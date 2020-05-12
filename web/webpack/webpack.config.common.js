@@ -8,6 +8,9 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const WebpackNotifierPlugin = require('webpack-notifier')
 const chalk = require('chalk')
 const simplegit = require('simple-git/promise')
+const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
+
+const smp = new SpeedMeasurePlugin()
 
 function getCommitHash() {
     const git = simplegit()
@@ -71,7 +74,8 @@ module.exports = (config) => {
                 }
             })
 
-            return resolve({
+
+            let finalConfig = {
                 entry: jsEntries,
                 output: {
                     path: helpers.publicDir,
@@ -142,20 +146,55 @@ module.exports = (config) => {
                     },
                 },
                 module: {
+                    noParse: /^(vue|vue-router|vuex|vuex-router-sync)$/,
                     rules: [
                         {
                             test: /\.vue$/,
-                            loader: 'vue-loader',
+                            use: [
+                                // {
+                                //     loader: 'cache-loader',
+                                // },
+                                {
+                                    loader: 'vue-loader',
+                                    options: {
+                                        compilerOptions: {
+                                            whitespace: 'condense',
+                                        },
+                                    },
+                                },
+                            ],
+
                         },
                         {
                             test: /\.ts$/,
                             loader: 'ts-loader',
                             options: {
+                                transpileOnly: true,
+                                happyPackMode: false,
                                 appendTsSuffixTo: [/\.vue$/],
                             },
                         },
                         {
-                            test: /\.(css|scss)$/,
+                            test: /\.css$/,
+                            use: [
+                                // 'style-loader',
+                                {
+                                    loader: MiniCssExtractPlugin.loader,
+                                    options: {
+                                        hmr: isDev,
+                                    },
+                                },
+                                {
+                                    loader: 'css-loader',
+                                    options: {sourceMap: true, url: false},
+                                },
+                                {
+                                    loader: 'postcss-loader',
+                                },
+                            ],
+                        },
+                        {
+                            test: /\.(scss)$/,
                             use: [
                                 // 'style-loader',
                                 {
@@ -216,8 +255,10 @@ module.exports = (config) => {
                         contentImage: path.join(helpers.webpackDir, 'cactus-square.png'),
                     }),
                 ],
-            })
-        })
+            }
+
+            return resolve(finalConfig)
+        }).then(config => smp.wrap(config))
     })
 
 
