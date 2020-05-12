@@ -50,14 +50,14 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {EmailContact} from "@shared/types/EmailContactTypes";
-    import {notifyFriendRequest, sendInvite} from '@web/social';
-    import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
+    import { EmailContact } from "@shared/types/EmailContactTypes";
+    import { notifyFriendRequest, sendInvite } from '@web/social';
+    import { getIntegerFromStringBetween } from '@shared/util/StringUtil';
     import InputNameModal from "@components/InputNameModal.vue";
     import CactusMember from "@shared/models/CactusMember";
     import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
     import SocialConnectionRequest from "@shared/models/SocialConnectionRequest"
-    import {ImportedContact} from "@shared/types/ImportedContactTypes";
+    import { ImportedContact } from "@shared/types/ImportedContactTypes";
     import Logger from "@shared/Logger";
 
     const logger = new Logger("SocialImportedContact.vue");
@@ -180,20 +180,20 @@
             },
             canAddFriend(): boolean {
                 return (this.isExistingMember &&
-                    !this.isLoading &&
-                    !this.sendingInvite &&
-                    !this.error &&
-                    !this.wasFriended &&
-                    !this.isFriend &&
-                    !this.isPendingFriend &&
-                    !this.isYou);
+                !this.isLoading &&
+                !this.sendingInvite &&
+                !this.error &&
+                !this.wasFriended &&
+                !this.isFriend &&
+                !this.isPendingFriend &&
+                !this.isYou);
             },
             canInviteContact(): boolean {
                 return (!this.isLoading &&
-                    !this.readyToInvite &&
-                    !this.wasInvited &&
-                    !this.isExistingMember &&
-                    !this.isYou);
+                !this.readyToInvite &&
+                !this.wasInvited &&
+                !this.isExistingMember &&
+                !this.isYou);
             },
             isYou(): boolean {
                 return ((this.contact && this.contact.email == this.member?.email) ? true : false);
@@ -211,10 +211,10 @@
 </script>
 
 <style scoped lang="scss">
-    @import "~styles/common";
-    @import "~styles/mixins";
-    @import "~styles/transitions";
-    @import "~styles/social";
+    @import "common";
+    @import "mixins";
+    @import "transitions";
+    @import "social";
 
     .contactCard {
         grid-template-columns: 5.2rem 1fr max-content;
