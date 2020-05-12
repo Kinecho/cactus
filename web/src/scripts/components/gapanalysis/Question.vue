@@ -46,6 +46,7 @@
         keyListener: any;
 
         setValue(selected: boolean, value: number | undefined) {
+            this.focusedIndex = null;
             this.$emit("change", selected ? value : undefined);
         }
 
@@ -58,6 +59,13 @@
             window.removeEventListener("keyup", this.onKeyUp);
         }
 
+        get currentIndex(): number|null {
+            if (this.currentValue) {
+                return this.question.options.findIndex(o => o.value === this.currentValue);
+            }
+            return null;
+        }
+
         onKeyUp(event: KeyboardEvent) {
             if (event.key === "Enter" || event.keyCode === 13) {
                 //no op
@@ -67,10 +75,10 @@
                 }
             } else if (event.key === "ArrowDown" || event.keyCode === 40) {
                 //handle arrow down
-                this.focusedIndex = Math.min(this.question.options.length - 1, (this.focusedIndex ?? -1) + 1);
+                this.focusedIndex = Math.min(this.question.options.length - 1, (this.focusedIndex ?? this.currentIndex ?? -1) + 1);
             } else if (event.key === "ArrowUp" || event.keyCode === 38) {
                 //handle arrow down
-                this.focusedIndex = Math.max(0, (this.focusedIndex ?? 1) - 1);
+                this.focusedIndex = Math.max(0, (this.focusedIndex ?? this.currentIndex ?? 1) - 1);
             }
         }
     }
