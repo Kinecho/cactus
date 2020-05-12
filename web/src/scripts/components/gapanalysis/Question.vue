@@ -10,6 +10,7 @@
                         :selected="currentValue === option.value"
                         @change="setValue"
                         :focused="focusedIndex === index"
+                        @focus="focusedIndex = index"
                 />
             </template>
         </div>

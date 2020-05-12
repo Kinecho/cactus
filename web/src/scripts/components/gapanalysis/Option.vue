@@ -1,6 +1,8 @@
 <template>
     <div class="question-option" :class="[{'selected':selected, focused}]"
+            :tabindex="0"
             ref="main"
+            @focus="onFocus"
     >
         <div class="main">
             <div class="grow">
@@ -44,6 +46,15 @@
         @Prop({ type: Boolean, default: false })
         focused!: boolean
 
+        @Watch("focused")
+        focusChanged(isFocused: boolean) {
+            if (isFocused) {
+                (this.$el as HTMLElement).focus();
+            } else {
+                (this.$el as HTMLElement).blur();
+            }
+        }
+
         type = QuestionType.RADIO;
 
         selectionChanged(selected: boolean) {
@@ -56,6 +67,10 @@
 
         get label(): string {
             return this.option.label ?? "";
+        }
+
+        onFocus() {
+            this.$emit('focus');
         }
     }
 </script>
