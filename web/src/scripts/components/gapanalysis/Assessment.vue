@@ -38,7 +38,12 @@
                         </svg>
                     </button>
                     <transition name="component-fade" mode="out-in">
-                        <question :question="currentQuestion" :current-value="currentValue" @change="setValue" :key="`question_${currentQuestionIndex}`"/>
+                        <question :question="currentQuestion"
+                                :current-value="currentValue"
+                                @change="setValue"
+                                :key="`question_${currentQuestionIndex}`"
+                                @submit="nextQuestion"
+                        />
                     </transition>
                     <div class="cvActions">
                         <button class="btn primary no-loading"

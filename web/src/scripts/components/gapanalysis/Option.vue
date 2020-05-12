@@ -1,9 +1,8 @@
 <template>
     <div class="question-option" :class="[{'selected':selected, focused}]"
             :tabindex="0"
-            ref="main" @keyup.enter="enterPressed"
-            @focus="hasFocus = true"
-            @blur="hasFocus = false"
+            ref="main"
+            @focus="onFocus"
     >
         <div class="main">
             <div class="grow">
@@ -47,7 +46,15 @@
         @Prop({ type: Boolean, default: false })
         focused!: boolean
 
-        hasFocus: boolean = false;
+        @Watch("focused")
+        focusChanged(isFocused: boolean) {
+            if (isFocused) {
+                (this.$el as HTMLElement).focus();
+            } else {
+                (this.$el as HTMLElement).blur();
+            }
+        }
+
         type = QuestionType.RADIO;
 
         selectionChanged(selected: boolean) {
@@ -62,10 +69,8 @@
             return this.option.label ?? "";
         }
 
-        enterPressed() {
-            if (this.focused || this.hasFocus) {
-                this.selectionChanged(!this.selected);
-            }
+        onFocus() {
+            this.$emit('focus');
         }
     }
 </script>
