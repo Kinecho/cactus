@@ -8,6 +8,7 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const WebpackNotifierPlugin = require('webpack-notifier')
 const chalk = require('chalk')
 const simplegit = require('simple-git/promise')
+const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
 
 function getCommitHash() {
     const git = simplegit()
@@ -71,7 +72,8 @@ module.exports = (config) => {
                 }
             })
 
-            return resolve({
+
+            let finalConfig = {
                 entry: jsEntries,
                 output: {
                     path: helpers.publicDir,
@@ -142,20 +144,71 @@ module.exports = (config) => {
                     },
                 },
                 module: {
+                    noParse: /^(vue|vue-router|vuex|vuex-router-sync)$/,
                     rules: [
                         {
                             test: /\.vue$/,
-                            loader: 'vue-loader',
+                            use: [
+                                // {
+                                //     loader: 'cache-loader',
+                                // },
+                                {
+                                    loader: 'vue-loader',
+                                    options: {
+                                        compilerOptions: {
+                                            whitespace: 'condense',
+                                        },
+                                    },
+                                },
+                            ],
+
                         },
                         {
                             test: /\.ts$/,
-                            loader: 'ts-loader',
-                            options: {
-                                appendTsSuffixTo: [/\.vue$/],
-                            },
+                            use: [
+                                {
+                                    loader: 'cache-loader',
+                                },
+                                isDev ? null : {
+                                    loader: 'thread-loader',
+                                },
+                                {
+                                    loader: 'babel-loader', options: {
+                                        cacheDirectory: true,
+                                    },
+                                },
+                                {
+                                    loader: 'ts-loader',
+                                    options: {
+                                        transpileOnly: true,
+                                        happyPackMode: !isDev,
+                                        appendTsSuffixTo: [/\.vue$/],
+                                    },
+                                },
+                            ].filter(Boolean),
+
                         },
                         {
-                            test: /\.(css|scss)$/,
+                            test: /\.css$/,
+                            use: [
+                                // 'style-loader',
+                                {
+                                    loader: MiniCssExtractPlugin.loader,
+                                    options: {
+                                        hmr: isDev,
+                                    },
+                                },
+                                {
+                                    loader: 'css-loader',
+                                    options: {sourceMap: true, url: false},
+                                },
+                                {
+                                    loader: 'postcss-loader',
+                                },
+                            ],
+                        },
+                        {
+                            test: /\.(scss)$/,
                             use: [
                                 // 'style-loader',
                                 {
@@ -216,7 +269,14 @@ module.exports = (config) => {
                         contentImage: path.join(helpers.webpackDir, 'cactus-square.png'),
                     }),
                 ],
-            })
+            }
+
+            if (!isDev) {
+                const smp = new SpeedMeasurePlugin()
+                resolve(smp.wrap(finalConfig))
+            } else {
+                return resolve(finalConfig)
+            }
         })
     })
 

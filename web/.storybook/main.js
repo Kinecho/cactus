@@ -29,23 +29,38 @@ module.exports = {
         {
             test: /\.(ts|tsx)$/,
             use: [
+                {loader: 'cache-loader'},
+                {
+                    loader: 'babel-loader', options: {
+                        cacheDirectory: true,
+                    },
+                },
                 {
                     loader: require.resolve('ts-loader'),
                     options: {
                         appendTsSuffixTo: [/\.vue$/],
+                        transpileOnly: true,
+                        happyPackMode: false,
                     },
                 },
             ],
         },
         {
-            test: /\.(css|scss)$/,
+            test: /\.css$/,
             use: [
-                // {
-                //     loader: MiniCssExtractPlugin.loader,
-                //     options: {
-                //         hmr: true,
-                //     },
-                // },
+                'vue-style-loader',
+                {
+                    loader: 'css-loader',
+                    options: {sourceMap: true, url: false},
+                },
+                {
+                    loader: 'postcss-loader',
+                },
+            ],
+        },
+        {
+            test: /\.scss$/,
+            use: [
                 'vue-style-loader',
                 {
                     loader: 'css-loader',
@@ -57,7 +72,7 @@ module.exports = {
                 {
                     loader: 'sass-loader',
                     options: {
-                        sourceMap: true,
+                        sourceMap: false,
                         sourceMapContents: false,
                     },
                 },
