@@ -1,5 +1,5 @@
 <template>
-    <div class="element-icon" @click="toggleElement" :class="{selected, selectable, withCircle}">
+    <div class="element-icon" @click="toggleElement" :class="{selected, selectable, withCircle, withAnimation}">
         <img :src="imageUrl" :alt="`${element} Icon`"/>
         <h4>{{element}}</h4>
     </div>
@@ -25,6 +25,9 @@
 
         @Prop({ type: Boolean, required: false, default: false })
         withCircle!: boolean;
+
+        @Prop({ type: Boolean, required: false, default: false })
+        withAnimation!: boolean;
 
         toggleElement() {
             if (!this.selectable) {
@@ -66,6 +69,32 @@
         text-align: center;
         transition: all .3s linear;
 
+        &.selectable {
+            cursor: pointer;
+
+            h4 {
+                opacity: .6;
+                transition: opacity .3s;
+            }
+
+            img {
+                transition: transform .3s;
+            }
+
+            &:hover {
+                h4 {
+                    opacity: 1;
+                }
+                img {
+                    transform: scale(1.1);
+                }
+            }
+        }
+
+        &.selected h4 {
+            opacity: 1;
+        }
+
         &.withCircle {
             img {
                 margin-bottom: 1.6rem;
@@ -92,22 +121,29 @@
             }
         }
 
+        &.withAnimation {
+
+            &.energy img {
+                animation: wiggle .2s ease 1s 3;
+            }
+            &.emotions img {
+                animation: wiggle .2s ease 8s 3;
+            }
+            &.meaning img {
+                animation: wiggle .2s ease 5s 3;
+            }
+            &.experience img {
+                animation: wiggle .2s ease 11s 3;
+            }
+            &.relationships img {
+                animation: wiggle .2s ease 15s 3;
+            }
+        }
+
         img {
             width: 4rem;
             height: 4rem;
         }
-
-        // &.selectable {
-        //     opacity: .5;
-        // }
-        //
-        // &.selected.selectable {
-        //     opacity: 1;
-        // }
-        //
-        // &.selectable:hover {
-        //     opacity: 1;
-        // }
     }
 
     h4 {
