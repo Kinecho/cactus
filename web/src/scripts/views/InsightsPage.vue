@@ -46,11 +46,17 @@
             <div class="flexSections">
                 <section v-if="gapResults" class="gapContainer borderContainer">
                     <h2>Mental Fitness</h2>
-                    <p class="subtext">Find the gap between what is important to you and how satisfied you are regarding
-                        that area of your&nbsp;life.</p>
+                    <p class="subtext">This is the comparison of what's <strong class="pink">important</strong> to you and what you find <strong class="blue">satisfactory</strong>. Your focus is <strong>Meaning</strong>. To change your focus...</p>
                     <spinner v-if="gapResultsLoading" message="Loading Results..." :delay="1200"/>
                     <Results v-if="!gapResultsLoading && gapResults" :results="gapResults" :selectable-elements="false"/>
                     <dropdown-menu :items="mentalFitnessDropdownLinks" class="dotsBtn"/>
+                </section>
+                <section v-else class="nogapContainer borderContainer">
+                    <h2>Mental Fitness</h2>
+                    <p class="subtext">Find the gap between what is important to you and how satisfied you are regarding that area of your&nbsp;life.</p>
+                    <router-link tag="button" class="esButton" :to="gapAssessmentHref">Take the
+                        <span>Mental Fitness</span> Quiz
+                    </router-link>
                 </section>
 
                 <section class="bubblesContainer borderContainer" v-if="hasWordCloud">
@@ -60,17 +66,7 @@
                     </div>
                     <WordCloud class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
                 </section>
-
-                <section v-if="!gapResults" class="nogapContainer borderContainer">
-                    <h2>Mental Fitness</h2>
-                    <p class="subtext">Find the gap between what is important to you and how satisfied you are regarding
-                        that area of your&nbsp;life.</p>
-                    <router-link tag="button" class="esButton" :to="gapAssessmentHref">Take the
-                        <span>Mental Fitness</span> Quiz
-                    </router-link>
-                </section>
             </div>
-
         </div>
         <Footer/>
     </div>
@@ -610,10 +606,22 @@
         }
 
         .subtext {
-            margin: 0 3.2rem 2.4rem 0;
+            margin: 0 0 2.4rem;
             max-width: 60rem;
             opacity: .8;
+
+            @include r(600) {
+                margin: 0 3.2rem 2.4rem 0;
+            }
         }
+    }
+
+    .pink {
+        color: $magenta;
+    }
+
+    .blue {
+        color: $royal;
     }
 
     .gapAnalysisImg {
@@ -633,6 +641,32 @@
         }
     }
 
+    .gapContainer + .bubblesContainer {
+        flex-flow: column wrap;
+
+        .chart-container {
+            margin: 0 auto;
+            max-width: 38rem;
+            width: 100%;
+        }
+    }
+
+    .nogapContainer + .bubblesContainer {
+        flex-flow: row nowrap;
+
+        .subtext {
+            @include r(600) {
+                max-width: 24rem;
+            }
+        }
+
+        .chart-container {
+            @include r(600) {
+                margin: -4.8rem -4.8rem -4.8rem 0;
+            }
+        }
+    }
+
     .nogapContainer {
         @include shadowbox;
         background-color: lighten($dolphin, 5%);
@@ -649,18 +683,6 @@
 
         h2 {
             margin-bottom: .4rem;
-        }
-    }
-
-    .bubblesContainer {
-        flex-flow: row nowrap;
-
-        .subtext {
-            max-width: 24rem;
-        }
-
-        .chart-container {
-            margin: -4.8rem -4.8rem -4.8rem 0;
         }
     }
 
