@@ -10,10 +10,10 @@ import LoadableGapAnalysisUpsell from "@components/gapanalysis/LoadableGapAnalys
 const logger = new Logger("GapAnalysisUpsell.stories");
 
 export default {
-    title: "Gap Analysis",
+    title: "Gap Analysis/Upsell",
 }
 
-export const Upsell = () => Vue.extend({
+export const StaticProduct = () => Vue.extend({
     template: `
         <div>
             <GapAnalysisUpsell :element="element"

@@ -150,10 +150,10 @@ service cloud.firestore {
     }
 
     match /gapAnalysisAssessmentResults/{document=**} {
-            //allow create: if getMemberId() == request.resource.data.memberId;
-            //allow read,update: if getMemberId() == resource.data.memberId;
-            allow read,update,create: if true;
-        }
+        //allow create: if getMemberId() == request.resource.data.memberId;
+        //allow read,update: if getMemberId() == resource.data.memberId;
+        allow read,update,create: if true;
+    }
 
 	  match /socialConnections/{document=**} {
       allow create: if request.resource.data.memberId == getMemberId() || request.resource.data.friendMemberId == getMemberId()
