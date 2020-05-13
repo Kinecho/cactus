@@ -483,6 +483,7 @@
                 display: grid;
                 grid-column-gap: 6.4rem;
                 grid-template-columns: 1fr 1fr;
+                grid-template-rows: auto;
                 justify-items: center;
                 max-width: 120rem;
             }
