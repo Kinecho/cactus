@@ -47,25 +47,12 @@ module.exports = {
             ],
         },
         {
-            test: /\.css$/,
-            use: [
-                'vue-style-loader',
-                {
-                    loader: 'css-loader',
-                    options: {sourceMap: true, url: false},
-                },
-                {
-                    loader: 'postcss-loader',
-                },
-            ],
-        },
-        {
             test: /\.scss$/,
             use: [
                 'vue-style-loader',
                 {
                     loader: 'css-loader',
-                    options: {sourceMap: true, url: false},
+                    options: {sourceMap: false, url: false},
                 },
                 {
                     loader: 'postcss-loader',
