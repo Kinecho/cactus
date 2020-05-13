@@ -101,6 +101,7 @@
     import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
     import GapAnalysisService from "@web/services/GapAnalysisService";
     import Spinner from "@components/Spinner.vue";
+    import { CactusElement } from "@shared/models/CactusElement";
 
     const logger = new Logger("InsightsPage");
     const copy = CopyService.getSharedInstance().copy;
