@@ -1,6 +1,6 @@
 import Vue from "vue";
 import ResultsPage from "@components/gapanalysis/Results.vue";
-import { boolean, text } from "@storybook/addon-knobs";
+import { boolean, number, text } from "@storybook/addon-knobs";
 import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
 import { RadarChartConfig } from "@web/charts/radarChart";
 
@@ -15,7 +15,7 @@ window._toggleConfetti = () => {
 export const ResultScreen = () => Vue.extend({
     template: `
         <div>
-            <results-page :results="results" :chart-options="options" :selectable-elements="elementsSelectable"/>
+            <results-page :results="results" :chart-options="options" :selectable-elements="elementsSelectable" :chart-padding="chartPadding"/>
         </div>
     `,
     components: {
@@ -30,6 +30,9 @@ export const ResultScreen = () => Vue.extend({
         },
         elementsSelectable: {
             default: boolean("Selectable Elements", true),
+        },
+        chartPadding: {
+            default: number("Chart Padding", 100),
         }
     },
 

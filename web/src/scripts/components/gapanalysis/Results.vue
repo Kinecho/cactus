@@ -25,6 +25,12 @@
     import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
     import ResultElement from "@components/gapanalysis/ResultElement.vue";
     import { RadarChartConfig } from "@web/charts/radarChart";
+    import { debounce } from "debounce";
+    import Logger from "@shared/Logger"
+    import { getDeviceDimensions } from "@web/DeviceUtil";
+
+    const logger = new Logger("Results");
+
 
     /**
      * Render the results of a Gap analysis assessment.
@@ -64,7 +70,30 @@
         @Prop({ type: String, required: false, default: "assessment-1" })
         chartId!: string;
 
+        @Prop({ type: Number, required: false, default: 100 })
+        chartPadding!: number;
+
         selectedElement: ResultElement | string | null = null;
+
+        debounceHandler: (() => void) | null = null;
+        chartDiameter = 200;
+
+        mounted() {
+            this.debounceHandler = debounce(this.onResize)
+            window.addEventListener("resize", this.debounceHandler);
+            this.onResize();
+        }
+
+        destroyed() {
+            if (this.debounceHandler) {
+                window.removeEventListener("resize", this.debounceHandler);
+            }
+        }
+
+        onResize() {
+            const w = this.$el.getBoundingClientRect().width;
+            this.chartDiameter = w;
+        }
 
         async done() {
             this.$emit('done')
@@ -87,7 +116,8 @@
                     bottom: 10,
                 },
                 legend: false,
-
+                w: Math.max(this.chartDiameter - this.chartPadding, 50),
+                h: Math.max(this.chartDiameter - this.chartPadding, 50),
                 ...this.chartOptions
             }
         }
@@ -99,6 +129,7 @@
 
     .chart {
         opacity: 1;
+        text-align: center;
     }
 
     .hideChart .chart,
@@ -108,18 +139,15 @@
 
     .analysisResults {
         display: grid;
-        grid-template-areas:
-            ". . energy . ."
-            "emotions emotions . meaning meaning"
-            "experience experience . relationships relationships";
+        grid-template-areas: ". . energy . ." "emotions emotions . meaning meaning" "experience experience . relationships relationships";
         grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
         grid-template-rows: 1fr 1fr 1fr;
         margin: 3.2rem auto;
         padding: 70px 0 20px; /*offset elements*/
-        width: 22rem;
+        /*width: 22rem;*/
 
         @include r(600) {
-            width: 34rem;
+            /*width: 34rem;*/
         }
     }
 
@@ -127,22 +155,27 @@
         grid-area: energy;
         transform: translateY(-70px);
     }
+
     .emotions {
         grid-area: emotions;
         transform: translate(-50px, -30px);
     }
+
     .meaning {
         grid-area: meaning;
         transform: translate(50px, -30px);
     }
+
     .experience {
         grid-area: experience;
         transform: translate(-20px, 20px);
     }
+
     .relationships {
         grid-area: relationships;
         transform: translate(20px, 20px);
     }
+
     .radar-container {
         grid-area: 1 / 1 / 4 / 6;
     }

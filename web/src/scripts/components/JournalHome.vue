@@ -27,15 +27,10 @@
             </div>
 
             <transition name="fade-in-fast" appear mode="out-in">
-                                <div class="section-container" v-if="showOnboardingPrompt" :key="'empty'">
-                                    <journal-home-empty-state :focus-element="focusElement"/>
-                <!--                    <section class="empty journalList">-->
-                <!--                        <h1>Welcome to Cactus</h1>-->
-                <!--                        <p>To get started, you'll learn about how Cactus works and reflect on your first question of the&nbsp;day.</p>-->
-                <!--                        <img class="graphic" src="assets/images/emptyState.png" alt="Three friends welcoming you"/>-->
-                <!--                        <a class="button primary" :href="firstPromptPath">Let's Begin</a>-->
-                <!--                    </section>-->
-                                </div>
+                <div class="section-container" v-if="showOnboardingPrompt" :key="'empty'">
+                    <journal-home-empty-state :focus-element="focusElement"/>
+
+                </div>
 
                 <div class="section-container" v-if="loggedIn && loginReady && journalEntries.length > 0">
                     <!-- TODO: this key isn't right -->
@@ -140,6 +135,7 @@
         coreValuesClosed: boolean,
         upgradeConfirmed: boolean,
         loggingOut: boolean,
+        windowScrollHandler: any,
     }
 
     export default Vue.extend({
@@ -159,6 +155,7 @@
         },
         mounted() {
             let handler = debounce(this.scrollHandler, 10);
+            this.windowScrollHandler = handler;
             window.addEventListener('scroll', handler);
             this.scrollHandler();
 
@@ -290,12 +287,14 @@
                 coreValuesClosed: false,
                 upgradeConfirmed: false,
                 loggingOut: false,
+                windowScrollHandler: undefined,
             };
         },
         destroyed() {
             this.authUnsubscribe?.();
             this.todayUnsubscriber?.();
             this.dataSource?.stop();
+            window.removeEventListener('scroll', this.windowScrollHandler);
         },
         methods: {
             beforeEnter: function (el: HTMLElement) {
@@ -509,42 +508,6 @@
                     opacity: 0;
                 }
             }
-
-            //&.empty {
-            //    align-items: center;
-            //    justify-content: center;
-            //    padding: 2.4rem;
-            //    text-align: center;
-//
-            //    h1 {
-            //        line-height: 1.2;
-            //        margin-bottom: .4rem;
-            //    }
-//
-            //    p {
-            //        margin: 0 auto 2.4rem;
-            //        max-width: 60rem;
-            //        opacity: .8;
-//
-            //        @include r(768) {
-            //            margin-bottom: 1.6rem;
-            //        }
-            //    }
-//
-            //    .graphic {
-            //        margin-bottom: 2.4rem;
-            //        max-width: 56rem;
-            //        width: 90%;
-//
-            //        @include r(768) {
-            //            margin-bottom: 1.6rem;
-            //        }
-            //    }
-//
-            //    .button {
-            //        min-width: 22rem;
-            //    }
-            //}
 
             &.loggedOut {
                 display: flex;
