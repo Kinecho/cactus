@@ -219,7 +219,6 @@
     .contactCard {
         grid-template-columns: 5.2rem 1fr max-content;
         grid-template-rows: auto;
-
         @include r(600) {
             grid-template-columns: 5.2rem 1fr 12rem;
             grid-template-rows: auto;
