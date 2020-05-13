@@ -27,14 +27,16 @@
             </div>
 
             <transition name="fade-in-fast" appear mode="out-in">
-                <div class="section-container" v-if="showOnboardingPrompt" :key="'empty'">
-                    <section class="empty journalList">
-                        <h1>Welcome to Cactus</h1>
-                        <p>To get started, you'll learn about how Cactus works and reflect on your first question of the&nbsp;day.</p>
-                        <img class="graphic" src="assets/images/emptyState.png" alt="Three friends welcoming you"/>
-                        <a class="button primary" :href="firstPromptPath">Let's Begin</a>
-                    </section>
-                </div>
+                                <div class="section-container" v-if="showOnboardingPrompt" :key="'empty'">
+                                    <journal-home-empty-state :focus-element="focusElement"/>
+                <!--                    <section class="empty journalList">-->
+                <!--                        <h1>Welcome to Cactus</h1>-->
+                <!--                        <p>To get started, you'll learn about how Cactus works and reflect on your first question of the&nbsp;day.</p>-->
+                <!--                        <img class="graphic" src="assets/images/emptyState.png" alt="Three friends welcoming you"/>-->
+                <!--                        <a class="button primary" :href="firstPromptPath">Let's Begin</a>-->
+                <!--                    </section>-->
+                                </div>
+
                 <div class="section-container" v-if="loggedIn && loginReady && journalEntries.length > 0">
                     <!-- TODO: this key isn't right -->
                     <snackbar-content
@@ -117,6 +119,8 @@
     import { fireOptInStartTrialEvent } from "@web/analytics";
     import StorageService, { LocalStorageKey } from "@web/services/StorageService";
     import { pushRoute } from "@web/NavigationUtil";
+    import JournalHomeEmptyState from "@components/JournalHomeEmptyState.vue";
+    import { CactusElement } from "@shared/models/CactusElement";
 
     const logger = new Logger("JournalHome.vue");
 
@@ -140,6 +144,7 @@
 
     export default Vue.extend({
         components: {
+            JournalHomeEmptyState,
             NavBar,
             entry: JournalEntryCard,
             AutoPromptContentModal,
@@ -355,6 +360,12 @@
                 this.loginReady &&
                 this.dataHasLoaded &&
                 this.journalEntries.length === 0)
+            },
+            focusElement(): CactusElement | null {
+                if (this.dataHasLoaded && this.cactusMember) {
+                    return this.cactusMember?.focusElement ?? null;
+                }
+                return null;
             }
         }
     })
@@ -499,41 +510,41 @@
                 }
             }
 
-            &.empty {
-                align-items: center;
-                justify-content: center;
-                padding: 2.4rem;
-                text-align: center;
-
-                h1 {
-                    line-height: 1.2;
-                    margin-bottom: .4rem;
-                }
-
-                p {
-                    margin: 0 auto 2.4rem;
-                    max-width: 60rem;
-                    opacity: .8;
-
-                    @include r(768) {
-                        margin-bottom: 1.6rem;
-                    }
-                }
-
-                .graphic {
-                    margin-bottom: 2.4rem;
-                    max-width: 56rem;
-                    width: 90%;
-
-                    @include r(768) {
-                        margin-bottom: 1.6rem;
-                    }
-                }
-
-                .button {
-                    min-width: 22rem;
-                }
-            }
+            //&.empty {
+            //    align-items: center;
+            //    justify-content: center;
+            //    padding: 2.4rem;
+            //    text-align: center;
+//
+            //    h1 {
+            //        line-height: 1.2;
+            //        margin-bottom: .4rem;
+            //    }
+//
+            //    p {
+            //        margin: 0 auto 2.4rem;
+            //        max-width: 60rem;
+            //        opacity: .8;
+//
+            //        @include r(768) {
+            //            margin-bottom: 1.6rem;
+            //        }
+            //    }
+//
+            //    .graphic {
+            //        margin-bottom: 2.4rem;
+            //        max-width: 56rem;
+            //        width: 90%;
+//
+            //        @include r(768) {
+            //            margin-bottom: 1.6rem;
+            //        }
+            //    }
+//
+            //    .button {
+            //        min-width: 22rem;
+            //    }
+            //}
 
             &.loggedOut {
                 display: flex;
