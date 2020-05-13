@@ -1,10 +1,11 @@
-import FirestoreService, {ListenerUnsubscriber, Query} from "@web/services/FirestoreService";
-import CactusMember, {Field} from "@shared/models/CactusMember";
-import {Collection} from "@shared/FirestoreBaseModels";
-import {FirebaseUser, getAuth, Unsubscribe} from "@web/firebase";
-import {getDeviceLocale, getDeviceTimeZone, getUserAgent, isAndroidApp} from "@web/DeviceUtil";
+import FirestoreService, { ListenerUnsubscriber, Query, DocumentReference } from "@web/services/FirestoreService";
+import CactusMember, { Field } from "@shared/models/CactusMember";
+import { Collection } from "@shared/FirestoreBaseModels";
+import { FirebaseUser, getAuth, Unsubscribe } from "@web/firebase";
+import { getDeviceLocale, getDeviceTimeZone, getUserAgent, isAndroidApp } from "@web/DeviceUtil";
 import Logger from "@shared/Logger";
-import StorageService, {LocalStorageKey} from "@web/services/StorageService";
+import StorageService, { LocalStorageKey } from "@web/services/StorageService";
+import { CactusElement } from "@shared/models/CactusElement";
 
 const logger = new Logger("CactusMemberService");
 
@@ -93,7 +94,7 @@ export default class CactusMemberService {
         }
 
         if (!isAndroidApp()) {
-            logger.warn(`User agent not allowed: ${getUserAgent()}`);
+            logger.warn(`User agent not allowed: ${ getUserAgent() }`);
             return;
         }
 
@@ -136,6 +137,13 @@ export default class CactusMemberService {
         return this.firestoreService.getCollectionRef(Collection.members);
     }
 
+    getMemberRef(member: CactusMember): DocumentReference | undefined {
+        if (!member.id) {
+            return undefined;
+        }
+        return this.getCollectionRef().doc(member.id);
+    }
+
     async executeQuery(query: Query) {
         return this.firestoreService.executeQuery(query, CactusMember);
     }
@@ -173,11 +181,11 @@ export default class CactusMemberService {
             if (user) {
                 memberUnsubscriber = this.observeByUserId(user.uid, {
                     onData: (member) => {
-                        options.onData({user: user, member: member})
+                        options.onData({ user: user, member: member })
                     }
                 })
             } else {
-                options.onData({user: undefined, member: undefined});
+                options.onData({ user: undefined, member: undefined });
             }
         });
 
@@ -187,5 +195,14 @@ export default class CactusMemberService {
                 memberUnsubscriber();
             }
         }
+    }
+
+    async setFocusElement(params: { element: CactusElement | null, member?: CactusMember }): Promise<void> {
+        const member = params.member ?? this.currentMember;
+        const ref = this.getMemberRef(member);
+        if (!ref) {
+            return;
+        }
+        await ref.update({ [CactusMember.Field.focusElement]: params.element });
     }
 }

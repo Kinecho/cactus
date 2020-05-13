@@ -4,6 +4,10 @@
         <div class="centered" v-if="authLoaded">
             <h1>Insights</h1>
 
+            <!--TO REMOVE - For testing only -->
+            <h2 v-if="focusElement" :style="{color: 'blue', fontSize: '5rem'}">Your focus is:
+                <strong :style="{color: 'red', fontSize: '6rem'}">{{focusElement}}</strong></h2>
+
             <section class="statsContainer">
                 <div class="stat" v-for="(stat, index) in stats" :key="`stat_${index}`">
                     <div class="statIcon">
@@ -42,15 +46,19 @@
             <div class="flexSections">
                 <section v-if="gapResults" class="gapContainer borderContainer">
                     <h2>Mental Fitness</h2>
-                    <p class="subtext">Find the gap between what is important to you and how satisfied you are regarding that area of your&nbsp;life.</p>
+                    <p class="subtext">Find the gap between what is important to you and how satisfied you are regarding
+                        that area of your&nbsp;life.</p>
                     <spinner v-if="gapResultsLoading" message="Loading Results..." :delay="1200"/>
                     <Results v-if="!gapResultsLoading && gapResults" :results="gapResults" :selectable-elements="false"/>
                     <dropdown-menu :items="mentalFitnessDropdownLinks" class="dotsBtn"/>
                 </section>
                 <section v-else class="nogapContainer borderContainer">
                     <h2>Mental Fitness</h2>
-                    <p class="subtext">Find the gap between what is important to you and how satisfied you are regarding that area of your&nbsp;life.</p>
-                    <router-link tag="button" class="esButton" :to="gapAssessmentHref">Take the <span>Mental Fitness</span> Quiz</router-link>
+                    <p class="subtext">Find the gap between what is important to you and how satisfied you are regarding
+                        that area of your&nbsp;life.</p>
+                    <router-link tag="button" class="esButton" :to="gapAssessmentHref">Take the
+                        <span>Mental Fitness</span> Quiz
+                    </router-link>
                 </section>
 
                 <section class="bubblesContainer borderContainer" v-if="hasWordCloud">
@@ -243,6 +251,10 @@
 
         get fakeGapAnalysisResults(): GapAnalysisAssessmentResult {
             return GapAnalysisAssessmentResult.mock();
+        }
+
+        get focusElement(): CactusElement | null {
+            return this.member?.focusElement ?? null;
         }
     }
 </script>

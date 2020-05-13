@@ -13,6 +13,7 @@ import {
 } from "@shared/models/MemberSubscription";
 import { DEFAULT_SUBSCRIPTION_TIER, SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 import { CoreValue } from "@shared/models/CoreValueTypes";
+import { CactusElement } from "@shared/models/CactusElement";
 
 export enum JournalStatus {
     PREMIUM = "PREMIUM",
@@ -80,6 +81,7 @@ export enum Field {
     subscriptionOptOutTrialEndsAt = "subscription.optOutTrial.endsAt",
     stripeCustomerId = "stripe.customerId",
     coreValues = "coreValues",
+    focusElement = "focusElement",
 }
 
 export interface PromptSendTime {
@@ -89,7 +91,7 @@ export interface PromptSendTime {
 
 export type QuarterHour = 0 | 15 | 30 | 45;
 
-export const DEFAULT_PROMPT_SEND_TIME: PromptSendTime = {hour: 2, minute: 45};
+export const DEFAULT_PROMPT_SEND_TIME: PromptSendTime = { hour: 2, minute: 45 };
 
 export interface MemberStripeDetails {
     customerId?: string,
@@ -147,6 +149,8 @@ export default class CactusMember extends BaseModel {
     wordCloud?: InsightWord[];
     coreValues?: CoreValue[];
 
+    focusElement?: CactusElement | null;
+
     prepareForFirestore(): any {
         super.prepareForFirestore();
         this.email = this.email ? this.email.toLowerCase().trim() : this.email;
@@ -179,7 +183,7 @@ export default class CactusMember extends BaseModel {
     }
 
     getFullName(): string {
-        return `${this.firstName || ""} ${this.lastName || ""}`.trim();
+        return `${ this.firstName || "" } ${ this.lastName || "" }`.trim();
     }
 
     getCurrentLocaleDateObject(date: Date = new Date()): DateObject {
@@ -191,7 +195,7 @@ export default class CactusMember extends BaseModel {
 
     getDefaultPromptSendTimeUTC(): PromptSendTime {
         return {
-            hour: DateTime.utc().minus({hours: 1}).hour,
+            hour: DateTime.utc().minus({ hours: 1 }).hour,
             minute: DateUtil.getCurrentQuarterHour()
         } as PromptSendTime;
     }
@@ -244,8 +248,8 @@ export default class CactusMember extends BaseModel {
     }
 
     get hasUpcomingCancellation(): boolean {
-        return !!this.subscription?.cancellation?.accessEndsAt && 
-            this.subscription.cancellation.accessEndsAt > new Date();
+        return !!this.subscription?.cancellation?.accessEndsAt &&
+        this.subscription.cancellation.accessEndsAt > new Date();
     }
 
     set stripeCustomerId(customerId: string | undefined) {
