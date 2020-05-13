@@ -141,8 +141,9 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
 
     //Initiate the radar chart SVG
     const svg = parent.append("svg")
-    .attr("width", cfg.w + cfg.margin.left + cfg.margin.right)
-    .attr("height", cfg.h + cfg.margin.top + cfg.margin.bottom)
+    // .attr("width", cfg.w + cfg.margin.left + cfg.margin.right)
+    // .attr("height", cfg.h + cfg.margin.top + cfg.margin.bottom)
+    .attr("viewBox", `0 0 ${ cfg.w + cfg.margin.left + cfg.margin.right } ${ cfg.h + cfg.margin.top + cfg.margin.bottom }`)
     .attr("class", "radar");
 
     //Append a g element

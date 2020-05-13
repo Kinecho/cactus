@@ -32,7 +32,7 @@ export const ResultScreen = () => Vue.extend({
             default: boolean("Selectable Elements", true),
         },
         chartPadding: {
-            default: number("Chart Padding", 100),
+            default: number("Chart Padding", 10),
         }
     },
 

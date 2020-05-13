@@ -1,6 +1,9 @@
 <template>
     <div class="analysisResults" :class="{hideChart, hideElements}">
-        <radar-chart :chart-data="results.chartData" :chart-id="chartId" :options="options" class="chart"/>
+        <radar-chart :chart-data="results.chartData"
+                :chart-id="chartId"
+                :options="options" class="chart"
+        />
         <result-element
                 element="emotions"
                 class="element emotions"
@@ -25,9 +28,7 @@
     import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
     import ResultElement from "@components/gapanalysis/ResultElement.vue";
     import { RadarChartConfig } from "@web/charts/radarChart";
-    import { debounce } from "debounce";
     import Logger from "@shared/Logger"
-    import { getDeviceDimensions } from "@web/DeviceUtil";
 
     const logger = new Logger("Results");
 
@@ -70,30 +71,10 @@
         @Prop({ type: String, required: false, default: "assessment-1" })
         chartId!: string;
 
-        @Prop({ type: Number, required: false, default: 100 })
+        @Prop({ type: Number, required: false, default: 10 })
         chartPadding!: number;
 
         selectedElement: ResultElement | string | null = null;
-
-        debounceHandler: (() => void) | null = null;
-        chartDiameter = 200;
-
-        mounted() {
-            this.debounceHandler = debounce(this.onResize)
-            window.addEventListener("resize", this.debounceHandler);
-            this.onResize();
-        }
-
-        destroyed() {
-            if (this.debounceHandler) {
-                window.removeEventListener("resize", this.debounceHandler);
-            }
-        }
-
-        onResize() {
-            const w = this.$el.getBoundingClientRect().width;
-            this.chartDiameter = w;
-        }
 
         async done() {
             this.$emit('done')
@@ -110,14 +91,12 @@
         get options(): Partial<RadarChartConfig> {
             return {
                 margin: {
-                    top: 10,
-                    left: 10,
-                    right: 10,
-                    bottom: 10,
+                    top: this.chartPadding,
+                    left: this.chartPadding,
+                    right: this.chartPadding,
+                    bottom: this.chartPadding,
                 },
                 legend: false,
-                w: Math.max(this.chartDiameter - this.chartPadding, 50),
-                h: Math.max(this.chartDiameter - this.chartPadding, 50),
                 ...this.chartOptions
             }
         }
