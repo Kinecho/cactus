@@ -9,7 +9,7 @@
         <template v-if="focusElement">
             <ResultElement :element="focusElement" :selectable="false" :with-label="false"/>
             <p>
-                To get started, you'll learn about how Cactus works and reflect on your first question of
+                To get started, you'll learn about how Cactus works and reflect on your first question
                 about&nbsp;<strong>{{focusElement}}</strong>.
             </p>
         </template>
