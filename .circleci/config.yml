@@ -232,7 +232,7 @@ jobs:
       - notify-on-failure
   install-all:
     executor: cactus-web
-    resource_class: small
+    resource_class: medium
     steps:
       - checkout
       - install-module:
