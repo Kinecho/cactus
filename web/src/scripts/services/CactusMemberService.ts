@@ -131,14 +131,12 @@ export default class CactusMemberService {
 
     }
 
-    // async awaitCurrentMember(): Promise<CactusMember|undefined>
-
     getCollectionRef() {
         return this.firestoreService.getCollectionRef(Collection.members);
     }
 
-    getMemberRef(member: CactusMember): DocumentReference | undefined {
-        if (!member.id) {
+    getMemberRef(member?: CactusMember): DocumentReference | undefined {
+        if (!member?.id) {
             return undefined;
         }
         return this.getCollectionRef().doc(member.id);
