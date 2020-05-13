@@ -58,7 +58,7 @@
 
         },
         props: {
-            words: {type: Array as () => InsightWord[], default: () => []},
+            words: {type: Array as () => InsightWord[], default: []},
             startBlurred: {type: Boolean, default: false},
             subscriptionTier: {type: String as () => SubscriptionTier, default: SubscriptionTier.PLUS},
             startGated: {type: Boolean, default: false},
