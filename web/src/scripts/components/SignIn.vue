@@ -6,7 +6,7 @@
         </div>
         <div class="actions-container">
             <magic-link :initialEmail="email" v-if="!isPendingRedirect && showMagicLink"/>
-            <spinner :message="`${commonCopy.SIGNING_IN}...`" slot="body" v-if="isSigningIn" color="light"/>
+            <spinner :message="`${commonCopy.SIGNING_IN}...`" slot="body" v-if="isSigningIn" :color="spinnerColor"/>
             <div class="divider" v-if="!isPendingRedirect && showMagicLink">
                 <p class="message-container">Or choose from one of the following</p>
             </div>
@@ -29,6 +29,7 @@
     import { PageRoute } from "@shared/PageRoutes"
     import { QueryParam } from "@shared/util/queryParams"
     import Spinner from "@components/Spinner.vue";
+    import {SpinnerColor} from "@components/SpinnerTypes";
     import { getQueryParam } from "@web/util"
     import StorageService, { LocalStorageKey } from '@web/services/StorageService'
     import CopyService from '@shared/copy/CopyService'
@@ -134,6 +135,7 @@
                 type: Boolean,
                 default: true,
             },
+            spinnerColor: { type: String as () => SpinnerColor, default: "light" },
             title: String,
             message: { type: String, default: getQueryParam(QueryParam.MESSAGE), required: false },
             redirectOnSignIn: { type: Boolean, required: false, default: true },
