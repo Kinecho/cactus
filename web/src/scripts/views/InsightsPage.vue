@@ -633,21 +633,32 @@
 
     .nogapContainer {
         @include shadowbox;
-        background-color: $dolphin;
-        background-image: url(assets/images/grainy.png);
-        background-position: 0 0;
-        background-repeat: repeat;
-        background-size: auto;
+        background-color: lighten($dolphin, 5%);
+        background-image: url(assets/images/grainy.png),
+            url(assets/images/crosses2.svg),
+            url(assets/images/outlineBlob.svg),
+            url(assets/images/royalBlob.svg),
+            url(assets/images/pinkBlob5.svg);
+        background-position: 0 0, 39rem -1rem, -34rem -84rem, -5rem 23rem, -17rem -32rem;
+        background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+        background-size: auto, 40%, 200%, 100%, 100%;
         color: $white;
         position: relative;
 
-        @include r(768) {
-            background-position: 0 0;
-            background-size: auto;
-        }
-
         h2 {
             margin-bottom: .4rem;
+        }
+    }
+
+    .bubblesContainer {
+        flex-flow: row nowrap;
+
+        .subtext {
+            max-width: 24rem;
+        }
+
+        .chart-container {
+            margin: -4.8rem -4.8rem -4.8rem 0;
         }
     }
 
