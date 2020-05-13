@@ -1,7 +1,7 @@
 <template>
     <div class="element-icon" @click="toggleElement" :class="{selected, selectable, withCircle, withAnimation}">
         <img :src="imageUrl" :alt="`${element} Icon`"/>
-        <h4>{{element}}</h4>
+        <h4 v-if="withLabel">{{element}}</h4>
     </div>
 </template>
 
@@ -28,6 +28,9 @@
 
         @Prop({ type: Boolean, required: false, default: false })
         withAnimation!: boolean;
+
+        @Prop({type: Boolean, required: false, default: true})
+        withLabel!: boolean;
 
         toggleElement() {
             if (!this.selectable) {
