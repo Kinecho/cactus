@@ -14,7 +14,7 @@
             </p>
         </template>
         <img class="graphic" src="assets/images/emptyState.png" alt="Three friends welcoming you"/>
-        <a class="button primary" :href="firstPromptPath">Let's Begin</a>
+        <router-link class="button primary" tag="button" :to="firstPromptPath">Let's Begin</router-link>
     </section>
 </template>
 
