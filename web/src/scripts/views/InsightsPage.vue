@@ -52,14 +52,6 @@
                     <Results v-if="!gapResultsLoading && gapResults" :results="gapResults" :selectable-elements="false"/>
                     <dropdown-menu :items="mentalFitnessDropdownLinks" class="dotsBtn"/>
                 </section>
-                <section v-else class="nogapContainer borderContainer">
-                    <h2>Mental Fitness</h2>
-                    <p class="subtext">Find the gap between what is important to you and how satisfied you are regarding
-                        that area of your&nbsp;life.</p>
-                    <router-link tag="button" class="esButton" :to="gapAssessmentHref">Take the
-                        <span>Mental Fitness</span> Quiz
-                    </router-link>
-                </section>
 
                 <section class="bubblesContainer borderContainer" v-if="hasWordCloud">
                     <div class="flexIt">
@@ -67,6 +59,15 @@
                         <p class="subtext">These are the words used most in your daily reflections.</p>
                     </div>
                     <WordCloud class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
+                </section>
+
+                <section v-if="!gapResults" class="nogapContainer borderContainer">
+                    <h2>Mental Fitness</h2>
+                    <p class="subtext">Find the gap between what is important to you and how satisfied you are regarding
+                        that area of your&nbsp;life.</p>
+                    <router-link tag="button" class="esButton" :to="gapAssessmentHref">Take the
+                        <span>Mental Fitness</span> Quiz
+                    </router-link>
                 </section>
             </div>
 
