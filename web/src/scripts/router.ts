@@ -42,7 +42,7 @@ const routes: MetaRouteConfig[] = [
         component: LoadingPage,
     },
     {
-        component: () => lazyLoadView(import("@web/views/HomePage.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@web/views/HomePage.vue")),
         path: "/",
         name: "Cactus",
         meta: {
@@ -58,7 +58,7 @@ const routes: MetaRouteConfig[] = [
         }
     },
     {
-        component: () => lazyLoadView(import("@components/JournalHome.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@components/JournalHome.vue")),
         path: PageRoute.JOURNAL_HOME,
         name: "Home",
         meta: {
@@ -67,7 +67,7 @@ const routes: MetaRouteConfig[] = [
         }
     },
     {
-        component: () => lazyLoadView(import("@web/views/WordBubbleEmbedPage.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@web/views/WordBubbleEmbedPage.vue")),
         path: PageRoute.INSIGHTS_EMBED,
         name: "Insights Embed",
         meta: {
@@ -76,7 +76,7 @@ const routes: MetaRouteConfig[] = [
         }
     },
     {
-        component: () => lazyLoadView(import("@web/views/SignUpView.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@web/views/SignUpView.vue")),
         path: PageRoute.SIGNUP,
         name: "Sign Up",
         meta: {
@@ -85,7 +85,7 @@ const routes: MetaRouteConfig[] = [
             description: "See yourself and the world more positively. Questions to help you become more mindful and reflect on what makes you happy.",
         }
     }, {
-        component: () => lazyLoadView(import("@web/views/SignUpView.vue")),
+        component: () => lazyLoadView(import(/* webpackPreload: true */ "@web/views/SignUpView.vue")),
         path: PageRoute.LOGIN,
         name: "Log In",
         meta: {
@@ -95,7 +95,7 @@ const routes: MetaRouteConfig[] = [
         }
     },
     {
-        component: () => lazyLoadView(import("@web/views/PromptContentPage.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@web/views/PromptContentPage.vue")),
         path: `${ PageRoute.PROMPTS_ROOT }/:entryId`,
         name: "Prompt",
         meta: {
@@ -104,7 +104,7 @@ const routes: MetaRouteConfig[] = [
         }
     },
     {
-        component: () => lazyLoadView(import("@web/views/TermsOfServicePage.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@web/views/TermsOfServicePage.vue")),
         path: PageRoute.TERMS_OF_SERVICE,
         name: "Terms of Service",
     },
@@ -113,22 +113,22 @@ const routes: MetaRouteConfig[] = [
         redirect: PageRoute.CORE_VALUES,
     },
     {
-        component: () => lazyLoadView(import("@components/SharedReflectionPage.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@components/SharedReflectionPage.vue")),
         path: `${ PageRoute.SHARED_REFLECTION }/:reflectionId`,
         name: "Reflection"
     },
     {
-        component: () => lazyLoadView(import("@components/AndroidWelcome.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@components/AndroidWelcome.vue")),
         path: PageRoute.WELCOME,
         name: "Welcome",
     },
     {
-        component: () => lazyLoadView(import("@components/MagicLinkAppContinue.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@components/MagicLinkAppContinue.vue")),
         path: PageRoute.NATIVE_APP_MAGIC_LINK_LOGIN,
         name: "App Login",
     },
     {
-        component: () => lazyLoadView(import("@components/PricingPage.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@components/PricingPage.vue")),
         name: "Pricing",
         path: PageRoute.PRICING,
         meta: {
@@ -143,17 +143,17 @@ const routes: MetaRouteConfig[] = [
         }
     },
     {
-        component: () => lazyLoadView(import("@components/SocialHome.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@components/SocialHome.vue")),
         name: "Friends & Activity | Cactus",
         path: PageRoute.SOCIAL,
     },
     {
-        component: () => lazyLoadView(import("@components/SocialInvite.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@components/SocialInvite.vue")),
         name: "Invite Friends | Cactus",
         path: PageRoute.FRIENDS
     },
     {
-        component: () => lazyLoadView(import("@components/CoreValuesPage.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@components/CoreValuesPage.vue")),
         path: PageRoute.CORE_VALUES,
         name: "Core Values",
         meta: {
@@ -175,52 +175,52 @@ const routes: MetaRouteConfig[] = [
         }
     },
     {
-        component: () => lazyLoadView(import("@components/EmailActionHandler.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@components/EmailActionHandler.vue")),
         path: PageRoute.AUTHENTICATE_ACTIONS,
         name: "Authentication",
     },
     {
-        component: () => lazyLoadView(import("@components/SponsorPage.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@components/SponsorPage.vue")),
         path: PageRoute.SPONSOR,
         name: "Sponsor",
     },
     {
-        component: () => lazyLoadView(import("@web/views/PrivacyPolicyPage.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@web/views/PrivacyPolicyPage.vue")),
         path: PageRoute.PRIVACY_POLICY,
         name: "Privacy Policy",
     },
     {
-        component: () => lazyLoadView(import("@components/AccountSettings.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@components/AccountSettings.vue")),
         path: PageRoute.ACCOUNT,
         name: "Account Settings",
     },
     {
-        component: () => lazyLoadView(import("@web/views/PaymentCanceled.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@web/views/PaymentCanceled.vue")),
         name: "Payment Canceled",
         path: PageRoute.PAYMENT_CANCELED,
     },
     {
-        component: () => lazyLoadView(import("@components/UnsubscribeConfirmedPage.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@components/UnsubscribeConfirmedPage.vue")),
         name: "Unsubscribe Confirmed",
         path: PageRoute.UNSUBSCRIBE_SUCCESS
     },
     {
-        component: () => lazyLoadView(import("@web/views/StripeCheckoutRedirect.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@web/views/StripeCheckoutRedirect.vue")),
         name: "Checkout",
         path: PageRoute.CHECKOUT,
     },
     {
-        component: () => lazyLoadView(import("@web/views/SignupConfirmed.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@web/views/SignupConfirmed.vue")),
         name: "Sign up",
         path: PageRoute.SIGNUP_CONFIRMED,
     },
     {
-        component: () => lazyLoadView(import("@web/views/InsightsPage.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@web/views/InsightsPage.vue")),
         name: "Insights",
         path: PageRoute.INSIGHTS,
     },
     {
-        component: () => lazyLoadView(import("@components/404.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@components/404.vue")),
         path: "*",
         name: "Page Not Found",
     },

@@ -1,4 +1,4 @@
-import {AndroidAppDelegateInterface, AndroidAppInterface} from "@web/android/AndroidAppInterface";
+import { AndroidAppDelegateInterface, AndroidAppInterface } from "@web/android/AndroidAppInterface";
 
 declare global {
     interface Window {
@@ -10,11 +10,6 @@ declare global {
 
         [key: string]: any; // Add index signature
     }
-
-    interface Navigator {
-        share: (options: { title?: string, url?: string, text?: string }) => Promise<void | any>
-    }
-
 
     interface FirebaseObject {
         [key: string]: any;
