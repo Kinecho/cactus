@@ -12,6 +12,7 @@
     import Logger from "@shared/Logger";
     import * as d3 from "d3";
     import { drawRadarChartD3, RadarChartConfig } from "@web/charts/radarChart";
+    import { debounce } from "debounce";
 
     const logger = new Logger("RadarChart");
 
@@ -68,8 +69,21 @@
         @Prop({ type: String, required: true })
         chartId!: string;
 
+        debounceHandler: (() => void) | null = null;
+
+        chartDiameter = 200;
+
         mounted() {
             this.isMounted = true;
+            this.debounceHandler = debounce(this.onResize)
+            window.addEventListener("resize", this.debounceHandler);
+            this.onResize();
+        }
+
+        onResize() {
+            const w = this.$el.getBoundingClientRect().width;
+            this.chartDiameter = w;
+            logger.info("Chart diameter from resize is", w);
             this.drawChart();
         }
 
@@ -90,7 +104,13 @@
                 return;
             }
 
-            drawRadarChartD3(`.${ this.chartId }`, this.chartData, this.options ?? {});
+            drawRadarChartD3(`.${ this.chartId }`,
+            this.chartData,
+            {
+                ...this.options ?? {},
+                w: Math.max(this.chartDiameter, 50),
+                h: Math.max(this.chartDiameter, 50),
+            });
         }
     }
 </script>
