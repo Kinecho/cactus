@@ -478,6 +478,7 @@
             margin: 0 auto;
             @include r(600) {
                 width: 64rem; //setting an explicit width fixes the "jumpy" sizing when the card first loads.
+                max-width: 100%; //fix for very specific device sizes ~600px.
             }
 
             .skeleton {
