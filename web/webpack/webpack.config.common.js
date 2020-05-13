@@ -191,12 +191,8 @@ module.exports = (config) => {
                         {
                             test: /\.css$/,
                             use: [
-                                // 'style-loader',
                                 {
-                                    loader: MiniCssExtractPlugin.loader,
-                                    options: {
-                                        hmr: isDev,
-                                    },
+                                    loader: isDev ? 'vue-style-loader' : MiniCssExtractPlugin.loader,
                                 },
                                 {
                                     loader: 'css-loader',
@@ -212,10 +208,10 @@ module.exports = (config) => {
                             use: [
                                 // 'style-loader',
                                 {
-                                    loader: MiniCssExtractPlugin.loader,
-                                    options: {
-                                        hmr: isDev,
-                                    },
+                                    loader: isDev ? 'vue-style-loader' : MiniCssExtractPlugin.loader,
+                                    // options: {
+                                    //     hmr: isDev,
+                                    // },
                                 },
                                 {
                                     loader: 'css-loader',
