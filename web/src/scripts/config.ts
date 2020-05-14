@@ -23,29 +23,6 @@ export interface SentryConfig {
     dsn: string,
 }
 
-//these variables come from the webpack Define plugin
-// declare var __APP_CUSTOM_SCHEME__: string;
-// declare var __GOOGLE_ANALYTICS_ID__: string;
-// declare var __GOOGLE_OPTIMIZE_ID__: string;
-// declare var __FACEBOOK_PIXEL_ID__: string;
-// declare var __FIREBASE_CONFIG__: FirebaseConfig;
-// declare var __FLAMELINK_FIREBASE_CONFIG__: FirebaseConfig;
-// declare var __FLAMELINK_ENV_ID__: string;
-// declare var __FIRST_PROMPT_ID__: string;
-// declare var __CLOUDSPONGE_KEY__: string;
-// declare var __APP_STORE_URL__: string;
-// declare var __PLAY_STORE_URL__: string;
-//
-// declare var __API_DOMAIN__: string;
-// declare var __STRIPE_CONFIG__: StripeConfig;
-// declare var __PUBLIC_DOMAIN__: string;
-// declare var __FIREBASE_DYNAMIC_LINK__: FirebaseDynamicLinkConfig;
-// declare var __SENTRY__: SentryConfig;
-// declare var __SENTRY_VERSION__: string | undefined;
-// declare var __BRANCH_LIVE_KEY__: string;
-//
-// declare var __BUILD_ENV__: string;
-
 export const Config: {
     appCustomScheme: string,
     googleAnalyticsID: string,
@@ -95,5 +72,3 @@ export const Config: {
     androidUserAgent: "CactusAndroid",
     branchLiveKey: process.env.__BRANCH_LIVE_KEY__ as any,
 };
-
-console.log("this is the web config", JSON.stringify(Config));

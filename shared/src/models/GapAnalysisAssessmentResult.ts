@@ -83,9 +83,9 @@ export default class GapAnalysisAssessmentResult extends BaseModel {
         return super.prepareFromFirestore(data);
     }
 
-    static create(params: { responsesByQuestionId?: Record<string, number | undefined> }): GapAnalysisAssessmentResult {
+    static create(params?: { responsesByQuestionId?: Record<string, number | undefined> }): GapAnalysisAssessmentResult {
         const result = new GapAnalysisAssessmentResult();
-        result.responsesByQuestionId = params.responsesByQuestionId ?? {};
+        result.responsesByQuestionId = params?.responsesByQuestionId ?? {};
         return result;
     }
 

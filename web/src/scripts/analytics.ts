@@ -57,9 +57,6 @@ export function init() {
 
     getAuth().onAuthStateChanged(user => {
         setUser(user);
-        if (user) {
-            logger.log("User has logged in, removing any tracking/referral info");
-        }
         isFirstAuthLoad = true;
 
     });

@@ -19,10 +19,15 @@
             <assessment v-if="member"
                     :assessment="assessment"
                     :result="assessmentResults"
-                    @questionChanged="setQuestion"
                     :include-upsell="includeUpsell"
+                    :questionIndex="questionIndex"
+                    :currentScreen="currentScreen"
+                    :screens="screens"
+                    @screen="setScreen"
+                    @questionChanged="setQuestion"
                     @close="closeAssessment"
-                    @finished="finishAssessment"/>
+                    @finished="finishAssessment"
+            />
         </div>
     </div>
 </template>
@@ -45,8 +50,10 @@
     import SignIn from "@components/SignIn.vue";
     import LoadingPage from "@web/views/LoadingPage.vue";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
-    import { Prop } from "vue-property-decorator";
+    import { Prop, Watch } from "vue-property-decorator";
     import Spinner from "@components/Spinner.vue";
+    import { defaultScreens, ScreenName, Screen } from "@components/gapanalysis/GapAssessmentTypes";
+
     const logger = new Logger("GapAnalysisPage");
 
     @Component({
@@ -60,20 +67,41 @@
         }
     })
     export default class GapAnalysisPage extends Vue {
-        assessmentId: string | null = null;
         assessment = GapAnalysisAssessment.create();
-        latestResults: GapAnalysisAssessmentResult | undefined = undefined;
-        currentPage: number = 0;
+        latestResults: GapAnalysisAssessmentResult | null = null;
         memberLoaded = false;
         resultsLoaded = false;
         memberUnsubscriber?: ListenerUnsubscriber;
         member: CactusMember | undefined | null = null;
 
-        @Prop({type: String, required: false })
-        resultsId?:string;
+        @Prop({ type: String, required: false })
+        resultsId?: string;
+
+        @Prop({ type: String as () => ScreenName, required: false })
+        screen?: ScreenName;
+
+        @Prop({ type: Number, required: false, default: 0 })
+        questionIndex!: number;
+
+        currentScreen
+        : ScreenName = Screen.intro;
+
+        @Watch("screen")
+        onScreenRoute(screen: ScreenName | undefined | null) {
+            if (screen) {
+                this.currentScreen = screen;
+            }
+        }
+
+        @Watch("resultsId")
+        onResultsId(newId: string | null | undefined, oldId: string | undefined | null) {
+            logger.info("ResultsId changed, ")
+            if (newId && newId !== oldId) {
+                this.fetchResults(newId);
+            }
+        }
 
         async beforeMount() {
-
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({ member }) => {
                     this.member = member;
@@ -82,14 +110,42 @@
             })
 
             if (this.resultsId) {
-                const results = await GapAnalysisService.sharedInstance.getById(this.resultsId)
+                logger.info("Before mount - results Id = fetching results");
+                await this.fetchResults(this.resultsId);
+            }
+
+        }
+
+        async fetchResults(resultsId: string | null | undefined) {
+            logger.info("Fetching results for id", resultsId);
+            if (resultsId) {
+                const results = await GapAnalysisService.sharedInstance.getById(resultsId)
+                logger.info(`Got latest results for id ${ resultsId }`, results);
                 if (results) {
                     this.latestResults = results;
                     this.resultsLoaded = true;
                 }
+
+                if (this.screen) {
+                    this.currentScreen = this.screen;
+                    // this.setScreen(this.screen);
+                }
             } else {
                 this.resultsLoaded = true;
             }
+        }
+
+        setScreen(screen: ScreenName) {
+            if (this.resultsId) {
+                if (screen === Screen.questions) {
+                    pushRoute(`${ PageRoute.GAP_ANALYSIS }/${ this.resultsId }/${ screen }/${ this.questionIndex }`);
+                } else {
+                    pushRoute(`${ PageRoute.GAP_ANALYSIS }/${ this.resultsId }/${ screen }`);
+                }
+            } else {
+                this.currentScreen = screen;
+            }
+
         }
 
         get signInSuccessRoute() {
@@ -97,7 +153,10 @@
         }
 
         get assessmentResults(): GapAnalysisAssessmentResult | undefined {
-            return this.latestResults || GapAnalysisAssessmentResult.create({ assessment: this.assessment });
+            if (this.resultsLoaded) {
+                return this.latestResults ?? GapAnalysisAssessmentResult.create();
+            }
+            return GapAnalysisAssessmentResult.create();
         }
 
         get numSteps(): number {
@@ -113,8 +172,17 @@
             return !isPremiumTier(this.member?.tier);
         }
 
+
+        get screens(): ScreenName[] {
+            return [...defaultScreens].filter(screen => {
+                return !(screen === Screen.upgrade && !this.includeUpsell);
+            })
+        }
+
         setQuestion(questionIndex: number) {
-            this.currentPage = questionIndex;
+            if (this.currentScreen === Screen.questions && this.resultsId && questionIndex !== this.questionIndex) {
+                pushRoute(`${ PageRoute.GAP_ANALYSIS }/${ this.resultsId }/${ Screen.questions }/${ questionIndex }`);
+            }
         }
 
         async closeAssessment() {

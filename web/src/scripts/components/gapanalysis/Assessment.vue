@@ -107,34 +107,9 @@
     import { pushRoute } from "@web/NavigationUtil";
     import { PageRoute } from "@shared/PageRoutes";
     import CactusMemberService from "@web/services/CactusMemberService";
+    import { Screen, ScreenName } from "@components/gapanalysis/GapAssessmentTypes";
 
     const logger = new Logger("gap/Assessment");
-
-    /**
-     * Screen Names
-     * @type {{upgrade: string, intro: string, pendingResults: string, questions: string, chooseFocus: string, results: string}}
-     */
-    const Screen = {
-        intro: "intro",
-        questions: "questions",
-        pendingResults: "pendingResults",
-        results: "results",
-        chooseFocus: "choose-focus",
-        upgrade: "upgrade"
-    }
-
-    /**
-     * Screen Order
-     * @type {(string)[]}
-     */
-    const defaultScreens = [
-        Screen.intro,
-        Screen.questions,
-        Screen.pendingResults,
-        Screen.results,
-        Screen.chooseFocus,
-        Screen.upgrade
-    ];
 
     @Component({
         components: {
@@ -156,14 +131,16 @@
         @Prop({ type: Boolean, required: false, default: true })
         includeUpsell!: boolean;
 
-        started: boolean = false;
         finished: boolean = false;
 
 
         @Prop({ type: Object as () => GapAnalysisAssessmentResult, required: true })
         result!: GapAnalysisAssessmentResult;
 
-        currentQuestionIndex: number = 0;
+        @Prop({ type: Number, required: false, default: 0 })
+        questionIndex!: number;
+
+        // currentQuestionIndex: number = 0;
         currentScreenIndex: number = 0;
         Screen = Screen;
         upsellBillingPeriod = BillingPeriod.yearly;
@@ -177,7 +154,17 @@
         showCloseConfirm = false;
         processingTimeout?: number;
         selectedElement: CactusElement | null = null;
-        currentScreen: string = Screen.intro;
+
+        /**
+         * The screen that is displaying.
+         * This property controls what is actually being shown.
+         * The passed in prop may be used to set this from an parent component
+         */
+        @Prop({ type: String, required: false, default: Screen.intro })
+        currentScreen!: ScreenName;
+
+        @Prop({ type: Array as () => ScreenName[], required: true })
+        screens!: ScreenName[];
 
         //Note: I don't like this implementation but it was the fastest thing i could come up with
         @Watch("result")
@@ -203,9 +190,6 @@
         }
 
         get currentQuestion(): GapAnalysisQuestion | null {
-            if (!this.started) {
-                return null;
-            }
             return this.assessment.questionByIndex(this.currentQuestionIndex) ?? null;
         }
 
@@ -244,13 +228,15 @@
                 this.finishAssessment();
                 return
             }
-            this.currentQuestionIndex += 1;
+            // this.currentQuestionIndex += 1;
+            this.setQuestionIndex(this.currentQuestionIndex + 1);
             // this.currentScreenIndex += 1;
         }
 
         previousQuestion() {
             if (this.currentQuestionIndex > 0) {
-                this.currentQuestionIndex = this.currentQuestionIndex - 1;
+                // this.currentQuestionIndex = this.currentQuestionIndex - 1;
+                this.setQuestionIndex(this.currentQuestionIndex - 1);
                 // this.currentScreenIndex -= 1;
             }
         }
@@ -259,14 +245,14 @@
             return this.currentQuestionIndex != undefined && this.currentQuestionIndex > 0;
         }
 
-        get screens(): string[] {
-            return [...defaultScreens].filter(screen => {
-                if (screen === Screen.upgrade && !this.includeUpsell) {
-                    return false;
-                }
-                return true;
-            })
-        }
+        // get screens(): string[] {
+        //     return [...defaultScreens].filter(screen => {
+        //         if (screen === Screen.upgrade && !this.includeUpsell) {
+        //             return false;
+        //         }
+        //         return true;
+        //     })
+        // }
 
         get nextQuestionEnabled(): boolean {
             const questionId = this.currentQuestion?.id
@@ -285,9 +271,13 @@
         //     return this.result.responsesByQuestionId;
         // }
 
+        setQuestionIndex(index: number) {
+            this.$emit('questionChanged', index);
+        }
+
         finishAssessment() {
             const result = this.result;
-            result.calculateResults({assessment: this.assessment});
+            result.calculateResults({ assessment: this.assessment });
             logger.info("finishing assessment...", result);
             this.finished = true;
             this.setScreen(Screen.pendingResults);
@@ -299,15 +289,16 @@
         }
 
         start() {
-            this.currentQuestionIndex = 0;
-            this.started = true;
-            this.setScreen("questions");
+            this.setQuestionIndex(0);
+            // this.setScreen("questions");
+            // this.currentQuestionIndex = 0;
         }
 
         setScreen(name: string) {
             logger.info("Setting screen...", name);
-            this.currentScreenIndex = Math.max(0, this.screens.indexOf(name));
-            this.currentScreen = this.screens[this.currentScreenIndex];
+            this.$emit('screen', name);
+            // this.currentScreenIndex = Math.max(0, this.screens.indexOf(name));
+            // this.currentScreen = this.screens[this.currentScreenIndex];
         }
 
         async focusSelected() {
@@ -321,14 +312,19 @@
         }
 
         get currentStepperIndex(): number {
-            if (!this.started) {
-                return 0;
-            }
+
             return this.currentScreenIndex + this.currentQuestionIndex;
             // if (this.result) {
             //     return this.stepperTotal - 1;
             // }
             // return (this.currentQuestionIndex ?? 0) + 1;
+        }
+
+        /**
+         * Bounds safe question index
+         */
+        get currentQuestionIndex(): number {
+            return Math.min(Math.max(0, this.questionIndex), this.questionsTotal - 1);
         }
 
         /**
