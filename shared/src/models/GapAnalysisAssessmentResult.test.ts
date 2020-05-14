@@ -21,7 +21,8 @@ test("ensure an error is returned when ids dont' match", () => {
     ])
     const answers = { "0": 2 };
 
-    const result = GapAnalysisAssessmentResult.create({ assessment, responsesByQuestionId: answers });
+    const result = GapAnalysisAssessmentResult.create({ responsesByQuestionId: answers });
+    result.calculateResults({ assessment });
     expect(result.errorMessage).toBeDefined();
 
 })
@@ -34,7 +35,8 @@ test("get results when all questions are answered", () => {
     ])
     const answers = { "0": 2, "1": 5 };
 
-    const result = GapAnalysisAssessmentResult.create({ assessment, responsesByQuestionId: answers });
+    const result = GapAnalysisAssessmentResult.create({ responsesByQuestionId: answers });
+    result.calculateResults({ assessment });
     expect(result.errorMessage).toBeUndefined();
 
     expect(result.chartData?.length).toEqual(2);
