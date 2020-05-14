@@ -346,11 +346,17 @@
         }
 
         async skipCheckout() {
-            logger.info("Skipping checkout");
-            const c = confirm("Are you sure you want to skip upgrading?")
-            if (c) {
+            // if (!this.showSkipCheckoutModal) {
+            //     this.showSkipCheckoutModal = true;
+            //     return;
+            // }
+            // logger.info("Skipping checkout");
+            // const c = confirm("Are you sure you want to skip upgrading?")
+            // if (c) {
                 await pushRoute(PageRoute.INSIGHTS);
-            }
+            // }
+            // logger.info("skipping!");
+            // window.alert("Actually closing the flow....");
         }
 
         async startCheckout(subscriptionProduct: SubscriptionProduct | undefined | null) {
