@@ -5,14 +5,12 @@ import { CactusElement } from "@shared/models/CactusElement";
 
 function createAssessment(args: [CactusElement, GapType][]): GapAnalysisAssessment {
     const assessment = new GapAnalysisAssessment();
-
     args.forEach((arg, index) => {
         const [element, gapType] = arg;
         assessment.addQuestion(GapAnalysisQuestion.create({ title: `Option ${ index }`, element, gapType }));
     })
     return assessment
 }
-
 
 test("ensure an error is returned when ids dont' match", () => {
     const assessment = createAssessment([
@@ -24,9 +22,7 @@ test("ensure an error is returned when ids dont' match", () => {
     const result = GapAnalysisAssessmentResult.create({ responsesByQuestionId: answers });
     result.calculateResults({ assessment });
     expect(result.errorMessage).toBeDefined();
-
 })
-
 
 test("get results when all questions are answered", () => {
     const assessment = createAssessment([
@@ -49,5 +45,4 @@ test("get results when all questions are answered", () => {
     expect(result.chartData[1].name.toLowerCase()).toEqual(GapType.satisfaction);
     expect(result.chartData[1].axes[0].value).toEqual(0)
     expect(result.chartData[1].axes[2].value).toEqual(2)
-
 })

@@ -131,27 +131,11 @@
         @Prop({ type: Boolean, required: false, default: true })
         includeUpsell!: boolean;
 
-        finished: boolean = false;
-
-
         @Prop({ type: Object as () => GapAnalysisAssessmentResult, required: true })
         result!: GapAnalysisAssessmentResult;
 
         @Prop({ type: Number, required: false, default: 0 })
         questionIndex!: number;
-
-        Screen = Screen;
-        upsellBillingPeriod = BillingPeriod.yearly;
-
-
-        /**
-         * Responses by questionID
-         * @type {{string: number|undefined}}
-         */
-        responseValues: Record<string, number | undefined> = {};
-        showCloseConfirm = false;
-        processingTimeout?: number;
-        selectedElement: CactusElement | null = null;
 
         /**
          * The screen that is displaying.
@@ -163,6 +147,19 @@
 
         @Prop({ type: Array as () => ScreenName[], required: true })
         screens!: ScreenName[];
+
+        finished: boolean = false;
+        Screen = Screen;
+        upsellBillingPeriod = BillingPeriod.yearly;
+
+        /**
+         * Responses by questionID
+         * @type {{string: number|undefined}}
+         */
+        responseValues: Record<string, number | undefined> = {};
+        showCloseConfirm = false;
+        processingTimeout?: number;
+        selectedElement: CactusElement | null = null;
 
         //Note: I don't like this implementation but it was the fastest thing i could come up with
         @Watch("result")
