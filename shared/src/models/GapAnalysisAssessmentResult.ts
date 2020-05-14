@@ -33,9 +33,16 @@ export default class GapAnalysisAssessmentResult extends BaseModel {
     importance?: ElementResultMap | null | undefined = null
     satisfaction?: ElementResultMap | null | undefined = null;
 
+    responsesByQuestionId: Record<string, number | undefined> = {};
+
     setCompleted() {
         this.completed = true
         this.completedAt = new Date();
+    }
+
+    setAnswer(params: { questionId: string, value: number | undefined }) {
+        //creating a new instance of the map, to support responsiveness in the Vue
+        this.responsesByQuestionId = { ...this.responsesByQuestionId, [params.questionId]: params.value }
     }
 
     chartDataFromElementResultMap(map: ElementResultMap, name: string): RadarChartData {
@@ -76,44 +83,29 @@ export default class GapAnalysisAssessmentResult extends BaseModel {
         return super.prepareFromFirestore(data);
     }
 
-    static create(params: { assessment: GapAnalysisAssessment, responsesByQuestionId: Record<string, number | undefined> }): GapAnalysisAssessmentResult {
+    static create(params: { responsesByQuestionId?: Record<string, number | undefined> }): GapAnalysisAssessmentResult {
         const result = new GapAnalysisAssessmentResult();
-        const { assessment, responsesByQuestionId } = params;
+        result.responsesByQuestionId = params.responsesByQuestionId ?? {};
+        return result;
+    }
 
-        const responseQuestionIds = Object.values(responsesByQuestionId).filter(isNotNull)
+    calculateResults(params: { assessment: GapAnalysisAssessment, }): GapAnalysisAssessmentResult {
+        const { assessment } = params;
+        const result = this;
+        const responseQuestionIds = Object.values(this.responsesByQuestionId).filter(isNotNull)
 
         //quick guard for mismatched questions & answers;
         if (assessment.questions.length !== responseQuestionIds.length) {
-            result.errorMessage = "Not all questions were ansered. Unable to calculate a result";
+            result.errorMessage = "Not all questions were answered. Unable to calculate a result";
             return result;
         }
 
-        // const gapMap: Record<GapType, RadarChartData> = {
-        //     [GapType.importance]: { name: GapType.importance, axes: [] },
-        //     [GapType.satisfaction]: { name: GapType.satisfaction, axes: [] },
-        // }
         const importance: ElementResultMap = createElementResultMap();
         const satisfaction: ElementResultMap = createElementResultMap();
 
-        //
-        // assessment.questions.reduce((map, question) => {
-        //     const type = question.gapType;
-        //
-        //     const dataList = map[type].axes;
-        //
-        //
-        //     const answerValue = responsesByQuestionId[question.id];
-        //     dataList.push({
-        //         axis: question.element,
-        //         value: answerValue ?? 0
-        //     })
-        //
-        //     return map;
-        // }, gapMap)
-
         assessment.questions.forEach(question => {
             const type = question.gapType;
-            const answerValue = responsesByQuestionId[question.id];
+            const answerValue = this.responsesByQuestionId[question.id];
             if (type === GapType.importance) {
                 importance[question.element] = answerValue ?? 0
             } else if (type === GapType.satisfaction) {
@@ -123,8 +115,6 @@ export default class GapAnalysisAssessmentResult extends BaseModel {
 
         result.importance = importance;
         result.satisfaction = satisfaction;
-
-        // result.chartData = Object.values(gapMap);
 
         return result;
     }

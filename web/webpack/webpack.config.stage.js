@@ -5,12 +5,11 @@ const minimizersConfig = require('./minimizers.config');
 const config = require('./config.stage');
 const SentryWebpackPlugin = require('@sentry/webpack-plugin');
 
-
 module.exports = () => {
     return getCommonWebpackConfig(config).then(common => {
         return merge(common, minimizersConfig, {
             devtool: 'source-map',
-            mode: "development",
+            mode: "production",
             // plugins: [
             //     new SentryWebpackPlugin({
             //         include: path.resolve(__dirname, '..', 'public'),

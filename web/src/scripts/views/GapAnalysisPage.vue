@@ -1,7 +1,10 @@
 <template>
     <div class="gapAnalysisPage" :class="{signin: !member && memberLoaded}">
-        <div class="centered">
-            <div class="sign-in" v-if="!member && memberLoaded">
+        <div class="centered" v-if="!memberLoaded || !resultsLoaded">
+            <spinner color="dark" message="Loading Assessment...." :delay="1200"/>
+        </div>
+        <div class="centered" v-else>
+            <div class="sign-in" v-if="!member">
                 <sign-in :show-magic-link="false"
                         :show-title="true"
                         title="Sign In"
@@ -13,8 +16,9 @@
                         spinner-color="dark"
                 />
             </div>
-            <assessment v-if="member && memberLoaded"
+            <assessment v-if="member"
                     :assessment="assessment"
+                    :result="assessmentResults"
                     @questionChanged="setQuestion"
                     :include-upsell="includeUpsell"
                     @close="closeAssessment"
@@ -41,12 +45,14 @@
     import SignIn from "@components/SignIn.vue";
     import LoadingPage from "@web/views/LoadingPage.vue";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
-
+    import { Prop } from "vue-property-decorator";
+    import Spinner from "@components/Spinner.vue";
     const logger = new Logger("GapAnalysisPage");
 
     @Component({
         components: {
             LoadingPage,
+            Spinner,
             Results,
             SignIn,
             Assessment,
@@ -59,8 +65,12 @@
         latestResults: GapAnalysisAssessmentResult | undefined = undefined;
         currentPage: number = 0;
         memberLoaded = false;
+        resultsLoaded = false;
         memberUnsubscriber?: ListenerUnsubscriber;
         member: CactusMember | undefined | null = null;
+
+        @Prop({type: String, required: false })
+        resultsId?:string;
 
         async beforeMount() {
 
@@ -68,19 +78,26 @@
                 onData: async ({ member }) => {
                     this.member = member;
                     this.memberLoaded = true;
-                    // if (!member) {
-                    //     pushRoute(`${ PageRoute.SIGNUP }?${ QueryParam.MESSAGE }=${ encodeURIComponent("Please sign in to take the assessment") }`);
-                    // }
                 }
             })
+
+            if (this.resultsId) {
+                const results = await GapAnalysisService.sharedInstance.getById(this.resultsId)
+                if (results) {
+                    this.latestResults = results;
+                    this.resultsLoaded = true;
+                }
+            } else {
+                this.resultsLoaded = true;
+            }
         }
 
         get signInSuccessRoute() {
             return PageRoute.GAP_ANALYSIS;
         }
 
-        get results(): GapAnalysisAssessmentResult | undefined {
-            return this.latestResults;
+        get assessmentResults(): GapAnalysisAssessmentResult | undefined {
+            return this.latestResults || GapAnalysisAssessmentResult.create({ assessment: this.assessment });
         }
 
         get numSteps(): number {
