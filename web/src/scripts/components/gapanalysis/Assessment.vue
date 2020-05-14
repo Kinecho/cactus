@@ -71,7 +71,8 @@
                 <results :selectable-elements="true" :results="result" chart-id="select_results_chart" @elementSelected="elementSelected"/>
                 <div class="cvActions flexActions">
                     <p v-if="selectedElement">You chose <strong>{{selectedElement}}</strong>.</p>
-                    <p v-if="!selectedElement" class="validationText">Tap a cactus to continue. You can always change this later.</p>
+                    <p v-if="!selectedElement" class="validationText">Tap a cactus to continue. You can always change
+                        this later.</p>
                     <button class="no-loading" @click="focusSelected" :disabled="!selectedElement">Next
                     </button>
                 </div>
@@ -105,14 +106,13 @@
     import { startCheckout } from "@web/checkoutService";
     import { pushRoute } from "@web/NavigationUtil";
     import { PageRoute } from "@shared/PageRoutes";
-    import CactusMember from "@shared/models/CactusMember";
     import CactusMemberService from "@web/services/CactusMemberService";
 
     const logger = new Logger("gap/Assessment");
 
     /**
      * Screen Names
-     * @type {{upgrade: string; intro: string; pendingResults: string; questions: string; chooseFocus: string; results: string}}
+     * @type {{upgrade: string, intro: string, pendingResults: string, questions: string, chooseFocus: string, results: string}}
      */
     const Screen = {
         intro: "intro",
@@ -158,7 +158,11 @@
 
         started: boolean = false;
         finished: boolean = false;
-        result: GapAnalysisAssessmentResult | undefined;
+
+
+        @Prop({ type: Object as () => GapAnalysisAssessmentResult, required: true })
+        result!: GapAnalysisAssessmentResult;
+
         currentQuestionIndex: number = 0;
         currentScreenIndex: number = 0;
         Screen = Screen;
@@ -174,6 +178,16 @@
         processingTimeout?: number;
         selectedElement: CactusElement | null = null;
         currentScreen: string = Screen.intro;
+
+        //Note: I don't like this implementation but it was the fastest thing i could come up with
+        @Watch("result")
+        onResultChanged(newResult: GapAnalysisAssessmentResult) {
+            this.responseValues = newResult.responsesByQuestionId;
+        }
+
+        beforeMount() {
+            this.responseValues = this.result.responsesByQuestionId;
+        }
 
         @Watch("currentQuestionIndex")
         emitPageChange(newIndex: number) {
@@ -221,7 +235,8 @@
                 return;
             }
 
-            this.responseValues = { ...this.responseValues, [questionId]: value };
+            this.result.setAnswer({ questionId, value })
+            this.responseValues = this.result.responsesByQuestionId;
         }
 
         nextQuestion() {
@@ -266,23 +281,22 @@
             return this.responseValues[questionId] !== undefined;
         }
 
+        // get responseValues(): Record<string, number | undefined> {
+        //     return this.result.responsesByQuestionId;
+        // }
+
         finishAssessment() {
-            const result = GapAnalysisAssessmentResult.create({
-                assessment: this.assessment,
-                responsesByQuestionId: this.responseValues
-            })
+            const result = this.result;
+            result.calculateResults({assessment: this.assessment});
             logger.info("finishing assessment...", result);
             this.finished = true;
-            // this.processingResults = true;
             this.setScreen(Screen.pendingResults);
             this.processingTimeout = window.setTimeout(() => {
-                // this.processingResults = false;
                 this.setScreen(Screen.results);
             }, 2500);
             this.result = result;
             this.$emit('finished', this.result);
         }
-
 
         start() {
             this.currentQuestionIndex = 0;

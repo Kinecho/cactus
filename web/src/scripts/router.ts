@@ -175,6 +175,15 @@ const routes: MetaRouteConfig[] = [
         }
     },
     {
+        path: `${ PageRoute.GAP_ANALYSIS }/:resultsId`,
+        component: () => import("@web/views/GapAnalysisPage.vue"),
+        name: "ExistingGapAnalysisPage",
+        props: true,
+        meta: {
+            title: "Gap Analysis | Cactus"
+        }
+    },
+    {
         component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@components/EmailActionHandler.vue")),
         path: PageRoute.AUTHENTICATE_ACTIONS,
         name: "Authentication",
