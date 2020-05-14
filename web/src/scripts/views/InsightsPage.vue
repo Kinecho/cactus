@@ -49,7 +49,10 @@
                     <p class="subtext">The comparison of what you find <strong class="pink">important</strong> and what you find <strong class="blue">satisfactory</strong></p>
                     <spinner v-if="gapResultsLoading" message="Loading Results..." :delay="1200"/>
                     <Results v-if="!gapResultsLoading && gapResults" :results="gapResults" :selectable-elements="false" :hideElements="true"/>
-                    <p v-if="focusElement">Your focus is <strong>{{focusElement}}</strong>. To change your focus...</p>
+                    <p v-if="focusElement">
+                        Your focus is <strong>{{focusElement}}</strong>. To change your focus...
+                        <router-link :to="setFocusPath" tag="button">Click Here</router-link>
+                    </p>
                     <dropdown-menu :items="mentalFitnessDropdownLinks" class="dotsBtn"/>
                 </section>
                 <section v-else class="nogapContainer borderContainer">
@@ -100,6 +103,7 @@
     import GapAnalysisService from "@web/services/GapAnalysisService";
     import Spinner from "@components/Spinner.vue";
     import { CactusElement } from "@shared/models/CactusElement";
+    import { Screen } from "@components/gapanalysis/GapAssessmentTypes";
 
     const logger = new Logger("InsightsPage");
     const copy = CopyService.getSharedInstance().copy;
@@ -179,6 +183,13 @@
 
         get coreValuesHref(): string {
             return `${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`;
+        }
+
+        get setFocusPath(): string|undefined {
+            if (this.gapResults) {
+                return `${PageRoute.GAP_ANALYSIS}/${this.gapResults.id}/${Screen.chooseFocus}`
+            }
+            return undefined;
         }
 
         get gapAssessmentHref(): string {
