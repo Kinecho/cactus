@@ -35,7 +35,8 @@
         {
             "target": "storybook",
             "predeploy": [
-                "npm --prefix ./web run build-storybook"
+                "npm --prefix ./web run build-storybook",
+                "npm --prefix ./web run copy:storybook"
             ],
             "public": "web/storybook-static"
         },
