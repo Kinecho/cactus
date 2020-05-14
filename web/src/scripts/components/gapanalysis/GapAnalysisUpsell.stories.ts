@@ -19,6 +19,7 @@ export const StaticProduct = () => Vue.extend({
             <GapAnalysisUpsell :element="element"
                     :subscription-product="product"
                     @checkout="checkout"
+                    @skip="skip"
                     :checkout-loading="checkoutLoading"
             />
         </div>`,
@@ -75,6 +76,8 @@ export const StaticProduct = () => Vue.extend({
             setTimeout(() => {
                 this.checkoutLoading = false;
             }, 1500);
+        }, skip() {
+            alert("This is going to be skipped!");
         }
     }
 

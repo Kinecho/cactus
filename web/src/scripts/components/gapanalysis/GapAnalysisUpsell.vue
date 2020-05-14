@@ -42,6 +42,7 @@
             </transition>
         </section>
         <button class="tertiary" @click="skip">Skip for now</button>
+        <upsell-skip-modal :show="showSkipCheckoutModal" @confirmed="skip" @close="showSkipCheckoutModal = false"/>
     </div>
 </template>
 
@@ -55,12 +56,14 @@
     import { Prop } from "vue-property-decorator";
     import SvgIcon from "@components/SvgIcon.vue";
     import { formatPriceCentsUsd } from "@shared/util/StringUtil";
+    import UpsellSkipModal from "@components/gapanalysis/UpsellSkipModal.vue";
 
     @Component({
         components: {
             SvgIcon,
             ResultElement,
             Spinner,
+            UpsellSkipModal,
         }
     })
     export default class GapAnalysisUpsell extends Vue {
@@ -74,6 +77,8 @@
 
         @Prop({ type: Boolean, required: false, default: false })
         checkoutLoading!: boolean;
+
+        showSkipCheckoutModal = false;
 
         get loading(): boolean {
             return !this.subscriptionProduct
@@ -107,6 +112,10 @@
         }
 
         skip() {
+            if (!this.showSkipCheckoutModal) {
+                this.showSkipCheckoutModal = true;
+                return;
+            }
             this.$emit('skip');
         }
     }
@@ -119,7 +128,7 @@
 
     .upsellContainer {
         padding: 6.4rem 2.4rem;
-
+        text-align: center;
         @include r(768) {
             background: $beige;
             padding: 6.4rem 0 0;

@@ -10,6 +10,7 @@
                         :redirect-on-sign-in="false"
                         :redirect-url="signInSuccessRoute"
                         :twitterEnabled="false"
+                        spinner-color="dark"
                 />
             </div>
             <assessment v-if="member && memberLoaded"

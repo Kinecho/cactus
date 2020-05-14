@@ -346,11 +346,7 @@
         }
 
         async skipCheckout() {
-            logger.info("Skipping checkout");
-            const c = confirm("Are you sure you want to skip upgrading?")
-            if (c) {
-                await pushRoute(PageRoute.INSIGHTS);
-            }
+            await pushRoute(PageRoute.INSIGHTS);
         }
 
         async startCheckout(subscriptionProduct: SubscriptionProduct | undefined | null) {
