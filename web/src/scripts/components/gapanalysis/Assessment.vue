@@ -66,10 +66,11 @@
             </div>
             <div class="whiteBg" v-else-if="currentScreen === Screen.chooseFocus">
                 <h2>Choose your focus</h2>
-                <p class="subtext">Tap a cactus to continue. Your choice will be used to personalize questions designed
+                <p class="subtext">Your choice will be used to personalize questions designed
                     to help you focus on what makes you happy.</p>
                 <results :selectable-elements="true" :results="result" chart-id="select_results_chart" @elementSelected="elementSelected" :withAnimation="true"/>
                 <p v-if="selectedElement">You chose <strong>{{selectedElement}}</strong>.</p>
+                <div v-else ><p class="validationText">Tap a cactus to continue. You can always change this later.</p></div>
                 <div class="cvActions flexActions">
                     <button class="no-loading" @click="focusSelected" :disabled="!selectedElement">Next
                     </button>
@@ -449,12 +450,17 @@
 
         @include r(768) {
             display: flex;
-            margin-top: 6.4rem;
+            margin-top: 3.2rem;
         }
 
         button {
             margin-bottom: .8rem;
             min-width: 0;
         }
+    }
+
+    .validationText {
+        font-size: 1.6rem;
+        opacity: .8;
     }
 </style>

@@ -6,7 +6,7 @@
             </router-link>
             <div v-if="!loggedIn" class="anonLinks">
                 <router-link v-if="displayLoginButton"
-                        class="login "
+                        class="login"
                         :to="sponsorHref"
                         type="link"
                 >
@@ -21,13 +21,10 @@
                     <span>{{copy.common.LOG_IN}}</span>
                 </router-link>
                 <router-link v-if="displaySignupButton"
-                        data-test="signup-button"
-                        class="jump-to-form button small"
-                        :to="signupHref"
-                        @click.prevent="goToSignup"
+                        class="button small"
+                        :to="assessmentHref"
                         type="button"
-                >{{copy.common.TRY_IT_FREE}}
-                </router-link>
+                >Take the Quiz</router-link>
             </div>
             <div class="navContainer" v-if="loggedIn && showLinks">
                 <router-link class="navbarLink home" :to="journalHref" v-if="loggedIn">
@@ -229,6 +226,9 @@
             },
             signupHref(): string {
                 return PageRoute.SIGNUP;
+            },
+            assessmentHref(): string {
+                return PageRoute.GAP_ANALYSIS;
             },
             journalHref(): string {
                 return PageRoute.JOURNAL_HOME;
