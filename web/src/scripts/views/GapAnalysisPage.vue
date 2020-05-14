@@ -1,11 +1,11 @@
 <template>
-    <div class="gapAnalysisPage">
+    <div class="gapAnalysisPage" :class="{signin: !member && memberLoaded}">
         <div class="centered">
             <div class="sign-in" v-if="!member && memberLoaded">
                 <sign-in :show-magic-link="false"
                         :show-title="true"
-                        title="Mental Fitness Quiz"
-                        message="Sign in to continue to your quiz."
+                        title="Sign In"
+                        message="Please sign in to continue to the quiz."
                         :sign-in-success-path="signInSuccessRoute"
                         :redirect-on-sign-in="false"
                         :redirect-url="signInSuccessRoute"
@@ -177,10 +177,14 @@
                 -1rem -1rem,
                 -59rem -26rem,
                 -15rem 34rem,
-                70rem -90rem;
+                70rem -70rem;
                 background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat;
-                background-size: auto, auto, 110%, 100%, 100%;
+                background-size: auto, auto, 110%, 100%, 120rem;
             }
+        }
+
+        &.signin {
+            background: lighten($dolphin, 16%);
         }
 
         .centered {
@@ -195,8 +199,15 @@
     }
 
     .sign-in {
-        @include shadowbox;
-        padding: 3rem;
+        align-items: center;
+        color: $white;
+        display: flex;
+        min-height: 100vh;
+        padding: 0 2.4rem;
+
+        .centered {
+            text-align: center;
+        }
     }
 
 </style>

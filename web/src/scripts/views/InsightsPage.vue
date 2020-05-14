@@ -46,7 +46,7 @@
             <div class="flexSections">
                 <section v-if="gapResults" class="gapContainer borderContainer">
                     <h2>Mental Fitness</h2>
-                    <p class="subtext">This is the comparison of what's <strong class="pink">important</strong> to you and what you find <strong class="blue">satisfactory</strong>. Your focus is <strong>Meaning</strong>. To change your focus...</p>
+                    <p class="subtext">This is the comparison of what's <strong class="pink">important</strong> to you and what you find <strong class="blue">satisfactory</strong>. <span v-if="focusElement">Your focus is <strong>{{focusElement}}</strong>. To change your focus...</span></p>
                     <spinner v-if="gapResultsLoading" message="Loading Results..." :delay="1200"/>
                     <Results v-if="!gapResultsLoading && gapResults" :results="gapResults" :selectable-elements="false"/>
                     <dropdown-menu :items="mentalFitnessDropdownLinks" class="dotsBtn"/>

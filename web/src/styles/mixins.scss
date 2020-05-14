@@ -223,6 +223,21 @@ $widthDesktop: $widthXL;
 
 /* ANIMATIONS */
 
+@keyframes pulse-green {
+	0% {
+		box-shadow: 0 0 0 0 rgba(51, 204, 171, 0.7);
+		transform: scale(0.95);
+	}
+	70% {
+		box-shadow: 0 0 0 32px rgba(51, 204, 171, 0);
+		transform: scale(1);
+	}
+	100% {
+		box-shadow: 0 0 0 0 rgba(51, 204, 171, 0);
+		transform: scale(0.95);
+	}
+}
+
 @keyframes slide {
   100% {
     opacity: 1;

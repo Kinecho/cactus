@@ -227,6 +227,15 @@
         }
     }
 
+    .firebaseui-tos,
+    .firebaseui-link {
+        color: white;
+    }
+
+    .firebaseui-link {
+        text-decoration: underline;
+    }
+
 </style>
 
 <style lang="scss" scoped>
@@ -244,6 +253,8 @@
 
     .messageSubtext {
         font-size: 2rem;
+        margin-bottom: 3.2rem;
+        opacity: .8;
 
         @include r(600) {
             font-size: 2.4rem;

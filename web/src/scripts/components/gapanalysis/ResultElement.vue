@@ -1,5 +1,5 @@
 <template>
-    <div class="element-icon" @click="toggleElement" :class="{selected, selectable, withCircle, withAnimation}">
+    <div class="element-icon" @click="toggleElement" :class="{selected, selectable, withCircle}">
         <img :src="imageUrl" :alt="`${element} Icon`"/>
         <h4 v-if="withLabel">{{element}}</h4>
     </div>
@@ -25,9 +25,6 @@
 
         @Prop({ type: Boolean, required: false, default: false })
         withCircle!: boolean;
-
-        @Prop({ type: Boolean, required: false, default: false })
-        withAnimation!: boolean;
 
         @Prop({type: Boolean, required: false, default: true})
         withLabel!: boolean;
@@ -70,24 +67,35 @@
         justify-content: center;
         position: relative;
         text-align: center;
-        transition: all .3s linear;
 
         &.selectable {
             cursor: pointer;
 
-            h4 {
-                opacity: .6;
-                transition: opacity .3s;
+            &:before {
+                animation: pulse-green 2s infinite;
+                background: rgba(51, 217, 178, 1);
+                border-radius: 50%;
+                bottom: 0;
+                box-shadow: 0 0 0 0 rgba(51, 217, 178, 1);
+                content: "";
+                height: 10px;
+                left: 0;
+                margin: auto;
+                position: absolute;
+                right: 0;
+                top: 0;
+                transform: scale(1);
+                width: 10px;
+                z-index: 0;
             }
 
             img {
+                position: relative;
                 transition: transform .3s;
+                z-index: 1;
             }
 
             &:hover {
-                h4 {
-                    opacity: 1;
-                }
                 img {
                     transform: scale(1.1);
                 }
@@ -121,25 +129,6 @@
                         background-color: darken($beige, 5%);
                     }
                 }
-            }
-        }
-
-        &.withAnimation {
-
-            &.energy img {
-                animation: wiggle .2s ease 1s 3;
-            }
-            &.emotions img {
-                animation: wiggle .2s ease 8s 3;
-            }
-            &.meaning img {
-                animation: wiggle .2s ease 5s 3;
-            }
-            &.experience img {
-                animation: wiggle .2s ease 11s 3;
-            }
-            &.relationships img {
-                animation: wiggle .2s ease 15s 3;
             }
         }
 

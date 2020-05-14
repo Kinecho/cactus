@@ -60,20 +60,20 @@
             <div class="whiteBg" v-else-if="currentScreen === Screen.results">
                 <results-onboarding :results="result"/>
                 <div class="cvActions">
-                    <button class="btn primary" @click="setScreen(Screen.chooseFocus)">Choose Your Focus</button>
+                    <button class="btn primary" @click="setScreen(Screen.chooseFocus)">Next: Choose Your Focus</button>
                 </div>
-                <cactus-confetti :running="true"/>
+                <cactus-confetti :running="false"/>
             </div>
             <div class="whiteBg" v-else-if="currentScreen === Screen.chooseFocus">
                 <h2>Choose your focus</h2>
-                <p class="subtext">Tap a cactus to continue. Your choice will be used to personalize questions designed
+                <p class="subtext">Your choice will be used to personalize questions designed
                     to help you focus on what makes you happy.</p>
-                <results :selectable-elements="true" :results="result" chart-id="select_results_chart" @elementSelected="elementSelected" :withAnimation="true"/>
-                <p v-if="selectedElement">You chose <strong>{{selectedElement}}</strong>.</p>
+                <results :selectable-elements="true" :results="result" chart-id="select_results_chart" @elementSelected="elementSelected"/>
                 <div class="cvActions flexActions">
+                    <p v-if="selectedElement">You chose <strong>{{selectedElement}}</strong>.</p>
+                    <p v-if="!selectedElement" class="validationText">Tap a cactus to continue. You can always change this later.</p>
                     <button class="no-loading" @click="focusSelected" :disabled="!selectedElement">Next
                     </button>
-                    <button class="no-loading tertiary" @click="skipFocus">Do this later</button>
                 </div>
             </div>
             <template v-else-if="currentScreen === Screen.upgrade">
@@ -446,12 +446,20 @@
 
         @include r(768) {
             display: flex;
-            margin-top: 6.4rem;
+        }
+
+        p {
+            margin: 2.4rem 0;
         }
 
         button {
             margin-bottom: .8rem;
             min-width: 0;
         }
+    }
+
+    .validationText {
+        font-size: 1.6rem;
+        opacity: .8;
     }
 </style>

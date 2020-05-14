@@ -10,12 +10,11 @@
                 @selected="elementClicked"
                 :selectable="selectableElements"
                 :selected="selectedElement === 'emotions'"
-                :withAnimation="withAnimation"
         />
-        <result-element element="relationships" class="element relationships" @selected="elementClicked" :selected="selectedElement === 'relationships'" :selectable="selectableElements" :withAnimation="withAnimation"/>
-        <result-element element="energy" class="element energy" @selected="elementClicked" :selected="selectedElement === 'energy'" :selectable="selectableElements" :withAnimation="withAnimation"/>
-        <result-element element="meaning" class="element meaning" @selected="elementClicked" :selected="selectedElement === 'meaning'" :selectable="selectableElements" :withAnimation="withAnimation"/>
-        <result-element element="experience" class="element experience" @selected="elementClicked" :selected="selectedElement === 'experience'" :selectable="selectableElements" :withAnimation="withAnimation"/>
+        <result-element element="relationships" class="element relationships" @selected="elementClicked" :selected="selectedElement === 'relationships'" :selectable="selectableElements"/>
+        <result-element element="energy" class="element energy" @selected="elementClicked" :selected="selectedElement === 'energy'" :selectable="selectableElements"/>
+        <result-element element="meaning" class="element meaning" @selected="elementClicked" :selected="selectedElement === 'meaning'" :selectable="selectableElements"/>
+        <result-element element="experience" class="element experience" @selected="elementClicked" :selected="selectedElement === 'experience'" :selectable="selectableElements"/>
     </div>
 </template>
 
@@ -64,9 +63,6 @@
 
         @Prop({ type: Boolean, required: false, default: false })
         hideElements!: boolean;
-
-        @Prop({ type: Boolean, required: false, default: false })
-        withAnimation!: boolean;
 
         @Prop({ type: String, required: false, default: "assessment-1" })
         chartId!: string;
@@ -122,37 +118,72 @@
         grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
         grid-template-rows: 1fr 1fr 1fr;
         margin: 3.2rem auto;
-        padding: 70px 0 20px; /*offset elements*/
-        /*width: 22rem;*/
+        max-width: 16rem;
+        padding-top: 4.8rem; /*offset elements*/
 
+        @include r(374) {
+            max-width: 28rem;
+        }
         @include r(600) {
-            /*width: 34rem;*/
+            max-width: 40rem;
         }
     }
 
     .energy {
         grid-area: energy;
         transform: translateY(-70px);
+
+        @include r(600) {
+            transform: translateY(-95px);
+        }
     }
 
     .emotions {
         grid-area: emotions;
         transform: translate(-50px, -30px);
+
+        @include r(374) {
+            transform: translate(-70px, -50px);
+        }
+        @include r(600) {
+            transform: translate(-115px, -80px);
+        }
     }
 
     .meaning {
         grid-area: meaning;
         transform: translate(50px, -30px);
+
+        @include r(374) {
+            transform: translate(70px, -50px);
+        }
+        @include r(600) {
+            transform: translate(115px, -80px);
+        }
     }
 
     .experience {
         grid-area: experience;
         transform: translate(-20px, 20px);
+
+        @include r(374) {
+            transform: translate(-30px, 20px);
+        }
+        @include r(600) {
+            transform: translate(-30px, 40px);
+        }
     }
 
     .relationships {
         grid-area: relationships;
         transform: translate(20px, 20px);
+
+        @include r(374) {
+            transform: translate(30px, 20px);
+        }
+        @include r(600) {
+            transform: translate(30px, 40px);
+        }
     }
 
     .radar-container {
