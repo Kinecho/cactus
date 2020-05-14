@@ -1,5 +1,5 @@
 <template>
-    <div class="element-icon" @click="toggleElement" :class="{selected, selectable, withCircle}">
+    <div class="element-icon" @click="toggleElement" :class="{selected, selectable, withCircle, withLabel}">
         <img :src="imageUrl" :alt="`${element} Icon`"/>
         <h4 v-if="withLabel">{{element}}</h4>
     </div>
@@ -107,26 +107,36 @@
         }
 
         &.withCircle {
-            img {
-                margin-bottom: 1.6rem;
-                z-index: 2;
-            }
+            background-color: $beige;
+            border-radius: 50%;
+            height: 6.4rem;
+            width: 6.4rem;
 
-            h4 {
-                &:before {
-                    background-color: $beige;
-                    border-radius: 50%;
-                    content: '';
-                    height: 6.4rem;
-                    left: 0;
-                    margin: auto;
-                    position: absolute;
-                    right: 0;
-                    top: -11px;
-                    width: 6.4rem;
+            &.withLabel {
+                background-color: transparent;
+                height: auto;
+                width: auto;
 
-                    @include r(768) {
-                        background-color: darken($beige, 5%);
+                img {
+                    margin-bottom: 1.6rem;
+                    z-index: 2;
+                }
+                h4 {
+                    &:before {
+                        background-color: $beige;
+                        border-radius: 50%;
+                        content: '';
+                        height: 6.4rem;
+                        left: 0;
+                        margin: auto;
+                        position: absolute;
+                        right: 0;
+                        top: -11px;
+                        width: 6.4rem;
+
+                        @include r(768) {
+                            background-color: darken($beige, 5%);
+                        }
                     }
                 }
             }

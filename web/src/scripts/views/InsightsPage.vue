@@ -48,8 +48,14 @@
                     <h2>Mental Fitness</h2>
                     <p class="subtext">The comparison of what you find <strong class="pink">important</strong> and what you find <strong class="blue">satisfactory</strong></p>
                     <spinner v-if="gapResultsLoading" message="Loading Results..." :delay="1200"/>
-                    <Results v-if="!gapResultsLoading && gapResults" :results="gapResults" :selectable-elements="false" :hideElements="true"/>
-                    <p v-if="focusElement">Your focus is <strong>{{focusElement}}</strong>. To change your focus...</p>
+                    <Results v-if="!gapResultsLoading && gapResults" :results="gapResults" :selectable-elements="false" :withLabel="false"/>
+                    <div class="gapFocus" v-if="focusElement">
+                        <ResultElement :element="focusElement" :selectable="false" :with-label="false" :withCircle="true"/>
+                        <div class="flexIt">
+                            <p class="statLabel">Focus</p>
+                            <p class="focusElement">{{focusElement}}</p>
+                        </div>
+                    </div>
                     <dropdown-menu :items="mentalFitnessDropdownLinks" class="dotsBtn"/>
                 </section>
                 <section v-else class="nogapContainer borderContainer">
@@ -96,6 +102,7 @@
     import { isPremiumTier } from "@shared/models/MemberSubscription";
     import { pushRoute } from "@web/NavigationUtil";
     import Results from "@components/gapanalysis/Results.vue";
+    import ResultElement from "@components/gapanalysis/ResultElement.vue";
     import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
     import GapAnalysisService from "@web/services/GapAnalysisService";
     import Spinner from "@components/Spinner.vue";
@@ -107,6 +114,7 @@
     @Component({
         components: {
             Results,
+            ResultElement,
             NavBar,
             Footer,
             WordCloud,
@@ -621,6 +629,25 @@
                 max-width: 60rem;
             }
         }
+    }
+
+    .gapFocus {
+        align-items: center;
+        border-top: 1px solid $lightest;
+        display: flex;
+        margin: 4rem -3.2rem 0;
+        padding: 3.2rem 3.2rem 0;
+        width: calc(100% + 6.4rem);
+
+        .flexIt {
+            margin-left: 1.6rem;
+        }
+    }
+
+    .focusElement {
+        font-size: 2rem;
+        font-weight: bold;
+        text-transform: capitalize;
     }
 
     .pink {
