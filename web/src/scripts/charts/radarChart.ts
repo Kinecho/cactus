@@ -40,7 +40,7 @@ export interface RadarChartConfig {
 export const DEFAULT_CONFIG = (): RadarChartConfig => ({
     w: 200,				//Width of the circle
     h: 200,				//Height of the circle
-    circleFillBaseColor: "#E1D9D5",
+    circleFillBaseColor: "#E3DCD8",
     showLevelLabel: false,
     margin: { top: 60, right: 60, bottom: 60, left: 60 }, //The margins of the SVG
     levels: 5,				//How many levels or inner circles should there be drawn
@@ -49,8 +49,8 @@ export const DEFAULT_CONFIG = (): RadarChartConfig => ({
     wrapWidth: 60, 		//The number of pixels after which a label needs to be given a new line
     opacityArea: 0.75, 	//The opacity of the area of the blob
     dotRadius: 0, 			//The size of the colored circles of each blog
-    opacityCircles: 0.1, 	//The opacity of the circles of each blob
-    strokeWidth: 2, 		//The width of the stroke around each blob
+    opacityCircles: 0.2, 	//The opacity of the circles of each blob
+    strokeWidth: 0, 		//The width of the stroke around each blob
     roundStrokes: true,	//If true the area and stroke will follow a round path (cardinal-closed)
     format: ',d',
     unit: '',
@@ -176,7 +176,6 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     .attr("class", "gridCircle")
     .attr("r", d => radius / cfg.levels * d)
     .style("fill", cfg.circleFillBaseColor)
-    .style("stroke", cfg.circleFillBaseColor)
     .style("fill-opacity", cfg.opacityCircles)
     .style("filter", "url(#glow)");
 
@@ -213,7 +212,7 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     .attr("y2", (d, i) => rScale(maxValue * 1.1) * sin(angleSlice * i - HALF_PI))
     .attr("class", "line")
     .style("stroke", "white")
-    .style("stroke-width", "2px");
+    .style("stroke-width", "1px");
 
 
     //Append the labels at each axis
