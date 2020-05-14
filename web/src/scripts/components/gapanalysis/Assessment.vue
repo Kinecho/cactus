@@ -68,7 +68,12 @@
                 <h2>Choose your focus</h2>
                 <p class="subtext">Your choice will be used to personalize Cactus and help you focus on what makes you
                     happy.</p>
-                <results :selectable-elements="true" :results="result" chart-id="select_results_chart" @elementSelected="elementSelected"/>
+                <results :selectable-elements="true"
+                        :results="result"
+                        :selected-element="selectedElement"
+                        chart-id="select_results_chart"
+                        @elementSelected="elementSelected"
+                />
                 <div class="cvActions flexActions">
                     <p v-if="selectedElement">You chose <strong>{{selectedElement}}</strong>.</p>
                     <p v-if="!selectedElement" class="validationText">Tap a cactus to continue. You can always change

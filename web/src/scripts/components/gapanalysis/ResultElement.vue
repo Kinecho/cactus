@@ -1,5 +1,5 @@
 <template>
-    <div class="element-icon" @click="toggleElement" :class="{selected, selectable, withCircle}">
+    <div class="element-icon" @click="toggleElement" :class="{selected, selectable, pulsing, withCircle}">
         <img :src="imageUrl" :alt="`${element} Icon`"/>
         <h4 v-if="withLabel">{{element}}</h4>
     </div>
@@ -26,8 +26,11 @@
         @Prop({ type: Boolean, required: false, default: false })
         withCircle!: boolean;
 
-        @Prop({type: Boolean, required: false, default: true})
+        @Prop({ type: Boolean, required: false, default: true })
         withLabel!: boolean;
+
+        @Prop({ type: Boolean, required: false, default: false })
+        pulsing!: boolean;
 
         toggleElement() {
             if (!this.selectable) {
@@ -68,9 +71,7 @@
         position: relative;
         text-align: center;
 
-        &.selectable {
-            cursor: pointer;
-
+        &.pulsing {
             &:before {
                 animation: pulse-green 2s infinite;
                 background: rgba(51, 217, 178, 1);
@@ -88,7 +89,10 @@
                 width: 10px;
                 z-index: 0;
             }
+        }
 
+        &.selectable {
+            cursor: pointer;
             img {
                 position: relative;
                 transition: transform .3s;
