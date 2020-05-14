@@ -87,7 +87,7 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
 
         //4
         Question.create({
-            title: "Consider the ways in which you explore your own intellectual curiosities and learn new things.  How intellectually and emotionally satisfied are you in those areas of your life?",
+            title: "Consider the ways in which you explore your own intellectual curiosities and learn new things.  How emotionally satisfied are you in those areas of your life?",
             element: CactusElement.experience,
             gapType: GapType.satisfaction,
         })
