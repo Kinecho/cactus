@@ -71,8 +71,28 @@
         &.selectable {
             cursor: pointer;
 
+            &:before {
+                animation: pulse-green 2s infinite;
+                background: rgba(51, 217, 178, 1);
+                border-radius: 50%;
+                bottom: 0;
+                box-shadow: 0 0 0 0 rgba(51, 217, 178, 1);
+                content: "";
+                height: 10px;
+                left: 0;
+                margin: auto;
+                position: absolute;
+                right: 0;
+                top: 0;
+                transform: scale(1);
+                width: 10px;
+                z-index: 0;
+            }
+
             img {
+                position: relative;
                 transition: transform .3s;
+                z-index: 1;
             }
 
             &:hover {
