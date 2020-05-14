@@ -46,9 +46,10 @@
             <div class="flexSections">
                 <section v-if="gapResults" class="gapContainer borderContainer">
                     <h2>Mental Fitness</h2>
-                    <p class="subtext">This is the comparison of what's <strong class="pink">important</strong> to you and what you find <strong class="blue">satisfactory</strong>. <span v-if="focusElement">Your focus is <strong>{{focusElement}}</strong>. To change your focus...</span></p>
+                    <p class="subtext">The comparison of what you find <strong class="pink">important</strong> and what you find <strong class="blue">satisfactory</strong></p>
                     <spinner v-if="gapResultsLoading" message="Loading Results..." :delay="1200"/>
-                    <Results v-if="!gapResultsLoading && gapResults" :results="gapResults" :selectable-elements="false"/>
+                    <Results v-if="!gapResultsLoading && gapResults" :results="gapResults" :selectable-elements="false" :hideElements="true"/>
+                    <p v-if="focusElement">Your focus is <strong>{{focusElement}}</strong>. To change your focus...</p>
                     <dropdown-menu :items="mentalFitnessDropdownLinks" class="dotsBtn"/>
                 </section>
                 <section v-else class="nogapContainer borderContainer">
@@ -62,7 +63,7 @@
                 <section class="bubblesContainer borderContainer" v-if="hasWordCloud">
                     <div class="flexIt">
                         <h2>Word Bubbles</h2>
-                        <p class="subtext">These are the words used most in your daily reflections.</p>
+                        <p class="subtext">The words used most in your daily reflections</p>
                     </div>
                     <WordCloud class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
                 </section>
@@ -455,12 +456,10 @@
                 display: flex;
                 flex-direction: row-reverse;
                 justify-content: flex-end;
-                max-width: 48rem;
             }
             @include r(768) {
                 align-items: flex-start;
                 flex-direction: row;
-                max-width: none;
             }
             @include r(960) {
                 margin-top: -4.8rem;
@@ -479,9 +478,11 @@
         }
         @include r(600) {
             margin-bottom: -4.8rem;
-            margin-top: -12rem;
+            margin-top: -14rem;
+            max-width: 38rem;
             position: relative;
             transform: none;
+            width: 100%;
         }
         @include r(768) {
             margin-top: 3.2rem;
@@ -516,6 +517,9 @@
             width: 29rem;
 
             @include r(600) {
+                width: 100%;
+            }
+            @include r(768) {
                 width: 32rem;
             }
         }
@@ -524,14 +528,14 @@
     .core-values-list {
         list-style: none;
         margin: 2.4rem 0;
-        min-width: 50%;
+        width: 50%;
         padding: 0;
 
         @include r(768) {
             display: flex;
             flex-flow: row wrap;
             margin: 0;
-            min-width: 0;
+            width: auto;
         }
         @include r(960) {
             max-width: 48.75%;
@@ -607,11 +611,14 @@
 
         .subtext {
             margin: 0 0 2.4rem;
-            max-width: 60rem;
             opacity: .8;
 
             @include r(600) {
                 margin: 0 3.2rem 2.4rem 0;
+                max-width: 17rem;
+            }
+            @include r(768) {
+                max-width: 60rem;
             }
         }
     }
@@ -624,20 +631,19 @@
         color: $royal;
     }
 
-    .gapAnalysisImg {
-        display: block;
-        margin: 2.4rem auto 0;
-        max-width: 40rem;
+    .analysisResults {
+        margin: -4rem auto auto;
+        max-width: 38rem;
         width: 100%;
 
         @include r(600) {
-            margin: 0 0 0 2.4rem;
+            margin-right: 0;
+            margin-top: -20rem;
+            position: relative;
         }
         @include r(768) {
-            margin: 0;
-        }
-        @include r(960) {
-            min-width: 50%;
+            margin-right: auto;
+            margin-top: -4rem;
         }
     }
 
@@ -646,8 +652,18 @@
 
         .chart-container {
             margin: 0 auto;
-            max-width: 38rem;
+            max-width: 40rem;
             width: 100%;
+
+            @include r(600) {
+                margin-right: 0;
+                margin-top: -12rem;
+                position: relative;
+            }
+            @include r(768) {
+                margin-right: auto;
+                margin-top: 0;
+            }
         }
     }
 
