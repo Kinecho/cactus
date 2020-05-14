@@ -19,11 +19,13 @@
         <transition name="component-fade" mode="out-in" appear>
             <div v-if="currentScreen === Screen.intro" class="intro" key="intro">
                 <h1>What makes you happy?</h1>
-                <p>The Cactus Quiz is the first step in understanding yourself better. Answer honestly and Cactus will help you identify and focus on the people, places, and things that make you happy.</p>
+                <p>The Cactus Quiz is the first step in understanding yourself better. Answer honestly and Cactus will
+                    help you identify and focus on the people, places, and things that make you happy.</p>
                 <button class="btn primary" @click="start">Let's go!</button>
                 <div class="private">
                     <img class="lock" src="assets/images/lock.svg" alt=""/>
-                    All answers are private and confidential and will be used solely to help tune Cactus to be most effective for you.
+                    All answers are private and confidential and will be used solely to help tune Cactus to be most
+                    effective for you.
                 </div>
             </div>
             <!-- Note: This needs to be a div (not template) so that the fade transitoin works -->
@@ -64,7 +66,8 @@
             </div>
             <div class="whiteBg" v-else-if="currentScreen === Screen.chooseFocus">
                 <h2>Choose your focus</h2>
-                <p class="subtext">Your choice will be used to personalize Cactus and help you focus on what makes you happy.</p>
+                <p class="subtext">Your choice will be used to personalize Cactus and help you focus on what makes you
+                    happy.</p>
                 <results :selectable-elements="true" :results="result" chart-id="select_results_chart" @elementSelected="elementSelected"/>
                 <div class="cvActions flexActions">
                     <p v-if="selectedElement">You chose <strong>{{selectedElement}}</strong>.</p>
@@ -137,8 +140,6 @@
         @Prop({ type: Number, required: false, default: 0 })
         questionIndex!: number;
 
-        // currentQuestionIndex: number = 0;
-        currentScreenIndex: number = 0;
         Screen = Screen;
         upsellBillingPeriod = BillingPeriod.yearly;
 
@@ -198,6 +199,10 @@
             return "Next";
         }
 
+        get currentScreenIndex(): number {
+            return this.screens.indexOf(this.currentScreen);
+        }
+
         get currentValue(): number | undefined {
             const questionId = this.currentQuestion?.id;
             if (questionId === undefined) {
@@ -225,31 +230,18 @@
                 this.finishAssessment();
                 return
             }
-            // this.currentQuestionIndex += 1;
             this.setQuestionIndex(this.currentQuestionIndex + 1);
-            // this.currentScreenIndex += 1;
         }
 
         previousQuestion() {
             if (this.currentQuestionIndex > 0) {
-                // this.currentQuestionIndex = this.currentQuestionIndex - 1;
                 this.setQuestionIndex(this.currentQuestionIndex - 1);
-                // this.currentScreenIndex -= 1;
             }
         }
 
         get previousQuestionEnabled(): boolean {
             return this.currentQuestionIndex != undefined && this.currentQuestionIndex > 0;
         }
-
-        // get screens(): string[] {
-        //     return [...defaultScreens].filter(screen => {
-        //         if (screen === Screen.upgrade && !this.includeUpsell) {
-        //             return false;
-        //         }
-        //         return true;
-        //     })
-        // }
 
         get nextQuestionEnabled(): boolean {
             const questionId = this.currentQuestion?.id
@@ -263,10 +255,6 @@
 
             return this.responseValues[questionId] !== undefined;
         }
-
-        // get responseValues(): Record<string, number | undefined> {
-        //     return this.result.responsesByQuestionId;
-        // }
 
         setQuestionIndex(index: number) {
             this.$emit('questionChanged', index);
@@ -286,8 +274,8 @@
         }
 
         start() {
+            this.setScreen(Screen.questions);
             this.setQuestionIndex(0);
-            // this.setScreen("questions");
             // this.currentQuestionIndex = 0;
         }
 
@@ -309,12 +297,12 @@
         }
 
         get currentStepperIndex(): number {
-
-            return this.currentScreenIndex + this.currentQuestionIndex;
-            // if (this.result) {
-            //     return this.stepperTotal - 1;
-            // }
-            // return (this.currentQuestionIndex ?? 0) + 1;
+            let questionIndex = this.screens.indexOf(Screen.questions);
+            if (this.currentScreenIndex > questionIndex) {
+                return this.currentScreenIndex + this.questionsTotal - 1;
+            } else {
+                return this.currentScreenIndex + this.currentQuestionIndex;
+            }
         }
 
         /**

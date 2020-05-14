@@ -177,7 +177,7 @@ const routes: MetaRouteConfig[] = [
         props: (route) => {
             return {
                 resultsId: route.params.resultsId,
-                screen: route.params.screen,
+                screen: route.params.screen ?? Screen.intro,
                 questionIndex: route.params.screen === Screen.questions ? Number(route.params.index ?? 0) : 0,
             }
         },

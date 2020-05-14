@@ -1,5 +1,5 @@
 <template>
-    <div class="gapAnalysisPage" :class="{signin: !member && memberLoaded}">
+    <div class="gapAnalysisPage" :class="{signin: !member && memberLoaded && resultsLoaded}">
         <div class="centered" v-if="!memberLoaded || !resultsLoaded">
             <spinner color="dark" message="Loading Assessment...." :delay="1200"/>
         </div>
@@ -83,8 +83,7 @@
         @Prop({ type: Number, required: false, default: 0 })
         questionIndex!: number;
 
-        currentScreen
-        : ScreenName = Screen.intro;
+        currentScreen: ScreenName = Screen.intro;
 
         @Watch("screen")
         onScreenRoute(screen: ScreenName | undefined | null) {
@@ -108,12 +107,28 @@
                     this.memberLoaded = true;
                 }
             })
+        }
 
+        async mounted() {
             if (this.resultsId) {
                 logger.info("Before mount - results Id = fetching results");
                 await this.fetchResults(this.resultsId);
+            } else {
+                await this.createNewResults()
             }
+        }
 
+        async createNewResults() {
+            const results = GapAnalysisAssessmentResult.create();
+            // results.id = GapAnalysisService.sharedInstance.createDocId();
+            await GapAnalysisService.sharedInstance.save(results);
+            this.latestResults = results;
+            logger.info("Saved brand new results on mount. id = ", results.id);
+            const id = results.id;
+            if (id) {
+                await pushRoute(`${ PageRoute.GAP_ANALYSIS }/${ id }`);
+            }
+            this.resultsLoaded = true;
         }
 
         async fetchResults(resultsId: string | null | undefined) {
@@ -128,7 +143,6 @@
 
                 if (this.screen) {
                     this.currentScreen = this.screen;
-                    // this.setScreen(this.screen);
                 }
             } else {
                 this.resultsLoaded = true;
@@ -159,15 +173,6 @@
             return GapAnalysisAssessmentResult.create();
         }
 
-        get numSteps(): number {
-            return this.assessment.questions.length;
-        }
-
-        async saveResults(results: GapAnalysisAssessmentResult) {
-            logger.info("Saving results of assessment...");
-            this.latestResults = results;
-        }
-
         get includeUpsell(): boolean {
             return !isPremiumTier(this.member?.tier);
         }
@@ -179,9 +184,12 @@
             })
         }
 
-        setQuestion(questionIndex: number) {
+        async setQuestion(questionIndex: number) {
             if (this.currentScreen === Screen.questions && this.resultsId && questionIndex !== this.questionIndex) {
-                pushRoute(`${ PageRoute.GAP_ANALYSIS }/${ this.resultsId }/${ Screen.questions }/${ questionIndex }`);
+                if (this.latestResults) {
+                    await GapAnalysisService.sharedInstance.save(this.latestResults);
+                }
+                await pushRoute(`${ PageRoute.GAP_ANALYSIS }/${ this.resultsId }/${ Screen.questions }/${ questionIndex }`);
             }
         }
 
@@ -212,11 +220,6 @@
             } catch (error) {
                 logger.error(`Failed to save gap results for member ${ this.member?.id }`, error);
             }
-            // if (!this.member) {
-            //     await pushRoute(PageRoute.PRICING);
-            // } else {
-            //     await pushRoute(PageRoute.INSIGHTS);
-            // }
         }
     }
 </script>
