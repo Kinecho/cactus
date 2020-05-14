@@ -1,6 +1,6 @@
 <template>
     <div class="resultsOnboarding" v-touch:swipe="swipeHandler">
-        <h2>Here are your results</h2>
+        <h2>Your Cactus Quiz results</h2>
         <!-- Made this a div vs a template because i needed to set a :key on it for the transition to work -->
         <div class="message" v-if="currentIndex === 0" :key="`msg_${currentIndex}`">
             <p>Each of the five elements represents a core focus of a balanced&nbsp;life.</p>

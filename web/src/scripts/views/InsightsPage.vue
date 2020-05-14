@@ -45,7 +45,7 @@
 
             <div class="flexSections">
                 <section v-if="gapResults" class="gapContainer borderContainer">
-                    <h2>Mental Fitness</h2>
+                    <h2>Happiness Quiz</h2>
                     <p class="subtext">The comparison of what you find <strong class="pink">important</strong> and what you find <strong class="blue">satisfactory</strong></p>
                     <spinner v-if="gapResultsLoading" message="Loading Results..." :delay="1200"/>
                     <Results v-if="!gapResultsLoading && gapResults" :results="gapResults" :selectable-elements="false" :hideElements="true"/>

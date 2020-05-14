@@ -12,8 +12,7 @@
                 color="successAlt">
             <div slot="text" class="centered">
                 <h3>Welcome to Cactus Plus!</h3>
-                <p>You just upgraded and it made our day. If you ever have questions or feedback, please reach out to us
-                    at <a href="mailto:help@cactus.app">help@cactus.app</a>.</p>
+                <p>Now you have full access to personalized activities, insights, and tools to help you better know yourself. If you have questions or feedback, please reach out to us at <a href="mailto:help@cactus.app">help@cactus.app</a>.</p>
             </div>
         </snackbar-content>
         <div class="container centered">
