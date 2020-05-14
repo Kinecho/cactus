@@ -31,11 +31,11 @@ export const FullAssessment = () => Vue.extend({
             default: boolean("Include Upsell", true),
         },
         questionOverride: {
-            default: number("Question Index", 0)
+            default: number("Question Index Override", 0)
         },
         screenOverride: {
             type: String as () => ScreenName,
-            default: select("Set Screen", Object.values(Screen), Screen.intro)
+            default: select("Screen Override", Object.values(Screen), Screen.intro)
         }
     },
     watch: {
