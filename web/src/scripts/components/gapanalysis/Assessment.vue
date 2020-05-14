@@ -60,9 +60,9 @@
             <div class="whiteBg" v-else-if="currentScreen === Screen.results">
                 <results-onboarding :results="result"/>
                 <div class="cvActions">
-                    <button class="btn primary" @click="setScreen(Screen.chooseFocus)">Choose Your Focus</button>
+                    <button class="btn primary" @click="setScreen(Screen.chooseFocus)">Next: Choose Your Focus</button>
                 </div>
-                <cactus-confetti :running="true"/>
+                <cactus-confetti :running="false"/>
             </div>
             <div class="whiteBg" v-else-if="currentScreen === Screen.chooseFocus">
                 <h2>Choose your focus</h2>
@@ -73,7 +73,6 @@
                 <div class="cvActions flexActions">
                     <button class="no-loading" @click="focusSelected" :disabled="!selectedElement">Next
                     </button>
-                    <button class="no-loading tertiary" @click="skipFocus">Do this later</button>
                 </div>
             </div>
             <template v-else-if="currentScreen === Screen.upgrade">
