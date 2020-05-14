@@ -136,26 +136,58 @@
     .energy {
         grid-area: energy;
         transform: translateY(-70px);
+
+        @include r(600) {
+            transform: translateY(-95px);
+        }
     }
 
     .emotions {
         grid-area: emotions;
         transform: translate(-50px, -30px);
+
+        @include r(374) {
+            transform: translate(-70px, -50px);
+        }
+        @include r(600) {
+            transform: translate(-115px, -80px);
+        }
     }
 
     .meaning {
         grid-area: meaning;
         transform: translate(50px, -30px);
+
+        @include r(374) {
+            transform: translate(70px, -50px);
+        }
+        @include r(600) {
+            transform: translate(115px, -80px);
+        }
     }
 
     .experience {
         grid-area: experience;
         transform: translate(-20px, 20px);
+
+        @include r(374) {
+            transform: translate(-30px, 20px);
+        }
+        @include r(600) {
+            transform: translate(-30px, 40px);
+        }
     }
 
     .relationships {
         grid-area: relationships;
         transform: translate(20px, 20px);
+
+        @include r(374) {
+            transform: translate(30px, 20px);
+        }
+        @include r(600) {
+            transform: translate(30px, 40px);
+        }
     }
 
     .radar-container {
