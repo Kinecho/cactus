@@ -18,14 +18,12 @@
         </modal>
         <transition name="component-fade" mode="out-in" appear>
             <div v-if="currentScreen === Screen.intro" class="intro" key="intro">
-                <h1>Mental Fitness Quiz</h1>
-                <p>The Cactus Mental Fitness Quiz is the first step towards understanding yourself better. Together, we
-                    will identify areas of your life to improve.</p>
-                <button class="btn primary" @click="start">Let's Go!</button>
+                <h1>What makes you happy?</h1>
+                <p>The Cactus Quiz is the first step in understanding yourself better. Answer honestly and Cactus will help you identify and focus on the people, places, and things that make you happy.</p>
+                <button class="btn primary" @click="start">Let's go!</button>
                 <div class="private">
                     <img class="lock" src="assets/images/lock.svg" alt=""/>
-                    All answers are private and confidential and will be used solely to help you understand your mental
-                    fitness.
+                    All answers are private and confidential and will be used solely to help tune Cactus to be most effective for you.
                 </div>
             </div>
             <!-- Note: This needs to be a div (not template) so that the fade transitoin works -->
@@ -60,14 +58,13 @@
             <div class="whiteBg" v-else-if="currentScreen === Screen.results">
                 <results-onboarding :results="result"/>
                 <div class="cvActions">
-                    <button class="btn primary" @click="setScreen(Screen.chooseFocus)">Next: Choose Your Focus</button>
+                    <button class="btn primary" @click="setScreen(Screen.chooseFocus)">Next: Choose your focus</button>
                 </div>
                 <cactus-confetti :running="false"/>
             </div>
             <div class="whiteBg" v-else-if="currentScreen === Screen.chooseFocus">
                 <h2>Choose your focus</h2>
-                <p class="subtext">Your choice will be used to personalize questions designed
-                    to help you focus on what makes you happy.</p>
+                <p class="subtext">Your choice will be used to personalize Cactus and help you focus on what makes you happy.</p>
                 <results :selectable-elements="true" :results="result" chart-id="select_results_chart" @elementSelected="elementSelected"/>
                 <div class="cvActions flexActions">
                     <p v-if="selectedElement">You chose <strong>{{selectedElement}}</strong>.</p>

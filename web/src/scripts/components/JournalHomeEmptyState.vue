@@ -1,6 +1,5 @@
 <template>
     <section class="empty journalHome">
-        <h1>Welcome to Cactus</h1>
         <p v-if="!focusElement">
             To get started, you'll learn about how Cactus works and reflect on your first question of
             the&nbsp;day.
@@ -14,7 +13,7 @@
             </p>
         </template>
         <img class="graphic" src="assets/images/emptyState.png" alt="Three friends welcoming you"/>
-        <router-link class="button primary" tag="button" :to="firstPromptPath">Let's Begin</router-link>
+        <router-link class="button primary" tag="button" :to="firstPromptPath">Let's begin</router-link>
     </section>
 </template>
 
