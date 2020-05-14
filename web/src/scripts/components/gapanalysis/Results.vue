@@ -8,14 +8,14 @@
                 element="emotions"
                 class="element emotions"
                 @selected="elementClicked"
-                :pulsing="!selectedElement"
+                :pulsing="!selectedElement && selectableElements"
                 :selectable="selectableElements"
                 :selected="selectedElement === 'emotions'"
         />
-        <result-element :pulsing="!selectedElement" element="relationships" class="element relationships" @selected="elementClicked" :selected="selectedElement === 'relationships'" :selectable="selectableElements"/>
-        <result-element :pulsing="!selectedElement" element="energy" class="element energy" @selected="elementClicked" :selected="selectedElement === 'energy'" :selectable="selectableElements"/>
-        <result-element :pulsing="!selectedElement" element="meaning" class="element meaning" @selected="elementClicked" :selected="selectedElement === 'meaning'" :selectable="selectableElements"/>
-        <result-element :pulsing="!selectedElement" element="experience" class="element experience" @selected="elementClicked" :selected="selectedElement === 'experience'" :selectable="selectableElements"/>
+        <result-element :pulsing="!selectedElement && selectableElements" element="relationships" class="element relationships" @selected="elementClicked" :selected="selectedElement === 'relationships'" :selectable="selectableElements"/>
+        <result-element :pulsing="!selectedElement && selectableElements" element="energy" class="element energy" @selected="elementClicked" :selected="selectedElement === 'energy'" :selectable="selectableElements"/>
+        <result-element :pulsing="!selectedElement && selectableElements" element="meaning" class="element meaning" @selected="elementClicked" :selected="selectedElement === 'meaning'" :selectable="selectableElements"/>
+        <result-element :pulsing="!selectedElement && selectableElements" element="experience" class="element experience" @selected="elementClicked" :selected="selectedElement === 'experience'" :selectable="selectableElements"/>
     </div>
 </template>
 
@@ -80,10 +80,6 @@
         }
 
         elementClicked(element: CactusElement | undefined) {
-            // if (this.selectedElement === element) {
-            //     this.selectedElement = null;
-            // }
-            // this.selectedElement = element ?? null;
             this.$emit('elementSelected', element);
         }
 
