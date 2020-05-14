@@ -128,7 +128,7 @@
 
     .upsellContainer {
         padding: 6.4rem 2.4rem;
-
+        text-align: center;
         @include r(768) {
             background: $beige;
             padding: 6.4rem 0 0;

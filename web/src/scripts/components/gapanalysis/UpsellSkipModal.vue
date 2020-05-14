@@ -1,11 +1,11 @@
 <template>
-    <Modal :show="show" :show-close-button="false">
+    <Modal :show="show" :show-close-button="false" :dark="true">
         <div slot="body" class="skip-body">
             <h1>Are you sure?</h1>
             <img src="/assets/images/cvBlob.png " alt="Test Image"/>
             <div class="actions">
-                <button @click="$emit('close')">Cancel - back to assessment</button>
-                <button @click="$emit('confirmed')">Yes, skip this</button>
+                <button class="secondary" @click="$emit('confirmed')">Yes, skip this</button>
+                <button class="" @click="$emit('close')">Cancel - back to assessment</button>
             </div>
         </div>
     </Modal>
@@ -35,5 +35,6 @@
 
     .skip-body {
         background-color: $white;
+        padding: 2rem;
     }
 </style>
