@@ -1,5 +1,5 @@
 <template>
-    <div class="element-icon" @click="toggleElement" :class="{selected, selectable, withCircle, withAnimation}">
+    <div class="element-icon" @click="toggleElement" :class="{selected, selectable, withCircle}">
         <img :src="imageUrl" :alt="`${element} Icon`"/>
         <h4 v-if="withLabel">{{element}}</h4>
     </div>
@@ -25,9 +25,6 @@
 
         @Prop({ type: Boolean, required: false, default: false })
         withCircle!: boolean;
-
-        @Prop({ type: Boolean, required: false, default: false })
-        withAnimation!: boolean;
 
         @Prop({type: Boolean, required: false, default: true})
         withLabel!: boolean;
@@ -112,25 +109,6 @@
                         background-color: darken($beige, 5%);
                     }
                 }
-            }
-        }
-
-        &.withAnimation {
-
-            &.energy img {
-                animation: wiggle .2s ease 1s 3;
-            }
-            &.emotions img {
-                animation: wiggle .2s ease 8s 3;
-            }
-            &.meaning img {
-                animation: wiggle .2s ease 5s 3;
-            }
-            &.experience img {
-                animation: wiggle .2s ease 11s 3;
-            }
-            &.relationships img {
-                animation: wiggle .2s ease 15s 3;
             }
         }
 
