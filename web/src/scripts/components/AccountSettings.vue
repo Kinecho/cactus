@@ -91,7 +91,7 @@
                                 <provider-icon :providerId="provider.providerId" class="provider-icon"/>
                                 <span class="provider-name">{{provider.displayName}}</span>
                                 <button class="red tertiary remove">
-                                    <img src="assets/images/trash.svg" alt=""/>
+                                    <img src="/assets/images/trash.svg" alt=""/>
                                     {{copy.common.REMOVE}}
                                 </button>
                             </div>
@@ -111,7 +111,7 @@
                     <div class="settings-group delete">
                         <div class="item">
                             <button class="red tertiary remove" @click="deleteAccountModalVisible = true">
-                                <img src="assets/images/trash.svg" alt=""/>
+                                <img src="/assets/images/trash.svg" alt=""/>
                                 {{copy.account.DELETE_ACCOUNT}}
                             </button>
                         </div>

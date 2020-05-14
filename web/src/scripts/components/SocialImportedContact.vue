@@ -22,7 +22,7 @@
             Sending...
         </div>
         <div class="status" v-if="wasInvited">
-            <img class="statusIcon" src="assets/images/check.svg" alt=""/>
+            <img class="statusIcon" src="/assets/images/check.svg" alt=""/>
             Invited
         </div>
         <div class="status error" v-if="error">
@@ -35,11 +35,11 @@
             You!
         </div>
         <div class="status" v-if="wasFriended || isPendingFriend">
-            <img class="statusIcon" src="assets/images/clock.svg" alt=""/>
+            <img class="statusIcon" src="/assets/images/clock.svg" alt=""/>
             Requested
         </div>
         <div class="status" v-if="isFriend">
-            <img class="statusIcon" src="assets/images/check.svg" alt=""/>
+            <img class="statusIcon" src="/assets/images/check.svg" alt=""/>
             Friends
         </div>
         <input-name-modal

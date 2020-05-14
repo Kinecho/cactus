@@ -12,7 +12,7 @@
                 about&nbsp;<strong>{{focusElement}}</strong>.
             </p>
         </template>
-        <img class="graphic" src="assets/images/emptyState.png" alt="Three friends welcoming you"/>
+        <img class="graphic" src="/assets/images/emptyState.png" alt="Three friends welcoming you"/>
         <router-link class="button primary" tag="button" :to="firstPromptPath">Let's begin</router-link>
     </section>
 </template>

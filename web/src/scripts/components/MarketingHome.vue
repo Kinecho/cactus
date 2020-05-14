@@ -30,7 +30,7 @@
                         <p class="text">A daily question helps you focus on the positives in your&nbsp;life.</p>
                     </div>
                     <div class="benefit">
-                        <img src="assets/images/benefit2.png" alt="Self-discovery image" class="illustration"/>
+                        <img src="/assets/images/benefit2.png" alt="Self-discovery image" class="illustration"/>
                         <h5>Self-Discovery</h5>
                         <p class="text">Exercises are designed to help your journey of&nbsp;self-discovery.</p>
                     </div>
@@ -40,7 +40,7 @@
                         <p class="text">Privately record your thoughts through text, speech, and&nbsp;photos.</p>
                     </div>
                     <div class="benefit">
-                        <img src="assets/images/benefit4.png" alt="Growth image" class="illustration"/>
+                        <img src="/assets/images/benefit4.png" alt="Growth image" class="illustration"/>
                         <h5>Growth</h5>
                         <p class="text">Celebrate your mindful practice and personal&nbsp;growth.</p>
                     </div>
@@ -52,7 +52,7 @@
                 <h2>Fortify your EQ</h2>
                 <p class="subtext">Cactus helps make you more optimistic, generous to yourself and others,
                     and&nbsp;healthier.</p>
-                <img src="assets/images/fortify.png" alt="Fortify image" class="sectionImg"/>
+                <img src="/assets/images/fortify.png" alt="Fortify image" class="sectionImg"/>
             </section>
             <section class="private">
                 <h2 class="magenta">Private and secure</h2>
@@ -63,7 +63,7 @@
                     <div class="flexContainer">
                         <p class="date">Nov 12, 2019</p>
                         <button class="secondary icon" aria-label="Unclickable Option Menu">
-                            <img src="assets/images/dots.svg" alt="" class="iconImg"/></button>
+                            <img src="/assets/images/dots.svg" alt="" class="iconImg"/></button>
                     </div>
                     <p class="question">What experiences or activities make you lose track of&nbsp;time?</p>
                     <div class="reply"></div>

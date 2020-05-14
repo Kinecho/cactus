@@ -23,7 +23,7 @@
                     help you identify and focus on the people, places, and things that make you happy.</p>
                 <button class="btn primary" @click="start">Let's go!</button>
                 <div class="private">
-                    <img class="lock" src="assets/images/lock.svg" alt=""/>
+                    <img class="lock" src="/assets/images/lock.svg" alt=""/>
                     All answers are private and confidential and will be used solely to help tune Cactus to be most
                     effective for you.
                 </div>
