@@ -95,7 +95,6 @@
             if (ui.isPendingRedirect()) {
                 this.isPendingRedirect = true;
                 logger.log("Is pending redirect.... need to log the user in");
-                debugger;
                 this.checkForPendingUIInterval = window.setInterval(() => {
                     this.checkPendingUI()
                 }, 500);
