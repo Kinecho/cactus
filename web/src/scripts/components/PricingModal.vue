@@ -59,7 +59,7 @@
 
   .miniModal {
       background: $beige no-repeat;
-      background-image: url(assets/images/beigeBlob.svg), url(assets/images/blob-outline-beige.svg);
+      background-image: url(/assets/images/beigeBlob.svg), url(/assets/images/blob-outline-beige.svg);
       background-position: right -185px top -65px, right -55px top -175px;
       background-size: 394px;
       margin: 0 auto;
@@ -145,7 +145,7 @@
   }
 
   .pricingWrapper {
-      background: $dolphin url(assets/images/grainy.png) repeat;
+      background: $dolphin url(/assets/images/grainy.png) repeat;
       margin-top: 3.2rem;
 
       @include r(600) {

@@ -316,7 +316,7 @@
         }
 
         &.note {
-            background: $darkerGreen url(assets/images/darkGreenNeedles.svg) 0 0/31rem;
+            background: $darkerGreen url(/assets/images/darkGreenNeedles.svg) 0 0/31rem;
             padding: 2.4rem 0;
             text-align: center;
         }

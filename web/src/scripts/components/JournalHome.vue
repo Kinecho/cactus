@@ -425,7 +425,7 @@
     }
 
     .coreValuesBox {
-        background-image: url(assets/images/grainy.png), url(assets/images/cvBlob.png), url(assets/images/pinkVs.svg);
+        background-image: url(/assets/images/grainy.png), url(/assets/images/cvBlob.png), url(/assets/images/pinkVs.svg);
         background-position: 0 0, -14rem -15rem, -7rem 120%;
         background-repeat: repeat, no-repeat, no-repeat;
         background-size: auto, 28rem, auto;

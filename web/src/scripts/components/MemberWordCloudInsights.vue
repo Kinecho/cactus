@@ -145,7 +145,7 @@
 
     .box {
         @include shadowbox;
-        background: $dolphin url(assets/images/grainy.png);
+        background: $dolphin url(/assets/images/grainy.png);
         color: $white;
         left: 0;
         margin: auto;
@@ -160,7 +160,7 @@
         }
 
         &.warning {
-            background-image: url(assets/images/sadCactusPatternWhiteTransparent.svg);
+            background-image: url(/assets/images/sadCactusPatternWhiteTransparent.svg);
         }
     }
 

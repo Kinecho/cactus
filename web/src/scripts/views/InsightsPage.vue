@@ -386,7 +386,7 @@
     .novaluesContainer {
         @include shadowbox;
         background-color: $dolphin;
-        background-image: url(assets/images/grainy.png), url(assets/images/cvBlob.png), url(assets/images/pinkVs.svg);
+        background-image: url(/assets/images/grainy.png), url(/assets/images/cvBlob.png), url(/assets/images/pinkVs.svg);
         background-position: 0 0, -14rem -15rem, -7rem 120%;
         background-repeat: repeat, no-repeat, no-repeat;
         background-size: auto, 28rem, auto;
@@ -686,11 +686,11 @@
     .nogapContainer {
         @include shadowbox;
         background-color: lighten($dolphin, 5%);
-        background-image: url(assets/images/grainy.png),
-            url(assets/images/crosses2.svg),
-            url(assets/images/outlineBlob.svg),
-            url(assets/images/royalBlob.svg),
-            url(assets/images/pinkBlob5.svg);
+        background-image: url(/assets/images/grainy.png),
+            url(/assets/images/crosses2.svg),
+            url(/assets/images/outlineBlob.svg),
+            url(/assets/images/royalBlob.svg),
+            url(/assets/images/pinkBlob5.svg);
         background-position: 0 0, 39rem -1rem, -34rem -84rem, -5rem 23rem, -17rem -32rem;
         background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat;
         background-size: auto, 40%, 200%, 100%, 100%;

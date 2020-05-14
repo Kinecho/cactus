@@ -56,7 +56,7 @@
     @import "variables";
 
     .celebrateUpgrade {
-        background: $royal url(assets/images/plusBg.svg) center top/105% auto no-repeat;
+        background: $royal url(/assets/images/plusBg.svg) center top/105% auto no-repeat;
         color: $white;
         cursor: pointer;
         padding: 1.6rem 4rem;

@@ -326,7 +326,7 @@
 
     .graphicContainer {
         align-self: end;
-        background: url(assets/images/demoBg.png) no-repeat center bottom -10rem/38rem;
+        background: url(/assets/images/demoBg.png) no-repeat center bottom -10rem/38rem;
         grid-area: demo;
         overflow: hidden;
         position: relative;
@@ -535,7 +535,7 @@
 
     section.private {
         align-items: center;
-        background: $beige url(assets/images/pinkBlobNeedleBg.png) no-repeat center top 16rem/36rem;
+        background: $beige url(/assets/images/pinkBlobNeedleBg.png) no-repeat center top 16rem/36rem;
         display: flex;
         flex-direction: column;
         padding: 4.8rem 2.4rem 8rem;

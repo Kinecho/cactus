@@ -250,7 +250,7 @@
 
         @include h(768) {
             &:before {
-                background-image: url(assets/images/yellowNeedleBlob.svg);
+                background-image: url(/assets/images/yellowNeedleBlob.svg);
                 background-repeat: no-repeat;
                 background-size: 730px;
                 content: "";
@@ -264,7 +264,7 @@
         }
 
         &:after {
-            background-image: url(assets/images/stem2.svg);
+            background-image: url(/assets/images/stem2.svg);
             background-repeat: no-repeat;
             background-size: 170px;
             bottom: 80vh;

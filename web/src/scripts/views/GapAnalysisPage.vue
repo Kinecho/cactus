@@ -238,10 +238,10 @@
         position: relative;
 
         &:after {
-            background-image: url(assets/images/crosses2.svg),
-            url(assets/images/outlineBlob.svg),
-            url(assets/images/royalBlob.svg),
-            url(assets/images/pinkBlob5.svg);
+            background-image: url(/assets/images/crosses2.svg),
+            url(/assets/images/outlineBlob.svg),
+            url(/assets/images/royalBlob.svg),
+            url(/assets/images/pinkBlob5.svg);
             background-position: -11rem 38rem, right -11rem top -35rem, -21rem 41rem, 50% -143px;
             background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
             background-size: 20rem, 48rem, 30rem, 23rem;
@@ -256,11 +256,11 @@
 
             @include r(768) {
                 background: lighten($dolphin, 16%);
-                background-image: url(assets/images/grainy.png),
-                url(assets/images/crosses2.svg),
-                url(assets/images/outlineBlob.svg),
-                url(assets/images/royalBlob.svg),
-                url(assets/images/pinkBlob5.svg);
+                background-image: url(/assets/images/grainy.png),
+                url(/assets/images/crosses2.svg),
+                url(/assets/images/outlineBlob.svg),
+                url(/assets/images/royalBlob.svg),
+                url(/assets/images/pinkBlob5.svg);
                 background-position: 0 0,
                 -1rem -1rem,
                 -59rem -26rem,
