@@ -122,11 +122,14 @@
         grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
         grid-template-rows: 1fr 1fr 1fr;
         margin: 3.2rem auto;
-        padding: 70px 0 20px; /*offset elements*/
-        /*width: 22rem;*/
+        max-width: 16rem;
+        padding-top: 4.8rem; /*offset elements*/
 
+        @include r(374) {
+            max-width: 28rem;
+        }
         @include r(600) {
-            /*width: 34rem;*/
+            max-width: 40rem;
         }
     }
 

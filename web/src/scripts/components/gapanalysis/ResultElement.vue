@@ -70,24 +70,15 @@
         justify-content: center;
         position: relative;
         text-align: center;
-        transition: all .3s linear;
 
         &.selectable {
             cursor: pointer;
-
-            h4 {
-                opacity: .6;
-                transition: opacity .3s;
-            }
 
             img {
                 transition: transform .3s;
             }
 
             &:hover {
-                h4 {
-                    opacity: 1;
-                }
                 img {
                     transform: scale(1.1);
                 }
