@@ -8,11 +8,11 @@
         </button>
         <modal :show="showCloseConfirm" @close="showCloseConfirm = false" :dark="true">
             <div class="close-confirm-modal paddingContainer" slot="body">
-                <h3>Close assessment?</h3>
-                <p class="subtext">Are you sure you want to close the assessment? Your progress will not be saved.</p>
+                <h3>Leave the quiz?</h3>
+                <p class="subtext">Are you sure you want to leave the Happiness Quiz? Your answers will be lost.</p>
                 <div class="btnContainer">
-                    <button @click="showCloseConfirm = false">Continue assessment</button>
-                    <button class="secondary" @click="close">Close &amp; discard</button>
+                    <button @click="showCloseConfirm = false">No, keep going</button>
+                    <button class="secondary" @click="close">Leave the quiz</button>
                 </div>
             </div>
         </modal>
