@@ -5,7 +5,7 @@
                 <div class="heroText">
                     <h1>What makes you&nbsp;happy?</h1>
                     <p class="subtext">Questions designed to improve how you think about your work, life, relationships, and emotions</p>
-                    <router-link :to="assessmentHref" tag="button" class="quizBtn primary">Take the Quiz</router-link>
+                    <router-link :to="assessmentHref" tag="button" class="quizBtn primary">Take the quiz</router-link>
                 </div>
                 <aside class="graphicContainer">
                     <p class="sampleQuestion">What helps you unwind and recuperate?</p>
@@ -126,7 +126,7 @@
             <section class="email">
                 <h2 class="emailHeader">A reflection a day…</h2>
                 <p class="subtext">Cactus is a different kind of mindfulness.</p>
-                <router-link :to="assessmentHref" tag="button" class="quizBtn primary">Take the Quiz</router-link>
+                <router-link :to="assessmentHref" tag="button" class="quizBtn primary">Take the quiz</router-link>
             </section>
         </div>
     </div>
