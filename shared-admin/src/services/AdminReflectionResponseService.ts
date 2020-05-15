@@ -290,7 +290,7 @@ export default class AdminReflectionResponseService {
                                 return;
                             }
                             // don't include words with apostrophes / quotes that are less than 4 chars long
-                            if (/['’"`]/.test(wordInsight.word) && wordInsight.word.length <= 4) {
+                            if (wordInsight.word && /['’"`]/.test(wordInsight.word) && wordInsight.word.length <= 4) {
                                 return;
                             }
 
