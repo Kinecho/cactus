@@ -68,7 +68,7 @@
         @Prop({ type: String, required: false, default: "assessment-1" })
         chartId!: string;
 
-        @Prop({ type: Number, required: false, default: 10 })
+        @Prop({ type: Number, required: false, default: 0 })
         chartPadding!: number;
 
         @Prop({type: Boolean, required: false, default: true})
@@ -117,81 +117,41 @@
     }
 
     .analysisResults {
-        display: grid;
-        grid-template-areas: ". . energy . ." "emotions emotions . meaning meaning" "experience experience . relationships relationships";
-        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-        grid-template-rows: 1fr 1fr 1fr;
-        margin: 3.2rem auto;
-        max-width: 16rem;
-        padding-top: 4.8rem; /*offset elements*/
+        position: relative;
+    }
 
-        @include r(374) {
-            max-width: 28rem;
-        }
-        @include r(600) {
-            max-width: 40rem;
-        }
+    .element {
+        position: absolute;
     }
 
     .energy {
-        grid-area: energy;
-        transform: translateY(-70px);
-
-        @include r(600) {
-            transform: translateY(-95px);
-        }
+        right: 0;
+        top: 6rem;
     }
 
     .emotions {
-        grid-area: emotions;
-        transform: translate(-50px, -30px);
-
-        @include r(374) {
-            transform: translate(-70px, -50px);
-        }
-        @include r(600) {
-            transform: translate(-115px, -80px);
-        }
+        left: 0;
+        right: 0;
+        top: 0;
     }
 
     .meaning {
-        grid-area: meaning;
-        transform: translate(50px, -30px);
-
-        @include r(374) {
-            transform: translate(70px, -50px);
-        }
-        @include r(600) {
-            transform: translate(115px, -80px);
-        }
+        left: 0;
+        top: 6rem;
     }
 
     .experience {
-        grid-area: experience;
-        transform: translate(-20px, 20px);
-
-        @include r(374) {
-            transform: translate(-30px, 20px);
-        }
-        @include r(600) {
-            transform: translate(-30px, 40px);
-        }
+        bottom: 0;
+        left: 2rem;
     }
 
     .relationships {
-        grid-area: relationships;
-        transform: translate(20px, 20px);
-
-        @include r(374) {
-            transform: translate(30px, 20px);
-        }
-        @include r(600) {
-            transform: translate(30px, 40px);
-        }
+        bottom: 0;
+        right: 2rem;
     }
 
     .radar-container {
-        grid-area: 1 / 1 / 4 / 6;
+        padding: 6.4rem 6.4rem 3.2rem;
     }
 
 </style>

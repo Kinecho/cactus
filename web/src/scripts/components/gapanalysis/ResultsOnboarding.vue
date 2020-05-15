@@ -16,14 +16,15 @@
             <p>The <span class="blue">blue hue</span> represents how satisfied you are regarding that area of your&nbsp;life.
             </p>
         </div>
-        <result-graph :key="currentIndex"
-                :v-touch="swipeHandler"
-                :chart-options="chartOptions"
-                :results="chartData(currentIndex)"
-                :selectable-elements="false"
-                :hide-elements="currentIndex > 0"
-                :chartId="`chart_${currentIndex}`"/>
-
+        <div class="radarChartContainer">
+            <result-graph :key="currentIndex"
+                    :v-touch="swipeHandler"
+                    :chart-options="chartOptions"
+                    :results="chartData(currentIndex)"
+                    :selectable-elements="false"
+                    :hide-elements="currentIndex > 0"
+                    :chartId="`chart_${currentIndex}`"/>
+        </div>
         <div class="actions">
             <button aria-label="Previous" @click="previous" class="tertiary icon left no-loading" :disabled="currentIndex < 1">
                 <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
@@ -208,6 +209,14 @@
     .blue {
         color: $royal;
         font-weight: bold;
+    }
+
+    .radarChartContainer {
+        margin: 3.2rem auto;
+
+        @include r(600) {
+            max-width: 56rem;
+        }
     }
 
     .actions {

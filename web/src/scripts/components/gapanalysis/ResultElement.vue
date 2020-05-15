@@ -141,14 +141,31 @@
                 }
             }
         }
+    }
 
-        img {
-            width: 4rem;
+    img {
+        height: 4.8rem;
+        width: 4.8rem;
+
+        .withCircle &,
+        .withLabel &,
+        .selectable & {
             height: 4rem;
+            width: 4rem;
         }
     }
 
     h4 {
-        font-size: 1.4rem;
+        font-size: 1.6rem;
+        font-weight: normal;
+        letter-spacing: 0;
+        text-transform: capitalize;
+
+        @include r(374) {
+            font-size: 1.4rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
     }
 </style>

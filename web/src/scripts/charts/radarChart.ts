@@ -42,7 +42,7 @@ export const DEFAULT_CONFIG = (): RadarChartConfig => ({
     h: 200,				//Height of the circle
     circleFillBaseColor: "#E3DCD8",
     showLevelLabel: false,
-    margin: { top: 60, right: 60, bottom: 60, left: 60 }, //The margins of the SVG
+    margin: { top: 0, right: 0, bottom: 0, left: 0 }, //The margins of the SVG
     levels: 5,				//How many levels or inner circles should there be drawn
     maxValue: 5, 			//What is the value that the biggest circle will represent
     labelFactor: 1.25, 	//How much farther than the radius of the outer circle should the labels be placed
