@@ -67,12 +67,14 @@
     import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
     import Results from "@components/gapanalysis/Results.vue";
     import ResultElement from "@components/gapanalysis/ResultElement.vue";
+    import Spinner from "@components/Spinner.vue";
 
     @Component({
         components: {
             DropdownMenu,
             Results,
-            ResultElement
+            ResultElement,
+            Spinner
         }
     })
     export default class GapAnalysisWidget extends Vue {

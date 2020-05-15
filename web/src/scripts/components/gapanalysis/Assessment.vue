@@ -6,7 +6,7 @@
                 <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
             </svg>
         </button>
-        <modal :show="showCloseConfirm" @close="showCloseConfirm = false">
+        <modal :show="showCloseConfirm" @close="showCloseConfirm = false" :dark="true">
             <div class="close-confirm-modal paddingContainer" slot="body">
                 <h3>Close assessment?</h3>
                 <p class="subtext">Are you sure you want to close the assessment? Your progress will not be saved.</p>
