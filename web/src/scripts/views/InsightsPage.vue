@@ -422,24 +422,6 @@
         }
     }
 
-    .esButton {
-        display: block;
-        flex-grow: 0;
-        white-space: nowrap;
-
-        @include r(960) {
-            width: 100%;
-        }
-
-        span {
-            display: none;
-
-            @include r(374) {
-                display: inline;
-            }
-        }
-    }
-
     .valuesContainer {
         background-color: lighten($beige, 3%);
         border-radius: 1.6rem;

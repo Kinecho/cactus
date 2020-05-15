@@ -2,6 +2,7 @@ import Vue from "vue";
 import ResultElement from "@components/gapanalysis/ResultElement.vue";
 import { CactusElement } from "@shared/models/CactusElement";
 import { boolean, select } from "@storybook/addon-knobs";
+import { cactusElementSelect } from "@web/StorybookHelpers";
 
 export default {
     title: "Gap Analysis/Result Element"
@@ -89,11 +90,7 @@ export const WithCircle = () => Vue.extend({
         },
         element: {
             type: String as () => CactusElement,
-            default: select("Element", [CactusElement.energy,
-                CactusElement.meaning,
-                CactusElement.experience,
-                CactusElement.relationships,
-                CactusElement.emotions], CactusElement.meaning),
+            default: cactusElementSelect(),
         },
     },
     data(): { selectedElement: CactusElement | undefined } {
