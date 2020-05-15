@@ -212,6 +212,12 @@
         order: 2;
         position: relative;
 
+        @include r(768) {
+            flex-basis: 50%;
+            flex-grow: 1;
+            order: 2;
+        }
+
         &.plus {
             background-image: url(/assets/images/crosses2.svg),
             url(/assets/images/outlineBlob.svg),
@@ -223,14 +229,11 @@
 
             @include r(768) {
                 background-position: -1rem 28rem, right -9rem top -32rem, -11rem 32rem, 61% -133px;
-                flex-basis: 50%;
-                flex-grow: 1;
-                order: 2;
             }
         }
 
         &.basic {
-            background: url(/assets/images/radarChartGraphic.svg) center bottom -50rem no-repeat;
+            background: url(/assets/images/radarChartGraphic.svg) center top 14rem no-repeat;
             padding-bottom: 7.2rem;
 
             @include r(600) {
@@ -243,7 +246,8 @@
             }
 
             @include r(768) {
-                background-position: center bottom -27rem;
+                background-size: 150%;
+                background-position: center top 22rem;
 
                 .subtext {
                     max-width: none;
