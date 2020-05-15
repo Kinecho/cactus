@@ -1,5 +1,5 @@
 <template>
-    <section v-if="gapAssessmentResults" class="gapContainer borderContainer">
+    <section v-if="isPlusMember && gapAssessmentResults" class="gapContainer borderContainer">
         <h2>Happiness Quiz</h2>
         <p class="subtext">The comparison of what you find <strong class="pink">important</strong> and what
             you find <strong class="blue">satisfactory</strong></p>
@@ -114,8 +114,10 @@
             this.currentElementSelection = element;
         }
 
-        saveFocus(element: CactusElement | null) {
-            this.$emit('focusElement', element);
+        saveFocus() {
+            this.$emit('focusElement', this.currentElementSelection);
+            this.selectFocusEnabled = false;
+            this.currentElementSelection = null;
         }
     }
 </script>

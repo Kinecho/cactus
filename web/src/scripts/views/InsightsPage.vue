@@ -106,6 +106,7 @@
                         :gap-assessment-results="gapAssessmentResults"
                         :is-plus-member="isPlusMember"
                         :member-focus-element="focusElement"
+                        @focusElement="saveFocus"
                 />
 
                 <section class="bubblesContainer borderContainer" v-if="hasWordCloud">
@@ -205,16 +206,14 @@
             this.currentElementSelection = element;
         }
 
-        async saveFocus() {
+        async saveFocus(element: CactusElement | null) {
             if (this.member) {
-                this.member.focusElement = this.currentElementSelection;
+                this.member.focusElement = element;
                 await CactusMemberService.sharedInstance.setFocusElement({
-                    element: this.currentElementSelection,
+                    element,
                     member: this.member
                 })
             }
-            this.selectFocusEnabled = false;
-            this.currentElementSelection = null;
         }
 
         cancelSetFocus() {
@@ -330,6 +329,7 @@
     @import "mixins";
     @import "variables";
     @import "insights";
+
     .insightsDash {
         display: flex;
         flex-flow: column nowrap;
@@ -697,7 +697,7 @@
     //    margin: 4rem -3.2rem 0;
     //    padding: 3.2rem 3.2rem 0;
     //    width: calc(100% + 6.4rem);
-//
+    //
     //    .flexIt {
     //        margin-left: 1.6rem;
     //    }
