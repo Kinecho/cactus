@@ -507,7 +507,7 @@
     }
 
     .lowerContainer {
-        background: $darkerGreen url(assets/images/grainy.png);
+        background: $darkerGreen url(/assets/images/grainy.png);
         padding: 6.4rem 4rem 4rem;
     }
 
@@ -636,7 +636,7 @@
             }
 
             &.back {
-                background: $darkerGreen url(assets/images/darkGreenNeedles.svg) 0 0/31rem;
+                background: $darkerGreen url(/assets/images/darkGreenNeedles.svg) 0 0/31rem;
                 transform: rotateY(180deg);
 
                 @include r(600) {

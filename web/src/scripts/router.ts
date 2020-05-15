@@ -7,6 +7,7 @@ import { isExternalUrl } from "@shared/util/StringUtil";
 import LoadingPage from "@web/views/LoadingPage.vue";
 import ErrorPage from "@web/views/ErrorPage.vue";
 import { Component } from "vue";
+import { Screen } from "@components/gapanalysis/GapAssessmentTypes";
 
 const logger = new Logger("router.ts");
 
@@ -172,16 +173,31 @@ const routes: MetaRouteConfig[] = [
         name: "GapAnalysisPage",
         meta: {
             title: "Gap Analysis | Cactus"
-        }
-    },
-    {
-        path: `${ PageRoute.GAP_ANALYSIS }/:resultsId`,
-        component: () => import("@web/views/GapAnalysisPage.vue"),
-        name: "ExistingGapAnalysisPage",
-        props: true,
-        meta: {
-            title: "Gap Analysis | Cactus"
-        }
+        },
+        props: (route) => {
+            return {
+                resultsId: route.params.resultsId,
+                screen: route.params.screen ?? Screen.intro,
+                questionIndex: route.params.screen === Screen.questions ? Number(route.params.index ?? 0) : 0,
+            }
+        },
+        children: [
+            {
+                path: ":resultsId",
+                props: true,
+                children: [
+                    {
+                        path: ":screen",
+                        props: true,
+                        children: [
+                            {
+                                path: ":index",
+                            },
+                        ]
+                    }
+                ]
+            }
+        ]
     },
     {
         component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@components/EmailActionHandler.vue")),
@@ -247,8 +263,7 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
     try {
-        const meta = updateRouteMeta(to, from);
-        logger.info("Setting page meta:", meta);
+        updateRouteMeta(to, from);
     } catch (error) {
         logger.error("Failed to update meta", error);
     } finally {

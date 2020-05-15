@@ -27,11 +27,8 @@ export default class CactusMemberService {
             if (user) {
                 this.currentMemberUnsubscriber = this.observeByUserId(user.uid, {
                     onData: async member => {
-                        logger.log("[memberService constructor callback] BEFORE LOGGING member trial started at type of = ", typeof (member?.subscription?.trial?.startedAt));
-                        logger.info("Current CactusMember", member);
                         this.currentMember = member;
                         this.memberHasLoaded = true;
-                        logger.log("[memberService instance constructor callback] member trial started at type of = ", typeof (member?.subscription?.trial?.startedAt));
                         if (member) {
                             await this.updateMemberSettingsIfNeeded(member)
                         }

@@ -63,7 +63,7 @@
         text-align: left;
 
         &:after {
-            background: url(assets/images/royalBlob.png) 0 0/228px 216px no-repeat;
+            background: url(/assets/images/royalBlob.png) 0 0/228px 216px no-repeat;
             content: "";
             display: block;
             height: 216px;
@@ -77,7 +77,7 @@
         }
 
         &:before {
-            background: url(assets/images/crossesBlue.svg) 0 0/228px 216px no-repeat;
+            background: url(/assets/images/crossesBlue.svg) 0 0/228px 216px no-repeat;
             content: "";
             bottom: 4rem;
             display: block;

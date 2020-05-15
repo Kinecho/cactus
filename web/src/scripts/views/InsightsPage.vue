@@ -44,11 +44,20 @@
             </section>
 
             <div class="flexSections">
-                <section v-if="gapResults" class="gapContainer borderContainer">
-                    <h2>Mental Fitness</h2>
-                    <p class="subtext">The comparison of what you find <strong class="pink">important</strong> and what you find <strong class="blue">satisfactory</strong></p>
+                <section v-if="showGapResults && gapAssessmentResults" class="gapContainer borderContainer">
+                    <h2>Happiness Quiz</h2>
+                    <p class="subtext">The comparison of what you find <strong class="pink">important</strong> and what
+                        you find <strong class="blue">satisfactory</strong></p>
                     <spinner v-if="gapResultsLoading" message="Loading Results..." :delay="1200"/>
-                    <Results v-if="!gapResultsLoading && gapResults" :results="gapResults" :selectable-elements="false" :withLabel="false"/>
+                    <Results v-if="!gapResultsLoading && gapAssessmentResults"
+                            :results="gapAssessmentResults"
+                            :selectable-elements="selectFocusEnabled"
+                            :pulsing-enabled="selectFocusEnabled"
+                            :hideElements="false"
+                            :selected-element="radarChartSelectedElement"
+                            @elementSelected="elementSelected"
+                             :withLabel="false"
+                    />
                     <div class="gapFocus" v-if="focusElement">
                         <ResultElement :element="focusElement" :selectable="false" :with-label="false" :withCircle="true"/>
                         <div class="flexIt">
@@ -56,13 +65,39 @@
                             <p class="focusElement">{{focusElement}}</p>
                         </div>
                     </div>
+                    <div v-if="selectFocusEnabled" class="gapActions">
+                        <p>Tap a cactus to choose a focus.</p>
+                        <p v-if="currentElementSelection">
+                            You've selected: {{currentElementSelection || 'nothing yet'}}
+                        </p>
+                        <button class="small secondary" @click="cancelSetFocus">Cancel</button>
+                        <button class="small" @click="saveFocus">Done</button>
+
+                    </div>
+                    <p v-else-if="focusElement && !selectFocusEnabled" class="gapActions">
+                        Your focus is <strong>{{focusElement}}</strong>. To change your focus...
+                        <!--                        <router-link :to="setFocusPath" tag="button">Click Here</router-link>-->
+                        <button class="secondary small" @click="selectFocusEnabled = true">Change your focus</button>
+                    </p>
+                    <p v-else-if="!selectFocusEnabled" class="gapActions">
+                        <button class="secondary small" @click="selectFocusEnabled = true">Choose a focus</button>
+                    </p>
                     <dropdown-menu :items="mentalFitnessDropdownLinks" class="dotsBtn"/>
                 </section>
-                <section v-else class="nogapContainer borderContainer">
-                    <h2>Mental Fitness</h2>
-                    <p class="subtext">Find the gap between what is important to you and how satisfied you are regarding that area of your&nbsp;life.</p>
+                <!-- Show PLUS User Empty State message -->
+                <section v-else-if="isPlusMember" class="nogapContainer borderContainer">
+                    <h2>Happiness Quiz</h2>
+                    <p class="subtext">Find the gap between what is important to you and how satisfied you are regarding
+                        that area of your&nbsp;life.</p>
                     <router-link tag="button" class="esButton" :to="gapAssessmentHref">Take the
                         <span>Mental Fitness</span> Quiz
+                    </router-link>
+                </section>
+                <!-- Show BASIC User Upgrade message -->
+                <section v-else-if="!isPlusMember" class="nogapContainer borderContainer">
+                    <h2>Happiness Quiz</h2>
+                    <p class="subtext">NEEDS WORK To choose your focus, upgrade to Cactus Plus </p>
+                    <router-link tag="button" class="esButton" :to="pricingHref">Try Cactus Plus
                     </router-link>
                 </section>
 
@@ -107,6 +142,7 @@
     import GapAnalysisService from "@web/services/GapAnalysisService";
     import Spinner from "@components/Spinner.vue";
     import { CactusElement } from "@shared/models/CactusElement";
+    import { Screen } from "@components/gapanalysis/GapAssessmentTypes";
 
     const logger = new Logger("InsightsPage");
     const copy = CopyService.getSharedInstance().copy;
@@ -124,15 +160,17 @@
     })
     export default class InsightsPage extends Vue {
         authLoaded = false;
-        member?: CactusMember;
+        member: CactusMember|null = null;
         memberObserver?: ListenerUnsubscriber;
         gapResultsLoading = false;
-        gapResults?: GapAnalysisAssessmentResult | null = null;
+        gapAssessmentResults?: GapAnalysisAssessmentResult | null = null;
+        selectFocusEnabled = false;
+        currentElementSelection: CactusElement | null = null
 
         beforeMount() {
             this.memberObserver = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({ member }) => {
-                    this.member = member;
+                    this.member = member ?? null;
 
                     if (!member) {
                         await pushRoute(PageRoute.HOME);
@@ -151,8 +189,29 @@
             this.gapResultsLoading = true;
 
             const results = await GapAnalysisService.sharedInstance.getLatestForMember(this.member.id)
-            this.gapResults = results ?? null;
+            this.gapAssessmentResults = results ?? null;
             this.gapResultsLoading = false;
+        }
+
+        async elementSelected(element: CactusElement | null) {
+            this.currentElementSelection = element;
+        }
+
+        async saveFocus() {
+            if (this.member) {
+                this.member.focusElement = this.currentElementSelection;
+                await CactusMemberService.sharedInstance.setFocusElement({
+                    element: this.currentElementSelection,
+                    member: this.member
+                })
+            }
+            this.selectFocusEnabled = false;
+            this.currentElementSelection = null;
+        }
+
+        cancelSetFocus() {
+            this.selectFocusEnabled = false;
+            this.currentElementSelection = null;
         }
 
         get coreValuesBlob(): CoreValuesBlob | undefined {
@@ -164,6 +223,13 @@
             const blob = getCoreValuesBlob(this.member?.coreValues, forceIndex);
             logger.info("Blob info:", blob);
             return blob;
+        }
+
+        get radarChartSelectedElement(): CactusElement | null {
+            if (this.selectFocusEnabled) {
+                return this.currentElementSelection;
+            }
+            return this.focusElement;
         }
 
         get wordCloud(): InsightWord[] {
@@ -189,8 +255,24 @@
             return `${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`;
         }
 
+        get setFocusPath(): string | undefined {
+            if (this.gapAssessmentResults) {
+                return `${ PageRoute.GAP_ANALYSIS }/${ this.gapAssessmentResults.id }/${ Screen.chooseFocus }`
+            }
+            return undefined;
+        }
+
         get gapAssessmentHref(): string {
             return PageRoute.GAP_ANALYSIS;
+        }
+
+        get showGapResults(): boolean {
+            return !!(this.isPlusMember && this.gapAssessmentResults);
+
+        }
+
+        get isPlusMember(): boolean {
+            return this.authLoaded && !!this.member?.tier && isPremiumTier(this.member.tier);
         }
 
         get stats(): { value: string, label: string, unit: string, icon: string }[] {
@@ -249,6 +331,10 @@
             }];
         }
 
+        get pricingHref(): string {
+            return PageRoute.PRICING;
+        }
+
         get mentalFitnessDropdownLinks(): DropdownMenuLink[] {
             return [{
                 title: "Retake Quiz",
@@ -261,7 +347,10 @@
         }
 
         get focusElement(): CactusElement | null {
-            return this.member?.focusElement ?? null;
+            if (!this.authLoaded || !this.member) {
+                return null;
+            }
+            return this.member.focusElement ?? null;
         }
     }
 </script>
@@ -394,7 +483,7 @@
     .novaluesContainer {
         @include shadowbox;
         background-color: $dolphin;
-        background-image: url(assets/images/grainy.png), url(assets/images/cvBlob.png), url(assets/images/pinkVs.svg);
+        background-image: url(/assets/images/grainy.png), url(/assets/images/cvBlob.png), url(/assets/images/pinkVs.svg);
         background-position: 0 0, -14rem -15rem, -7rem 120%;
         background-repeat: repeat, no-repeat, no-repeat;
         background-size: auto, 28rem, auto;
@@ -713,11 +802,11 @@
     .nogapContainer {
         @include shadowbox;
         background-color: lighten($dolphin, 5%);
-        background-image: url(assets/images/grainy.png),
-            url(assets/images/crosses2.svg),
-            url(assets/images/outlineBlob.svg),
-            url(assets/images/royalBlob.svg),
-            url(assets/images/pinkBlob5.svg);
+        background-image: url(/assets/images/grainy.png),
+        url(/assets/images/crosses2.svg),
+        url(/assets/images/outlineBlob.svg),
+        url(/assets/images/royalBlob.svg),
+        url(/assets/images/pinkBlob5.svg);
         background-position: 0 0, 39rem -1rem, -34rem -84rem, -5rem 23rem, -17rem -32rem;
         background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat;
         background-size: auto, 40%, 200%, 100%, 100%;
@@ -727,6 +816,10 @@
         h2 {
             margin-bottom: .4rem;
         }
+    }
+
+    .gapActions {
+        margin: 2rem 0;
     }
 
 </style>

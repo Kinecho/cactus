@@ -25,7 +25,7 @@
                           <p class="text">Cactus will visualize your journey, revealing important insights about you, to&nbsp;you.</p>
                       </div>
                       <div class="benefit">
-                          <span class="benefitIcon"><img src="assets/images/checkCircle.svg" alt=""/></span>
+                          <span class="benefitIcon"><img src="/assets/images/checkCircle.svg" alt=""/></span>
                           <h3>Core values</h3>
                           <p class="text">Cactus will help identify your core values and use them to provide a personalized mindfulness&nbsp;journey.</p>
                       </div>
@@ -41,7 +41,7 @@
         <section class="insights feature">
             <div class="centered reverse" id="insights">
                 <div class="sectionGraphic">
-                    <img class="" src="assets/images/insights.svg" alt="insights graphic" />
+                    <img class="" src="/assets/images/insights.svg" alt="insights graphic" />
                 </div>
                 <div class="textContainer">
                     <h4>New</h4>
@@ -53,7 +53,7 @@
         <section class="coreValues feature">
             <div class="centered" id="coreValues">
                 <div class="sectionGraphic">
-                    <img class="" src="assets/images/coreValues.svg" alt="core values graphic" />
+                    <img class="" src="/assets/images/coreValues.svg" alt="core values graphic" />
                 </div>
                 <div class="textContainer">
                     <h4>New</h4>

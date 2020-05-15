@@ -1,7 +1,7 @@
 <template>
     <div class="centered pageContainer" id="page-container">
         <header>
-            <a href="/"><img class="logo" src="assets/images/logoWhite.svg" alt="Cactus logo"/></a>
+            <a href="/"><img class="logo" src="/assets/images/logoWhite.svg" alt="Cactus logo"/></a>
         </header>
         <section id="loading-container" class="loading" v-if="!authLoaded">
             <h2><span class="loading"><img src="/assets/images/loading-white.svg" alt=""/></span>Signing In...</h2>

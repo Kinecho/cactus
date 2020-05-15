@@ -12,8 +12,7 @@
                 color="successAlt">
             <div slot="text" class="centered">
                 <h3>Welcome to Cactus Plus!</h3>
-                <p>You just upgraded and it made our day. If you ever have questions or feedback, please reach out to us
-                    at <a href="mailto:help@cactus.app">help@cactus.app</a>.</p>
+                <p>Now you have full access to personalized activities, insights, and tools to help you better know yourself. If you have questions or feedback, please reach out to us at <a href="mailto:help@cactus.app">help@cactus.app</a>.</p>
             </div>
         </snackbar-content>
         <div class="container centered">
@@ -426,7 +425,7 @@
     }
 
     .coreValuesBox {
-        background-image: url(assets/images/grainy.png), url(assets/images/cvBlob.png), url(assets/images/pinkVs.svg);
+        background-image: url(/assets/images/grainy.png), url(/assets/images/cvBlob.png), url(/assets/images/pinkVs.svg);
         background-position: 0 0, -14rem -15rem, -7rem 120%;
         background-repeat: repeat, no-repeat, no-repeat;
         background-size: auto, 28rem, auto;

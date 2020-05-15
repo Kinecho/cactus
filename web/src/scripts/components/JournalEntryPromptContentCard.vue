@@ -35,7 +35,7 @@
         <nav v-show="!canReflectInline && !hasNote" class="buttonContainer">
             <router-link :to="promptContentPath" class="button" v-show="!completed">{{promptCopy.REFLECT}}</router-link>
             <button @click.prevent="canReflectInline = true" class="wiggle secondary" v-show="completed && !hasNote">
-                <img src="assets/images/pen.svg" alt=""/>
+                <img src="/assets/images/pen.svg" alt=""/>
                 {{promptCopy.ADD_A_NOTE}}
             </button>
         </nav>
@@ -316,7 +316,7 @@
         }
 
         &.note {
-            background: $darkerGreen url(assets/images/darkGreenNeedles.svg) 0 0/31rem;
+            background: $darkerGreen url(/assets/images/darkGreenNeedles.svg) 0 0/31rem;
             padding: 2.4rem 0;
             text-align: center;
         }

@@ -8,14 +8,15 @@
                 element="emotions"
                 class="element emotions"
                 @selected="elementClicked"
+                :pulsing="!selectedElement && selectableElements && pulsingEnabled"
                 :selectable="selectableElements"
                 :selected="selectedElement === 'emotions'"
                 :withLabel="withLabel"
         />
-        <result-element element="relationships" class="element relationships" @selected="elementClicked" :selected="selectedElement === 'relationships'" :selectable="selectableElements" :withLabel="withLabel"/>
-        <result-element element="energy" class="element energy" @selected="elementClicked" :selected="selectedElement === 'energy'" :selectable="selectableElements" :withLabel="withLabel"/>
-        <result-element element="meaning" class="element meaning" @selected="elementClicked" :selected="selectedElement === 'meaning'" :selectable="selectableElements" :withLabel="withLabel"/>
-        <result-element element="experience" class="element experience" @selected="elementClicked" :selected="selectedElement === 'experience'" :selectable="selectableElements" :withLabel="withLabel"/>
+        <result-element :pulsing="!selectedElement && selectableElements" element="relationships" class="element relationships" @selected="elementClicked" :selected="selectedElement === 'relationships'" :selectable="selectableElements" :withLabel="withLabel"/>
+        <result-element :pulsing="!selectedElement && selectableElements" element="energy" class="element energy" @selected="elementClicked" :selected="selectedElement === 'energy'" :selectable="selectableElements" :withLabel="withLabel"/>
+        <result-element :pulsing="!selectedElement && selectableElements" element="meaning" class="element meaning" @selected="elementClicked" :selected="selectedElement === 'meaning'" :selectable="selectableElements" :withLabel="withLabel"/>
+        <result-element :pulsing="!selectedElement && selectableElements" element="experience" class="element experience" @selected="elementClicked" :selected="selectedElement === 'experience'" :selectable="selectableElements" :withLabel="withLabel"/>
     </div>
 </template>
 
@@ -29,6 +30,7 @@
     import ResultElement from "@components/gapanalysis/ResultElement.vue";
     import { RadarChartConfig } from "@web/charts/radarChart";
     import Logger from "@shared/Logger"
+    import { CactusElement } from "@shared/models/CactusElement";
 
     const logger = new Logger("Results");
 
@@ -59,6 +61,9 @@
         @Prop({ type: Boolean, required: false, default: true })
         selectableElements!: boolean;
 
+        @Prop({type: Boolean, required: false, default: true})
+        pulsingEnabled!: boolean;
+
         @Prop({ type: Boolean, required: false, default: false })
         hideChart!: boolean;
 
@@ -74,17 +79,14 @@
         @Prop({type: Boolean, required: false, default: true})
         withLabel!: boolean;
 
-        selectedElement: ResultElement | string | null = null;
+        @Prop({ type: String as () => CactusElement, required: false, default: null })
+        selectedElement!: CactusElement | null;
 
         async done() {
             this.$emit('done')
         }
 
-        elementClicked(element: ResultElement | undefined) {
-            if (this.selectedElement === element) {
-                this.selectedElement = null;
-            }
-            this.selectedElement = element ?? null;
+        elementClicked(element: CactusElement | undefined) {
             this.$emit('elementSelected', element);
         }
 

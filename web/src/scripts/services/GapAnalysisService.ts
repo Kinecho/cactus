@@ -36,6 +36,10 @@ export default class GapAnalysisService {
         return this.getFirst(query);
     }
 
+    createDocId(): string {
+        return this.getCollectionRef().doc().id
+    }
+
 }
 
 

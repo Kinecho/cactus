@@ -49,7 +49,7 @@
                     </div>
                 </div>
                 <div class="card-info" v-if="showCardInfo">
-                    <img class="ccIcon" src="assets/icons/creditCard.svg" alt=""/>
+                    <img class="ccIcon" src="/assets/icons/creditCard.svg" alt=""/>
                     <div class="cardDetails">
                         <span class="brand" v-if="cardBrandName">{{cardBrandName}}</span>
                         <span class="last4" v-if="last4">ending in {{last4}}</span>
@@ -58,7 +58,7 @@
                             {{digitalWallet.displayName}}</p>
                     </div>
                     <button class="tertiary button updateBtn" @click="updatePaymentMethod" :disabled="loadingUpdatePaymentMethod">
-                        <img class="penIcon" src="assets/images/pen.svg" alt="" v-if="!loadingUpdatePaymentMethod"/>
+                        <img class="penIcon" src="/assets/images/pen.svg" alt="" v-if="!loadingUpdatePaymentMethod"/>
                         <span class="btnText" v-if="!loadingUpdatePaymentMethod">Update</span>
                         <span class="btnText loading" v-if="loadingUpdatePaymentMethod">Loading...</span>
                     </button>

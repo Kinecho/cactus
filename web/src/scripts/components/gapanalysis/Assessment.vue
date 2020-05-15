@@ -18,14 +18,14 @@
         </modal>
         <transition name="component-fade" mode="out-in" appear>
             <div v-if="currentScreen === Screen.intro" class="intro" key="intro">
-                <h1>Mental Fitness Quiz</h1>
-                <p>The Cactus Mental Fitness Quiz is the first step towards understanding yourself better. Together, we
-                    will identify areas of your life to improve.</p>
-                <button class="btn primary" @click="start">Let's Go!</button>
+                <h1>What makes you happy?</h1>
+                <p>The Cactus Quiz is the first step in understanding yourself better. Answer honestly and Cactus will
+                    help you identify and focus on the people, places, and things that make you happy.</p>
+                <button class="btn primary" @click="start">Let's go!</button>
                 <div class="private">
-                    <img class="lock" src="assets/images/lock.svg" alt=""/>
-                    All answers are private and confidential and will be used solely to help you understand your mental
-                    fitness.
+                    <img class="lock" src="/assets/images/lock.svg" alt=""/>
+                    All answers are private and confidential and will be used solely to help tune Cactus to be most
+                    effective for you.
                 </div>
             </div>
             <!-- Note: This needs to be a div (not template) so that the fade transitoin works -->
@@ -60,15 +60,20 @@
             <div class="whiteBg" v-else-if="currentScreen === Screen.results">
                 <results-onboarding :results="result"/>
                 <div class="cvActions">
-                    <button class="btn primary" @click="setScreen(Screen.chooseFocus)">Next: Choose Your Focus</button>
+                    <button class="btn primary" @click="setScreen(Screen.chooseFocus)">Next: Choose your focus</button>
                 </div>
                 <cactus-confetti :running="false"/>
             </div>
             <div class="whiteBg" v-else-if="currentScreen === Screen.chooseFocus">
                 <h2>Choose your focus</h2>
-                <p class="subtext">Your choice will be used to personalize questions designed
-                    to help you focus on what makes you happy.</p>
-                <results :selectable-elements="true" :results="result" chart-id="select_results_chart" @elementSelected="elementSelected"/>
+                <p class="subtext">Your choice will be used to personalize Cactus and help you focus on what makes you
+                    happy.</p>
+                <results :selectable-elements="true"
+                        :results="result"
+                        :selected-element="selectedElement"
+                        chart-id="select_results_chart"
+                        @elementSelected="elementSelected"
+                />
                 <div class="cvActions flexActions">
                     <p v-if="selectedElement">You chose <strong>{{selectedElement}}</strong>.</p>
                     <p v-if="!selectedElement" class="validationText">Tap a cactus to continue. You can always change
@@ -107,34 +112,9 @@
     import { pushRoute } from "@web/NavigationUtil";
     import { PageRoute } from "@shared/PageRoutes";
     import CactusMemberService from "@web/services/CactusMemberService";
+    import { Screen, ScreenName } from "@components/gapanalysis/GapAssessmentTypes";
 
     const logger = new Logger("gap/Assessment");
-
-    /**
-     * Screen Names
-     * @type {{upgrade: string, intro: string, pendingResults: string, questions: string, chooseFocus: string, results: string}}
-     */
-    const Screen = {
-        intro: "intro",
-        questions: "questions",
-        pendingResults: "pendingResults",
-        results: "results",
-        chooseFocus: "choose-focus",
-        upgrade: "upgrade"
-    }
-
-    /**
-     * Screen Order
-     * @type {(string)[]}
-     */
-    const defaultScreens = [
-        Screen.intro,
-        Screen.questions,
-        Screen.pendingResults,
-        Screen.results,
-        Screen.chooseFocus,
-        Screen.upgrade
-    ];
 
     @Component({
         components: {
@@ -156,18 +136,26 @@
         @Prop({ type: Boolean, required: false, default: true })
         includeUpsell!: boolean;
 
-        started: boolean = false;
-        finished: boolean = false;
-
-
         @Prop({ type: Object as () => GapAnalysisAssessmentResult, required: true })
         result!: GapAnalysisAssessmentResult;
 
-        currentQuestionIndex: number = 0;
-        currentScreenIndex: number = 0;
+        @Prop({ type: Number, required: false, default: 0 })
+        questionIndex!: number;
+
+        /**
+         * The screen that is displaying.
+         * This property controls what is actually being shown.
+         * The passed in prop may be used to set this from an parent component
+         */
+        @Prop({ type: String, required: false, default: Screen.intro })
+        currentScreen!: ScreenName;
+
+        @Prop({ type: Array as () => ScreenName[], required: true })
+        screens!: ScreenName[];
+
+        finished: boolean = false;
         Screen = Screen;
         upsellBillingPeriod = BillingPeriod.yearly;
-
 
         /**
          * Responses by questionID
@@ -177,7 +165,6 @@
         showCloseConfirm = false;
         processingTimeout?: number;
         selectedElement: CactusElement | null = null;
-        currentScreen: string = Screen.intro;
 
         //Note: I don't like this implementation but it was the fastest thing i could come up with
         @Watch("result")
@@ -203,9 +190,6 @@
         }
 
         get currentQuestion(): GapAnalysisQuestion | null {
-            if (!this.started) {
-                return null;
-            }
             return this.assessment.questionByIndex(this.currentQuestionIndex) ?? null;
         }
 
@@ -215,6 +199,10 @@
             }
 
             return "Next";
+        }
+
+        get currentScreenIndex(): number {
+            return this.screens.indexOf(this.currentScreen);
         }
 
         get currentValue(): number | undefined {
@@ -244,28 +232,17 @@
                 this.finishAssessment();
                 return
             }
-            this.currentQuestionIndex += 1;
-            // this.currentScreenIndex += 1;
+            this.setQuestionIndex(this.currentQuestionIndex + 1);
         }
 
         previousQuestion() {
             if (this.currentQuestionIndex > 0) {
-                this.currentQuestionIndex = this.currentQuestionIndex - 1;
-                // this.currentScreenIndex -= 1;
+                this.setQuestionIndex(this.currentQuestionIndex - 1);
             }
         }
 
         get previousQuestionEnabled(): boolean {
             return this.currentQuestionIndex != undefined && this.currentQuestionIndex > 0;
-        }
-
-        get screens(): string[] {
-            return [...defaultScreens].filter(screen => {
-                if (screen === Screen.upgrade && !this.includeUpsell) {
-                    return false;
-                }
-                return true;
-            })
         }
 
         get nextQuestionEnabled(): boolean {
@@ -281,13 +258,13 @@
             return this.responseValues[questionId] !== undefined;
         }
 
-        // get responseValues(): Record<string, number | undefined> {
-        //     return this.result.responsesByQuestionId;
-        // }
+        setQuestionIndex(index: number) {
+            this.$emit('questionChanged', index);
+        }
 
         finishAssessment() {
             const result = this.result;
-            result.calculateResults({assessment: this.assessment});
+            result.calculateResults({ assessment: this.assessment });
             logger.info("finishing assessment...", result);
             this.finished = true;
             this.setScreen(Screen.pendingResults);
@@ -299,15 +276,16 @@
         }
 
         start() {
-            this.currentQuestionIndex = 0;
-            this.started = true;
-            this.setScreen("questions");
+            this.setScreen(Screen.questions);
+            this.setQuestionIndex(0);
+            // this.currentQuestionIndex = 0;
         }
 
         setScreen(name: string) {
             logger.info("Setting screen...", name);
-            this.currentScreenIndex = Math.max(0, this.screens.indexOf(name));
-            this.currentScreen = this.screens[this.currentScreenIndex];
+            this.$emit('screen', name);
+            // this.currentScreenIndex = Math.max(0, this.screens.indexOf(name));
+            // this.currentScreen = this.screens[this.currentScreenIndex];
         }
 
         async focusSelected() {
@@ -321,14 +299,19 @@
         }
 
         get currentStepperIndex(): number {
-            if (!this.started) {
-                return 0;
+            let questionIndex = this.screens.indexOf(Screen.questions);
+            if (this.currentScreenIndex > questionIndex) {
+                return this.currentScreenIndex + this.questionsTotal - 1;
+            } else {
+                return this.currentScreenIndex + this.currentQuestionIndex;
             }
-            return this.currentScreenIndex + this.currentQuestionIndex;
-            // if (this.result) {
-            //     return this.stepperTotal - 1;
-            // }
-            // return (this.currentQuestionIndex ?? 0) + 1;
+        }
+
+        /**
+         * Bounds safe question index
+         */
+        get currentQuestionIndex(): number {
+            return Math.min(Math.max(0, this.questionIndex), this.questionsTotal - 1);
         }
 
         /**

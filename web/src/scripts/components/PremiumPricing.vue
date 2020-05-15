@@ -235,7 +235,7 @@
     }
 
     .tabset {
-        background: $dolphin url(assets/images/grainy.png) repeat;
+        background: $dolphin url(/assets/images/grainy.png) repeat;
         border-radius: 1.2rem;
         margin: 0 auto;
         max-width: 48rem;
@@ -273,7 +273,7 @@
         }
 
         &.plus {
-            background: $dolphin url(assets/images/grainy.png) repeat;
+            background: $dolphin url(/assets/images/grainy.png) repeat;
             color: $white;
         }
     }
@@ -348,7 +348,7 @@
         }
 
         &.active {
-            background: $dolphin url(assets/images/grainy.png) repeat;
+            background: $dolphin url(/assets/images/grainy.png) repeat;
 
             @include r(768) {
                 background-image: none;
@@ -369,14 +369,14 @@
             border-radius: 0 1.6rem 0 0;
 
             @include r(768) {
-                background: $dolphin url(assets/images/grainy.png) repeat;
+                background: $dolphin url(/assets/images/grainy.png) repeat;
                 border-radius: $cardBorderRadius $cardBorderRadius 0 0;
                 color: $white;
             }
         }
 
         &:only-child {
-            background: $dolphin url(assets/images/grainy.png) repeat;
+            background: $dolphin url(/assets/images/grainy.png) repeat;
             border-radius: $cardBorderRadius $cardBorderRadius 0 0;
             flex-basis: 100%;
             padding-left: 1.6rem;

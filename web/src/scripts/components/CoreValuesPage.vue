@@ -357,7 +357,7 @@
 
         &.inProgress {
             &:after {
-                background: url(assets/images/cvBlob.png) no-repeat;
+                background: url(/assets/images/cvBlob.png) no-repeat;
                 content: "";
                 display: block;
                 height: 35rem;
@@ -369,7 +369,7 @@
             }
 
             &:before {
-                background: url(assets/images/pinkVs.svg) no-repeat;
+                background: url(/assets/images/pinkVs.svg) no-repeat;
                 background-size: cover;
                 content: "";
                 display: block;

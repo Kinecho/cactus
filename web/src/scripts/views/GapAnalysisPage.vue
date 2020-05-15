@@ -1,5 +1,5 @@
 <template>
-    <div class="gapAnalysisPage" :class="{signin: !member && memberLoaded}">
+    <div class="gapAnalysisPage" :class="{signin: !member && memberLoaded && resultsLoaded}">
         <div class="centered" v-if="!memberLoaded || !resultsLoaded">
             <spinner color="dark" message="Loading Assessment...." :delay="1200"/>
         </div>
@@ -19,10 +19,15 @@
             <assessment v-if="member"
                     :assessment="assessment"
                     :result="assessmentResults"
-                    @questionChanged="setQuestion"
                     :include-upsell="includeUpsell"
+                    :questionIndex="questionIndex"
+                    :currentScreen="currentScreen"
+                    :screens="screens"
+                    @screen="setScreen"
+                    @questionChanged="setQuestion"
                     @close="closeAssessment"
-                    @finished="finishAssessment"/>
+                    @finished="finishAssessment"
+            />
         </div>
     </div>
 </template>
@@ -45,8 +50,10 @@
     import SignIn from "@components/SignIn.vue";
     import LoadingPage from "@web/views/LoadingPage.vue";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
-    import { Prop } from "vue-property-decorator";
+    import { Prop, Watch } from "vue-property-decorator";
     import Spinner from "@components/Spinner.vue";
+    import { defaultScreens, ScreenName, Screen } from "@components/gapanalysis/GapAssessmentTypes";
+
     const logger = new Logger("GapAnalysisPage");
 
     @Component({
@@ -60,36 +67,99 @@
         }
     })
     export default class GapAnalysisPage extends Vue {
-        assessmentId: string | null = null;
         assessment = GapAnalysisAssessment.create();
-        latestResults: GapAnalysisAssessmentResult | undefined = undefined;
-        currentPage: number = 0;
+        latestResults: GapAnalysisAssessmentResult | null = null;
         memberLoaded = false;
         resultsLoaded = false;
         memberUnsubscriber?: ListenerUnsubscriber;
         member: CactusMember | undefined | null = null;
 
-        @Prop({type: String, required: false })
-        resultsId?:string;
+        @Prop({ type: String, required: false })
+        resultsId?: string;
+
+        @Prop({ type: String as () => ScreenName, required: false })
+        screen?: ScreenName;
+
+        @Prop({ type: Number, required: false, default: 0 })
+        questionIndex!: number;
+
+        currentScreen: ScreenName = Screen.intro;
+
+        @Watch("screen")
+        onScreenRoute(screen: ScreenName | undefined | null) {
+            if (screen) {
+                this.currentScreen = screen;
+            }
+        }
+
+        @Watch("resultsId")
+        onResultsId(newId: string | null | undefined, oldId: string | undefined | null) {
+            logger.info("ResultsId changed, ")
+            if (newId && newId !== oldId) {
+                this.fetchResults(newId);
+            }
+        }
 
         async beforeMount() {
-
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({ member }) => {
                     this.member = member;
                     this.memberLoaded = true;
                 }
             })
+        }
 
+        async mounted() {
             if (this.resultsId) {
-                const results = await GapAnalysisService.sharedInstance.getById(this.resultsId)
+                logger.info("Before mount - results Id = fetching results");
+                await this.fetchResults(this.resultsId);
+            } else {
+                await this.createNewResults()
+            }
+        }
+
+        async createNewResults() {
+            const results = GapAnalysisAssessmentResult.create();
+            // results.id = GapAnalysisService.sharedInstance.createDocId();
+            await GapAnalysisService.sharedInstance.save(results);
+            this.latestResults = results;
+            logger.info("Saved brand new results on mount. id = ", results.id);
+            const id = results.id;
+            if (id) {
+                await pushRoute(`${ PageRoute.GAP_ANALYSIS }/${ id }`);
+            }
+            this.resultsLoaded = true;
+        }
+
+        async fetchResults(resultsId: string | null | undefined) {
+            logger.info("Fetching results for id", resultsId);
+            if (resultsId) {
+                const results = await GapAnalysisService.sharedInstance.getById(resultsId)
+                logger.info(`Got latest results for id ${ resultsId }`, results);
                 if (results) {
                     this.latestResults = results;
                     this.resultsLoaded = true;
                 }
+
+                if (this.screen) {
+                    this.currentScreen = this.screen;
+                }
             } else {
                 this.resultsLoaded = true;
             }
+        }
+
+        setScreen(screen: ScreenName) {
+            if (this.resultsId) {
+                if (screen === Screen.questions) {
+                    pushRoute(`${ PageRoute.GAP_ANALYSIS }/${ this.resultsId }/${ screen }/${ this.questionIndex }`);
+                } else {
+                    pushRoute(`${ PageRoute.GAP_ANALYSIS }/${ this.resultsId }/${ screen }`);
+                }
+            } else {
+                this.currentScreen = screen;
+            }
+
         }
 
         get signInSuccessRoute() {
@@ -97,24 +167,30 @@
         }
 
         get assessmentResults(): GapAnalysisAssessmentResult | undefined {
-            return this.latestResults || GapAnalysisAssessmentResult.create({ assessment: this.assessment });
-        }
-
-        get numSteps(): number {
-            return this.assessment.questions.length;
-        }
-
-        async saveResults(results: GapAnalysisAssessmentResult) {
-            logger.info("Saving results of assessment...");
-            this.latestResults = results;
+            if (this.resultsLoaded) {
+                return this.latestResults ?? GapAnalysisAssessmentResult.create();
+            }
+            return GapAnalysisAssessmentResult.create();
         }
 
         get includeUpsell(): boolean {
             return !isPremiumTier(this.member?.tier);
         }
 
-        setQuestion(questionIndex: number) {
-            this.currentPage = questionIndex;
+
+        get screens(): ScreenName[] {
+            return [...defaultScreens].filter(screen => {
+                return !(screen === Screen.upgrade && !this.includeUpsell);
+            })
+        }
+
+        async setQuestion(questionIndex: number) {
+            if (this.currentScreen === Screen.questions && this.resultsId && questionIndex !== this.questionIndex) {
+                if (this.latestResults) {
+                    await GapAnalysisService.sharedInstance.save(this.latestResults);
+                }
+                await pushRoute(`${ PageRoute.GAP_ANALYSIS }/${ this.resultsId }/${ Screen.questions }/${ questionIndex }`);
+            }
         }
 
         async closeAssessment() {
@@ -144,11 +220,6 @@
             } catch (error) {
                 logger.error(`Failed to save gap results for member ${ this.member?.id }`, error);
             }
-            // if (!this.member) {
-            //     await pushRoute(PageRoute.PRICING);
-            // } else {
-            //     await pushRoute(PageRoute.INSIGHTS);
-            // }
         }
     }
 </script>
@@ -167,10 +238,10 @@
         position: relative;
 
         &:after {
-            background-image: url(assets/images/crosses2.svg),
-            url(assets/images/outlineBlob.svg),
-            url(assets/images/royalBlob.svg),
-            url(assets/images/pinkBlob5.svg);
+            background-image: url(/assets/images/crosses2.svg),
+            url(/assets/images/outlineBlob.svg),
+            url(/assets/images/royalBlob.svg),
+            url(/assets/images/pinkBlob5.svg);
             background-position: -11rem 38rem, right -11rem top -35rem, -21rem 41rem, 50% -143px;
             background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
             background-size: 20rem, 48rem, 30rem, 23rem;
@@ -185,11 +256,11 @@
 
             @include r(768) {
                 background: lighten($dolphin, 16%);
-                background-image: url(assets/images/grainy.png),
-                url(assets/images/crosses2.svg),
-                url(assets/images/outlineBlob.svg),
-                url(assets/images/royalBlob.svg),
-                url(assets/images/pinkBlob5.svg);
+                background-image: url(/assets/images/grainy.png),
+                url(/assets/images/crosses2.svg),
+                url(/assets/images/outlineBlob.svg),
+                url(/assets/images/royalBlob.svg),
+                url(/assets/images/pinkBlob5.svg);
                 background-position: 0 0,
                 -1rem -1rem,
                 -59rem -26rem,

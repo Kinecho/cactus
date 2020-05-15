@@ -14,6 +14,7 @@
     "clean": "rm -rf ./public && rm -rf ./node_modules/.cache",
     "config:get": "firebase functions:config:get > .runtimeconfig.json -P stage",
     "copy": "mkdir ./public ; cp -r src/assets/ public/assets ; cp ./src/favicon* ./public;",
+    "copy:storybook": "cp -r src/assets/ storybook-static/assets ; cp ./src/favicon* ./storybook-static;",
     "fe": "npm run logo && NODE_OPTIONS=--max_old_space_size=4096 webpack-dev-server --config webpack/webpack.config.fe.js --progress",
     "fe:prod": "npm run logo && NODE_OPTIONS=--max_old_space_size=4096 webpack-dev-server --config webpack/webpack.config.fe.prod.js --progress",
     "dev": "npm run logo && NODE_OPTIONS=--max_old_space_size=4096 webpack-dev-server --config webpack/webpack.config.dev.js --progress",
