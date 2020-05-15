@@ -289,6 +289,10 @@ export default class AdminReflectionResponseService {
                             if (WordCloudExclusionList.includes(wordInsight.word)) {
                                 return;
                             }
+                            // don't include words with apostrophes / quotes that are less than 4 chars long
+                            if (wordInsight.word && /['’"`]/.test(wordInsight.word) && wordInsight.word.length <= 4) {
+                                return;
+                            }
 
                             if (wordInsight.word) {
                                 if(wordStats[wordInsight.word]) {
