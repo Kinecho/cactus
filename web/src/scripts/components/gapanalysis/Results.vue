@@ -8,7 +8,7 @@
                 element="emotions"
                 class="element emotions"
                 @selected="elementClicked"
-                :pulsing="!selectedElement && selectableElements"
+                :pulsing="!selectedElement && selectableElements && pulsingEnabled"
                 :selectable="selectableElements"
                 :selected="selectedElement === 'emotions'"
         />
@@ -59,6 +59,9 @@
 
         @Prop({ type: Boolean, required: false, default: true })
         selectableElements!: boolean;
+
+        @Prop({type: Boolean, required: false, default: true})
+        pulsingEnabled!: boolean;
 
         @Prop({ type: Boolean, required: false, default: false })
         hideChart!: boolean;
