@@ -46,7 +46,7 @@
         <dropdown-menu :items="mentalFitnessDropdownLinks" class="dotsBtn"/>
     </section>
     <!-- Show PLUS User Empty State message -->
-    <section v-else-if="isPlusMember" class="nogapContainer borderContainer">
+    <section v-else-if="isPlusMember" class="plus nogapContainer borderContainer">
         <h2>Happiness Quiz</h2>
         <p class="subtext">Find the gap between what is important to you and how satisfied you are regarding
             that area of your&nbsp;life.</p>
@@ -55,7 +55,7 @@
         </router-link>
     </section>
     <!-- Show BASIC User Upgrade message -->
-    <section v-else-if="!isPlusMember" class="nogapContainer borderContainer">
+    <section v-else-if="!isPlusMember" class="basic nogapContainer borderContainer">
         <h2>What makes you happy?</h2>
         <p class="subtext">Get access to the quiz that helps you identify and focus on the people, places, and things
             that make you happy.</p>
@@ -209,28 +209,58 @@
 
     .nogapContainer {
         @include shadowbox;
-        background-image: url(/assets/images/crosses2.svg),
-        url(/assets/images/outlineBlob.svg),
-        url(/assets/images/royalBlob.svg),
-        url(/assets/images/pinkBlob5.svg);
-        background-position: -1rem 18rem, right -29rem top -32rem, -11rem 16rem, 61% -133px;
-        background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
-        background-size: 20rem, 48rem, 30rem, 23rem;
+        order: 2;
         position: relative;
 
-        @include r(768) {
-            background-position: -1rem 28rem, right -9rem top -32rem, -11rem 32rem, 61% -133px;
-            flex-basis: 50%;
-            flex-grow: 1;
-            order: 2;
+        &.plus {
+            background-image: url(/assets/images/crosses2.svg),
+            url(/assets/images/outlineBlob.svg),
+            url(/assets/images/royalBlob.svg),
+            url(/assets/images/pinkBlob5.svg);
+            background-position: -1rem 18rem, right -29rem top -32rem, -11rem 16rem, 61% -133px;
+            background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
+            background-size: 20rem, 48rem, 30rem, 23rem;
 
-            .subtext {
-                max-width: 48rem;
+            @include r(768) {
+                background-position: -1rem 28rem, right -9rem top -32rem, -11rem 32rem, 61% -133px;
+                flex-basis: 50%;
+                flex-grow: 1;
+                order: 2;
+            }
+        }
+
+        &.basic {
+            background: url(/assets/images/radarChartGraphic.svg) center bottom -50rem no-repeat;
+            padding-bottom: 7.2rem;
+
+            @include r(600) {
+                background-position: right -38rem center;
+                padding-bottom: 3.2rem;
+
+                .subtext {
+                    max-width: 66%;
+                }
+            }
+
+            @include r(768) {
+                background-position: center bottom -27rem;
+
+                .subtext {
+                    max-width: none;
+                }
             }
         }
 
         h2 {
             margin-bottom: .4rem;
+        }
+
+        .subtext {
+            margin-bottom: 2.4rem;
+
+            @include r(768) {
+                max-width: 48rem;
+            }
         }
     }
 
