@@ -82,11 +82,6 @@ export function init() {
         });
     }
 
-    logger.log("version is ", Config.version);
-
-    // if ()
-
-
     createGTag();
     gtag('js', new Date());
     gtag('config', Config.googleAnalyticsID, { 'optimize_id': Config.googleOptimizeID });

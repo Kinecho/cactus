@@ -13,7 +13,7 @@
                         spinner-color="dark"
                 />
             </div>
-            <div class="centered" v-if="memberLoaded && !resultsLoaded">
+            <div class="centered" v-if="memberLoaded && !!member && !resultsLoaded">
                 <spinner color="dark" message="Loading Assessment...." :delay="1200"/>
             </div>
             <assessment v-if="member && resultsLoaded"

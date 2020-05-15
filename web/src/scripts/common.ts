@@ -24,7 +24,6 @@ window.registerFCMToken = async (token?: string) => {
 
 export function commonInit() {
     if (hasCommonInit) {
-        logger.warn("Common already initialized, not reinitializing");
         return;
     }
 
