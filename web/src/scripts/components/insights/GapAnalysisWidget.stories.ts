@@ -32,6 +32,8 @@ export const MultipleSubscriptionTiers = () => Vue.extend({
                         :is-plus-member="true"
                         :loading="loading"
                         :gap-assessment-results="results"
+                        :show-gap-analysis-labels="showLabels"
+                        :show-legend="showLegend"
                         @focusElement="saveFocus"
                 />
             </section>
@@ -47,7 +49,13 @@ export const MultipleSubscriptionTiers = () => Vue.extend({
             default: boolean("Loading Results", false)
         },
         withResults: {
-            default: boolean("Has Results", false)
+            default: boolean("Has Results", true)
+        },
+        showLabels: {
+            default: boolean("Show Element Labels", true)
+        },
+        showLegend: {
+            default: boolean("Show Legend", true),
         }
     },
     computed: {

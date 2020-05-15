@@ -2,7 +2,8 @@
     <section v-if="isPlusMember && gapAssessmentResults" class="gapContainer borderContainer">
         <div class="flexIt">
             <h2>Happiness Quiz Results</h2>
-            <p class="subtext">See the differences in levels of <strong class="pink">importance</strong> and <strong class="blue">satisfaction</strong> across the five core elements of a balanced life.</p>
+            <p class="subtext">See the differences in levels of <strong class="pink">importance</strong> and
+                <strong class="blue">satisfaction</strong> across the five core elements of a balanced life.</p>
             <div class="gapFocus" v-if="memberFocusElement">
                 <p class="statLabel">Current Focus</p>
                 <h3>{{memberFocusElement}}</h3>
@@ -17,7 +18,8 @@
                     :hideElements="false"
                     :selected-element="radarChartSelectedElement"
                     @elementSelected="setSelectedElement"
-                    :withLabel="selectFocusEnabled"
+                    :withLabel="showElementLabels"
+                    :show-legend="showLegend"
             />
         </div>
         <div v-if="selectFocusEnabled" class="gapActions">
@@ -50,7 +52,8 @@
     <!-- Show BASIC User Upgrade message -->
     <section v-else-if="!isPlusMember" class="nogapContainer borderContainer">
         <h2>What makes you happy?</h2>
-        <p class="subtext">Get access to the quiz that helps you identify and focus on the people, places, and things that make you happy.</p>
+        <p class="subtext">Get access to the quiz that helps you identify and focus on the people, places, and things
+            that make you happy.</p>
         <router-link tag="button" class="esButton" :to="pricingHref">Try Cactus Plus
         </router-link>
     </section>
@@ -90,6 +93,12 @@
         @Prop({ type: String as () => CactusElement, required: false, default: null })
         memberFocusElement!: CactusElement | null;
 
+        @Prop({ type: Boolean, required: false, default: true })
+        showGapAnalysisLabels!: boolean;
+
+        @Prop({ type: Boolean, required: false, default: true })
+        showLegend!: boolean;
+
         selectFocusEnabled = false;
         currentElementSelection: CactusElement | null = null
 
@@ -111,6 +120,10 @@
         cancelSetFocus() {
             this.selectFocusEnabled = false;
             this.currentElementSelection = null;
+        }
+
+        get showElementLabels(): boolean {
+            return this.selectFocusEnabled || this.showGapAnalysisLabels;
         }
 
         get radarChartSelectedElement(): CactusElement | null {
@@ -160,11 +173,11 @@
     }
 
     .pink {
-      color: $magenta;
+        color: $magenta;
     }
 
     .blue {
-      color: $royal;
+        color: $royal;
     }
 
     .radarChartContainer {
