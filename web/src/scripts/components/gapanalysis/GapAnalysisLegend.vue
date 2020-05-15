@@ -14,13 +14,14 @@
 <script lang="ts">
     import Vue from "vue";
     import Component from "vue-class-component"
+    import { Prop } from "vue-property-decorator";
 
     @Component
     export default class GapAnalysisLegend extends Vue {
         name = "GapAnalysisLegend";
 
-        // @Prop({ type: Boolean, required: false, default: false })
-        // stacked!: boolean;
+        @Prop({ type: Boolean, required: false, default: false })
+        stacked!: boolean;
     }
 </script>
 
