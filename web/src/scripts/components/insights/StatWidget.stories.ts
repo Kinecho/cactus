@@ -11,7 +11,7 @@ export default {
 
 export const SingleStat = () => Vue.extend({
     template: `
-        <div>
+        <div :style="{padding: '4rem'}">
             <StatWidget :stat="stat"/>
         </div>`,
     components: {
