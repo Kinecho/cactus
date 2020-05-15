@@ -172,7 +172,7 @@ const routes: MetaRouteConfig[] = [
         component: () => import("@web/views/GapAnalysisPage.vue"),
         name: "GapAnalysisPage",
         meta: {
-            title: "Gap Analysis | Cactus"
+            title: "Happiness Quiz | Cactus"
         },
         props: (route) => {
             return {
