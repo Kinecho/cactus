@@ -123,6 +123,7 @@ export default class EnglishCopy extends LocalizedCopy {
         CELEBRATIONS: ["Well done!", "Nice work!", "Way to go!"],
         REFLECTIONS: "Reflections",
         SECONDS: "Seconds",
+        SECOND: "Second",
         MINUTES: "Minutes",
         DAY_STREAK: "Day Streak",
         WEEK_STREAK: "Week Streak",
