@@ -1,11 +1,11 @@
 <template>
     <section class="empty journalHome">
-        <p v-if="!focusElement">
+        <p v-if="!focusElement || !isPlusMember">
             To get started, you'll learn about how Cactus works and reflect on your first question of
             the&nbsp;day.
         </p>
 
-        <template v-if="focusElement">
+        <template v-if="focusElement && isPlusMember">
             <ResultElement :element="focusElement" :selectable="false" :with-label="false"/>
             <p>
                 To get started, you'll learn about how Cactus works and reflect on your first question
@@ -27,6 +27,8 @@
     import { Prop } from "vue-property-decorator";
     import Logger from "@shared/Logger"
     import ResultElement from "@components/gapanalysis/ResultElement.vue";
+    import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
+    import { isPremiumTier } from "@shared/models/MemberSubscription";
 
     const logger = new Logger("JournalHomeEmptyState");
 
@@ -42,6 +44,13 @@
         @Prop({ type: String as () => CactusElement, default: null, required: false })
         focusElement!: CactusElement | null;
 
+        @Prop({ type: String as () => SubscriptionTier, default: null, required: false })
+        tier!: SubscriptionTier | null
+
+        get isPlusMember(): boolean {
+            return !!this.tier && isPremiumTier(this.tier);
+        }
+
         get firstPromptPath(): string {
             const appSettings = AppSettingsService.sharedInstance.currentSettings;
             const entryId = this.focusElement ? appSettings?.getElementOnboardingPromptEntryId(this.focusElement) : undefined;
@@ -50,7 +59,7 @@
                 logger.warn("No entry id found for element", this.focusElement)
             }
 
-            if (!this.focusElement || !entryId) {
+            if (!this.focusElement || !entryId || !this.isPlusMember) {
                 return PageRoute.PROMPTS_ROOT + '/' + Config.firstPromptId;
             }
 

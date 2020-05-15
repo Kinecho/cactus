@@ -18,6 +18,7 @@ export interface PromptCopy {
     CELEBRATIONS: string[],
     REFLECTIONS: string,
     SECONDS: string,
+    SECOND: string,
     MINUTES: string,
     DAY_STREAK: string,
     WEEK_STREAK: string,

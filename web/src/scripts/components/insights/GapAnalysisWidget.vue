@@ -62,11 +62,13 @@
     import { CactusElement } from "@shared/models/CactusElement";
     import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
     import Results from "@components/gapanalysis/Results.vue";
+    import Spinner from "@components/Spinner.vue";
 
     @Component({
         components: {
             DropdownMenu,
             Results,
+            Spinner
         }
     })
     export default class GapAnalysisWidget extends Vue {

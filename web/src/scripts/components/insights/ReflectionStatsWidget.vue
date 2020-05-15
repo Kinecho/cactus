@@ -69,12 +69,18 @@
             let totalDuration = memberStats.totalDurationMs ?? 0;
             let durationValue = `${ totalDuration.toFixed(0) }`;
             let durationLabel = "Seconds";
-            if (totalDuration < (60 * 1000)) {
+            if (totalDuration <= (60 * 1000)) {
                 durationValue = `${ Math.round(totalDuration / 1000) }`;
                 durationLabel = this.copy.prompts.SECONDS
+                if (durationValue === "1") {
+                    durationLabel = this.copy.prompts.SECOND
+                }
             } else {
                 durationLabel = this.copy.prompts.MINUTES;
                 durationValue = millisecondsToMinutes(totalDuration, 0);
+                if (durationValue === "1") {
+                    durationLabel = this.copy.common.MINUTE
+                }
             }
 
             stats.push({ value: durationValue, label: "Duration", unit: durationLabel, icon: "clock" });

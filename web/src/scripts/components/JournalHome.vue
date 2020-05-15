@@ -27,8 +27,7 @@
 
             <transition name="fade-in-fast" appear mode="out-in">
                 <div class="section-container" v-if="showOnboardingPrompt" :key="'empty'">
-                    <journal-home-empty-state :focus-element="focusElement"/>
-
+                    <journal-home-empty-state :focus-element="focusElement" :tier="tier"/>
                 </div>
 
                 <div class="section-container" v-if="loggedIn && loginReady && journalEntries.length > 0">
@@ -331,6 +330,9 @@
             }
         },
         computed: {
+            tier(): SubscriptionTier|null {
+                return this.cactusMember?.tier ?? null;
+            },
             email(): string | undefined | null {
                 return this.user ? this.user.email : null;
             },

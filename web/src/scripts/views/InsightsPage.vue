@@ -4,10 +4,6 @@
         <div class="centered" v-if="authLoaded">
             <h1>Insights</h1>
 
-            <!--TO REMOVE - For testing only -->
-            <h2 v-if="focusElement" :style="{color: 'blue', fontSize: '5rem'}">Your focus is:
-                <strong :style="{color: 'red', fontSize: '6rem'}">{{focusElement}}</strong></h2>
-
             <reflection-stats-widget :reflection-stats="reflectionStats" v-if="reflectionStats"/>
 
             <section class="valuesContainer" v-if="hasCoreValues">
@@ -114,13 +110,21 @@
         beforeMount() {
             this.memberObserver = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({ member }) => {
-                    this.member = member ?? null;
 
                     if (!member) {
                         await pushRoute(PageRoute.HOME);
-                    } else {
-                        this.authLoaded = true;
+                        return;
+                    }
+                    const memberChanged = !this.member || this.member.id !== member.id
+
+                    this.member = member ?? null;
+                    this.authLoaded = true;
+
+                    if (memberChanged) {
+                        logger.info("fetching gap results because member id is different / not set")
                         await this.fetchGapResults();
+                    } else {
+                        logger.info("member changed but not fetching results because it's the same member");
                     }
                 }
             })
