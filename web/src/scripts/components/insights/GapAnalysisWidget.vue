@@ -21,8 +21,8 @@
             <button class="small" @click="saveFocus">Done</button>
 
         </div>
-        <p v-else-if="focusElement && !selectFocusEnabled" class="gapActions">
-            Your focus is <strong>{{focusElement}}</strong>. To change your focus...
+        <p v-else-if="memberFocusElement && !selectFocusEnabled" class="gapActions">
+            Your focus is <strong>{{memberFocusElement}}</strong>. To change your focus...
             <!--                        <router-link :to="setFocusPath" tag="button">Click Here</router-link>-->
             <button class="secondary small" @click="selectFocusEnabled = true">Change your focus</button>
         </p>
@@ -58,10 +58,11 @@
     import { Prop } from "vue-property-decorator";
     import { CactusElement } from "@shared/models/CactusElement";
     import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
-
+    import Results from "@components/gapanalysis/Results.vue";
     @Component({
         components: {
-            DropdownMenu
+            DropdownMenu,
+            Results,
         }
     })
     export default class GapAnalysisWidget extends Vue {
@@ -81,8 +82,6 @@
 
         selectFocusEnabled = false;
         currentElementSelection: CactusElement | null = null
-
-
 
         get mentalFitnessDropdownLinks(): DropdownMenuLink[] {
             return [{
