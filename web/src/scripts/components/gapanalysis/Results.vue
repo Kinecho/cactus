@@ -1,23 +1,28 @@
 <template>
-    <div class="analysisResults" :class="{hideChart, hideElements, withLabel}">
-        <radar-chart :chart-data="results.chartData"
-                :chart-id="chartId"
-                :options="options" class="chart"
-        />
-        <result-element
-                element="emotions"
-                class="element emotions"
-                @selected="elementClicked"
-                :pulsing="!selectedElement && selectableElements && pulsingEnabled"
-                :selectable="selectableElements"
-                :selected="selectedElement === 'emotions'"
-                :withLabel="withLabel"
-                :show-image="showElementImages"
-        />
-        <result-element :pulsing="!selectedElement && selectableElements" :show-image="showElementImages" element="relationships" class="element relationships" @selected="elementClicked" :selected="selectedElement === 'relationships'" :selectable="selectableElements" :withLabel="withLabel"/>
-        <result-element :pulsing="!selectedElement && selectableElements" :show-image="showElementImages" element="energy" class="element energy" @selected="elementClicked" :selected="selectedElement === 'energy'" :selectable="selectableElements" :withLabel="withLabel"/>
-        <result-element :pulsing="!selectedElement && selectableElements" :show-image="showElementImages" element="meaning" class="element meaning" @selected="elementClicked" :selected="selectedElement === 'meaning'" :selectable="selectableElements" :withLabel="withLabel"/>
-        <result-element :pulsing="!selectedElement && selectableElements" :show-image="showElementImages" element="experience" class="element experience" @selected="elementClicked" :selected="selectedElement === 'experience'" :selectable="selectableElements" :withLabel="withLabel"/>
+    <div>
+        <div class="analysisResults" :class="{hideChart, hideElements, withLabel}">
+            <radar-chart :chart-data="results.chartData"
+                    :chart-id="chartId"
+                    :options="options" class="chart"
+            />
+            <result-element
+                    element="emotions"
+                    class="element emotions"
+                    @selected="elementClicked"
+                    :pulsing="!selectedElement && selectableElements && pulsingEnabled"
+                    :selectable="selectableElements"
+                    :selected="selectedElement === 'emotions'"
+                    :withLabel="withLabel"
+                    :show-image="showElementImages"
+            />
+            <result-element :pulsing="!selectedElement && selectableElements" :show-image="showElementImages" element="relationships" class="element relationships" @selected="elementClicked" :selected="selectedElement === 'relationships'" :selectable="selectableElements" :withLabel="withLabel"/>
+            <result-element :pulsing="!selectedElement && selectableElements" :show-image="showElementImages" element="energy" class="element energy" @selected="elementClicked" :selected="selectedElement === 'energy'" :selectable="selectableElements" :withLabel="withLabel"/>
+            <result-element :pulsing="!selectedElement && selectableElements" :show-image="showElementImages" element="meaning" class="element meaning" @selected="elementClicked" :selected="selectedElement === 'meaning'" :selectable="selectableElements" :withLabel="withLabel"/>
+            <result-element :pulsing="!selectedElement && selectableElements" :show-image="showElementImages" element="experience" class="element experience" @selected="elementClicked" :selected="selectedElement === 'experience'" :selectable="selectableElements" :withLabel="withLabel"/>
+        </div>
+        <div v-if="showLegend" class="legend-container">
+            <gap-analysis-legend/>
+        </div>
     </div>
 </template>
 
@@ -32,6 +37,7 @@
     import { RadarChartConfig } from "@web/charts/radarChart";
     import Logger from "@shared/Logger"
     import { CactusElement } from "@shared/models/CactusElement";
+    import GapAnalysisLegend from "@components/gapanalysis/GapAnalysisLegend.vue";
 
     const logger = new Logger("Results");
 
@@ -49,6 +55,7 @@
             ResultElement,
             CactusConfetti,
             RadarChart,
+            GapAnalysisLegend,
         }
     })
     export default class Results extends Vue {
@@ -85,6 +92,9 @@
 
         @Prop({ type: Boolean, required: false, default: true })
         showElementImages!: boolean;
+
+        @Prop({ type: Boolean, required: false, default: true })
+        showLegend!: boolean;
 
         async done() {
             this.$emit('done')
