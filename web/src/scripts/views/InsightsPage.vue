@@ -268,7 +268,6 @@
 
         get showGapResults(): boolean {
             return !!(this.isPlusMember && this.gapAssessmentResults);
-
         }
 
         get isPlusMember(): boolean {
