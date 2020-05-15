@@ -19,7 +19,8 @@
         <transition name="component-fade" mode="out-in" appear>
             <div v-if="currentScreen === Screen.intro" class="intro" key="intro">
                 <h1>What makes you happy?</h1>
-                <p>The Happiness Quiz is the first step in understanding yourself better. Answer honestly and Cactus will
+                <p>The Happiness Quiz is the first step in understanding yourself better. Answer honestly and Cactus
+                    will
                     help you identify and focus on the people, places, and things that make you happy.</p>
                 <button class="btn primary" @click="start">Let's go!</button>
                 <div class="private">
@@ -66,7 +67,8 @@
             </div>
             <div class="whiteBg" v-else-if="currentScreen === Screen.chooseFocus">
                 <h2>Choose your focus</h2>
-                <p class="subtext">Your choice will be used to personalize Cactus and help you focus on what makes you happy.</p>
+                <p class="subtext">Your choice will be used to personalize Cactus and help you focus on what makes you
+                    happy.</p>
                 <div class="radarChartContainer">
                     <results :selectable-elements="true"
                             :results="result"
@@ -334,16 +336,8 @@
             return;
         }
 
-        async skipFocus() {
-            logger.info("Skipping focus");
-            const c = confirm("Are you sure you want to skip choosing your element?")
-            if (c) {
-                await pushRoute(PageRoute.INSIGHTS);
-            }
-        }
-
         async skipCheckout() {
-            await pushRoute(PageRoute.INSIGHTS);
+            await pushRoute(PageRoute.JOURNAL_HOME);
         }
 
         async startCheckout(subscriptionProduct: SubscriptionProduct | undefined | null) {
