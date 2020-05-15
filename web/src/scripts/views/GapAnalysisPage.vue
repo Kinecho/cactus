@@ -174,9 +174,12 @@
         }
 
         get includeUpsell(): boolean {
-            return !isPremiumTier(this.member?.tier);
+            return !this.isPlusMember;
         }
 
+        get isPlusMember(): boolean {
+            return !!this.member && isPremiumTier(this.member?.tier);
+        }
 
         get screens(): ScreenName[] {
             return [...defaultScreens].filter(screen => {
@@ -196,8 +199,10 @@
         async closeAssessment() {
             logger.info("CLOSE ASSESSMENT");
             try {
-                if (this.member) {
+                if (this.isPlusMember) {
                     await pushRoute(PageRoute.INSIGHTS)
+                } else if (this.member) {
+                    await pushRoute(PageRoute.JOURNAL_HOME);
                 } else {
                     await pushRoute(PageRoute.HOME);
                 }
