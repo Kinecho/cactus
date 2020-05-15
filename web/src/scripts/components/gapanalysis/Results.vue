@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="analysisResults" :class="{hideChart, hideElements, withLabel}">
+        <div class="analysisResults" :class="{hideChart, hideElements, withLabel, noCacti: !showElementImages}">
             <radar-chart :chart-data="results.chartData"
                     :chart-id="chartId"
                     :options="options" class="chart"
@@ -171,6 +171,10 @@
 
         .withLabel & {
             padding: 6.4rem 6.4rem 3.2rem;
+        }
+
+        .noCacti & {
+            padding: .8rem;
         }
     }
 
