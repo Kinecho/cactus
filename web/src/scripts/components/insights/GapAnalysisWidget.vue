@@ -49,8 +49,8 @@
     </section>
     <!-- Show BASIC User Upgrade message -->
     <section v-else-if="!isPlusMember" class="nogapContainer borderContainer">
-        <h2>Happiness Quiz</h2>
-        <p class="subtext">NEEDS WORK To choose your focus, upgrade to Cactus Plus </p>
+        <h2>What makes you happy?</h2>
+        <p class="subtext">Get access to the quiz that helps you identify and focus on the people, places, and things that make you happy.</p>
         <router-link tag="button" class="esButton" :to="pricingHref">Try Cactus Plus
         </router-link>
     </section>
