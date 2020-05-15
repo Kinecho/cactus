@@ -19,7 +19,7 @@
         <transition name="component-fade" mode="out-in" appear>
             <div v-if="currentScreen === Screen.intro" class="intro" key="intro">
                 <h1>What makes you happy?</h1>
-                <p>The Cactus Quiz is the first step in understanding yourself better. Answer honestly and Cactus will
+                <p>The Happiness Quiz is the first step in understanding yourself better. Answer honestly and Cactus will
                     help you identify and focus on the people, places, and things that make you happy.</p>
                 <button class="btn primary" @click="start">Let's go!</button>
                 <div class="private">
