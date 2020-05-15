@@ -24,8 +24,7 @@
             </section>
             <section class="novaluesContainer" v-else>
                 <h2>Core Values</h2>
-                <p class="subtext">What is most important for you so that you better understand past decisions and make
-                    better decisions in the future.</p>
+                <p class="subtext">Discover what is most important for you so that you better understand past decisions and make better decisions in the future.</p>
                 <router-link tag="button" class="esButton" :to="coreValuesHref">Get My Core Values</router-link>
             </section>
 
@@ -277,7 +276,7 @@
 
         .subtext {
             margin: 0 0 2.4rem;
-            max-width: 60rem;
+            max-width: 56rem;
             opacity: .8;
         }
     }
@@ -459,15 +458,12 @@
     }
 
     .nogapContainer + .bubblesContainer {
-      flex-flow: row nowrap;
-
-      .subtext {
-        @include r(600) {
-          max-width: 24rem;
+        @include r(768) {
+            flex-basis: 50%;
+            margin-right: 1.6rem;
+            order: 1;
         }
-      }
     }
-
 
     .focusElement {
         font-size: 2rem;

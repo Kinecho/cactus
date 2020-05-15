@@ -184,17 +184,25 @@
 
     .nogapContainer {
         @include shadowbox;
-        background-color: lighten($dolphin, 5%);
-        background-image: url(/assets/images/grainy.png),
-        url(/assets/images/crosses2.svg),
+        background-image: url(/assets/images/crosses2.svg),
         url(/assets/images/outlineBlob.svg),
         url(/assets/images/royalBlob.svg),
         url(/assets/images/pinkBlob5.svg);
-        background-position: 0 0, 39rem -1rem, -34rem -84rem, -5rem 23rem, -17rem -32rem;
-        background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat;
-        background-size: auto, 40%, 200%, 100%, 100%;
-        color: $white;
+        background-position: -1rem 18rem, right -29rem top -32rem, -11rem 16rem, 61% -133px;
+        background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
+        background-size: 20rem, 48rem, 30rem, 23rem;
         position: relative;
+
+        @include r(768) {
+            background-position: -1rem 28rem, right -9rem top -32rem, -11rem 32rem, 61% -133px;
+            flex-basis: 50%;
+            flex-grow: 1;
+            order: 2;
+
+            .subtext {
+                max-width: 48rem;
+            }
+        }
 
         h2 {
             margin-bottom: .4rem;
