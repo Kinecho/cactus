@@ -43,7 +43,6 @@ export const WithFocusElement = () => Vue.extend({
             return { border: '2px solid blue' }
         }
     }
-
 })
 
 export const NoFocusElement = () => Vue.extend({
