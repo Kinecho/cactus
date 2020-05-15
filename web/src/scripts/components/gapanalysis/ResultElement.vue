@@ -1,6 +1,6 @@
 <template>
     <div class="element-icon" @click="toggleElement" :class="{selected, selectable, pulsing, withCircle, withLabel}">
-        <img :src="imageUrl" :alt="`${element} Icon`"/>
+        <img :src="imageUrl" :alt="`${element} Icon`" v-if="showImage"/>
         <h4 v-if="withLabel">{{element}}</h4>
     </div>
 </template>
@@ -31,6 +31,9 @@
 
         @Prop({ type: Boolean, required: false, default: false })
         pulsing!: boolean;
+
+        @Prop({ type: Boolean, required: false, default: true })
+        showImage!: boolean;
 
         toggleElement() {
             if (!this.selectable) {
@@ -93,6 +96,7 @@
 
         &.selectable {
             cursor: pointer;
+
             img {
                 position: relative;
                 transition: transform .3s;
@@ -125,6 +129,7 @@
                     margin-bottom: 1.6rem;
                     z-index: 2;
                 }
+
                 h4 {
                     &:before {
                         background-color: $beige;

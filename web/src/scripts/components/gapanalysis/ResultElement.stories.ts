@@ -16,6 +16,7 @@ export const Default = () => Vue.extend({
                     @selected="onSelected"
                     :selected="selected"
                     :pulsing="pulsing"
+                    :show-image="showImage"
                     :with-label="showLabel"/>
             <pre>is Selected = {{selected}}</pre>
         </div>`,
@@ -32,6 +33,9 @@ export const Default = () => Vue.extend({
         },
         showLabel: {
             default: boolean("Show Label", true),
+        },
+        showImage: {
+            default: boolean("Show Image", true),
         },
         element: {
             type: String as () => CactusElement,
@@ -68,6 +72,7 @@ export const WithCircle = () => Vue.extend({
                     :selected="selected"
                     :with-circle="showCircle"
                     :pulsing="pulsing"
+                    :show-image="showImage"
                     :with-label="showLabel"/>
             <pre>is Selected = {{selected}}</pre>
         </div>`,
@@ -87,6 +92,9 @@ export const WithCircle = () => Vue.extend({
         },
         pulsing: {
             default: boolean("Pulsing", true),
+        },
+        showImage: {
+            default: boolean("Show Image", true),
         },
         element: {
             type: String as () => CactusElement,

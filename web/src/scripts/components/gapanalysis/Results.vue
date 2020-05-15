@@ -12,11 +12,12 @@
                 :selectable="selectableElements"
                 :selected="selectedElement === 'emotions'"
                 :withLabel="withLabel"
+                :show-image="showElementImages"
         />
-        <result-element :pulsing="!selectedElement && selectableElements" element="relationships" class="element relationships" @selected="elementClicked" :selected="selectedElement === 'relationships'" :selectable="selectableElements" :withLabel="withLabel"/>
-        <result-element :pulsing="!selectedElement && selectableElements" element="energy" class="element energy" @selected="elementClicked" :selected="selectedElement === 'energy'" :selectable="selectableElements" :withLabel="withLabel"/>
-        <result-element :pulsing="!selectedElement && selectableElements" element="meaning" class="element meaning" @selected="elementClicked" :selected="selectedElement === 'meaning'" :selectable="selectableElements" :withLabel="withLabel"/>
-        <result-element :pulsing="!selectedElement && selectableElements" element="experience" class="element experience" @selected="elementClicked" :selected="selectedElement === 'experience'" :selectable="selectableElements" :withLabel="withLabel"/>
+        <result-element :pulsing="!selectedElement && selectableElements" :show-image="showElementImages" element="relationships" class="element relationships" @selected="elementClicked" :selected="selectedElement === 'relationships'" :selectable="selectableElements" :withLabel="withLabel"/>
+        <result-element :pulsing="!selectedElement && selectableElements" :show-image="showElementImages" element="energy" class="element energy" @selected="elementClicked" :selected="selectedElement === 'energy'" :selectable="selectableElements" :withLabel="withLabel"/>
+        <result-element :pulsing="!selectedElement && selectableElements" :show-image="showElementImages" element="meaning" class="element meaning" @selected="elementClicked" :selected="selectedElement === 'meaning'" :selectable="selectableElements" :withLabel="withLabel"/>
+        <result-element :pulsing="!selectedElement && selectableElements" :show-image="showElementImages" element="experience" class="element experience" @selected="elementClicked" :selected="selectedElement === 'experience'" :selectable="selectableElements" :withLabel="withLabel"/>
     </div>
 </template>
 
@@ -61,7 +62,7 @@
         @Prop({ type: Boolean, required: false, default: true })
         selectableElements!: boolean;
 
-        @Prop({type: Boolean, required: false, default: true})
+        @Prop({ type: Boolean, required: false, default: true })
         pulsingEnabled!: boolean;
 
         @Prop({ type: Boolean, required: false, default: false })
@@ -76,11 +77,14 @@
         @Prop({ type: Number, required: false, default: 0 })
         chartPadding!: number;
 
-        @Prop({type: Boolean, required: false, default: true})
+        @Prop({ type: Boolean, required: false, default: true })
         withLabel!: boolean;
 
         @Prop({ type: String as () => CactusElement, required: false, default: null })
         selectedElement!: CactusElement | null;
+
+        @Prop({ type: Boolean, required: false, default: true })
+        showElementImages!: boolean;
 
         async done() {
             this.$emit('done')

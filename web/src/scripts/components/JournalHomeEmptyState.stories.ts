@@ -1,6 +1,6 @@
 import Vue from "vue";
 import JournalHomeEmptyState from "@components/JournalHomeEmptyState.vue";
-import { select } from "@storybook/addon-knobs";
+import { boolean, select } from "@storybook/addon-knobs";
 import { CactusElement } from "@shared/models/CactusElement";
 import AppSettingsService from "@web/services/AppSettingsService";
 
@@ -11,12 +11,15 @@ export default {
 export const WithFocusElement = () => Vue.extend({
     template: `
         <div :style="containerStyles" v-if="ready">
-            <journal-home-empty-state :focus-element="focusElement"/>
+            <journal-home-empty-state :focus-element="focusElement" :tier="tier"/>
         </div>`,
     components: {
         JournalHomeEmptyState,
     },
     props: {
+        tier: {
+            default: select("Tier", ["PLUS", "BASIC"], "PLUS")
+        },
         focusElement: {
             type: String as () => CactusElement,
             default: select("Element", [CactusElement.energy,
@@ -46,12 +49,16 @@ export const WithFocusElement = () => Vue.extend({
 export const NoFocusElement = () => Vue.extend({
     template: `
         <div :style="containerStyles" v-if="ready">
-            <journal-home-empty-state/>
+            <journal-home-empty-state :tier="tier"/>
         </div>`,
     components: {
         JournalHomeEmptyState,
     },
-    props: {},
+    props: {
+        tier: {
+            default: select("Tier", ["PLUS", "BASIC"], "PLUS")
+        },
+    },
     async beforeMount() {
         await AppSettingsService.sharedInstance.getCurrentSettings();
         this.ready = true;

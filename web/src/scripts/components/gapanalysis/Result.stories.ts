@@ -22,6 +22,7 @@ export const ResultScreen = () => Vue.extend({
                     :selectable-elements="elementsSelectable"
                     :chart-padding="chartPadding"
                     :selected-element="selectedElement"
+                    :show-element-images="showElementImages"
                     @elementSelected="elementSelected"
             />
             <h3>Selected Element = {{selectedElement}}</h3>
@@ -33,6 +34,9 @@ export const ResultScreen = () => Vue.extend({
     props: {
         errorMessage: {
             default: text("Error Message", ""),
+        },
+        showElementImages: {
+            default: boolean("Show Element Images",true),
         },
         showRadarLabels: {
             default: boolean("Show Radar Labels", false),
