@@ -10,7 +10,7 @@
                         :redirect-on-sign-in="false"
                         :redirect-url="signInSuccessRoute"
                         :twitterEnabled="false"
-                        spinner-color="dark"
+                        spinner-color="light"
                 />
             </div>
             <div class="centered" v-if="memberLoaded && !!member && !resultsLoaded">
