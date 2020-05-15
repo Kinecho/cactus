@@ -127,8 +127,8 @@
     }
 
     .energy {
-        right: 0;
-        top: 25%;
+        right: -1rem;
+        top: 33%;
     }
 
     .emotions {
@@ -138,17 +138,17 @@
     }
 
     .meaning {
-        left: 0;
-        top: 25%;
+        left: -1rem;
+        top: 33%;
     }
 
     .experience {
-        bottom: 0;
+        bottom: 1rem;
         left: 15%;
     }
 
     .relationships {
-        bottom: 0;
+        bottom: 1rem;
         right: 15%;
     }
 

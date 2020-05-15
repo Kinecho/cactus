@@ -66,14 +66,15 @@
             </div>
             <div class="whiteBg" v-else-if="currentScreen === Screen.chooseFocus">
                 <h2>Choose your focus</h2>
-                <p class="subtext">Your choice will be used to personalize Cactus and help you focus on what makes you
-                    happy.</p>
-                <results :selectable-elements="true"
-                        :results="result"
-                        :selected-element="selectedElement"
-                        chart-id="select_results_chart"
-                        @elementSelected="elementSelected"
-                />
+                <p class="subtext">Your choice will be used to personalize Cactus and help you focus on what makes you happy.</p>
+                <div class="radarChartContainer">
+                    <results :selectable-elements="true"
+                            :results="result"
+                            :selected-element="selectedElement"
+                            chart-id="select_results_chart"
+                            @elementSelected="elementSelected"
+                    />
+                </div>
                 <div class="cvActions flexActions">
                     <p v-if="selectedElement">You chose <strong>{{selectedElement}}</strong>.</p>
                     <p v-if="!selectedElement" class="validationText">Tap a cactus to continue. You can always change
@@ -452,6 +453,14 @@
         button {
             margin-bottom: .8rem;
             min-width: 0;
+        }
+    }
+
+    .radarChartContainer {
+        margin: 3.2rem auto;
+
+        @include r(600) {
+            max-width: 56rem;
         }
     }
 
