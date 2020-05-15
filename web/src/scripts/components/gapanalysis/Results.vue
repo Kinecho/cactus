@@ -1,5 +1,5 @@
 <template>
-    <div class="analysisResults" :class="{hideChart, hideElements}">
+    <div class="analysisResults" :class="{hideChart, hideElements, withLabel}">
         <radar-chart :chart-data="results.chartData"
                 :chart-id="chartId"
                 :options="options" class="chart"
@@ -153,7 +153,11 @@
     }
 
     .radar-container {
-        padding: 6.4rem 6.4rem 3.2rem;
+        padding: 6.4rem 3.2rem 3.2rem;
+
+        .withLabel & {
+            padding: 6.4rem 6.4rem 3.2rem;
+        }
     }
 
 </style>

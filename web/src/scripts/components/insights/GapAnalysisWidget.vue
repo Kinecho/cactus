@@ -10,14 +10,11 @@
                 :hideElements="false"
                 :selected-element="radarChartSelectedElement"
                 @elementSelected="setSelectedElement"
+                :withLabel="selectFocusEnabled"
         />
-
         <div class="gapFocus" v-if="memberFocusElement">
-            <ResultElement :element="memberFocusElement" :selectable="false" :with-label="false" :withCircle="true"/>
-            <div class="flexIt">
-                <p class="statLabel">Focus</p>
-                <p class="focusElement">{{memberFocusElement}}</p>
-            </div>
+            <p class="statLabel">Focus</p>
+            <p class="focusElement">{{memberFocusElement}}</p>
         </div>
         <div v-if="selectFocusEnabled" class="gapActions">
             <p>Tap a cactus to choose a focus.</p>
@@ -65,13 +62,11 @@
     import { CactusElement } from "@shared/models/CactusElement";
     import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
     import Results from "@components/gapanalysis/Results.vue";
-    import ResultElement from "@components/gapanalysis/ResultElement.vue";
 
     @Component({
         components: {
             DropdownMenu,
             Results,
-            ResultElement
         }
     })
     export default class GapAnalysisWidget extends Vue {
@@ -137,6 +132,10 @@
     @import "mixins";
     @import "insights";
 
+    h2 {
+        font-size: 2.4rem;
+    }
+
     .chart-container {
         margin: 0 auto;
         max-width: 40rem;
@@ -154,12 +153,7 @@
     }
 
     .gapFocus {
-        align-items: center;
-        border-top: 1px solid $lightest;
-        display: flex;
-        margin: 4rem -3.2rem 0;
-        padding: 3.2rem 3.2rem 0;
-        width: calc(100% + 6.4rem);
+        margin: 4rem 0 0;
 
         .flexIt {
             margin-left: 1.6rem;
@@ -170,6 +164,10 @@
         margin: 2rem 0;
     }
 
+    .statLabel {
+        color: $lightText;
+        font-size: 1.6rem;
+    }
 
     .nogapContainer {
         @include shadowbox;
