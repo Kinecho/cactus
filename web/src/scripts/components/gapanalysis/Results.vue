@@ -128,7 +128,7 @@
 
     .energy {
         right: 0;
-        top: 6rem;
+        top: 25%;
     }
 
     .emotions {
@@ -139,17 +139,17 @@
 
     .meaning {
         left: 0;
-        top: 6rem;
+        top: 25%;
     }
 
     .experience {
         bottom: 0;
-        left: 2rem;
+        left: 15%;
     }
 
     .relationships {
         bottom: 0;
-        right: 2rem;
+        right: 15%;
     }
 
     .radar-container {
