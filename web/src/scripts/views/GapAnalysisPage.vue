@@ -14,7 +14,7 @@
                 />
             </div>
             <div class="centered" v-if="memberLoaded && !resultsLoaded">
-                <spinner color="dark" message="Loading Assessment...." :delay="1200"/>
+                <spinner color="dark" message="Loading quiz..." :delay="1200"/>
             </div>
             <assessment v-if="member && resultsLoaded"
                     :assessment="assessment"
