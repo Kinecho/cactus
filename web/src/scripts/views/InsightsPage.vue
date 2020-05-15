@@ -8,14 +8,14 @@
 
             <section class="valuesContainer" v-if="hasCoreValues">
                 <h2>Core Values</h2>
-                <p class="subtext">What’s most important for you</p>
+                <p class="subtext">The values important in your life</p>
                 <div class="flexIt">
                     <div class="imgContainer" v-if="coreValuesBlob">
                         <img :src="coreValuesBlob.imageUrl" alt="Core Values Graphic"/>
                     </div>
                     <ul class="core-values-list">
                         <li v-for="(coreValue, index) in coreValues" :key="`value_${index}`" class="core-value">
-                            <p class="title">{{coreValue.value}}</p>
+                            <h3>{{coreValue.value}}</h3>
                             <p class="description">{{coreValue.description}}</p>
                         </li>
                     </ul>
@@ -246,29 +246,6 @@
 
             @include r(768) {
                 margin: 6.4rem 0 4rem;
-            }
-        }
-
-        h2 {
-            font-size: 2rem;
-            margin-bottom: .8rem;
-
-            @include r(768) {
-                font-size: 2.4rem;
-            }
-        }
-
-        .subtext {
-            font-size: 1.6rem;
-            margin-bottom: .8rem;
-            opacity: .8;
-
-            @include r(768) {
-                font-size: 1.8rem;
-            }
-
-            &.light {
-                opacity: .4;
             }
         }
     }
@@ -521,64 +498,5 @@
     .blue {
         color: $royal;
     }
-
-    .gapContainer + .bubblesContainer {
-        flex-flow: column wrap;
-
-        .chart-container {
-            margin: 0 auto;
-            max-width: 40rem;
-            width: 100%;
-
-            @include r(600) {
-                margin-right: 0;
-                margin-top: -12rem;
-                position: relative;
-            }
-            @include r(768) {
-                margin-right: auto;
-                margin-top: 0;
-            }
-        }
-    }
-
-    .nogapContainer + .bubblesContainer {
-        flex-flow: row nowrap;
-
-        .subtext {
-            @include r(600) {
-                max-width: 24rem;
-            }
-        }
-
-        .chart-container {
-            @include r(600) {
-                margin: -4.8rem -4.8rem -4.8rem 0;
-            }
-        }
-    }
-
-    .nogapContainer {
-        @include shadowbox;
-        background-color: lighten($dolphin, 5%);
-        background-image: url(/assets/images/grainy.png),
-        url(/assets/images/crosses2.svg),
-        url(/assets/images/outlineBlob.svg),
-        url(/assets/images/royalBlob.svg),
-        url(/assets/images/pinkBlob5.svg);
-        background-position: 0 0, 39rem -1rem, -34rem -84rem, -5rem 23rem, -17rem -32rem;
-        background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat;
-        background-size: auto, 40%, 200%, 100%, 100%;
-        color: $white;
-        position: relative;
-
-        h2 {
-            margin-bottom: .4rem;
-        }
-    }
-
-    /*.gapActions {*/
-    /*    margin: 2rem 0;*/
-    /*}*/
 
 </style>

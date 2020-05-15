@@ -2,6 +2,28 @@
 @import "mixins";
 @import "variables";
 
+h2 {
+    font-size: 2rem;
+    margin-bottom: .8rem;
+
+    @include r(768) {
+        font-size: 2.4rem;
+    }
+}
+
+.subtext {
+    font-size: 1.6rem;
+    margin-bottom: 4rem;
+    opacity: .8;
+
+    @include r(768) {
+        font-size: 1.8rem;
+    }
+
+    &.light {
+        opacity: .4;
+    }
+}
 
 .borderContainer {
   border: 1px solid $lightest;
@@ -18,39 +40,11 @@
   @include r(768) {
     display: block;
     margin-bottom: 4.8rem;
-    width: 49%;
   }
   @include r(960) {
     display: flex;
   }
-
-  .subtext {
-    margin: 0 0 2.4rem;
-    opacity: .8;
-
-    @include r(600) {
-      margin: 0 3.2rem 2.4rem 0;
-      max-width: 17rem;
-    }
-    @include r(768) {
-        margin-right: 0;
-      max-width: 60rem;
-    }
-  }
 }
-
-//.gapFocus {
-//    align-items: center;
-//    border-top: 1px solid $lightest;
-//    display: flex;
-//    margin: 4rem -3.2rem 0;
-//    padding: 3.2rem 3.2rem 0;
-//    width: calc(100% + 6.4rem);
-//
-//    .flexIt {
-//        margin-left: 1.6rem;
-//    }
-//}
 
 .focusElement {
   font-size: 2rem;
@@ -80,46 +74,9 @@
   }
   @include r(768) {
     margin-right: auto;
-    margin-top: 0;
+    margin-top: -7.2rem;
   }
 }
-
-.gapContainer + .bubblesContainer {
-  flex-flow: column wrap;
-
-  .chart-container {
-    margin: 0 auto;
-    max-width: 40rem;
-    width: 100%;
-
-    @include r(600) {
-      margin-right: 0;
-      margin-top: -12rem;
-      position: relative;
-    }
-    @include r(768) {
-      margin-right: auto;
-      margin-top: 0;
-    }
-  }
-}
-
-.nogapContainer + .bubblesContainer {
-  flex-flow: row nowrap;
-
-  .subtext {
-    @include r(600) {
-      max-width: 24rem;
-    }
-  }
-
-  .chart-container {
-    @include r(600) {
-      margin: -4.8rem -4.8rem -4.8rem 0;
-    }
-  }
-}
-
 
 .dotsBtn {
   position: absolute;
