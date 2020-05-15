@@ -144,12 +144,12 @@
 
     .experience {
         bottom: 1rem;
-        left: 15%;
+        left: 12%;
     }
 
     .relationships {
         bottom: 1rem;
-        right: 15%;
+        right: 12%;
     }
 
     .radar-container {

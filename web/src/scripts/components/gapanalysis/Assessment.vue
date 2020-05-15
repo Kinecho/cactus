@@ -75,10 +75,9 @@
                             @elementSelected="elementSelected"
                     />
                 </div>
+                <p v-if="selectedElement">You chose <strong>{{selectedElement}}</strong>.</p>
+                <p class="validationText" v-if="!selectedElement">Tap a cactus to continue. You can always change this&nbsp;later.</p>
                 <div class="cvActions flexActions">
-                    <p v-if="selectedElement">You chose <strong>{{selectedElement}}</strong>.</p>
-                    <p v-if="!selectedElement" class="validationText">Tap a cactus to continue. You can always change
-                        this later.</p>
                     <button class="no-loading" @click="focusSelected" :disabled="!selectedElement">Next
                     </button>
                 </div>
@@ -425,11 +424,12 @@
         background-color: $white;
         font-size: 2rem;
         min-height: 100vh;
-        padding: 6.4rem 2.4rem;
+        padding: 6.4rem 2.4rem 12rem;
 
         @include r(768) {
             background-color: transparent;
             min-height: 0;
+            padding: 6.4rem 2.4rem;
         }
     }
 
@@ -444,15 +444,6 @@
 
         @include r(768) {
             display: flex;
-        }
-
-        p {
-            margin: 2.4rem 0;
-        }
-
-        button {
-            margin-bottom: .8rem;
-            min-width: 0;
         }
     }
 
