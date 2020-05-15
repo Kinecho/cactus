@@ -1,10 +1,7 @@
 <template>
-    <div class="gapAnalysisPage" :class="{signin: !member && memberLoaded && resultsLoaded}">
-        <div class="centered" v-if="!memberLoaded || !resultsLoaded">
-            <spinner color="dark" message="Loading Assessment...." :delay="1200"/>
-        </div>
-        <div class="centered" v-else>
-            <div class="sign-in" v-if="!member">
+    <div class="gapAnalysisPage" :class="{signin: !member && memberLoaded}">
+        <div class="centered">
+            <div class="sign-in" v-if="!member && memberLoaded">
                 <sign-in :show-magic-link="false"
                         :show-title="true"
                         title="Sign In"
@@ -16,7 +13,10 @@
                         spinner-color="dark"
                 />
             </div>
-            <assessment v-if="member"
+            <div class="centered" v-if="memberLoaded && !resultsLoaded">
+                <spinner color="dark" message="Loading Assessment...." :delay="1200"/>
+            </div>
+            <assessment v-if="member && resultsLoaded"
                     :assessment="assessment"
                     :result="assessmentResults"
                     :include-upsell="includeUpsell"
@@ -105,16 +105,23 @@
                 onData: async ({ member }) => {
                     this.member = member;
                     this.memberLoaded = true;
+                    await this.fetchOrCreateResults()
                 }
             })
         }
 
         async mounted() {
-            if (this.resultsId) {
-                logger.info("Before mount - results Id = fetching results");
-                await this.fetchResults(this.resultsId);
-            } else {
-                await this.createNewResults()
+
+        }
+
+        async fetchOrCreateResults() {
+            if (this.member) {
+                if (this.resultsId) {
+                    logger.info("Before mount - results Id = fetching results");
+                    await this.fetchResults(this.resultsId);
+                } else {
+                    await this.createNewResults()
+                }
             }
         }
 
