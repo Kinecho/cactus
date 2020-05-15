@@ -44,62 +44,62 @@
             </section>
 
             <div class="flexSections">
-                <!--                <section v-if="showGapResults && gapAssessmentResults" class="gapContainer borderContainer">-->
-                <!--                    <h2>Happiness Quiz</h2>-->
-                <!--                    <p class="subtext">The comparison of what you find <strong class="pink">important</strong> and what-->
-                <!--                        you find <strong class="blue">satisfactory</strong></p>-->
-                <!--                    <spinner v-if="gapResultsLoading" message="Loading Results..." :delay="1200"/>-->
-                <!--                    <Results v-if="!gapResultsLoading && gapAssessmentResults"-->
-                <!--                            :results="gapAssessmentResults"-->
-                <!--                            :selectable-elements="selectFocusEnabled"-->
-                <!--                            :pulsing-enabled="selectFocusEnabled"-->
-                <!--                            :hideElements="false"-->
-                <!--                            :selected-element="radarChartSelectedElement"-->
-                <!--                            @elementSelected="elementSelected"-->
-                <!--                             :withLabel="false"-->
-                <!--                    />-->
-                <!--                    <div class="gapFocus" v-if="focusElement">-->
-                <!--                        <ResultElement :element="focusElement" :selectable="false" :with-label="false" :withCircle="true"/>-->
-                <!--                        <div class="flexIt">-->
-                <!--                            <p class="statLabel">Focus</p>-->
-                <!--                            <p class="focusElement">{{focusElement}}</p>-->
-                <!--                        </div>-->
-                <!--                    </div>-->
-                <!--                    <div v-if="selectFocusEnabled" class="gapActions">-->
-                <!--                        <p>Tap a cactus to choose a focus.</p>-->
-                <!--                        <p v-if="currentElementSelection">-->
-                <!--                            You've selected: {{currentElementSelection || 'nothing yet'}}-->
-                <!--                        </p>-->
-                <!--                        <button class="small secondary" @click="cancelSetFocus">Cancel</button>-->
-                <!--                        <button class="small" @click="saveFocus">Done</button>-->
+<!--                                <section v-if="showGapResults && gapAssessmentResults" class="gapContainer borderContainer">-->
+<!--                                    <h2>Happiness Quiz</h2>-->
+<!--                                    <p class="subtext">The comparison of what you find <strong class="pink">important</strong> and what-->
+<!--                                        you find <strong class="blue">satisfactory</strong></p>-->
+<!--                                    <spinner v-if="gapResultsLoading" message="Loading Results..." :delay="1200"/>-->
+<!--                                    <Results v-if="!gapResultsLoading && gapAssessmentResults"-->
+<!--                                            :results="gapAssessmentResults"-->
+<!--                                            :selectable-elements="selectFocusEnabled"-->
+<!--                                            :pulsing-enabled="selectFocusEnabled"-->
+<!--                                            :hideElements="false"-->
+<!--                                            :selected-element="radarChartSelectedElement"-->
+<!--                                            @elementSelected="elementSelected"-->
+<!--                                             :withLabel="false"-->
+<!--                                    />-->
+<!--                                    <div class="gapFocus" v-if="focusElement">-->
+<!--                                        <ResultElement :element="focusElement" :selectable="false" :with-label="false" :withCircle="true"/>-->
+<!--                                        <div class="flexIt">-->
+<!--                                            <p class="statLabel">Focus</p>-->
+<!--                                            <p class="focusElement">{{focusElement}}</p>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                    <div v-if="selectFocusEnabled" class="gapActions">-->
+<!--                                        <p>Tap a cactus to choose a focus.</p>-->
+<!--                                        <p v-if="currentElementSelection">-->
+<!--                                            You've selected: {{currentElementSelection || 'nothing yet'}}-->
+<!--                                        </p>-->
+<!--                                        <button class="small secondary" @click="cancelSetFocus">Cancel</button>-->
+<!--                                        <button class="small" @click="saveFocus">Done</button>-->
 
-                <!--                    </div>-->
-                <!--                    <p v-else-if="focusElement && !selectFocusEnabled" class="gapActions">-->
-                <!--                        Your focus is <strong>{{focusElement}}</strong>. To change your focus...-->
-                <!--                        &lt;!&ndash;                        <router-link :to="setFocusPath" tag="button">Click Here</router-link>&ndash;&gt;-->
-                <!--                        <button class="secondary small" @click="selectFocusEnabled = true">Change your focus</button>-->
-                <!--                    </p>-->
-                <!--                    <p v-else-if="!selectFocusEnabled" class="gapActions">-->
-                <!--                        <button class="secondary small" @click="selectFocusEnabled = true">Choose a focus</button>-->
-                <!--                    </p>-->
-                <!--                    <dropdown-menu :items="mentalFitnessDropdownLinks" class="dotsBtn"/>-->
-                <!--                </section>-->
-                <!--                &lt;!&ndash; Show PLUS User Empty State message &ndash;&gt;-->
-                <!--                <section v-else-if="isPlusMember" class="nogapContainer borderContainer">-->
-                <!--                    <h2>Happiness Quiz</h2>-->
-                <!--                    <p class="subtext">Find the gap between what is important to you and how satisfied you are regarding-->
-                <!--                        that area of your&nbsp;life.</p>-->
-                <!--                    <router-link tag="button" class="esButton" :to="gapAssessmentHref">Take the-->
-                <!--                        <span>Mental Fitness</span> Quiz-->
-                <!--                    </router-link>-->
-                <!--                </section>-->
-                <!--                &lt;!&ndash; Show BASIC User Upgrade message &ndash;&gt;-->
-                <!--                <section v-else-if="!isPlusMember" class="nogapContainer borderContainer">-->
-                <!--                    <h2>Happiness Quiz</h2>-->
-                <!--                    <p class="subtext">NEEDS WORK To choose your focus, upgrade to Cactus Plus </p>-->
-                <!--                    <router-link tag="button" class="esButton" :to="pricingHref">Try Cactus Plus-->
-                <!--                    </router-link>-->
-                <!--                </section>-->
+<!--                                    </div>-->
+<!--                                    <p v-else-if="focusElement && !selectFocusEnabled" class="gapActions">-->
+<!--                                        Your focus is <strong>{{focusElement}}</strong>. To change your focus...-->
+<!--                                        &lt;!&ndash;                        <router-link :to="setFocusPath" tag="button">Click Here</router-link>&ndash;&gt;-->
+<!--                                        <button class="secondary small" @click="selectFocusEnabled = true">Change your focus</button>-->
+<!--                                    </p>-->
+<!--                                    <p v-else-if="!selectFocusEnabled" class="gapActions">-->
+<!--                                        <button class="secondary small" @click="selectFocusEnabled = true">Choose a focus</button>-->
+<!--                                    </p>-->
+<!--                                    <dropdown-menu :items="mentalFitnessDropdownLinks" class="dotsBtn"/>-->
+<!--                                </section>-->
+<!--                                &lt;!&ndash; Show PLUS User Empty State message &ndash;&gt;-->
+<!--                                <section v-else-if="isPlusMember" class="nogapContainer borderContainer">-->
+<!--                                    <h2>Happiness Quiz</h2>-->
+<!--                                    <p class="subtext">Find the gap between what is important to you and how satisfied you are regarding-->
+<!--                                        that area of your&nbsp;life.</p>-->
+<!--                                    <router-link tag="button" class="esButton" :to="gapAssessmentHref">Take the-->
+<!--                                        <span>Mental Fitness</span> Quiz-->
+<!--                                    </router-link>-->
+<!--                                </section>-->
+<!--                                &lt;!&ndash; Show BASIC User Upgrade message &ndash;&gt;-->
+<!--                                <section v-else-if="!isPlusMember" class="nogapContainer borderContainer">-->
+<!--                                    <h2>Happiness Quiz</h2>-->
+<!--                                    <p class="subtext">NEEDS WORK To choose your focus, upgrade to Cactus Plus </p>-->
+<!--                                    <router-link tag="button" class="esButton" :to="pricingHref">Try Cactus Plus-->
+<!--                                    </router-link>-->
+<!--                                </section>-->
 
 
                 <gap-analysis-widget :loading="gapResultsLoading"

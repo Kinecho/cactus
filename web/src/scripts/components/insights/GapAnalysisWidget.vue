@@ -12,6 +12,14 @@
                 :selected-element="radarChartSelectedElement"
                 @elementSelected="setSelectedElement"
         />
+
+        <div class="gapFocus" v-if="memberFocusElement">
+            <ResultElement :element="memberFocusElement" :selectable="false" :with-label="false" :withCircle="true"/>
+            <div class="flexIt">
+                <p class="statLabel">Focus</p>
+                <p class="focusElement">{{memberFocusElement}}</p>
+            </div>
+        </div>
         <div v-if="selectFocusEnabled" class="gapActions">
             <p>Tap a cactus to choose a focus.</p>
             <p v-if="currentElementSelection">
@@ -58,11 +66,13 @@
     import { CactusElement } from "@shared/models/CactusElement";
     import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
     import Results from "@components/gapanalysis/Results.vue";
+    import ResultElement from "@components/gapanalysis/ResultElement.vue";
 
     @Component({
         components: {
             DropdownMenu,
             Results,
+            ResultElement
         }
     })
     export default class GapAnalysisWidget extends Vue {
