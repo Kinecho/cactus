@@ -4,11 +4,6 @@
         <div class="centered" v-if="authLoaded">
             <h1>Insights</h1>
 
-            <!--TO REMOVE - For testing only -->
-            <h2 v-if="focusElement" :style="{color: 'blue', fontSize: '5rem'}">Your focus is:
-                <strong :style="{color: 'red', fontSize: '6rem'}">{{focusElement}}</strong>
-            </h2>
-
             <reflection-stats-widget :reflection-stats="reflectionStats" v-if="reflectionStats"/>
 
             <section class="valuesContainer" v-if="hasCoreValues">
