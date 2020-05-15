@@ -35,7 +35,6 @@ export default class CactusMemberService {
                     }
                 })
             } else {
-                logger.info("unsetting current cactus member");
                 this.currentMember = undefined;
             }
         });

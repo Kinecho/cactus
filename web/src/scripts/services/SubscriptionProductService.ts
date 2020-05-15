@@ -8,10 +8,6 @@ export default class SubscriptionProductService {
     public static sharedInstance = new SubscriptionProductService();
     flamelinkService = FlamelinkService.sharedInstance;
 
-    constructor() {
-        logger.debug("Created a new SubscriptionProductService instance")
-    }
-
     async getByEntryId(entryId: string): Promise<SubscriptionProduct | undefined> {
         return this.flamelinkService.getById(entryId, SubscriptionProduct)
     }

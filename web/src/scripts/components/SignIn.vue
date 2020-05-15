@@ -41,7 +41,6 @@
 
     const logger = new Logger("SignIn.vue");
     const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
-    logger.log("Redirect url param is ", redirectUrlParam);
     let emailLinkRedirectUrl: string = PageRoute.SIGNUP_CONFIRMED;
     if (redirectUrlParam) {
         emailLinkRedirectUrl = `${ emailLinkRedirectUrl }?${ QueryParam.REDIRECT_URL }=${ redirectUrlParam }`
@@ -174,15 +173,12 @@
                         this.isSigningIn = false;
                     },
                     uiShown: () => {
-                        logger.info("Firebase UI shown", ui);
-                        logger.info("UI Shown... is pending redirect? ", ui.isPendingRedirect());
                         this.firebaseUiLoading = false;
                     }
                 });
 
                 if (ui.isPendingRedirect()) {
                     this.isPendingRedirect = true;
-                    logger.log("Is pending redirect.... need to log the user in");
                     this.checkForPendingUIInterval = window.setInterval(() => {
                         this.checkPendingUI()
                     }, 500);
@@ -190,7 +186,6 @@
                     ui.reset();
                 }
 
-                // ui.reset();
                 ui.start('#signup-app', config);
             }
         },

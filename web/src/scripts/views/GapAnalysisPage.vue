@@ -10,10 +10,10 @@
                         :redirect-on-sign-in="false"
                         :redirect-url="signInSuccessRoute"
                         :twitterEnabled="false"
-                        spinner-color="dark"
+                        spinner-color="light"
                 />
             </div>
-            <div class="centered" v-if="memberLoaded && !resultsLoaded">
+            <div class="centered" v-if="memberLoaded && !!member && !resultsLoaded">
                 <spinner color="dark" message="Loading quiz..." :delay="1200"/>
             </div>
             <assessment v-if="member && resultsLoaded"
