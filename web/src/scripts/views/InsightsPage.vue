@@ -8,17 +8,7 @@
             <h2 v-if="focusElement" :style="{color: 'blue', fontSize: '5rem'}">Your focus is:
                 <strong :style="{color: 'red', fontSize: '6rem'}">{{focusElement}}</strong></h2>
 
-            <section class="statsContainer">
-                <div class="stat" v-for="(stat, index) in stats" :key="`stat_${index}`">
-                    <div class="statIcon">
-                        <img :src="`/assets/images/${stat.icon}.svg`" :alt="`${stat.label} icon`"/>
-                    </div>
-                    <div class="textContainer">
-                        <p class="statLabel">{{stat.label}}</p>
-                        <p class="statValue">{{stat.value}}<span class="unit">{{stat.unit}}</span></p>
-                    </div>
-                </div>
-            </section>
+            <reflection-stats-widget :reflection-stats="reflectionStats" v-if="reflectionStats"/>
 
             <section class="valuesContainer" v-if="hasCoreValues">
                 <h2>Core Values</h2>
@@ -70,7 +60,7 @@
     import Footer from "@components/StandardFooter.vue";
     import NavBar from "@components/NavBar.vue";
     import WordCloud from "@components/MemberWordCloudInsights.vue";
-    import CactusMember from "@shared/models/CactusMember";
+    import CactusMember, { ReflectionStats } from "@shared/models/CactusMember";
     import { ListenerUnsubscriber } from "@web/services/FirestoreService";
     import CactusMemberService from "@web/services/CactusMemberService";
     import { InsightWord } from "@shared/models/ReflectionResponse";
@@ -93,12 +83,15 @@
     import Spinner from "@components/Spinner.vue";
     import { CactusElement } from "@shared/models/CactusElement";
     import GapAnalysisWidget from "@components/insights/GapAnalysisWidget.vue";
+    import { StatWidgetData } from "@components/insights/MemberStatsTypes";
+    import ReflectionStatsWidget from "@components/insights/ReflectionStatsWidget.vue";
 
     const logger = new Logger("InsightsPage");
     const copy = CopyService.getSharedInstance().copy;
 
     @Component({
         components: {
+            ReflectionStatsWidget,
             GapAnalysisWidget,
             Results,
             ResultElement,
@@ -201,53 +194,8 @@
             return this.authLoaded && !!this.member?.tier && isPremiumTier(this.member.tier);
         }
 
-        get stats(): { value: string, label: string, unit: string, icon: string }[] {
-            const memberStats = this.member?.stats?.reflections;
-            if (!memberStats) {
-                return []
-            }
-
-            const stats: { value: string, label: string, unit: string, icon: string }[] = [];
-
-            stats.push({ value: `${ memberStats.totalCount }`, label: "Reflections", unit: "", icon: "journal" });
-
-            if (memberStats.currentStreakDays > 1) {
-                stats.push({
-                    value: `${ memberStats.currentStreakDays }`,
-                    label: "Streak",
-                    unit: "Days",
-                    icon: "flame"
-                })
-            } else if (memberStats.currentStreakWeeks > 1) {
-                stats.push({
-                    value: `${ memberStats.currentStreakWeeks }`,
-                    label: "Streak",
-                    unit: "Weeks",
-                    icon: "flame"
-                })
-            } else if (memberStats.currentStreakMonths > 1) {
-                stats.push({
-                    value: `${ memberStats.currentStreakMonths }`,
-                    label: "Streak",
-                    unit: "Months",
-                    icon: "flame"
-                })
-            }
-
-            let totalDuration = memberStats.totalDurationMs ?? 0;
-            let durationValue = `${ totalDuration.toFixed(0) }`;
-            let durationLabel = "Seconds";
-            if (totalDuration < (60 * 1000)) {
-                durationValue = `${ Math.round(totalDuration / 1000) }`;
-                durationLabel = copy.prompts.SECONDS
-            } else {
-                durationLabel = copy.prompts.MINUTES;
-                durationValue = millisecondsToMinutes(totalDuration, 0);
-            }
-
-            stats.push({ value: durationValue, label: "Duration", unit: durationLabel, icon: "clock" });
-
-            return stats;
+        get reflectionStats(): ReflectionStats | undefined {
+            return this.member?.stats.reflections;
         }
 
         get coreValuesDropdownLinks(): DropdownMenuLink[] {
@@ -318,77 +266,6 @@
             &.light {
                 opacity: .4;
             }
-        }
-    }
-
-    .statsContainer {
-        display: flex;
-        margin: 0 -2.4rem 2.4rem 0;
-        overflow: auto;
-        padding-bottom: 1.6rem;
-
-        @include r(960) {
-            margin: 0 0 2.4rem;
-            overflow: visible;
-            padding-bottom: 2.4rem;
-        }
-    }
-
-    .stat {
-        align-items: center;
-        border: 1px solid $lightest;
-        border-radius: 1.2rem;
-        display: flex;
-        flex-basis: 33%;
-        margin-right: 1.6rem;
-        padding: 3.2rem;
-
-        @include r(960) {
-            @include shadowbox;
-            border: 0;
-            flex-grow: 1;
-
-            &:last-child {
-                margin-right: 0;
-            }
-        }
-    }
-
-    .statIcon {
-        align-items: center;
-        background-color: lighten($beige, 3%);
-        border-radius: 50%;
-        display: flex;
-        flex-shrink: 0;
-        height: 8rem;
-        justify-content: center;
-        margin-right: 1.6rem;
-        width: 8rem;
-
-        img {
-            height: 3.2rem;
-            width: 3.2rem;
-        }
-    }
-
-    .statLabel {
-        color: $lightText;
-        font-size: 1.6rem;
-    }
-
-    .statValue {
-        color: $green;
-        font-size: 5.6rem;
-        font-weight: bold;
-        line-height: 1;
-    }
-
-    .unit {
-        font-size: 1.8rem;
-        padding-left: .8rem;
-
-        &:empty {
-            display: none;
         }
     }
 
