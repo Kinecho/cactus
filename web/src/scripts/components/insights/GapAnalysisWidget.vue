@@ -25,11 +25,11 @@
             <button class="small" @click="saveFocus">Done</button>
 
         </div>
-        <p v-else-if="memberFocusElement && !selectFocusEnabled" class="gapActions">
+        <p v-else-if="false" class="gapActions">
             Your focus is <strong>{{memberFocusElement}}</strong>. To change your focus...
             <button class="secondary small" @click="selectFocusEnabled = true">Change your focus</button>
         </p>
-        <p v-else-if="!selectFocusEnabled" class="gapActions">
+        <p v-else-if="false" class="gapActions">
             <button class="secondary small" @click="selectFocusEnabled = true">Choose a focus</button>
         </p>
         <dropdown-menu :items="mentalFitnessDropdownLinks" class="dotsBtn"/>
