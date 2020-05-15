@@ -23,7 +23,6 @@
         </div>
         <p v-else-if="memberFocusElement && !selectFocusEnabled" class="gapActions">
             Your focus is <strong>{{memberFocusElement}}</strong>. To change your focus...
-            <!--                        <router-link :to="setFocusPath" tag="button">Click Here</router-link>-->
             <button class="secondary small" @click="selectFocusEnabled = true">Change your focus</button>
         </p>
         <p v-else-if="!selectFocusEnabled" class="gapActions">
@@ -59,6 +58,7 @@
     import { CactusElement } from "@shared/models/CactusElement";
     import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
     import Results from "@components/gapanalysis/Results.vue";
+
     @Component({
         components: {
             DropdownMenu,
@@ -77,8 +77,8 @@
         @Prop({ type: Boolean, default: false, })
         loading!: boolean;
 
-        @Prop({type: String as () => CactusElement, required: false, default: null})
-        memberFocusElement!: CactusElement|null;
+        @Prop({ type: String as () => CactusElement, required: false, default: null })
+        memberFocusElement!: CactusElement | null;
 
         selectFocusEnabled = false;
         currentElementSelection: CactusElement | null = null
@@ -114,12 +114,70 @@
             this.currentElementSelection = element;
         }
 
-        saveFocus(element: CactusElement|null) {
+        saveFocus(element: CactusElement | null) {
             this.$emit('focusElement', element);
         }
     }
 </script>
 
 <style scoped lang="scss">
+    @import "common";
+    @import "variables";
+    @import "mixins";
+    @import "insights";
+
+    .chart-container {
+        margin: 0 auto;
+        max-width: 40rem;
+        width: 100%;
+
+        @include r(600) {
+            margin-right: 0;
+            margin-top: -12rem;
+            position: relative;
+        }
+        @include r(768) {
+            margin-right: auto;
+            margin-top: 0;
+        }
+    }
+
+    .gapFocus {
+        align-items: center;
+        border-top: 1px solid $lightest;
+        display: flex;
+        margin: 4rem -3.2rem 0;
+        padding: 3.2rem 3.2rem 0;
+        width: calc(100% + 6.4rem);
+
+        .flexIt {
+            margin-left: 1.6rem;
+        }
+    }
+
+    .gapActions {
+        margin: 2rem 0;
+    }
+
+
+    .nogapContainer {
+        @include shadowbox;
+        background-color: lighten($dolphin, 5%);
+        background-image: url(/assets/images/grainy.png),
+        url(/assets/images/crosses2.svg),
+        url(/assets/images/outlineBlob.svg),
+        url(/assets/images/royalBlob.svg),
+        url(/assets/images/pinkBlob5.svg);
+        background-position: 0 0, 39rem -1rem, -34rem -84rem, -5rem 23rem, -17rem -32rem;
+        background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+        background-size: auto, 40%, 200%, 100%, 100%;
+        color: $white;
+        position: relative;
+
+        h2 {
+            margin-bottom: .4rem;
+        }
+    }
+
 
 </style>

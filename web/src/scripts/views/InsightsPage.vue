@@ -149,7 +149,6 @@
     import GapAnalysisService from "@web/services/GapAnalysisService";
     import Spinner from "@components/Spinner.vue";
     import { CactusElement } from "@shared/models/CactusElement";
-    import { Screen } from "@components/gapanalysis/GapAssessmentTypes";
     import GapAnalysisWidget from "@components/insights/GapAnalysisWidget.vue";
 
     const logger = new Logger("InsightsPage");
@@ -234,13 +233,6 @@
             return blob;
         }
 
-        get radarChartSelectedElement(): CactusElement | null {
-            if (this.selectFocusEnabled) {
-                return this.currentElementSelection;
-            }
-            return this.focusElement;
-        }
-
         get wordCloud(): InsightWord[] {
             return (this.authLoaded && this.member) ? (this.member?.wordCloud ?? []) : [];
         }
@@ -262,21 +254,6 @@
 
         get coreValuesHref(): string {
             return `${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`;
-        }
-
-        get setFocusPath(): string | undefined {
-            if (this.gapAssessmentResults) {
-                return `${ PageRoute.GAP_ANALYSIS }/${ this.gapAssessmentResults.id }/${ Screen.chooseFocus }`
-            }
-            return undefined;
-        }
-
-        get gapAssessmentHref(): string {
-            return PageRoute.GAP_ANALYSIS;
-        }
-
-        get showGapResults(): boolean {
-            return !!(this.isPlusMember && this.gapAssessmentResults);
         }
 
         get isPlusMember(): boolean {
@@ -339,21 +316,6 @@
             }];
         }
 
-        get pricingHref(): string {
-            return PageRoute.PRICING;
-        }
-
-        get mentalFitnessDropdownLinks(): DropdownMenuLink[] {
-            return [{
-                title: "Retake Quiz",
-                href: PageRoute.GAP_ANALYSIS,
-            }];
-        }
-
-        get fakeGapAnalysisResults(): GapAnalysisAssessmentResult {
-            return GapAnalysisAssessmentResult.mock();
-        }
-
         get focusElement(): CactusElement | null {
             if (!this.authLoaded || !this.member) {
                 return null;
@@ -367,7 +329,7 @@
     @import "common";
     @import "mixins";
     @import "variables";
-
+    @import "insights";
     .insightsDash {
         display: flex;
         flex-flow: column nowrap;
@@ -680,11 +642,11 @@
         }
     }
 
-    .dotsBtn {
-        position: absolute;
-        right: 1rem;
-        top: 1.6rem;
-    }
+    /*.dotsBtn {*/
+    /*    position: absolute;*/
+    /*    right: 1rem;*/
+    /*    top: 1.6rem;*/
+    /*}*/
 
     .flexSections {
         @include r(768) {
@@ -728,18 +690,18 @@
         }
     }
 
-    .gapFocus {
-        align-items: center;
-        border-top: 1px solid $lightest;
-        display: flex;
-        margin: 4rem -3.2rem 0;
-        padding: 3.2rem 3.2rem 0;
-        width: calc(100% + 6.4rem);
-
-        .flexIt {
-            margin-left: 1.6rem;
-        }
-    }
+    //.gapFocus {
+    //    align-items: center;
+    //    border-top: 1px solid $lightest;
+    //    display: flex;
+    //    margin: 4rem -3.2rem 0;
+    //    padding: 3.2rem 3.2rem 0;
+    //    width: calc(100% + 6.4rem);
+//
+    //    .flexIt {
+    //        margin-left: 1.6rem;
+    //    }
+    //}
 
     .focusElement {
         font-size: 2rem;
@@ -826,8 +788,8 @@
         }
     }
 
-    .gapActions {
-        margin: 2rem 0;
-    }
+    /*.gapActions {*/
+    /*    margin: 2rem 0;*/
+    /*}*/
 
 </style>
