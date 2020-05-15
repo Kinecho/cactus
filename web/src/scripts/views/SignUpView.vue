@@ -9,7 +9,22 @@
                     :forceTransparent="true"
                     :largeLogoOnDesktop="true"
                     :whiteLogo="true"/>
-            <SignIn :message="message" :title="title"/>
+            <SignIn :message="message" :title="title" :twitter-enabled="includeTwitter"/>
+
+            <div class="switcher">
+                <p v-if="isLogIn">
+                    Don't have an account?
+                    <router-link :to="signUpPath">Sign up</router-link>
+                    .
+                </p>
+                <p v-if="isSignUp">
+                    Already have an account?
+                    <router-link :to="loginPath">Log in</router-link>
+                    .
+                </p>
+            </div>
+
+
         </div>
         <StandardFooter :isTransparent="true"/>
     </div>
@@ -46,11 +61,31 @@
         destroyed(): void {
             document.body.classList.remove("sign-up-body");
         },
-        data(): { title: string, copy: LocalizedCopy, message: string | null } {
+        data(): { copy: LocalizedCopy, message: string | null } {
             return {
                 copy,
                 message: getQueryParam(QueryParam.MESSAGE),
-                title: window.location.pathname.startsWith(PageRoute.LOGIN) ? copy.common.LOG_IN : copy.common.SIGN_UP,
+            }
+        },
+        computed: {
+            loginPath(): string {
+                return PageRoute.LOGIN;
+            },
+            signUpPath(): string {
+                return PageRoute.SIGNUP;
+            },
+            includeTwitter(): boolean {
+                //only show twitter on login screen, not sign up
+                return this.isLogIn;
+            },
+            title(): string {
+                return this.isLogIn ? copy.common.LOG_IN : copy.common.SIGN_UP;
+            },
+            isSignUp(): boolean {
+                return this.$route.path === PageRoute.SIGNUP;
+            },
+            isLogIn(): boolean {
+                return this.$route.path === PageRoute.LOGIN;
             }
         },
         name: "SignUpView"
@@ -71,6 +106,11 @@
     @import "variables";
     @import "~styles/modal.scss";
     @import "~styles/forms.scss";
+
+    .switcher {
+        text-align: center;
+        margin-top: 5rem;
+    }
 
     .page-wrapper {
         position: relative;

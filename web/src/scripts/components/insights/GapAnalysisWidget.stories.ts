@@ -6,10 +6,11 @@ import { cactusElementSelect } from "@web/StorybookHelpers";
 import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
 import { CactusElement } from "@shared/models/CactusElement";
 import { action } from "@storybook/addon-actions";
+import { isBlank } from "@shared/util/StringUtil";
 
 
 export default {
-    title: "Insights/Widgets"
+    title: "Insights/Widgets/Gap Analysis"
 }
 
 export const MultipleSubscriptionTiers = () => Vue.extend({
@@ -18,7 +19,7 @@ export const MultipleSubscriptionTiers = () => Vue.extend({
             <section :style="sectionStyle">
                 <h2>BASIC USER</h2>
                 <GapAnalysisWidget
-                        :member-focus-element="focusElement"
+                        :member-focus-element="element"
                         :is-plus-member="false"
                         :loading="loading"
                         :gap-assessment-results="results"
@@ -27,7 +28,7 @@ export const MultipleSubscriptionTiers = () => Vue.extend({
             <section :style="sectionStyle">
                 <h2>PLUS USER</h2>
                 <GapAnalysisWidget
-                        :member-focus-element="focusElement"
+                        :member-focus-element="element"
                         :is-plus-member="true"
                         :loading="loading"
                         :gap-assessment-results="results"
@@ -50,6 +51,12 @@ export const MultipleSubscriptionTiers = () => Vue.extend({
         }
     },
     computed: {
+        element(): CactusElement | null {
+            if (isBlank(this.focusElement) || this.focusElement === "null") {
+                return null;
+            }
+            return this.focusElement as CactusElement;
+        },
         results(): GapAnalysisAssessmentResult | null {
             return this.withResults ? GapAnalysisAssessmentResult.mock() : null;
         },
