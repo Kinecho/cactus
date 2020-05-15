@@ -24,7 +24,7 @@
                         class="button small"
                         :to="assessmentHref"
                         type="button"
-                >Take the Quiz</router-link>
+                >Take the quiz</router-link>
             </div>
             <div class="navContainer" v-if="loggedIn && showLinks">
                 <router-link class="navbarLink home" :to="journalHref" v-if="loggedIn">
