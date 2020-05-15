@@ -42,7 +42,9 @@
                         <h2>Word Bubbles</h2>
                         <p class="subtext">The words used most in your daily reflections</p>
                     </div>
-                    <WordCloud class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
+                    <div class="wordCloud">
+                        <WordCloud class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
+                    </div>
                 </section>
             </div>
         </div>
@@ -292,10 +294,20 @@
         }
 
         .subtext {
-            max-width: 17rem;
+            margin-bottom: 0;
+            max-width: 16rem;
 
-            @include r(960) {
-                max-width: 16rem;
+            @include r(374) {
+                margin-bottom: 4rem;
+            }
+            @include r(768) {
+                max-width: none;
+            }
+            @include r(1024) {
+                max-width: 15rem;
+            }
+            @include r(1140) {
+                max-width: 22rem;
             }
         }
 
@@ -306,12 +318,10 @@
                 flex-direction: row-reverse;
                 justify-content: flex-end;
             }
-            @include r(768) {
+            @include r(1024) {
                 align-items: flex-start;
                 flex-direction: row;
-            }
-            @include r(960) {
-                margin-top: -4.8rem;
+                margin-top: -9.2rem;
             }
         }
     }
@@ -328,19 +338,18 @@
         @include r(600) {
             margin-bottom: -4.8rem;
             margin-top: -14rem;
-            max-width: 38rem;
+            max-width: 60%;
             position: relative;
             transform: none;
             width: 100%;
         }
         @include r(768) {
-            margin-top: 3.2rem;
-        }
-        @include r(960) {
-            margin-top: 0;
+            max-width: 32rem;
         }
         @include r(1024) {
             margin-top: -9.2rem;
+            max-width: 38rem;
+            text-align: right;
         }
 
         &:before {
@@ -386,7 +395,7 @@
             margin: 0;
             width: auto;
         }
-        @include r(960) {
+        @include r(1024) {
             max-width: 48.75%;
         }
     }
@@ -397,20 +406,13 @@
         padding: 0;
 
         @include r(768) {
-            margin: 0 0 4rem;
-            min-width: 20rem;
+            margin: 0 2.4rem 2.4rem 0;
+            width: calc(50% - 2.4rem);
+        }
+        @include r(1024) {
+            margin: 0 0 2.4rem;
             padding-left: 3.2rem;
             width: 50%;
-        }
-
-        .title {
-            color: darken($royal, 11%);
-            font-size: 1.4rem;
-            font-weight: bold;
-            letter-spacing: 1px;
-            opacity: .8;
-            text-transform: uppercase;
-            white-space: nowrap;
         }
 
         .description {
@@ -424,12 +426,6 @@
         }
     }
 
-    /*.dotsBtn {*/
-    /*    position: absolute;*/
-    /*    right: 1rem;*/
-    /*    top: 1.6rem;*/
-    /*}*/
-
     .flexSections {
         @include r(768) {
             display: flex;
@@ -437,53 +433,41 @@
         }
     }
 
-    .borderContainer {
-        border: 1px solid $lightest;
-        border-radius: 1.6rem;
-        margin-bottom: 4rem;
-        padding: 3.2rem;
-        position: relative;
-
+    .bubblesContainer {
         @include r(600) {
-            align-items: flex-start;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
         }
         @include r(768) {
             display: block;
-            margin-bottom: 4.8rem;
-            width: 49%;
-        }
-        @include r(960) {
-            display: flex;
+            flex-basis: 33%;
         }
 
-        .subtext {
-            margin: 0 0 2.4rem;
-            opacity: .8;
+        .wordCloud {
+            margin: -1.6rem auto 0;
+            max-width: 40rem;
+            width: 100%;
 
             @include r(600) {
-                margin: 0 3.2rem 2.4rem 0;
-                max-width: 17rem;
+                width: 50%;
             }
             @include r(768) {
-                max-width: 60rem;
+                margin: -2.4rem -1.6rem 0;
+                width: calc(100% + 3.2rem);
             }
         }
     }
 
-    //.gapFocus {
-    //    align-items: center;
-    //    border-top: 1px solid $lightest;
-    //    display: flex;
-    //    margin: 4rem -3.2rem 0;
-    //    padding: 3.2rem 3.2rem 0;
-    //    width: calc(100% + 6.4rem);
-    //
-    //    .flexIt {
-    //        margin-left: 1.6rem;
-    //    }
-    //}
+    .nogapContainer + .bubblesContainer {
+      flex-flow: row nowrap;
+
+      .subtext {
+        @include r(600) {
+          max-width: 24rem;
+        }
+      }
+    }
+
 
     .focusElement {
         font-size: 2rem;

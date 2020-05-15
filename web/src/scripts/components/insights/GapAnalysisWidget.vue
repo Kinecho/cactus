@@ -1,20 +1,24 @@
 <template>
     <section v-if="isPlusMember && gapAssessmentResults" class="gapContainer borderContainer">
-        <h2>Happiness Quiz</h2>
-        <p class="subtext">The comparison of what you find <strong class="pink">important</strong> and what you find <strong class="blue">satisfactory</strong></p>
-        <spinner v-if="loading" message="Loading Results..." :delay="1200"/>
-        <Results v-if="!loading && gapAssessmentResults"
-                :results="gapAssessmentResults"
-                :selectable-elements="selectFocusEnabled"
-                :pulsing-enabled="selectFocusEnabled"
-                :hideElements="false"
-                :selected-element="radarChartSelectedElement"
-                @elementSelected="setSelectedElement"
-                :withLabel="selectFocusEnabled"
-        />
-        <div class="gapFocus" v-if="memberFocusElement">
-            <p class="statLabel">Focus</p>
-            <p class="focusElement">{{memberFocusElement}}</p>
+        <div class="flexIt">
+            <h2>Happiness Quiz</h2>
+            <p class="subtext">The comparison of what you find <strong class="pink">important</strong> and what you find <strong class="blue">satisfactory</strong></p>
+            <div class="gapFocus" v-if="memberFocusElement">
+                <p class="statLabel">Focus</p>
+                <h3>{{memberFocusElement}}</h3>
+            </div>
+        </div>
+        <div class="radarChartContainer">
+            <spinner v-if="loading" message="Loading Results..." :delay="1200"/>
+            <Results v-if="!loading && gapAssessmentResults"
+                    :results="gapAssessmentResults"
+                    :selectable-elements="selectFocusEnabled"
+                    :pulsing-enabled="selectFocusEnabled"
+                    :hideElements="false"
+                    :selected-element="radarChartSelectedElement"
+                    @elementSelected="setSelectedElement"
+                    :withLabel="selectFocusEnabled"
+            />
         </div>
         <div v-if="selectFocusEnabled" class="gapActions">
             <p>Tap a cactus to choose a focus.</p>
@@ -134,36 +138,43 @@
     @import "mixins";
     @import "insights";
 
-    h2 {
-        font-size: 2.4rem;
+    .gapContainer {
+        @include r(600) {
+            display: flex;
+            flex-basis: 66%;
+            flex-direction: row;
+        }
+        @include r(768) {
+            margin-right: 1.6rem;
+        }
+
+        .subtext {
+            margin: 0 0 4rem;
+        }
     }
 
-    .chart-container {
+    .flexIt {
+        @include r(600) {
+            width: 50%;
+        }
+    }
+
+    .pink {
+      color: $magenta;
+    }
+
+    .blue {
+      color: $royal;
+    }
+
+    .radarChartContainer {
         margin: 0 auto;
-        max-width: 40rem;
+        max-width: 38rem;
         width: 100%;
 
         @include r(600) {
-            margin-right: 0;
-            margin-top: -12rem;
-            position: relative;
+            width: 50%;
         }
-        @include r(768) {
-            margin-right: auto;
-            margin-top: 0;
-        }
-    }
-
-    .gapFocus {
-        margin: 4rem 0 0;
-
-        .flexIt {
-            margin-left: 1.6rem;
-        }
-    }
-
-    .gapActions {
-        margin: 2rem 0;
     }
 
     .statLabel {
@@ -189,6 +200,5 @@
             margin-bottom: .4rem;
         }
     }
-
 
 </style>
