@@ -2,7 +2,7 @@
     <section v-if="isPlusMember && gapAssessmentResults" class="gapContainer borderContainer">
         <div class="flexIt">
             <h2>Happiness Quiz Results</h2>
-            <p class="subtext">The differences in levels of importance and satisfaction across the five core elements of a balanced life.</p>
+            <p class="subtext">The differences in your levels of importance and satisfaction across the five core elements of a balanced life.</p>
             <div class="gapFocus" v-if="memberFocusElement">
                 <p class="statLabel">Focus</p>
                 <h3>{{memberFocusElement}}</h3>
