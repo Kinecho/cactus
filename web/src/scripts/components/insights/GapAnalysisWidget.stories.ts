@@ -4,6 +4,8 @@ import GapAnalysisWidget from "@components/insights/GapAnalysisWidget.vue";
 import { boolean } from "@storybook/addon-knobs";
 import { cactusElementSelect } from "@web/StorybookHelpers";
 import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
+import { CactusElement } from "@shared/models/CactusElement";
+import { action } from "@storybook/addon-actions";
 
 
 export default {
@@ -29,6 +31,7 @@ export const MultipleSubscriptionTiers = () => Vue.extend({
                         :is-plus-member="true"
                         :loading="loading"
                         :gap-assessment-results="results"
+                        @focusElement="saveFocus"
                 />
             </section>
         </div>`,
@@ -55,6 +58,10 @@ export const MultipleSubscriptionTiers = () => Vue.extend({
                 padding: '1rem',
 
             }
+        }
+    }, methods: {
+        saveFocus(element: CactusElement | null) {
+            action('saved element: ')(element);
         }
     }
 })
