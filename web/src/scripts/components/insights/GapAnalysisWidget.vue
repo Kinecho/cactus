@@ -1,8 +1,7 @@
 <template>
     <section v-if="isPlusMember && gapAssessmentResults" class="gapContainer borderContainer">
         <h2>Happiness Quiz</h2>
-        <p class="subtext">The comparison of what you find <strong class="pink">important</strong> and what
-            you find <strong class="blue">satisfactory</strong></p>
+        <p class="subtext">The comparison of what you find <strong class="pink">important</strong> and what you find <strong class="blue">satisfactory</strong></p>
         <spinner v-if="loading" message="Loading Results..." :delay="1200"/>
         <Results v-if="!loading && gapAssessmentResults"
                 :results="gapAssessmentResults"

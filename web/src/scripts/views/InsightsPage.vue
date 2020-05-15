@@ -518,22 +518,6 @@
         color: $royal;
     }
 
-    .analysisResults {
-        margin: -4rem auto auto;
-        max-width: 38rem;
-        width: 100%;
-
-        @include r(600) {
-            margin-right: 0;
-            margin-top: -20rem;
-            position: relative;
-        }
-        @include r(768) {
-            margin-right: auto;
-            margin-top: -4rem;
-        }
-    }
-
     .gapContainer + .bubblesContainer {
         flex-flow: column wrap;
 

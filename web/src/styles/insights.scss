@@ -33,6 +33,7 @@
       max-width: 17rem;
     }
     @include r(768) {
+        margin-right: 0;
       max-width: 60rem;
     }
   }
@@ -68,18 +69,18 @@
 
 
 .analysisResults {
-  margin: -4rem auto auto;
+  margin: 0 auto;
   max-width: 38rem;
   width: 100%;
 
   @include r(600) {
     margin-right: 0;
-    margin-top: -20rem;
+    margin-top: -15rem;
     position: relative;
   }
   @include r(768) {
     margin-right: auto;
-    margin-top: -4rem;
+    margin-top: 0;
   }
 }
 
