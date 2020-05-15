@@ -2,11 +2,13 @@
     <section v-if="isPlusMember && gapAssessmentResults" class="gapContainer borderContainer">
         <div class="flexIt">
             <h2>Happiness Quiz Results</h2>
-            <p class="subtext">See the differences in levels of <strong class="pink">importance</strong> and
-                <strong class="blue">satisfaction</strong> across the five core elements of a balanced life.</p>
+            <p class="subtext">The differences in levels of importance and satisfaction across the five core elements of a balanced life.</p>
             <div class="gapFocus" v-if="memberFocusElement">
-                <p class="statLabel">Current Focus</p>
+                <p class="statLabel">Focus</p>
                 <h3>{{memberFocusElement}}</h3>
+            </div>
+            <div class="legend">
+                <gap-analysis-legend stacked="true"/>
             </div>
         </div>
         <div class="radarChartContainer">
@@ -19,8 +21,12 @@
                     :selected-element="radarChartSelectedElement"
                     @elementSelected="setSelectedElement"
                     :withLabel="showElementLabels"
-                    :show-legend="showLegend"
+                    :showElementImages="false"
+                    :showLegend="false"
             />
+            <div class="legend">
+                <gap-analysis-legend/>
+            </div>
         </div>
         <div v-if="selectFocusEnabled" class="gapActions">
             <p>Tap a cactus to choose a focus.</p>
@@ -29,7 +35,6 @@
             </p>
             <button class="small secondary" @click="cancelSetFocus">Cancel</button>
             <button class="small" @click="saveFocus">Done</button>
-
         </div>
         <p v-else-if="false" class="gapActions">
             Your focus is <strong>{{memberFocusElement}}</strong>. To change your focus...
@@ -70,11 +75,13 @@
     import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
     import Results from "@components/gapanalysis/Results.vue";
     import Spinner from "@components/Spinner.vue";
+    import GapAnalysisLegend from "@components/gapanalysis/GapAnalysisLegend.vue";
 
     @Component({
         components: {
             DropdownMenu,
             Results,
+            GapAnalysisLegend,
             Spinner
         }
     })
@@ -167,17 +174,22 @@
     }
 
     .flexIt {
+
+        .legend {
+            display: none;
+        }
+
         @include r(600) {
-            width: 50%;
+            width: 45%;
+
+            .legend {
+                display: flex;
+            }
         }
     }
 
-    .pink {
-        color: $magenta;
-    }
-
-    .blue {
-        color: $royal;
+    .gapFocus {
+        margin-bottom: 4rem;
     }
 
     .radarChartContainer {
@@ -186,13 +198,13 @@
         width: 100%;
 
         @include r(600) {
-            width: 50%;
-        }
-    }
+            padding-left: 3.2rem;
+            width: 55%;
 
-    .statLabel {
-        color: $lightText;
-        font-size: 1.6rem;
+            .legend {
+                display: none;
+            }
+        }
     }
 
     .nogapContainer {

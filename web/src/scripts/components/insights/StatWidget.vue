@@ -32,6 +32,7 @@
 <style scoped lang="scss">
     @import "variables";
     @import "mixins";
+    @import "insights";
 
     .stat {
         align-items: center;
@@ -68,11 +69,6 @@
             height: 3.2rem;
             width: 3.2rem;
         }
-    }
-
-    .statLabel {
-        color: $lightText;
-        font-size: 1.6rem;
     }
 
     .statValue {

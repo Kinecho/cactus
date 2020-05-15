@@ -8,7 +8,7 @@
 
             <section class="valuesContainer" v-if="hasCoreValues">
                 <h2>Core Values</h2>
-                <p class="subtext">The values important in your life</p>
+                <p class="subtext">The values important in your&nbsp;life</p>
                 <div class="flexIt">
                     <div class="imgContainer" v-if="coreValuesBlob">
                         <img :src="coreValuesBlob.imageUrl" alt="Core Values Graphic"/>
@@ -39,7 +39,7 @@
                 <section class="bubblesContainer borderContainer" v-if="hasWordCloud">
                     <div class="flexIt">
                         <h2>Word Bubbles</h2>
-                        <p class="subtext">The words used most in your daily reflections</p>
+                        <p class="subtext">Common words in your reflections</p>
                     </div>
                     <div class="wordCloud">
                         <WordCloud class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
@@ -451,7 +451,7 @@
                 width: 50%;
             }
             @include r(768) {
-                margin: -2.4rem -1.6rem 0;
+                margin: -3.2rem -1.6rem -1.6rem;
                 width: calc(100% + 3.2rem);
             }
         }
@@ -469,14 +469,6 @@
         font-size: 2rem;
         font-weight: bold;
         text-transform: capitalize;
-    }
-
-    .pink {
-        color: $magenta;
-    }
-
-    .blue {
-        color: $royal;
     }
 
 </style>

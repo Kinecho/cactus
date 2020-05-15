@@ -221,7 +221,8 @@
 
     .actions {
         align-items: center;
-        display: flex;
+        // display: flex;
+        display: none;
         justify-content: space-between;
         margin: 0 auto;
         width: 16rem;
