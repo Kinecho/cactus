@@ -1,10 +1,10 @@
 <template>
     <section v-if="isPlusMember && gapAssessmentResults" class="gapContainer borderContainer">
         <div class="flexIt">
-            <h2>Happiness Quiz</h2>
-            <p class="subtext">The comparison of what you find <strong class="pink">important</strong> and what you find <strong class="blue">satisfactory</strong></p>
+            <h2>Happiness Quiz Results</h2>
+            <p class="subtext">See the differences in levels of <strong class="pink">importance</strong> and <strong class="blue">satisfaction</strong> across the five core elements of a balanced life.</p>
             <div class="gapFocus" v-if="memberFocusElement">
-                <p class="statLabel">Focus</p>
+                <p class="statLabel">Current Focus</p>
                 <h3>{{memberFocusElement}}</h3>
             </div>
         </div>
@@ -44,13 +44,13 @@
         <p class="subtext">Find the gap between what is important to you and how satisfied you are regarding
             that area of your&nbsp;life.</p>
         <router-link tag="button" class="esButton" :to="gapAssessmentHref">Take the
-            <span>Mental Fitness</span> Quiz
+            <span>Mental Fitness</span> quiz
         </router-link>
     </section>
     <!-- Show BASIC User Upgrade message -->
     <section v-else-if="!isPlusMember" class="nogapContainer borderContainer">
-        <h2>Happiness Quiz</h2>
-        <p class="subtext">NEEDS WORK To choose your focus, upgrade to Cactus Plus </p>
+        <h2>What makes you happy?</h2>
+        <p class="subtext">Get access to the quiz that helps you identify and focus on the people, places, and things that make you happy.</p>
         <router-link tag="button" class="esButton" :to="pricingHref">Try Cactus Plus
         </router-link>
     </section>

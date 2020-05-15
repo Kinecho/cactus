@@ -13,18 +13,17 @@
             </button>
             <modal :show="showCloseConfirm" @close="showCloseConfirm = false">
                 <div class="close-confirm-modal paddingContainer" slot="body">
-                    <h3>Close assessment?</h3>
-                    <p class="subtext">Are you sure you want to close the assessment? Your progress will not be
-                        saved.</p>
+                    <h3>Leave Core Values?</h3>
+                    <p class="subtext">Are you sure you want to leave the Core Values exercise? Your progess will be lost.</p>
                     <div class="btnContainer">
-                        <button @click="showCloseConfirm = false">Continue assessment</button>
-                        <button class="secondary" @click="close">Close &amp; discard</button>
+                        <button @click="showCloseConfirm = false">No, keep going</button>
+                        <button class="secondary" @click="close">Leave exercise</button>
                     </div>
                 </div>
             </modal>
 
             <template v-if="completed">
-                <p class="titleMarkdown">The survey is completed.</p>
+                <p class="titleMarkdown">You completed the quiz!</p>
             </template>
 
             <template v-else-if="currentQuestion && currentResponse">
