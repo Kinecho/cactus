@@ -20,11 +20,6 @@
                 >
                     <span>{{copy.common.LOG_IN}}</span>
                 </router-link>
-                <router-link v-if="displaySignupButton"
-                        class="button small"
-                        :to="assessmentHref"
-                        type="button"
-                >Take the quiz</router-link>
             </div>
             <div class="navContainer" v-if="loggedIn && showLinks">
                 <router-link class="navbarLink home" :to="journalHref" v-if="loggedIn">
@@ -198,10 +193,6 @@
             },
             profileImageUrl(): string | undefined | null {
                 return (this.memberProfile?.avatarUrl) ? this.memberProfile.avatarUrl : getRandomAvatar(this.member?.id);
-            },
-            displaySignupButton(): boolean {
-                const show = this.showSignup && this.authLoaded && !this.user;
-                return show;
             },
             displayLoginButton(): boolean {
                 return this.showLogin && this.authLoaded && !this.user;
