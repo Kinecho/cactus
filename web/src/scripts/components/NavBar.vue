@@ -4,7 +4,6 @@
             <router-link :to="logoHref">
                 <img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" :src="'/assets/images/' + logoSrc" alt="Cactus logo"/>
             </router-link>
-            <router-link to="/">MH TEST</router-link>
             <div v-if="!loggedIn" class="anonLinks">
                 <router-link v-if="displayLoginButton"
                         class="login"
