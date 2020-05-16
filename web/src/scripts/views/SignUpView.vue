@@ -9,21 +9,11 @@
                     :forceTransparent="true"
                     :largeLogoOnDesktop="true"
                     :whiteLogo="true"/>
-            <SignIn :message="message" :title="title" :twitter-enabled="includeTwitter"/>
-
-            <div class="switcher">
-                <p v-if="isLogIn">
-                    Don't have an account?
-                    <router-link :to="signUpPath">Sign up</router-link>
-                    .
-                </p>
-                <p v-if="isSignUp">
-                    Already have an account?
-                    <router-link :to="loginPath">Log in</router-link>
-                    .
-                </p>
-            </div>
-
+            <SignIn :message="message"
+                    :title="title"
+                    :twitter-enabled="includeTwitter"
+                    :mode="isSignUp ? 'SIGN_UP' : 'LOG_IN'"
+            />
 
         </div>
         <StandardFooter :isTransparent="true"/>
@@ -68,12 +58,6 @@
             }
         },
         computed: {
-            loginPath(): string {
-                return PageRoute.LOGIN;
-            },
-            signUpPath(): string {
-                return PageRoute.SIGNUP;
-            },
             includeTwitter(): boolean {
                 //only show twitter on login screen, not sign up
                 return this.isLogIn;
@@ -102,15 +86,10 @@
 </style>
 
 <style lang="scss">
-    @import "common";
     @import "variables";
-    @import "~styles/modal.scss";
-    @import "~styles/forms.scss";
-
-    .switcher {
-        text-align: center;
-        margin-top: 5rem;
-    }
+    @import "common";
+    @import "forms";
+    @import "modal.scss";
 
     .page-wrapper {
         position: relative;
