@@ -120,6 +120,7 @@
     import CactusMemberService from "@web/services/CactusMemberService";
     import { Screen, ScreenName } from "@components/gapanalysis/GapAssessmentTypes";
     import { QueryParam } from "@shared/util/queryParams";
+    import { logFocusElementSelected } from "@web/analytics";
 
     const logger = new Logger("gap/Assessment");
 
@@ -274,6 +275,7 @@
             result.calculateResults({ assessment: this.assessment });
             logger.info("finishing assessment...", result);
             this.finished = true;
+
             this.setScreen(Screen.pendingResults);
             this.processingTimeout = window.setTimeout(() => {
                 this.setScreen(Screen.results);
@@ -297,7 +299,7 @@
 
         async focusSelected() {
             await CactusMemberService.sharedInstance.setFocusElement({ element: this.selectedElement });
-
+            logFocusElementSelected(this.selectedElement);
             if (this.includeUpsell) {
                 this.setScreen(Screen.upgrade)
             } else {
@@ -355,7 +357,7 @@
                 });
 
                 if (checkoutResult.success) {
-                    await pushRoute(`${PageRoute.JOURNAL_HOME}?${QueryParam.UPGRADE_SUCCESS}=success`)
+                    await pushRoute(`${ PageRoute.JOURNAL_HOME }?${ QueryParam.UPGRADE_SUCCESS }=success`)
                 }
             } else {
                 logger.warn("no subscription product or entry id was found");

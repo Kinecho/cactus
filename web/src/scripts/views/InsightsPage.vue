@@ -82,6 +82,7 @@
     import GapAnalysisWidget from "@components/insights/GapAnalysisWidget.vue";
     import { StatWidgetData } from "@components/insights/MemberStatsTypes";
     import ReflectionStatsWidget from "@components/insights/ReflectionStatsWidget.vue";
+    import { logFocusElementSelected } from "@web/analytics";
 
     const logger = new Logger("InsightsPage");
     const copy = CopyService.getSharedInstance().copy;
@@ -149,6 +150,7 @@
         async saveFocus(element: CactusElement | null) {
             if (this.member) {
                 this.member.focusElement = element;
+                logFocusElementSelected(element);
                 await CactusMemberService.sharedInstance.setFocusElement({
                     element,
                     member: this.member

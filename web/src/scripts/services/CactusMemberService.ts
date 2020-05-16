@@ -1,4 +1,4 @@
-import FirestoreService, { ListenerUnsubscriber, Query, DocumentReference } from "@web/services/FirestoreService";
+import FirestoreService, { DocumentReference, ListenerUnsubscriber, Query } from "@web/services/FirestoreService";
 import CactusMember, { Field } from "@shared/models/CactusMember";
 import { Collection } from "@shared/FirestoreBaseModels";
 import { FirebaseUser, getAuth, Unsubscribe } from "@web/firebase";
