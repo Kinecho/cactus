@@ -2,16 +2,16 @@
     <div class="upsellContainer">
         <template v-if="element">
             <ResultElement :element="element" :selectable="false" :withCircle="true"/>
-            <p class="subtext">Great choice! To focus on <strong>what makes you happy</strong>, Cactus Plus gives you
+            <p class="subtext">Great choice! To focus on what makes you happy, Cactus Plus gives you
                 access to:</p>
         </template>
-        <p class="subtext" v-else>To focus on <strong>what makes you happy</strong>, Cactus Plus gives you access to:
+        <p class="subtext" v-else>To focus on what makes you happy, Cactus Plus gives you access to:
         </p>
         <section class="features">
             <ul>
                 <li>
                     <svg-icon icon="heartOutline" class="icon"/>
-                    <span><strong>Personalized</strong> mental fitness activities<span v-if="element">, beginning today with&nbsp;<i>{{element}}</i></span></span>
+                    <span><strong>Personalized</strong> mental fitness activities<span v-if="element">, beginning today with&nbsp;<em>{{element}}</em></span></span>
                 </li>
                 <li>
                     <svg-icon icon="pie" class="icon"/>
@@ -131,6 +131,12 @@
             background: $beige;
             padding: 6.4rem 0 0;
         }
+    }
+
+    em {
+        background: linear-gradient(rgba(101, 144, 237, 0.6), rgba(101, 144, 237, 0.6)) 0 90%/100% 0.8rem no-repeat;
+        font-style: normal;
+        padding: .2rem;
     }
 
     .element-icon {

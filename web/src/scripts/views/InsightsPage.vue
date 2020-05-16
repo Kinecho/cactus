@@ -269,11 +269,6 @@
             margin-bottom: 4.8rem;
         }
 
-        h2 {
-            font-size: 2.4rem;
-            margin-bottom: .4rem;
-        }
-
         .subtext {
             margin: 0 0 2.4rem;
             max-width: 56rem;

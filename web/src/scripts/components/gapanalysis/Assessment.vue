@@ -77,7 +77,7 @@
                             @elementSelected="elementSelected"
                     />
                 </div>
-                <p v-if="selectedElement">You chose <strong>{{selectedElement}}</strong>.</p>
+                <p class="selectedElementText" v-if="selectedElement">You chose <strong>{{selectedElement}}</strong>.</p>
                 <p class="validationText" v-if="!selectedElement">Tap a cactus to continue. You can always change this&nbsp;later.</p>
                 <div class="cvActions flexActions">
                     <button class="no-loading" @click="focusSelected" :disabled="!selectedElement">Next
@@ -449,8 +449,13 @@
         }
     }
 
+    .selectedElementText {
+        padding-bottom: 2.4rem;
+    }
+
     .validationText {
         font-size: 1.6rem;
         opacity: .8;
+        padding-bottom: 1.6rem;
     }
 </style>
