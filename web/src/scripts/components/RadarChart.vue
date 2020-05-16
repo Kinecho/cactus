@@ -83,7 +83,6 @@
         onResize() {
             const w = this.$el.getBoundingClientRect().width;
             this.chartDiameter = w;
-            logger.info("Chart diameter from resize is", w);
             this.drawChart();
         }
 
