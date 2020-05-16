@@ -147,10 +147,12 @@
                 const ui = getAuthUI();
                 let emailLinkSignInPath = this.redirectUrl || redirectUrlParam || PageRoute.JOURNAL_HOME;
                 let includeEmailLink = false;
-                if (ui.isPendingRedirect()) {
-                    includeEmailLink = true;
-                    emailLinkSignInPath = PageRoute.LOGIN;
-                }
+
+                //TODO: this was in there before, but i don't think we need it... leaving for a bit.
+                // if (ui.isPendingRedirect()) {
+                    // includeEmailLink = true;
+                    // emailLinkSignInPath = PageRoute.LOGIN;
+                // }
 
                 const config = getAuthUIConfig({
                     includeEmailLink,
