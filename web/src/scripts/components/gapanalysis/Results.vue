@@ -142,7 +142,7 @@
 
     .energy {
         right: -1rem;
-        top: 33%;
+        top: 35%;
     }
 
     .emotions {
@@ -153,24 +153,32 @@
 
     .meaning {
         left: -1rem;
-        top: 33%;
+        top: 35%;
     }
 
     .experience {
         bottom: 1rem;
         left: 12%;
+
+        .noCacti & {
+            left: 0;
+        }
     }
 
     .relationships {
         bottom: 1rem;
         right: 12%;
+
+        .noCacti & {
+            right: 0;
+        }
     }
 
     .radar-container {
         padding: 6.4rem 3.2rem 3.2rem;
 
         .withLabel & {
-            padding: 6.4rem 6.4rem 3.2rem;
+            padding: 6.4rem 5.6rem 3.2rem;
         }
 
         .noCacti & {

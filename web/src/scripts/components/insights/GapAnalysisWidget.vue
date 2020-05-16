@@ -159,13 +159,14 @@
     @import "insights";
 
     .gapContainer {
-        @include r(600) {
+        @include r(768) {
+            flex-basis: 50%;
+            margin-right: 1.6rem;
+        }
+        @include r(960) {
             display: flex;
             flex-basis: 66%;
             flex-direction: row;
-        }
-        @include r(768) {
-            margin-right: 1.6rem;
         }
 
         .subtext {
@@ -179,7 +180,7 @@
             display: none;
         }
 
-        @include r(600) {
+        @include r(960) {
             width: 45%;
 
             .legend {
@@ -190,6 +191,10 @@
 
     .gapFocus {
         margin-bottom: 4rem;
+
+        @include r(960) {
+            margin-bottom: 0;
+        }
     }
 
     .radarChartContainer {
@@ -197,7 +202,7 @@
         max-width: 38rem;
         width: 100%;
 
-        @include r(600) {
+        @include r(960) {
             padding-left: 3.2rem;
             width: 55%;
 

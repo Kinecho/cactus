@@ -54,9 +54,9 @@
 
     .color {
         border-radius: 50%;
-        height: 1.6rem;
+        height: 1.2rem;
         margin-right: .4rem;
-        width: 1.6rem;
+        width: 1.2rem;
 
         @include r(600) {
             margin-right: .8rem;

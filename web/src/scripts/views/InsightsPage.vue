@@ -434,6 +434,9 @@
         }
         @include r(768) {
             display: block;
+            flex-basis: 50%;
+        }
+        @include r(960) {
             flex-basis: 33%;
         }
 
