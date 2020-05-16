@@ -39,6 +39,7 @@ import { onPublish as GooglePlayBillingJob } from "@api/pubsub/subscribers/Googl
 import { transactionalOnCreate } from "@admin/AuthUserCreateJob";
 import { onPublish as CancellationJob } from "@admin/pubsub/ProcessSubscriptionCancellations";
 import { updateMemberCoreValueFromAssessment } from "@api/triggers/CoreValuesAssessessmentResponseTriggers";
+import { gapAssessmentCompleted } from "@api/triggers/GapAnalysisTriggers";
 export const cloudFunctions = {
     //API Endpoints
     checkout: functions.https.onRequest(checkoutApp),
@@ -94,5 +95,8 @@ export const cloudFunctions = {
         updateSubscriptionDetailsTrigger,
         updateInsightWordsOnReflectionWrite: updateInsightWordsOnReflectionWrite,
         updateMemberCoreValueFromAssessment: updateMemberCoreValueFromAssessment,
+    },
+    db3: {
+        gapAssessmentCompleted,
     }
 };
