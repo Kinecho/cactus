@@ -15,6 +15,19 @@
             <spinner v-if="firebaseUiLoading" :delay="1000" color="light"/>
             <div class="buttonContainer" id="signup-app"></div>
         </div>
+
+        <div class="switcher" v-if="!isPendingRedirect">
+            <p v-if="mode === 'LOG_IN'">
+                Don't have an account?
+                <router-link :to="signUpPath">Sign up</router-link>
+                .
+            </p>
+            <p v-if="mode === 'SIGN_UP'">
+                Already have an account?
+                <router-link :to="loginPath">Log in</router-link>
+                .
+            </p>
+        </div>
     </div>
 </template>
 
@@ -94,6 +107,7 @@
             redirectUrl: { type: String, required: false },
             showMagicLink: { type: Boolean, default: true },
             twitterEnabled: { type: Boolean, default: true },
+            mode: {type: String as () => "SIGN_UP" | "LOG_IN", required: false, default: "SIGN_UP"}
         },
         data(): {
             memberListener: ListenerUnsubscriber | undefined,
@@ -129,7 +143,13 @@
         computed: {
             _title(): string {
                 return this.title || copy.common.SIGN_UP
-            }
+            },
+            loginPath(): string {
+                return PageRoute.LOGIN;
+            },
+            signUpPath(): string {
+                return PageRoute.SIGNUP;
+            },
         },
         methods: {
             checkPendingUI() {
@@ -150,8 +170,8 @@
 
                 //TODO: this was in there before, but i don't think we need it... leaving for a bit.
                 // if (ui.isPendingRedirect()) {
-                    // includeEmailLink = true;
-                    // emailLinkSignInPath = PageRoute.LOGIN;
+                // includeEmailLink = true;
+                // emailLinkSignInPath = PageRoute.LOGIN;
                 // }
 
                 const config = getAuthUIConfig({
@@ -196,6 +216,9 @@
                 if (current !== previous) {
                     this.setupAuthUi();
                 }
+            },
+            isPendingRedirect(pending: boolean) {
+                this.$emit("loading", pending);
             },
             async doRedirect(doRedirect) {
                 //TODO: probalby make this method more clear what it does by renaming/refactoring
@@ -279,6 +302,11 @@
     .divider {
         margin: 0 0 2.4rem;
         opacity: .8;
+    }
+
+    .switcher {
+        text-align: center;
+        margin-top: 5rem;
     }
 
 </style>

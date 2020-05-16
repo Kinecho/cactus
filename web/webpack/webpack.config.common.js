@@ -50,18 +50,13 @@ module.exports = (config) => {
                 return entries
             }, {})
 
-            //add the little dev pages index
-            // if (isDev) {
-            // jsEntries['pages-index'] = `${helpers.scriptDir}/pages/pages-index.ts`
-            // }
-
             console.log('JS Entries to use', chalk.cyan(JSON.stringify(jsEntries, null, 2)))
 
             const plugins = [new MiniCssExtractPlugin({
-                // filename: isDev ? '[name].css' : '[id].[hash].css',
-                // chunkFilename: isDev ? '[id].css' : '[id].[hash].css',
-                filename: '[name].css',
-                chunkFilename: '[id].css',
+                filename: isDev ? '[name].css' : '[id].[hash].css',
+                chunkFilename: isDev ? '[id].css' : '[id].[hash].css',
+                // filename: '[name].css',
+                // chunkFilename: '[id].css',
 
             })]
 

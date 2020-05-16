@@ -77,7 +77,8 @@
                             @elementSelected="elementSelected"
                     />
                 </div>
-                <p class="selectedElementText" v-if="selectedElement">You chose <strong>{{selectedElement}}</strong>.</p>
+                <p class="selectedElementText" v-if="selectedElement">You chose <strong>{{selectedElement}}</strong>.
+                </p>
                 <p class="validationText" v-if="!selectedElement">Tap a cactus to continue. You can always change this&nbsp;later.</p>
                 <div class="cvActions flexActions">
                     <button class="no-loading" @click="focusSelected" :disabled="!selectedElement">Next
@@ -85,7 +86,10 @@
                 </div>
             </div>
             <template v-else-if="currentScreen === Screen.upgrade">
-                <LoadableGapAnalysisUpsell :element="selectedElement" :billing-period="upsellBillingPeriod" @checkout="startCheckout" @skip="skipCheckout"/>
+                <LoadableGapAnalysisUpsell :element="selectedElement"
+                        :billing-period="upsellBillingPeriod"
+                        @checkout="startCheckout"
+                        @skip="skipCheckout"/>
             </template>
         </transition>
     </div>
@@ -115,6 +119,8 @@
     import { PageRoute } from "@shared/PageRoutes";
     import CactusMemberService from "@web/services/CactusMemberService";
     import { Screen, ScreenName } from "@components/gapanalysis/GapAssessmentTypes";
+    import { QueryParam } from "@shared/util/queryParams";
+    import { logFocusElementSelected } from "@web/analytics";
 
     const logger = new Logger("gap/Assessment");
 
@@ -269,6 +275,7 @@
             result.calculateResults({ assessment: this.assessment });
             logger.info("finishing assessment...", result);
             this.finished = true;
+
             this.setScreen(Screen.pendingResults);
             this.processingTimeout = window.setTimeout(() => {
                 this.setScreen(Screen.results);
@@ -292,7 +299,7 @@
 
         async focusSelected() {
             await CactusMemberService.sharedInstance.setFocusElement({ element: this.selectedElement });
-
+            logFocusElementSelected(this.selectedElement);
             if (this.includeUpsell) {
                 this.setScreen(Screen.upgrade)
             } else {
@@ -341,8 +348,19 @@
         }
 
         async startCheckout(subscriptionProduct: SubscriptionProduct | undefined | null) {
+            logger.info("Starting checkout handler");
             if (subscriptionProduct?.entryId) {
-                await startCheckout({ subscriptionProductId: subscriptionProduct.entryId });
+                logger.info("Starting checkout for product entry ID = ", subscriptionProduct?.entryId)
+                const checkoutResult = await startCheckout({
+                    subscriptionProductId: subscriptionProduct.entryId,
+                    subscriptionProduct: subscriptionProduct
+                });
+
+                if (checkoutResult.success) {
+                    await pushRoute(`${ PageRoute.JOURNAL_HOME }?${ QueryParam.UPGRADE_SUCCESS }=success`)
+                }
+            } else {
+                logger.warn("no subscription product or entry id was found");
             }
         }
     }

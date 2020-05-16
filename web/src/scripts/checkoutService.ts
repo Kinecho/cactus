@@ -151,14 +151,17 @@ export async function startCheckout(options: {
 }
 
 export async function startAndroidCheckout(options: { subscriptionProductId: string, member: CactusMember, subscriptionProduct?: SubscriptionProduct, }): Promise<CheckoutRedirectResult> {
+    logger.info("starting android checkout with", options);
     const {member, subscriptionProduct} = options;
     const androidProductId = subscriptionProduct?.androidProductId;
     const memberId = member.id;
     if (!memberId) {
+        logger.warn("No member id was found, returning error");
         return {isRedirecting: false, isLoggedIn: false, success: false}
     }
 
     if (!androidProductId) {
+        logger.warn("no android product ID was found, returning failure")
         return {isRedirecting: false, isLoggedIn: true, success: false}
     }
 
@@ -319,7 +322,7 @@ async function fulfillAndroidRestoredPurchases(params: AndroidFulfillRestoredPur
         if (isAxiosError(error)) {
             e = error.response?.data ?? e
         }
-        logger.error("Failed to process result", stringifyJSON(e));
+        logger.error("Failed to process the anrdroid restore purchases result", stringifyJSON(e));
         return {success: false, message: "Unable to complete the purchase."}
     }
 }

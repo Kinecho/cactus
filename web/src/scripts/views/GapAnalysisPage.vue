@@ -53,6 +53,12 @@
     import { Prop, Watch } from "vue-property-decorator";
     import Spinner from "@components/Spinner.vue";
     import { defaultScreens, ScreenName, Screen } from "@components/gapanalysis/GapAssessmentTypes";
+    import {
+        logCoreValuesAssessmentCompleted,
+        logGapAnalysisCanceled,
+        logGapAnalysisCompleted,
+        logGapAnalysisStarted
+    } from "@web/analytics";
 
     const logger = new Logger("GapAnalysisPage");
 
@@ -133,6 +139,7 @@
             logger.info("Saved brand new results on mount. id = ", results.id);
             const id = results.id;
             if (id) {
+                logGapAnalysisStarted();
                 await pushRoute(`${ PageRoute.GAP_ANALYSIS }/${ id }`);
             }
             this.resultsLoaded = true;
@@ -204,7 +211,10 @@
         }
 
         async closeAssessment() {
-            logger.info("CLOSE ASSESSMENT");
+            if (this.assessmentResults?.completed !== true) {
+                logGapAnalysisCanceled(this.screen);
+            }
+
             try {
                 if (this.isPlusMember) {
                     await pushRoute(PageRoute.INSIGHTS)
@@ -220,15 +230,14 @@
         }
 
         async finishAssessment(results: GapAnalysisAssessmentResult) {
-            logger.info("FINISH ASSESSMENT gap results", results);
             try {
                 results.setCompleted()
+                logGapAnalysisCompleted();
                 if (this.member) {
                     results.memberId = this.member?.id;
                 }
 
                 await GapAnalysisService.sharedInstance.save(results);
-
             } catch (error) {
                 logger.error(`Failed to save gap results for member ${ this.member?.id }`, error);
             }

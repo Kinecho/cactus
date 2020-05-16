@@ -1,5 +1,9 @@
 <template>
-    <GapAnalysisUpsell :checkout-loading="loading" :subscription-product="product" :element="element" @checkout="checkout" @skip="skip"/>
+    <GapAnalysisUpsell :checkout-loading="loading"
+            :subscription-product="product"
+            :element="element"
+            @checkout="checkout"
+            @skip="skip"/>
 </template>
 
 <script lang="ts">
