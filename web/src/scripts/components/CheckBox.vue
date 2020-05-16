@@ -1,20 +1,29 @@
 <template>
     <label :class="['checkbox-container', this.classNames]">
-        <input type="checkbox" :checked="shouldBeChecked" :value="value" @change="updateInput" :disabled="disabled">
+        <input type="checkbox" :checked="shouldBeChecked" :value="value" @change="updateInput" :disabled="disabled" :tabindex="tabindex">
+        <!--        <img class="icon" v-if="icon" :src="`/assets/images/${icon}.svg`" />-->
+        <SvgIcon :icon="icon" v-if="icon"/>
         <span class="checkmark" :class="selectTypeClass"></span>
         <span class="checkbox-label">{{ label }}</span>
     </label>
 </template>
 <script lang="ts">
     import Vue from 'vue'
-    import { QuestionType } from "@shared/models/CoreValuesQuestion";
+    import { QuestionType } from "@shared/models/Questions";
+    import { SvgIconName } from "@shared/types/IconTypes";
+    import SvgIcon from "@components/SvgIcon.vue";
 
     export default Vue.extend({
+        components: { SvgIcon },
         model: {
             prop: 'modelValue',
             event: 'change',
         },
         props: {
+            tabindex: {
+                type: Number,
+                default: -1
+            },
             value: {
                 type: [String, Boolean],
             },
@@ -30,6 +39,10 @@
                 type: Boolean,
                 default: false,
             },
+            vertCenter: {
+                type: Boolean,
+                default: false,
+            },
             modelValue: {
                 default: false,
                 type: [Boolean, String, Array],
@@ -37,6 +50,10 @@
             label: {
                 type: String,
                 required: true,
+            },
+            icon: {
+                type: String as () => SvgIconName,
+                required: false,
             },
             // We set `true-value` and `false-value` to the default true and false so
             // we can always use them instead of checking whether or not they are set.
@@ -59,6 +76,7 @@
                 return {
                     disabled: this.disabled,
                     extraPadding: this.extraPadding,
+                    vertCenter: this.vertCenter,
                     radio: this.type === QuestionType.RADIO,
                     checkbox: this.type === QuestionType.MULTI_SELECT
                 }
@@ -132,6 +150,10 @@
         &.extraPadding {
             padding: 1.6rem;
         }
+
+        &.vertCenter {
+            align-items: center;
+        }
     }
 
     /* Hide the browser's default checkbox */
@@ -141,6 +163,10 @@
         cursor: pointer;
         height: 0;
         width: 0;
+
+        &:focus {
+            background-color: red;
+        }
 
         &:disabled ~ .checkmark {
             border-color: #ccc;
@@ -185,7 +211,7 @@
         border-radius: .4rem;
         flex-shrink: 0;
         height: $checkHeight;
-        margin-right: .8rem;
+        margin-right: 1.6rem;
         width: $checkHeight;
 
         /* Create the checkmark/indicator (hidden when not checked) */
@@ -210,6 +236,17 @@
         &.radio {
             border-radius: 50%;
         }
+    }
+
+    .icon {
+        height: 3.2rem;
+        margin-right: 1.6rem;
+        width: 3.2rem;
+    }
+
+    input:checked ~ .icon + .checkmark.radio,
+    .icon + .checkmark {
+        display: none;
     }
 
 </style>

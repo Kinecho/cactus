@@ -11,6 +11,7 @@ import CactusMemberService from "@web/services/CactusMemberService";
 import Logger from "@shared/Logger";
 import { isAndroidApp } from "@web/DeviceUtil";
 import { Route } from "vue-router";
+import { CactusElement } from "@shared/models/CactusElement";
 
 const logger = new Logger("Analytics.ts");
 
@@ -57,9 +58,6 @@ export function init() {
 
     getAuth().onAuthStateChanged(user => {
         setUser(user);
-        if (user) {
-            logger.log("User has logged in, removing any tracking/referral info");
-        }
         isFirstAuthLoad = true;
 
     });
@@ -84,11 +82,6 @@ export function init() {
             }
         });
     }
-
-    logger.log("version is ", Config.version);
-
-    // if ()
-
 
     createGTag();
     gtag('js', new Date());
@@ -204,7 +197,7 @@ export function logCoreValuesAssessmentStarted() {
 }
 
 export function logCoreValuesAssessmentProgress(page: number) {
-    firebaseAnalytics().logEvent("core_values_progress", {page: page});
+    firebaseAnalytics().logEvent("core_values_progress", { page: page });
 }
 
 
@@ -251,4 +244,20 @@ export function logRouteChanged(to: Route): void {
         });
     }
     firstRouteFired = true;
+}
+
+export function logGapAnalysisStarted() {
+    firebaseAnalytics().logEvent("gap_analysis_started")
+}
+
+export function logFocusElementSelected(element: CactusElement | null) {
+    firebaseAnalytics().logEvent("focus_element_selected", { element })
+}
+
+export function logGapAnalysisCompleted() {
+    firebaseAnalytics().logEvent("gap_analysis_completed")
+}
+
+export function logGapAnalysisCanceled(screen?: string | null) {
+    firebaseAnalytics().logEvent("gap_analysis_canceled", { screen });
 }

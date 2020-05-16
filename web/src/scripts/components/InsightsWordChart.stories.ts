@@ -7,23 +7,13 @@ export default {
 
 export const SimpleWordChart = () => ({
     components: { WordChart },
-    template: '<word-chart :words="words"/>',
+    template: `
+        <div :style="{maxWidth: '300px'}">
+            <word-chart :words="words"/>
+        </div>`,
     data(): { words: InsightWord[] } {
         return {
             words: [{ word: "Hello" }, { word: "Test" }]
-        }
-    }
-})
-
-
-export const WordChartWithWords = () => ({
-    components: { WordChart },
-    template: '<div><h1>Hello!</h1><WordChart :word="words" :blurry="false"/></div>',
-    data(): {
-        words: InsightWord[],
-    } {
-        return {
-            words: [{ word: "Hello", frequency: .1 }, { word: "StoryBook", frequency: 0.2 }],
         }
     }
 })

@@ -1,9 +1,10 @@
-import { QuestionType } from "@shared/models/CoreValuesQuestion";
 import QuestionOption from "@components/corevalues/QuestionOption.vue";
 import CoreValuesQuestionOption from "@shared/models/CoreValuesQuestionOption";
 import { CoreValue } from "@shared/models/CoreValueTypes";
 import { boolean, text } from "@storybook/addon-knobs";
 import Vue from "vue";
+import { QuestionType } from "@shared/models/Questions";
+
 export default {
     title: "Core Values/Assessment/Question/Option",
 }

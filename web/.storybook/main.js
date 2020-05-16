@@ -1,6 +1,7 @@
 const helpers = require('../helpers')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-
+const appConfig = require('../webpack/config.stage')
+const webpack = require('webpack')
 const plugins = [new MiniCssExtractPlugin({
     // filename: isDev ? '[name].css' : '[id].[hash].css',
     // chunkFilename: isDev ? '[id].css' : '[id].[hash].css',
@@ -46,25 +47,12 @@ module.exports = {
             ],
         },
         {
-            test: /\.css$/,
-            use: [
-                'vue-style-loader',
-                {
-                    loader: 'css-loader',
-                    options: {sourceMap: true, url: false},
-                },
-                {
-                    loader: 'postcss-loader',
-                },
-            ],
-        },
-        {
             test: /\.scss$/,
             use: [
                 'vue-style-loader',
                 {
                     loader: 'css-loader',
-                    options: {sourceMap: true, url: false},
+                    options: {sourceMap: false, url: false},
                 },
                 {
                     loader: 'postcss-loader',
@@ -102,6 +90,16 @@ module.exports = {
         }
 
         // config.plugins.push(...plugins)
+
+
+        let parsedConfig = {}
+        Object.keys(appConfig).forEach(key => {
+            parsedConfig[`process.env.${key}`] = JSON.stringify(appConfig[key])
+        })
+
+        config.plugins.push(new webpack.DefinePlugin({
+            ...parsedConfig,
+        }))
 
         return config
     },

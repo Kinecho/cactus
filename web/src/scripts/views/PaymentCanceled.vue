@@ -1,10 +1,10 @@
 <template>
     <div class="centered">
         <header>
-            <router-link to="/"><img class="logo" src="assets/images/logo.svg" alt="Cactus logo"/></router-link>
+            <router-link to="/"><img class="logo" src="/assets/images/logo.svg" alt="Cactus logo"/></router-link>
         </header>
         <section>
-            <img class="graphic" src="assets/images/yogi.svg" alt=""/>
+            <img class="graphic" src="/assets/images/yogi.svg" alt=""/>
             <h1>Your payment has been canceled</h1>
             <router-link class="button" to="/">Return Home</router-link>
         </section>

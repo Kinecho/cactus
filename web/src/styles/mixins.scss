@@ -223,6 +223,21 @@ $widthDesktop: $widthXL;
 
 /* ANIMATIONS */
 
+@keyframes pulse-green {
+	0% {
+		box-shadow: 0 0 0 0 rgba(51, 204, 171, 0.7);
+		transform: scale(0.95);
+	}
+	70% {
+		box-shadow: 0 0 0 32px rgba(51, 204, 171, 0);
+		transform: scale(1);
+	}
+	100% {
+		box-shadow: 0 0 0 0 rgba(51, 204, 171, 0);
+		transform: scale(0.95);
+	}
+}
+
 @keyframes slide {
   100% {
     opacity: 1;
@@ -231,6 +246,15 @@ $widthDesktop: $widthXL;
 }
 
 @keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rotateInfinite {
+  0% {
+    transform: rotate(0deg);
+  }
   100% {
     transform: rotate(360deg);
   }
@@ -290,6 +314,7 @@ $widthDesktop: $widthXL;
   border: 1px solid $lightestGreen;
   box-shadow: none;
   color: $darkestGreen;
+  font-weight: bold;
   padding: 1.2rem 2.4rem;
 
   @include r(600) {
@@ -303,6 +328,7 @@ $widthDesktop: $widthXL;
   background-color: transparent;
   box-shadow: none;
   color: $darkGreen;
+  font-weight: bold;
 
   @include r(600) {
     &:hover {
@@ -345,7 +371,7 @@ $widthDesktop: $widthXL;
   color: white;
   cursor: pointer;
   flex-grow: 1;
-  font: 1.8rem $font-stack;
+  font: bold 1.8rem $font-stack;
   margin: 0;
   padding: 1.2rem 2.4rem 1.6rem;
   transition: box-shadow .2s ease-in-out, background-color .2s ease-in-out, opacity .3s;
@@ -375,7 +401,7 @@ $widthDesktop: $widthXL;
   &:disabled, &.disabled {
     background-color: #ccc;
     box-shadow: none;
-    color: $darkText;
+    color: lighten($darkText, 20%);
     cursor: default;
 
 

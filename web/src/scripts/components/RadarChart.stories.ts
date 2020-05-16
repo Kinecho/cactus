@@ -12,9 +12,8 @@ export default {
 
 export const Configurable = () => Vue.extend({
     template: `
-        <div :style="{width: containerWidth + 'px', height: containerHeight + 'px', border: '1px solid black', display: 'flex', justifyContent: 'center', alignItems: 'center'}">
-            <radar-chart :chart-data="chartData" chart-id="simple-radar-1" :options="options"/>
-        </div>`,
+        <radar-chart :chart-data="chartData" chart-id="simple-radar-1" :options="options"/>
+    `,
     components: { RadarChart },
     props: {
         color1: {
@@ -27,37 +26,34 @@ export const Configurable = () => Vue.extend({
             default: boolean("Rounded Lines", true, "Chart"),
         },
         showLegend: {
-            default: boolean("Show Legend", true, "Chart"),
+            default: boolean("Show Legend", false, "Legend"),
         },
         legendTitle: {
-            default: text("Legend Title", "Legend", "Chart")
+            default: text("Legend Title", "Legend", "Legend")
         },
         legendOffsetX: {
-            default: number("Legend Offset X", -120, undefined, "Chart")
+            default: number("Legend Offset X", -120, undefined, "Legend")
         },
         legendOffsetY: {
-            default: number("Legend Offset Y", 300, undefined, "Chart")
-        },
-        circleDiameter: {
-            default: number("Circle Diameter (px)", 200, undefined, "Chart")
+            default: number("Legend Offset Y", 300, undefined, "Legend")
         },
         chartPaddingTop: {
-            default: number("Padding Top (px)", 60, undefined, "Chart"),
+            default: number("Padding Top (px)", 10, undefined, "Chart"),
         },
         chartPaddingLeft: {
-            default: number("Padding Left (px)", 60, undefined, "Chart"),
+            default: number("Padding Left (px)", 10, undefined, "Chart"),
         },
         chartPaddingRight: {
-            default: number("Padding Right (px)", 60, undefined, "Chart"),
+            default: number("Padding Right (px)", 10, undefined, "Chart"),
         },
         chartPaddingBottom: {
-            default: number("Padding Bottom (px)", 100, undefined, "Chart"),
+            default: number("Padding Bottom (px)", 10, undefined, "Chart"),
         },
-        containerWidth: {
-            default: number("Width", 400, undefined, "Container"),
+        fontSize: {
+            default: number("Font Size", 12, undefined, "Chart"),
         },
-        containerHeight: {
-            default: number("Height", 400, undefined, "Container"),
+        showLabels: {
+            default: boolean("Show Labels", false, "Chart"),
         }
     },
     computed: {
@@ -72,8 +68,8 @@ export const Configurable = () => Vue.extend({
                     right: this.chartPaddingRight
                 },
                 roundStrokes: this.roundedLines,
-                w: this.circleDiameter,
-                h: this.circleDiameter,
+                fontSizePx: this.fontSize,
+                showLabels: this.showLabels,
             };
 
             if (this.showLegend) {

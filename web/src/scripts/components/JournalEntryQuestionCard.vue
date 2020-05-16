@@ -24,7 +24,7 @@
         <nav v-show="!doReflect && responsesLoaded" class="buttonContainer">
             <a v-if="prompt && prompt.contentPath && !responseText" :href="prompt.contentPath" class="button">Reflect</a>
             <button @click.prevent="doReflect = true" class="wiggle secondary" v-show="!this.responseText">
-                <img src="assets/images/pen.svg" alt=""/>
+                <img src="/assets/images/pen.svg" alt=""/>
                 Add a Note
             </button>
         </nav>

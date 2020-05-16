@@ -45,7 +45,7 @@
 
     li.icon {
         &:before, &.check:before {
-            background-image: url(assets/images/check.svg);
+            background-image: url(/assets/images/check.svg);
             background-repeat: no-repeat;
             background-size: contain;
             content: "";
@@ -57,7 +57,7 @@
         }
 
         &.heart:before {
-            background-image: url(assets/icons/heart.svg);
+            background-image: url(/assets/icons/heart.svg);
             height: 1.5rem;
         }
     }

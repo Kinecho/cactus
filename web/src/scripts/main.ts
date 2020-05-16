@@ -6,15 +6,11 @@ import VueRouter from "vue-router";
 
 Vue.use(VueRouter);
 
-const logger = new Logger("main.ts");
-
-logger.info("Starting single page app");
 
 //self-calling function to create app;
 export async function start() {
     new Vue({
         router,
-
         render: h => h(App),
     }).$mount("#app");
 }

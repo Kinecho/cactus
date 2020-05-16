@@ -263,7 +263,7 @@
         text-align: left;
 
         &:first-child:before {
-            background: url(assets/images/crosses.svg) 0 0/228px 216px no-repeat;
+            background: url(/assets/images/crosses.svg) 0 0/228px 216px no-repeat;
             bottom: -4rem;
             content: "";
             display: block;
@@ -297,7 +297,7 @@
         }
 
         &.plus-panel {
-            background: $dolphin url(assets/images/grainy.png) repeat;
+            background: $dolphin url(/assets/images/grainy.png) repeat;
             color: $white;
         }
 
@@ -306,7 +306,7 @@
             color: $darkestGreen;
 
             &.tabsOnMobile {
-                background: $dolphin url(assets/images/grainy.png) repeat;
+                background: $dolphin url(/assets/images/grainy.png) repeat;
                 color: $white;
 
                 @include r(768) {
@@ -370,7 +370,7 @@
     }
 
     .actions .error {
-        background: lighten($red, 20%) url(assets/images/sadCactusPatternWhiteTransparent.svg);
+        background: lighten($red, 20%) url(/assets/images/sadCactusPatternWhiteTransparent.svg);
         border-radius: 0.8rem;
         color: $dolphin;
         margin-bottom: 1.6rem;
@@ -450,7 +450,7 @@
             }
 
             &.heart:before {
-                background: url(assets/icons/heart.svg) no-repeat;
+                background: url(/assets/icons/heart.svg) no-repeat;
                 height: 1.4rem;
                 width: 1.6rem;
             }

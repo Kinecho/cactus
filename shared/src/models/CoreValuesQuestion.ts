@@ -2,11 +2,7 @@ import CoreValuesQuestionOption from "@shared/models/CoreValuesQuestionOption";
 import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
 import CoreValuesAssessment from "@shared/models/CoreValuesAssessment";
 import Logger from "@shared/Logger";
-
-export enum QuestionType {
-    RADIO = "RADIO",
-    MULTI_SELECT = "MULTI_SELECT"
-}
+import { QuestionType } from "@shared/models/Questions";
 
 export interface DynamicAssessmentParams {
     assessment: CoreValuesAssessment

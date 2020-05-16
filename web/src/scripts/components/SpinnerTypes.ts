@@ -1,0 +1,1 @@
+export type SpinnerColor = "light" | "dark"

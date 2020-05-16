@@ -125,7 +125,7 @@
         }
 
         &.successAlt {
-            background: $darkerGreen url(assets/images/grainy.png) repeat;
+            background: $darkerGreen url(/assets/images/grainy.png) repeat;
             color: $white;
         }
 

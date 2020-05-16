@@ -1,10 +1,11 @@
-import FirestoreService, {ListenerUnsubscriber, Query} from "@web/services/FirestoreService";
-import CactusMember, {Field} from "@shared/models/CactusMember";
-import {Collection} from "@shared/FirestoreBaseModels";
-import {FirebaseUser, getAuth, Unsubscribe} from "@web/firebase";
-import {getDeviceLocale, getDeviceTimeZone, getUserAgent, isAndroidApp} from "@web/DeviceUtil";
+import FirestoreService, { DocumentReference, ListenerUnsubscriber, Query } from "@web/services/FirestoreService";
+import CactusMember, { Field } from "@shared/models/CactusMember";
+import { Collection } from "@shared/FirestoreBaseModels";
+import { FirebaseUser, getAuth, Unsubscribe } from "@web/firebase";
+import { getDeviceLocale, getDeviceTimeZone, getUserAgent, isAndroidApp } from "@web/DeviceUtil";
 import Logger from "@shared/Logger";
-import StorageService, {LocalStorageKey} from "@web/services/StorageService";
+import StorageService, { LocalStorageKey } from "@web/services/StorageService";
+import { CactusElement } from "@shared/models/CactusElement";
 
 const logger = new Logger("CactusMemberService");
 
@@ -26,18 +27,14 @@ export default class CactusMemberService {
             if (user) {
                 this.currentMemberUnsubscriber = this.observeByUserId(user.uid, {
                     onData: async member => {
-                        logger.log("[memberService constructor callback] BEFORE LOGGING member trial started at type of = ", typeof (member?.subscription?.trial?.startedAt));
-                        logger.info("Current CactusMember", member);
                         this.currentMember = member;
                         this.memberHasLoaded = true;
-                        logger.log("[memberService instance constructor callback] member trial started at type of = ", typeof (member?.subscription?.trial?.startedAt));
                         if (member) {
                             await this.updateMemberSettingsIfNeeded(member)
                         }
                     }
                 })
             } else {
-                logger.info("unsetting current cactus member");
                 this.currentMember = undefined;
             }
         });
@@ -93,7 +90,7 @@ export default class CactusMemberService {
         }
 
         if (!isAndroidApp()) {
-            logger.warn(`User agent not allowed: ${getUserAgent()}`);
+            logger.warn(`User agent not allowed: ${ getUserAgent() }`);
             return;
         }
 
@@ -130,10 +127,15 @@ export default class CactusMemberService {
 
     }
 
-    // async awaitCurrentMember(): Promise<CactusMember|undefined>
-
     getCollectionRef() {
         return this.firestoreService.getCollectionRef(Collection.members);
+    }
+
+    getMemberRef(member?: CactusMember): DocumentReference | undefined {
+        if (!member?.id) {
+            return undefined;
+        }
+        return this.getCollectionRef().doc(member.id);
     }
 
     async executeQuery(query: Query) {
@@ -173,11 +175,11 @@ export default class CactusMemberService {
             if (user) {
                 memberUnsubscriber = this.observeByUserId(user.uid, {
                     onData: (member) => {
-                        options.onData({user: user, member: member})
+                        options.onData({ user: user, member: member })
                     }
                 })
             } else {
-                options.onData({user: undefined, member: undefined});
+                options.onData({ user: undefined, member: undefined });
             }
         });
 
@@ -187,5 +189,14 @@ export default class CactusMemberService {
                 memberUnsubscriber();
             }
         }
+    }
+
+    async setFocusElement(params: { element: CactusElement | null, member?: CactusMember }): Promise<void> {
+        const member = params.member ?? this.currentMember;
+        const ref = this.getMemberRef(member);
+        if (!ref) {
+            return;
+        }
+        await ref.update({ [CactusMember.Field.focusElement]: params.element });
     }
 }

@@ -6,7 +6,7 @@
             </router-link>
             <div v-if="!loggedIn" class="anonLinks">
                 <router-link v-if="displayLoginButton"
-                        class="login "
+                        class="login"
                         :to="sponsorHref"
                         type="link"
                 >
@@ -19,14 +19,6 @@
                         type="link"
                 >
                     <span>{{copy.common.LOG_IN}}</span>
-                </router-link>
-                <router-link v-if="displaySignupButton"
-                        data-test="signup-button"
-                        class="jump-to-form button small"
-                        :to="signupHref"
-                        @click.prevent="goToSignup"
-                        type="button"
-                >{{copy.common.TRY_IT_FREE}}
                 </router-link>
             </div>
             <div class="navContainer" v-if="loggedIn && showLinks">
@@ -47,7 +39,7 @@
                 </router-link> -->
                 <!-- INSIGHTS      -->
                 <router-link class="navbarLink" :to="insightsHref" v-if="loggedIn">
-                    <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><title>Insights</title>
+                    <svg class="navIcon pie" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><title>Insights</title>
                         <path fill="#07454C" d="M6.601.913a1 1 0 01.8 1.834A9 9 0 1019.29 14.5a1 1 0 011.842.778A11 11 0 116.601.913zm4.4-.913a11 11 0 0111 11 1 1 0 01-1 1h-10a1 1 0 01-1-1V1a1 1 0 011-1zm1 2.056V10h7.944a9 9 0 00-7.944-7.944z"/>
                     </svg>
                     <span class="navLabel">{{copy.navigation.INSIGHTS}}</span>
@@ -202,10 +194,6 @@
             profileImageUrl(): string | undefined | null {
                 return (this.memberProfile?.avatarUrl) ? this.memberProfile.avatarUrl : getRandomAvatar(this.member?.id);
             },
-            displaySignupButton(): boolean {
-                const show = this.showSignup && this.authLoaded && !this.user;
-                return show;
-            },
             displayLoginButton(): boolean {
                 return this.showLogin && this.authLoaded && !this.user;
             },
@@ -229,6 +217,9 @@
             },
             signupHref(): string {
                 return PageRoute.SIGNUP;
+            },
+            assessmentHref(): string {
+                return PageRoute.GAP_ANALYSIS;
             },
             journalHref(): string {
                 return PageRoute.JOURNAL_HOME;
@@ -336,6 +327,8 @@
             background-color: transparent;
             color: $darkGreen;
             flex-grow: 0;
+            font-size: 1.6rem;
+            font-weight: bold;
             margin: 0;
             padding: 0 0 0 3vw;
 
@@ -346,7 +339,6 @@
                 padding: .6rem 1.2rem;
             }
             @include r(600) {
-                font-size: 1.8rem;
                 margin-left: 3.2vw;
                 padding: .8rem 1.6rem;
             }
@@ -411,18 +403,15 @@
             }
         }
 
-        &.home {
-            display: none;
-
-            @include r(374) {
-                display: block;
-            }
-        }
-
         .navIcon {
             display: block;
             height: 2.4rem;
             width: 2.4rem;
+
+            &.pie {
+                height: 2.2rem;
+                width: 2.2rem;
+            }
 
             @include r(600) {
                 display: none;

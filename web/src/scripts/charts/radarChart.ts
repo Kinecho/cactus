@@ -1,3 +1,4 @@
+// tslint:disable:prefer-for-of
 import * as d3 from "d3";
 import { RadarChartData, RadarChartDataPoint } from "@shared/charts/RadarChartData";
 
@@ -19,12 +20,16 @@ export interface RadarChartConfig {
     opacityCircles: number,
     strokeWidth: number,
     roundStrokes: boolean,
+    circleFillBaseColor: string,
+    showLevelLabel: boolean,
+    showTooltip: boolean,
     // color: d3.ScaleOrdinal<string, string>,
     format: string,
     unit: string,
     legend: boolean | { title: string, translateX: number, translateY: number },
     colorValues: string[],
     fontSizePx: number,
+    showLabels: boolean,
 }
 
 
@@ -32,27 +37,31 @@ export interface RadarChartConfig {
  * Default config
  * @type {{strokeWidth: number; margin: {top: number; left: number; bottom: number; right: number}; color: ScaleOrdinal<string, string>; maxValue: number; legend: boolean; h: number; format: string; opacityCircles: number; roundStrokes: boolean; opacityArea: number; wrapWidth: number; labelFactor: number; unit: string; w: number; levels: number; dotRadius: number}}
  */
-const DEFAULT_CONFIG = (): RadarChartConfig => ({
+export const DEFAULT_CONFIG = (): RadarChartConfig => ({
     w: 200,				//Width of the circle
     h: 200,				//Height of the circle
-    margin: { top: 60, right: 60, bottom: 60, left: 60 }, //The margins of the SVG
+    circleFillBaseColor: "#E3DCD8",
+    showLevelLabel: false,
+    margin: { top: 0, right: 0, bottom: 0, left: 0 }, //The margins of the SVG
     levels: 5,				//How many levels or inner circles should there be drawn
-    maxValue: 0, 			//What is the value that the biggest circle will represent
+    maxValue: 5, 			//What is the value that the biggest circle will represent
     labelFactor: 1.25, 	//How much farther than the radius of the outer circle should the labels be placed
     wrapWidth: 60, 		//The number of pixels after which a label needs to be given a new line
-    opacityArea: 0.35, 	//The opacity of the area of the blob
-    dotRadius: 4, 			//The size of the colored circles of each blog
-    opacityCircles: 0.1, 	//The opacity of the circles of each blob
-    strokeWidth: 2, 		//The width of the stroke around each blob
-    roundStrokes: false,	//If true the area and stroke will follow a round path (cardinal-closed)
+    opacityArea: 0.75, 	//The opacity of the area of the blob
+    dotRadius: 0, 			//The size of the colored circles of each blog
+    opacityCircles: 0.2, 	//The opacity of the circles of each blob
+    strokeWidth: 0, 		//The width of the stroke around each blob
+    roundStrokes: true,	//If true the area and stroke will follow a round path (cardinal-closed)
     format: ',d',
     unit: '',
     legend: false,
+    showTooltip: false,
     colorValues: [
         "#CC33A1",
         "#6590ED",
     ],
     fontSizePx: 12,
+    showLabels: false,
 });
 
 //Wraps SVG text - Taken from http://bl.ocks.org/mbostock/7555321
@@ -95,7 +104,8 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
 
     //If the supplied maxValue is smaller than the actual one, replace by the max in the data
     // var maxValue = max(cfg.maxValue, d3.max(data, function(i){return d3.max(i.map(function(o){return o.value;}))}));
-    let maxValue = 0;
+    let maxValue = cfg.maxValue;
+
     for (let j = 0; j < data.length; j++) {
         for (let i = 0; i < data[j].axes.length; i++) {
             data[j].axes[i].id = data[j].name;
@@ -106,8 +116,12 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     }
     maxValue = max(cfg.maxValue, maxValue);
 
-    const allAxisNames = data[0].axes.map((i, j) => i.axis),	//Names of each axis
-    total = allAxisNames.length,					//The number of different axes
+    data.forEach(r => {
+        r.axes = r.axes.sort((a, b) => a.axis.localeCompare(b.axis));
+    })
+
+    const allAxisNames = data[0]?.axes.map((i, j) => i.axis)?.sort() ?? [""],	//Names of each axis
+    total = allAxisNames?.length ?? 0,					//The number of different axes
     radius = Math.min(cfg.w / 2, cfg.h / 2), 	//Radius of the outermost circle
     Format = d3.format(cfg.format),			 	//Formatting
     angleSlice = Math.PI * 2 / total;		//The width in radians of each "slice"
@@ -127,8 +141,9 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
 
     //Initiate the radar chart SVG
     const svg = parent.append("svg")
-    .attr("width", cfg.w + cfg.margin.left + cfg.margin.right)
-    .attr("height", cfg.h + cfg.margin.top + cfg.margin.bottom)
+    // .attr("width", cfg.w + cfg.margin.left + cfg.margin.right)
+    // .attr("height", cfg.h + cfg.margin.top + cfg.margin.bottom)
+    .attr("viewBox", `0 0 ${ cfg.w + cfg.margin.left + cfg.margin.right } ${ cfg.h + cfg.margin.top + cfg.margin.bottom }`)
     .attr("class", "radar");
 
     //Append a g element
@@ -160,29 +175,31 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     .append("circle")
     .attr("class", "gridCircle")
     .attr("r", d => radius / cfg.levels * d)
-    .style("fill", "#CDCDCD")
-    .style("stroke", "#CDCDCD")
+    .style("fill", cfg.circleFillBaseColor)
     .style("fill-opacity", cfg.opacityCircles)
     .style("filter", "url(#glow)");
 
-    //Text indicating at what % each level is
-    axisGrid.selectAll(".axisLabel")
-    .data(d3.range(1, (cfg.levels + 1)).reverse())
-    .enter().append("text")
-    .attr("class", "axisLabel")
-    .attr("x", 4)
-    .attr("y", d => -d * radius / cfg.levels)
-    .attr("dy", "0.4em")
-    .style("font-size", "10px")
-    .attr("fill", "#737373")
-    .text(d => Format(maxValue * d / cfg.levels) + cfg.unit);
+    if (cfg.showLevelLabel) {
+        //Text indicating at what % each level is
+        axisGrid.selectAll(".axisLabel")
+        .data(d3.range(1, (cfg.levels + 1)).reverse())
+        .enter().append("text")
+        .attr("class", "axisLabel")
+        .attr("x", 4)
+        .attr("y", d => -d * radius / cfg.levels)
+        .attr("dy", "0.4em")
+        .style("font-size", "10px")
+        .attr("fill", "#737373")
+        .text(d => Format(maxValue * d / cfg.levels) + cfg.unit);
+    }
+
 
     /////////////////////////////////////////////////////////
     //////////////////// Draw the axes //////////////////////
     /////////////////////////////////////////////////////////
 
     //Create the straight lines radiating outward from the center
-    let axis = axisGrid.selectAll(".axis")
+    const axis = axisGrid.selectAll(".axis")
     .data(allAxisNames)
     .enter()
     .append("g")
@@ -195,18 +212,22 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     .attr("y2", (d, i) => rScale(maxValue * 1.1) * sin(angleSlice * i - HALF_PI))
     .attr("class", "line")
     .style("stroke", "white")
-    .style("stroke-width", "2px");
+    .style("stroke-width", "1px");
+
 
     //Append the labels at each axis
-    axis.append("text")
-    .attr("class", "legend")
-    .style("font-size", `${ cfg.fontSizePx }px`)
-    .attr("text-anchor", "middle")
-    .attr("dy", "0.35em")
-    .attr("x", (d, i) => rScale(maxValue * cfg.labelFactor) * cos(angleSlice * i - HALF_PI))
-    .attr("y", (d, i) => rScale(maxValue * cfg.labelFactor) * sin(angleSlice * i - HALF_PI))
-    .text(d => d)
-    .call(wrapText, cfg.wrapWidth);
+    if (cfg.showLabels) {
+        axis.append("text")
+        .attr("class", "legend")
+        .style("font-size", `${ cfg.fontSizePx }px`)
+        .attr("text-anchor", "middle")
+        .attr("dy", "0.35em")
+        .attr("x", (d, i) => rScale(maxValue * cfg.labelFactor) * cos(angleSlice * i - HALF_PI))
+        .attr("y", (d, i) => rScale(maxValue * cfg.labelFactor) * sin(angleSlice * i - HALF_PI))
+        .text(d => d)
+        .call(wrapText, cfg.wrapWidth);
+
+    }
 
     /////////////////////////////////////////////////////////
     ///////////// Draw the radar chart blobs ////////////////
@@ -227,7 +248,8 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     .data(data)
     .enter()
     .append("g")
-    .attr("class", "radarWrapper");
+    .attr("class", "radarWrapper")
+    .style("mix-blend-mode", "multiply");
 
     //Append the backgrounds
     blobWrapper
@@ -281,49 +303,53 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     //////// Append invisible circles for tooltip ///////////
     /////////////////////////////////////////////////////////
 
-    //Wrapper for the invisible circles on top
-    const blobCircleWrapper = g.selectAll(".radarCircleWrapper")
-    .data(data)
-    .enter().append("g")
-    .attr("class", "radarCircleWrapper");
+    if (cfg.showTooltip) {
 
-    //Append a set of invisible circles on top for the mouseover pop-up
-    blobCircleWrapper.selectAll(".radarInvisibleCircle")
-    .data(d => d.axes)
-    .enter().append("circle")
-    .attr("class", "radarInvisibleCircle")
-    .attr("r", cfg.dotRadius * 1.5)
-    .attr("cx", (d, i) => rScale(d.value) * cos(angleSlice * i - HALF_PI))
-    .attr("cy", (d, i) => rScale(d.value) * sin(angleSlice * i - HALF_PI))
-    .style("fill", "none")
-    .style("pointer-events", "all")
-    .on("mouseover", function (d, i) {
-        tooltip
-        .attr('x', this.cx.baseVal.value - 10)
-        .attr('y', this.cy.baseVal.value - 10)
-        .transition()
-        .style('display', 'block')
-        .text(Format(d.value) + cfg.unit);
-    })
-    .on("mouseout", function () {
-        tooltip.transition()
-        .style('display', 'none').text('');
-    });
 
-    const tooltip = g.append("text")
-    .attr("class", "tooltip")
-    .attr('x', 0)
-    .attr('y', 0)
-    .style("font-size", "12px")
-    .style('display', 'none')
-    .attr("text-anchor", "middle")
-    .attr("dy", "0.35em");
+        //Wrapper for the invisible circles on top
+        const blobCircleWrapper = g.selectAll(".radarCircleWrapper")
+        .data(data)
+        .enter().append("g")
+        .attr("class", "radarCircleWrapper");
 
+        //Append a set of invisible circles on top for the mouseover pop-up
+        blobCircleWrapper.selectAll(".radarInvisibleCircle")
+        .data(d => d.axes)
+        .enter().append("circle")
+        .attr("class", "radarInvisibleCircle")
+        .attr("r", cfg.dotRadius * 1.5)
+        .attr("cx", (d, i) => rScale(d.value) * cos(angleSlice * i - HALF_PI))
+        .attr("cy", (d, i) => rScale(d.value) * sin(angleSlice * i - HALF_PI))
+        .style("fill", "none")
+        .style("pointer-events", "all")
+        .on("mouseover", function (d, i) {
+            tooltip
+            .attr('x', this.cx.baseVal.value - 10)
+            .attr('y', this.cy.baseVal.value - 10)
+            .transition()
+            .style('display', 'block')
+            .text(Format(d.value) + cfg.unit);
+        })
+        .on("mouseout", function () {
+            tooltip.transition()
+            .style('display', 'none').text('');
+        });
+
+        const tooltip = g.append("text")
+        .attr("class", "tooltip")
+        .attr('x', 0)
+        .attr('y', 0)
+        .style("font-size", "12px")
+        .style('display', 'none')
+        .attr("text-anchor", "middle")
+        .attr("dy", "0.35em");
+    }
     if (cfg.legend !== false && typeof cfg.legend === "object") {
-        let legendZone = svg.append('g');
-        let names = data.map(el => el.name);
+        const legendZone = svg.append('g');
+        const names = data.map(el => el.name);
         if (cfg.legend?.title) {
-            let title = legendZone.append("text")
+            //append title
+            legendZone.append("text")
             .attr("class", "title")
             .attr('transform', `translate(${ cfg.legend.translateX },${ cfg.legend.translateY })`)
             .attr("x", cfg.w - 70)
@@ -332,7 +358,7 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
             .attr("fill", "#404040")
             .text(cfg.legend.title);
         }
-        let legend = legendZone.append("g")
+        const legend = legendZone.append("g")
         .attr("class", "legend")
         .attr("height", 100)
         .attr("width", 200)

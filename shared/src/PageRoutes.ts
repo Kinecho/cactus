@@ -19,6 +19,7 @@ export enum PageRoute {
     CORE_VALUES = "/core-values",
     AUTHENTICATE_ACTIONS = "/authenticate-actions",
     PAYMENT_CANCELED = "/cancel",
+    GAP_ANALYSIS = "/gap-analysis",
 
     /**
      * @deprecated

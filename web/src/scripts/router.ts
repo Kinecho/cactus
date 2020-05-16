@@ -6,7 +6,8 @@ import { MetaRouteConfig, updateRouteMeta } from "@web/router-meta";
 import { isExternalUrl } from "@shared/util/StringUtil";
 import LoadingPage from "@web/views/LoadingPage.vue";
 import ErrorPage from "@web/views/ErrorPage.vue";
-import { Component, AsyncComponent } from "vue";
+import { Component } from "vue";
+import { Screen } from "@components/gapanalysis/GapAssessmentTypes";
 
 const logger = new Logger("router.ts");
 
@@ -156,6 +157,47 @@ const routes: MetaRouteConfig[] = [
         component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@components/CoreValuesPage.vue")),
         path: PageRoute.CORE_VALUES,
         name: "Core Values",
+        meta: {
+            title: "Discover your core values",
+            description: "Core values are the general expression of what is most important for you, and they help you " +
+            "understand past decisions and make better decisions in the future."
+        }
+    },
+    {
+        path: PageRoute.VALUES_HOME,
+        redirect: PageRoute.CORE_VALUES,
+    },
+    {
+        path: PageRoute.GAP_ANALYSIS,
+        component: () => import("@web/views/GapAnalysisPage.vue"),
+        name: "GapAnalysisPage",
+        meta: {
+            title: "Happiness Quiz | Cactus"
+        },
+        props: (route) => {
+            return {
+                resultsId: route.params.resultsId,
+                screen: route.params.screen ?? Screen.intro,
+                questionIndex: route.params.screen === Screen.questions ? Number(route.params.index ?? 0) : 0,
+            }
+        },
+        children: [
+            {
+                path: ":resultsId",
+                props: true,
+                children: [
+                    {
+                        path: ":screen",
+                        props: true,
+                        children: [
+                            {
+                                path: ":index",
+                            },
+                        ]
+                    }
+                ]
+            }
+        ]
     },
     {
         component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@components/EmailActionHandler.vue")),
@@ -221,8 +263,7 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
     try {
-        const meta = updateRouteMeta(to, from);
-        logger.info("Setting page meta:", meta);
+        updateRouteMeta(to, from);
     } catch (error) {
         logger.error("Failed to update meta", error);
     } finally {

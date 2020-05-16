@@ -20,7 +20,7 @@
     import Spinner from "@components/Spinner.vue";
     import Component from "vue-class-component";
     import LoadingPage from "@web/views/LoadingPage.vue";
-    import { getQueryParam } from "@web/util";
+    import { getQueryParam, removeQueryParam } from "@web/util";
     import { QueryParam } from "@shared/util/queryParams";
     import { appendQueryParams } from "@shared/util/StringUtil";
     import Logger from "@shared/Logger"
@@ -40,9 +40,9 @@
         showLoading = true;
 
         beforeMount() {
-
             this.showLoading = getQueryParam(QueryParam.CLEAR_CACHE) !== "true";
             logger.info("show loading = ", this.showLoading);
+            removeQueryParam(QueryParam.CLEAR_CACHE);
         }
 
         mounted() {

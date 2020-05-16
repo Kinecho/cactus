@@ -1,5 +1,6 @@
 import { CoreValue } from "@shared/models/CoreValueTypes";
-import CoreValuesQuestion, { QuestionType } from "@shared/models/CoreValuesQuestion";
+import CoreValuesQuestion from "@shared/models/CoreValuesQuestion";
+import { QuestionType } from "@shared/models/Questions";
 
 export interface ResponseValidation {
     isValid: boolean,

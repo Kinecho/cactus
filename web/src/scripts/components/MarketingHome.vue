@@ -4,12 +4,8 @@
             <section class="hero">
                 <div class="heroText">
                     <h1>What makes you&nbsp;happy?</h1>
-                    <p class="subtext">Questions designed to improve how you think about work, life, relationships, and&nbsp;emotions</p>
-                    <h3 id="tryItHeader" v-if="showTryItHeader">Try it free:</h3>
-                    <div class="app-icons">
-                        <AppStoreIcon :onlyiOS="true" :onlyMobile="true"/>
-                        <PlayStoreIcon :onlyAndroid="true" :onlyMobile="true"/>
-                    </div>
+                    <p class="subtext">Questions designed to improve how you think about your work, life, relationships, and emotions</p>
+                    <router-link :to="assessmentHref" tag="button" class="quizBtn primary">Take the quiz</router-link>
                 </div>
                 <aside class="graphicContainer">
                     <p class="sampleQuestion">What helps you unwind and recuperate?</p>
@@ -21,16 +17,6 @@
                         <p class="demoText">Today you’ll reflect on your favorite thing to do on a sunny&nbsp;day.</p>
                     </div>
                 </aside>
-                <div id="signupAnchor"></div>
-                <form class="heroForm" id="sign-up-top">
-                    <div class="alert error hidden">Sorry, looks like we have issues.</div>
-                    <input type="email" name="email" placeholder="Enter your email address">
-                    <button type="submit" name="submit" class="email-submit-button">Try It Free</button>
-                    <div class="app-icons">
-                        <AppStoreIcon/>
-                        <PlayStoreIcon/>
-                    </div>
-                </form>
             </section>
         </div>
         <section class="why">
@@ -44,7 +30,7 @@
                         <p class="text">A daily question helps you focus on the positives in your&nbsp;life.</p>
                     </div>
                     <div class="benefit">
-                        <img src="assets/images/benefit2.png" alt="Self-discovery image" class="illustration"/>
+                        <img src="/assets/images/benefit2.png" alt="Self-discovery image" class="illustration"/>
                         <h5>Self-Discovery</h5>
                         <p class="text">Exercises are designed to help your journey of&nbsp;self-discovery.</p>
                     </div>
@@ -54,7 +40,7 @@
                         <p class="text">Privately record your thoughts through text, speech, and&nbsp;photos.</p>
                     </div>
                     <div class="benefit">
-                        <img src="assets/images/benefit4.png" alt="Growth image" class="illustration"/>
+                        <img src="/assets/images/benefit4.png" alt="Growth image" class="illustration"/>
                         <h5>Growth</h5>
                         <p class="text">Celebrate your mindful practice and personal&nbsp;growth.</p>
                     </div>
@@ -66,7 +52,7 @@
                 <h2>Fortify your EQ</h2>
                 <p class="subtext">Cactus helps make you more optimistic, generous to yourself and others,
                     and&nbsp;healthier.</p>
-                <img src="assets/images/fortify.png" alt="Fortify image" class="sectionImg"/>
+                <img src="/assets/images/fortify.png" alt="Fortify image" class="sectionImg"/>
             </section>
             <section class="private">
                 <h2 class="magenta">Private and secure</h2>
@@ -77,14 +63,13 @@
                     <div class="flexContainer">
                         <p class="date">Nov 12, 2019</p>
                         <button class="secondary icon" aria-label="Unclickable Option Menu">
-                            <img src="assets/images/dots.svg" alt="" class="iconImg"/></button>
+                            <img src="/assets/images/dots.svg" alt="" class="iconImg"/></button>
                     </div>
                     <p class="question">What experiences or activities make you lose track of&nbsp;time?</p>
                     <div class="reply"></div>
                 </div>
             </section>
         </div>
-
         <section class="testimonials list">
             <div class="centered">
                 <h2>What people are saying</h2>
@@ -141,11 +126,7 @@
             <section class="email">
                 <h2 class="emailHeader">A reflection a day…</h2>
                 <p class="subtext">Cactus is a different kind of mindfulness.</p>
-                <form id="email-form-bottom" class="lowerForm">
-                    <div class="alert error hidden">Sorry, looks like we have issues.</div>
-                    <input type="email" name="email" placeholder="Enter your email address">
-                    <button type="submit" name="submit" class="email-submit-button">Try It Free</button>
-                </form>
+                <router-link :to="assessmentHref" tag="button" class="quizBtn primary">Take the quiz</router-link>
             </section>
         </div>
     </div>
@@ -157,34 +138,42 @@
     import AppStoreIcon from "@components/AppStoreIcon.vue";
     import PlayStoreIcon from "@components/PlayStoreIcon.vue";
     import { configureLoginForm } from "@web/mailchimp";
+    import Component from "vue-class-component";
+    import { PageRoute } from "@shared/PageRoutes";
 
-    export default Vue.extend({
-        name: "MarketingHome",
+    @Component({
         components: {
             AppStoreIcon,
             PlayStoreIcon,
-        },
+        }
+    })
+    export default class MarketingHome extends Vue {
+        name = "MarketingHome";
+
         beforeMount() {
             this.isMobileDevice = (isAndroidDevice() || isIosDevice());
             this.isAndroidApp = isAndroidApp();
-        },
+        }
+
         mounted() {
             //Legacy sign up form code.
             configureLoginForm("email-form-bottom");
             configureLoginForm("sign-up-top");
-        },
-        data(): { isMobileDevice: boolean, isAndroidApp: boolean } {
-            return {
-                isMobileDevice: false,
-                isAndroidApp: false,
-            }
-        },
-        computed: {
-            showTryItHeader(): boolean {
-                return this.isMobileDevice && this.isAndroidApp;
-            }
         }
-    })
+
+        isMobileDevice = false;
+        isAndroidApp = false;
+
+
+        get assessmentHref(): string {
+            return PageRoute.GAP_ANALYSIS;
+        }
+
+        get showTryItHeader(): boolean {
+            return this.isMobileDevice && this.isAndroidApp;
+        }
+
+    }
 </script>
 
 <style scoped lang="scss">
@@ -213,6 +202,7 @@
     .hero {
         display: grid;
         grid-template-areas: "heroText" "demo" "target" "form";
+        grid-template-rows: auto;
         margin: 2.4rem auto 0;
         max-width: 50rem;
         position: relative;
@@ -236,8 +226,16 @@
         .heroText {
             align-self: end;
             grid-area: heroText;
-            margin: 0 auto 4rem;
+            margin: 0 auto 4.8rem;
             max-width: 60rem;
+
+            @include r(768) {
+                margin: 0;
+                text-align: left;
+            }
+            @include r(1140) {
+                padding-top: 8rem;
+            }
 
             .app-icons {
                 display: flex;
@@ -260,28 +258,20 @@
             .play-store-icon {
                 margin-top: 1.6rem;
             }
-
-            @include r(768) {
-                margin: 0;
-                text-align: left;
-            }
-            @include r(1140) {
-                padding-top: 8rem;
-            }
         }
 
         h1 {
             line-height: 1.2;
-            margin: .8rem 2.4rem .4rem;
+            margin: .8rem 2.4rem;
 
             @include r(768) {
-                margin: 0 2.4rem .4rem 0;
+                margin: 0 2.4rem .8rem 0;
                 max-width: 65rem;
             }
         }
 
         .subtext {
-            margin: 0 2.4rem;
+            margin: 0 2.4rem 2.4rem;
 
             @include r(768) {
                 margin: 0 2.4rem 3.2rem 0;
@@ -330,9 +320,13 @@
         top: 32rem;
     }
 
+    .quizBtn {
+        min-width: 24rem;
+    }
+
     .graphicContainer {
         align-self: end;
-        background: url(assets/images/demoBg.png) no-repeat center bottom -10rem/38rem;
+        background: url(/assets/images/demoBg.png) no-repeat center bottom -10rem/38rem;
         grid-area: demo;
         overflow: hidden;
         position: relative;
@@ -541,7 +535,7 @@
 
     section.private {
         align-items: center;
-        background: $beige url(assets/images/pinkBlobNeedleBg.png) no-repeat center top 16rem/36rem;
+        background: $beige url(/assets/images/pinkBlobNeedleBg.png) no-repeat center top 16rem/36rem;
         display: flex;
         flex-direction: column;
         padding: 4.8rem 2.4rem 8rem;
@@ -707,7 +701,7 @@
 
     section.email {
         background-color: $beige;
-        padding: 5.6rem 0 .8rem;
+        padding: 5.6rem 0;
         position: relative;
         z-index: 1;
 

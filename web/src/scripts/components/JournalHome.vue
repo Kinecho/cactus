@@ -12,8 +12,7 @@
                 color="successAlt">
             <div slot="text" class="centered">
                 <h3>Welcome to Cactus Plus!</h3>
-                <p>You just upgraded and it made our day. If you ever have questions or feedback, please reach out to us
-                    at <a href="mailto:help@cactus.app">help@cactus.app</a>.</p>
+                <p>Now you have full access to personalized activities, insights, and tools to help you better know yourself. If you have questions or feedback, please reach out to us at <a href="mailto:help@cactus.app">help@cactus.app</a>.</p>
             </div>
         </snackbar-content>
         <div class="container centered">
@@ -28,13 +27,9 @@
 
             <transition name="fade-in-fast" appear mode="out-in">
                 <div class="section-container" v-if="showOnboardingPrompt" :key="'empty'">
-                    <section class="empty journalList">
-                        <h1>Welcome to Cactus</h1>
-                        <p>To get started, you'll learn about how Cactus works and reflect on your first question of the&nbsp;day.</p>
-                        <img class="graphic" src="assets/images/emptyState.png" alt="Three friends welcoming you"/>
-                        <a class="button primary" :href="firstPromptPath">Let's Begin</a>
-                    </section>
+                    <journal-home-empty-state :focus-element="focusElement" :tier="tier"/>
                 </div>
+
                 <div class="section-container" v-if="loggedIn && loginReady && journalEntries.length > 0">
                     <!-- TODO: this key isn't right -->
                     <snackbar-content
@@ -117,6 +112,8 @@
     import { fireOptInStartTrialEvent } from "@web/analytics";
     import StorageService, { LocalStorageKey } from "@web/services/StorageService";
     import { pushRoute } from "@web/NavigationUtil";
+    import JournalHomeEmptyState from "@components/JournalHomeEmptyState.vue";
+    import { CactusElement } from "@shared/models/CactusElement";
 
     const logger = new Logger("JournalHome.vue");
 
@@ -136,10 +133,12 @@
         coreValuesClosed: boolean,
         upgradeConfirmed: boolean,
         loggingOut: boolean,
+        windowScrollHandler: any,
     }
 
     export default Vue.extend({
         components: {
+            JournalHomeEmptyState,
             NavBar,
             entry: JournalEntryCard,
             AutoPromptContentModal,
@@ -154,6 +153,7 @@
         },
         mounted() {
             let handler = debounce(this.scrollHandler, 10);
+            this.windowScrollHandler = handler;
             window.addEventListener('scroll', handler);
             this.scrollHandler();
 
@@ -285,12 +285,14 @@
                 coreValuesClosed: false,
                 upgradeConfirmed: false,
                 loggingOut: false,
+                windowScrollHandler: undefined,
             };
         },
         destroyed() {
             this.authUnsubscribe?.();
             this.todayUnsubscriber?.();
             this.dataSource?.stop();
+            window.removeEventListener('scroll', this.windowScrollHandler);
         },
         methods: {
             beforeEnter: function (el: HTMLElement) {
@@ -328,6 +330,9 @@
             }
         },
         computed: {
+            tier(): SubscriptionTier|null {
+                return this.cactusMember?.tier ?? null;
+            },
             email(): string | undefined | null {
                 return this.user ? this.user.email : null;
             },
@@ -355,6 +360,12 @@
                 this.loginReady &&
                 this.dataHasLoaded &&
                 this.journalEntries.length === 0)
+            },
+            focusElement(): CactusElement | null {
+                if (this.dataHasLoaded && this.cactusMember) {
+                    return this.cactusMember?.focusElement ?? null;
+                }
+                return null;
             }
         }
     })
@@ -416,7 +427,7 @@
     }
 
     .coreValuesBox {
-        background-image: url(assets/images/grainy.png), url(assets/images/cvBlob.png), url(assets/images/pinkVs.svg);
+        background-image: url(/assets/images/grainy.png), url(/assets/images/cvBlob.png), url(/assets/images/pinkVs.svg);
         background-position: 0 0, -14rem -15rem, -7rem 120%;
         background-repeat: repeat, no-repeat, no-repeat;
         background-size: auto, 28rem, auto;
@@ -497,42 +508,6 @@
                 &.out {
                     transform: translateY(-30px);
                     opacity: 0;
-                }
-            }
-
-            &.empty {
-                align-items: center;
-                justify-content: center;
-                padding: 2.4rem;
-                text-align: center;
-
-                h1 {
-                    line-height: 1.2;
-                    margin-bottom: .4rem;
-                }
-
-                p {
-                    margin: 0 auto 2.4rem;
-                    max-width: 60rem;
-                    opacity: .8;
-
-                    @include r(768) {
-                        margin-bottom: 1.6rem;
-                    }
-                }
-
-                .graphic {
-                    margin-bottom: 2.4rem;
-                    max-width: 56rem;
-                    width: 90%;
-
-                    @include r(768) {
-                        margin-bottom: 1.6rem;
-                    }
-                }
-
-                .button {
-                    min-width: 22rem;
                 }
             }
 
