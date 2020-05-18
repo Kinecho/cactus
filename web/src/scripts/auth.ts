@@ -14,7 +14,7 @@ import {
 import { QueryParam } from "@shared/util/queryParams";
 import StorageService, { LocalStorageKey } from "@web/services/StorageService";
 import CactusMemberService from "@web/services/CactusMemberService";
-import { fireConfirmedSignupEvent, fireSignupEvent } from "@web/analytics";
+import { fireConfirmedSignupEvent, fireLoginEvent, fireSignupLeadEvent } from "@web/analytics";
 import Logger from "@shared/Logger";
 import { getAppType, isAndroidApp } from "@web/DeviceUtil";
 import router from "@web/router";
@@ -155,14 +155,17 @@ export async function sendLoginEvent(args: {
                            implement the Facebook Ads API */
                         if (event.isNewUser && isThirdPartySignIn(event.providerId)) {
                             // new user who did not previous enter their email address
-                            await fireSignupEvent();
+                            await fireSignupLeadEvent();
                         }
                         if (event.isNewUser) {
                             // all new users
                             await fireConfirmedSignupEvent({
                                 email: args.user?.email || undefined,
-                                userId: args.user?.uid
+                                userId: args.user?.uid,
+                                method: event.providerId,
                             });
+                        } else {
+                            await fireLoginEvent({ method: event.providerId });
                         }
                     } catch (error) {
                         logger.error("failed to send login event", error);

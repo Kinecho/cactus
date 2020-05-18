@@ -133,8 +133,10 @@ export function setUser(user?: User | null) {
     }
 }
 
-export async function fireConfirmedSignupEvent(options: { email?: string, userId?: string }): Promise<void> {
+export async function fireConfirmedSignupEvent(options: { email?: string, userId?: string, method?: string }): Promise<void> {
     return new Promise(async resolve => {
+
+        firebaseAnalytics().logEvent("sign_up", {method: options.method})
 
         logger.debug("Firing confirmed signup event");
         /* Facebook */
@@ -149,7 +151,11 @@ export async function fireConfirmedSignupEvent(options: { email?: string, userId
     })
 }
 
-export async function fireSignupEvent() {
+export function fireLoginEvent(options: { method?: string }) {
+    firebaseAnalytics().logEvent("login", {method: options.method});
+}
+
+export async function fireSignupLeadEvent() {
     return new Promise(async resolve => {
         logger.info("Fired 'Lead' Event");
         /* Facebook */

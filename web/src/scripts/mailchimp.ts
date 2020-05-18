@@ -2,7 +2,7 @@ import "firebase/functions"
 import SignupRequest from "@shared/mailchimp/models/SignupRequest";
 import {Endpoint, getAuthHeaders, request} from "@web/requestUtils";
 import SubscriptionResult from "@shared/mailchimp/models/SubscriptionResult";
-import {gtag, fireSignupEvent} from "@web/analytics";
+import {gtag, fireSignupLeadEvent} from "@web/analytics";
 import {addModal, getQueryParam, showModal} from "@web/util";
 import {QueryParam} from "@shared/util/queryParams";
 import {sendEmailLinkSignIn} from "@web/auth";
@@ -160,7 +160,7 @@ export function configureLoginForm(formId: string) {
                     event_category: "email_signup",
                     event_label: `${formId}`
                 });
-                await fireSignupEvent();
+                await fireSignupLeadEvent();
                 showModal(modalId);
 
 
