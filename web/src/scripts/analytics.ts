@@ -136,7 +136,7 @@ export function setUser(user?: User | null) {
 export async function fireConfirmedSignupEvent(options: { email?: string, userId?: string, method?: string }): Promise<void> {
     return new Promise(async resolve => {
 
-        firebaseAnalytics().logEvent("sign_up", {method: options.method})
+        firebaseAnalytics().logEvent("sign_up", { method: options.method })
 
         logger.debug("Firing confirmed signup event");
         /* Facebook */
@@ -151,8 +151,9 @@ export async function fireConfirmedSignupEvent(options: { email?: string, userId
     })
 }
 
-export function fireLoginEvent(options: { method?: string }) {
-    firebaseAnalytics().logEvent("login", {method: options.method});
+export async function fireLoginEvent(options: { method?: string }): void {
+    firebaseAnalytics().logEvent("login", { method: options.method });
+    return;
 }
 
 export async function fireSignupLeadEvent() {

@@ -165,7 +165,7 @@ export async function sendLoginEvent(args: {
                                 method: event.providerId,
                             });
                         } else {
-                            await fireLoginEvent({ method: event.providerId });
+                            fireLoginEvent({ method: event.providerId });
                         }
                     } catch (error) {
                         logger.error("failed to send login event", error);
