@@ -208,7 +208,7 @@
         get coreValuesDropdownLinks(): DropdownMenuLink[] {
             return [{
                 title: "Retake Assessment",
-                href: `${ PageRoute.CORE_VALUES }?=${ QueryParam.CV_LAUNCH }=true`,
+                href: `${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`,
             }];
         }
 
