@@ -151,9 +151,8 @@ export async function fireConfirmedSignupEvent(options: { email?: string, userId
     })
 }
 
-export async function fireLoginEvent(options: { method?: string }): void {
+export function fireLoginEvent(options: { method?: string }) {
     firebaseAnalytics().logEvent("login", { method: options.method });
-    return;
 }
 
 export async function fireSignupLeadEvent() {
