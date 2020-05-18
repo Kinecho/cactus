@@ -52,7 +52,7 @@
                     <img class="ccIcon" src="/assets/icons/creditCard.svg" alt=""/>
                     <div class="cardDetails">
                         <span class="brand" v-if="cardBrandName">{{cardBrandName}}</span>
-                        <span class="last4" v-if="last4">ending in {{last4}}</span>
+                        <span class="last4" v-if="last4"> ending in {{last4}}</span>
                         <p class="expires" v-if="cardExpiration">Expires: {{cardExpiration}}</p>
                         <p class="wallet" v-if="digitalWallet && digitalWallet.displayName">
                             {{digitalWallet.displayName}}</p>
