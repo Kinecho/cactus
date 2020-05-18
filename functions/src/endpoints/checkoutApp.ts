@@ -50,6 +50,10 @@ app.get("/", async (req: express.Request, res: express.Response) => {
     res.send("totally different...." + index);
 });
 
+app.get('/healthcheck', async (req: express.Request, res: express.Response) => {
+    res.send(`OK ${ new Date().toISOString() }`);
+})
+
 app.post("/stripe/subscriptions/cancel", async (req: express.Request, res: express.Response) => {
     const userId = await getAuthUserId(req);
 
