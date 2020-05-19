@@ -1,7 +1,7 @@
 <template>
     <GapAnalysisUpsell :checkout-loading="loading"
             :subscription-product="product"
-            :element="element"
+            :element="selectedElement"
             @checkout="checkout"
             @skip="skip"/>
 </template>
@@ -15,6 +15,8 @@
     import { Prop, Watch } from "vue-property-decorator";
     import SubscriptionProductService from "@web/services/SubscriptionProductService";
     import Logger from "@shared/Logger"
+    import { getQueryParam } from "@web/util";
+    import { QueryParam } from "@shared/util/queryParams";
 
     const logger = new Logger("LoadableGapAnalysisUpsell");
 
@@ -24,8 +26,8 @@
     export default class LoadableGapAnalysisUpsell extends Vue {
         name = "LoadableGapAnalysisUpsell";
 
-        @Prop({ type: String as () => CactusElement, required: true })
-        element!: CactusElement;
+        @Prop({ type: String as () => CactusElement, required: false, default: null })
+        element!: CactusElement | null;
 
         @Prop({ type: String as () => BillingPeriod, required: true, default: BillingPeriod.yearly })
         billingPeriod!: BillingPeriod;
@@ -66,6 +68,10 @@
 
         skip() {
             this.$emit('skip');
+        }
+
+        get selectedElement(): CactusElement | null {
+            return this.element ?? getQueryParam(QueryParam.SELECTED_ELEMENT) as (CactusElement | null) ?? null;
         }
     }
 </script>

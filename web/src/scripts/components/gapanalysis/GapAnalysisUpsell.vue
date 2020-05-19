@@ -67,8 +67,8 @@
     export default class GapAnalysisUpsell extends Vue {
         name = "GapAnalysisUpsell";
 
-        @Prop({ type: String as () => CactusElement, required: true })
-        element!: CactusElement;
+        @Prop({ type: String as () => CactusElement, required: false, default: null })
+        element!: CactusElement|null;
 
         @Prop({ type: Object as () => SubscriptionProduct, required: false, default: null })
         subscriptionProduct!: SubscriptionProduct | null;

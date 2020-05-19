@@ -49,7 +49,10 @@
                                     :is-restoring-purchases="isRestoringPurchases"
                                     :class="{active: activetab === i}"
                                     :showFooter="showFooter"
-                                    :startTrial="startTrial"/>
+                                    :startTrial="startTrial"
+                                    :checkout-cancel-url="checkoutCancelUrl"
+                                    :checkout-success-url="checkoutSuccessUrl"
+                            />
                         </template>
 
                     </div>
@@ -97,6 +100,8 @@
             showFooter: { type: Boolean, default: true },
             startTrial: { type: Boolean, default: false },
             promotionName: {type: String, default: "Pricing Page"},
+            checkoutSuccessUrl: { type: String, required: false },
+            checkoutCancelUrl: { type: String, required: false },
         },
         data(): {
             isProcessing: boolean,
