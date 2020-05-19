@@ -12,6 +12,9 @@ import Logger from "@shared/Logger";
 import { isAndroidApp } from "@web/DeviceUtil";
 import { Route } from "vue-router";
 import { CactusElement } from "@shared/models/CactusElement";
+import { isNumber } from "@shared/util/ObjectUtil";
+import { ScreenName } from "@components/gapanalysis/GapAssessmentTypes";
+import { BillingPeriod } from "@shared/models/SubscriptionProduct";
 
 const logger = new Logger("Analytics.ts");
 
@@ -186,13 +189,14 @@ export async function fireOptInStartTrialEvent(options: { value?: number, predic
                 predicted_ltv: (predicted_ltv?.toString() ?? value?.toString() ?? '0.00')
             });
         }
-
+        const dollar = (options.value ?? 0);
         //if web, it means we checked out via stripe.
         if (!isAndroidApp()) {
-            const dollar = (options.value ?? 0);
             //@ts-ignore
             firebaseAnalytics().logEvent("purchase", { value: dollar, currency: 'USD' })
         }
+
+        firebaseAnalytics().logEvent("trial_start", { value: dollar, currency: 'USD' })
 
         resolve();
     })
@@ -266,4 +270,35 @@ export function logGapAnalysisCompleted() {
 
 export function logGapAnalysisCanceled(screen?: string | null) {
     firebaseAnalytics().logEvent("gap_analysis_canceled", { screen });
+}
+
+
+export function logGapAnalysisScreen(screen: ScreenName, questionId?: number) {
+    let params = {};
+    if (!isNumber(questionId)) {
+        params = { question: questionId };
+    }
+    firebaseAnalytics().logEvent(`gap_analysis_screen_${ screen }`, params)
+}
+
+export function logPresentSubscriptionOffers(options: {
+    promotionName?: string,
+    creativeName?: string,
+    products: {
+        subscriptionProductId?: string,
+        billingPeriod?: BillingPeriod,
+        name?: string
+    }[]
+}) {
+    const items = options.products.map(product => ({
+        item_category: product.billingPeriod,
+        item_name: product.name,
+        item_id: product.subscriptionProductId
+    }));
+
+    firebaseAnalytics().logEvent("view_promotion", {
+        items,
+        promotion_name: options.promotionName,
+        creative_name: options.creativeName,
+    })
 }

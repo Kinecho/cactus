@@ -103,10 +103,10 @@
 </script>
 
 <style scoped lang="scss">
-  @import "~styles/common";
-  @import "~styles/mixins";
-  @import "~styles/transitions";
-  @import "~styles/pages/pricing";
+  @import "common";
+  @import "mixins";
+  @import "transitions";
+  @import "pages/pricing";
   
   .top-message {
       border-radius: 0;

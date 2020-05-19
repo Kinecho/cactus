@@ -88,6 +88,7 @@
             <template v-else-if="currentScreen === Screen.upgrade">
                 <LoadableGapAnalysisUpsell :element="selectedElement"
                         :billing-period="upsellBillingPeriod"
+                        @product="upsellProductLoaded"
                         @checkout="startCheckout"
                         @skip="skipCheckout"/>
             </template>
@@ -195,6 +196,10 @@
 
         elementSelected(element: CactusElement | undefined) {
             this.selectedElement = element ?? null;
+        }
+
+        async upsellProductLoaded(product: SubscriptionProduct|undefined|null) {
+            this.$emit('upsellProductLoaded', product);
         }
 
         get currentQuestion(): GapAnalysisQuestion | null {

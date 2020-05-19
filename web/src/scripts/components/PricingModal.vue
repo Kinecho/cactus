@@ -24,7 +24,7 @@
             </div>
         </div>
         <div class="pricingWrapper">
-            <PremiumPricing :showFooter="false" :startTrial="true" />
+            <PremiumPricing :showFooter="false" :startTrial="true" promotion-name="Pricing Modal" />
         </div>
     </div>
   </modal>

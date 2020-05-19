@@ -82,6 +82,7 @@
     import AndroidService from "@web/android/AndroidService";
     import { restoreAndroidPurchases } from "@web/checkoutService";
     import { pushRoute } from "@web/NavigationUtil";
+    import { logPresentSubscriptionOffers } from "@web/analytics";
 
     const copy = CopyService.getSharedInstance().copy;
     const logger = new Logger("PremiumPricing");
@@ -94,7 +95,8 @@
             tabsOnMobile: { type: Boolean, default: true },
             learnMoreLinks: { type: Boolean, default: false },
             showFooter: { type: Boolean, default: true },
-            startTrial: { type: Boolean, default: false }
+            startTrial: { type: Boolean, default: false },
+            promotionName: {type: String, default: "Pricing Page"},
         },
         data(): {
             isProcessing: boolean,
@@ -145,6 +147,18 @@
 
             this.productGroups = await SubscriptionProductGroupService.sharedInstance.getSortedProductGroupEntries();
             this.productsLoaded = true;
+
+            this.productGroups.forEach((groupEntry: SubscriptionProductGroupEntry) => {
+                const items = groupEntry.products.map(product => {
+                    return {
+                        subscriptionProductId: product?.entryId,
+                        name: product?.displayName,
+                        billingPeriod: product?.billingPeriod
+                    }
+                });
+
+                logPresentSubscriptionOffers({ products: items, promotionName: this.promotionName });
+            })
 
             const prem = getQueryParam(QueryParam.PREMIUM_DEFAULT);
 

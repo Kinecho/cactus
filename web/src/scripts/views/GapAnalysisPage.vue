@@ -23,6 +23,7 @@
                     :questionIndex="questionIndex"
                     :currentScreen="currentScreen"
                     :screens="screens"
+                    @upsellProductLoaded="upsellProductLoaded"
                     @screen="setScreen"
                     @questionChanged="setQuestion"
                     @close="closeAssessment"
@@ -52,13 +53,15 @@
     import { isPremiumTier } from "@shared/models/MemberSubscription";
     import { Prop, Watch } from "vue-property-decorator";
     import Spinner from "@components/Spinner.vue";
-    import { defaultScreens, ScreenName, Screen } from "@components/gapanalysis/GapAssessmentTypes";
+    import { defaultScreens, Screen, ScreenName } from "@components/gapanalysis/GapAssessmentTypes";
     import {
-        logCoreValuesAssessmentCompleted,
         logGapAnalysisCanceled,
         logGapAnalysisCompleted,
-        logGapAnalysisStarted
+        logGapAnalysisScreen,
+        logGapAnalysisStarted,
+        logPresentSubscriptionOffers
     } from "@web/analytics";
+    import SubscriptionProduct from "@shared/models/SubscriptionProduct";
 
     const logger = new Logger("GapAnalysisPage");
 
@@ -120,6 +123,17 @@
 
         }
 
+        async upsellProductLoaded(product: SubscriptionProduct | null | undefined) {
+            logPresentSubscriptionOffers({
+                creativeName: "Gap Analysis Upsell",
+                products: [{
+                    subscriptionProductId: product?.entryId,
+                    name: product?.displayName,
+                    billingPeriod: product?.billingPeriod
+                }]
+            })
+        }
+
         async fetchOrCreateResults() {
             if (this.member) {
                 if (this.resultsId) {
@@ -166,14 +180,15 @@
         setScreen(screen: ScreenName) {
             if (this.resultsId) {
                 if (screen === Screen.questions) {
+                    logGapAnalysisScreen(screen, this.questionIndex);
                     pushRoute(`${ PageRoute.GAP_ANALYSIS }/${ this.resultsId }/${ screen }/${ this.questionIndex }`);
                 } else {
+                    logGapAnalysisScreen(screen);
                     pushRoute(`${ PageRoute.GAP_ANALYSIS }/${ this.resultsId }/${ screen }`);
                 }
             } else {
                 this.currentScreen = screen;
             }
-
         }
 
         get signInSuccessRoute() {

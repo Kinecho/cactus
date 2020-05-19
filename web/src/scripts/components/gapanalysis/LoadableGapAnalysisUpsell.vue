@@ -30,7 +30,6 @@
         @Prop({ type: String as () => BillingPeriod, required: true, default: BillingPeriod.yearly })
         billingPeriod!: BillingPeriod;
 
-
         @Watch("billingPeriod")
         async billingPeriodChanged(current: BillingPeriod, previous: BillingPeriod | undefined) {
             if (current !== previous) {
@@ -49,6 +48,7 @@
             this.loaded = false;
             this.product = await SubscriptionProductService.sharedInstance.getByBillingPeriod(this.billingPeriod) ?? null;
             logger.info("Fetched subscription product for billing period: ", this.billingPeriod, this.product);
+            this.$emit('product', this.product);
             this.loaded = true;
         }
 
