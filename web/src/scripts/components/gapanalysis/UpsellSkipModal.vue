@@ -1,11 +1,11 @@
 <template>
     <Modal :show="show" :show-close-button="false" :dark="true">
         <div slot="body" class="skip-body">
-            <h2>Skip trying out Cactus&nbsp;Plus?</h2>
-            <p>You'll get access to your Happiness Quiz results plus exclusive tests, premium tools, personalized insights, and the endless satisfaction of knowing you’re supporting the ongoing development of Cactus.</p>
+            <h2>Close the quiz?</h2>
+            <p>Leave now and your answers will be discarded. Start a free trial to <strong>get your quiz results</strong>, plus tools designed to help you understand what makes you&nbsp;happy.
             <div class="actions">
-                <button class="" @click="$emit('close')">Go back</button>
-                <button class="secondary" @click="$emit('confirmed')">Skip for now</button>
+                <button class="" @click="$emit('close')">Try it free</button>
+                <button class="secondary" @click="$emit('confirmed')">Discard my answers</button>
             </div>
         </div>
     </Modal>
