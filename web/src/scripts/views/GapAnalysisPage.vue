@@ -243,9 +243,7 @@
             }
 
             try {
-                if (this.isPlusMember) {
-                    await pushRoute(PageRoute.INSIGHTS)
-                } else if (this.member) {
+                if (this.member) {
                     await pushRoute(PageRoute.JOURNAL_HOME);
                 } else {
                     await pushRoute(PageRoute.HOME);
