@@ -8,7 +8,7 @@
                 <h3>{{memberFocusElement}}</h3>
             </div>
             <div class="legend">
-                <gap-analysis-legend stacked="true"/>
+                <gap-analysis-legend :stacked="true"/>
             </div>
         </div>
         <div class="radarChartContainer">
