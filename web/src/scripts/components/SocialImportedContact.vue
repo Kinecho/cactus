@@ -1,11 +1,11 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="contactCard" :class="{inviting: readyToInvite}">
-        <div class="avatar" v-if="avatarUrl">
+        <div class="contactAvatar" v-if="avatarUrl">
             <img :src="avatarUrl" alt="Avatar"/>
         </div>
         <div class="contactInfo" v-if="contact">
             <p class="name">{{contact.first_name}} {{contact.last_name}}</p>
-            <p class="email">{{contact.email}}</p>
+            <p class="contactEmail">{{contact.email}}</p>
             <div class="invite" v-if="readyToInvite && !sendingInvite && !error">
                 <textarea placeholder="Include an optional note..." v-model="message"/>
                 <button class="primary" @click="sendInvite">Send Invite</button>

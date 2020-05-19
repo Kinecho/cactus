@@ -16,7 +16,7 @@
                 <span v-if="copySucceeded === false">Copy Link</span>
             </button>
         </div>
-        <div class="flexContainer">
+        <div class="sharingContainer">
             <div class="sharing native-sharing" v-if="nativeShareEnabled">
                 <button class="btn wiggle  secondary" @click="shareNatively()" >
                     <img class="icon" src="/assets/images/share.svg" alt="Share Icon"/>
@@ -152,7 +152,7 @@
 <style lang=scss>
     @import "social";
 
-    .flexContainer {
+    .sharingContainer {
         display: flex;
         justify-content: center;
     }
