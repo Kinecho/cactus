@@ -11,15 +11,15 @@
             <ul>
                 <li>
                     <svg-icon icon="heartOutline" class="icon"/>
-                    <span><strong>Personalized</strong> mental fitness activities<span v-if="element">, beginning today with&nbsp;<em>{{element}}</em></span></span>
+                    <span><strong>Personalized</strong> journal app with daily questions to reflect&nbsp;on</span>
                 </li>
                 <li>
                     <svg-icon icon="pie" class="icon"/>
-                    <span><strong>Insights dashboard</strong>, visualizing your progress as you use&nbsp;Cactus</span>
+                    <span><strong>Insights dashboard</strong>, showing the things that make you&nbsp;happy</span>
                 </li>
                 <li>
                     <svg-icon icon="checkCircle" class="icon"/>
-                    <span><strong>Tools</strong> to help you better know yourself, including your unique core&nbsp;values</span>
+                    <span><strong>Personality tests</strong> to help you better know&nbsp;yourself</span>
                 </li>
             </ul>
             <transition name="component-fade" appear mode="out-in">
@@ -29,18 +29,16 @@
                 <div v-else key="checkout-info" class="checkout-info">
                     <button @click="checkout" :disabled="checkoutLoading">Try it free</button>
                     <p class="small" v-if="subscriptionProduct.trialDays && subscriptionProduct.trialDays > 0">
-                        Free to try for {{subscriptionProduct.trialDays}} days. No commitment. After your free period, Cactus Plus is {{pricePerMonth}} /
-                        {{displayPeriod}}<span v-if="isAnnualBilling">, billed annually</span>. Cancel&nbsp;anytime.
+                        Cactus Plus is free for {{subscriptionProduct.trialDays}} days, then {{pricePerMonth}} /
+                        {{displayPeriod}}<span v-if="isAnnualBilling"> (billed annually)</span>. No commitment. Cancel anytime.
                     </p>
                     <p class="small" v-else>
                         Cactus Plus is {{pricePerMonth}} /
-                        {{displayPeriod}}<span v-if="isAnnualBilling">, billed annually</span>. Cancel&nbsp;anytime.
+                        {{displayPeriod}}<span v-if="isAnnualBilling"> (billed annually)</span>. Cancel&nbsp;anytime.
                     </p>
                 </div>
             </transition>
         </section>
-        <button class="tertiary" @click="skip">Skip for now</button>
-        <upsell-skip-modal :show="showSkipCheckoutModal" @confirmed="skip" @close="showSkipCheckoutModal = false"/>
     </div>
 </template>
 
@@ -54,14 +52,12 @@
     import { Prop } from "vue-property-decorator";
     import SvgIcon from "@components/SvgIcon.vue";
     import { formatPriceCentsUsd } from "@shared/util/StringUtil";
-    import UpsellSkipModal from "@components/gapanalysis/UpsellSkipModal.vue";
 
     @Component({
         components: {
             SvgIcon,
             ResultElement,
             Spinner,
-            UpsellSkipModal,
         }
     })
     export default class GapAnalysisUpsell extends Vue {
@@ -75,8 +71,6 @@
 
         @Prop({ type: Boolean, required: false, default: false })
         checkoutLoading!: boolean;
-
-        showSkipCheckoutModal = false;
 
         get loading(): boolean {
             return !this.subscriptionProduct
@@ -107,14 +101,6 @@
 
         checkout() {
             this.$emit('checkout', this.subscriptionProduct);
-        }
-
-        skip() {
-            if (!this.showSkipCheckoutModal) {
-                this.showSkipCheckoutModal = true;
-                return;
-            }
-            this.$emit('skip');
         }
     }
 </script>
