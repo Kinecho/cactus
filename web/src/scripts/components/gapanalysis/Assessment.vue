@@ -82,7 +82,8 @@
                 </p>
                 <p class="validationText" v-if="!selectedElement">Tap a cactus to continue. You can always change this&nbsp;later.</p>
                 <div class="cvActions flexActions">
-                    <button class="no-loading" @click="focusSelected" :disabled="!selectedElement">Next
+                    <button class="no-loading" @click="focusSelected" :disabled="!selectedElement">
+                        {{chooseFocusScreenCta}}
                     </button>
                 </div>
             </div>
@@ -221,6 +222,14 @@
 
         get currentQuestion(): GapAnalysisQuestion | null {
             return this.assessment.questionByIndex(this.currentQuestionIndex) ?? null;
+        }
+
+        get chooseFocusScreenCta(): string {
+            if (this.includeUpsell) {
+                return "Next"
+            } else {
+                return "Done";
+            }
         }
 
         get nextButtonText(): string {
