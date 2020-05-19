@@ -202,6 +202,23 @@ export async function fireOptInStartTrialEvent(options: { value?: number, predic
     })
 }
 
+export function logBeginCheckout(params: { valueDollars: number, subscriptionProductId: string }) {
+    // /**
+    //  * Old style analytics..
+    //  */
+    // gtag('event', 'begin_checkout', {
+    //     value: params.valueDollars,
+    //     items: [params.subscriptionProductId],
+    //     currency: 'USD',
+    // });
+
+    firebaseAnalytics().logEvent("begin_checkout", {
+        value: params.valueDollars,
+        currency: 'USD',
+        items: [{ item_id: params.subscriptionProductId }]
+    })
+}
+
 export function logCoreValuesAssessmentStarted() {
     firebaseAnalytics().logEvent("core_values_started");
 }
