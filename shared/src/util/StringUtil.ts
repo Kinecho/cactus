@@ -78,6 +78,10 @@ export function appendDomain(input: string | null | undefined, domain: string | 
         return "";
     }
 
+    if (toProcess.includes("://")) {
+        return toProcess;
+    }
+
     if (toProcess && toProcess.indexOf("/") === 0) {
         toProcess = toProcess.slice(1);
     }
@@ -85,6 +89,10 @@ export function appendDomain(input: string | null | undefined, domain: string | 
     let name = toProcess;
     if (!name.startsWith("/")) {
         name = `/${ name }`;
+    }
+
+    if (domain && domain.includes("://")) {
+        return `${ domain }${ name }`
     }
 
     if (domain && !name.startsWith("http") && !domain.includes("localhost")) {
