@@ -168,6 +168,24 @@ describe("appendDomain", () => {
         const domain = "cactus.app";
         expect(appendDomain(path, domain)).toEqual("https://cactus.app/test?key=value");
     });
+
+    test("path already has domain = localhost", () => {
+        const path = "http://localhost:8080/test?key=value";
+        const domain = "cactus.app";
+        expect(appendDomain(path, domain)).toEqual("http://localhost:8080/test?key=value");
+    });
+
+    test("domain already includes protocol", () => {
+        const path = "http://localhost:8080/test?key=value";
+        const domain = "https://cactus.app";
+        expect(appendDomain(path, domain)).toEqual("http://localhost:8080/test?key=value");
+    });
+
+    test("domain already includes protocol, path doesn't", () => {
+        const path = "/test?key=value";
+        const domain = "https://cactus.app";
+        expect(appendDomain(path, domain)).toEqual("https://cactus.app/test?key=value");
+    });
 })
 
 describe("isFeatureAuthUrl", () => {

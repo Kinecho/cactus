@@ -1,7 +1,7 @@
 <template>
     <div class="assessment-container">
         <progress-stepper :current="currentStepperIndex || 0" :total="stepperTotal" type="rectangle"/>
-        <button aria-label="Close" title="Close" class="close tertiary icon" @click="showCloseConfirm = true">
+        <button aria-label="Close" title="Close" class="close tertiary icon" @click="closeOrSkipUpsell">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
                 <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
             </svg>
@@ -9,13 +9,14 @@
         <modal :show="showCloseConfirm" @close="showCloseConfirm = false" :dark="true">
             <div class="close-confirm-modal paddingContainer" slot="body">
                 <h3>Leave the quiz?</h3>
-                <p class="subtext">Are you sure you want to leave the Happiness Quiz? Your answers will be lost.</p>
+                <p class="subtext">Are you sure you want to leave the Happiness Quiz? Your results may be lost.</p>
                 <div class="btnContainer">
                     <button @click="showCloseConfirm = false">No, keep going</button>
                     <button class="secondary" @click="close">Leave the quiz</button>
                 </div>
             </div>
         </modal>
+        <upsell-skip-modal :show="showSkipUpsellModal" @confirmed="skipCheckout" @close="showSkipUpsellModal = false"/>
         <transition name="component-fade" mode="out-in" appear>
             <div v-if="currentScreen === Screen.intro" class="intro" key="intro">
                 <h1>What makes you happy?</h1>
@@ -119,9 +120,12 @@
     import { pushRoute } from "@web/NavigationUtil";
     import { PageRoute } from "@shared/PageRoutes";
     import CactusMemberService from "@web/services/CactusMemberService";
+    import UpsellSkipModal from "@components/gapanalysis/UpsellSkipModal.vue";
     import { Screen, ScreenName } from "@components/gapanalysis/GapAssessmentTypes";
     import { QueryParam } from "@shared/util/queryParams";
     import { logFocusElementSelected } from "@web/analytics";
+    import { removeQueryParam, updateQueryParam } from "@web/util";
+    import { appendQueryParams } from "@shared/util/StringUtil";
 
     const logger = new Logger("gap/Assessment");
 
@@ -136,6 +140,7 @@
             CactusConfetti,
             ProgressStepper,
             Modal,
+            UpsellSkipModal,
         }
     })
     export default class Assessment extends Vue {
@@ -162,6 +167,12 @@
         @Prop({ type: Array as () => ScreenName[], required: true })
         screens!: ScreenName[];
 
+        @Prop({ type: String, required: false, default: null })
+        checkoutSuccessPath!: string | null
+
+        @Prop({ type: String, required: false, default: null })
+        checkoutCancelPath!: string | null
+
         finished: boolean = false;
         Screen = Screen;
         upsellBillingPeriod = BillingPeriod.yearly;
@@ -172,6 +183,7 @@
          */
         responseValues: Record<string, number | undefined> = {};
         showCloseConfirm = false;
+        showSkipUpsellModal = false;
         processingTimeout?: number;
         selectedElement: CactusElement | null = null;
 
@@ -196,9 +208,14 @@
 
         elementSelected(element: CactusElement | undefined) {
             this.selectedElement = element ?? null;
+            if (element) {
+                updateQueryParam(QueryParam.SELECTED_ELEMENT, element);
+            } else {
+                removeQueryParam(QueryParam.SELECTED_ELEMENT);
+            }
         }
 
-        async upsellProductLoaded(product: SubscriptionProduct|undefined|null) {
+        async upsellProductLoaded(product: SubscriptionProduct | undefined | null) {
             this.$emit('upsellProductLoaded', product);
         }
 
@@ -302,6 +319,14 @@
             // this.currentScreen = this.screens[this.currentScreenIndex];
         }
 
+        closeOrSkipUpsell() {
+            if (this.currentScreen === Screen.upgrade) {
+                this.showSkipUpsellModal = true;
+            } else {
+                this.showCloseConfirm = true;
+            }
+        }
+
         async focusSelected() {
             await CactusMemberService.sharedInstance.setFocusElement({ element: this.selectedElement });
             logFocusElementSelected(this.selectedElement);
@@ -356,13 +381,24 @@
             logger.info("Starting checkout handler");
             if (subscriptionProduct?.entryId) {
                 logger.info("Starting checkout for product entry ID = ", subscriptionProduct?.entryId)
+                const defaultSuccessPath = `${ PageRoute.JOURNAL_HOME }?${ QueryParam.UPGRADE_SUCCESS }=success`
+
+                let checkoutSuccessUrl = this.checkoutSuccessPath ?? defaultSuccessPath;
+                let checkoutCancelUrl = this.checkoutCancelPath ?? window.location.href;
+
+                if (this.selectedElement) {
+                    checkoutCancelUrl = appendQueryParams(checkoutCancelUrl, { [QueryParam.SELECTED_ELEMENT]: this.selectedElement });
+                }
+
                 const checkoutResult = await startCheckout({
                     subscriptionProductId: subscriptionProduct.entryId,
-                    subscriptionProduct: subscriptionProduct
+                    subscriptionProduct: subscriptionProduct,
+                    stripeSuccessUrl: checkoutSuccessUrl,
+                    stripeCancelUrl: checkoutCancelUrl,
                 });
 
                 if (checkoutResult.success) {
-                    await pushRoute(`${ PageRoute.JOURNAL_HOME }?${ QueryParam.UPGRADE_SUCCESS }=success`)
+                    await pushRoute(checkoutSuccessUrl)
                 }
             } else {
                 logger.warn("no subscription product or entry id was found");
