@@ -26,7 +26,7 @@ export const defaultScreens: ScreenName[] = [
     Screen.intro,
     Screen.questions,
     Screen.pendingResults,
+    Screen.upgrade,
     Screen.results,
-    Screen.chooseFocus,
-    Screen.upgrade
+    Screen.chooseFocus
 ];
