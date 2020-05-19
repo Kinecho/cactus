@@ -300,7 +300,12 @@
 
             this.setScreen(Screen.pendingResults);
             this.processingTimeout = window.setTimeout(() => {
-                this.setScreen(Screen.results);
+                if (this.includeUpsell) {
+                    this.setScreen(Screen.upgrade);
+                } else {
+                    this.setScreen(Screen.results);
+                }
+
             }, 2500);
             this.result = result;
             this.$emit('finished', this.result);
@@ -381,7 +386,10 @@
             logger.info("Starting checkout handler");
             if (subscriptionProduct?.entryId) {
                 logger.info("Starting checkout for product entry ID = ", subscriptionProduct?.entryId)
-                const defaultSuccessPath = `${ PageRoute.JOURNAL_HOME }?${ QueryParam.UPGRADE_SUCCESS }=success`
+                let defaultSuccessPath = `${ PageRoute.JOURNAL_HOME }?${ QueryParam.UPGRADE_SUCCESS }=success`
+                if (this.result?.id) {
+                    defaultSuccessPath = `${ PageRoute.GAP_ANALYSIS }/${this.result.id}/${Screen.results}?${ QueryParam.UPGRADE_SUCCESS }=success`
+                }
 
                 let checkoutSuccessUrl = this.checkoutSuccessPath ?? defaultSuccessPath;
                 let checkoutCancelUrl = this.checkoutCancelPath ?? window.location.href;
