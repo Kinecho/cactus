@@ -122,6 +122,8 @@
     import { Screen, ScreenName } from "@components/gapanalysis/GapAssessmentTypes";
     import { QueryParam } from "@shared/util/queryParams";
     import { logFocusElementSelected } from "@web/analytics";
+    import { removeQueryParam, updateQueryParam } from "@web/util";
+    import { appendQueryParams } from "@shared/util/StringUtil";
 
     const logger = new Logger("gap/Assessment");
 
@@ -162,6 +164,12 @@
         @Prop({ type: Array as () => ScreenName[], required: true })
         screens!: ScreenName[];
 
+        @Prop({ type: String, required: false, default: null })
+        checkoutSuccessPath!: string | null
+
+        @Prop({ type: String, required: false, default: null })
+        checkoutCancelPath!: string | null
+
         finished: boolean = false;
         Screen = Screen;
         upsellBillingPeriod = BillingPeriod.yearly;
@@ -196,9 +204,14 @@
 
         elementSelected(element: CactusElement | undefined) {
             this.selectedElement = element ?? null;
+            if (element) {
+                updateQueryParam(QueryParam.SELECTED_ELEMENT, element);
+            } else {
+                removeQueryParam(QueryParam.SELECTED_ELEMENT);
+            }
         }
 
-        async upsellProductLoaded(product: SubscriptionProduct|undefined|null) {
+        async upsellProductLoaded(product: SubscriptionProduct | undefined | null) {
             this.$emit('upsellProductLoaded', product);
         }
 
@@ -356,13 +369,24 @@
             logger.info("Starting checkout handler");
             if (subscriptionProduct?.entryId) {
                 logger.info("Starting checkout for product entry ID = ", subscriptionProduct?.entryId)
+                const defaultSuccessPath = `${ PageRoute.JOURNAL_HOME }?${ QueryParam.UPGRADE_SUCCESS }=success`
+
+                let checkoutSuccessUrl = this.checkoutSuccessPath ?? defaultSuccessPath;
+                let checkoutCancelUrl = this.checkoutCancelPath ?? window.location.href;
+
+                if (this.selectedElement) {
+                    checkoutCancelUrl = appendQueryParams(checkoutCancelUrl, { [QueryParam.SELECTED_ELEMENT]: this.selectedElement });
+                }
+
                 const checkoutResult = await startCheckout({
                     subscriptionProductId: subscriptionProduct.entryId,
-                    subscriptionProduct: subscriptionProduct
+                    subscriptionProduct: subscriptionProduct,
+                    stripeSuccessUrl: checkoutSuccessUrl,
+                    stripeCancelUrl: checkoutCancelUrl,
                 });
 
                 if (checkoutResult.success) {
-                    await pushRoute(`${ PageRoute.JOURNAL_HOME }?${ QueryParam.UPGRADE_SUCCESS }=success`)
+                    await pushRoute(checkoutSuccessUrl)
                 }
             } else {
                 logger.warn("no subscription product or entry id was found");

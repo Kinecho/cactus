@@ -166,6 +166,8 @@
                 this.firebaseUiLoading = true;
                 const ui = getAuthUI();
                 let emailLinkSignInPath = this.redirectUrl || redirectUrlParam || PageRoute.JOURNAL_HOME;
+                logger.info("SignIn.vue emailLinkSignInPath = ", emailLinkSignInPath);
+                logger.info("SignIn.vue signInSuccessPath = ", emailLinkSignInPath);
                 let includeEmailLink = false;
 
                 //TODO: this was in there before, but i don't think we need it... leaving for a bit.

@@ -93,7 +93,9 @@
             learnMoreLinks: { type: Boolean, default: false },
             isRestoringPurchases: { type: Boolean, default: false },
             showFooter: { type: Boolean, default: true },
-            startTrial: { type: Boolean, default: false }
+            startTrial: { type: Boolean, default: false },
+            checkoutSuccessUrl: { type: String, required: false },
+            checkoutCancelUrl: { type: String, required: false },
         },
         data(): {
             selectedProduct: SubscriptionProduct,
@@ -214,11 +216,12 @@
                 const product = this.selectedProduct;
 
                 if (this.isCurrentTier && !this.isOptInTrialing) {
-                    this.goToAccount()
+                    await this.goToAccount()
+                    return;
                 }
 
                 if (product.isFree && !this.signedIn) {
-                    this.goToSignup();
+                    await this.goToSignup();
                     return;
                 }
 
@@ -229,7 +232,15 @@
                     this.isProcessing = false;
                     return;
                 }
-                const checkoutResult = await startCheckout({ subscriptionProductId, subscriptionProduct: product });
+
+                const successUrl = this.checkoutSuccessUrl;
+                const cancelUrl = this.checkoutCancelUrl;
+                const checkoutResult = await startCheckout({
+                    subscriptionProductId,
+                    subscriptionProduct: product,
+                    stripeSuccessUrl: successUrl,
+                    stripeCancelUrl: cancelUrl
+                });
                 if (!checkoutResult.success && !checkoutResult.canceled) {
                     logger.error("failed to load checkout", stringifyJSON(checkoutResult, 2));
                     this.checkoutError = "Unable to load checkout. Please try again later";

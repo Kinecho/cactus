@@ -262,6 +262,11 @@ export function removeQueryParam(name: QueryParam) {
 
 }
 
+/**
+ * Add/Set/Change query params without changing browser history
+ * @param {QueryParam} name
+ * @param {string | number} value
+ */
 export function updateQueryParam(name: QueryParam, value: string | number) {
     try {
         const params = qs.parse(window.location.search, { ignoreQueryPrefix: true }) || {};
@@ -274,7 +279,11 @@ export function updateQueryParam(name: QueryParam, value: string | number) {
     }
 }
 
-
+/**
+ * Add/Set/Change query params and push to the browser history stack.
+ * @param {QueryParam} name
+ * @param {string | number} value
+ */
 export function pushQueryParam(name: QueryParam, value: string | number) {
     try {
         const params = qs.parse(window.location.search, { ignoreQueryPrefix: true }) || {};
