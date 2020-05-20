@@ -681,7 +681,6 @@
             height: auto;
             max-height: 35rem;
             max-width: 100%;
-            width: 500px;
         }
     }
 
