@@ -678,9 +678,10 @@
         }
 
         img {
+            height: auto;
             max-height: 35rem;
             max-width: 100%;
-            min-height: 30rem; /*for slow loading*/
+            width: 500px;
         }
     }
 
