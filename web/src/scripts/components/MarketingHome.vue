@@ -4,7 +4,8 @@
             <section class="hero">
                 <div class="heroText">
                     <h1>What makes you&nbsp;happy?</h1>
-                    <p class="subtext">Questions designed to improve how you think about your work, life, relationships, and emotions</p>
+                    <p class="subtext">Questions designed to improve how you think about your work, life, relationships,
+                        and emotions</p>
                     <router-link :to="assessmentHref" tag="button" class="quizBtn primary">Take the quiz</router-link>
                 </div>
                 <aside class="graphicContainer">
@@ -137,7 +138,6 @@
     import { isAndroidApp, isAndroidDevice, isIosDevice } from "@web/DeviceUtil";
     import AppStoreIcon from "@components/AppStoreIcon.vue";
     import PlayStoreIcon from "@components/PlayStoreIcon.vue";
-    import { configureLoginForm } from "@web/mailchimp";
     import Component from "vue-class-component";
     import { PageRoute } from "@shared/PageRoutes";
 
@@ -155,15 +155,8 @@
             this.isAndroidApp = isAndroidApp();
         }
 
-        mounted() {
-            //Legacy sign up form code.
-            configureLoginForm("email-form-bottom");
-            configureLoginForm("sign-up-top");
-        }
-
         isMobileDevice = false;
         isAndroidApp = false;
-
 
         get assessmentHref(): string {
             return PageRoute.GAP_ANALYSIS;
@@ -177,10 +170,10 @@
 </script>
 
 <style scoped lang="scss">
-    @import "~styles/mixins";
-    @import "~styles/variables";
-    @import "~styles/common";
-    @import "~styles/modal";
+    @import "mixins";
+    @import "variables";
+    @import "common";
+    @import "modal.scss";
 
     //This is the target for the sign-up jump button
     #sign-up {
