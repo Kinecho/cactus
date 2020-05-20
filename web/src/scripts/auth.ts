@@ -93,7 +93,7 @@ export async function sendEmailLinkSignIn(subscription: SignupRequest): Promise<
     const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
     let emailLinkRedirectUrl: string = PageRoute.SIGNUP_CONFIRMED;
     if (redirectUrlParam) {
-        emailLinkRedirectUrl = `${ emailLinkRedirectUrl }?${ QueryParam.REDIRECT_URL }=${ redirectUrlParam }`
+        emailLinkRedirectUrl = `${ emailLinkRedirectUrl }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(redirectUrlParam) }`
     }
 
     const landingParams = StorageService.getJSON(LocalStorageKey.landingQueryParams);

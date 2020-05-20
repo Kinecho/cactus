@@ -11,6 +11,7 @@
                         :redirect-url="signInSuccessRoute"
                         :twitterEnabled="false"
                         spinner-color="light"
+                        :show-login-switcher="false"
                 />
             </div>
             <div class="centered" v-if="memberLoaded && !!member && !resultsLoaded">

@@ -229,7 +229,7 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
             logger.error(error);
             await AdminSlackService.getSharedInstance().uploadTextSnippet({
                 message: `Failed to send magic link to ${email}`,
-                data: stringifyJSON(error, 2),
+                data: stringifyJSON({ error, continueUrl: url }, 2),
                 fileType: "json",
                 channel: ChannelName.engineering,
                 filename: `failed-magic-link-${new Date().toISOString()}.json`

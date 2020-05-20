@@ -16,7 +16,7 @@
             <div class="buttonContainer" id="signup-app"></div>
         </div>
 
-        <div class="switcher" v-if="!isPendingRedirect">
+        <div class="switcher" v-if="!isPendingRedirect && showLoginSwitcher">
             <p v-if="mode === 'LOG_IN'">
                 Don't have an account?
                 <router-link :to="signUpPath">Sign up</router-link>
@@ -107,6 +107,7 @@
             redirectUrl: { type: String, required: false },
             showMagicLink: { type: Boolean, default: true },
             twitterEnabled: { type: Boolean, default: true },
+            showLoginSwitcher: {type: Boolean, default: true},
             mode: {type: String as () => "SIGN_UP" | "LOG_IN", required: false, default: "SIGN_UP"}
         },
         data(): {
