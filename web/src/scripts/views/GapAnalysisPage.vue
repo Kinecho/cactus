@@ -11,6 +11,7 @@
                         :redirect-url="signInSuccessRoute"
                         :twitterEnabled="false"
                         spinner-color="light"
+                        :show-login-switcher="false"
                 />
             </div>
             <div class="centered" v-if="memberLoaded && !!member && !resultsLoaded">
@@ -55,6 +56,7 @@
     import Spinner from "@components/Spinner.vue";
     import { defaultScreens, Screen, ScreenName } from "@components/gapanalysis/GapAssessmentTypes";
     import {
+        fireOptInStartTrialEvent,
         logGapAnalysisCanceled,
         logGapAnalysisCompleted,
         logGapAnalysisScreen,
@@ -62,6 +64,9 @@
         logPresentSubscriptionOffers
     } from "@web/analytics";
     import SubscriptionProduct from "@shared/models/SubscriptionProduct";
+    import { getQueryParam } from "@web/util";
+    import { QueryParam } from "@shared/util/queryParams";
+    import StorageService, { LocalStorageKey } from "@web/services/StorageService";
 
     const logger = new Logger("GapAnalysisPage");
 
@@ -120,7 +125,15 @@
         }
 
         async mounted() {
+            const upgradeSuccess = getQueryParam(QueryParam.UPGRADE_SUCCESS);
+            if (upgradeSuccess === "success") {
+                let priceDollars = StorageService.getNumber(LocalStorageKey.subscriptionPriceCents);
 
+                if (priceDollars) {
+                    priceDollars = priceDollars / 100;
+                }
+                await fireOptInStartTrialEvent({ value: priceDollars })
+            }
         }
 
         async upsellProductLoaded(product: SubscriptionProduct | null | undefined) {
@@ -231,9 +244,7 @@
             }
 
             try {
-                if (this.isPlusMember) {
-                    await pushRoute(PageRoute.INSIGHTS)
-                } else if (this.member) {
+                if (this.member) {
                     await pushRoute(PageRoute.JOURNAL_HOME);
                 } else {
                     await pushRoute(PageRoute.HOME);
