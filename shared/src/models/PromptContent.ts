@@ -100,13 +100,6 @@ export enum ContentType {
     invite = "invite",
 }
 
-export enum DisplayCondition {
-    HAS_CORE_VALUES = "HAS_CORE_VALUES",
-    NO_CORE_VALUES = "NO_CORE_VALUES",
-    TIER_PLUS = "TIER_PLUS",
-    TIER_BASIC = "TIER_BASIC",
-}
-
 export enum ContentStatus {
     in_progress = "in_progress",
     submitted = "submitted",
@@ -118,6 +111,7 @@ export enum ContentStatus {
 /**
  * Removes unneeded fields from the content for easier display
  * @param {Content} content
+ * @param {CactusMember} [member]
  * @return {Content}
  */
 export function processContent(content: Content, member?: CactusMember | null | undefined): Content {
