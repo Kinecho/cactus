@@ -44,23 +44,24 @@
                     <div class="front flip-card" v-touch:tap="handleTap">
                         <transition :name="transitionName" mode="out-in" v-if="!completed">
                             <content-card
-                                    v-bind:key="activeIndex"
-                                    v-bind:cactusElement="promptContent.cactusElement"
-                                    v-bind:content="contentItems[activeIndex]"
-                                    v-bind:response="reflectionResponse"
-                                    v-bind:hasNext="hasNext && activeIndex > 0"
-                                    v-bind:reflectionDuration="reflectionDuration"
-                                    v-bind:saving="saving"
-                                    v-bind:saved="saved"
-                                    v-bind:tapAnywhereEnabled="tapAnywhereEnabled"
-                                    v-on:next="next"
-                                    v-on:previous="previous"
-                                    v-on:complete="complete"
-                                    v-on:save="save"
+                                    :key="activeIndex"
+                                    :cactusElement="promptContent.cactusElement"
+                                    :content="contentItems[activeIndex]"
+                                    :response="reflectionResponse"
+                                    :hasNext="hasNext && activeIndex > 0"
+                                    :reflectionDuration="reflectionDuration"
+                                    :saving="saving"
+                                    :saved="saved"
+                                    :tapAnywhereEnabled="tapAnywhereEnabled"
                                     :member="member"
+                                    :style="cardStyles"
+                                    :prompt-content="promptContent"
+                                    @next="next"
+                                    @previous="previous"
+                                    @complete="complete"
+                                    @save="save"
                                     @navigationDisabled="navigationDisabled = true"
                                     @navigationEnabled="navigationDisabled = false"
-                                    :style="cardStyles"
                             />
                         </transition>
                         <transition name="celebrate" appear mode="out-in" v-if="completed">

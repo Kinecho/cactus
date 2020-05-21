@@ -2,7 +2,7 @@
     <div class="shared-reflection-card">
         <div class="profile">
             <div class="avatar">
-                <img :src="avatarUrl" alt="User Avatar" />
+                <img :src="avatarUrl" alt="User Avatar"/>
             </div>
             <div class="info">
                 <p class="name" v-if="memberName">{{memberName}}</p>
@@ -11,7 +11,9 @@
             </div>
         </div>
         <div class="note">
-            <h3 class="noteQuestion">{{preventOrphan(response.promptQuestion)}}</h3>
+            <h3 class="noteQuestion">
+                <markdown-text :source="preventOrphan(questionText)"/>
+            </h3>
             <p class="note-text">{{preventOrphan(response.content.text)}}</p>
         </div>
     </div>
@@ -20,17 +22,22 @@
 <script lang="ts">
     import Vue from "vue";
     import ReflectionResponse from '@shared/models/ReflectionResponse'
-    import {formatDate} from '@shared/util/DateUtil'
+    import { formatDate } from '@shared/util/DateUtil'
     import CopyService from "@shared/copy/CopyService"
-    import {getDeviceDimensions, MOBILE_BREAKPOINT_PX} from "@web/DeviceUtil"
-    import {getRandomAvatar} from '@web/AvatarUtil'
+    import { getDeviceDimensions, MOBILE_BREAKPOINT_PX } from "@web/DeviceUtil"
+    import { getRandomAvatar } from '@web/AvatarUtil'
     import MemberProfile from "@shared/models/MemberProfile";
     import MemberProfileService from '@web/services/MemberProfileService';
-    import {preventOrphanedWords} from "@shared/util/StringUtil"
+    import { preventOrphanedWords } from "@shared/util/StringUtil"
+    import MarkdownText from "@components/MarkdownText.vue";
+    import PromptContent from "@shared/models/PromptContent";
 
     const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
+        components: {
+            MarkdownText,
+        },
         async beforeMount() {
             if (!this.fetchedProfile && this.response?.cactusMemberId) {
                 this.fetchedProfile = await MemberProfileService.sharedInstance.getByMemberId(this.response.cactusMemberId);
@@ -38,7 +45,9 @@
         },
         props: {
             response: Object as () => ReflectionResponse,
-            memberProfile: Object as () => MemberProfile
+            memberProfile: Object as () => MemberProfile,
+            question: String,
+            promptContent: Object as () => PromptContent,
         },
         data(): {
             resizeListener: any | undefined,
@@ -68,6 +77,13 @@
                     return this.fetchedProfile.getFullName();
                 }
             },
+            questionText(): string | undefined {
+                if (this.promptContent && this.response) {
+                    const coreValue = this.response.coreValue ?? undefined;
+                    return this.promptContent?.getDynamicQuestionText({ coreValue }) ?? this.response.promptQuestion;
+                }
+                return this.response.promptQuestion;
+            },
             memberEmail(): string | undefined {
                 if (this.fetchedProfile?.email) {
                     return this.fetchedProfile.email;
@@ -77,14 +93,14 @@
             },
             shareDate(): string | undefined {
                 const format = this.deviceWidth > MOBILE_BREAKPOINT_PX ? copy.settings.dates.longFormat : copy.settings.dates.shortFormat;
-                return this.response && this.response.sharedAt && `Shared on ${formatDate(this.response.sharedAt, format)}` || undefined;
+                return this.response && this.response.sharedAt && `Shared on ${ formatDate(this.response.sharedAt, format) }` || undefined;
             },
             avatarUrl(): string {
                 return this.fetchedProfile?.avatarUrl || getRandomAvatar(this.response.memberEmail);
             }
         },
         methods: {
-            preventOrphan(input?: string): string|undefined {
+            preventOrphan(input?: string): string | undefined {
                 return preventOrphanedWords(input)
             },
         }
@@ -124,7 +140,7 @@
             white-space: pre-line;
 
             &:after {
-                background: linear-gradient(rgba(255,255,255,0), $white);
+                background: linear-gradient(rgba(255, 255, 255, 0), $white);
                 content: '';
                 display: block;
                 height: 4.8rem;

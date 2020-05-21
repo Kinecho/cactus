@@ -261,4 +261,18 @@ export default class CactusMember extends BaseModel {
     get stripeCustomerId(): string | undefined {
         return this.stripe?.customerId;
     }
+
+    /**
+     * Get a core value with a preferred index, or the last value, which ever is smaller.
+     * @param {number} index - the preferred core value index
+     * @return {CoreValue | undefined}
+     */
+    getCoreValueAtIndex(index: number = 0): CoreValue | undefined {
+        const coreValues = this.coreValues;
+        if (!coreValues) {
+            return undefined;
+        }
+        const i = Math.min(coreValues.length - 1, index);
+        return coreValues[i];
+    }
 }

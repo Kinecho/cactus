@@ -1,5 +1,6 @@
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 import {CactusElement} from "@shared/models/CactusElement";
+import { CoreValue } from "@shared/models/CoreValueTypes";
 
 export enum ResponseMediumType {
     PROMPT = "PROMPT",
@@ -178,7 +179,7 @@ export default class ReflectionResponse extends BaseModel {
     cactusElement?: CactusElement | null;
     reflectionDates: Date[] = [];
     insights?: InsightWordsResult;
-
+    coreValue?: CoreValue|undefined|null;
     /**
      * Only Add a date log if the new date is not within 10 minutes of an existing date
      * @param {Date} date

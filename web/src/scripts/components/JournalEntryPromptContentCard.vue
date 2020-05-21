@@ -16,7 +16,10 @@
             <p class="subtext" v-show="subText">{{preventOrphan(subText)}}</p>
         </div>
         <div :class="{textContainer: !canReflectInline && hasBackgroundImage}" v-if="entry.promptContent && completed">
-            <h3 class="question" v-show="questionText">{{preventOrphan(questionText)}}</h3>
+
+            <h3 class="question" v-show="questionText">
+                <markdown-text :source="preventOrphan(questionText)"/>
+            </h3>
         </div>
         <div class="entry" v-if="!canReflectInline">{{preventOrphan(responseText)}}</div>
         <edit-reflection
@@ -59,6 +62,7 @@
         <modal :show="showShareNote" v-on:close="showShareNote = false" :showCloseButton="true" v-if="!!shareNote">
             <div class="sharing-card note" slot="body">
                 <prompt-content-card
+                        :prompt-content="entry.promptContent"
                         :content="shareNote.content"
                         :response="shareNote.response"/>
             </div>
@@ -68,27 +72,38 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {Content, ContentType, Image} from "@shared/models/PromptContent"
-    import {PageRoute} from "@shared/PageRoutes"
+    import { Content, ContentType, Image } from "@shared/models/PromptContent"
+    import { PageRoute } from "@shared/PageRoutes"
     import PromptContentVue from "@components/PromptContent.vue"
-    import {formatDate} from "@shared/util/DateUtil"
-    import ReflectionResponse, {getResponseMedium, ResponseMedium, ResponseMediumType} from "@shared/models/ReflectionResponse"
-    import {getIntegerFromStringBetween, getResponseText, isBlank, preventOrphanedWords} from "@shared/util/StringUtil"
+    import { formatDate } from "@shared/util/DateUtil"
+    import ReflectionResponse, {
+        getResponseMedium,
+        ResponseMedium,
+        ResponseMediumType
+    } from "@shared/models/ReflectionResponse"
+    import {
+        getIntegerFromStringBetween,
+        getResponseText,
+        isBlank,
+        preventOrphanedWords
+    } from "@shared/util/StringUtil"
     import DropdownMenu from "@components/DropdownMenu.vue";
     import Modal from "@components/Modal.vue"
     import EditReflection from "@components/ReflectionResponseTextEdit.vue"
     import PromptSharing from "@components/PromptContentSharing.vue";
     import FlamelinkImage from "@components/FlamelinkImage.vue";
-    import {removeQueryParam, updateQueryParam} from '@web/util'
-    import {QueryParam} from "@shared/util/queryParams"
+    import { removeQueryParam, updateQueryParam } from '@web/util'
+    import { QueryParam } from "@shared/util/queryParams"
     import SkeletonCard from "@components/JournalEntrySkeleton.vue";
-    import {hasImage} from '@shared/util/FlamelinkUtils'
+    import { hasImage } from '@shared/util/FlamelinkUtils'
     import CopyService from "@shared/copy/CopyService";
-    import {PromptCopy} from "@shared/copy/CopyTypes"
+    import { PromptCopy } from "@shared/copy/CopyTypes"
     import PromptContentCard from "@components/PromptContentCard.vue"
     import JournalEntry from '@web/datasource/models/JournalEntry'
     import Logger from "@shared/Logger";
-    import {getAppType} from "@web/DeviceUtil";
+    import { getAppType } from "@web/DeviceUtil";
+    import CactusMember from "@shared/models/CactusMember";
+    import MarkdownText from "@components/MarkdownText.vue";
 
     const logger = new Logger("JournalEntryPromptContentCard.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -102,10 +117,12 @@
             EditReflection,
             PromptSharing,
             FlamelinkImage,
-            SkeletonCard
+            SkeletonCard,
+            MarkdownText,
         },
         props: {
-            entryId: {type: String, required: true},
+            entryId: { type: String, required: true },
+            member: Object as () => CactusMember,
             entry: {
                 type: Object as () => JournalEntry,
                 required: true,
@@ -131,7 +148,7 @@
                 showContent: false,
                 editedText: "",
                 editedResponses: [],
-                responseMedium: getResponseMedium({app: getAppType(), type: ResponseMediumType.JOURNAL}),
+                responseMedium: getResponseMedium({ app: getAppType(), type: ResponseMediumType.JOURNAL }),
                 showSharing: false,
                 promptCopy: copy.prompts,
                 initialIndex: undefined,
@@ -152,7 +169,7 @@
 
                 const [response] = this.entry.responses;
                 if (response) {
-                    return {content: sharingCard, response: response}
+                    return { content: sharingCard, response: response }
                 } else {
                     return
                 }
@@ -170,15 +187,22 @@
 
                 return {
                     randomBackground: showRandomBackground,
-                    [`bg${getIntegerFromStringBetween(id, NUM_RANDO_BACKGROUND_IMAGES - 1)}`]: showRandomBackground
+                    [`bg${ getIntegerFromStringBetween(id, NUM_RANDO_BACKGROUND_IMAGES - 1) }`]: showRandomBackground
                 };
 
             },
             questionText(): string | undefined {
+
+
                 let contentList = this.entry.promptContent?.content || [];
-                if (contentList) {
-                    const reflectCard = contentList.find(c => c.contentType === ContentType.reflect);
-                    return reflectCard && preventOrphanedWords(reflectCard.text);
+                const reflectCard = contentList?.find(c => c.contentType === ContentType.reflect);
+                if (reflectCard) {
+                    return this.entry.promptContent.getDynamicDisplayText({
+                        content: reflectCard,
+                        member: this.member,
+                    })
+
+                    // return reflectCard && preventOrphanedWords(reflectCard.text);
                 }
                 return
                 // return this.promptContent && this.promptContent.getQuestion();
@@ -205,7 +229,7 @@
                 return first && first.text
             },
             promptContentPath(): string {
-                return `${PageRoute.PROMPTS_ROOT}/${this.entryId}`
+                return `${ PageRoute.PROMPTS_ROOT }/${ this.entryId }`
             },
             isTodaysPrompt(): boolean {
                 return (this.promptDate == formatDate(new Date(), copy.settings.dates.longFormat))
