@@ -57,6 +57,7 @@
                                     v-on:previous="previous"
                                     v-on:complete="complete"
                                     v-on:save="save"
+                                    :member="member"
                                     @navigationDisabled="navigationDisabled = true"
                                     @navigationEnabled="navigationDisabled = false"
                                     :style="cardStyles"
@@ -329,7 +330,7 @@
             reflectionTimerInterval: any,
             authLoaded: boolean,
             memberUnsubscriber: ListenerUnsubscriber | undefined,
-            member: CactusMember | undefined,
+            member: CactusMember | undefined | null,
             touchStart: MouseEvent | undefined,
             cardStyles: any,
             popStateListener: any | undefined,
@@ -361,7 +362,7 @@
                 reflectionTimerInterval: undefined,
                 authLoaded: false,
                 memberUnsubscriber: undefined,
-                member: undefined,
+                member: null,
                 touchStart: undefined,
                 cardStyles: {},
                 popStateListener: undefined,

@@ -344,7 +344,8 @@
             reflectionDuration: Number,
             saving: Boolean,
             saved: Boolean,
-            tapAnywhereEnabled: Boolean
+            tapAnywhereEnabled: Boolean,
+            member: { type: Object as () => CactusMember | undefined, required: false, default: undefined },
         },
         data(): {
             youtubeVideoLoading: boolean,
@@ -358,7 +359,6 @@
             cactusModalVisible: boolean,
             cactusModalElement: string | undefined
             nativeShareEnabled: boolean,
-            member: CactusMember | undefined,
             showPricingModal: boolean,
         } {
             return {
@@ -373,13 +373,12 @@
                 cactusModalVisible: false,
                 cactusModalElement: undefined,
                 nativeShareEnabled: SharingService.canShareNatively(),
-                member: undefined,
                 showPricingModal: false,
             }
         },
         beforeMount() {
             this.shareableLinkUrl = ReflectionResponseService.getShareableUrl(this.response);
-            this.member = CactusMemberService.sharedInstance.currentMember;
+            // this.member = CactusMemberService.sharedInstance.currentMember;
         },
         watch: {
             saved(isSaved) {
@@ -418,7 +417,7 @@
                 return formatDurationAsTime(this.reflectionDuration);
             },
             processedContent(): Content {
-                return processContent(this.content);
+                return processContent(this.content, this.member);
             },
             quoteAvatar(): ContentImage | undefined | null {
                 if (!this.content.quote || !this.content.quote.authorAvatar) {

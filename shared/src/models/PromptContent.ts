@@ -5,6 +5,8 @@ import { timestampToDate } from "@shared/util/FirestoreUtil";
 import { getFlamelinkDateStringInDenver } from "@shared/util/DateUtil";
 import Logger from "@shared/Logger";
 import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
+import CactusMember from "@shared/models/CactusMember";
+import { CoreValue, CoreValuesService } from "@shared/models/CoreValueTypes";
 
 const logger = new Logger("PromptContent.ts");
 
@@ -98,6 +100,12 @@ export enum ContentType {
     invite = "invite",
 }
 
+export enum DisplayCondition {
+    HAS_CORE_VALUES = "HAS_CORE_VALUES",
+    NO_CORE_VALUES = "NO_CORE_VALUES",
+    TIER_PLUS = "TIER_PLUS",
+    TIER_BASIC = "TIER_BASIC",
+}
 
 export enum ContentStatus {
     in_progress = "in_progress",
@@ -112,7 +120,7 @@ export enum ContentStatus {
  * @param {Content} content
  * @return {Content}
  */
-export function processContent(content: Content): Content {
+export function processContent(content: Content, member?: CactusMember | null | undefined): Content {
     const processed: Content = {
         contentType: content.contentType,
         label: content.label,
@@ -170,9 +178,18 @@ export function processContent(content: Content): Content {
     if (processed.quote && processed.quote.text) {
         processed.quote.text = preventOrphanedWords(processed.quote.text)!;
     }
+
+    const [coreValue] = (member?.coreValues ?? []) as (CoreValue | undefined)[];
+    if (coreValue && content.coreValues?.textTemplateMd) {
+        const coreValueMeta = CoreValuesService.shared.getMeta(coreValue)
+        const token = content.coreValues?.valueReplaceToken ?? DEFAULT_CORE_VALUE_REPLACE_TOKEN
+        processed.text = preventOrphanedWords(content.coreValues.textTemplateMd.replace(token, coreValueMeta.title));
+    }
+
     return processed;
 }
 
+export const DEFAULT_CORE_VALUE_REPLACE_TOKEN = "{{CORE_VALUE}}";
 
 export interface Content {
     contentType: ContentType;
@@ -190,6 +207,10 @@ export interface Content {
     invite?: boolean;
     actionButton?: ActionButton;
     showElementIcon?: boolean;
+    coreValues?: {
+        textTemplateMd?: string,
+        valueReplaceToken?: string,
+    }
 }
 
 export enum PromptContentFields {
@@ -231,6 +252,7 @@ export default class PromptContent extends FlamelinkModel {
             }
         }
     }
+
 
     prepareForFirestore(): any {
         const data = super.prepareForFirestore();
