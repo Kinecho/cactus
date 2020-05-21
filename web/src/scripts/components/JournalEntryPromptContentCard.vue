@@ -199,15 +199,13 @@
                 let contentList = this.entry.promptContent?.content || [];
                 const reflectCard = contentList?.find(c => c.contentType === ContentType.reflect);
                 if (reflectCard) {
-                    return this.entry.promptContent.getDynamicDisplayText({
+                    return this.entry.promptContent?.getDynamicDisplayText({
                         content: reflectCard,
                         member: this.member,
+                        coreValue: this.entry.responses?.find(r => r.coreValue)?.coreValue
                     })
-
-                    // return reflectCard && preventOrphanedWords(reflectCard.text);
                 }
                 return
-                // return this.promptContent && this.promptContent.getQuestion();
             },
             backgroundImage(): Image | undefined {
                 const [first]: Content[] = this.entry.promptContent?.content || [];
