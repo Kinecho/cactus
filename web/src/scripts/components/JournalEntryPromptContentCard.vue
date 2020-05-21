@@ -25,7 +25,9 @@
         <edit-reflection
                 :show="canReflectInline"
                 :responses="entry.responses"
+                :prompt-content="entry.promptContent"
                 :prompt="entry.prompt"
+                :member="member"
                 :responseMedium="responseMedium"
                 @close="canReflectInline = false"
         />

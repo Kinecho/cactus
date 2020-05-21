@@ -673,6 +673,11 @@
                     this.saved = false;
                     this.reflectionResponse.reflectionDurationMs = this.reflectionDuration;
                     this.reflectionResponse.cactusElement = this.promptContent && this.promptContent.cactusElement || null;
+
+                    if (!this.reflectionResponse.coreValue) {
+                        this.reflectionResponse.coreValue = this.member?.getCoreValueAtIndex(this.promptContent?.preferredCoreValueIndex ?? 0) ?? null
+                    }
+
                     const saved = await ReflectionResponseService.sharedInstance.save(this.reflectionResponse, {
                         saveIfAnonymous: true,
                         updateReflectionLog: options.updateReflectionLog
