@@ -21,8 +21,18 @@ describe("core values getters", () => {
         expect(member.getCoreValueAtIndex(9)).toEqual(CoreValue.Abundance);
     })
 
-    test("get core value - no core values on their profile", () => {
+    test("get core value - undefined core values on their profile", () => {
         const member = new CactusMember();
+        member.coreValues = undefined;
+        expect(member.getCoreValueAtIndex(1)).toBeUndefined();
+        expect(member.getCoreValueAtIndex()).toBeUndefined()
+        expect(member.getCoreValueAtIndex(10)).toBeUndefined()
+        expect(member.getCoreValueAtIndex(2)).toBeUndefined()
+    })
+
+    test("get core value - empty array values on their profile", () => {
+        const member = new CactusMember();
+        member.coreValues = [];
         expect(member.getCoreValueAtIndex(1)).toBeUndefined();
         expect(member.getCoreValueAtIndex()).toBeUndefined()
         expect(member.getCoreValueAtIndex(10)).toBeUndefined()

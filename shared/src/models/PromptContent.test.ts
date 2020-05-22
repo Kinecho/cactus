@@ -70,11 +70,11 @@ describe("Get dynamic content", () => {
 
 
         //use out of range core value index
-        prompt.preferredCoreValueIndex = 99
+        prompt.preferredCoreValueIndex = 3
         expect(prompt.getDynamicDisplayText({
             member,
             content,
-        })).toEqual("This is a custom Beauty markdown string with a core value.");
+        })).toEqual("This is a custom Achievement markdown string with a core value.");
 
 
         //no values on the member

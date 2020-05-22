@@ -97,7 +97,7 @@ export interface MemberStripeDetails {
     customerId?: string,
 }
 
-export default class CactusMember extends BaseModel {
+export default class  CactusMember extends BaseModel {
     readonly collection = Collection.members;
     static Field = Field;
     firstName?: string;
@@ -269,7 +269,7 @@ export default class CactusMember extends BaseModel {
      */
     getCoreValueAtIndex(index: number = 0): CoreValue | undefined {
         const coreValues = this.coreValues;
-        if (!coreValues) {
+        if (!coreValues || coreValues.length === 0) {
             return undefined;
         }
 
