@@ -6,8 +6,6 @@ import {
 } from "@shared/models/MemberSubscription";
 import { DateTime } from "luxon";
 import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
-import CactusMember from "@shared/models/CactusMember";
-import { CoreValue } from "@shared/models/CoreValueTypes";
 
 describe("trialEnded tests", () => {
     test("Trial ended", () => {
@@ -60,21 +58,3 @@ describe("trialEnded tests", () => {
         expect(isOptInTrialing(undefined)).toBeFalsy()
     })
 });
-
-
-test("get core value - with values", () => {
-    const member = new CactusMember();
-    member.coreValues = [CoreValue.Abundance, CoreValue.Accomplishment, CoreValue.Achievement];
-    expect(member.getCoreValueAtIndex(1)).toEqual(CoreValue.Accomplishment);
-    expect(member.getCoreValueAtIndex()).toEqual(CoreValue.Abundance);
-    expect(member.getCoreValueAtIndex(10)).toEqual(CoreValue.Achievement);
-    expect(member.getCoreValueAtIndex(2)).toEqual(CoreValue.Achievement);
-})
-
-test("get core value - no values", () => {
-    const member = new CactusMember();
-    expect(member.getCoreValueAtIndex(1)).toBeUndefined();
-    expect(member.getCoreValueAtIndex()).toBeUndefined()
-    expect(member.getCoreValueAtIndex(10)).toBeUndefined()
-    expect(member.getCoreValueAtIndex(2)).toBeUndefined()
-})

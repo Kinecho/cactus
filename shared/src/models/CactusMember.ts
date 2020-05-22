@@ -272,7 +272,8 @@ export default class CactusMember extends BaseModel {
         if (!coreValues) {
             return undefined;
         }
-        const i = Math.min(coreValues.length - 1, index);
+
+        const i = index % coreValues.length;
         return coreValues[i];
     }
 }

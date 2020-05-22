@@ -194,8 +194,6 @@
 
             },
             questionText(): string | undefined {
-
-
                 let contentList = this.entry.promptContent?.content || [];
                 const reflectCard = contentList?.find(c => c.contentType === ContentType.reflect);
                 if (reflectCard) {
