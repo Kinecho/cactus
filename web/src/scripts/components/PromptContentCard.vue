@@ -17,7 +17,7 @@
 
             <!--  START SHARE_NOTE -->
             <div v-if="isShareNoteScreen">
-                <shared-reflection-card :response="response"/>
+                <shared-reflection-card :response="response" :prompt-content="promptContent" :question="processedContent.text"/>
 
                 <transition name="fade-in" mode="out-in">
                     <div v-if="shareableLinkUrl" class="share-note-link-container">
@@ -279,7 +279,7 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {
+    import PromptContent, {
         Content,
         ContentAction,
         ContentType,
@@ -295,7 +295,6 @@
     import { MINIMUM_REFLECT_DURATION_MS } from '@web/PromptContentUtil';
     import CopyService from '@shared/copy/CopyService'
     import { PromptCopy } from '@shared/copy/CopyTypes'
-    // import VueSimpleMarkdown from 'vue-simple-markdown'
     import CopyTextInput from "@components/CopyTextInput.vue";
     import { QueryParam } from "@shared/util/queryParams"
     import SnackbarContent from "@components/SnackbarContent.vue"
@@ -303,7 +302,6 @@
     import PromptContentCardElements from "@components/PromptContentCardElements.vue";
     import PromptContentCardInviteFriend from "@components/PromptContentCardInviteFriend.vue";
     import SharedReflectionCard from "@components/SharedReflectionCard.vue";
-    import CactusMemberService from '@web/services/CactusMemberService'
     import { CactusElement } from "@shared/models/CactusElement";
     import CactusMember from "@shared/models/CactusMember";
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
@@ -337,6 +335,10 @@
             content: {
                 type: Object as () => Content
             },
+            promptContent: {
+                type: Object as () => PromptContent,
+                required: true,
+            },
             cactusElement: String,
             hasNext: Boolean,
             hasPrevious: Boolean,
@@ -344,7 +346,8 @@
             reflectionDuration: Number,
             saving: Boolean,
             saved: Boolean,
-            tapAnywhereEnabled: Boolean
+            tapAnywhereEnabled: Boolean,
+            member: { type: Object as () => CactusMember | undefined, required: false, default: undefined },
         },
         data(): {
             youtubeVideoLoading: boolean,
@@ -358,7 +361,6 @@
             cactusModalVisible: boolean,
             cactusModalElement: string | undefined
             nativeShareEnabled: boolean,
-            member: CactusMember | undefined,
             showPricingModal: boolean,
         } {
             return {
@@ -373,13 +375,12 @@
                 cactusModalVisible: false,
                 cactusModalElement: undefined,
                 nativeShareEnabled: SharingService.canShareNatively(),
-                member: undefined,
                 showPricingModal: false,
             }
         },
         beforeMount() {
             this.shareableLinkUrl = ReflectionResponseService.getShareableUrl(this.response);
-            this.member = CactusMemberService.sharedInstance.currentMember;
+            // this.member = CactusMemberService.sharedInstance.currentMember;
         },
         watch: {
             saved(isSaved) {
@@ -418,7 +419,12 @@
                 return formatDurationAsTime(this.reflectionDuration);
             },
             processedContent(): Content {
-                return processContent(this.content);
+                return processContent({
+                    content: this.content,
+                    member: this.member,
+                    promptContent: this.promptContent,
+                    reflectionResponse: this.response
+                });
             },
             quoteAvatar(): ContentImage | undefined | null {
                 if (!this.content.quote || !this.content.quote.authorAvatar) {

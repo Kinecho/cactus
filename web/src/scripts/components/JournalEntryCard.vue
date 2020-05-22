@@ -12,6 +12,7 @@
     import SkeletonEntry from "@components/JournalEntrySkeleton.vue";
     import JournalEntry from '@web/datasource/models/JournalEntry'
     import Logger from "@shared/Logger";
+    import CactusMember from "@shared/models/CactusMember";
 
     const logger = new Logger("JournalEntryCard");
     export default Vue.extend({
@@ -25,7 +26,8 @@
             journalEntry: {
                 type: Object as () => JournalEntry,
                 required: true
-            }
+            },
+            member: Object as () => CactusMember,
         },
         data(): { entry: JournalEntry } {
             return {
@@ -43,6 +45,7 @@
                         name: "prompt-content",
                         props: {
                             entry: entry,
+                            member: this.member,
                             entryId: entry.promptContent.entryId,
                             content: entry.promptContent.content,
                         }
@@ -54,6 +57,7 @@
                             prompt: entry.prompt,
                             sentPrompt: entry.sentPrompt,
                             responses: entry.responses,
+                            member: this.member,
                             entry: entry,
                             responsesLoaded: entry.responsesLoaded,
                         }

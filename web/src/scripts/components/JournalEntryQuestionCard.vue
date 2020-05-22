@@ -43,6 +43,7 @@
     import EditReflection from "@components/ReflectionResponseTextEdit.vue"
     import JournalEntry from '@web/datasource/models/JournalEntry'
     import CopyService from "@shared/copy/CopyService";
+    import CactusMember from "@shared/models/CactusMember";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -55,6 +56,7 @@
 
         },
         props: {
+            member: Object as () => CactusMember,
             entry: {
                 type: Object as () => JournalEntry,
                 required: true,

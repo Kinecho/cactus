@@ -8,7 +8,7 @@
             </p>
         </div>
         <div class="referral-link">
-            <input type="text" class="link-input" name="referral-link" :disabled="true" :value="attributedLink">
+            <input type="text" class="link-input" name="referral-link" :disabled="true" :value="attributedLink" />
             <button class="copy btn" v-clipboard:copy="attributedLink"
                     v-clipboard:success="handleCopySuccess"
                     v-clipboard:error="handleCopyError">
@@ -83,7 +83,7 @@
             promptContent: {
                 type: Object as () => PromptContent | undefined,
                 required: true,
-            }
+            },
         },
         data(): {
             member: CactusMember | undefined,

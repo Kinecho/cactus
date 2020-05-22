@@ -64,13 +64,14 @@
                                     v-bind:key="todayEntry.promptId"
                             ></entry>
                             <entry
+                                    v-for="(entry, index) in journalEntries"
                                     :class="['journalListItem', {even: index%2}]"
                                     :style="{zIndex: Math.max(1000 - index, 0)}"
-                                    v-for="(entry, index) in journalEntries"
                                     :journalEntry="entry"
-                                    v-bind:index="index"
-                                    v-bind:key="entry.promptId"
-                                    v-bind:data-index="index"
+                                    :member="cactusMember"
+                                    :index="index"
+                                    :key="entry.promptId"
+                                    :data-index="index"
                             ></entry>
                         </transition-group>
 
