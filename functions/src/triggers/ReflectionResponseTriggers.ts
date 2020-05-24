@@ -293,12 +293,13 @@ export const onReflectionResponseCreated = functions.firestore
             }
 
             if (member?.subscription?.tier) {
+                const isTrialing = member?.isOptInTrialing || member?.isOptOutTrialing;
                 const trialDaysLeft = member?.daysLeftInTrial;
                 let daysLeftText = '';
 
-                if (member?.isOptInTrialing && trialDaysLeft > 0) {
-                    daysLeftText = ' (' + member.daysLeftInTrial + ' days left)';
-                } else if (member?.isOptInTrialing && trialDaysLeft === 0) {
+                if (isTrialing && trialDaysLeft > 0) {
+                    daysLeftText = ' (' + trialDaysLeft + ' days left)';
+                } else if (isTrialing && trialDaysLeft === 0) {
                     daysLeftText = ' (Ends Today)';
                 }
 

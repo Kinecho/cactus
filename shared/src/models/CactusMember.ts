@@ -7,6 +7,7 @@ import * as DateUtil from "@shared/util/DateUtil";
 import { getValidTimezoneName } from "@shared/timezones";
 import {
     isOptInTrialing,
+    isOptOutTrialing,
     MemberSubscription,
     needsTrialExpiration,
     subscriptionTierDisplayName
@@ -228,7 +229,7 @@ export default class  CactusMember extends BaseModel {
     }
 
     get daysLeftInTrial(): number {
-        const end = this.subscription?.trial?.endsAt;
+        const end = this.subscription?.optOutTrial?.endsAt || this.subscription?.trial?.endsAt;
         if (!end) {
             return 0;
         }
@@ -237,6 +238,10 @@ export default class  CactusMember extends BaseModel {
 
     get isOptInTrialing(): boolean {
         return isOptInTrialing(this.subscription)
+    }
+
+    get isOptOutTrialing(): boolean {
+        return isOptOutTrialing(this.subscription)
     }
 
     get needsTrialExpiration(): boolean {

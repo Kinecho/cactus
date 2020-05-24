@@ -179,6 +179,20 @@ export function isOptInTrialing(subscription?: MemberSubscription): boolean {
     return !subscription.trial?.activatedAt && subscription.trial?.endsAt > new Date();
 }
 
+export function isOptOutTrialing(subscription?: MemberSubscription): boolean {
+    if (!subscription) {
+        return false;
+    }
+    if (!subscription?.optOutTrial?.endsAt) {
+        return false
+    }
+    if (!PremiumSubscriptionTiers.includes(subscription.tier) || subscription.tier === SubscriptionTier.BASIC) {
+        return false;
+    }
+
+    return subscription.optOutTrial?.endsAt > new Date();
+}
+
 /**
  * Check if this subscription is in a premium status with an expired trial that has not been activated
  * @param {MemberSubscription} subscription
