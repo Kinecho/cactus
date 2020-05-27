@@ -285,7 +285,10 @@ export default class PromptContent extends FlamelinkModel {
 
     getQuestion(): string | undefined {
         const content = this.getQuestionContent()
-        return content?.text_md ?? content?.text;
+        if (content && !isBlank(content?.text_md)) {
+            return content.text_md;
+        }
+        return content?.text;
     }
 
     getPreviewText(): string | undefined {

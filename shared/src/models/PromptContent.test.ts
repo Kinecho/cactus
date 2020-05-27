@@ -2,6 +2,7 @@ import PromptContent, { Content, ContentType } from "@shared/models/PromptConten
 import { fromFlamelinkData } from "@shared/util/FlamelinkUtils";
 import CactusMember from "@shared/models/CactusMember";
 import { CoreValue } from "@shared/models/CoreValueTypes";
+import { isBlank } from "@shared/util/StringUtil";
 
 describe("serialize and deserialize send date", () => {
     test("serialize 2020-01-10T12:00:00-07:00", () => {
@@ -76,7 +77,6 @@ describe("Get dynamic content", () => {
             content,
         })).toEqual("This is a custom Achievement markdown string with a core value.");
 
-
         //no values on the member
         member.coreValues = undefined;
         prompt.preferredCoreValueIndex = 99
@@ -113,7 +113,103 @@ describe("Get dynamic content", () => {
                 text: "Plain Text",
             },
         })).toEqual("Plain Text");
-
-
     })
+})
+
+describe("get question", () => {
+    test("no content", () => {
+        const prompt = new PromptContent();
+        prompt.content = [];
+
+        expect(prompt.getQuestion()).toBeUndefined();
+        expect(isBlank(prompt.getQuestion())).toBeTruthy();
+    });
+
+    test("no reflect content", () => {
+        const prompt = new PromptContent();
+        prompt.content = [{
+            contentType: ContentType.text,
+            text: "Text 1",
+            text_md: "Text Markdown",
+        }];
+
+        expect(prompt.getQuestion()).toBeUndefined();
+        expect(isBlank(prompt.getQuestion())).toBeTruthy();
+    });
+
+    test("reflect content with markdown and plain text ", () => {
+        const prompt = new PromptContent();
+        prompt.content = [
+            {
+                contentType: ContentType.text,
+                text: "Text 1",
+                text_md: "Text Markdown",
+            },
+            {
+                contentType: ContentType.reflect,
+                text: "Question Text",
+                text_md: "Question Markdown",
+            }];
+
+        expect(prompt.getQuestion()).not.toBeUndefined();
+        expect(isBlank(prompt.getQuestion())).toBeFalsy();
+        expect(prompt.getQuestion()).toEqual("Question Markdown");
+    });
+
+    test("reflect content only plain text ", () => {
+        const prompt = new PromptContent();
+        prompt.content = [
+            {
+                contentType: ContentType.text,
+                text: "Text 1",
+                text_md: "Text Markdown",
+            },
+            {
+                contentType: ContentType.reflect,
+                text: "Question Text",
+            }];
+
+        expect(prompt.getQuestion()).not.toBeUndefined();
+        expect(isBlank(prompt.getQuestion())).toBeFalsy();
+        expect(prompt.getQuestion()).toEqual("Question Text");
+    });
+
+    test("reflect content blank markdown, has plain text ", () => {
+        const prompt = new PromptContent();
+        prompt.content = [
+            {
+                contentType: ContentType.text,
+                text: "Text 1",
+                text_md: "Text Markdown",
+            },
+            {
+                contentType: ContentType.reflect,
+                text_md: " ",
+                text: "Question Text",
+            }];
+
+        expect(prompt.getQuestion()).not.toBeUndefined();
+        expect(isBlank(prompt.getQuestion())).toBeFalsy();
+        expect(prompt.getQuestion()).toEqual("Question Text");
+    });
+
+    test("from flamelink data - reflect with plain text", () => {
+        const data = {
+            content: [
+                {
+                    contentType: ContentType.text,
+                    text: "Text 1",
+                    text_md: "Text Markdown",
+                },
+                {
+                    contentType: ContentType.reflect,
+                    text: "Question Text",
+                }]
+        };
+        const prompt = fromFlamelinkData(data, PromptContent);
+
+        expect(prompt.getQuestion()).not.toBeUndefined();
+        expect(isBlank(prompt.getQuestion())).toBeFalsy();
+        expect(prompt.getQuestion()).toEqual("Question Text");
+    });
 })

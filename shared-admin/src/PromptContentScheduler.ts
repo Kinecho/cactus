@@ -1,6 +1,6 @@
-import PromptContent, {ContentStatus, ContentType} from "@shared/models/PromptContent";
-import {appendDomain, isBlank} from "@shared/util/StringUtil";
-import {CactusConfig} from "@shared/CactusConfig";
+import PromptContent, { ContentStatus, ContentType } from "@shared/models/PromptContent";
+import { appendDomain, isBlank } from "@shared/util/StringUtil";
+import { CactusConfig } from "@shared/CactusConfig";
 import chalk from "chalk";
 import AdminFlamelinkService from "@admin/services/AdminFlamelinkService";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
@@ -10,8 +10,8 @@ import AdminSlackService, {
     SlackAttachment,
     SlackAttachmentField
 } from "@admin/services/AdminSlackService";
-import {buildPromptContentURL} from "@admin/util/StringUtil";
-import {formatDateTime, mailchimpTimeZone} from "@shared/util/DateUtil";
+import { buildPromptContentURL } from "@admin/util/StringUtil";
+import { formatDateTime, mailchimpTimeZone } from "@shared/util/DateUtil";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import {
@@ -30,11 +30,11 @@ import {
     UpdateCampaignRequest
 } from "@shared/mailchimp/models/CreateCampaignRequest";
 import MailchimpService from "@admin/services/MailchimpService";
-import {DateTime} from "luxon";
-import {AxiosError} from "axios";
-import {PageRoute} from "@shared/PageRoutes";
+import { DateTime } from "luxon";
+import { AxiosError } from "axios";
+import { PageRoute } from "@shared/PageRoutes";
 import Logger from "@shared/Logger";
-import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 
 const logger = new Logger("PromptContentScheduler");
 
@@ -97,7 +97,7 @@ export default class PromptContentScheduler {
         this.result.validInput = true;
         if (promptContent.contentStatus !== ContentStatus.submitted) {
             this.result.validInput = false;
-            this.result.errors.push(`The prompt content status must be '${ContentStatus.submitted}'. Not processing.`);
+            this.result.errors.push(`The prompt content status must be '${ ContentStatus.submitted }'. Not processing.`);
         }
 
         if (isBlank(promptContent.cactusElement)) {
@@ -107,7 +107,7 @@ export default class PromptContentScheduler {
 
         if (!promptContent.scheduledSendAt) {
             this.result.validInput = false;
-            this.result.errors.push(`You must provide a '${PromptContent.Fields.scheduledSendAt}' value`);
+            this.result.errors.push(`You must provide a '${ PromptContent.Fields.scheduledSendAt }' value`);
         }
 
         if (promptContent.content.length === 0) {
@@ -115,9 +115,20 @@ export default class PromptContentScheduler {
             this.result.errors.push("The list of content cards was empty. You must provide at least one content card.")
         }
 
-        if (isBlank(promptContent.getQuestion())) {
+        const reflectContent = promptContent.getQuestionContent();
+        logger.info("The prompt reflection content is: ", reflectContent);
+
+        if (!reflectContent) {
+            logger.info("No reflection card found. Current content card types: " + promptContent.content?.map(r => r.contentType).join(", "));
             this.result.validInput = false;
-            this.result.errors.push(`No question was found. Please add a \"${ContentType.reflect}\" card with a value in the \"text\" field`)
+            this.result.errors.push(`no reflect content card found. Please add a reflect screen.`);
+        }
+
+        const questionString = promptContent.getQuestion();
+        if (isBlank(questionString)) {
+            logger.info(`The prompt.getQuestion() method returned: ${ questionString }`);
+            this.result.validInput = false;
+            this.result.errors.push(`No question was found. Please add a \"${ ContentType.reflect }\" card with a value in the \"text\" field`)
         }
 
         return this.result.validInput;
@@ -144,7 +155,7 @@ export default class PromptContentScheduler {
             result.success = false;
             result.didPublish = false;
             logger.error("Failed to process Prompt Content", error);
-            result.errors.push(`An unexpected error occurred while processing the PromptContent. Please see the function logs for more information.  ${error.message || error}`)
+            result.errors.push(`An unexpected error occurred while processing the PromptContent. Please see the function logs for more information.  ${ error.message || error }`)
         }
 
         await this.notifySlack();
@@ -159,32 +170,35 @@ export default class PromptContentScheduler {
 
     buildErrorMessage(result: ScheduleResult): ChatMessage {
         // const dateString = getISODate(this.promptContent.scheduledSendAt);
-        const dateString = formatDateTime(this.promptContent.scheduledSendAt, { format: "cccc, LLLL d, yyyy", timezone: mailchimpTimeZone });
+        const dateString = formatDateTime(this.promptContent.scheduledSendAt, {
+            format: "cccc, LLLL d, yyyy",
+            timezone: mailchimpTimeZone
+        });
         const fields: SlackAttachmentField[] = [
-            {title: "Question", value: this.promptContent.getQuestion() || "not set"},
-            {title: "Scheduled Send Date", value: dateString || "not set"},
-            {title: "Prompt Content Entry ID", value: result.promptContent.entryId!}
+            { title: "Question", value: this.promptContent.getQuestion() || "not set" },
+            { title: "Scheduled Send Date", value: dateString || "not set" },
+            { title: "Prompt Content Entry ID", value: result.promptContent.entryId! }
         ];
 
         if (result.existingPromptContent) {
-            fields.push({title: "Existing Prompt Content Entry ID", value: result.existingPromptContent.entryId!})
+            fields.push({ title: "Existing Prompt Content Entry ID", value: result.existingPromptContent.entryId! })
         }
 
         if (result.promptContent.getQuestion()) {
-            fields.push({title: "Prompt Question", value: result.promptContent.getQuestion()!});
+            fields.push({ title: "Prompt Question", value: result.promptContent.getQuestion()! });
         }
 
         if (result.mailchimpCampaign?.web_id) {
             fields.push({
                 title: "Mailchimp",
-                value: `<https://us20.admin.mailchimp.com/campaigns/edit?id=${result.mailchimpCampaign.web_id}|Edit Campaign>`
+                value: `<https://us20.admin.mailchimp.com/campaigns/edit?id=${ result.mailchimpCampaign.web_id }|Edit Campaign>`
             })
         }
 
         if (result.errors.length > 0) {
             fields.push({
                 title: "Issues",
-                value: "```" + result.errors.map(e => `- ${e}`).join("\n") + "```",
+                value: "```" + result.errors.map(e => `- ${ e }`).join("\n") + "```",
             });
         }
 
@@ -204,7 +218,10 @@ export default class PromptContentScheduler {
     buildSuccessMessage(result: ScheduleResult): ChatMessage {
         const link = buildPromptContentURL(this.promptContent, this.config);
         // const dateString = getISODate(this.promptContent.scheduledSendAt);
-        const dateString = formatDateTime(this.promptContent.scheduledSendAt, { format: "cccc, LLLL d, yyyy", timezone: mailchimpTimeZone });
+        const dateString = formatDateTime(this.promptContent.scheduledSendAt, {
+            format: "cccc, LLLL d, yyyy",
+            timezone: mailchimpTimeZone
+        });
         const fields: SlackAttachmentField[] = [
             {
                 title: "Send Date",
@@ -224,28 +241,31 @@ export default class PromptContentScheduler {
             {
                 title: "iOS Link (Custom Scheme)",
                 short: true,
-                value: `<${this.config.ios.custom_scheme}://cactus.app${PageRoute.PROMPTS_ROOT}/${this.promptContent.entryId!}|Open in iOS>`,
+                value: `<${ this.config.ios.custom_scheme }://cactus.app${ PageRoute.PROMPTS_ROOT }/${ this.promptContent.entryId! }|Open in iOS>`,
             },
             {
                 title: "Web Link",
-                value: `<${link}|Open in Browser>`,
+                value: `<${ link }|Open in Browser>`,
                 short: true,
             }
         ];
         if (this.result.mailchimpCampaign?.archive_url) {
             fields.push({
                 title: "Mailchimp Email",
-                value: `<${this.result.mailchimpCampaign.archive_url}|View Email>`,
+                value: `<${ this.result.mailchimpCampaign.archive_url }|View Email>`,
                 short: true,
             })
         }
 
         if (this.result.errors.length > 0) {
-            fields.push({title: "Message", value: "```" + this.result.errors.map(e => `- ${e}`).join("\n") + "```"});
+            fields.push({
+                title: "Message",
+                value: "```" + this.result.errors.map(e => `- ${ e }`).join("\n") + "```"
+            });
         }
 
         return {
-            text: `:white_check_mark: Successfully published prompt content for <${link}|${dateString}: ${result.promptContent.getQuestion()}>`,
+            text: `:white_check_mark: Successfully published prompt content for <${ link }|${ dateString }: ${ result.promptContent.getQuestion() }>`,
             attachments: [{
                 color: "good",
                 text: " ",
@@ -274,7 +294,7 @@ export default class PromptContentScheduler {
         }
 
         if (!this.hasValidContentStatus()) {
-            result.errors.push(`Will not process prompts with status of '${promptContent.contentStatus}'. To schedule a prompt it must be in the status of '${ContentStatus.submitted}'`);
+            result.errors.push(`Will not process prompts with status of '${ promptContent.contentStatus }'. To schedule a prompt it must be in the status of '${ ContentStatus.submitted }'`);
             result.success = false;
 
             return result;
@@ -325,7 +345,7 @@ export default class PromptContentScheduler {
             //make sure the existing prompt matches any potentially existing prompt
             if (this.promptContent.promptId && this.promptContent.promptId !== existingPrompt.id) {
                 logger.warn("The existing promptId on the promptContent doesn't match an existing ReflectionPrompt that has this promptContentId");
-                this.result.errors.push(`The PromptContent's promptId does not match an existing ReflectionPrompt that had \"promptContentEntryId\" of ${this.promptContent.entryId}`);
+                this.result.errors.push(`The PromptContent's promptId does not match an existing ReflectionPrompt that had \"promptContentEntryId\" of ${ this.promptContent.entryId }`);
                 this.result.success = false;
                 return false;
             }
@@ -344,7 +364,7 @@ export default class PromptContentScheduler {
             this.savePromptContent()
         ]);
 
-        logger.log(chalk.green(`Saved ReflectionPrompt to firestore and saved PromptContent to flamelink. PromptID = ${prompt.id}`));
+        logger.log(chalk.green(`Saved ReflectionPrompt to firestore and saved PromptContent to flamelink. PromptID = ${ prompt.id }`));
         return true;
     }
 
@@ -368,7 +388,7 @@ export default class PromptContentScheduler {
             logger.warn("A prompt already exists for this date.");
             this.result.existingPromptContentForDay = true;
             this.result.existingPromptContent = existingPrompt;
-            this.result.errors.push(`A promptContent entry (${existingPrompt.entryId}) already exists for this tier on this date (${scheduledDate.toLocaleString()})`)
+            this.result.errors.push(`A promptContent entry (${ existingPrompt.entryId }) already exists for this tier on this date (${ scheduledDate.toLocaleString() })`)
             return existingPrompt;
         }
 
@@ -376,7 +396,7 @@ export default class PromptContentScheduler {
     }
 
     async setupEmails(): Promise<EmailResult> {
-        const {success, error, campaign} = await this.createMailchimpCampaign();
+        const { success, error, campaign } = await this.createMailchimpCampaign();
 
         if (!success || !campaign) {
             this.result.success = false;
@@ -414,7 +434,7 @@ export default class PromptContentScheduler {
 
     async scheduleCampaign(campaign: Campaign): Promise<ScheduleCampaignResult> {
         const campaignChecklist = await MailchimpService.getSharedInstance().getCampaignSendChecklist(campaign.id);
-        const result: ScheduleCampaignResult = {success: false};
+        const result: ScheduleCampaignResult = { success: false };
         const isReady = campaignChecklist.is_ready;
         // let didForceRetry = false;
 
@@ -431,21 +451,21 @@ export default class PromptContentScheduler {
         const warnings = campaignChecklist.items.filter(item => item.type === SendChecklistItemType.warning && item.heading !== "MonkeyRewards");
         logger.log(chalk.green(`Campaign is ready to be scheduled`));
         if (warnings.length > 0) {
-            logger.warn(chalk.yellow(`The mailchimp campaign is ready to send, however, there are ${warnings.length} warnings. \n${JSON.stringify(warnings, null, 2)}`));
+            logger.warn(chalk.yellow(`The mailchimp campaign is ready to send, however, there are ${ warnings.length } warnings. \n${ JSON.stringify(warnings, null, 2) }`));
             result.warnings = warnings;
         }
 
         const scheduledDate = new Date(this.promptContent.scheduledSendAt!);
 
         const send_time = DateTime.fromJSDate(scheduledDate).setZone(mailchimpTimeZone)
-            .set({
-                hour: 2,
-                minute: 45
-            }).toISO();
+        .set({
+            hour: 2,
+            minute: 45
+        }).toISO();
         logger.log("Scheduling Mailchimp campaign for promptContent scheduled Date", scheduledDate);
         logger.log("The scheduled date is converted into ISO string for mailchimp at 2:45am: ", send_time);
 
-        let scheduleResponse = await MailchimpService.getSharedInstance().scheduleCampaign(campaign.id, {schedule_time: send_time}, campaign.web_id);
+        let scheduleResponse = await MailchimpService.getSharedInstance().scheduleCampaign(campaign.id, { schedule_time: send_time }, campaign.web_id);
         logger.log("schedule campaign success:", scheduleResponse);
 
         if (scheduleResponse.alreadyScheduled) {
@@ -453,13 +473,13 @@ export default class PromptContentScheduler {
             const unscheduleResponse = await MailchimpService.getSharedInstance().unscheduleCampaign(campaign);
             if (unscheduleResponse.success) {
                 logger.log("Un-scheduling campaign was successful. attempting to re-schedule campaign");
-                scheduleResponse = await MailchimpService.getSharedInstance().scheduleCampaign(campaign.id, {schedule_time: send_time}, campaign.web_id);
+                scheduleResponse = await MailchimpService.getSharedInstance().scheduleCampaign(campaign.id, { schedule_time: send_time }, campaign.web_id);
                 logger.log("re-schedule campaign response: ", JSON.stringify(scheduleResponse))
             } else {
                 logger.error("Unschedule campaign failed", unscheduleResponse.errorMessage);
                 result.error = unscheduleResponse.errorMessage;
                 result.success = false;
-                this.result.errors.push(`The campaign was already scheduled and failed to re-schedule: ${unscheduleResponse.errorMessage}`);
+                this.result.errors.push(`The campaign was already scheduled and failed to re-schedule: ${ unscheduleResponse.errorMessage }`);
                 return result;
             }
         }
@@ -475,10 +495,10 @@ export default class PromptContentScheduler {
     }
 
     createReflectButtonHtml(): string {
-        const path = `${PageRoute.PROMPTS_ROOT}/${this.promptContent.entryId!}`;
+        const path = `${ PageRoute.PROMPTS_ROOT }/${ this.promptContent.entryId! }`;
         const domain = this.config.web.domain;
         const linkText = "Reflect";
-        return `<a class="button" href="${appendDomain(path, domain)}?e=*|URL:EMAIL|*">${linkText}</a>`
+        return `<a class="button" href="${ appendDomain(path, domain) }?e=*|URL:EMAIL|*">${ linkText }</a>`
     }
 
     async updateCampaignContent(campaign: Campaign): Promise<{ success: boolean, content?: CampaignContent, error?: string }> {
@@ -504,7 +524,7 @@ export default class PromptContentScheduler {
             const campaignContent = await MailchimpService.getSharedInstance().updateCampaignContent(campaign.id, contentRequest);
             logger.log("Successfully updated the template content for campaign\n");
 
-            return {success: !!campaignContent, content: campaignContent}
+            return { success: !!campaignContent, content: campaignContent }
         } catch (error) {
             const message = error.isAxiosError && (error as AxiosError).response?.data || "Unable to create campaign content";
             this.result.errors.push(message);
@@ -520,9 +540,12 @@ export default class PromptContentScheduler {
 
         const config = this.config.mailchimp;
         const promptContent = this.promptContent;
-        const sendDate = formatDateTime(promptContent.scheduledSendAt, { format: "yyyy-LL-dd", timezone: mailchimpTimeZone });
-        logger.log(chalk.red(`Mailchimp Send Date is formatted as: ${sendDate}`));
-        const campaignTitle = `${sendDate} - Daily - ${promptContent.getQuestion()}`;
+        const sendDate = formatDateTime(promptContent.scheduledSendAt, {
+            format: "yyyy-LL-dd",
+            timezone: mailchimpTimeZone
+        });
+        logger.log(chalk.red(`Mailchimp Send Date is formatted as: ${ sendDate }`));
+        const campaignTitle = `${ sendDate } - Daily - ${ promptContent.getQuestion() }`;
 
         const prompt = this.result.reflectionPrompt;
         const campaignSettings: CreateCampaignSettings = {
@@ -552,13 +575,13 @@ export default class PromptContentScheduler {
 
             try {
                 const updatedCampaign = await MailchimpService.getSharedInstance().updateCampaign(promptContent.mailchimpCampaignId, updateRequest);
-                return {success: true, campaign: updatedCampaign};
+                return { success: true, campaign: updatedCampaign };
             } catch (updateError) {
                 logger.error("Update campaign failed.", updateError);
                 return {
                     success: false,
                     campaign: campaign,
-                    error: `${JSON.stringify(updateError.response?.data || updateError)}`
+                    error: `${ JSON.stringify(updateError.response?.data || updateError) }`
                 };
             }
         }
@@ -587,7 +610,7 @@ export default class PromptContentScheduler {
                 await AdminReflectionPromptService.getSharedInstance().save(prompt)
             }
 
-            return {campaign, success: true};
+            return { campaign, success: true };
         } catch (error) {
             if (error.isAxiosError) {
                 const axiosError = error as AxiosError;
@@ -600,7 +623,7 @@ export default class PromptContentScheduler {
                 logger.error("Failed to create mailchimp campaign", error);
                 return {
                     success: false,
-                    error: `API Call to mailchimp to create the campaign failed: ${error.message ? error.message : error}`
+                    error: `API Call to mailchimp to create the campaign failed: ${ error.message ? error.message : error }`
                 };
             }
 
@@ -609,8 +632,8 @@ export default class PromptContentScheduler {
 
     async savePromptContent(): Promise<void> {
         const promptContent = this.promptContent;
-        await AdminFlamelinkService.getSharedInstance().updateRaw(promptContent, {updatedBy: this.robotUserId});
-        logger.log(chalk.blue(`Saved PromptContent with status ${promptContent.contentStatus}`));
+        await AdminFlamelinkService.getSharedInstance().updateRaw(promptContent, { updatedBy: this.robotUserId });
+        logger.log(chalk.blue(`Saved PromptContent with status ${ promptContent.contentStatus }`));
         return;
     }
 
