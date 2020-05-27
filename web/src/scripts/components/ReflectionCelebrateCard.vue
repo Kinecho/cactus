@@ -109,7 +109,8 @@
                 <prompt-content-card
                         v-if="showTradeNote"
                         :content="sharingContentCard"
-                        :response="reflectionResponse"/>
+                        :response="reflectionResponse"
+                        :promptContent="promptContent" />
                 <div class="flexContainer">
                     <button @click="flipped = false" class="backBtn tertiary">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
