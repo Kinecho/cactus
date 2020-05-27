@@ -35,6 +35,7 @@ import { AxiosError } from "axios";
 import { PageRoute } from "@shared/PageRoutes";
 import Logger from "@shared/Logger";
 import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
+import { stringifyJSON } from "@shared/util/ObjectUtil";
 
 const logger = new Logger("PromptContentScheduler");
 
@@ -141,11 +142,13 @@ export default class PromptContentScheduler {
             await this.processPromptContent();
 
             if (result.success) {
+                logger.info("Saving prompt content with SUCCESS");
                 promptContent.contentStatus = ContentStatus.published;
                 promptContent.errorMessage = "";
                 await this.savePromptContent();
                 result.didPublish = true;
             } else {
+                logger.warn("Saving prompt content with NEEDS_CHANGES", stringifyJSON(result.errors));
                 promptContent.contentStatus = ContentStatus.needs_changes;
                 promptContent.errorMessage = result.errors.join(" | ");
                 await this.savePromptContent();
@@ -509,6 +512,7 @@ export default class PromptContentScheduler {
             [TemplateSection.content_link]: this.createReflectButtonHtml(),
         };
 
+        logger.info(`Setting email template sections to\n: ${ chalk.blue(stringifyJSON(sections)) }`);
 
         if (this.promptContent.topic) {
             sections[TemplateSection.prompt_topic] = this.promptContent.topic || "";

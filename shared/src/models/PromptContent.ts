@@ -293,7 +293,10 @@ export default class PromptContent extends FlamelinkModel {
 
     getPreviewText(): string | undefined {
         const [first] = (this.content || []);
-        return first?.text_md ?? first.text;
+        if (first && !isBlank(first.text_md)) {
+            return first.text_md;
+        }
+        return first?.text;
     }
 
     getOpenGraphImageUrl(): string | null {
