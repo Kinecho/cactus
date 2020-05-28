@@ -19,12 +19,12 @@
         <div class="switcher" v-if="!isPendingRedirect && showLoginSwitcher">
             <p v-if="mode === 'LOG_IN'">
                 Don't have an account?
-                <router-link :to="signUpPath">Sign up</router-link>
+                <router-link :to="signUpPath" :class="[switcherLinkStyle]">Sign up</router-link>
                 .
             </p>
             <p v-if="mode === 'SIGN_UP'">
                 Already have an account?
-                <router-link :to="loginPath">Log in</router-link>
+                <router-link :to="loginPath" :class="[switcherLinkStyle]">Log in</router-link>
                 .
             </p>
         </div>
@@ -63,7 +63,7 @@
     const copy = locale.copy;
 
     export default Vue.extend({
-        components: {
+            components: {
             MagicLink,
             Spinner,
         },
@@ -113,6 +113,7 @@
             showMagicLink: { type: Boolean, default: true },
             twitterEnabled: { type: Boolean, default: true },
             showLoginSwitcher: {type: Boolean, default: true},
+            switcherLinkStyle: {type: String, default: "light"},
             mode: {type: String as () => "SIGN_UP" | "LOG_IN", required: false, default: "SIGN_UP"}
         },
         data(): {
@@ -306,6 +307,14 @@
     .switcher {
         text-align: center;
         margin-top: 5rem;
+
+        .dark {
+            //color: $darkerGreen
+        }
+
+        .light {
+            color: $white;
+        }
     }
 
 </style>

@@ -7,14 +7,7 @@
                     <p class="subtext">Questions designed to improve how you think about your work, life, relationships,
                         and emotions</p>
 <!--                    <router-link :to="assessmentHref" tag="button" class="quizBtn primary">Take the quiz</router-link>-->
-                    <SignIn
-                            :show-login-switcher="false"
-                            :show-title="false"
-                            :show-magic-link="false"
-                            :twitter-enabled="false"
-                            spinner-color="dark"
-                            redirect-url="/signup"
-                    />
+                    <router-link :to="getStartedPath" tag="button" class="quizBtn primary">Get Started</router-link>
                 </div>
                 <aside class="graphicContainer">
                     <p class="sampleQuestion">What helps you unwind and recuperate?</p>
@@ -135,7 +128,8 @@
             <section class="email">
                 <h2 class="emailHeader">A reflection a day…</h2>
                 <p class="subtext">Cactus is a different kind of mindfulness.</p>
-                <router-link :to="assessmentHref" tag="button" class="quizBtn primary">Take the quiz</router-link>
+<!--                <router-link :to="assessmentHref" tag="button" class="quizBtn primary">Take the quiz</router-link>-->
+                <router-link :to="getStartedPath" tag="button" class="quizBtn primary">Get Started</router-link>
             </section>
         </div>
     </div>
@@ -169,6 +163,10 @@
 
         get assessmentHref(): string {
             return PageRoute.GAP_ANALYSIS;
+        }
+
+        get getStartedPath(): string {
+            return PageRoute.GET_STARTED
         }
 
         get showTryItHeader(): boolean {

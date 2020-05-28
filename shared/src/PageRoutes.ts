@@ -1,6 +1,7 @@
 export enum PageRoute {
     SIGNUP = "/signup",
     LOGIN = "/login",
+    GET_STARTED = "/get-started",
     HOME = "/",
     SIGNUP_CONFIRMED = "/confirmed",
     CHECKOUT = "/checkout",
