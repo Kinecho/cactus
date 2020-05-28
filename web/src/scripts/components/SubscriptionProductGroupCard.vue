@@ -23,7 +23,9 @@
                     class="planButton" :id="product.entryId"
                     :aria-controls="product.displayName"
                     @click="selectedProduct = product"
-                    :class="{selected: isSelected(product)}">
+                    :class="{selected: isSelected(product)}"
+                    :style="planButtonStyles"
+            >
                 <div class="cadence">{{copy.checkout.BILLING_PERIOD[product.billingPeriod]}}</div>
                 <div class="planPrice">{{formatPrice(product.priceCentsUsd)}}</div>
                 <div class="payment-period-per">per {{copy.checkout.BILLING_PERIOD_PER[product.billingPeriod]}}</div>
@@ -117,6 +119,15 @@
             this.selectedProduct = this.getSelectedProduct();
         },
         computed: {
+            planButtonStyles(): any {
+                let numProducts = this.productGroup.products.length ?? 0;
+                if (numProducts === 0) {
+                    numProducts = 1;
+                }
+                return {
+                    width: `${(100 / numProducts) - 1}%`,
+                }
+            },
             tierName(): string | undefined {
                 return subscriptionTierDisplayName(this.productGroup.tier);
             },
@@ -407,7 +418,7 @@
         font-size: 1.6rem;
         padding: 0.8rem;
         text-align: center;
-        width: 32%;
+        width: 49%;
 
         &.selected {
             border-color: $green;

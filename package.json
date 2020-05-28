@@ -54,7 +54,7 @@
         "firebase": "^7.14.0"
     },
     "devDependencies": {
-        "firebase-tools": "^8.0.3",
+        "firebase-tools": "^8.4.0",
         "jest": "^24.8.0",
         "ts-jest": "^24.1.0",
         "ts-node": "^8.10.1",
