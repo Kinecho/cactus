@@ -6,7 +6,15 @@
                     <h1>What makes you&nbsp;happy?</h1>
                     <p class="subtext">Questions designed to improve how you think about your work, life, relationships,
                         and emotions</p>
-                    <router-link :to="assessmentHref" tag="button" class="quizBtn primary">Take the quiz</router-link>
+<!--                    <router-link :to="assessmentHref" tag="button" class="quizBtn primary">Take the quiz</router-link>-->
+                    <SignIn
+                            :show-login-switcher="false"
+                            :show-title="false"
+                            :show-magic-link="false"
+                            :twitter-enabled="false"
+                            spinner-color="dark"
+                            redirect-url="/signup"
+                    />
                 </div>
                 <aside class="graphicContainer">
                     <p class="sampleQuestion">What helps you unwind and recuperate?</p>
@@ -140,9 +148,10 @@
     import PlayStoreIcon from "@components/PlayStoreIcon.vue";
     import Component from "vue-class-component";
     import { PageRoute } from "@shared/PageRoutes";
-
+    import SignIn from "@components/SignIn.vue";
     @Component({
         components: {
+            SignIn,
             AppStoreIcon,
             PlayStoreIcon,
         }
