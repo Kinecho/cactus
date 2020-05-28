@@ -65,7 +65,7 @@ export function getProductsByTier(products: SubscriptionProduct[]): ProductTierM
 
 export function sortSubscriptionProductsByBillingPeriod(products: SubscriptionProduct[]) {
     products.sort((a, b) => {
-        return BillingPeriodSortOrder.indexOf(a.billingPeriod) - BillingPeriodSortOrder.indexOf(b.billingPeriod);
+        return BillingPeriodSortOrder.indexOf(b.billingPeriod) - BillingPeriodSortOrder.indexOf(a.billingPeriod);
     });
 }
 
