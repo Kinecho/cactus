@@ -15,22 +15,16 @@
     import Vue from "vue";
     import NavBar from "@components/NavBar.vue";
     import Footer from "@components/StandardFooter.vue";
-    import SocialActivityFeed from "@components/SocialActivityFeed.vue"
     import SocialFindFriends from "@components/SocialFindFriends.vue"
     import { ListenerUnsubscriber } from '@web/services/FirestoreService'
     import CactusMember from "@shared/models/CactusMember"
     import CactusMemberService from "@web/services/CactusMemberService"
     import { PageRoute } from "@shared/PageRoutes"
     import { QueryParam } from '@shared/util/queryParams'
-    import VueClipboard from "vue-clipboard2";
-    import SocialSharing from "vue-social-sharing";
     import Logger from "@shared/Logger"
     import { pushRoute } from "@web/NavigationUtil";
 
     const logger = new Logger("SocialInvite");
-
-    Vue.use(VueClipboard);
-    Vue.use(SocialSharing);
 
     export default Vue.extend({
         components: {

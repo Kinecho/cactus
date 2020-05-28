@@ -53,7 +53,7 @@
 <script lang="ts">
     import Vue from "vue";
     import CactusMember from '@shared/models/CactusMember'
-    import SocialSharing from "vue-social-sharing"
+    import * as SocialSharing from "vue-social-sharing"
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
     import CactusMemberService from '@web/services/CactusMemberService'
     import {appendQueryParams} from '@shared/util/StringUtil'

@@ -54,7 +54,7 @@
     import SocialActivityFeed from "@components/SocialActivityFeed.vue"
     import SocialActivityCard from "@components/SocialActivityCard.vue"
     import VueClipboard from "vue-clipboard2";
-    import SocialSharing from "vue-social-sharing";
+    import * as SocialSharing from "vue-social-sharing";
     import Logger from "@shared/Logger"
     import { pushRoute } from "@web/NavigationUtil";
 
