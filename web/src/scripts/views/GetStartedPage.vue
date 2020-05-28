@@ -133,9 +133,6 @@
 
         .nav-bar {
             z-index: 2;
-            position: absolute;
-            top: 1rem;
-            left: 1rem;
         }
 
         &:after {
