@@ -57,11 +57,9 @@
                 //more color options: https://github.com/d3/d3-scale-chromatic
                 let colorRange: string[] = [
                     "#47445E",
-                    "#364FAC",
-                    "#CC33A1",
-                    "#ECE7E4",
-                    "#ECE7E4",
-                    "#ECE7E4"
+                    "#5E5A7C",
+                    "#9490B0",
+                    "#D3D1E3",
                 ];
 
                 const color = d3ScaleOrdinal()
