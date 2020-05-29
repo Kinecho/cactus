@@ -45,6 +45,7 @@ import StripeService from "@admin/services/StripeService";
 import { GooglePaymentState, subscriptionStatusFromGooglePaymentState } from "@shared/api/GooglePlayBillingTypes";
 import { formatDateTime, fromMillisecondsString } from "@shared/util/DateUtil";
 import { microDollarsStringToCents } from "@shared/util/StringUtil";
+import SubscriptionProduct from "@shared/models/SubscriptionProduct";
 
 export interface ExpireTrialResult {
     member: CactusMember,
@@ -510,10 +511,10 @@ export default class AdminSubscriptionService {
         if (!unifiedReceipt) {
             this.logger.error("Unable to get unified receipt info from apple payment");
             await AdminSlackService.getSharedInstance().uploadTextSnippet({
-                message: `:ios: Unable to get a unified apple receipt object from a payment record while building the Cactus SubscriptionInvoice object. \nPaymentID = \`${payment.id}\`\nMember = \`${member.email} (${member.id})\``,
+                message: `:ios: Unable to get a unified apple receipt object from a payment record while building the Cactus SubscriptionInvoice object. \nPaymentID = \`${ payment.id }\`\nMember = \`${ member.email } (${ member.id })\``,
                 data: stringifyJSON(payment, 2),
                 fileType: "json",
-                filename: `apple-subscription-invoice-failed-payment-${payment.id}.json`,
+                filename: `apple-subscription-invoice-failed-payment-${ payment.id }.json`,
                 channel: ChannelName.engineering,
             });
             return undefined;
@@ -528,10 +529,20 @@ export default class AdminSubscriptionService {
         }
 
         const [autoRenewInfo] = receiptInfo?.pending_renewal_info as (PendingRenewalInfo | undefined)[];
-        const subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByAppleProductId({
-            appleProductId: latestInfo.product_id,
-            onlyAvailableForSale: false
-        });
+
+
+        const memberSubscriptionProductId = member.subscription?.subscriptionProductId;
+
+        let subscriptionProduct: SubscriptionProduct | undefined;
+        if (memberSubscriptionProductId) {
+            subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByEntryId(memberSubscriptionProductId)
+        }
+        if (!subscriptionProduct) {
+            subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByAppleProductId({
+                appleProductId: latestInfo.product_id,
+                onlyAvailableForSale: false
+            });
+        }
 
         const expiresAtSeconds = latestInfo.expires_date_ms ? Number(latestInfo.expires_date_ms) / 1000 : undefined;
 
@@ -559,6 +570,7 @@ export default class AdminSubscriptionService {
             periodStart_epoch_seconds: optionalStringToNumber(latestInfo.purchase_date_ms),
             periodEnd_epoch_seconds: expiresAtSeconds,
             optOutTrialEndsAt_epoch_seconds: subscriptionStatus === SubscriptionStatus.in_trial ? expiresAtSeconds : undefined,
+            appleProductPrice: payment?.apple?.productPrice,
         };
         return invoice;
     }
@@ -759,7 +771,7 @@ export default class AdminSubscriptionService {
                 this.logger.error("Failed to complete android purchase - no cactus product was found", result);
                 return result;
             }
-            
+
             const payment = Payment.fromAndroidPurchase({
                 memberId: memberId,
                 subscriptionProductId,
@@ -809,7 +821,7 @@ export default class AdminSubscriptionService {
                 await AdminSlackService.getSharedInstance().sendChaChingMessage({
                     text: `:android: ${ member.email } has completed an in-app purchase \`${ subscriptionProduct.displayName } (${ item.subscriptionProductId })\`\n` +
                     `*In Opt-Out Trial*: \`${ isOptOutTrial ? "Yes" : "No" }\`\n` +
-                    `${ (isOptOutTrial && !!periodEndDate ) ? `*Trial End Date*: ${ formatDateTime(periodEndDate) ?? "Not Set"}` : "" }`
+                    `${ (isOptOutTrial && !!periodEndDate) ? `*Trial End Date*: ${ formatDateTime(periodEndDate) ?? "Not Set" }` : "" }`
                 })
             }
 

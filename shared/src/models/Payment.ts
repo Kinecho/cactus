@@ -5,7 +5,7 @@ import {
     AppleServerNotificationBody,
     AppleTransactionInfo,
     getOriginalTransactionId,
-    getOriginalTransactionIdFromServerNotification, AppleUnifiedReceipt
+    getOriginalTransactionIdFromServerNotification, AppleUnifiedReceipt, AppleProductPrice
 } from "@shared/api/AppleApi";
 import Logger from "@shared/Logger";
 import { AndroidPurchase } from "@shared/api/CheckoutTypes";
@@ -45,8 +45,13 @@ export default class Payment extends BaseModel {
         return payment;
     }
 
-    static fromAppleReceipt(options: { memberId: string, subscriptionProductId: string, receipt: AppleVerifiedReceipt }): Payment {
-        const { memberId: memberId, receipt, subscriptionProductId } = options;
+    static fromAppleReceipt(options: {
+        memberId: string,
+        subscriptionProductId: string,
+        receipt: AppleVerifiedReceipt,
+        productPrice?: AppleProductPrice,
+    }): Payment {
+        const { memberId: memberId, receipt, subscriptionProductId, productPrice } = options;
         const payment = new Payment();
         payment.memberId = memberId;
         payment.subscriptionProductId = subscriptionProductId;
@@ -64,6 +69,7 @@ export default class Payment extends BaseModel {
             originalTransactionId: transactionId,
             latestReceiptInfo,
             unifiedReceipt: receipt,
+            productPrice,
         };
 
         return payment;
@@ -133,6 +139,10 @@ interface StripePayment {
 
 interface ApplePayment {
     raw?: AppleVerifiedReceipt;
+    /**
+     * The amount the customer paid, in local currency.
+     */
+    productPrice?: AppleProductPrice;
     originalTransactionId?: string;
     latestNotificationRaw?: AppleServerNotificationBody;
     latestReceiptInfo?: AppleTransactionInfo;

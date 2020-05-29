@@ -48,7 +48,7 @@ app.post("/complete-purchase", async (req: functions.https.Request | any, resp: 
 
     const product = result.fulfillmentResult?.subscriptionProduct;
     if (result.success && result.fulfillmentResult?.didFulfill) {
-        await AdminSlackService.getSharedInstance().sendChaChingMessage({ text: `:ios: ${ member?.email } has ${ purchaseType } an subscription \`${ product?.displayName } (${ product?.appleProductId })\`` });
+        await AdminSlackService.getSharedInstance().sendChaChingMessage({ text: `:ios: ${ member?.email } has ${ purchaseType } a subscription \`${ product?.displayName } (${ product?.appleProductId })\`. Purchase Price: ${body.localePriceFormatted ?? "not set"}` });
     } else if (result.success) {
         await AdminSlackService.getSharedInstance().sendChaChingMessage({ text: `:ios: ${ member?.email } was unable to fulfill a \`${ purchaseType }\` receipt\n>${ result.message }` });
     }
