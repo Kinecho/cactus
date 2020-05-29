@@ -3,9 +3,7 @@
         <section class="content">
             <div v-if="processedContent.text" class="text">
                 <a v-if="processedContent.showElementIcon" class="element-container" @click.prevent="showCactusModal(cactusElement)">
-                    <div class="element-icon">
-                        <img :src="'/assets/images/cacti/' + cactusElement + '-3.svg'" alt=""/>
-                    </div>
+                    <img :src="'/assets/images/elements/' + cactusElement + '.svg'" alt=""/>
                     <h4 class="label">{{cactusElement}}</h4>
                 </a>
                 <h4 v-if="processedContent.label" class="label">{{processedContent.label}}</h4>
@@ -771,21 +769,11 @@
     }
 
     .element-icon {
-        align-items: center;
-        background-color: darken($beige, 5%);
-        border-radius: 50%;
-        display: inline-flex;
-        height: 6.4rem;
-        justify-content: center;
-        margin-bottom: 1.6rem;
-        padding: .4rem;
-        width: 6.4rem;
-
-        img {
-            $avatarSize: 5.6rem;
-            height: $avatarSize;
-            width: $avatarSize;
-        }
+        $avatarSize: 5.6rem;
+        display: block;
+        height: $avatarSize;
+        margin: 0 auto;
+        width: $avatarSize;
     }
 
     .quote-container {
