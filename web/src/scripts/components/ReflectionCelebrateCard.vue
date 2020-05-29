@@ -17,92 +17,80 @@
                             :startBlurred="subscriptionTier === basicTier"
                             :loggedIn="loggedIn"/>
                 </div>
-                <div class="lowerContainer">
-                    <div class="cactusGarden">
-                        <a class="cactusContainer" v-for="(count, element) in elementAccumulations" v-if="count > 0 && cactusElement !== undefined" @click.prevent="showCactusModal(element)">
-                            <img
-                                    :class="['cactusIllustration', `count-${count}`]"
-                                    :src="'/assets/images/cacti/'+ element + '-' + (count > 3 ? 3 : count) + '.svg'"
-                                    :alt="element + ' cactus'"
-                                    :title="elementCopy[element.toUpperCase()]"
-                            />
-                        </a>
-                    </div>
-                    <div class="stats-container">
-                        <section class="metric">
-                            <div class="label">
-                                <transition name="fade-in" mode="out-in" appear>
-                                    <span v-if="reflectionCount !== undefined">{{reflectionCount}}</span>
-                                    <spinner v-if="reflectionCount === undefined" :delay="1000"/>
-                                </transition>
-                            </div>
-                            <p v-show="reflectionCount !== undefined">
-                                {{promptCopy.REFLECTIONS}}
-                            </p>
-                        </section>
-                        <section class="metric">
-                            <div class="label">
-                                <transition name="fade-in" mode="out-in" appear>
-                                    <span v-if="totalDuration !== undefined">{{totalDuration}}</span>
-                                    <spinner v-if="totalDuration === undefined" :delay="1000"/>
-                                </transition>
-                            </div>
-                            <p v-show="totalDuration !== undefined">
-                                {{durationLabel}}
-                            </p>
-                        </section>
-                        <section class="metric" v-if="currentStreak == 'days'">
-                            <div class="label">
-                                <transition name="fade-in" mode="out-in" appear>
-                                    <span v-if="streakDays !== undefined">{{streakDays}}</span>
-                                    <spinner v-if="streakDays === undefined" :delay="1000"/>
-                                </transition>
-                            </div>
-                            <p v-show="streakDays !== undefined">
-                                {{promptCopy.DAY_STREAK}}
-                            </p>
-                        </section>
-                        <section class="metric" v-if="currentStreak == 'weeks'">
-                            <div class="label">
-                                <transition name="fade-in" mode="out-in" appear>
-                                    <span v-if="streakWeeks !== undefined">{{streakWeeks}}</span>
-                                    <spinner v-if="streakWeeks === undefined" :delay="1000"/>
-                                </transition>
-                            </div>
-                            <p v-show="streakWeeks !== undefined">
-                                {{promptCopy.WEEK_STREAK}}
-                            </p>
-                        </section>
-                        <section class="metric" v-if="currentStreak == 'months'">
-                            <div class="label">
-                                <transition name="fade-in" mode="out-in" appear>
-                                    <span v-if="streakMonths !== undefined">{{streakMonths}}</span>
-                                    <spinner v-if="streakMonths === undefined" :delay="1000"/>
-                                </transition>
-                            </div>
-                            <p v-show="streakMonths !== undefined">
-                                {{promptCopy.MONTH_STREAK}}
-                            </p>
-                        </section>
-                    </div>
-                    <div class="btnContainer">
-                        <button class="lowerBtn authBtn secondary" v-if="didWriteReflection && !isOnboardingPrompt" @click="tradeNote">
-                            Share Note
-                        </button>
-                        <!-- <button class="lowerBtn primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
-                            {{promptCopy.SIGN_UP_MESSAGE}}
-                        </button> -->
-                        <button class="lowerBtn authBtn secondary"
-                                v-if="authLoaded && loggedIn && !isModal"
-                                @click="close">
-                            {{promptCopy.GO_HOME}}
-                        </button>
-                        <button class="lowerBtn primary authBtn"
-                                v-if="authLoaded && loggedIn && isModal"
-                                @click="close">
-                            {{promptCopy.CLOSE}}
-                        </button>
-                    </div>
+                <div class="stats-container">
+                    <section class="metric">
+                        <div class="label">
+                            <transition name="fade-in" mode="out-in" appear>
+                                <span v-if="reflectionCount !== undefined">{{reflectionCount}}</span>
+                                <spinner v-if="reflectionCount === undefined" :delay="1000"/>
+                            </transition>
+                        </div>
+                        <p v-show="reflectionCount !== undefined">
+                            {{promptCopy.REFLECTIONS}}
+                        </p>
+                    </section>
+                    <section class="metric">
+                        <div class="label">
+                            <transition name="fade-in" mode="out-in" appear>
+                                <span v-if="totalDuration !== undefined">{{totalDuration}}</span>
+                                <spinner v-if="totalDuration === undefined" :delay="1000"/>
+                            </transition>
+                        </div>
+                        <p v-show="totalDuration !== undefined">
+                            {{durationLabel}}
+                        </p>
+                    </section>
+                    <section class="metric" v-if="currentStreak == 'days'">
+                        <div class="label">
+                            <transition name="fade-in" mode="out-in" appear>
+                                <span v-if="streakDays !== undefined">{{streakDays}}</span>
+                                <spinner v-if="streakDays === undefined" :delay="1000"/>
+                            </transition>
+                        </div>
+                        <p v-show="streakDays !== undefined">
+                            {{promptCopy.DAY_STREAK}}
+                        </p>
+                    </section>
+                    <section class="metric" v-if="currentStreak == 'weeks'">
+                        <div class="label">
+                            <transition name="fade-in" mode="out-in" appear>
+                                <span v-if="streakWeeks !== undefined">{{streakWeeks}}</span>
+                                <spinner v-if="streakWeeks === undefined" :delay="1000"/>
+                            </transition>
+                        </div>
+                        <p v-show="streakWeeks !== undefined">
+                            {{promptCopy.WEEK_STREAK}}
+                        </p>
+                    </section>
+                    <section class="metric" v-if="currentStreak == 'months'">
+                        <div class="label">
+                            <transition name="fade-in" mode="out-in" appear>
+                                <span v-if="streakMonths !== undefined">{{streakMonths}}</span>
+                                <spinner v-if="streakMonths === undefined" :delay="1000"/>
+                            </transition>
+                        </div>
+                        <p v-show="streakMonths !== undefined">
+                            {{promptCopy.MONTH_STREAK}}
+                        </p>
+                    </section>
+                </div>
+                <div class="btnContainer">
+                    <button class="lowerBtn authBtn secondary" v-if="didWriteReflection && !isOnboardingPrompt" @click="tradeNote">
+                        Share Note
+                    </button>
+                    <!-- <button class="lowerBtn primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
+                        {{promptCopy.SIGN_UP_MESSAGE}}
+                    </button> -->
+                    <button class="lowerBtn authBtn secondary"
+                            v-if="authLoaded && loggedIn && !isModal"
+                            @click="close">
+                        {{promptCopy.GO_HOME}}
+                    </button>
+                    <button class="lowerBtn primary authBtn"
+                            v-if="authLoaded && loggedIn && isModal"
+                            @click="close">
+                        {{promptCopy.CLOSE}}
+                    </button>
                 </div>
             </div>
             <div :class="[ 'flip-card', 'back']">
@@ -504,51 +492,6 @@
             margin: 1.6rem auto 0;
             max-width: 28rem;
             opacity: .8;
-        }
-    }
-
-    .lowerContainer {
-        background: $darkerGreen url(/assets/images/grainy.png);
-        padding: 6.4rem 4rem 4rem;
-    }
-
-    .cactusGarden {
-        align-items: flex-end;
-        display: flex;
-        justify-content: center;
-        margin: -12rem 0 1.6rem;
-
-        @include r(374) {
-            margin-bottom: 2.4rem;
-        }
-        @include r(600) {
-            margin-bottom: 0;
-        }
-    }
-
-    .cactusContainer {
-        cursor: pointer;
-        display: flex;
-        justify-content: center;
-        transition: transform .3s;
-        width: 6rem;
-
-        @include r(600) {
-            &:hover {
-                transform: scale(1.03);
-            }
-        }
-    }
-
-    .cactusIllustration {
-        height: 14rem;
-
-        &.count-2 {
-            height: 12rem;
-        }
-
-        &.count-1 {
-            height: 10rem;
         }
     }
 
