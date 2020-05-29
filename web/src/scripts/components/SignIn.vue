@@ -20,12 +20,10 @@
             <p v-if="mode === 'LOG_IN'">
                 Don't have an account?
                 <router-link :to="signUpPath" :class="[switcherLinkStyle]">Sign up</router-link>
-                .
             </p>
             <p v-if="mode === 'SIGN_UP'">
                 Already have an account?
                 <router-link :to="loginPath" :class="[switcherLinkStyle]">Log in</router-link>
-                .
             </p>
         </div>
     </div>
