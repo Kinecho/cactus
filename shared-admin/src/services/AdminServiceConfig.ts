@@ -36,6 +36,7 @@ import GooglePlayService from "@admin/services/GooglePlayService";
 import StripeService from "@admin/services/StripeService";
 import AdminDataExportService from "@admin/services/AdminDataExportService";
 import AdminDeletedUserService from "@admin/services/AdminDeletedUserService";
+import RevenueCatService from "@admin/services/RevenueCatService";
 
 const logger = new Logger("AdminServiceConfig");
 
@@ -89,6 +90,9 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
 
     //Google Play
     GooglePlayService.initialize(config);
+
+    //RevenueCat
+    RevenueCatService.initialize(config);
 
     logger.log("Initializing Sentry");
     const sentryOptions: Sentry.NodeOptions = {

@@ -234,6 +234,10 @@ const defaultTestConfig: CactusConfig = {
             auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
             client_x509_cert_url: "https://www.googleapis.com/robot/v1/metadata/x509/firestore-backups%40cactus-app-stage.iam.gserviceaccount.com"
         },
+    },
+    revenuecat: {
+        public_key: "public_key",
+        secret_key: "secret_key",
     }
 };
 

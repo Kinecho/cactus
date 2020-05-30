@@ -46,6 +46,7 @@ import { GooglePaymentState, subscriptionStatusFromGooglePaymentState } from "@s
 import { formatDateTime, fromMillisecondsString } from "@shared/util/DateUtil";
 import { microDollarsStringToCents } from "@shared/util/StringUtil";
 import SubscriptionProduct from "@shared/models/SubscriptionProduct";
+import RevenueCatService from "@admin/services/RevenueCatService";
 
 export interface ExpireTrialResult {
     member: CactusMember,
@@ -780,6 +781,13 @@ export default class AdminSubscriptionService {
             });
 
             await AdminPaymentService.getSharedInstance().save(payment);
+
+            await RevenueCatService.shared.updateGoogleSubscription({
+                memberId,
+                token: item.token,
+                isRestore: !isNewPurchase,
+                sku: item.subscriptionProductId
+            })
 
             //Do the upgrade
             const isOptOutTrial = androidSubscriptionPurchase.paymentState === GooglePaymentState.FREE_TRIAL;
