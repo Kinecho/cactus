@@ -121,5 +121,6 @@ export interface CactusConfig {
     revenuecat: {
         public_key: string,
         secret_key: string,
+        webhook_bearer_token: string,
     }
 }

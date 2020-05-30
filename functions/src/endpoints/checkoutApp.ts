@@ -413,4 +413,24 @@ app.post("/android/fulfill-restored-purchases", async (req, resp) => {
     return;
 });
 
+app.post("/reveneuecat/webhooks", async (req, resp) => {
+    const authHeader = req.header("Authorization");
+    if (!authHeader) {
+        resp.sendStatus(401);
+        return
+    }
+    const authToken = authHeader.split("Bearer ")[1];
+    logger.info("Auth token on the request is", authToken);
+    logger.info("Expected token value is", config.revenuecat.webhook_bearer_token);
+    if (authToken !== config.revenuecat.webhook_bearer_token) {
+        resp.sendStatus(403);
+        return
+    }
+
+    logger.info("Authenticated the webhook request");
+
+    resp.sendStatus(200);
+    return;
+})
+
 export default app;
