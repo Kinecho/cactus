@@ -13,7 +13,7 @@
                     <p class="sampleQuestion">When did you first fall in love?</p>
                     <div class="promptDemo">
                         <div class="progressBar"></div>
-                        <img class="demoCactus" src="/assets/images/cacti/experienceGrow.svg" alt="Meaning cactus icon"/>
+                        <img class="demoCactus" src="/assets/images/elements/experience.svg" alt="Meaning cactus icon"/>
                         <h4 class="demoTheme">Experience</h4>
                         <p class="demoText">Today you’ll reflect on your favorite thing to do on a sunny&nbsp;day.</p>
                     </div>
@@ -362,12 +362,9 @@
         }
 
         .demoCactus {
-            background-color: $pink;
-            border-radius: 50%;
             display: block;
             height: 5.6rem;
-            margin: 0 auto .8rem;
-            padding: .8rem;
+            margin: 0 auto;
             width: 5.6rem;
         }
 

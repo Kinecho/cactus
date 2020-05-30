@@ -143,8 +143,10 @@
             }
 
             img {
-                $avatarSize: 9.6rem;
+                $avatarSize: 8rem;
+                display: block;
                 height: $avatarSize;
+                margin: 0 auto;
                 width: $avatarSize;
             }
         }

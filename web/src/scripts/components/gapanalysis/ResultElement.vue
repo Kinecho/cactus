@@ -48,15 +48,15 @@
             }
             switch (this.element) {
                 case Element.meaning:
-                    return "/assets/images/cacti/meaniningGrow.svg";
+                    return "/assets/images/elements/meaning.svg";
                 case Element.emotions:
-                    return "/assets/images/cacti/emotionsGrow.svg";
+                    return "/assets/images/elements/emotions.svg";
                 case Element.relationships:
-                    return "/assets/images/cacti/relationshipsGrow.svg";
+                    return "/assets/images/elements/relationships.svg";
                 case Element.experience:
-                    return "/assets/images/cacti/experienceGrow.svg";
+                    return "/assets/images/elements/experience.svg";
                 case Element.energy:
-                    return "/assets/images/cacti/energy-3.svg";
+                    return "/assets/images/elements/energy.svg";
             }
         }
     }
