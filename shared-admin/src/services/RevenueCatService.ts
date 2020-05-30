@@ -9,14 +9,28 @@ import CactusMember from "@shared/models/CactusMember";
 import SubscriptionProduct from "@shared/models/SubscriptionProduct";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
 import { getStripeId } from "@admin/util/AdminStripeUtils";
+import { AppType } from "@shared/models/ReflectionResponse";
+import { isBlank } from "@shared/util/StringUtil";
+import { millisecondsToMinutes } from "@shared/util/DateUtil";
 
 const logger = new Logger("RevenueCatService");
-
+type AttributeType = string | number | null | undefined;
 const Endpoints = {
     receipts: "/receipts",
     subscriberAttributes(memberId: string): string {
         return `/subscribers/${ memberId }/attributes`
+    },
+    subscriber(memberId: string): string {
+        return `/subscribers/${ memberId }`;
     }
+}
+
+interface AttributesInput {
+    memberId: string,
+    email?: string,
+    name?: string,
+
+    [key: string]: AttributeType
 }
 
 export default class RevenueCatService {
@@ -193,19 +207,46 @@ export default class RevenueCatService {
         }
     }
 
-    async updateAttributes(params: { memberId: string, email?: string, name?: string }): Promise<void> {
-        const { memberId, email, name } = params;
+    /**
+     * Set attributes on the subscriber in RevenueCat. Can pass any attributes as strings or numbers.
+     * Null values or empty strings will clear the attribute;
+     * @param {object} params
+     * @param {string} params.memberId - the Cactus Member ID. Required.
+     * @param {string} [params.email] - the email address of the member;
+     * @param {string} [params.name] the display name of the member;
+     *
+     * @return {Promise<void>}
+     */
+    async updateAttributes(params: AttributesInput): Promise<void> {
+        const { memberId, email, name, ...additionalAttributes } = params;
         try {
             const path = Endpoints.subscriberAttributes(memberId);
-            const attributes: Record<string, { value: string | number }> = {};
+            const attributes: Record<string, { value: string | null }> = {};
             if (email) {
                 attributes.$email = { value: email };
             }
             if (name) {
                 attributes.$displayName = { value: name };
             }
+            Object.keys(additionalAttributes).forEach(key => {
+                let value = additionalAttributes[key];
+                if (isNull(attributes)) {
+                    value = null;
+                } else {
+                    value = `${ value }`;
+                    if (isBlank(value)) {
+                        return;
+                    }
+                }
+
+
+                attributes[key] = { value }
+            })
+
+            logger.info("Setting attributes to", stringifyJSON(attributes, 2));
+
             const response = await this.client.post(path, { attributes });
-            logger.info("Update attributes success response", stringifyJSON(response.data));
+            logger.info("Update attributes success response", stringifyJSON(response.data, 2));
         } catch (error) {
             if (isAxiosError(error)) {
                 logger.error("Failed to update RevenueCat user attributes", error.response?.data ?? error);
@@ -249,6 +290,43 @@ export default class RevenueCatService {
         }
     }
 
+    getPlatformHeader(appType?: AppType): Record<string, string> | undefined {
+        let platform: string | undefined;
+        switch (appType) {
+            case AppType.WEB:
+                break;
+            case AppType.ANDROID:
+                platform = "android";
+                break;
+            case AppType.IOS:
+                platform = "ios"
+                break;
+            default:
+                break;
+        }
+        if (!platform) {
+            return;
+        }
+
+        return { "X-Platform": platform };
+    }
+
+    /**
+     * Get a customer from revenuecat, or create them if they don't exist in RevenueCat's sytem.
+     * Pass the appType to update the last seen time of the user.
+     * @param {boolean} params.updateLastSeen - set to FALSE if you do not want to update the last seen data.
+     * Useful if you are fetching the member for information purposes
+     *
+     * @param {string} params.memberId - the Cactus Member ID to get/create
+     * @param {AppType} params.appType - the type of App that the user was last seen using
+     * @return {Promise<void>}
+     */
+    async updateLastSeen(params: { memberId: string, appType?: AppType, updateLastSeen: boolean }) {
+        const { memberId, appType, updateLastSeen = true } = params;
+        const headers = updateLastSeen ? this.getPlatformHeader(appType) : undefined;
+        await this.client.get(Endpoints.subscriber(memberId), { headers: { ...headers } })
+    }
+
     async updateSubscriberAttributes(member?: CactusMember) {
         const memberId = member?.id;
         if (!member || !memberId) {
@@ -256,7 +334,21 @@ export default class RevenueCatService {
         }
         const email = member.email;
         const name = member.getFullName();
-        await this.updateAttributes({ memberId, email, name });
+
+        const attributes: AttributesInput = { memberId, email, name };
+        if (member.stats.reflections) {
+            attributes.reflectionCount = member.stats.reflections.totalCount;
+            attributes.streakDays = member.stats.reflections.currentStreakDays;
+            attributes.streakWeeks = member.stats.reflections.currentStreakWeeks;
+            attributes.streakMonths = member.stats.reflections.currentStreakMonths;
+            attributes.reflectionMinutes = millisecondsToMinutes(member.stats.reflections.totalDurationMs);
+        }
+
+        if (member.getReferredBy()) {
+            attributes.referredBy = member.getReferredBy();
+        }
+
+        await this.updateAttributes(attributes);
     }
 
     async processStripePayment(payment: Payment): Promise<void> {

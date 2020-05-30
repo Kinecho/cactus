@@ -141,7 +141,7 @@ export interface SubscriberAttributes {
     $apnsTokens?: string[] | any
     $fcmTokens?: string[] | any
 
-    [key: string]: string | number | null | undefined
+    [key: string]: string | null | undefined
 }
 
 export interface WebhookEvent {
