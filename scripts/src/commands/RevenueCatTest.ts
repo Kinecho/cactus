@@ -101,7 +101,6 @@ export default class RevenueCatTest extends FirebaseCommand {
         return this.productsById;
     }
 
-
     async migrateApplePayments() {
         const productsById = await this.fetchCactusProducts();
         console.log(`Got ${ Object.values(productsById).length } subscription products`);
@@ -118,7 +117,7 @@ export default class RevenueCatTest extends FirebaseCommand {
                     const priceLocale = payment.apple?.productPrice?.priceLocale;
                     let currency = "USD";
                     if (priceLocale?.includes("@currency=")) {
-                        currency = priceLocale!.split("@currency=")[1];
+                        currency = priceLocale.split("@currency=")[1];
                     }
                     // const appleProductId = payment.apple?.unifiedReceipt?.latest_receipt_info
                     const appleProductId = product?.appleProductId;
