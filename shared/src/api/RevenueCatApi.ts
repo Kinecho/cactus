@@ -173,6 +173,12 @@ export interface WebhookEvent {
     environment: Enviornment
 
     /**
+     * @Deprecated - use the entitlement_ids instead.
+     * This value is deprecated, maybe?
+     */
+    entitlement_id?: string | null;
+
+    /**
      * This can be NULL if the product_id is not mapped to any entitlements.
      */
     entitlement_ids?: string[] | null
@@ -200,7 +206,7 @@ export interface WebhookEvent {
      * Not available for apps using legacy entitlements.
      * The identifier for the offering that was presented to the user during their initial purchase.
      */
-    presented_offering_id?: string
+    presented_offering_id?: string | null
 
     /**
      * Map of attribute names to attribute objects.
