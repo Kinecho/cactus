@@ -1,7 +1,7 @@
 <template>
     <div class="elements-container">
         <a href="#" class="element-icon" v-for="element in elements" @click="showCactusModal(element)">
-            <img :src="'/assets/images/cacti/'+ element + '-3.svg'" alt=""/>
+            <img :src="'/assets/images/elements/'+ element + '.svg'" alt=""/>
             <h4 class="label">{{element}}</h4>
         </a>
         <element-description-modal
