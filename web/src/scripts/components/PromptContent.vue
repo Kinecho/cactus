@@ -791,7 +791,7 @@
 
         @include r(600) {
             background-color: transparent;
-            padding: 11vh 0;
+            padding: 8vh 0;
         }
 
         button.secondary {
@@ -1044,7 +1044,6 @@
 
         @include r(600) {
             min-height: 66rem;
-            max-width: 48rem;
         }
 
         &.flipped {
@@ -1075,7 +1074,6 @@
             border-radius: 12px;
             height: 100%;
             min-height: 66rem;
-            max-width: 48rem;
         }
 
         &.front {

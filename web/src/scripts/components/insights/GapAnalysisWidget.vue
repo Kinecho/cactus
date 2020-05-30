@@ -29,7 +29,7 @@
             </div>
         </div>
         <div v-if="selectFocusEnabled" class="gapActions">
-            <p>Tap a cactus to choose a focus.</p>
+            <p>Tap an element to choose a focus.</p>
             <p v-if="currentElementSelection">
                 You've selected: {{currentElementSelection || 'nothing yet'}}
             </p>

@@ -1,17 +1,17 @@
 @import "variables";
 
 @mixin fancyLink {
-  background-image: linear-gradient(lighten($pinky, 10%), lighten($pinky, 10%));
-  background-position: 0 100%;
+  background-image: linear-gradient(lighten($pink, 5%), lighten($pink, 5%));
+  background-position: 0 90%;
   background-repeat: no-repeat;
   background-size: 100% .8rem;
-  color: $darkText;
+  color: $darkestGreen;
   padding: .2rem;
   text-decoration: none;
   transition: background-size cubic-bezier(0, .5, 0, 1) .3s;
 
   &:hover {
-    background-image: linear-gradient($green, $green);
+    background-image: linear-gradient($pink, $pink);
     background-size: 100% 100%;
     text-decoration: none;
   }
