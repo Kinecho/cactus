@@ -570,10 +570,8 @@
             }
         }
 
-        &.flipped {
-            .flipper {
-                transform: rotateY(180deg);
-            }
+        &.flipped .flipper {
+            transform: rotateY(180deg);
         }
 
         .flip-card {
@@ -593,15 +591,15 @@
             }
 
             &.front {
-                background-color: $beige;
-                box-shadow: 0 11px 15px -7px rgba(0, 0, 0, .16),
-                0 24px 38px 3px rgba(0, 0, 0, .1),
-                0 9px 46px 8px rgba(0, 0, 0, .08);
+                background-color: lighten($beige, 3%);
+                box-shadow: 0 30px 160px -6px rgba(0, 0, 0, .3);
                 height: 100%;
                 transform: rotateY(0);
                 z-index: 2;
 
                 @include r(600) {
+                    background-position: -55rem -90rem;
+                    background-size: auto;
                     min-height: 66rem;
                 }
             }
@@ -636,9 +634,11 @@
 
         button.lowerBtn {
             box-shadow: none;
+            margin: .4rem 0;
             white-space: nowrap;
 
             @include r(600) {
+                margin: 0 .4rem;
                 width: 50%;
             }
 

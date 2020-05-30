@@ -82,14 +82,14 @@
                 bottom: 0;
                 box-shadow: 0 0 0 0 rgba(51, 217, 178, 1);
                 content: "";
-                height: 10px;
+                height: 1px;
                 left: 0;
                 margin: auto;
                 position: absolute;
                 right: 0;
                 top: 0;
                 transform: scale(1);
-                width: 10px;
+                width: 1px;
                 z-index: 0;
             }
         }

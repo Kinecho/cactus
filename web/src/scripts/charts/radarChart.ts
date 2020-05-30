@@ -57,8 +57,8 @@ export const DEFAULT_CONFIG = (): RadarChartConfig => ({
     legend: false,
     showTooltip: false,
     colorValues: [
-        "#CC33A1",
-        "#6590ED",
+        "#33CCAB",
+        "#07454C",
     ],
     fontSizePx: 12,
     showLabels: false,
