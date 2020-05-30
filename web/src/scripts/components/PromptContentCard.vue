@@ -523,32 +523,22 @@
     @import "common";
     @import "transitions";
 
-    $cardPadding: 2.4rem;
     .content-card {
-        background: $beige no-repeat;
+        background-color: $beige;
         display: flex;
         flex-direction: column;
         flex-grow: 1;
         min-height: 100vh;
         justify-content: center;
-        padding: $cardPadding;
+        padding: 2.4rem 2.4rem 3.2rem;
         width: 100%;
-
-        &.type-reflect {
-            padding-bottom: 0;
-
-            .lowerActions {
-                padding-bottom: $cardPadding;
-            }
-        }
 
         @include r(600) {
             border-radius: 12px;
-            box-shadow: 0 11px 15px -7px rgba(0, 0, 0, .16),
-            0 24px 38px 3px rgba(0, 0, 0, .1),
-            0 9px 46px 8px rgba(0, 0, 0, .08);
+            box-shadow: 0 8px 150px 0 rgba(0, 0, 0, .2);
             min-height: 100%;
             justify-content: space-between;
+            padding: 3.2rem 3.2rem 4rem;
             position: relative;
         }
 
@@ -581,13 +571,9 @@
         }
     }
 
-    .content, .lowerActions {
-        background-color: $beige;
+    .content,
+    .lowerActions {
         z-index: 2;
-
-        .type-share_reflection & {
-            background-color: transparent;
-        }
     }
 
     .backgroundImage {
@@ -734,6 +720,7 @@
 
         .name {
             font-size: 1.6rem;
+            font-weight: bold;
             opacity: .8;
 
             @include r(768) {
@@ -972,14 +959,15 @@
         padding: .8rem 1.6rem;
 
         img {
-            height: 2rem;
+            height: 1.8rem;
             margin-right: .8rem;
-            width: 2rem;
+            width: 1.8rem;
         }
     }
 
     .shareText {
-        opacity: .7;
+        font-size: 1.6rem;
+        opacity: .8;
     }
 
     .directLink {
