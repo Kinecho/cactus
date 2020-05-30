@@ -1,6 +1,6 @@
 import { Message } from "firebase-functions/lib/providers/pubsub";
 import * as functions from "firebase-functions";
-import { isWebhookPayload, WebhookEvent, WebhookPayload } from "@shared/api/RevenueCatApi";
+import { isWebhookPayload, WebhookPayload } from "@shared/api/RevenueCatApi";
 import { PubSubService } from "@admin/pubsub/PubSubService";
 import { PubSubTopic } from "@shared/types/PubSubTypes";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
