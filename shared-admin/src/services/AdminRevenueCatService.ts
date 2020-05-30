@@ -11,27 +11,16 @@ import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionPr
 import { getStripeId } from "@admin/util/AdminStripeUtils";
 import { AppType } from "@shared/models/ReflectionResponse";
 import { isBlank } from "@shared/util/StringUtil";
-import { millisecondsToMinutes } from "@shared/util/DateUtil";
+import {
+    apiDomain,
+    AttributesInput,
+    getPlatformHeader,
+    getSubscriberAttributes, processAttributeInputForUpdate,
+    RevenueCatEndpoints
+} from "@shared/api/RevenueCatApi";
 
 const logger = new Logger("RevenueCatService");
-type AttributeType = string | number | null | undefined;
-const Endpoints = {
-    receipts: "/receipts",
-    subscriberAttributes(memberId: string): string {
-        return `/subscribers/${ memberId }/attributes`
-    },
-    subscriber(memberId: string): string {
-        return `/subscribers/${ memberId }`;
-    }
-}
 
-interface AttributesInput {
-    memberId: string,
-    email?: string,
-    name?: string,
-
-    [key: string]: AttributeType
-}
 
 export default class AdminRevenueCatService {
     static shared: AdminRevenueCatService;
@@ -52,7 +41,7 @@ export default class AdminRevenueCatService {
         const secretToken = config.revenuecat.secret_key;
         const apiToken = config.revenuecat.public_key;
         this.secretClient = _axios.create({
-            baseURL: "https://api.revenuecat.com/v1",
+            baseURL: apiDomain,
             headers: {
                 'Authorization': `Bearer ${ secretToken }`,
                 "Content-Type": "application/json",
@@ -60,7 +49,7 @@ export default class AdminRevenueCatService {
         });
 
         this.client = _axios.create({
-            baseURL: "https://api.revenuecat.com/v1",
+            baseURL: apiDomain,
             headers: {
                 'Authorization': `Bearer ${ apiToken }`,
                 "Content-Type": "application/json",
@@ -120,7 +109,7 @@ export default class AdminRevenueCatService {
     }): Promise<void> {
         const memberId = params.memberId;
         try {
-            const response = await this.client.post(Endpoints.receipts, {
+            const response = await this.client.post(RevenueCatEndpoints.receipts, {
                 app_user_id: params.memberId,
                 fetch_token: params.token,
                 product_id: params.sku,
@@ -168,7 +157,7 @@ export default class AdminRevenueCatService {
     }): Promise<void> {
         const memberId = params.memberId;
         try {
-            const response = await this.client.post(Endpoints.receipts, {
+            const response = await this.client.post(RevenueCatEndpoints.receipts, {
                 app_user_id: params.memberId,
                 fetch_token: params.encodedReceipt,
                 price: params.price,
@@ -193,7 +182,7 @@ export default class AdminRevenueCatService {
     }): Promise<void> {
         const memberId = params.memberId;
         try {
-            const response = await this.client.post(Endpoints.receipts, {
+            const response = await this.client.post(RevenueCatEndpoints.receipts, {
                 app_user_id: params.memberId,
                 fetch_token: params.subscriptionId,
             }, { headers: { ...this.headers.platform.stripe } });
@@ -203,55 +192,6 @@ export default class AdminRevenueCatService {
                 logger.error(`Failed to update stripe subscription to RevenueCat for memberId: ${ memberId }`, error.response?.data ?? error);
             } else {
                 logger.error(`Failed to update stripe subscription to RevenueCat for memberId: ${ memberId }`, error);
-            }
-        }
-    }
-
-    /**
-     * Set attributes on the subscriber in RevenueCat. Can pass any attributes as strings or numbers.
-     * Null values or empty strings will clear the attribute;
-     * @param {object} params
-     * @param {string} params.memberId - the Cactus Member ID. Required.
-     * @param {string} [params.email] - the email address of the member;
-     * @param {string} [params.name] the display name of the member;
-     *
-     * @return {Promise<void>}
-     */
-    async updateAttributes(params: AttributesInput): Promise<void> {
-        const { memberId, email, name, ...additionalAttributes } = params;
-        try {
-            const path = Endpoints.subscriberAttributes(memberId);
-            const attributes: Record<string, { value: string | null }> = {};
-            if (email) {
-                attributes.$email = { value: email };
-            }
-            if (name) {
-                attributes.$displayName = { value: name };
-            }
-            Object.keys(additionalAttributes).forEach(key => {
-                let value = additionalAttributes[key];
-                if (isNull(attributes)) {
-                    value = null;
-                } else {
-                    value = `${ value }`;
-                    if (isBlank(value)) {
-                        return;
-                    }
-                }
-
-
-                attributes[key] = { value }
-            })
-
-            logger.info("Setting attributes to", stringifyJSON(attributes, 2));
-
-            const response = await this.client.post(path, { attributes });
-            logger.info("Update attributes success response", stringifyJSON(response.data, 2));
-        } catch (error) {
-            if (isAxiosError(error)) {
-                logger.error("Failed to update RevenueCat user attributes", error.response?.data ?? error);
-            } else {
-                logger.error("Failed to update RevenueCat user attributes", error);
             }
         }
     }
@@ -290,27 +230,6 @@ export default class AdminRevenueCatService {
         }
     }
 
-    getPlatformHeader(appType?: AppType): Record<string, string> | undefined {
-        let platform: string | undefined;
-        switch (appType) {
-            case AppType.WEB:
-                break;
-            case AppType.ANDROID:
-                platform = "android";
-                break;
-            case AppType.IOS:
-                platform = "ios"
-                break;
-            default:
-                break;
-        }
-        if (!platform) {
-            return;
-        }
-
-        return { "X-Platform": platform };
-    }
-
     /**
      * Get a customer from revenuecat, or create them if they don't exist in RevenueCat's sytem.
      * Pass the appType to update the last seen time of the user.
@@ -323,32 +242,42 @@ export default class AdminRevenueCatService {
      */
     async updateLastSeen(params: { memberId: string, appType?: AppType, updateLastSeen: boolean }) {
         const { memberId, appType, updateLastSeen = true } = params;
-        const headers = updateLastSeen ? this.getPlatformHeader(appType) : undefined;
-        await this.client.get(Endpoints.subscriber(memberId), { headers: { ...headers } })
+        const headers = updateLastSeen ? getPlatformHeader(appType) : undefined;
+        await this.client.get(RevenueCatEndpoints.subscriber(memberId), { headers: { ...headers } })
     }
 
     async updateSubscriberAttributes(member?: CactusMember) {
-        const memberId = member?.id;
-        if (!member || !memberId) {
-            return;
-        }
-        const email = member.email;
-        const name = member.getFullName();
-
-        const attributes: AttributesInput = { memberId, email, name };
-        if (member.stats.reflections) {
-            attributes.reflectionCount = member.stats.reflections.totalCount;
-            attributes.streakDays = member.stats.reflections.currentStreakDays;
-            attributes.streakWeeks = member.stats.reflections.currentStreakWeeks;
-            attributes.streakMonths = member.stats.reflections.currentStreakMonths;
-            attributes.reflectionMinutes = millisecondsToMinutes(member.stats.reflections.totalDurationMs);
-        }
-
-        if (member.getReferredBy()) {
-            attributes.referredBy = member.getReferredBy();
-        }
-
+        const attributes = getSubscriberAttributes(member);
         await this.updateAttributes(attributes);
+    }
+
+
+    /**
+     * Set attributes on the subscriber in RevenueCat. Can pass any attributes as strings or numbers.
+     * Null values or empty strings will clear the attribute;
+     * @param {object} params
+     * @param {string} params.memberId - the Cactus Member ID. Required.
+     * @param {string} [params.email] - the email address of the member;
+     * @param {string} [params.name] the display name of the member;
+     *
+     * @return {Promise<void>}
+     */
+    async updateAttributes(params: AttributesInput): Promise<void> {
+        const { memberId } = params;
+        try {
+            const path = RevenueCatEndpoints.subscriberAttributes(memberId);
+            const attributes = processAttributeInputForUpdate(params);
+            logger.info("Setting attributes to", stringifyJSON(attributes, 2));
+
+            const response = await this.client.post(path, { attributes });
+            logger.info("Update attributes success response", stringifyJSON(response.data, 2));
+        } catch (error) {
+            if (isAxiosError(error)) {
+                logger.error("Failed to update RevenueCat user attributes", error.response?.data ?? error);
+            } else {
+                logger.error("Failed to update RevenueCat user attributes", error);
+            }
+        }
     }
 
     async processStripePayment(payment: Payment): Promise<void> {

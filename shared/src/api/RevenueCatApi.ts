@@ -1,4 +1,20 @@
 import { isNull } from "@shared/util/ObjectUtil";
+import { AppType } from "@shared/models/ReflectionResponse";
+import CactusMember from "@shared/models/CactusMember";
+import { millisecondsToMinutes } from "@shared/util/DateUtil";
+import { isBlank } from "@shared/util/StringUtil";
+
+export const apiDomain = "https://api.revenuecat.com/v1";
+
+export const RevenueCatEndpoints = {
+    receipts: "/receipts",
+    subscriberAttributes(memberId: string): string {
+        return `/subscribers/${ memberId }/attributes`
+    },
+    subscriber(memberId: string): string {
+        return `/subscribers/${ memberId }`;
+    }
+}
 
 export enum EventType {
     TEST = "TEST",
@@ -234,4 +250,87 @@ export function isWebhookPayload(body: any): body is WebhookPayload {
     }
 
     return !!(body as WebhookPayload).api_version && isWebhookEvent(body.event)
+}
+
+
+export function getPlatformHeader(appType?: AppType): Record<string, string> | undefined {
+    let platform: string | undefined;
+    switch (appType) {
+        case AppType.WEB:
+            platform = "web";
+            break;
+        case AppType.ANDROID:
+            platform = "android";
+            break;
+        case AppType.IOS:
+            platform = "ios"
+            break;
+        default:
+            break;
+    }
+    if (!platform) {
+        return;
+    }
+
+    return { "X-Platform": platform };
+}
+
+export type AttributeType = string | number | null | undefined;
+
+
+export interface AttributesInput {
+    memberId: string,
+    email?: string,
+    name?: string,
+
+    [key: string]: AttributeType
+}
+
+export function getSubscriberAttributes(member?: CactusMember): AttributesInput {
+    const memberId = member?.id;
+    if (!member || !memberId) {
+        return;
+    }
+    const email = member.email;
+    const name = member.getFullName();
+
+    const attributes: AttributesInput = { memberId, email, name };
+    if (member.stats.reflections) {
+        attributes.reflectionCount = member.stats.reflections.totalCount;
+        attributes.streakDays = member.stats.reflections.currentStreakDays;
+        attributes.streakWeeks = member.stats.reflections.currentStreakWeeks;
+        attributes.streakMonths = member.stats.reflections.currentStreakMonths;
+        attributes.reflectionMinutes = millisecondsToMinutes(member.stats.reflections.totalDurationMs);
+    }
+
+    if (member.getReferredBy()) {
+        attributes.referredBy = member.getReferredBy();
+    }
+
+    return attributes;
+}
+
+export function processAttributeInputForUpdate(params: AttributesInput): Record<string, { value: string | null }> {
+    const { memberId, email, name, ...additionalAttributes } = params;
+    const attributes: Record<string, { value: string | null }> = {};
+    if (email) {
+        attributes.$email = { value: email };
+    }
+    if (name) {
+        attributes.$displayName = { value: name };
+    }
+    Object.keys(additionalAttributes).forEach(key => {
+        let value = additionalAttributes[key];
+        if (isNull(attributes)) {
+            value = null;
+        } else {
+            value = `${ value }`;
+            if (isBlank(value)) {
+                return;
+            }
+        }
+
+        attributes[key] = { value }
+    })
+    return attributes;
 }
