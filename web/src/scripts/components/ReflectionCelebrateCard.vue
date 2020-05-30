@@ -75,21 +75,13 @@
                     </section>
                 </div>
                 <div class="btnContainer">
-                    <button class="lowerBtn authBtn secondary" v-if="didWriteReflection && !isOnboardingPrompt" @click="tradeNote">
-                        Share Note
-                    </button>
-                    <!-- <button class="lowerBtn primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
-                        {{promptCopy.SIGN_UP_MESSAGE}}
-                    </button> -->
-                    <button class="lowerBtn authBtn secondary"
+                    <button class="lowerBtn authBtn"
                             v-if="authLoaded && loggedIn && !isModal"
                             @click="close">
                         {{promptCopy.GO_HOME}}
                     </button>
-                    <button class="lowerBtn primary authBtn"
-                            v-if="authLoaded && loggedIn && isModal"
-                            @click="close">
-                        {{promptCopy.CLOSE}}
+                    <button class="lowerBtn authBtn secondary" v-if="didWriteReflection && !isOnboardingPrompt" @click="tradeNote">
+                        Share Note
                     </button>
                 </div>
             </div>
@@ -596,22 +588,27 @@
         display: flex;
         flex-flow: column wrap;
         justify-content: center;
-
-        button.lowerBtn {
-            box-shadow: none;
-            flex-grow: 1;
-            white-space: nowrap;
-
-            &.secondary:hover {
-                background-color: $white;
-            }
-        }
+        padding: 0 2.4rem 3.2rem;
 
         @include r(600) {
             flex-flow: row nowrap;
+            padding: 0 3.2rem 4rem;
 
             .lowerBtn {
                 height: 4.8rem;
+            }
+        }
+
+        button.lowerBtn {
+            box-shadow: none;
+            white-space: nowrap;
+
+            @include r(600) {
+                width: 50%;
+            }
+
+            &.secondary:hover {
+                background-color: $white;
             }
         }
     }
