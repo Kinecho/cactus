@@ -105,6 +105,7 @@ export default class RevenueCatTest extends FirebaseCommand {
         const productsById = await this.fetchCactusProducts();
         console.log(`Got ${ Object.values(productsById).length } subscription products`);
         await AdminPaymentService.getSharedInstance().getAllAppleTransactionsBatch({
+            batchSize: 1,
             onData: async (payments, batchNumber) => {
                 //hello;
                 logger.info("processing batch ", batchNumber);
@@ -152,11 +153,10 @@ export default class RevenueCatTest extends FirebaseCommand {
         const productsById = await this.fetchCactusProducts();
         console.log(`Got ${ Object.values(productsById).length } subscription products`);
         await AdminPaymentService.getSharedInstance().getAllStripeTransactionsBatch({
-            batchSize: 100,
+            batchSize: 10,
             onData: async (payments, batchNumber) => {
-                //hello;
                 logger.info("\nprocessing batch ", batchNumber);
-                const tasks = payments.map(payment => new Promise(async resolve => {
+                const tasks: Promise<void>[] = payments.map(payment => new Promise<void>(async resolve => {
                     console.log("Processing payment", payment.id);
                     const memberId = payment.memberId;
                     // const cactusProductId = payment.subscriptionProductId;
@@ -183,8 +183,10 @@ export default class RevenueCatTest extends FirebaseCommand {
                     logger.info("Finished processing member", memberId);
                     resolve()
                 }))
-                logger.info("Finished batch", batchNumber);
+
                 await Promise.all(tasks);
+                logger.info("Finished batch", batchNumber);
+                return;
             }
         })
 
@@ -194,7 +196,7 @@ export default class RevenueCatTest extends FirebaseCommand {
         const productsById = await this.fetchCactusProducts();
         console.log(`Got ${ Object.values(productsById).length } subscription products`);
         await AdminPaymentService.getSharedInstance().getAllGoogleTransactionsBatch({
-            batchSize: 100,
+            batchSize: 1,
             onData: async (payments, batchNumber) => {
                 //hello;
                 logger.info("\nprocessing batch ", batchNumber);

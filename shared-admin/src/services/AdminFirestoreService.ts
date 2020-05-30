@@ -300,7 +300,7 @@ export default class AdminFirestoreService {
         });
         logger.log(`Fetched ${ results.size } items in batch ${ batchNumber }`);
         await options.onData(results.results, 0);
-        while (results.results.length > 0 && results.lastCursor && (!isNull(maxBatches) || maxBatches && batchNumber < maxBatches)) {
+        while (results.results.length > 0 && results.lastCursor && (isNull(maxBatches) || maxBatches && batchNumber < maxBatches)) {
             batchNumber++;
             results = await this.executeQuery(query, type, {
                 includeDeleted,

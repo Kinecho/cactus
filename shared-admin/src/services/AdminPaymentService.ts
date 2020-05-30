@@ -79,6 +79,7 @@ export default class AdminPaymentService {
 
         await this.firestoreService.executeBatchedQuery({
             query,
+            maxBatches: options.maxBatches,
             type: Payment,
             onData: options.onData,
             batchSize: options?.batchSize,
