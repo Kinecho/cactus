@@ -5,10 +5,9 @@
                 <upgrade-banner :member="member"/>
                 <div class="successText">
                     <h2>{{celebrateText}}</h2>
+                    <p class="subtext" v-if="subscriptionTier == plusTier && didWriteReflection">Here are words that have come up recently for you.</p>
                 </div>
                 <div class="insightContainer revealed">
-                    <p class="subtext" v-if="subscriptionTier == plusTier && didWriteReflection">Here are words that
-                        have come up recently for&nbsp;you.</p>
                     <MemberInsights
                             :words="wordData"
                             :didWrite="didWriteReflection"
@@ -469,42 +468,71 @@
     }
 
     .successText {
-        color: $magenta;
         flex-grow: 1;
-        font-size: 3.2rem;
+        margin: 0 auto;
+        max-width: 36rem;
         padding: 4rem 2.4rem 2.4rem;
+
+        h2 {
+            font-size: 3.2rem;
+        }
+
+        .subtext {
+            opacity: .8;
+        }
     }
 
     .insightContainer {
-        padding: 0 3.2rem 3.2rem;
+        padding: 0 1.6rem;
         width: 100%;
-        margin: -4rem 0 0;
-
-        .subtext {
-            margin: 1.6rem auto 0;
-            max-width: 28rem;
-            opacity: .8;
-        }
     }
 
     .stats-container {
         display: flex;
         justify-content: center;
-        margin-bottom: 3.2rem;
+        padding: 0 2.4rem 3.2rem;
+
+        @include r(600) {
+            justify-content: space-around;
+            padding: 0 3.2rem 4rem;
+        }
     }
 
     .metric {
-        color: $lightGreen;
-        padding: 0 .8rem;
+        color: $dolphin;
+        flex-basis: 30%;
+        padding: .8rem;
+
+        @include r(374) {
+            @include shadowbox;
+            margin: 0 .8rem;
+            padding: 1.6rem;
+        }
+        @include r(600) {
+            margin: 0;
+        }
 
         p {
-            font-size: 1.6rem;
+            font-size: 1.4rem;
+            opacity: .8;
             white-space: nowrap;
+
+            @include r(600) {
+                font-size: 1.6rem;
+            }
+        }
+
+        .icon {
+            display: none;
+
+            @include r(374) {
+                display: inline-block;
+            }
         }
     }
 
     .label {
-        font-size: 4.8rem;
+        font-size: 3.2rem;
         font-weight: bold;
         text-align: center;
     }
