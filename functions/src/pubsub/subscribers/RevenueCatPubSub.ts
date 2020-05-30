@@ -1,6 +1,6 @@
 import { Message } from "firebase-functions/lib/providers/pubsub";
 import * as functions from "firebase-functions";
-import { isWebhookPayload, WebhookPayload } from "@shared/api/RevenueCatApi";
+import { isWebhookPayload, WebhookEvent, WebhookPayload } from "@shared/api/RevenueCatApi";
 import { PubSubService } from "@admin/pubsub/PubSubService";
 import { PubSubTopic } from "@shared/types/PubSubTypes";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
@@ -22,7 +22,7 @@ export async function onPublish(message: Message, context: functions.EventContex
         return true;
     }
 
-    const event = (payload as WebhookPayload).event;
+    const event = payload.event;
 
     logger.info("retrieved the revenuecat event message", stringifyJSON(message.json, 2));
 
