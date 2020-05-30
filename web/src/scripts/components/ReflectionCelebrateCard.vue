@@ -18,6 +18,7 @@
                 </div>
                 <div class="stats-container">
                     <section class="metric">
+                        <svg-icon icon="journal"/>
                         <div class="label">
                             <transition name="fade-in" mode="out-in" appear>
                                 <span v-if="reflectionCount !== undefined">{{reflectionCount}}</span>
@@ -29,6 +30,7 @@
                         </p>
                     </section>
                     <section class="metric">
+                        <svg-icon icon="clock"/>
                         <div class="label">
                             <transition name="fade-in" mode="out-in" appear>
                                 <span v-if="totalDuration !== undefined">{{totalDuration}}</span>
@@ -40,6 +42,7 @@
                         </p>
                     </section>
                     <section class="metric" v-if="currentStreak == 'days'">
+                        <svg-icon icon="flame"/>
                         <div class="label">
                             <transition name="fade-in" mode="out-in" appear>
                                 <span v-if="streakDays !== undefined">{{streakDays}}</span>
@@ -51,6 +54,7 @@
                         </p>
                     </section>
                     <section class="metric" v-if="currentStreak == 'weeks'">
+                        <svg-icon icon="flame"/>
                         <div class="label">
                             <transition name="fade-in" mode="out-in" appear>
                                 <span v-if="streakWeeks !== undefined">{{streakWeeks}}</span>
@@ -62,6 +66,7 @@
                         </p>
                     </section>
                     <section class="metric" v-if="currentStreak == 'months'">
+                        <svg-icon icon="flame"/>
                         <div class="label">
                             <transition name="fade-in" mode="out-in" appear>
                                 <span v-if="streakMonths !== undefined">{{streakMonths}}</span>
@@ -144,6 +149,7 @@
     import Logger from "@shared/Logger";
     import { gtag } from "@web/analytics"
     import { pushRoute } from "@web/NavigationUtil";
+    import SvgIcon from "@components/SvgIcon.vue";
 
     const logger = new Logger("ReflectionCelebrateCard.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -157,7 +163,8 @@
             ElementDescriptionModal,
             InputNameModal,
             UpgradeBanner: ReflectionCelebrateUpgradeBanner,
-            MemberInsights
+            MemberInsights,
+            SvgIcon
         },
         async beforeMount() {
             CactusMemberService.sharedInstance.observeCurrentMember({
