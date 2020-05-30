@@ -5,7 +5,7 @@ import { CactusConfig } from "@shared/CactusConfig";
 import { Project } from "@scripts/config";
 import * as prompts from "prompts";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
-import RevenueCatService from "@admin/services/RevenueCatService";
+import AdminRevenueCatService from "@admin/services/AdminRevenueCatService";
 import CactusMember from "@shared/models/CactusMember";
 import SubscriptionProduct from "@shared/models/SubscriptionProduct";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
@@ -104,7 +104,7 @@ export default class RevenueCatTest extends FirebaseCommand {
     async migrateAllForMember(member: CactusMember) {
         const payments = await AdminPaymentService.getSharedInstance().getAllForMemberId(member?.id);
         logger.info(`Processing ${ payments.length } payments`);
-        await RevenueCatService.shared.processPayments(payments);
+        await AdminRevenueCatService.shared.processPayments(payments);
         logger.info(`Finished processing ${ payments.length } payments`);
         return;
     }
@@ -124,7 +124,7 @@ export default class RevenueCatTest extends FirebaseCommand {
             batchSize: 10,
             onData: async (payments, batchNumber) => {
                 logger.info("\nStarting processing batch", batchNumber);
-                const tasks = payments.map(payment => RevenueCatService.shared.processApplePayment(payment));
+                const tasks = payments.map(payment => AdminRevenueCatService.shared.processApplePayment(payment));
                 logger.info("Finished processing batch", batchNumber);
                 await Promise.all(tasks);
             }
@@ -138,7 +138,7 @@ export default class RevenueCatTest extends FirebaseCommand {
             batchSize: 10,
             onData: async (payments, batchNumber) => {
                 logger.info("\nprocessing batch ", batchNumber);
-                const tasks: Promise<void>[] = payments.map(payment => RevenueCatService.shared.processStripePayment(payment));
+                const tasks: Promise<void>[] = payments.map(payment => AdminRevenueCatService.shared.processStripePayment(payment));
                 await Promise.all(tasks);
                 logger.info("Finished batch", batchNumber);
                 return;
@@ -154,7 +154,7 @@ export default class RevenueCatTest extends FirebaseCommand {
             batchSize: 10,
             onData: async (payments, batchNumber) => {
                 logger.info("\nprocessing batch ", batchNumber);
-                const tasks = payments.map(payment => RevenueCatService.shared.processGooglePayment(payment))
+                const tasks = payments.map(payment => AdminRevenueCatService.shared.processGooglePayment(payment))
                 logger.info("Finished batch", batchNumber);
                 await Promise.all(tasks);
             }
@@ -170,11 +170,11 @@ export default class RevenueCatTest extends FirebaseCommand {
             return;
         }
 
-        await RevenueCatService.shared.updateStripeSubscription({ memberId, subscriptionId: stripeSubscriptionId });
+        await AdminRevenueCatService.shared.updateStripeSubscription({ memberId, subscriptionId: stripeSubscriptionId });
     }
 
     async updateSubscriberAttributes(member: CactusMember) {
-        await RevenueCatService.shared.updateSubscriberAttributes(member)
+        await AdminRevenueCatService.shared.updateSubscriberAttributes(member)
     }
 
     async askRunAgain() {

@@ -24,7 +24,7 @@ import { buildPromptURL } from "@admin/util/StringUtil";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import SentPrompt, { PromptSendMedium } from "@shared/models/SentPrompt";
 import Logger from "@shared/Logger";
-import RevenueCatService from "@admin/services/RevenueCatService";
+import AdminRevenueCatService from "@admin/services/AdminRevenueCatService";
 
 const logger = new Logger("ReflectionResponseTriggers");
 
@@ -80,8 +80,8 @@ export const updateReflectionStatsTrigger = functions.firestore
     member.wordCloud = wordCloud;
     const responseMedium: ResponseMedium | undefined | null = change.after.get(ReflectionResponse.Field.responseMedium);
     const appType = getAppTypeFromResponseMedium(responseMedium);
-    await RevenueCatService.shared.updateLastSeen({ memberId, appType: appType, updateLastSeen: true });
-    await RevenueCatService.shared.updateSubscriberAttributes(member);
+    await AdminRevenueCatService.shared.updateLastSeen({ memberId, appType: appType, updateLastSeen: true });
+    await AdminRevenueCatService.shared.updateSubscriberAttributes(member);
 });
 
 export const updateInsightWordsOnReflectionWrite = functions.firestore

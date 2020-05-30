@@ -46,7 +46,7 @@ import { GooglePaymentState, subscriptionStatusFromGooglePaymentState } from "@s
 import { formatDateTime, fromMillisecondsString } from "@shared/util/DateUtil";
 import { microDollarsStringToCents } from "@shared/util/StringUtil";
 import SubscriptionProduct from "@shared/models/SubscriptionProduct";
-import RevenueCatService from "@admin/services/RevenueCatService";
+import AdminRevenueCatService from "@admin/services/AdminRevenueCatService";
 
 export interface ExpireTrialResult {
     member: CactusMember,
@@ -782,7 +782,7 @@ export default class AdminSubscriptionService {
 
             await AdminPaymentService.getSharedInstance().save(payment);
 
-            await RevenueCatService.shared.updateGoogleSubscription({
+            await AdminRevenueCatService.shared.updateGoogleSubscription({
                 memberId,
                 token: item.token,
                 isRestore: !isNewPurchase,

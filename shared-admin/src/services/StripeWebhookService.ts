@@ -21,7 +21,7 @@ import { getCustomerId, getStripeId, isStripeSubscription } from "@admin/util/Ad
 import { destructureDisplayName, isBlank } from "@shared/util/StringUtil";
 import StripeService from "@admin/services/StripeService";
 import { formatDateTime } from "@shared/util/DateUtil";
-import RevenueCatService from "@admin/services/RevenueCatService";
+import AdminRevenueCatService from "@admin/services/AdminRevenueCatService";
 
 const logger = new Logger("StripeWebhookService");
 
@@ -243,7 +243,7 @@ export default class StripeWebhookService {
             subscriptionProductId: subscriptionProduct?.entryId
         });
         if (memberId && stripeSubscriptionId) {
-            await RevenueCatService.shared.updateStripeSubscription({ memberId, subscriptionId: stripeSubscriptionId });
+            await AdminRevenueCatService.shared.updateStripeSubscription({ memberId, subscriptionId: stripeSubscriptionId });
         }
 
         await AdminPaymentService.getSharedInstance().save(payment);
@@ -337,7 +337,7 @@ export default class StripeWebhookService {
         const memberId = member?.id;
         if (memberId && stripeSubscriptionId) {
             logger.info("Updating stripe subscription in revenue cat");
-            await RevenueCatService.shared.updateStripeSubscription({ memberId, subscriptionId: stripeSubscriptionId });
+            await AdminRevenueCatService.shared.updateStripeSubscription({ memberId, subscriptionId: stripeSubscriptionId });
         }
 
         const previousAttributes = event.data.previous_attributes as Partial<Stripe.Subscription>;

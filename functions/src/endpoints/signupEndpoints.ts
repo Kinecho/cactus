@@ -32,7 +32,7 @@ import { QueryParam } from "@shared/util/queryParams";
 import Logger from "@shared/Logger";
 import { getAppEmoji } from "@shared/models/ReflectionResponse";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
-import RevenueCatService from "@admin/services/RevenueCatService";
+import AdminRevenueCatService from "@admin/services/AdminRevenueCatService";
 
 const logger = new Logger("signupEndpoints");
 const Config = getConfig();
@@ -383,8 +383,8 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
 
         const memberId = member?.id;
         if (memberId) {
-            await RevenueCatService.shared.updateLastSeen({ memberId, appType, updateLastSeen: true });
-            await RevenueCatService.shared.updateSubscriberAttributes(member);
+            await AdminRevenueCatService.shared.updateLastSeen({ memberId, appType, updateLastSeen: true });
+            await AdminRevenueCatService.shared.updateSubscriberAttributes(member);
         }
 
         if (message.didSignup) {

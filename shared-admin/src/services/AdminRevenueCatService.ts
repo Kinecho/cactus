@@ -33,14 +33,14 @@ interface AttributesInput {
     [key: string]: AttributeType
 }
 
-export default class RevenueCatService {
-    static shared: RevenueCatService;
+export default class AdminRevenueCatService {
+    static shared: AdminRevenueCatService;
 
     hasFetchedProducts: boolean = false;
     cactusSubscriptionProductsById: Record<string, SubscriptionProduct | null> = {};
 
     static initialize(config: CactusConfig) {
-        this.shared = new RevenueCatService(config)
+        this.shared = new AdminRevenueCatService(config)
     }
 
     config: CactusConfig;
@@ -276,7 +276,7 @@ export default class RevenueCatService {
         }
 
         logger.info(`updating apple subscription for memberId: ${ memberId } in revenuecat: price: ${ price } | currency: ${ currency }`);
-        await RevenueCatService.shared.updateAppleSubscription({
+        await AdminRevenueCatService.shared.updateAppleSubscription({
             memberId,
             encodedReceipt,
             price,
@@ -362,7 +362,7 @@ export default class RevenueCatService {
 
         const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
         logger.info(`updating stripe subscription for memberId: ${ memberId } | email: ${ member?.email ?? "" } in revenuecat with subscriptionId ${ stripeSubscriptionId }`);
-        await RevenueCatService.shared.updateStripeSubscription({
+        await AdminRevenueCatService.shared.updateStripeSubscription({
             memberId,
             subscriptionId: stripeSubscriptionId,
         })
@@ -393,7 +393,7 @@ export default class RevenueCatService {
         }
         const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
         logger.info(`updating Android subscription for memberId: ${ memberId } | email: ${ member?.email ?? "" } in revenuecat with sku: ${ sku }`);
-        await RevenueCatService.shared.updateGoogleSubscription({
+        await AdminRevenueCatService.shared.updateGoogleSubscription({
             memberId,
             token,
             sku,

@@ -30,7 +30,7 @@ import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 import AdminSlackService, { ChannelName } from "@admin/services/AdminSlackService";
 import { formatDate } from "@shared/util/DateUtil";
 import CactusMember from "@shared/models/CactusMember";
-import RevenueCatService from "@admin/services/RevenueCatService";
+import AdminRevenueCatService from "@admin/services/AdminRevenueCatService";
 
 export default class AppleService {
     protected static sharedInstance: AppleService;
@@ -181,7 +181,7 @@ export default class AppleService {
         }
 
         //log to RevenueCat
-        await RevenueCatService.shared.updateAppleSubscription({
+        await AdminRevenueCatService.shared.updateAppleSubscription({
             memberId,
             encodedReceipt: receipt.latest_receipt,
             price,
