@@ -286,7 +286,7 @@ export interface AttributesInput {
     [key: string]: AttributeType
 }
 
-export function getSubscriberAttributes(member?: CactusMember): AttributesInput {
+export function getSubscriberAttributes(member?: CactusMember): AttributesInput | undefined {
     const memberId = member?.id;
     if (!member || !memberId) {
         return;
@@ -310,7 +310,10 @@ export function getSubscriberAttributes(member?: CactusMember): AttributesInput 
     return attributes;
 }
 
-export function processAttributeInputForUpdate(params: AttributesInput): Record<string, { value: string | null }> {
+export function processAttributeInputForUpdate(params?: AttributesInput): Record<string, { value: string | null }> | undefined {
+    if (!params) {
+        return;
+    }
     const { memberId, email, name, ...additionalAttributes } = params;
     const attributes: Record<string, { value: string | null }> = {};
     if (email) {

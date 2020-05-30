@@ -70,6 +70,9 @@ export default class RevenueCatService {
             const path = RevenueCatEndpoints.subscriberAttributes(memberId);
             const params = getSubscriberAttributes(member);
             const attributes = processAttributeInputForUpdate(params);
+            if (!attributes) {
+                return;
+            }
             await this.client.post(path, { attributes });
         } catch (error) {
             if (isAxiosError(error)) {

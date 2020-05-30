@@ -262,7 +262,10 @@ export default class AdminRevenueCatService {
      *
      * @return {Promise<void>}
      */
-    async updateAttributes(params: AttributesInput): Promise<void> {
+    async updateAttributes(params?: AttributesInput): Promise<void> {
+        if (!params) {
+            return;
+        }
         const { memberId } = params;
         try {
             const path = RevenueCatEndpoints.subscriberAttributes(memberId);
