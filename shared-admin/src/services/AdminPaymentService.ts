@@ -35,6 +35,16 @@ export default class AdminPaymentService {
         return await this.firestoreService.getById(id, Payment);
     }
 
+    async getAllForMemberId(memberId?: string): Promise<Payment[]> {
+        if (!memberId) {
+            return []
+        }
+
+        const query = this.getCollectionRef().where(Payment.Fields.memberId, "==", memberId);
+        const queryResult = await this.firestoreService.executeQuery(query, Payment);
+        return queryResult.results;
+    }
+
     async getByAppleOriginalTransactionId(transactionId?: string): Promise<Payment[]> {
         if (!transactionId) {
             return [];

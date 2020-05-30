@@ -24,6 +24,8 @@ enum Field {
     appleOriginalTransactionId = "apple.originalTransactionId",
     googlePurchaseToken = "google.token",
     stripeCheckoutSessionId = "stripe.checkoutSession.id",
+    memberId = "memberId",
+    subscriptionProductId = "subscriptionProductId",
 }
 
 export default class Payment extends BaseModel {

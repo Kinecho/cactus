@@ -2,7 +2,13 @@ import { CactusConfig } from "@shared/CactusConfig";
 import _axios, { AxiosInstance } from "axios";
 import Logger from "@shared/Logger"
 import { isAxiosError } from "@shared/api/ApiTypes";
-import { stringifyJSON } from "@shared/util/ObjectUtil";
+import { isNull, stringifyJSON } from "@shared/util/ObjectUtil";
+import Payment from "@shared/models/Payment";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
+import CactusMember from "@shared/models/CactusMember";
+import SubscriptionProduct from "@shared/models/SubscriptionProduct";
+import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
+import { getStripeId } from "@admin/util/AdminStripeUtils";
 
 const logger = new Logger("RevenueCatService");
 
@@ -15,6 +21,9 @@ const Endpoints = {
 
 export default class RevenueCatService {
     static shared: RevenueCatService;
+
+    hasFetchedProducts: boolean = false;
+    cactusSubscriptionProductsById: Record<string, SubscriptionProduct | null> = {};
 
     static initialize(config: CactusConfig) {
         this.shared = new RevenueCatService(config)
@@ -53,6 +62,33 @@ export default class RevenueCatService {
         }
     }
 
+    private async fetchCactusProducts() {
+        const products = await AdminSubscriptionProductService.getSharedInstance().getAll();
+        products.forEach(p => {
+            this.cactusSubscriptionProductsById[p.entryId!] = p;
+        });
+        this.hasFetchedProducts = true;
+        return this.cactusSubscriptionProductsById;
+    }
+
+    private async getCactusProduct(entryId?: string): Promise<SubscriptionProduct | null | undefined> {
+        if (!entryId) {
+            return null;
+        }
+
+        if (!this.hasFetchedProducts) {
+            await this.fetchCactusProducts()
+        }
+
+        const existing = this.cactusSubscriptionProductsById[entryId];
+        if (existing === undefined) {
+            const found = await AdminSubscriptionProductService.getSharedInstance().getByEntryId(entryId);
+            this.cactusSubscriptionProductsById[entryId] = found ?? null;
+        }
+
+        return this.cactusSubscriptionProductsById[entryId];
+    }
+
     /**
      * Save/Update a Google transaction in RevenueCat
      * @param {object} params - the configuration object for the request
@@ -76,7 +112,7 @@ export default class RevenueCatService {
                 product_id: params.sku,
                 is_restore: params.isRestore ?? false,
             }, { headers: { ...this.headers.platform.android } });
-            logger.info(`updateGoogleSubscription Response data: memberId ${params.memberId} | sku: ${params.sku}`, JSON.stringify(response.data, null, 2));
+            logger.info(`updateGoogleSubscription Response data: memberId ${ params.memberId } | sku: ${ params.sku }`, JSON.stringify(response.data, null, 2));
         } catch (error) {
             if (isAxiosError(error)) {
                 logger.error(`Failed to update android subscription to RevenueCat for memberId: ${ memberId }`, error.response?.data ?? error);
@@ -177,5 +213,123 @@ export default class RevenueCatService {
                 logger.error("Failed to update RevenueCat user attributes", error);
             }
         }
+    }
+
+    async processApplePayment(payment: Payment): Promise<void> {
+        logger.info("Processing payment", payment.id);
+        const memberId = payment.memberId;
+        const cactusProductId = payment.subscriptionProductId;
+        const product = await this.getCactusProduct(cactusProductId);
+        const price = payment.apple?.productPrice?.price ?? ((product?.priceCentsUsd ?? 0) / 100);
+        const priceLocale = payment.apple?.productPrice?.priceLocale;
+        let currency = "USD";
+        if (priceLocale?.includes("@currency=")) {
+            currency = priceLocale.split("@currency=")[1];
+        }
+        // const appleProductId = payment.apple?.unifiedReceipt?.latest_receipt_info
+        const appleProductId = product?.appleProductId;
+
+        const encodedReceipt = payment.apple?.raw?.latest_receipt;
+        if (!encodedReceipt) {
+            return;
+        }
+
+        logger.info(`updating apple subscription for memberId: ${ memberId } in revenuecat: price: ${ price } | currency: ${ currency }`);
+        await RevenueCatService.shared.updateAppleSubscription({
+            memberId,
+            encodedReceipt,
+            price,
+            currency,
+            productId: appleProductId
+        })
+        const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+        if (member) {
+            logger.info("Updating the member attributes in revenuecat");
+            await this.updateSubscriberAttributes(member);
+        }
+    }
+
+    async updateSubscriberAttributes(member?: CactusMember) {
+        const memberId = member?.id;
+        if (!member || !memberId) {
+            return;
+        }
+        const email = member.email;
+        const name = member.getFullName();
+        await this.updateAttributes({ memberId, email, name });
+    }
+
+    async processStripePayment(payment: Payment): Promise<void> {
+        logger.log("Processing payment", payment.id);
+        const memberId = payment.memberId;
+        const stripeSubscriptionId = getStripeId(payment.stripe?.checkoutSession?.subscription);
+        if (!stripeSubscriptionId) {
+            logger.info("Not processing member as there is no stripe subscription id", memberId);
+            return;
+        }
+
+        const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+        logger.info(`updating stripe subscription for memberId: ${ memberId } | email: ${ member?.email ?? "" } in revenuecat with subscriptionId ${ stripeSubscriptionId }`);
+        await RevenueCatService.shared.updateStripeSubscription({
+            memberId,
+            subscriptionId: stripeSubscriptionId,
+        })
+
+        if (member) {
+            logger.info("Updating the member attributes in revenuecat");
+            await this.updateSubscriberAttributes(member);
+        }
+        logger.info("Finished processing member", memberId);
+        return;
+    }
+
+    async processGooglePayment(payment: Payment): Promise<void> {
+        logger.log("Processing payment", payment.id);
+        const memberId = payment.memberId;
+        const cactusProductId = payment.subscriptionProductId;
+        const product = await this.getCactusProduct(cactusProductId);
+        const token = payment.google?.token;
+        if (!token) {
+            logger.info("Not processing member as there is no token", memberId);
+            return;
+        }
+
+        const sku = payment.google?.subscriptionProductId ?? product?.androidProductId;
+        if (!sku) {
+            logger.info(`Not processing member ${ memberId } as no SKU was found. PaymentID = ${ payment.id }`);
+            return;
+        }
+        const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+        logger.info(`updating Android subscription for memberId: ${ memberId } | email: ${ member?.email ?? "" } in revenuecat with sku: ${ sku }`);
+        await RevenueCatService.shared.updateGoogleSubscription({
+            memberId,
+            token,
+            sku,
+        })
+
+        if (member) {
+            logger.info("Updating the member attributes in revenuecat");
+            await this.updateSubscriberAttributes(member);
+        }
+        logger.info("Finished processing member", memberId);
+        return;
+    }
+
+    async processPayments(payments: Payment[]): Promise<void> {
+        const tasks = payments.map(payment => {
+            if (!isNull(payment.apple)) {
+                return this.processApplePayment(payment);
+            }
+            if (!isNull(payment.google)) {
+                return this.processGooglePayment(payment);
+            }
+
+            if (!isNull(payment.stripe)) {
+                return this.processStripePayment(payment);
+            }
+            return;
+        })
+
+        await Promise.all(tasks);
     }
 }

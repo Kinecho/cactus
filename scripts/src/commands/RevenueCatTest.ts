@@ -11,7 +11,6 @@ import SubscriptionProduct from "@shared/models/SubscriptionProduct";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
 import AdminPaymentService from "@admin/services/AdminPaymentService";
 import Logger from "@shared/Logger"
-import { getStripeId } from "@admin/util/AdminStripeUtils";
 
 const logger = new Logger("RevenueCatTest");
 
@@ -23,13 +22,19 @@ interface UserInput {
 
 enum RevenueCatType {
     syncStripeSubscription = "Sync Stripe Subscription",
+    syncAllForMember = "Sync All For Member",
     updateSubscriberAttributes = "Update Subscriber Attributes",
     migrateApplePayments = "Migrate Apple Payments",
     migrateGooglePayments = "Migrate Google Payments",
     migrateStripePayments = "Migrate Stripe Payments",
+
 }
 
-const MemberRequiredTypes: RevenueCatType[] = [RevenueCatType.syncStripeSubscription, RevenueCatType.updateSubscriberAttributes];
+const MemberRequiredTypes: RevenueCatType[] = [
+    RevenueCatType.syncStripeSubscription,
+    RevenueCatType.updateSubscriberAttributes,
+    RevenueCatType.syncAllForMember
+];
 
 export default class RevenueCatTest extends FirebaseCommand {
     name = "Revenue Cat Test";
@@ -54,11 +59,11 @@ export default class RevenueCatTest extends FirebaseCommand {
                 name: "jobType",
                 message: "What type of job do you want to run?",
                 type: "select",
-                choices: Object.values(RevenueCatType).map(v => ({ title: v, value: v })),
+                choices: Object.values(RevenueCatType as any).map((v: any) => ({ title: v, value: v })),
             }, {
                 name: "email",
                 message: "User Email",
-                type: (prev) => MemberRequiredTypes.includes(prev as RevenueCatType) ? "text" : null,
+                type: (prev: RevenueCatType) => MemberRequiredTypes.includes(prev) ? "text" : null,
                 initial: this.userInput?.email ?? "",
             }]);
         console.log("Got user input", userInput);
@@ -88,9 +93,20 @@ export default class RevenueCatTest extends FirebaseCommand {
             case RevenueCatType.migrateStripePayments:
                 await this.migrateStripePayments();
                 break;
+            case RevenueCatType.syncAllForMember:
+                await this.migrateAllForMember(member!);
+                break;
         }
 
         await this.askRunAgain();
+    }
+
+    async migrateAllForMember(member: CactusMember) {
+        const payments = await AdminPaymentService.getSharedInstance().getAllForMemberId(member?.id);
+        logger.info(`Processing ${ payments.length } payments`);
+        await RevenueCatService.shared.processPayments(payments);
+        logger.info(`Finished processing ${ payments.length } payments`);
+        return;
     }
 
     async fetchCactusProducts() {
@@ -107,43 +123,9 @@ export default class RevenueCatTest extends FirebaseCommand {
         await AdminPaymentService.getSharedInstance().getAllAppleTransactionsBatch({
             batchSize: 1,
             onData: async (payments, batchNumber) => {
-                //hello;
-                logger.info("processing batch ", batchNumber);
-                const tasks = payments.map(payment => new Promise(async resolve => {
-                    console.log("Processing payment", payment.id);
-                    const memberId = payment.memberId;
-                    const cactusProductId = payment.subscriptionProductId;
-                    const product = cactusProductId ? productsById[cactusProductId] : undefined;
-                    const price = payment.apple?.productPrice?.price ?? ((product?.priceCentsUsd ?? 0) / 100);
-                    const priceLocale = payment.apple?.productPrice?.priceLocale;
-                    let currency = "USD";
-                    if (priceLocale?.includes("@currency=")) {
-                        currency = priceLocale.split("@currency=")[1];
-                    }
-                    // const appleProductId = payment.apple?.unifiedReceipt?.latest_receipt_info
-                    const appleProductId = product?.appleProductId;
-
-                    const encodedReceipt = payment.apple?.raw?.latest_receipt;
-                    if (!encodedReceipt) {
-                        resolve();
-                        return;
-                    }
-
-                    logger.info(`updating apple subscription for memberId: ${ memberId } in revenuecat: price: ${ price } | currency: ${ currency }`);
-                    await RevenueCatService.shared.updateAppleSubscription({
-                        memberId,
-                        encodedReceipt,
-                        price,
-                        currency,
-                        productId: appleProductId
-                    })
-                    const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
-                    if (member) {
-                        logger.info("Updating the member attributes in revenuecat");
-                        await this.updateSubscriberAttributes(member);
-                    }
-                    resolve()
-                }))
+                logger.info("\nStarting processing batch", batchNumber);
+                const tasks = payments.map(payment => RevenueCatService.shared.processApplePayment(payment));
+                logger.info("Finished processing batch", batchNumber);
                 await Promise.all(tasks);
             }
         })
@@ -156,34 +138,7 @@ export default class RevenueCatTest extends FirebaseCommand {
             batchSize: 10,
             onData: async (payments, batchNumber) => {
                 logger.info("\nprocessing batch ", batchNumber);
-                const tasks: Promise<void>[] = payments.map(payment => new Promise<void>(async resolve => {
-                    console.log("Processing payment", payment.id);
-                    const memberId = payment.memberId;
-                    // const cactusProductId = payment.subscriptionProductId;
-                    // const product = cactusProductId ? productsById[cactusProductId] : undefined;
-                    const stripeSubscriptionId = getStripeId(payment.stripe?.checkoutSession?.subscription);
-                    if (!stripeSubscriptionId) {
-                        logger.info("Not processing member as there is no stripe subscription id", memberId);
-                        resolve();
-                        return;
-                    }
-
-                    const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
-                    logger.info(`updating stripe subscription for memberId: ${ memberId } | email: ${ member?.email ?? "" } in revenuecat with subscriptionId ${ stripeSubscriptionId }`);
-                    await RevenueCatService.shared.updateStripeSubscription({
-                        memberId,
-                        subscriptionId: stripeSubscriptionId,
-                        // sku,
-                    })
-
-                    if (member) {
-                        logger.info("Updating the member attributes in revenuecat");
-                        await this.updateSubscriberAttributes(member);
-                    }
-                    logger.info("Finished processing member", memberId);
-                    resolve()
-                }))
-
+                const tasks: Promise<void>[] = payments.map(payment => RevenueCatService.shared.processStripePayment(payment));
                 await Promise.all(tasks);
                 logger.info("Finished batch", batchNumber);
                 return;
@@ -198,41 +153,8 @@ export default class RevenueCatTest extends FirebaseCommand {
         await AdminPaymentService.getSharedInstance().getAllGoogleTransactionsBatch({
             batchSize: 1,
             onData: async (payments, batchNumber) => {
-                //hello;
                 logger.info("\nprocessing batch ", batchNumber);
-                const tasks = payments.map(payment => new Promise(async resolve => {
-                    console.log("Processing payment", payment.id);
-                    const memberId = payment.memberId;
-                    const cactusProductId = payment.subscriptionProductId;
-                    const product = cactusProductId ? productsById[cactusProductId] : undefined;
-                    const token = payment.google?.token;
-                    if (!token) {
-                        logger.info("Not processing member as there is no token", memberId);
-                        resolve();
-                        return;
-                    }
-
-                    const sku = payment.google?.subscriptionProductId ?? product?.androidProductId;
-                    if (!sku) {
-                        logger.info(`Not processing member ${ memberId } as no SKU was found. PaymentID = ${ payment.id }`);
-                        resolve();
-                        return;
-                    }
-                    const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
-                    logger.info(`updating Android subscription for memberId: ${ memberId } | email: ${ member?.email ?? "" } in revenuecat with sku: ${ sku }`);
-                    await RevenueCatService.shared.updateGoogleSubscription({
-                        memberId,
-                        token,
-                        sku,
-                    })
-
-                    if (member) {
-                        logger.info("Updating the member attributes in revenuecat");
-                        await this.updateSubscriberAttributes(member);
-                    }
-                    logger.info("Finished processing member", memberId);
-                    resolve()
-                }))
+                const tasks = payments.map(payment => RevenueCatService.shared.processGooglePayment(payment))
                 logger.info("Finished batch", batchNumber);
                 await Promise.all(tasks);
             }
@@ -252,10 +174,7 @@ export default class RevenueCatTest extends FirebaseCommand {
     }
 
     async updateSubscriberAttributes(member: CactusMember) {
-        const memberId = member.id!;
-        const email = member.email;
-        const name = member.getFullName();
-        await RevenueCatService.shared.updateAttributes({ memberId: memberId, email, name });
+        await RevenueCatService.shared.updateSubscriberAttributes(member)
     }
 
     async askRunAgain() {
