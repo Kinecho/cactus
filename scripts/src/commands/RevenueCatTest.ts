@@ -121,7 +121,7 @@ export default class RevenueCatTest extends FirebaseCommand {
         const productsById = await this.fetchCactusProducts();
         console.log(`Got ${ Object.values(productsById).length } subscription products`);
         await AdminPaymentService.getSharedInstance().getAllAppleTransactionsBatch({
-            batchSize: 1,
+            batchSize: 10,
             onData: async (payments, batchNumber) => {
                 logger.info("\nStarting processing batch", batchNumber);
                 const tasks = payments.map(payment => RevenueCatService.shared.processApplePayment(payment));
@@ -151,7 +151,7 @@ export default class RevenueCatTest extends FirebaseCommand {
         const productsById = await this.fetchCactusProducts();
         console.log(`Got ${ Object.values(productsById).length } subscription products`);
         await AdminPaymentService.getSharedInstance().getAllGoogleTransactionsBatch({
-            batchSize: 1,
+            batchSize: 10,
             onData: async (payments, batchNumber) => {
                 logger.info("\nprocessing batch ", batchNumber);
                 const tasks = payments.map(payment => RevenueCatService.shared.processGooglePayment(payment))
