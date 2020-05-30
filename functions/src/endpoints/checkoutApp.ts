@@ -29,6 +29,8 @@ import { appendQueryParams } from "@shared/util/StringUtil";
 import CactusMember from "@shared/models/CactusMember";
 import { PageRoute } from "@shared/PageRoutes";
 import StripeService from "@admin/services/StripeService";
+import { isWebhookPayload } from "@shared/api/RevenueCatApi";
+import { publishWebhookEvent as submitRevenueCatEvent } from "@api/pubsub/subscribers/RevenueCatPubSub";
 
 const bodyParser = require('body-parser');
 const logger = new Logger("checkoutApp");
@@ -427,8 +429,24 @@ app.post("/reveneuecat/webhooks", async (req, resp) => {
         return
     }
 
-    logger.info("Authenticated the webhook request");
+    const payload = req.body;
 
+    if (!isWebhookPayload(payload)) {
+        logger.warn("The body of the webhook payload did not conform to WebhookPayload type");
+        resp.sendStatus(400);
+        return;
+    }
+
+    logger.info("Authenticated the webhook request", stringifyJSON(payload, 2));
+
+    const messageId = await submitRevenueCatEvent(payload);
+
+    if (!messageId) {
+        logger.error("Unable to submit the message successfully. Returning an error code so revenue cat will retry");
+        resp.status(500).send("Unable to submit the event for processing");
+        return;
+    }
+    logger.info("Submitted revenuecat message payload. MessageID =", messageId);
     resp.sendStatus(200);
     return;
 })
