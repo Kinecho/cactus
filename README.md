@@ -7,7 +7,7 @@ Cactus App
 See the [Flamelink Docs](FLAMELINK.md)
 
 ## Versions
-You must use node version >= 8.13.0. The suggested version is v8.15.0
+You must use node version == 10.18.1.
 
 See [Firebase Runtime Environments](https://cloud.google.com/functions/docs/concepts/exec#runtimes) for more information
 
