@@ -121,18 +121,18 @@ commands:
             - restore_cache:
                 name: "Restore << parameters.module >> Cache"
                 keys:
-                  - v11-<< parameters.module >>-dependency-{{ .Branch }}-{{ checksum "<< parameters.module >>/package.json" }}
-                  - v11-<< parameters.module >>-dependency-{{ .Branch }}-
-                  - v11-<< parameters.module >>-dependency-
+                  - v12-<< parameters.module >>-dependency-{{ .Branch }}-{{ checksum "<< parameters.module >>/package.json" }}
+                  - v12-<< parameters.module >>-dependency-{{ .Branch }}-
+                  - v12-<< parameters.module >>-dependency-
       - unless:
           condition: << parameters.module >>
           steps:
             - restore_cache:
                 name: "Save Root Dependencies to Cache"
                 keys:
-                  - v11-root-dependency-{{ .Branch }}-{{ checksum "package.json" }}
-                  - v11-root-dependency-{{ .Branch }}-
-                  - v11-root-dependency-
+                  - v12-root-dependency-{{ .Branch }}-{{ checksum "package.json" }}
+                  - v12-root-dependency-{{ .Branch }}-
+                  - v12-root-dependency-
   restore-all:
     steps:
       - restore-module:
@@ -166,7 +166,7 @@ commands:
                 name: "Save << parameters.module >> Dependencies to Cache"
                 paths:
                   - << parameters.module >>/node_modules
-                key: v11-<< parameters.module >>-dependency-{{ .Branch }}-{{ checksum "<< parameters.module >>/package.json" }}
+                key: v12-<< parameters.module >>-dependency-{{ .Branch }}-{{ checksum "<< parameters.module >>/package.json" }}
       - unless:
           condition: << parameters.module >>
           steps:
@@ -175,7 +175,7 @@ commands:
                 name: "Save Root Dependencies to Cache"
                 paths:
                   - node_modules
-                key: v11-root-dependency-{{ .Branch }}-{{ checksum "package.json" }}
+                key: v12-root-dependency-{{ .Branch }}-{{ checksum "package.json" }}
   notify-on-failure:
     parameters:
       workflow_name:
