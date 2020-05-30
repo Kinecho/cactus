@@ -10,12 +10,12 @@ import SubscriptionProduct from "@shared/models/SubscriptionProduct";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
 import { getStripeId } from "@admin/util/AdminStripeUtils";
 import { AppType } from "@shared/models/ReflectionResponse";
-import { isBlank } from "@shared/util/StringUtil";
 import {
     apiDomain,
     AttributesInput,
     getPlatformHeader,
-    getSubscriberAttributes, processAttributeInputForUpdate,
+    getSubscriberAttributes,
+    processAttributeInputForUpdate,
     RevenueCatEndpoints
 } from "@shared/api/RevenueCatApi";
 

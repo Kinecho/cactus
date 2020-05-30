@@ -49,7 +49,7 @@ export const updateReflectionStatsTrigger = functions.firestore
         return;
     }
     const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
-    const memberId = member.id;
+    const memberId = member?.id;
 
     if (!member || !memberId) {
         logger.warn("Member details were not able to be loaded", data);
