@@ -137,7 +137,10 @@ export default class RevenueCatService {
         }
     }
 
-    async updateStripeSubscription(params: { memberId: string, subscriptionId: string }): Promise<void> {
+    async updateStripeSubscription(params: {
+        memberId: string,
+        subscriptionId: string
+    }): Promise<void> {
         const memberId = params.memberId;
         try {
             const response = await this.client.post(Endpoints.receipts, {

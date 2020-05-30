@@ -74,6 +74,20 @@ export default class AdminPaymentService {
         return;
     }
 
+    async getAllStripeTransactionsBatch(options: GetBatchOptions<Payment>): Promise<void> {
+        const query = this.getCollectionRef()
+
+        await this.firestoreService.executeBatchedQuery({
+            query,
+            type: Payment,
+            onData: options.onData,
+            batchSize: options?.batchSize,
+            orderBy: Payment.Fields.stripeCheckoutSessionId,
+            sortDirection: QuerySortDirection.asc,
+            includeDeleted: true,
+        });
+        return;
+    }
 
     async getByGooglePurchaseToken(purchaseToken?: string) : Promise<Payment[]> {
         if (!purchaseToken) {

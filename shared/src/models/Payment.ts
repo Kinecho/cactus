@@ -22,7 +22,8 @@ const logger = new Logger("PaymentModel");
 
 enum Field {
     appleOriginalTransactionId = "apple.originalTransactionId",
-    googlePurchaseToken = "google.token"
+    googlePurchaseToken = "google.token",
+    stripeCheckoutSessionId = "stripe.checkoutSession.id",
 }
 
 export default class Payment extends BaseModel {

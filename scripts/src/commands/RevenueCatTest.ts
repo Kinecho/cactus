@@ -11,6 +11,7 @@ import SubscriptionProduct from "@shared/models/SubscriptionProduct";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
 import AdminPaymentService from "@admin/services/AdminPaymentService";
 import Logger from "@shared/Logger"
+import { getStripeId } from "@admin/util/AdminStripeUtils";
 
 const logger = new Logger("RevenueCatTest");
 
@@ -25,6 +26,7 @@ enum RevenueCatType {
     updateSubscriberAttributes = "Update Subscriber Attributes",
     migrateApplePayments = "Migrate Apple Payments",
     migrateGooglePayments = "Migrate Google Payments",
+    migrateStripePayments = "Migrate Stripe Payments",
 }
 
 const MemberRequiredTypes: RevenueCatType[] = [RevenueCatType.syncStripeSubscription, RevenueCatType.updateSubscriberAttributes];
@@ -82,6 +84,9 @@ export default class RevenueCatTest extends FirebaseCommand {
                 break;
             case RevenueCatType.migrateGooglePayments:
                 await this.migrateGooglePayments();
+                break;
+            case RevenueCatType.migrateStripePayments:
+                await this.migrateStripePayments();
                 break;
         }
 
@@ -144,6 +149,48 @@ export default class RevenueCatTest extends FirebaseCommand {
         })
     }
 
+    async migrateStripePayments() {
+        const productsById = await this.fetchCactusProducts();
+        console.log(`Got ${ Object.values(productsById).length } subscription products`);
+        await AdminPaymentService.getSharedInstance().getAllStripeTransactionsBatch({
+            batchSize: 100,
+            onData: async (payments, batchNumber) => {
+                //hello;
+                logger.info("\nprocessing batch ", batchNumber);
+                const tasks = payments.map(payment => new Promise(async resolve => {
+                    console.log("Processing payment", payment.id);
+                    const memberId = payment.memberId;
+                    // const cactusProductId = payment.subscriptionProductId;
+                    // const product = cactusProductId ? productsById[cactusProductId] : undefined;
+                    const stripeSubscriptionId = getStripeId(payment.stripe?.checkoutSession?.subscription);
+                    if (!stripeSubscriptionId) {
+                        logger.info("Not processing member as there is no stripe subscription id", memberId);
+                        resolve();
+                        return;
+                    }
+
+                    const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+                    logger.info(`updating stripe subscription for memberId: ${ memberId } | email: ${ member?.email ?? "" } in revenuecat with subscriptionId ${ stripeSubscriptionId }`);
+                    await RevenueCatService.shared.updateStripeSubscription({
+                        memberId,
+                        subscriptionId: stripeSubscriptionId,
+                        // sku,
+                    })
+
+                    if (member) {
+                        logger.info("Updating the member attributes in revenuecat");
+                        await this.updateSubscriberAttributes(member);
+                    }
+                    logger.info("Finished processing member", memberId);
+                    resolve()
+                }))
+                logger.info("Finished batch", batchNumber);
+                await Promise.all(tasks);
+            }
+        })
+
+    }
+
     async migrateGooglePayments() {
         const productsById = await this.fetchCactusProducts();
         console.log(`Got ${ Object.values(productsById).length } subscription products`);
@@ -171,7 +218,7 @@ export default class RevenueCatTest extends FirebaseCommand {
                         return;
                     }
                     const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
-                    logger.info(`updating Android subscription for memberId: ${ memberId } | email: ${member?.email ?? ""} in revenuecat with sku: ${sku}`);
+                    logger.info(`updating Android subscription for memberId: ${ memberId } | email: ${ member?.email ?? "" } in revenuecat with sku: ${ sku }`);
                     await RevenueCatService.shared.updateGoogleSubscription({
                         memberId,
                         token,
