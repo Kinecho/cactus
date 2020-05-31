@@ -17,11 +17,10 @@
         </div>
 
         <!-- Basic user -->
-        <div class="box" v-if="loggedIn && didWrite && isBasic">
+        <div class="box" v-if="loggedIn && isBasic">
             <h4>Today's Insight</h4>
             <p>To reveal Today's Insight, upgrade to
-                Cactus&nbsp;Plus.<a class="fancyLink" href="#" @click.prevent="trackRevealUrlEvent(pricingPageUrl)">What
-                    are insights?</a></p>
+                Cactus&nbsp;Plus.<a class="fancyLink" href="#" @click.prevent="trackRevealUrlEvent(pricingPageUrl)">Learn more</a></p>
         </div>
 
         <!-- Plus (Trial) user -->

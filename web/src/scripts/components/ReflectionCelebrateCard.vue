@@ -5,7 +5,7 @@
                 <upgrade-banner :member="member"/>
                 <div class="successText">
                     <h2>{{celebrateText}}</h2>
-                    <p class="subtext" v-if="subscriptionTier == plusTier && didWriteReflection">Here are words that have come up recently for you.</p>
+                    <p class="subtext" v-if="subscriptionTier == plusTier">Here are words that have come up recently for you. The bubbles update the more you write.</p>
                 </div>
                 <div class="insightContainer revealed">
                     <MemberInsights
@@ -476,9 +476,7 @@
 
     .successText {
         flex-grow: 1;
-        margin: 0 auto;
-        max-width: 36rem;
-        padding: 4rem 2.4rem 2.4rem;
+        padding: 4rem 4rem 0;
 
         h2 {
             font-size: 3.2rem;
@@ -591,8 +589,8 @@
             }
 
             &.front {
-                background-color: lighten($beige, 3%);
-                box-shadow: 0 30px 160px -6px rgba(0, 0, 0, .3);
+                background-color: $bgGreen;
+                box-shadow: 0 30px 160px -6px rgba(6, 69, 76, 0.3);
                 height: 100%;
                 transform: rotateY(0);
                 z-index: 2;
