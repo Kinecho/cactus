@@ -535,7 +535,7 @@
 
         @include r(600) {
             border-radius: 12px;
-            box-shadow: 0 8px 150px 0 rgba(0, 0, 0, .2);
+            box-shadow: 0 30px 160px -6px rgba(0, 0, 0, 0.3);
             min-height: 100%;
             justify-content: space-between;
             padding: 3.2rem 3.2rem 4rem;
@@ -622,7 +622,7 @@
             font-size: 2.4rem;
         }
         @include r(600) {
-            padding-top: 4rem;
+            padding: 4rem 0;
         }
 
         p {
@@ -1024,7 +1024,6 @@
     @import "variables";
 
     .quote-container .md_wrapper strong {
-        color: $indigo;
         font-size: 2.8rem;
         line-height: 1.2;
     }

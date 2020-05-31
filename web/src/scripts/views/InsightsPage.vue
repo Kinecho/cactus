@@ -330,10 +330,11 @@
     }
 
     .imgContainer {
-        margin-bottom: 2.4rem;
+        margin-top: 2.4rem;
         position: relative;
 
         @include r(374) {
+            margin-bottom: 2.4rem;
             margin-top: -16rem;
             transform: translate(60%, 0);
             position: absolute;
@@ -349,7 +350,7 @@
         @include r(1024) {
             margin-top: -4.8rem;
             max-width: 38rem;
-            text-align: right;
+            text-align: center;
         }
 
         img {
@@ -357,12 +358,9 @@
             width: 29rem;
 
             @include r(600) {
-                width: 100%;
-            }
-            @include r(768) {
                 height: auto;
-                max-width: 32rem;
                 max-height: 32rem;
+                max-width: 32rem;
                 width: auto;
             }
         }
