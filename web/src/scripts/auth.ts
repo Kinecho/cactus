@@ -17,7 +17,6 @@ import CactusMemberService from "@web/services/CactusMemberService";
 import { fireConfirmedSignupEvent, fireLoginEvent, fireSignupLeadEvent } from "@web/analytics";
 import Logger from "@shared/Logger";
 import { getAppType, isAndroidApp } from "@web/DeviceUtil";
-import router from "@web/router";
 import { pushRoute } from "@web/NavigationUtil";
 
 const logger = new Logger("auth.ts");

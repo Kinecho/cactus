@@ -1,24 +1,24 @@
-import {FirebaseCommand} from "@scripts/CommandTypes";
+import { FirebaseCommand } from "@scripts/CommandTypes";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import * as admin from "firebase-admin";
-import {CactusConfig} from "@shared/CactusConfig";
-import {Project} from "@scripts/config";
+import { CactusConfig } from "@shared/CactusConfig";
+import { Project } from "@scripts/config";
 import * as prompts from "prompts";
 import CactusMember from "@shared/models/CactusMember";
 import Logger from "@shared/Logger";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
-import {stringifyJSON} from "@shared/util/ObjectUtil";
+import { stringifyJSON } from "@shared/util/ObjectUtil";
 import {
     getDefaultSubscription,
     getDefaultSubscriptionWithEndDate,
     getDefaultTrial
 } from "@shared/models/MemberSubscription";
-import {DateTime} from "luxon";
-import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+import { DateTime } from "luxon";
+import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 import * as csv from "csvtojson"
 import * as path from "path";
 import helpers from "@scripts/helpers";
-import {StringTransforms} from "@shared/util/StringUtil";
+import { StringTransforms } from "@shared/util/StringUtil";
 
 interface ExecuteCommandPrompt {
     runNow: boolean
@@ -72,12 +72,13 @@ interface LegacySubscriber {
     currentPeriodStart?: Date,
 }
 
+const logger = new Logger("CreateDefaultSubscriptions");
 
 export default class CreateDefaultSubscriptions extends FirebaseCommand {
     name = "Create Default Subscriptions";
     description = "Update all members that do not have a subscription";
     showInList = true;
-    logger = new Logger("CreateDeefaultSubscriptoin");
+    logger = logger;
     trialEndsAt = DateTime.local().set({
         month: 3,
         day: 1,
@@ -111,7 +112,7 @@ export default class CreateDefaultSubscriptions extends FirebaseCommand {
             } as LegacySubscriber
         });
 
-        console.log(`parsed ${rows.length} rows`);
+        console.log(`parsed ${ rows.length } rows`);
 
         const subscriberMap: { [email: string]: LegacySubscriber } = {};
 
@@ -134,7 +135,7 @@ export default class CreateDefaultSubscriptions extends FirebaseCommand {
         // this.legacySubscribers = subMap;
 
 
-        console.log("Using date func", Object.values(subMap)[0].start?.getTime());
+        // console.log("Using date func", Object.values(subMap)[0].start?.getTime());
 
         const doIt = await this.shouldExecute("Start the backfill now?");
         if (doIt) {
@@ -166,7 +167,7 @@ export default class CreateDefaultSubscriptions extends FirebaseCommand {
                 this.logger.info("Processing batch", batchNumber);
                 const batchResult = await this.handleMemberBatch(members, batchNumber);
                 const batchEnd = Date.now();
-                this.logger.info(`Finished batch ${batchNumber} after ${batchEnd - batchStart}ms`);
+                this.logger.info(`Finished batch ${ batchNumber } after ${ batchEnd - batchStart }ms`);
                 batchResults.push(batchResult);
             }
         });
@@ -198,7 +199,7 @@ export default class CreateDefaultSubscriptions extends FirebaseCommand {
             total.numSubscriptionsCreated += r.numSubscriptionsCreated;
         });
 
-        this.logger.info(`\n\nFinished after ${totalDuration}ms\nResults: \n `, stringifyJSON(total, 2));
+        this.logger.info(`\n\nFinished after ${ totalDuration }ms\nResults: \n `, stringifyJSON(total, 2));
         return;
     }
 
@@ -241,7 +242,7 @@ export default class CreateDefaultSubscriptions extends FirebaseCommand {
     async handleLegacySubscriber(member: CactusMember, batch: FirebaseFirestore.WriteBatch): Promise<MemberResult | undefined> {
         //NOTE: not processing legacy subscribers
         if (member.subscription?.legacyConversion === true) {
-            return {fixedSubscription: false, createdSubscription: false, legacyUpgrade: false};
+            return { fixedSubscription: false, createdSubscription: false, legacyUpgrade: false };
         }
 
         const email = member.email;
@@ -256,7 +257,7 @@ export default class CreateDefaultSubscriptions extends FirebaseCommand {
 
         if (member.subscription?.stripeSubscriptionId && member.subscription.tier === SubscriptionTier.PLUS && !!member.subscription.trial?.activatedAt) {
             //already has all the data needed
-            return {fixedSubscription: false, createdSubscription: false, legacyUpgrade: false};
+            return { fixedSubscription: false, createdSubscription: false, legacyUpgrade: false };
         }
 
         const sub = member.subscription || getDefaultSubscription();
@@ -280,9 +281,9 @@ export default class CreateDefaultSubscriptions extends FirebaseCommand {
         sub.trial = trial;
         member.subscription = sub;
 
-        await AdminCactusMemberService.getSharedInstance().save(member, {batch});
+        await AdminCactusMemberService.getSharedInstance().save(member, { batch });
 
-        return {fixedSubscription: true, createdSubscription: false, legacyUpgrade: true};
+        return { fixedSubscription: true, createdSubscription: false, legacyUpgrade: true };
     }
 
     async processMember(member: CactusMember, batch: FirebaseFirestore.WriteBatch): Promise<MemberResult> {
@@ -311,8 +312,8 @@ export default class CreateDefaultSubscriptions extends FirebaseCommand {
 
                 const isActivated = !!sub.trial?.activatedAt;
                 if (isActivated !== sub.activated) {
-                    logger.info(`setting ${member.email} subscription to activated = ${isActivated}`);
-                    subscription.activated = isActivated;
+                    logger.info(`setting ${ member.email } subscription to activated = ${ isActivated }`);
+                    sub.activated = isActivated;
                     save = true;
                 }
 
@@ -322,21 +323,21 @@ export default class CreateDefaultSubscriptions extends FirebaseCommand {
                 }
 
                 if (save) {
-                    await AdminCactusMemberService.getSharedInstance().save(member, {batch});
-                    return {createdSubscription: false, fixedSubscription: true};
+                    await AdminCactusMemberService.getSharedInstance().save(member, { batch });
+                    return { createdSubscription: false, fixedSubscription: true };
                 }
-                return {createdSubscription: false, fixedSubscription: false};
+                return { createdSubscription: false, fixedSubscription: false };
             } else {
 
                 const sub = getDefaultSubscriptionWithEndDate(this.trialEndsAt);
                 sub.legacyConversion = true;
                 member.subscription = sub;
-                await AdminCactusMemberService.getSharedInstance().save(member, {batch});
-                return {createdSubscription: true, fixedSubscription: false};
+                await AdminCactusMemberService.getSharedInstance().save(member, { batch });
+                return { createdSubscription: true, fixedSubscription: false };
             }
         } catch (error) {
-            this.logger.error(`Unexected error while processing member ${member.email}`, error);
-            return {error: error.message, createdSubscription: false, fixedSubscription: false};
+            this.logger.error(`Unexected error while processing member ${ member.email }`, error);
+            return { error: error.message, createdSubscription: false, fixedSubscription: false };
         }
     }
 }

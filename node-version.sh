@@ -25,5 +25,5 @@ fi
 
 
 echo "current node version is $(node -v)"
-nvm install 8.15.0
-nvm alias default 8.15.0
+nvm install 10.18.1
+nvm alias default 10.18.1

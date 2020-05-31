@@ -36,10 +36,12 @@ import * as PromptContentTriggers from "@api/triggers/PromptContentTriggers";
 import { onPublish as expireMembershipJob } from "@api/pubsub/subscribers/ExpireMembershipTrialJob";
 import { onPublish as syncTrailToMailchimpMembersJob } from "@admin/pubsub/SyncTrialMembersToMailchimpJob";
 import { onPublish as GooglePlayBillingJob } from "@api/pubsub/subscribers/GooglePlayBillingListeners";
+import { onPublish as RevenueCatEventJob } from "@api/pubsub/subscribers/RevenueCatPubSub";
 import { transactionalOnCreate } from "@admin/AuthUserCreateJob";
 import { onPublish as CancellationJob } from "@admin/pubsub/ProcessSubscriptionCancellations";
 import { updateMemberCoreValueFromAssessment } from "@api/triggers/CoreValuesAssessessmentResponseTriggers";
 import { gapAssessmentCompleted } from "@api/triggers/GapAnalysisTriggers";
+
 export const cloudFunctions = {
     //API Endpoints
     checkout: functions.https.onRequest(checkoutApp),
@@ -73,6 +75,7 @@ export const cloudFunctions = {
         syncTrailMembersToMailchimp: functions.pubsub.topic(PubSubTopic.sync_trial_members_to_mailchimp).onPublish(syncTrailToMailchimpMembersJob),
         googlePlayBillingEvents: functions.pubsub.topic(PubSubTopic.android_google_play_billing_events).onPublish(GooglePlayBillingJob),
         processCancellations: functions.pubsub.topic(PubSubTopic.process_cancellations).onPublish(CancellationJob),
+        revenueCatEvents: functions.pubsub.topic(PubSubTopic.revenuecat_events).onPublish(RevenueCatEventJob),
     },
 
     //auth triggers

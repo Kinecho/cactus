@@ -117,5 +117,10 @@ export interface CactusConfig {
         service_account: ServiceAccountCredentials,
         robot_user_id: string,
         environment_id: string,
+    },
+    revenuecat: {
+        public_key: string,
+        secret_key: string,
+        webhook_bearer_token: string,
     }
 }

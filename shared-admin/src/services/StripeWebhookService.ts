@@ -21,6 +21,7 @@ import { getCustomerId, getStripeId, isStripeSubscription } from "@admin/util/Ad
 import { destructureDisplayName, isBlank } from "@shared/util/StringUtil";
 import StripeService from "@admin/services/StripeService";
 import { formatDateTime } from "@shared/util/DateUtil";
+import AdminRevenueCatService from "@admin/services/AdminRevenueCatService";
 
 const logger = new Logger("StripeWebhookService");
 
@@ -241,6 +242,9 @@ export default class StripeWebhookService {
             session,
             subscriptionProductId: subscriptionProduct?.entryId
         });
+        if (memberId && stripeSubscriptionId) {
+            await AdminRevenueCatService.shared.updateStripeSubscription({ memberId, subscriptionId: stripeSubscriptionId });
+        }
 
         await AdminPaymentService.getSharedInstance().save(payment);
         await AdminCactusMemberService.getSharedInstance().save(cactusMember, { setUpdatedAt: false });
@@ -303,6 +307,7 @@ export default class StripeWebhookService {
         }
 
         const subscription = event.data.object as Stripe.Subscription;
+        const stripeSubscriptionId = subscription.id;
         const customerId = getStripeId(subscription.customer);
         if (!customerId) {
             logger.error("Could not get a customer ID from the event payload", stringifyJSON(event, 2));
@@ -327,6 +332,12 @@ export default class StripeWebhookService {
             response.statusCode = 200;
             response.body = { message: "Could not find a cactus member for this subscription" };
             return response;
+        }
+
+        const memberId = member?.id;
+        if (memberId && stripeSubscriptionId) {
+            logger.info("Updating stripe subscription in revenue cat");
+            await AdminRevenueCatService.shared.updateStripeSubscription({ memberId, subscriptionId: stripeSubscriptionId });
         }
 
         const previousAttributes = event.data.previous_attributes as Partial<Stripe.Subscription>;
@@ -365,7 +376,7 @@ export default class StripeWebhookService {
 
         response.statusCode = 200;
         response.body = { message: `Successfully processed subscription update ${ member.email } (${ member.id }) to BASIC` };
-        await AdminSlackService.getSharedInstance().sendMessage(ChannelName.subscription_status, `:stripe: ${ member.email } (${ member.id }) subscription has been canceled and will end on ${ formatDateTime(accessEndsAt)}`);
+        await AdminSlackService.getSharedInstance().sendMessage(ChannelName.subscription_status, `:stripe: ${ member.email } (${ member.id }) subscription has been canceled and will end on ${ formatDateTime(accessEndsAt) }`);
         return response;
     }
 
@@ -488,7 +499,8 @@ export default class StripeWebhookService {
 
         await AdminSlackService.getSharedInstance().sendMessage(ChannelName.cha_ching, `${ member.email } successfully completed an invoice for ${ productDescription } for ${ pricePaid }. Reason: \`${ invoice.billing_reason }\``);
 
-        return { statusCode: 200,
+        return {
+            statusCode: 200,
             body: {
                 message: "updated member subscription",
                 member: { email: member.email, id: member.id, subscription: member.subscription }
