@@ -165,15 +165,15 @@
     }
 
     h4 {
-        font-size: 1.6rem;
+        font-size: 1.4rem;
         font-weight: normal;
         letter-spacing: 0;
         text-transform: capitalize;
 
         @include r(374) {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: bold;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             text-transform: uppercase;
         }
     }
