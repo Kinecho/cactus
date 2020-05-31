@@ -63,10 +63,10 @@
         }
 
         &.pink {
-            background-color: $magenta;
+            background-color: $green;
         }
         &.blue {
-            background-color: $royal;
+            background-color: $dolphin;
         }
     }
 </style>

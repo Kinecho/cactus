@@ -240,13 +240,20 @@
 
         .centered {
             flex-grow: 1;
-            padding: 0 2.4rem 6.4rem;
+            padding: 0 0 6.4rem;
             text-align: left;
+
+            @include r(374) {
+                padding: 0 2.4rem 6.4rem;
+            }
         }
 
         h1 {
-            margin: 3.2rem 0;
+            margin: 3.2rem 2.4rem;
 
+            @include r(374) {
+                margin: 3.2rem 0;
+            }
             @include r(768) {
                 margin: 6.4rem 0 4rem;
             }
@@ -279,7 +286,7 @@
     }
 
     .valuesContainer {
-        background-color: lighten($beige, 3%);
+        background-color: $bgGreen;
         border-radius: 1.6rem;
         margin-bottom: 4rem;
         padding: 3.2rem;
@@ -339,31 +346,10 @@
             transform: none;
             width: 100%;
         }
-        @include r(768) {
-            max-width: 32rem;
-        }
         @include r(1024) {
-            margin-top: -9.2rem;
+            margin-top: -4.8rem;
             max-width: 38rem;
             text-align: right;
-        }
-
-        &:before {
-            background-image: radial-gradient($royal, rgba(101, 144, 237, 0) 60%);
-            bottom: 0;
-            content: '';
-            display: block;
-            height: 34rem;
-            left: 0;
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: 34rem;
-
-            @include r(600) {
-                height: 37rem;
-                width: 37rem;
-            }
         }
 
         img {
@@ -374,7 +360,10 @@
                 width: 100%;
             }
             @include r(768) {
-                width: 32rem;
+                height: auto;
+                max-width: 32rem;
+                max-height: 32rem;
+                width: auto;
             }
         }
     }
