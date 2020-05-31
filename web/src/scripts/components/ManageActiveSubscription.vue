@@ -94,7 +94,9 @@
     import Spinner from "@components/Spinner.vue";
     import { SnackbarMessage } from "@components/SnackbarContent.vue";
     import { appendQueryParams } from "@shared/util/StringUtil";
+    import Logger from "@shared/Logger"
 
+    const logger = new Logger("ManageActiveSubscription");
     const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
@@ -135,7 +137,7 @@
         watch: {
             member(current: CactusMember | undefined, previous: CactusMember | undefined) {
                 if (current?.subscription?.cancellation?.accessEndsAt !== previous?.subscription?.cancellation?.accessEndsAt ||
-                    current?.subscription?.tier !== previous?.subscription?.tier) {
+                current?.subscription?.tier !== previous?.subscription?.tier) {
                     this.fetchSubscriptionDetails();
                 }
             }
@@ -194,6 +196,12 @@
                 return;
             },
             nextBillAmount(): string | undefined {
+                let applePriceFormatted = this.subscriptionDetails?.upcomingInvoice?.appleProductPrice?.localePriceFormatted
+                if (!isBlank(applePriceFormatted)) {
+                    logger.info("Using apple price of: ", applePriceFormatted)
+                    return applePriceFormatted
+                }
+
                 const amount = this.subscriptionDetails?.upcomingInvoice?.amountCentsUsd;
                 if (!amount) {
                     return;

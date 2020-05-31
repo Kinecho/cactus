@@ -1,7 +1,7 @@
 import {
     AppleCompletePurchaseRequest,
     AppleCompletePurchaseResult,
-    AppleFulfillmentResult,
+    AppleFulfillmentResult, AppleProductPrice,
     AppleServerNotificationBody,
     AppleTransactionInfo,
     AppleVerifiedReceipt,
@@ -30,6 +30,7 @@ import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 import AdminSlackService, { ChannelName } from "@admin/services/AdminSlackService";
 import { formatDate } from "@shared/util/DateUtil";
 import CactusMember from "@shared/models/CactusMember";
+import AdminRevenueCatService from "@admin/services/AdminRevenueCatService";
 
 export default class AppleService {
     protected static sharedInstance: AppleService;
@@ -111,8 +112,17 @@ export default class AppleService {
         const { userId, receipt } = options;
         this.logger.info("Verifying receipt for userId", userId);
         const result: AppleCompletePurchaseResult = { success: false, isValid: false };
+        const { receiptData, localePriceFormatted, price, priceLocale, restored } = receipt;
+        const productPrice: AppleProductPrice = { price, priceLocale, localePriceFormatted };
 
-        const appleResponse = await this.decodeAppleReceipt(receipt.receiptData);
+        this.logger.info("Processing purchase request with options: ", stringifyJSON({
+            localePriceFormatted,
+            priceLocale,
+            price,
+            restored
+        }));
+
+        const appleResponse = await this.decodeAppleReceipt(receiptData);
 
         console.log("Got apple receipt info from ", appleResponse?.environment, `original transaction id = ${ getOriginalTransactionId(appleResponse) }`);
         result.appleReceiptData = appleResponse;
@@ -121,7 +131,7 @@ export default class AppleService {
         // console.log("verify receipt result", stringifyJSON(result, 2));
 
         if (appleResponse) {
-            const fulfilResult = await this.fulfillReceipt({ receipt: appleResponse, userId });
+            const fulfilResult = await this.fulfillReceipt({ receipt: appleResponse, userId, productPrice });
             this.logger.info("Fulfillment response", stringifyJSON(fulfilResult, 2));
             result.fulfillmentResult = fulfilResult;
             result.success = fulfilResult.success;
@@ -144,8 +154,8 @@ export default class AppleService {
         return nextRenewal?.product_id ?? lastInfo?.product_id;
     }
 
-    async fulfillReceipt(options: { userId: string, receipt: AppleVerifiedReceipt }): Promise<AppleFulfillmentResult> {
-        const { userId, receipt } = options;
+    async fulfillReceipt(options: { userId: string, receipt: AppleVerifiedReceipt, productPrice?: AppleProductPrice }): Promise<AppleFulfillmentResult> {
+        const { userId, receipt, productPrice } = options;
         const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
 
         const memberId = member?.id;
@@ -155,6 +165,29 @@ export default class AppleService {
         }
         const result: AppleFulfillmentResult = { success: false };
         const appleProductId = this.getAppleProductIdFromReceipt(receipt);
+
+        const subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByAppleProductId({
+            appleProductId,
+            onlyAvailableForSale: true
+        });
+
+        let currency = "USD";
+        let price: number = ((subscriptionProduct?.priceCentsUsd ?? 0) / 100);
+        if (productPrice?.priceLocale) {
+            currency = productPrice.priceLocale.split("currency=")[1] ?? "USD";
+        }
+        if (productPrice?.price) {
+            price = productPrice.price;
+        }
+
+        //log to RevenueCat
+        await AdminRevenueCatService.shared.updateAppleSubscription({
+            memberId,
+            encodedReceipt: receipt.latest_receipt,
+            price,
+            currency: currency
+        })
+
         const now = Date.now();
         const validTransaction = receipt.latest_receipt_info.find(txn => {
             const expires = optionalStringToNumber(txn.expires_date_ms);
@@ -166,13 +199,13 @@ export default class AppleService {
 
         if (!validTransaction) {
             this.logger.info("No active subscription was found in the apple receipt transaction was found, can not fulfill the purchase");
-            return {success: true, didFulfill: false, message: "No active subscription was found on the apple receipt. All transactions on the apple receipt are expired. Not fulfilling this purchase."};
+            return {
+                success: true,
+                didFulfill: false,
+                message: "No active subscription was found on the apple receipt. All transactions on the apple receipt are expired. Not fulfilling this purchase."
+            };
         }
 
-        const subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByAppleProductId({
-            appleProductId,
-            onlyAvailableForSale: false
-        });
         result.subscriptionProduct = subscriptionProduct;
         const subscriptionProductId = subscriptionProduct?.entryId;
         if (!subscriptionProductId) {
@@ -187,7 +220,8 @@ export default class AppleService {
         const payment = Payment.fromAppleReceipt({
             receipt: receipt,
             memberId: memberId,
-            subscriptionProductId: subscriptionProductId
+            subscriptionProductId: subscriptionProductId,
+            productPrice: productPrice,
         });
         await AdminPaymentService.getSharedInstance().save(payment);
         // this.logger.info("Saved payment for apple receipt", stringifyJSON(payment, 2));

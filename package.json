@@ -51,7 +51,7 @@
     },
     "homepage": "https://github.com/Kinecho/cactus#readme",
     "dependencies": {
-        "firebase": "^7.14.0"
+        "firebase": "^7.14.6"
     },
     "devDependencies": {
         "firebase-tools": "^8.4.0",

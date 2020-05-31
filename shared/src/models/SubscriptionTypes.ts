@@ -1,5 +1,6 @@
 import SubscriptionProduct from "@shared/models/SubscriptionProduct";
 import { BillingPlatform } from "@shared/models/MemberSubscription";
+import { AppleProductPrice } from "@shared/api/AppleApi";
 
 export interface SubscriptionDetails {
     upcomingInvoice?: SubscriptionInvoice,
@@ -27,6 +28,7 @@ export interface SubscriptionInvoice {
     subscriptionStatus: SubscriptionStatus,
     optOutTrialStartsAt_epoch_seconds?: number,
     optOutTrialEndsAt_epoch_seconds?: number,
+    appleProductPrice?: AppleProductPrice,
 }
 
 export enum SubscriptionStatus {

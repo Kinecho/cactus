@@ -15,6 +15,10 @@ export interface AppleCompletePurchaseRequest {
      * FALSE if this was a new purchase.
      */
     restored?: boolean|undefined;
+
+    localePriceFormatted?: string|undefined;
+    price?: number;
+    priceLocale?: string;
 }
 
 export interface AppleFulfillmentResult {
@@ -442,6 +446,11 @@ export interface AppleUnifiedReceipt {
     status: ReceiptStatusCode;
 }
 
+export interface AppleProductPrice {
+    localePriceFormatted?: string|undefined;
+    price?: number;
+    priceLocale?: string;
+}
 
 /**
  * see [Apple Docs](https://developer.apple.com/documentation/appstorereceipts/responsebody)

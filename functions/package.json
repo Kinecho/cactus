@@ -16,7 +16,7 @@
         "logs": "firebase functions:log",
         "ngrok": "ngrok http -subdomain=cactus-api 5000",
         "serve": "npm run config:get && npm run build && IS_EMULATOR=true firebase serve --only functions",
-        "emulate:funcs": "npm run config:get && npm run build && IS_EMULATOR=true GOOGLE_APPLICATION_CREDENTIALS=../applicationCredentials_stage.json firebase emulators:start --only functions --inspect-functions=9229",
+        "emulate:funcs": "npm run config:get && npm run build && IS_EMULATOR=true GOOGLE_APPLICATION_CREDENTIALS=../applicationCredentials_stage.json firebase emulators:start --only functions,pubsub --inspect-functions=9229",
         "_emulate:funcs": "npm run config:get && npm run build && IS_EMULATOR=true firebase emulators:start --only functions --inspect-functions=9229",
         "emulate:funcs:pubsub": "npm run config:get && npm run build && IS_EMULATOR=true firebase emulators:start --only functions,pubsub --inspect-functions=9229",
         "emulate:script": "npm run config:get && npm run build && IS_EMULATOR=true firebase emulators:exec --only functions,pubsub \"../scripts/pubsubTest.sh\" --inspect-functions=9229",
@@ -32,7 +32,7 @@
         "stripe:listen": "stripe listen --forward-to localhost:5000/cactus-app-stage/us-central1/checkout/stripe/webhooks/main"
     },
     "engines": {
-        "node": "8"
+        "node": "10"
     },
     "main": "lib/functions/src/main.js",
     "_moduleAliases": {
@@ -44,7 +44,7 @@
         "@firebase/app": "^0.5.4",
         "@google-cloud/bigquery": "^4.1.4",
         "@google-cloud/language": "^3.8.0",
-        "@google-cloud/pubsub": "^0.30.1",
+        "@google-cloud/pubsub": "^2.0.0",
         "@google-cloud/storage": "^3.0.2",
         "@sendgrid/helpers": "^6.4.0",
         "@sendgrid/inbound-mail-parser": "^6.4.0",
@@ -62,7 +62,7 @@
         "email-addresses": "^3.0.3",
         "express": "^4.17.1",
         "express-formidable": "^1.2.0",
-        "firebase-admin": "^8.10.0",
+        "firebase-admin": "^8.12.1",
         "firebase-functions": "^3.6.0",
         "flamelink": "^1.0.0-alpha.28",
         "fs-extra": "^8.1.0",
@@ -98,9 +98,9 @@
         "@types/multer": "^1.3.7",
         "@types/node": "^12.0.2",
         "@types/uuid": "^3.4.5",
-        "firebase": "^7.14.0",
+        "firebase": "^7.14.6",
         "firebase-functions-test": "^0.1.6",
-        "firebase-tools": "^8.4.0",
+        "firebase-tools": "^8.4.1",
         "jest": "^24.8.0",
         "jest-junit": "^6.4.0",
         "ts-jest": "^24.1.0",
