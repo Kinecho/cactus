@@ -295,17 +295,19 @@ export default class AdminReflectionResponseService {
                             }
 
                             if (wordInsight.word) {
-                                if(wordStats[wordInsight.word]) {
-                                   const aggFrequency = wordStats[wordInsight.word].frequency;
-                                   const aggSalience = wordStats[wordInsight.word].salience;
+                                const normalizedWord = wordInsight.word.toLowerCase();
+                                
+                                if(wordStats[normalizedWord]) {
+                                   const aggFrequency = wordStats[normalizedWord].frequency;
+                                   const aggSalience = wordStats[normalizedWord].salience;
                                    if (aggFrequency) {
-                                       wordStats[wordInsight.word].frequency = aggFrequency + 1;
+                                       wordStats[normalizedWord].frequency = aggFrequency + 1;
                                    }
                                    if (aggSalience && wordInsight.salience) {
-                                       wordStats[wordInsight.word].salience = (aggSalience + wordInsight.salience) / 2;
+                                       wordStats[normalizedWord].salience = (aggSalience + wordInsight.salience) / 2;
                                    }
                                 } else {
-                                   wordStats[wordInsight.word] = {
+                                   wordStats[normalizedWord] = {
                                        word: wordInsight.word,
                                        frequency: 1,
                                        salience: wordInsight.salience || 0
