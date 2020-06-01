@@ -72,5 +72,5 @@ export const Config: {
     version: process.env.__SENTRY_VERSION__ as any,
     androidUserAgent: "CactusAndroid",
     branchLiveKey: process.env.__BRANCH_LIVE_KEY__ as any,
-    revenueCatApiKey: process.env.__REVENUECAT_API_KEY as any,
+    revenueCatApiKey: process.env.__REVENUECAT_API_KEY__ as any,
 };

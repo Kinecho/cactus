@@ -51,7 +51,7 @@ export interface CactusConfig {
             data_log: string,
             ci: string,
             [key: string]: string,
-        }
+        },
         app: {
             app_id: string,
             client_id: string,

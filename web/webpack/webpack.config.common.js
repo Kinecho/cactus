@@ -53,10 +53,10 @@ module.exports = (config) => {
             console.log('JS Entries to use', chalk.cyan(JSON.stringify(jsEntries, null, 2)))
 
             const plugins = [new MiniCssExtractPlugin({
-                filename: isDev ? '[name].css' : '[id].[hash].css',
-                chunkFilename: isDev ? '[id].css' : '[id].[hash].css',
-                // filename: '[name].css',
-                // chunkFilename: '[id].css',
+                // filename: isDev ? '[name].css' : '[id].[hash].css',
+                // chunkFilename: isDev ? '[id].css' : '[id].[hash].css',
+                filename: '[name].css',
+                chunkFilename: '[id].css',
 
             })]
 
@@ -76,8 +76,8 @@ module.exports = (config) => {
                 entry: jsEntries,
                 output: {
                     path: helpers.publicDir,
-                    // filename: isDev ? '[name].js' : '[name].[hash].js',
-                    filename: '[name].js',
+                    filename: isDev ? '[name].js' : '[name].[hash].js',
+                    // filename: '[name].js',
                     publicPath: '/',
                 },
                 stats: 'errors-warnings',
