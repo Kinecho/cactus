@@ -93,7 +93,7 @@
     } from "@shared/util/SubscriptionProductUtil";
     import Spinner from "@components/Spinner.vue";
     import { SnackbarMessage } from "@components/SnackbarContent.vue";
-    import { appendQueryParams } from "@shared/util/StringUtil";
+    import { appendQueryParams, isBlank } from "@shared/util/StringUtil";
     import Logger from "@shared/Logger"
 
     const logger = new Logger("ManageActiveSubscription");
