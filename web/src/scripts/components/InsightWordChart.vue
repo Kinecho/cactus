@@ -60,6 +60,7 @@
                     "#5E5A7C",
                     "#9490B0",
                     "#D3D1E3",
+                    "#D3D1E3",
                 ];
 
                 const color = d3ScaleOrdinal()
@@ -184,8 +185,10 @@
    }
 
    .bubble-chart {
-       margin: 0 auto;
+       margin: 0 auto 1.6rem;
+       max-width: 40rem;
        transition: 1s ease-in-out;
+
        &.isBlurry {
            filter: blur(11px);
            opacity: .8;

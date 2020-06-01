@@ -2,7 +2,7 @@
     <section v-if="isPlusMember && gapAssessmentResults" class="gapContainer borderContainer">
         <div class="flexIt">
             <h2>Happiness Quiz Results</h2>
-            <p class="subtext">The differences in your levels of importance and satisfaction across the five core elements of a balanced life.</p>
+            <p class="subtext">Importance and satisfaction across Cactus's five core elements</p>
             <div class="gapFocus" v-if="memberFocusElement">
                 <p class="statLabel">Focus</p>
                 <h3>{{memberFocusElement}}</h3>
@@ -21,7 +21,7 @@
                     :selected-element="radarChartSelectedElement"
                     @elementSelected="setSelectedElement"
                     :withLabel="showElementLabels"
-                    :showElementImages="false"
+                    :showElementImages="true"
                     :showLegend="false"
             />
             <div class="legend">
@@ -29,7 +29,7 @@
             </div>
         </div>
         <div v-if="selectFocusEnabled" class="gapActions">
-            <p>Tap a cactus to choose a focus.</p>
+            <p>Tap an element to choose a focus.</p>
             <p v-if="currentElementSelection">
                 You've selected: {{currentElementSelection || 'nothing yet'}}
             </p>

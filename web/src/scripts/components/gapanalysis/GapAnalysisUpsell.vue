@@ -1,7 +1,7 @@
 <template>
     <div class="upsellContainer">
         <template v-if="element">
-            <ResultElement :element="element" :selectable="false" :withCircle="true"/>
+            <ResultElement :element="element" :selectable="false"/>
             <p class="subtext">To <strong>get your quiz results</strong>, try Cactus Plus. You'll also get access&nbsp;to:</p>
         </template>
         <p class="subtext" v-else>To <strong>get your quiz results</strong>, try Cactus Plus. You’ll also get access&nbsp;to:</p>

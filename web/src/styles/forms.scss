@@ -62,7 +62,7 @@
 }
 
 @mixin textArea {
-  border: 1px solid $green;
+  border: 1px solid darken($lightestGreen, 5%);
   border-radius: 6px;
   display: block;
   flex-grow: 1;

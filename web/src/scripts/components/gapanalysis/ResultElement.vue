@@ -48,15 +48,15 @@
             }
             switch (this.element) {
                 case Element.meaning:
-                    return "/assets/images/cacti/meaniningGrow.svg";
+                    return "/assets/images/elements/meaning.svg";
                 case Element.emotions:
-                    return "/assets/images/cacti/emotionsGrow.svg";
+                    return "/assets/images/elements/emotions.svg";
                 case Element.relationships:
-                    return "/assets/images/cacti/relationshipsGrow.svg";
+                    return "/assets/images/elements/relationships.svg";
                 case Element.experience:
-                    return "/assets/images/cacti/experienceGrow.svg";
+                    return "/assets/images/elements/experience.svg";
                 case Element.energy:
-                    return "/assets/images/cacti/energy-3.svg";
+                    return "/assets/images/elements/energy.svg";
             }
         }
     }
@@ -82,14 +82,14 @@
                 bottom: 0;
                 box-shadow: 0 0 0 0 rgba(51, 217, 178, 1);
                 content: "";
-                height: 10px;
+                height: 1px;
                 left: 0;
                 margin: auto;
                 position: absolute;
                 right: 0;
                 top: 0;
                 transform: scale(1);
-                width: 10px;
+                width: 1px;
                 z-index: 0;
             }
         }
@@ -165,15 +165,15 @@
     }
 
     h4 {
-        font-size: 1.6rem;
+        font-size: 1.4rem;
         font-weight: normal;
         letter-spacing: 0;
         text-transform: capitalize;
 
         @include r(374) {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: bold;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             text-transform: uppercase;
         }
     }

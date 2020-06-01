@@ -522,7 +522,7 @@
     }
 
     h2 {
-        color: $royal;
+        color: $mediumDolphin;
         font-size: 2.4rem;
         margin-bottom: 2.4rem;
 

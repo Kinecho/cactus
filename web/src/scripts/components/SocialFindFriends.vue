@@ -30,7 +30,7 @@
                     @open="socialSharingOpen"
                     @close="socialSharingClose"
             >
-                <div class="btnContainer">
+                <div class="emailbtnContainer">
                     <network network="email">
                         <button aria-label="Email" class="secondary btn wiggle">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 18">
@@ -62,7 +62,7 @@
             <div class="results" v-if="!importedContacts">
                 <h2>Find Friends</h2>
                 <p class="subtext">Invite your contacts and connect on Cactus.</p>
-                <div class="btnContainer" v-if="!isImporting">
+                <div class="emailbtnContainer" v-if="!isImporting">
                     <button class="secondary wiggle btn cloudsponge-launch" data-cloudsponge-source="gmail">
                         <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                             <path fill="#D44638" d="M22 6.25v12.5c0 .708-.542 1.25-1.25 1.25H19.5V8.656L12 14.042 4.5 8.656V20H3.25C2.54 20 2 19.458 2 18.75V6.25c0-.354.135-.667.36-.89.223-.227.537-.36.89-.36h.417L12 11.042 20.333 5h.417c.354 0 .667.135.89.36.226.223.36.536.36.89z"/>

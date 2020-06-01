@@ -16,20 +16,11 @@
             <button class="primary" @click="reloadPage()">Try Again</button>
         </div>
 
-        <!-- No words written -->
-        <div class="box" v-if="loggedIn && isRevealed && !didWrite">
-            <h4>Today's Insight</h4>
-            <p>You didn't write anything today. That's fine, but Today's Insight only works when you capture your
-                thoughts.<a class="fancyLink" href="#" @click.prevent="trackRevealUrlEvent(pricingPageUrl)">What are
-                    insights?</a></p>
-        </div>
-
         <!-- Basic user -->
-        <div class="box" v-if="loggedIn && didWrite && isBasic">
+        <div class="box" v-if="loggedIn && isBasic">
             <h4>Today's Insight</h4>
             <p>To reveal Today's Insight, upgrade to
-                Cactus&nbsp;Plus.<a class="fancyLink" href="#" @click.prevent="trackRevealUrlEvent(pricingPageUrl)">What
-                    are insights?</a></p>
+                Cactus&nbsp;Plus.<a class="fancyLink" href="#" @click.prevent="trackRevealUrlEvent(pricingPageUrl)">Learn more</a></p>
         </div>
 
         <!-- Plus (Trial) user -->
@@ -95,8 +86,6 @@
                 } else if (this.words?.length <= 0) {
                     return true;
                 } else if (!this.loggedIn) {
-                    return true;
-                } else if (!this.didWrite) {
                     return true;
                 }
                 return false;

@@ -443,6 +443,7 @@
     .coreValuesCard {
         @include shadowbox;
         background-color: darken($royal, 6%);
+        background-image: url(/assets/images/grainy.png);
         color: white;
         margin: 1.6rem auto 2.4rem;
         max-width: fit-content;
@@ -517,6 +518,7 @@
 
     .fancyLink {
         @include fancyLink;
+        font-weight: bold;
     }
 
     .extraPadding {
