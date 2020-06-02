@@ -41,15 +41,12 @@
     import Spinner from "@components/Spinner.vue";
     import Footer from "@components/StandardFooter.vue";
     import VueClipboard from 'vue-clipboard2';
-    import * as SocialSharing from 'vue-social-sharing';
     import SocialFriendList from "@components/SocialFriendList.vue";
     import SocialFriendNotifications from "@components/SocialFriendNotifications.vue";
     import SkeletonEvent from "@components/SocialActivityEventSkeleton.vue";
     import SocialActivityEvent from "@components/SocialActivityEvent.vue"
 
     Vue.use(VueClipboard);
-    Vue.use(SocialSharing);
-
 
     export default Vue.extend({
         components: {
