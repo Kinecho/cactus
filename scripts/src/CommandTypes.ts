@@ -1,12 +1,17 @@
-import {getAdmin, getCactusConfig, Project} from "@scripts/config";
+import { getAdmin, getCactusConfig, Project } from "@scripts/config";
 import * as admin from "firebase-admin";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import chalk from "chalk";
-import {resetConsole} from "@scripts/util/ConsoleUtil";
-import {CactusConfig} from "@shared/CactusConfig";
-import {initializeServices} from "@admin/services/AdminServiceConfig";
-import {setTimestamp} from "@shared/util/FirestoreUtil";
-import {setConfig} from "@admin/config/configService";
+import { resetConsole } from "@scripts/util/ConsoleUtil";
+import { CactusConfig } from "@shared/CactusConfig";
+import { initializeServices } from "@admin/services/AdminServiceConfig";
+import { setTimestamp } from "@shared/util/FirestoreUtil";
+import { setConfig } from "@admin/config/configService";
+import { stringifyJSON } from "@shared/util/ObjectUtil";
+import Logger from "@shared/Logger"
+
+const logger = new Logger("CommandTypes");
+
 
 const prompts = require("prompts");
 
@@ -41,18 +46,18 @@ export abstract class FirebaseCommand implements Command {
 
     async start(): Promise<void> {
         if (this.description) {
-            console.log(`\n${this.description}\n`)
+            console.log(`\n${ this.description }\n`)
         }
 
         if (this.confirmExecution) {
-            const {confirmed} = await prompts([{
+            const { confirmed } = await prompts([{
                 type: "confirm",
                 message: "Do you want to run this command?",
                 name: "confirmed"
             }]);
 
             if (!confirmed) {
-                console.log(`\n${chalk.red("Not running command")}`);
+                console.log(`\n${ chalk.red("Not running command") }`);
                 return;
             }
         }
@@ -70,14 +75,14 @@ export abstract class FirebaseCommand implements Command {
         initializeServices(config, app, admin.firestore.Timestamp, "scripts");
         setTimestamp(admin.firestore.Timestamp);
         setConfig(config);
-        console.group(chalk.yellow(`${this.name} Logs:`));
+        console.group(chalk.yellow(`${ this.name } Logs:`));
 
         await this.run(app, firestoreService, config);
         console.groupEnd();
         process.exit(0);
     }
 
-    protected constructor(opts: FirebaseCommandConstructorArgs = {useAdmin: false, name: "Command"}) {
+    protected constructor(opts: FirebaseCommandConstructorArgs = { useAdmin: false, name: "Command" }) {
         this.useAdmin = opts.useAdmin;
     }
 
@@ -104,7 +109,7 @@ export abstract class FirebaseCommand implements Command {
                     type: "select",
                     name: 'project',
                     message: 'Choose environment',
-                    choices: [{title: "Cactus Stage", value: Project.STAGE}, {
+                    choices: [{ title: "Cactus Stage", value: Project.STAGE }, {
                         title: "Cactus Prod",
                         value: Project.PROD
                     }],
@@ -121,15 +126,18 @@ export abstract class FirebaseCommand implements Command {
             this.project = response.project;
         }
 
-        this.app = await getAdmin(this.project, {useAdmin: this.useAdmin});
+        this.app = await getAdmin(this.project, { useAdmin: this.useAdmin });
 
         if (!this.app) {
             console.error("Failed to get the firebase app");
             process.exit(1);
         }
+        logger.info(`Got app with admin=${ this.useAdmin }: ${ stringifyJSON(this.app.options) }`)
         resetConsole();
+        //@ts-ignore
+        const projectId = this.app.options.projectId ?? this.app.options.sdkConfig.projectId;
         const separator = "====================================================";
-        const message = `${separator}\n Starting ${this.name}\n Using firebase project ${chalk.blue(this.app.options.projectId || "unknown")}\n${separator}`;
+        const message = `${ separator }\n Starting ${ this.name }\n Using firebase project ${ chalk.blue(projectId || "unknown") }\n${ separator }`;
         console.log(chalk.bold.green(message));
 
         // setAdmin(this.app);
