@@ -805,6 +805,13 @@
         .content-container {
             perspective: 1000px;
 
+            @include r(600) {
+                max-width: 48rem;
+            }
+            @include r(768) {
+                max-width: none;
+            }
+
             .progress-wrapper {
                 left: 0;
                 margin: 0 auto;

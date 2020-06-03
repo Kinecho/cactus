@@ -232,17 +232,6 @@ export function logCoreValuesAssessmentCompleted() {
     firebaseAnalytics().logEvent("core_values_completed");
 }
 
-export function findFriendsSocialSharingEvent(options: { type: "open" | "close" | "change", network?: string, url?: string }) {
-    gtag('event', options.type, {
-        event_category: "social_share",
-        event_label: options.network
-    });
-    if (options.type === "open") {
-        firebaseAnalytics().logEvent("share", { content_type: "find_friends", content_id: options.network })
-    }
-
-}
-
 function createGTag() {
     if (!_gtag) {
         window.dataLayer = window.dataLayer || [];
