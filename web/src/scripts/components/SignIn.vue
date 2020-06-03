@@ -1,5 +1,5 @@
 <template>
-    <div class="centered sign-up-component">
+    <div class="sign-up-component">
         <div>
             <h1 v-if="showTitle && !isPendingRedirect">{{_title}}</h1>
             <p class="messageSubtext" v-if="message && !isPendingRedirect">{{message}}</p>
@@ -19,13 +19,11 @@
         <div class="switcher" v-if="!isPendingRedirect && showLoginSwitcher">
             <p v-if="mode === 'LOG_IN'">
                 Don't have an account?
-                <router-link :to="signUpPath">Sign up</router-link>
-                .
+                <router-link :to="signUpPath" :class="[switcherLinkStyle]">Sign up</router-link>
             </p>
             <p v-if="mode === 'SIGN_UP'">
                 Already have an account?
-                <router-link :to="loginPath">Log in</router-link>
-                .
+                <router-link :to="loginPath" :class="[switcherLinkStyle]">Log in</router-link>
             </p>
         </div>
     </div>
@@ -63,7 +61,7 @@
     const copy = locale.copy;
 
     export default Vue.extend({
-        components: {
+            components: {
             MagicLink,
             Spinner,
         },
@@ -88,10 +86,15 @@
                 })
             });
         },
+        beforeDestroy() {
+            logger.info("beforeDestroy: resetting authUI");
+            getAuthUI()?.reset();
+        },
         destroyed() {
             if (this.memberListener) {
                 this.memberListener();
             }
+
             window.clearInterval(this.checkForPendingUIInterval)
         },
         props: {
@@ -108,6 +111,7 @@
             showMagicLink: { type: Boolean, default: true },
             twitterEnabled: { type: Boolean, default: true },
             showLoginSwitcher: {type: Boolean, default: true},
+            switcherLinkStyle: {type: String, default: "light"},
             mode: {type: String as () => "SIGN_UP" | "LOG_IN", required: false, default: "SIGN_UP"}
         },
         data(): {
@@ -186,6 +190,7 @@
                         this.isSigningIn = true;
                         logger.log("Redirect URL is", redirectUrl);
                         logger.log("Need to handle auth redirect");
+                        logger.log("Sign in Operation Type ", authResult.operationType)
                         this.pendingRedirectUrl = redirectUrl;
                         this.authResult = authResult;
                         this.doRedirect = true;
@@ -203,6 +208,7 @@
                 });
 
                 if (ui.isPendingRedirect()) {
+                    logger.info("is pending redirect")
                     this.isPendingRedirect = true;
                     this.checkForPendingUIInterval = window.setInterval(() => {
                         this.checkPendingUI()
@@ -210,7 +216,6 @@
                 } else {
                     ui.reset();
                 }
-
                 ui.start('#signup-app', config);
             }
         },
@@ -292,16 +297,6 @@
         }
     }
 
-    .centered {
-        position: relative;
-        z-index: 1;
-        padding: 6.4rem 2.4rem 0;
-
-        @include r(600) {
-            padding: 12rem 0 0;
-        }
-    }
-
     .divider {
         margin: 0 0 2.4rem;
         opacity: .8;
@@ -310,6 +305,14 @@
     .switcher {
         text-align: center;
         margin-top: 5rem;
+
+        .dark {
+            //color: $darkerGreen
+        }
+
+        .light {
+            color: $white;
+        }
     }
 
 </style>

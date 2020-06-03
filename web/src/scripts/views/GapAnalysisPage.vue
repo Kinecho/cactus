@@ -340,8 +340,17 @@
         min-height: 100vh;
         padding: 0 2.4rem;
 
-        .centered {
+        /*.centered {*/
             text-align: center;
+        /*}*/
+
+        /*position: relative;*/
+        justify-content: center;
+        z-index: 1;
+        /*padding: 6.4rem 2.4rem 0;*/
+
+        @include r(600) {
+            padding: 12rem 0 0;
         }
     }
 

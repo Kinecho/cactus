@@ -3,10 +3,10 @@
         <div class="centered">
             <section class="hero">
                 <div class="heroText">
-                    <h1>What makes you&nbsp;happy?</h1>
-                    <p class="subtext">Questions designed to improve how you think about your work, life, relationships,
-                        and emotions</p>
-                    <router-link :to="assessmentHref" tag="button" class="quizBtn primary">Take the quiz</router-link>
+                    <h1>Boost your mental&nbsp;fitness</h1>
+                    <p class="subtext">Research-backed prompts to increase self-awareness and resilience</p>
+<!--                    <router-link :to="assessmentHref" tag="button" class="quizBtn primary">Take the quiz</router-link>-->
+                    <router-link :to="getStartedPath" tag="button" class="quizBtn primary">Try It Free</router-link>
                 </div>
                 <aside class="graphicContainer">
                     <p class="sampleQuestion">What helps you unwind and recuperate?</p>
@@ -127,7 +127,8 @@
             <section class="email">
                 <h2 class="emailHeader">A reflection a day…</h2>
                 <p class="subtext">Cactus is a different kind of mindfulness.</p>
-                <router-link :to="assessmentHref" tag="button" class="quizBtn primary">Take the quiz</router-link>
+<!--                <router-link :to="assessmentHref" tag="button" class="quizBtn primary">Take the quiz</router-link>-->
+                <router-link :to="getStartedPath" tag="button" class="quizBtn primary">Try It Free</router-link>
             </section>
         </div>
     </div>
@@ -140,9 +141,10 @@
     import PlayStoreIcon from "@components/PlayStoreIcon.vue";
     import Component from "vue-class-component";
     import { PageRoute } from "@shared/PageRoutes";
-
+    import SignIn from "@components/SignIn.vue";
     @Component({
         components: {
+            SignIn,
             AppStoreIcon,
             PlayStoreIcon,
         }
@@ -160,6 +162,10 @@
 
         get assessmentHref(): string {
             return PageRoute.GAP_ANALYSIS;
+        }
+
+        get getStartedPath(): string {
+            return PageRoute.GET_STARTED
         }
 
         get showTryItHeader(): boolean {
@@ -265,9 +271,11 @@
 
         .subtext {
             margin: 0 2.4rem 2.4rem;
+            max-width: 44rem;
 
             @include r(768) {
                 margin: 0 2.4rem 3.2rem 0;
+                max-width: 48rem;
             }
         }
 
