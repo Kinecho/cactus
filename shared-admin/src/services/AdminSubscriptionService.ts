@@ -755,7 +755,7 @@ export default class AdminSubscriptionService {
 
             const subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByAndroidProductId({
                 androidProductId: item.subscriptionProductId,
-                onlyAvailableForSale: true
+                onlyAvailableForSale: false
             });
 
             const subscriptionProductId = subscriptionProduct?.entryId;
@@ -765,7 +765,7 @@ export default class AdminSubscriptionService {
                 await AdminSlackService.getSharedInstance().uploadTextSnippet({
                     channel: ChannelName.cha_ching,
                     message: ":boom: :android: Failed to fulfill Android Checkout",
-                    data: stringifyJSON({ memberId: member.id, email: member.email, params }),
+                    data: stringifyJSON({ memberId: member.id, email: member.email, params, result }, 2),
                     fileType: "json",
                     filename: `failed-purchase-android-${ member.id }.json`,
                 });
