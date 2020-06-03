@@ -7,7 +7,7 @@ import CactusMember from "@shared/models/CactusMember";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
-import AdminSlackService, { AttachmentColor, SlackAttachment } from "@admin/services/AdminSlackService";
+import AdminSlackService, { AttachmentColor, ChannelName, SlackAttachment } from "@admin/services/AdminSlackService";
 import AdminPendingUserService from "@admin/services/AdminPendingUserService";
 import AdminEmailReplyService from "@admin/services/AdminEmailReplyService";
 import AdminSocialInviteService from "@admin/services/AdminSocialInviteService";
@@ -17,6 +17,7 @@ import AdminSocialConnectionService from "@admin/services/AdminSocialConnectionS
 import AdminSocialConnectionRequestService from "@admin/services/AdminSocialConnectionRequestService";
 import MailchimpService from "@admin/services/MailchimpService";
 import Logger from "@shared/Logger";
+import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
 import DeletedUser from "@shared/models/DeletedUser";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
 
@@ -184,7 +185,11 @@ export default class AdminUserService {
         const errors: string[] = [];
         const results: DeleteUserResult = { email, documentsDeleted: {}, success: false };
         const [members, users, firebaseUser] = await Promise.all([
-            await AdminCactusMemberService.getSharedInstance().geAllMemberMatchingEmail(email, { includeDeleted: true }),
+
+            await AdminCactusMemberService.getSharedInstance().findAllMatchingAny({
+                email,
+                userId: userRecord?.uid
+            }, { includeDeleted: true }),
             await AdminUserService.getSharedInstance().getAllMatchingEmail(email, { includeDeleted: true }),
             await new Promise<admin.auth.UserRecord | undefined>(async resolve => {
                 if (userRecord) {
@@ -211,6 +216,14 @@ export default class AdminUserService {
         const userIds = users.map(u => u.id).filter(id => !!id) as string[];
         logger.log("Found member ids", memberIds.join(", "));
         logger.log("Found userIds", userIds.join(", "));
+
+
+        const subscriptionUnsubscribeResults = await Promise.all(members.map(m => {
+            return AdminSubscriptionService.getSharedInstance().unsubscribeMember(m);
+        }));
+
+        logger.info("Subscription unsubscribe results", stringifyJSON(subscriptionUnsubscribeResults, 2));
+
         const generator = (collection: Collection, job: Promise<number>): Promise<DeleteTaskResult> => {
             return new Promise<DeleteTaskResult>(async resolve => {
                 try {
@@ -360,6 +373,14 @@ export default class AdminUserService {
         await AdminSlackService.getSharedInstance().sendDeletionMessage({
             text: "",
             attachments,
+        });
+
+        await AdminSlackService.getSharedInstance().uploadTextSnippet({
+            message: `Subscription Cancellations for deleted user ${email}`,
+            data: stringifyJSON(subscriptionUnsubscribeResults, 2),
+            fileType: "json",
+            filename: `${email}-unsubscribe-results.json`,
+            channel: ChannelName.deletions,
         });
 
         const endTime = new Date().getTime();

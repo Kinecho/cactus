@@ -111,7 +111,8 @@ export interface CactusConfig {
         service_account: ServiceAccountCredentials,
     },
     android_publisher: {
-        service_account: ServiceAccountCredentials
+        service_account: ServiceAccountCredentials,
+        default_package_name: string
     },
     flamelink: {
         service_account: ServiceAccountCredentials,
