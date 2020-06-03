@@ -33,7 +33,6 @@ import { QueryWhereClauses, removeDuplicates } from "@shared/util/FirestoreUtil"
 import { isBlank } from "@shared/util/StringUtil";
 import DocumentReference = admin.firestore.DocumentReference;
 import { CoreValue } from "@shared/models/CoreValueTypes";
-import DocumentReference = admin.firestore.DocumentReference;
 
 const logger = new Logger("AdminCactusMemberService");
 let firestoreService: AdminFirestoreService;
@@ -329,8 +328,8 @@ export default class AdminCactusMemberService {
     }
 
     async findAllMatchingAny(params: { userId?: string | null, email?: string | null }, options: GetOptions = DefaultGetOptions): Promise<CactusMember[]> {
-        let {email} = params;
-        const {userId} = params;
+        let { email } = params;
+        const { userId } = params;
         if (!email && !userId) {
             return [];
         }
@@ -347,7 +346,7 @@ export default class AdminCactusMemberService {
 
         if (!isBlank(userId)) {
             const userIdQuery = firestoreService.getCollectionRef(Collection.members).where(Field.userId, "==", userId);
-            options.queryName = `AdminCactusMemberService.findAllMatchingAny(${userId}`;
+            options.queryName = `AdminCactusMemberService.findAllMatchingAny(${ userId }`;
             const result = await firestoreService.executeQuery(userIdQuery, CactusMember, options);
             members.push(...result.results);
         }
