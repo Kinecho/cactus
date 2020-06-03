@@ -1,9 +1,10 @@
-import Question, { DynamicAssessmentParams, QuestionType } from "@shared/models/CoreValuesQuestion";
+import Question, { DynamicAssessmentParams} from "@shared/models/CoreValuesQuestion";
 import Option from "@shared/models/CoreValuesQuestionOption";
 import { CoreValue } from "@shared/models/CoreValueTypes";
 import CoreValuesAssessmentResponse, { CoreValuesResults } from "@shared/models/CoreValuesAssessmentResponse";
 import CoreValuesQuestionResponse from "@shared/models/CoreValuesQuestionResponse";
 import { isNotNull } from "@shared/util/ObjectUtil";
+import { QuestionType } from "@shared/models/Questions";
 
 export default class CoreValuesAssessment {
     /**
@@ -19,7 +20,7 @@ export default class CoreValuesAssessment {
 
     /**
      * The questions of the assessment.
-     * @type {any[]}
+     * @type {CoreValuesQuestion[]}
      */
     protected questions: Question[] = [];
 

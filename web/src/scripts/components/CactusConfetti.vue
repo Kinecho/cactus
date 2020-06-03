@@ -24,6 +24,11 @@
                 }
             }
         },
+        mounted() {
+            if (this.running) {
+                this.run();
+            }
+        },
         methods: {
             run() {
                 function fire(particleRatio: number, opts: any) {

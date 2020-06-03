@@ -63,7 +63,7 @@
                     of how your values have been at the heart of past decisions and how they will unlock a happier
                     future. Your core values results will guide your Cactus reflections.</p>
 
-                <p>This tool is only available to Cactus Plus members...</p>
+                <p>Get your Core Values today when you try Cactus Plus.</p>
 
                 <button class="primaryBtn" @click="goToPricing">Upgrade</button>
             </template>
@@ -93,6 +93,7 @@
     import { isPremiumTier } from "@shared/models/MemberSubscription";
     import Spinner from "@components/Spinner.vue";
     import { logCoreValuesAssessmentCompleted, logCoreValuesAssessmentStarted, setUserId } from "@web/analytics";
+    import { pushRoute } from "@web/NavigationUtil";
 
     interface CoreValuesData {
         embed: boolean,
@@ -114,41 +115,6 @@
     }
 
     const logger = new Logger("CoreValuesPage");
-
-    const blobs: { imageUrl: string, backgroundColor: string }[] = [
-        {
-            backgroundColor: "#47445E",
-            imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fsized%2F375_9999_99%2F200411.png?alt=media&token=6f2c2d46-d282-4c1a-87de-9259136c79a0"
-        },
-        {
-            backgroundColor: "#47445E",
-            imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200425.png?alt=media&token=ed9a3600-eb1a-493b-ab41-49ac3ae19233"
-        },
-        {
-            backgroundColor: "#6590ED",
-            imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F2004212.png?alt=media&token=b678702d-46b2-44b3-8bd9-1c62e08a27c3"
-        },
-        {
-            backgroundColor: "#294FA3",
-            imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F2003252.png?alt=media&token=a4a38fbd-73ac-478d-a4cf-5d6b1d890140"
-        },
-        {
-            backgroundColor: "#294FA3",
-            imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F2004012.png?alt=media&token=4ee40a05-18a5-455e-95e0-f6f35d8a71f3"
-        },
-        {
-            backgroundColor: "#294FA3",
-            imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F2003253.png?alt=media&token=3b7d1d4a-487b-40d4-a8b0-a454c408555c"
-        },
-        {
-            backgroundColor: "#47445E",
-            imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200331.png?alt=media&token=a91bc22b-ff78-4ef7-ba73-888484c6710f"
-        },
-        {
-            backgroundColor: "#0DADB1",
-            imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200327.png?alt=media&token=ead11877-2088-492d-8b72-da5147c5b9b9"
-        }
-    ]
 
     export default Vue.extend({
         components: {
@@ -239,7 +205,7 @@
                         await this.loadCurrentResults();
 
                     } else {
-                        await this.$router.push(`${ PageRoute.LOGIN }?${ QueryParam.MESSAGE }=${ encodeURIComponent("Please log in to continue to Core Values") }`);
+                        await pushRoute(`${ PageRoute.LOGIN }?${ QueryParam.MESSAGE }=${ encodeURIComponent("Please log in to continue to Core Values") }`)
                     }
                     this.loading = false
                 }
@@ -280,7 +246,7 @@
                     }
 
                 } else {
-                    this.$router.push(PageRoute.PRICING);
+                    pushRoute(`${ PageRoute.PRICING }?${ QueryParam.CORE_VALUES }=true`);
                 }
             },
             async complete(assessmentResponse: CoreValuesAssessmentResponse) {
@@ -338,16 +304,9 @@
                 if (!this.hasValues || !results) {
                     return null
                 }
-                let valueString = results.map(r => r.title).join("");
-                let index = getIntegerFromStringBetween(valueString, blobs.length)
-
                 const forceIndex = getQueryParam(QueryParam.BG_INDEX);
-                if (forceIndex) {
-                    index = Number(forceIndex);
-                }
 
-                return blobs[index];
-
+                return this.assessmentResponse?.getBlob(forceIndex) ?? null
             },
             blobImageUrl(): string | null {
                 return this.valuesResultBlob?.imageUrl ?? null
@@ -398,7 +357,7 @@
 
         &.inProgress {
             &:after {
-                background: url(assets/images/cvBlob.png) no-repeat;
+                background: url(/assets/images/cvBlob.png) no-repeat;
                 content: "";
                 display: block;
                 height: 35rem;
@@ -410,7 +369,7 @@
             }
 
             &:before {
-                background: url(assets/images/pinkVs.svg) no-repeat;
+                background: url(/assets/images/pinkVs.svg) no-repeat;
                 background-size: cover;
                 content: "";
                 display: block;
@@ -484,6 +443,7 @@
     .coreValuesCard {
         @include shadowbox;
         background-color: darken($royal, 6%);
+        background-image: url(/assets/images/grainy.png);
         color: white;
         margin: 1.6rem auto 2.4rem;
         max-width: fit-content;
@@ -558,6 +518,7 @@
 
     .fancyLink {
         @include fancyLink;
+        font-weight: bold;
     }
 
     .extraPadding {

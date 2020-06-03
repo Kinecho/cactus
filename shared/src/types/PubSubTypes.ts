@@ -12,6 +12,7 @@ export enum PubSubTopic {
     sync_trial_members_to_mailchimp = "sync_trial_members_to_mailchimp",
     android_google_play_billing_events = "android_google_play_billing_events",
     process_cancellations = "process_cancellations",
+    revenuecat_events = "revenuecat_events",
 
 }
 

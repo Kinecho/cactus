@@ -1,11 +1,11 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="contactCard" :class="{inviting: readyToInvite}">
-        <div class="avatar" v-if="avatarUrl">
+        <div class="contactAvatar" v-if="avatarUrl">
             <img :src="avatarUrl" alt="Avatar"/>
         </div>
         <div class="contactInfo" v-if="contact">
             <p class="name">{{contact.first_name}} {{contact.last_name}}</p>
-            <p class="email">{{contact.email}}</p>
+            <p class="contactEmail">{{contact.email}}</p>
             <div class="invite" v-if="readyToInvite && !sendingInvite && !error">
                 <textarea placeholder="Include an optional note..." v-model="message"/>
                 <button class="primary" @click="sendInvite">Send Invite</button>
@@ -22,7 +22,7 @@
             Sending...
         </div>
         <div class="status" v-if="wasInvited">
-            <img class="statusIcon" src="assets/images/check.svg" alt=""/>
+            <img class="statusIcon" src="/assets/images/check.svg" alt=""/>
             Invited
         </div>
         <div class="status error" v-if="error">
@@ -35,11 +35,11 @@
             You!
         </div>
         <div class="status" v-if="wasFriended || isPendingFriend">
-            <img class="statusIcon" src="assets/images/clock.svg" alt=""/>
+            <img class="statusIcon" src="/assets/images/clock.svg" alt=""/>
             Requested
         </div>
         <div class="status" v-if="isFriend">
-            <img class="statusIcon" src="assets/images/check.svg" alt=""/>
+            <img class="statusIcon" src="/assets/images/check.svg" alt=""/>
             Friends
         </div>
         <input-name-modal
@@ -50,14 +50,14 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {EmailContact} from "@shared/types/EmailContactTypes";
-    import {notifyFriendRequest, sendInvite} from '@web/social';
-    import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
+    import { EmailContact } from "@shared/types/EmailContactTypes";
+    import { notifyFriendRequest, sendInvite } from '@web/social';
+    import { getIntegerFromStringBetween } from '@shared/util/StringUtil';
     import InputNameModal from "@components/InputNameModal.vue";
     import CactusMember from "@shared/models/CactusMember";
     import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
     import SocialConnectionRequest from "@shared/models/SocialConnectionRequest"
-    import {ImportedContact} from "@shared/types/ImportedContactTypes";
+    import { ImportedContact } from "@shared/types/ImportedContactTypes";
     import Logger from "@shared/Logger";
 
     const logger = new Logger("SocialImportedContact.vue");
@@ -180,20 +180,20 @@
             },
             canAddFriend(): boolean {
                 return (this.isExistingMember &&
-                    !this.isLoading &&
-                    !this.sendingInvite &&
-                    !this.error &&
-                    !this.wasFriended &&
-                    !this.isFriend &&
-                    !this.isPendingFriend &&
-                    !this.isYou);
+                !this.isLoading &&
+                !this.sendingInvite &&
+                !this.error &&
+                !this.wasFriended &&
+                !this.isFriend &&
+                !this.isPendingFriend &&
+                !this.isYou);
             },
             canInviteContact(): boolean {
                 return (!this.isLoading &&
-                    !this.readyToInvite &&
-                    !this.wasInvited &&
-                    !this.isExistingMember &&
-                    !this.isYou);
+                !this.readyToInvite &&
+                !this.wasInvited &&
+                !this.isExistingMember &&
+                !this.isYou);
             },
             isYou(): boolean {
                 return ((this.contact && this.contact.email == this.member?.email) ? true : false);
@@ -211,16 +211,17 @@
 </script>
 
 <style scoped lang="scss">
-    @import "~styles/common";
-    @import "~styles/mixins";
-    @import "~styles/transitions";
-    @import "~styles/social";
+    @import "common";
+    @import "mixins";
+    @import "transitions";
+    @import "social";
 
     .contactCard {
         grid-template-columns: 5.2rem 1fr max-content;
-
+        grid-template-rows: auto;
         @include r(600) {
             grid-template-columns: 5.2rem 1fr 12rem;
+            grid-template-rows: auto;
         }
 
         &.inviting {

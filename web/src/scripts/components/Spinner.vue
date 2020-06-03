@@ -14,11 +14,12 @@
 
 <script lang="ts">
     import Vue from "vue";
+    import { SpinnerColor } from "@components/SpinnerTypes";
 
     export default Vue.extend({
         props: {
             message: String,
-            color: {type: String as () => "light" | "dark", default: "dark"},
+            color: {type: String as () => SpinnerColor, default: "dark"},
             delay: {
                 type: Number,
                 default: 0,

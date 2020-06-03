@@ -24,6 +24,7 @@ export enum Collection {
     dataExports = "dataExports",
     coreValuesAssessmentResponses = "coreValuesAssessmentResponses",
     deletedUsers = "deletedUsers",
+    gapAnalysisAssessmentResults = "gapAnalysisAssessmentResults",
 }
 
 export interface FirestoreIdentifiable {

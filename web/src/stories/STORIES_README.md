@@ -1,0 +1,1 @@
+you may place Storybook stories in this directory, however it is preferred to put the stories next to the components they are testing.

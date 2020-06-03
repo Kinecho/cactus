@@ -23,7 +23,9 @@
                     class="planButton" :id="product.entryId"
                     :aria-controls="product.displayName"
                     @click="selectedProduct = product"
-                    :class="{selected: isSelected(product)}">
+                    :class="{selected: isSelected(product)}"
+                    :style="planButtonStyles"
+            >
                 <div class="cadence">{{copy.checkout.BILLING_PERIOD[product.billingPeriod]}}</div>
                 <div class="planPrice">{{formatPrice(product.priceCentsUsd)}}</div>
                 <div class="payment-period-per">per {{copy.checkout.BILLING_PERIOD_PER[product.billingPeriod]}}</div>
@@ -74,6 +76,7 @@
     import CactusMember from "@shared/models/CactusMember";
     import Logger from "@shared/Logger";
     import { stringifyJSON } from "@shared/util/ObjectUtil";
+    import { pushRoute } from "@web/NavigationUtil";
 
     const copy = CopyService.getSharedInstance().copy;
     const logger = new Logger("SubscriptionProductGroupCard");
@@ -92,7 +95,9 @@
             learnMoreLinks: { type: Boolean, default: false },
             isRestoringPurchases: { type: Boolean, default: false },
             showFooter: { type: Boolean, default: true },
-            startTrial: { type: Boolean, default: false }
+            startTrial: { type: Boolean, default: false },
+            checkoutSuccessUrl: { type: String, required: false },
+            checkoutCancelUrl: { type: String, required: false },
         },
         data(): {
             selectedProduct: SubscriptionProduct,
@@ -114,6 +119,15 @@
             this.selectedProduct = this.getSelectedProduct();
         },
         computed: {
+            planButtonStyles(): any {
+                let numProducts = this.productGroup.products.length ?? 0;
+                if (numProducts === 0) {
+                    numProducts = 1;
+                }
+                return {
+                    width: `${(100 / numProducts) - 1}%`,
+                }
+            },
             tierName(): string | undefined {
                 return subscriptionTierDisplayName(this.productGroup.tier);
             },
@@ -213,11 +227,12 @@
                 const product = this.selectedProduct;
 
                 if (this.isCurrentTier && !this.isOptInTrialing) {
-                    this.goToAccount()
+                    await this.goToAccount()
+                    return;
                 }
 
                 if (product.isFree && !this.signedIn) {
-                    this.goToSignup();
+                    await this.goToSignup();
                     return;
                 }
 
@@ -228,7 +243,15 @@
                     this.isProcessing = false;
                     return;
                 }
-                const checkoutResult = await startCheckout({ subscriptionProductId, subscriptionProduct: product });
+
+                const successUrl = this.checkoutSuccessUrl;
+                const cancelUrl = this.checkoutCancelUrl;
+                const checkoutResult = await startCheckout({
+                    subscriptionProductId,
+                    subscriptionProduct: product,
+                    stripeSuccessUrl: successUrl,
+                    stripeCancelUrl: cancelUrl
+                });
                 if (!checkoutResult.success && !checkoutResult.canceled) {
                     logger.error("failed to load checkout", stringifyJSON(checkoutResult, 2));
                     this.checkoutError = "Unable to load checkout. Please try again later";
@@ -238,13 +261,13 @@
                     this.checkoutError = undefined;
                 }
             },
-            goToAccount() {
+            async goToAccount() {
                 this.isProcessing = false;
-                this.$router.push(PageRoute.ACCOUNT);
+                await pushRoute(PageRoute.ACCOUNT)
             },
-            goToSignup() {
+            async goToSignup() {
                 this.isProcessing = false;
-                this.$router.push(PageRoute.SIGNUP);
+                await pushRoute(PageRoute.SIGNUP);
             },
         }
     })
@@ -262,7 +285,7 @@
         text-align: left;
 
         &:first-child:before {
-            background: url(assets/images/crosses.svg) 0 0/228px 216px no-repeat;
+            background: url(/assets/images/crosses.svg) 0 0/228px 216px no-repeat;
             bottom: -4rem;
             content: "";
             display: block;
@@ -296,7 +319,7 @@
         }
 
         &.plus-panel {
-            background: $dolphin url(assets/images/grainy.png) repeat;
+            background: $dolphin url(/assets/images/grainy.png) repeat;
             color: $white;
         }
 
@@ -305,7 +328,7 @@
             color: $darkestGreen;
 
             &.tabsOnMobile {
-                background: $dolphin url(assets/images/grainy.png) repeat;
+                background: $dolphin url(/assets/images/grainy.png) repeat;
                 color: $white;
 
                 @include r(768) {
@@ -369,7 +392,7 @@
     }
 
     .actions .error {
-        background: lighten($red, 20%) url(assets/images/sadCactusPatternWhiteTransparent.svg);
+        background: lighten($red, 20%) url(/assets/images/sadCactusPatternWhiteTransparent.svg);
         border-radius: 0.8rem;
         color: $dolphin;
         margin-bottom: 1.6rem;
@@ -395,7 +418,7 @@
         font-size: 1.6rem;
         padding: 0.8rem;
         text-align: center;
-        width: 32%;
+        width: 49%;
 
         &.selected {
             border-color: $green;
@@ -449,7 +472,7 @@
             }
 
             &.heart:before {
-                background: url(assets/icons/heart.svg) no-repeat;
+                background: url(/assets/icons/heart.svg) no-repeat;
                 height: 1.4rem;
                 width: 1.6rem;
             }

@@ -10,7 +10,7 @@ executors:
   cactus-web:
     working_directory: ~/project
     docker:
-      - image: circleci/node:8.15.0-browsers
+      - image: circleci/node:10.18.1-browsers
 aliases:
   ## Module Names
   - &root-module ""
@@ -27,6 +27,7 @@ aliases:
   - &func-auth "functions:authTriggers"
   - &func-db1 "functions:db1"
   - &func-db2 "functions:db2"
+  - &func-db3 "functions:db3"
   - &func-apis1 "functions:test,functions:mailchimp,functions:notificationPreferences"
   - &func-apis2 "functions:slack,functions:flamelink,functions:inbound,functions:apple"
   - &func-apis3 "functions:checkout,functions:signup,functions:social,functions:user"
@@ -39,6 +40,7 @@ aliases:
   - &auth-1-stage "Funcs: Auth 1 Stage"
   - &db-1-stage "Funcs: Firestore Triggers 1 Stage"
   - &db-2-stage "Funcs: Firestore Triggers 2 Stage"
+  - &db-3-stage "Funcs: Firestore Triggers 3 Stage"
   - &pubsub-1-stage "Funcs: PubSub 1 Stage"
   - &pubsub-2-stage "Funcs: PubSub 2 Stage"
   - &pubsub-3-stage "Funcs: PubSub 3 Stage"
@@ -49,6 +51,7 @@ aliases:
   - &auth-1-prod "Funcs: Auth 1 Prod"
   - &db-1-prod "Funcs: Firestore Triggers 1 Prod"
   - &db-2-prod "Funcs: Firestore Triggers 2 Prod"
+  - &db-3-prod "Funcs: Firestore Triggers 3 Prod"
   - &pubsub-1-prod "Funcs: PubSub 1 Prod"
   - &pubsub-2-prod "Funcs: PubSub 2 Prod"
   - &pubsub-3-prod "Funcs: PubSub 3 Prod"
@@ -118,18 +121,18 @@ commands:
             - restore_cache:
                 name: "Restore << parameters.module >> Cache"
                 keys:
-                  - v10-<< parameters.module >>-dependency-{{ .Branch }}-{{ checksum "<< parameters.module >>/package.json" }}
-                  - v10-<< parameters.module >>-dependency-{{ .Branch }}-
-                  - v10-<< parameters.module >>-dependency-
+                  - v12-<< parameters.module >>-dependency-{{ .Branch }}-{{ checksum "<< parameters.module >>/package.json" }}
+                  - v12-<< parameters.module >>-dependency-{{ .Branch }}-
+                  - v12-<< parameters.module >>-dependency-
       - unless:
           condition: << parameters.module >>
           steps:
             - restore_cache:
                 name: "Save Root Dependencies to Cache"
                 keys:
-                  - v10-root-dependency-{{ .Branch }}-{{ checksum "package.json" }}
-                  - v10-root-dependency-{{ .Branch }}-
-                  - v10-root-dependency-
+                  - v12-root-dependency-{{ .Branch }}-{{ checksum "package.json" }}
+                  - v12-root-dependency-{{ .Branch }}-
+                  - v12-root-dependency-
   restore-all:
     steps:
       - restore-module:
@@ -163,7 +166,7 @@ commands:
                 name: "Save << parameters.module >> Dependencies to Cache"
                 paths:
                   - << parameters.module >>/node_modules
-                key: v10-<< parameters.module >>-dependency-{{ .Branch }}-{{ checksum "<< parameters.module >>/package.json" }}
+                key: v12-<< parameters.module >>-dependency-{{ .Branch }}-{{ checksum "<< parameters.module >>/package.json" }}
       - unless:
           condition: << parameters.module >>
           steps:
@@ -172,13 +175,17 @@ commands:
                 name: "Save Root Dependencies to Cache"
                 paths:
                   - node_modules
-                key: v10-root-dependency-{{ .Branch }}-{{ checksum "package.json" }}
+                key: v12-root-dependency-{{ .Branch }}-{{ checksum "package.json" }}
   notify-on-failure:
     parameters:
       workflow_name:
         type: string
         default: "<not set>"
         description: "The message to send to slack"
+      env:
+        type: string
+        default: ""
+        description: "The firebase environment"
     steps:
       - get-repo-link
       - slack/status:
@@ -186,7 +193,7 @@ commands:
           fail_only: true
           include_project_field: false
           include_job_number_field: false
-          failure_message: ":boom: *$CIRCLE_JOB* job failed in a <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| CI workflow >\nBranch \\`<https://github.com/Kinecho/cactus-ios/compare/${CIRCLE_BRANCH}|${CIRCLE_BRANCH}>\\`"
+          failure_message: ":boom: << parameters.env >> *$CIRCLE_JOB* job failed in a <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| CI workflow >\nBranch \\`<https://github.com/Kinecho/cactus-ios/compare/${CIRCLE_BRANCH}|${CIRCLE_BRANCH}>\\`"
 
 jobs:
   get-changes:
@@ -229,10 +236,12 @@ jobs:
               echo "Starting firebase deploy for --only ${MODULES}"
               firebase deploy --only $MODULES -P stage
             fi
-      - notify-on-failure
+      - notify-on-failure:
+          env: "stage"
+
   install-all:
     executor: cactus-web
-    resource_class: small
+    resource_class: medium
     steps:
       - checkout
       - install-module:
@@ -436,6 +445,10 @@ jobs:
           group_name: "Firestore DB 2 Triggers"
       - firebase-deploy-only:
           project: << parameters.project >>
+          modules: *func-db3
+          group_name: "Firestore DB 3 Triggers"
+      - firebase-deploy-only:
+          project: << parameters.project >>
           modules: *func-auth
           group_name: "Auth Triggers"
       - firebase-deploy-only:
@@ -477,7 +490,8 @@ jobs:
             npx firebase use << parameters.project >>
             echo "Starting firebase deploy for << parameters.modules >> on project << parameters.project >>"
             npx firebase deploy --only << parameters.modules >> -P << parameters.project >> -f
-      - notify-on-failure
+      - notify-on-failure:
+              env: << parameters.project >>
 
   firebase-deploy-all:
     description: "Deploy selected modules to the selected project"
@@ -505,7 +519,8 @@ jobs:
             npx firebase use << parameters.project >>
             echo "Starting firebase deploy for << parameters.modules >> on project << parameters.project >>"
             npx firebase deploy -P << parameters.project >> -f
-      - notify-on-failure
+      - notify-on-failure:
+          env: << parameters.project >>
   notify-workflow-finished:
     description: "Notify slack that a workflow has finished and provide a link"
     parameters:
@@ -702,55 +717,61 @@ workflows:
           requires:
             - *stage_all_approval_name
       - firebase-deploy-some:
-          name: &api-1 "Funcs - Api 1"
+          name: &api-1 "Funcs - Api 1 (Stage)"
           project: "stage"
           modules: *func-apis1
           requires:
             - *notify-all-started
       - firebase-deploy-some:
-          name: &api-2 "Funcs - Api 2"
+          name: &api-2 "Funcs - Api 2 (Stage)"
           project: "stage"
           modules: *func-apis2
           requires:
             - *notify-all-started
       - firebase-deploy-some:
-          name: &api-3 "Funcs - Api 3"
+          name: &api-3 "Funcs - Api 3 (Stage)"
           project: "stage"
           modules: *func-apis3
           requires:
             - *notify-all-started
       - firebase-deploy-some:
-          name: &auth-1 "Funcs - Auth 3"
+          name: &auth-1 "Funcs - Auth 3 (Stage)"
           project: "stage"
           modules: *func-auth
           requires:
             - *notify-all-started
       - firebase-deploy-some:
-          name: &db-1 "Funcs - DB 1"
+          name: &db-1 "Funcs - DB 1 (Stage)"
           project: "stage"
           modules: *func-db1
           requires:
             - *notify-all-started
       - firebase-deploy-some:
-          name: &db-2 "Funcs - DB 2"
+          name: &db-2 "Funcs - DB 2 (Stage)"
           project: "stage"
           modules: *func-db2
           requires:
             - *notify-all-started
       - firebase-deploy-some:
-          name: &pubsub-1 "Funcs - PubSub 1"
+          name: &db-3 "Funcs - DB 3 (Stage)"
+          project: "stage"
+          modules: *func-db3
+          requires:
+            - *notify-all-started
+      - firebase-deploy-some:
+          name: &pubsub-1 "Funcs - PubSub 1 (Stage)"
           project: "stage"
           modules: *func-pubsub1
           requires:
             - *notify-all-started
       - firebase-deploy-some:
-          name: &pubsub-2 "Funcs - PubSub 2"
+          name: &pubsub-2 "Funcs - PubSub 2 (Stage)"
           project: "stage"
           modules: *func-pubsub2
           requires:
             - *notify-all-started
       - firebase-deploy-some:
-          name: &pubsub-3 "Funcs - PubSub 3"
+          name: &pubsub-3 "Funcs - PubSub 3 (Stage)"
           project: "stage"
           modules: *func-pubsub3
           requires:
@@ -766,6 +787,7 @@ workflows:
             - *auth-1
             - *db-1
             - *db-2
+            - *db-3
             - *pubsub-1
             - *pubsub-2
             - *pubsub-3
@@ -851,6 +873,12 @@ workflows:
           requires:
             - *unit_tests_passed_notification
       - firebase-deploy-some:
+          name: *db-3-stage
+          project: "stage"
+          modules: *func-db3
+          requires:
+            - *unit_tests_passed_notification
+      - firebase-deploy-some:
           name: *pubsub-1-stage
           project: "stage"
           modules: *func-pubsub1
@@ -879,6 +907,7 @@ workflows:
             - *auth-1-stage
             - *db-1-stage
             - *db-2-stage
+            - *db-3-stage
             - *pubsub-1-stage
             - *pubsub-2-stage
             - *pubsub-3-stage
@@ -947,6 +976,12 @@ workflows:
           requires:
             - *notify_promoted
       - firebase-deploy-some:
+          name: *db-3-prod
+          project: "prod"
+          modules: *func-db3
+          requires:
+            - *notify_promoted
+      - firebase-deploy-some:
           name: *pubsub-1-prod
           project: "prod"
           modules: *func-pubsub1
@@ -975,6 +1010,7 @@ workflows:
             - *auth-1-prod
             - *db-1-prod
             - *db-2-prod
+            - *db-3-prod
             - *pubsub-1-prod
             - *pubsub-2-prod
             - *pubsub-3-prod

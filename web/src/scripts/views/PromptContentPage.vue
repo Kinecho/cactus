@@ -7,6 +7,10 @@
     import { PageRoute } from "@shared/PageRoutes";
     import Prompt from "@components/PromptContent.vue"
     import Component from "vue-class-component";
+    import Logger from "@shared/Logger"
+    import { pushRoute } from "@web/NavigationUtil";
+
+    const logger = new Logger("PromptContentPage");
 
     @Component({
         components: {
@@ -14,8 +18,8 @@
         }
     })
     export default class PromptContentPage extends Vue {
-        redirectToJournal() {
-            this.$router.push({ path: PageRoute.JOURNAL_HOME });
+        async redirectToJournal() {
+            await pushRoute({ path: PageRoute.JOURNAL_HOME });
         }
     }
 </script>

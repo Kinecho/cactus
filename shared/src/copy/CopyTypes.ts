@@ -18,6 +18,7 @@ export interface PromptCopy {
     CELEBRATIONS: string[],
     REFLECTIONS: string,
     SECONDS: string,
+    SECOND: string,
     MINUTES: string,
     DAY_STREAK: string,
     WEEK_STREAK: string,
@@ -98,6 +99,7 @@ export interface NavigationCopy {
     SOCIAL: string,
     JOURNAL: string,
     ACTIVITY: string,
+    INSIGHTS: string,
     HOME: string
 }
 

@@ -33,6 +33,7 @@ import { QueryWhereClauses, removeDuplicates } from "@shared/util/FirestoreUtil"
 import { isBlank } from "@shared/util/StringUtil";
 import DocumentReference = admin.firestore.DocumentReference;
 import { CoreValue } from "@shared/models/CoreValueTypes";
+import DocumentReference = admin.firestore.DocumentReference;
 
 const logger = new Logger("AdminCactusMemberService");
 let firestoreService: AdminFirestoreService;
@@ -113,7 +114,6 @@ export default class AdminCactusMemberService {
                 reflections: stats
             }
         }
-        ;
 
         if (wordCloud) {
             data.wordCloud = wordCloud;
@@ -493,6 +493,30 @@ export default class AdminCactusMemberService {
             logger.error(error);
             return [];
         }
+    }
+
+    /**
+     * Get members where the opt-out trial started after the provided Date.
+     * This is typically used to look at members for the previous day in the Slack job.
+     * @param {Date} date - the date to start the query.
+     * @return {Promise<CactusMember[]>}
+     */
+    async getOptOutTrialStartedSince(date: Date): Promise<CactusMember[]> {
+        const ts = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(date));
+        const query = this.getCollectionRef().where(CactusMember.Field.subscriptionOptOutTrialStartedAt, ">=", ts);
+        return (await firestoreService.executeQuery(query, CactusMember)).results;
+    }
+
+    /**
+     * Get members where the cancellation.userInitiatedAt started after the provided Date.
+     * This is typically used to look at members for the previous day in the Slack job.
+     * @param {Date} date - the date to start the query.
+     * @return {Promise<CactusMember[]>}
+     */
+    async getCancellationsInitiatedSince(date: Date): Promise<CactusMember[]> {
+        const ts = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(date));
+        const query = this.getCollectionRef().where(CactusMember.Field.subscriptionCancellationInitiatedAt, ">=", ts);
+        return (await firestoreService.executeQuery(query, CactusMember)).results;
     }
 
     async getMembersForUTCSendPromptTime(sendTime: PromptSendTime, options?: GetOptions): Promise<CactusMember[]> {

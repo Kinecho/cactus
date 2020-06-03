@@ -17,7 +17,6 @@ export default class AppSettingsService {
                     this.logger.error("Failed to get app settings", error);
                 } else if (settings) {
                     this.currentSettings = settings;
-                    this.logger.info("current settings", settings);
                 } else {
                     this.logger.warn("No settings were returned from the settings observer");
                 }

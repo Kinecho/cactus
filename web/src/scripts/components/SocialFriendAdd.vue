@@ -1,7 +1,7 @@
 <template>
     <div class="contactCard" v-if="!sent">
         <div class="avatar">
-            <img :src="'assets/images/avatars/avatar' + avatarNumber(name) + '.png'" alt="User avatar"/>
+            <img :src="'/assets/images/avatars/avatar' + avatarNumber(name) + '.png'" alt="User avatar"/>
         </div>
         <div class="contactInfo">
             <p class="name" v-if="name">{{name}}</p>
@@ -84,5 +84,9 @@
     @import "common";
     @import "mixins";
     @import "variables";
+
+    .contactCard {
+        text-align: start;
+    }
 
 </style>

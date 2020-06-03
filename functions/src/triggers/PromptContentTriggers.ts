@@ -1,22 +1,27 @@
 import * as functions from "firebase-functions";
-import {Collection} from "@shared/FirestoreBaseModels";
-import PromptContent, {ContentStatus} from "@shared/models/PromptContent";
+import { Collection } from "@shared/FirestoreBaseModels";
+import PromptContent, { ContentStatus } from "@shared/models/PromptContent";
 import PromptContentScheduler from "@admin/PromptContentScheduler";
-import {fromFlamelinkData} from "@shared/util/FlamelinkUtils";
-import {stringifyJSON} from "@shared/util/ObjectUtil";
-import {getConfig} from "@admin/config/configService";
-import AdminSlackService from "@admin/services/AdminSlackService";
-import {buildPromptContentURL} from "@admin/util/StringUtil";
+import { fromFlamelinkData } from "@shared/util/FlamelinkUtils";
+import { stringifyJSON } from "@shared/util/ObjectUtil";
+import { getConfig } from "@admin/config/configService";
+import AdminSlackService, { ChannelName } from "@admin/services/AdminSlackService";
+import { buildPromptContentURL } from "@admin/util/StringUtil";
 import Logger from "@shared/Logger";
 
 const logger = new Logger("PromptContentTriggers");
 
 export const onContentPublished = functions.firestore
-    .document(`${Collection.flamelink_content}/{documentId}`)
-    .onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext): Promise<void> => {
+.document(`${ Collection.flamelink_content }/{documentId}`)
+.onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext): Promise<void> => {
+    try {
         const beforeStatus = change.before.get(PromptContent.Fields.contentStatus);
         const afterStatus = change.after.get(PromptContent.Fields.contentStatus);
-
+        const schema = change.after.get("_fl_meta_.schema");
+        if (schema !== "promptContent") {
+            logger.info(`"Not processing content with schema \"${ schema }\""`);
+            return;
+        }
         if (afterStatus !== ContentStatus.submitted) {
             logger.log("Content is not of status \"submitted\", not processing");
             return;
@@ -33,16 +38,19 @@ export const onContentPublished = functions.firestore
             logger.error("Unable to parse prompt content from firestore data", change.after.data());
         }
         const config = getConfig();
-        const job = new PromptContentScheduler({promptContent, config: config});
+        const job = new PromptContentScheduler({ promptContent, config: config });
 
         const result = await job.run();
         logger.log("result is ", stringifyJSON(result));
 
         if (result.promptContent.contentStatus === ContentStatus.published) {
             const link = buildPromptContentURL(promptContent);
-            await AdminSlackService.getSharedInstance().sendDataLogMessage(`Prompt content has been scheduled ${promptContent.entryId} - ${promptContent.scheduledSendAt?.toLocaleDateString()}. <See it here|${link}>`)
+            await AdminSlackService.getSharedInstance().sendDataLogMessage(`Prompt content has been scheduled ${ promptContent.entryId } - ${ promptContent.scheduledSendAt?.toLocaleDateString() }. <See it here|${ link }>`)
         }
 
         return;
-    });
+    } catch (error) {
+        await AdminSlackService.getSharedInstance().sendMessage(ChannelName.engineering, `Something has gone wrong while processing flamelink content via the webhook:\n\n ${ error.message || error }`);
+    }
+});
 

@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions"
-import {Environment, getEnvironment} from "@admin/config/environmentManager";
-import {CactusConfig} from "@shared/CactusConfig";
+import { Environment, getEnvironment } from "@admin/config/environmentManager";
+import { CactusConfig } from "@shared/CactusConfig";
 
 let _config: CactusConfig;
 let _testConfigOverrides: Partial<CactusConfig> = {};
@@ -25,13 +25,13 @@ export function getConfig(): CactusConfig {
 }
 
 export function getHostname(config: CactusConfig = _config): string {
-    return `${config.web.protocol}://${config.web.domain}`
+    return `${ config.web.protocol }://${ config.web.domain }`
 }
 
 export function buildConfig(configInput: CactusConfig = functions.config() as CactusConfig): CactusConfig {
     // const functionsConfig = functions.config() as CactusConfig;
 
-    const config = {...configInput};
+    const config = { ...configInput };
     config.app.serverName = process.env.FUNCTION_NAME || undefined;
     config.isEmulator = process.env.IS_EMULATOR === "true";
     if (config.isEmulator) {
@@ -235,9 +235,14 @@ const defaultTestConfig: CactusConfig = {
             auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
             client_x509_cert_url: "https://www.googleapis.com/robot/v1/metadata/x509/firestore-backups%40cactus-app-stage.iam.gserviceaccount.com"
         },
+    },
+    revenuecat: {
+        public_key: "public_key",
+        secret_key: "secret_key",
+        webhook_bearer_token: "test_bearer_token",
     }
 };
 
 function buildMockConfig(): CactusConfig {
-    return {...defaultTestConfig, ..._testConfigOverrides};
+    return { ...defaultTestConfig, ..._testConfigOverrides };
 }

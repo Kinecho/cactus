@@ -47,7 +47,7 @@
         }
 
         &.upgrade {
-            background: $royal url(assets/images/plusBg.svg) center top/140vw auto no-repeat;
+            background: $royal url(/assets/images/plusBg.svg) center top/140vw auto no-repeat;
 
             @include r(960) {
                 background-size: 97% auto;
@@ -59,7 +59,7 @@
         }
 
         &.basic {
-            background: $royal url(assets/images/plusBg.svg) center top/130% auto no-repeat;
+            background: $royal url(/assets/images/plusBg.svg) center top/130% auto no-repeat;
             width: 100%;
 
             @include r(960) {

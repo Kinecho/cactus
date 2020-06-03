@@ -18,22 +18,6 @@
                 <spinner message="Loading..." :delay="1000"/>
             </div>
             <section class="content-container centered" v-else-if="!loading && promptContent && responsesLoaded">
-                <div class="shareContainer" v-if="!completed">
-                    <button aria-label="Share Today's Prompt" class="share tertiary wiggle" @click="showSharing = true" v-show="!showSharing && sharePromptEnabled">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 22" aria-hidden="true">
-                            <path fill="#29A389" d="M10 3.414V14a1 1 0 0 1-2 0V3.414L5.707 5.707a1 1 0 0 1-1.414-1.414l4-4a1 1 0 0 1 1.414 0l4 4a1 1 0 1 1-1.414 1.414L10 3.414zM0 11a1 1 0 0 1 2 0v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8a1 1 0 0 1 2 0v8a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3v-8z"/>
-                        </svg>
-                        <span class="buttonText">Share Today's Prompt</span>
-                    </button>
-                    <button aria-label="Back" class="share tertiary back" @click="showSharing = false" v-show="showSharing">
-                        <div class="arrow-wrapper">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
-                                <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
-                            </svg>
-                        </div>
-                        <span class="buttonText">Back</span>
-                    </button>
-                </div>
                 <div class="progress-wrapper" v-if="!completed && !showSharing && !isShareNote">
                     <div class="progress">
                         <span v-for="(content, index) in promptContent.content" :class="['segment', {complete: index <= activeIndex}]"></span>
@@ -44,22 +28,24 @@
                     <div class="front flip-card" v-touch:tap="handleTap">
                         <transition :name="transitionName" mode="out-in" v-if="!completed">
                             <content-card
-                                    v-bind:key="activeIndex"
-                                    v-bind:cactusElement="promptContent.cactusElement"
-                                    v-bind:content="contentItems[activeIndex]"
-                                    v-bind:response="reflectionResponse"
-                                    v-bind:hasNext="hasNext && activeIndex > 0"
-                                    v-bind:reflectionDuration="reflectionDuration"
-                                    v-bind:saving="saving"
-                                    v-bind:saved="saved"
-                                    v-bind:tapAnywhereEnabled="tapAnywhereEnabled"
-                                    v-on:next="next"
-                                    v-on:previous="previous"
-                                    v-on:complete="complete"
-                                    v-on:save="save"
+                                    :key="activeIndex"
+                                    :cactusElement="promptContent.cactusElement"
+                                    :content="contentItems[activeIndex]"
+                                    :response="reflectionResponse"
+                                    :hasNext="hasNext && activeIndex > 0"
+                                    :reflectionDuration="reflectionDuration"
+                                    :saving="saving"
+                                    :saved="saved"
+                                    :tapAnywhereEnabled="tapAnywhereEnabled"
+                                    :member="member"
+                                    :style="cardStyles"
+                                    :prompt-content="promptContent"
+                                    @next="next"
+                                    @previous="previous"
+                                    @complete="complete"
+                                    @save="save"
                                     @navigationDisabled="navigationDisabled = true"
                                     @navigationEnabled="navigationDisabled = false"
-                                    :style="cardStyles"
                             />
                         </transition>
                         <transition name="celebrate" appear mode="out-in" v-if="completed">
@@ -131,6 +117,7 @@
     import FourOhFour from "@components/404.vue"
     import Logger from "@shared/Logger";
     import { RoutePageMeta, setPageMeta } from "@web/router-meta";
+    import { pushRoute } from "@web/NavigationUtil";
 
     const logger = new Logger("PromptContent.vue");
     const flamelink = getFlamelink();
@@ -179,13 +166,15 @@
 
 
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({ member }) => {
+                onData: async ({ member }) => {
                     this.authLoaded = true;
                     this.member = member;
 
                     if (!this.member && !isPreRender()) {
                         const afterLoginUrl = window.location.href;
-                        this.$router.push(`${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(afterLoginUrl) }`);
+                        logger.info("redirecting to after login url = ", afterLoginUrl)
+                        logger.info("Pushing to router", `${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(afterLoginUrl) }`);
+                        await pushRoute(`${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(afterLoginUrl) }`)
                     }
                 }
             });
@@ -326,7 +315,7 @@
             reflectionTimerInterval: any,
             authLoaded: boolean,
             memberUnsubscriber: ListenerUnsubscriber | undefined,
-            member: CactusMember | undefined,
+            member: CactusMember | undefined | null,
             touchStart: MouseEvent | undefined,
             cardStyles: any,
             popStateListener: any | undefined,
@@ -358,7 +347,7 @@
                 reflectionTimerInterval: undefined,
                 authLoaded: false,
                 memberUnsubscriber: undefined,
-                member: undefined,
+                member: null,
                 touchStart: undefined,
                 cardStyles: {},
                 popStateListener: undefined,
@@ -507,7 +496,6 @@
             },
             updateDocumentMeta() {
                 logger.info("Prompt content updating meta");
-                debugger;
                 let title = this.promptContent?.subjectLine ?? this.promptContent?.getPreviewText() ?? 'Cactus Mindful Moment';
 
                 const description = "Reflect on this mindful moment from Cactus.";
@@ -669,6 +657,11 @@
                     this.saved = false;
                     this.reflectionResponse.reflectionDurationMs = this.reflectionDuration;
                     this.reflectionResponse.cactusElement = this.promptContent && this.promptContent.cactusElement || null;
+
+                    if (!this.reflectionResponse.coreValue) {
+                        this.reflectionResponse.coreValue = this.member?.getCoreValueAtIndex(this.promptContent?.preferredCoreValueIndex ?? 0) ?? null
+                    }
+
                     const saved = await ReflectionResponseService.sharedInstance.save(this.reflectionResponse, {
                         saveIfAnonymous: true,
                         updateReflectionLog: options.updateReflectionLog
@@ -795,9 +788,10 @@
         position: relative;
         width: 100vw;
         min-height: 100vh;
+
         @include r(600) {
             background-color: transparent;
-            padding: 6.4rem 0;
+            padding: 8vh 0;
         }
 
         button.secondary {
@@ -811,6 +805,13 @@
         .content-container {
             perspective: 1000px;
 
+            @include r(600) {
+                max-width: 48rem;
+            }
+            @include r(768) {
+                max-width: none;
+            }
+
             .progress-wrapper {
                 left: 0;
                 margin: 0 auto;
@@ -821,7 +822,7 @@
                 z-index: 20;
 
                 @include r(600) {
-                    top: 5.6rem;
+                    top: .8rem;
                     width: 94%;
                 }
 
@@ -1050,7 +1051,6 @@
 
         @include r(600) {
             min-height: 66rem;
-            max-width: 48rem;
         }
 
         &.flipped {
@@ -1081,7 +1081,6 @@
             border-radius: 12px;
             height: 100%;
             min-height: 66rem;
-            max-width: 48rem;
         }
 
         &.front {

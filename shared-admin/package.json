@@ -25,10 +25,10 @@
     "chalk": "^2.4.2",
     "email-addresses": "^3.0.3",
     "express": "^4.17.1",
-    "firebase": "^7.14.0",
-    "firebase-admin": "^8.10.0",
+    "firebase": "^7.14.6",
+    "firebase-admin": "^8.12.1",
     "firebase-functions": "^3.6.0",
-    "firebase-tools": "^8.0.3",
+    "firebase-tools": "^8.4.0",
     "flamelink": "^1.0.0-alpha.28",
     "fs-extra": "^9.0.0",
     "googleapis": "^42.0.0",
@@ -54,9 +54,9 @@
     "jest": "^24.8.0",
     "jest-junit": "^6.4.0",
     "ts-jest": "^24.1.0",
-    "ts-node": "^8.5.2",
+    "ts-node": "^8.10.1",
     "tsconfig-paths": "^3.8.0",
     "tslint": "^5.20.1",
-    "typescript": "^3.7.2"
+    "typescript": "^3.9.2"
   }
 }

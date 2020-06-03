@@ -51,19 +51,15 @@
     },
     "homepage": "https://github.com/Kinecho/cactus#readme",
     "dependencies": {
-        "@cloudsponge/address-book-connector.js": "^1.0.9",
-        "firebase": "^7.14.0",
-        "vue-clipboard2": "^0.3.0",
-        "vue-social-sharing": "^2.4.6",
-        "vue2-touch-events": "^2.0.0"
+        "firebase": "^7.14.6"
     },
     "devDependencies": {
-        "firebase-tools": "^8.0.3",
+        "firebase-tools": "^8.4.0",
         "jest": "^24.8.0",
         "ts-jest": "^24.1.0",
-        "ts-node": "^8.5.2",
+        "ts-node": "^8.10.1",
         "tsconfig-paths": "^3.8.0",
         "tslint": "^5.20.1",
-        "typescript": "^3.7.2"
+        "typescript": "^3.9.2"
     }
 }

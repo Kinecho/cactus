@@ -69,7 +69,7 @@
     @import "variables";
 
     .signup-footer {
-        background: $yellow url(assets/images/yellowNeedles.svg) 0 0/320px;
+        background: $yellow url(/assets/images/yellowNeedles.svg) 0 0/320px;
         padding: 3.2rem 2.4rem 1.6rem;
         position: relative;
         z-index: 1;

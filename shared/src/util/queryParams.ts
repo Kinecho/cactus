@@ -29,6 +29,7 @@ export enum QueryParam {
     PREMIUM_DEFAULT = 'prem',
     SELECTED_PRODUCT = 'productId',
     SELECTED_TIER = "tier",
+    SELECTED_ELEMENT = "element",
     SELECTED_PERIOD = "period",
     SOURCE_APP = "source-app",
     USE_PROMPT_ID = "prompt",
@@ -46,6 +47,9 @@ export enum QueryParam {
     BG_INDEX = "bg",
     TIER = "tier",
     DISPLAY_NAME = "displayName",
+    CLEAR_CACHE = "cc",
+    CHECKOUT_SUCCESS_URL = "checkoutSuccessUrl",
+    CHECKOUT_CANCEL_URL = "checkoutCancelUrl",
 }
 
 export function includesLandingQueryParams(params: object | undefined): boolean {

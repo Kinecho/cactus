@@ -57,11 +57,10 @@
                 //more color options: https://github.com/d3/d3-scale-chromatic
                 let colorRange: string[] = [
                     "#47445E",
-                    "#364FAC",
-                    "#9C1AA3",
-                    "#D9D3D0",
-                    "#D9D3D0",
-                    "#D9D3D0"
+                    "#5E5A7C",
+                    "#9490B0",
+                    "#D3D1E3",
+                    "#D3D1E3",
                 ];
 
                 const color = d3ScaleOrdinal()
@@ -70,7 +69,7 @@
 
                 let bubble = d3Pack()
                     .size([maxDiameter, maxDiameter])
-                    .padding(12);
+                    .padding(20);
 
                 d3Select(".bubble-chart svg").remove();
 
@@ -86,10 +85,12 @@
                     const extras: InsightWord[] = [
                         {word: "", frequency: .5, salience: .5},
                         {word: "", frequency: .5, salience: .5},
+                        {word: "", frequency: .5, salience: .5},
+                        {word: "", frequency: .5, salience: .5},
                         {word: "", frequency: .3, salience: .3},
                         {word: "", frequency: .3, salience: .3},
                         {word: "", frequency: .3, salience: .3},
-                        {word: "", frequency: .1, salience: .1},
+                        {word: "", frequency: .3, salience: .3},
                         {word: "", frequency: .1, salience: .1},
                         {word: "", frequency: .1, salience: .1},
                         {word: "", frequency: .1, salience: .1},
@@ -184,8 +185,10 @@
    }
 
    .bubble-chart {
-       margin: 0 auto;
+       margin: 0 auto 1.6rem;
+       max-width: 40rem;
        transition: 1s ease-in-out;
+
        &.isBlurry {
            filter: blur(11px);
            opacity: .8;

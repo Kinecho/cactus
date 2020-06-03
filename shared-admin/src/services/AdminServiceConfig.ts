@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin'
-import {CactusConfig} from "@shared/CactusConfig";
+import { CactusConfig } from "@shared/CactusConfig";
 import MailchimpService from "@admin/services/MailchimpService";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
@@ -7,7 +7,7 @@ import AdminUserService from "@admin/services/AdminUserService";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import AdminSlackService from "@admin/services/AdminSlackService";
-import {setTimestamp} from "@shared/util/FirestoreUtil";
+import { setTimestamp } from "@shared/util/FirestoreUtil";
 import AdminSentCampaignService from "@admin/services/AdminSentCampaignService";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
 import AdminPendingUserService from "@admin/services/AdminPendingUserService";
@@ -29,12 +29,14 @@ import AdminCheckoutSessionService from "@admin/services/AdminCheckoutSessionSer
 import AdminPaymentService from "@admin/services/AdminPaymentService";
 import StripeWebhookService from "@admin/services/StripeWebhookService";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
-import {PubSubService} from "@admin/pubsub/PubSubService";
+import { PubSubService } from "@admin/pubsub/PubSubService";
 import AdminEmailLogService from "@admin/services/AdminEmailLogService";
 import AppleService from "@admin/services/AppleService";
 import GooglePlayService from "@admin/services/GooglePlayService";
 import StripeService from "@admin/services/StripeService";
 import AdminDataExportService from "@admin/services/AdminDataExportService";
+import AdminDeletedUserService from "@admin/services/AdminDeletedUserService";
+import AdminRevenueCatService from "@admin/services/AdminRevenueCatService";
 
 const logger = new Logger("AdminServiceConfig");
 
@@ -76,6 +78,7 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     StripeWebhookService.initialize(config);
     AdminEmailLogService.initialize(config);
     AdminDataExportService.initialize(config);
+    AdminDeletedUserService.initialize();
 
     //Flamelink
     AdminFlamelinkService.initialize(config, app);
@@ -87,6 +90,9 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
 
     //Google Play
     GooglePlayService.initialize(config);
+
+    //RevenueCat
+    AdminRevenueCatService.initialize(config);
 
     logger.log("Initializing Sentry");
     const sentryOptions: Sentry.NodeOptions = {

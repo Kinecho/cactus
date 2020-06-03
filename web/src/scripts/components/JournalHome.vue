@@ -1,6 +1,6 @@
 <template>
     <div>
-        <NavBar :show-signup="false" :isSticky="false"/>
+        <NavBar :show-signup="false" :isSticky="false" @logging-out="loggingOut = true"/>
         <upgrade-card class="journalListItem" v-if="showUpgradeCard" :member="cactusMember" :hasPromptToday="(todayEntry && todayLoaded)"/>
         <snackbar-content
                 class="upgrade-confirmation"
@@ -12,8 +12,7 @@
                 color="successAlt">
             <div slot="text" class="centered">
                 <h3>Welcome to Cactus Plus!</h3>
-                <p>You just upgraded and it made our day. If you ever have questions or feedback, please reach out to us
-                    at <a href="mailto:help@cactus.app">help@cactus.app</a>.</p>
+                <p>Now you have full access to personalized activities, insights, and tools to help you better know yourself. If you have questions or feedback, please reach out to us at <a href="mailto:help@cactus.app">help@cactus.app</a>.</p>
             </div>
         </snackbar-content>
         <div class="container centered">
@@ -28,13 +27,9 @@
 
             <transition name="fade-in-fast" appear mode="out-in">
                 <div class="section-container" v-if="showOnboardingPrompt" :key="'empty'">
-                    <section class="empty journalList">
-                        <h1>Welcome to Cactus</h1>
-                        <p>To get started, you'll learn about how Cactus works and reflect on your first question of the&nbsp;day.</p>
-                        <img class="graphic" src="assets/images/emptyState.png" alt="Three friends welcoming you"/>
-                        <a class="button primary" :href="firstPromptPath">Let's Begin</a>
-                    </section>
+                    <journal-home-empty-state :focus-element="focusElement" :tier="tier"/>
                 </div>
+
                 <div class="section-container" v-if="loggedIn && loginReady && journalEntries.length > 0">
                     <!-- TODO: this key isn't right -->
                     <snackbar-content
@@ -69,13 +64,14 @@
                                     v-bind:key="todayEntry.promptId"
                             ></entry>
                             <entry
+                                    v-for="(entry, index) in journalEntries"
                                     :class="['journalListItem', {even: index%2}]"
                                     :style="{zIndex: Math.max(1000 - index, 0)}"
-                                    v-for="(entry, index) in journalEntries"
                                     :journalEntry="entry"
-                                    v-bind:index="index"
-                                    v-bind:key="entry.promptId"
-                                    v-bind:data-index="index"
+                                    :member="cactusMember"
+                                    :index="index"
+                                    :key="entry.promptId"
+                                    :data-index="index"
                             ></entry>
                         </transition-group>
 
@@ -116,6 +112,9 @@
     import SnackbarContent from "@components/SnackbarContent.vue";
     import { fireOptInStartTrialEvent } from "@web/analytics";
     import StorageService, { LocalStorageKey } from "@web/services/StorageService";
+    import { pushRoute } from "@web/NavigationUtil";
+    import JournalHomeEmptyState from "@components/JournalHomeEmptyState.vue";
+    import { CactusElement } from "@shared/models/CactusElement";
 
     const logger = new Logger("JournalHome.vue");
 
@@ -134,10 +133,13 @@
         todayLoaded: boolean,
         coreValuesClosed: boolean,
         upgradeConfirmed: boolean,
+        loggingOut: boolean,
+        windowScrollHandler: any,
     }
 
     export default Vue.extend({
         components: {
+            JournalHomeEmptyState,
             NavBar,
             entry: JournalEntryCard,
             AutoPromptContentModal,
@@ -152,6 +154,7 @@
         },
         mounted() {
             let handler = debounce(this.scrollHandler, 10);
+            this.windowScrollHandler = handler;
             window.addEventListener('scroll', handler);
             this.scrollHandler();
 
@@ -175,8 +178,12 @@
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({ member, user }) => {
                     if (!user) {
-                        logger.log("JournalHome - auth state changed and user was not logged in. Sending to journal");
-                        this.$router.push(PageRoute.HOME);
+                        if (this.loggingOut) {
+                            return;
+                        } else {
+                            logger.log("JournalHome - auth state changed and user was not logged in. Sending to journal");
+                        }
+                        await pushRoute(PageRoute.HOME);
                         return;
                     }
                     const isFreshLogin = !this.cactusMember && member;
@@ -247,7 +254,6 @@
                                 this.journalEntries = entries;
                             },
                             onUpdated: (entry: JournalEntry, index?: number) => {
-                                logger.log(`entry updated at index ${ index }`, entry);
                                 if (index && index >= 0) {
                                     this.$set(this.$data.journalEntries, index, entry);
                                 }
@@ -279,12 +285,15 @@
                 todayLoaded: false,
                 coreValuesClosed: false,
                 upgradeConfirmed: false,
+                loggingOut: false,
+                windowScrollHandler: undefined,
             };
         },
         destroyed() {
             this.authUnsubscribe?.();
             this.todayUnsubscriber?.();
             this.dataSource?.stop();
+            window.removeEventListener('scroll', this.windowScrollHandler);
         },
         methods: {
             beforeEnter: function (el: HTMLElement) {
@@ -307,23 +316,24 @@
                 const threshold = window.innerHeight / 3;
                 const distance = this.getScrollOffset();
                 if (distance <= threshold) {
-                    logger.log("load more! Offset = ", distance);
-
                     const willLoad = this.dataSource?.loadNextPage() || false;
                     this.showPageLoading = this.dataSource?.loadingPage || willLoad
 
                 }
             },
-            launchCoreValues() {
+            async launchCoreValues() {
                 // TODO: launch core values assessment
                 // window.location.href = `${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`;
-                this.$router.push(`${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`)
+                await pushRoute(`${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`)
             },
             getScrollOffset(): number {
                 return -1 * ((window.innerHeight + document.documentElement.scrollTop) - document.body.offsetHeight)
             }
         },
         computed: {
+            tier(): SubscriptionTier|null {
+                return this.cactusMember?.tier ?? null;
+            },
             email(): string | undefined | null {
                 return this.user ? this.user.email : null;
             },
@@ -351,15 +361,21 @@
                 this.loginReady &&
                 this.dataHasLoaded &&
                 this.journalEntries.length === 0)
+            },
+            focusElement(): CactusElement | null {
+                if (this.dataHasLoaded && this.cactusMember) {
+                    return this.cactusMember?.focusElement ?? null;
+                }
+                return null;
             }
         }
     })
 </script>
 
 <style scoped lang="scss">
-    @import "~styles/common";
-    @import "~styles/mixins";
-    @import "~styles/transitions";
+    @import "common";
+    @import "mixins";
+    @import "transitions";
 
     .container {
         min-height: 100vh;
@@ -412,7 +428,7 @@
     }
 
     .coreValuesBox {
-        background-image: url(assets/images/grainy.png), url(assets/images/cvBlob.png), url(assets/images/pinkVs.svg);
+        background-image: url(/assets/images/grainy.png), url(/assets/images/cvBlob.png), url(/assets/images/pinkVs.svg);
         background-position: 0 0, -14rem -15rem, -7rem 120%;
         background-repeat: repeat, no-repeat, no-repeat;
         background-size: auto, 28rem, auto;
@@ -464,12 +480,22 @@
         @include r(960) {
             display: flex;
             flex-direction: row-reverse;
-            justify-content: center;
+            justify-content: space-around;
         }
 
         .journalList {
             display: flex;
             flex-direction: column;
+            justify-content: center;
+            margin: 0 auto;
+
+            @include r(600) {
+                margin: 0 2.4rem;
+            }
+            @include r(768) {
+                margin: 0 auto;
+                width: 64rem;
+            }
 
             .skeleton {
                 width: 100%;
@@ -483,46 +509,13 @@
                 @include r(374) {
                     padding: 0 2.4rem;
                 }
+                @include r(600) {
+                    padding: 0;
+                }
 
                 &.out {
                     transform: translateY(-30px);
                     opacity: 0;
-                }
-            }
-
-            &.empty {
-                align-items: center;
-                justify-content: center;
-                padding: 2.4rem;
-                text-align: center;
-
-                h1 {
-                    line-height: 1.2;
-                    margin-bottom: .4rem;
-                }
-
-                p {
-                    margin: 0 auto 2.4rem;
-                    max-width: 60rem;
-                    opacity: .8;
-
-                    @include r(768) {
-                        margin-bottom: 1.6rem;
-                    }
-                }
-
-                .graphic {
-                    margin-bottom: 2.4rem;
-                    max-width: 56rem;
-                    width: 90%;
-
-                    @include r(768) {
-                        margin-bottom: 1.6rem;
-                    }
-                }
-
-                .button {
-                    min-width: 22rem;
                 }
             }
 

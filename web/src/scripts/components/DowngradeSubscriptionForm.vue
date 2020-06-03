@@ -59,7 +59,7 @@
             },
             message(): string {
                 let message = "Please confirm your wish to cancel. You will continue to" +
-                "have access to Cactus Plus until your current billing\xa0period ends";
+                " have access to Cactus Plus until your current billing\xa0period ends";
                 if (this.nextBillingDateString) {
                     message += " on " + this.nextBillingDateString
                 }

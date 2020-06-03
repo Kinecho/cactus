@@ -1,17 +1,17 @@
 @import "variables";
 
 @mixin fancyLink {
-  background-image: linear-gradient(lighten($pinky, 10%), lighten($pinky, 10%));
-  background-position: 0 100%;
+  background-image: linear-gradient(lighten($pink, 5%), lighten($pink, 5%));
+  background-position: 0 90%;
   background-repeat: no-repeat;
   background-size: 100% .8rem;
-  color: $darkText;
+  color: $darkestGreen;
   padding: .2rem;
   text-decoration: none;
   transition: background-size cubic-bezier(0, .5, 0, 1) .3s;
 
   &:hover {
-    background-image: linear-gradient($green, $green);
+    background-image: linear-gradient($pink, $pink);
     background-size: 100% 100%;
     text-decoration: none;
   }
@@ -19,7 +19,7 @@
 
 @mixin fancyLinkLight {
   background-image: linear-gradient(lighten($darkestGreen, 15%), lighten($darkestGreen, 15%));
-  background-position: 0 100%;
+  background-position: 0 90%;
   background-repeat: no-repeat;
   background-size: 100% .8rem;
   color: $white;
@@ -28,7 +28,7 @@
   transition: background-size cubic-bezier(0, .5, 0, 1) .3s;
 
   &:hover {
-    background-image: linear-gradient(lighten($darkestGreen, 20%), lighten($darkestGreen, 20%));
+    background-image: linear-gradient(lighten($darkestGreen, 15%), lighten($darkestGreen, 15%));
     background-size: 100% 100%;
     text-decoration: none;
   }
@@ -223,6 +223,30 @@ $widthDesktop: $widthXL;
 
 /* ANIMATIONS */
 
+@keyframes pulse-green {
+	0% {
+		box-shadow: 0 0 0 0 rgba(51, 204, 171, 0.7);
+		transform: scale(0.95);
+	}
+	70% {
+		box-shadow: 0 0 0 32px rgba(51, 204, 171, 0);
+		transform: scale(1);
+	}
+	100% {
+		box-shadow: 0 0 0 0 rgba(51, 204, 171, 0);
+		transform: scale(0.95);
+	}
+}
+
+@keyframes dash {
+    from {
+        stroke-dasharray: 0 1000;
+    }
+    to {
+        stroke-dasharray: 1000 0;
+    }
+}
+
 @keyframes slide {
   100% {
     opacity: 1;
@@ -231,6 +255,15 @@ $widthDesktop: $widthXL;
 }
 
 @keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rotateInfinite {
+  0% {
+    transform: rotate(0deg);
+  }
   100% {
     transform: rotate(360deg);
   }
@@ -290,6 +323,7 @@ $widthDesktop: $widthXL;
   border: 1px solid $lightestGreen;
   box-shadow: none;
   color: $darkestGreen;
+  font-weight: bold;
   padding: 1.2rem 2.4rem;
 
   @include r(600) {
@@ -303,6 +337,7 @@ $widthDesktop: $widthXL;
   background-color: transparent;
   box-shadow: none;
   color: $darkGreen;
+  font-weight: bold;
 
   @include r(600) {
     &:hover {
@@ -345,7 +380,7 @@ $widthDesktop: $widthXL;
   color: white;
   cursor: pointer;
   flex-grow: 1;
-  font: 1.8rem $font-stack;
+  font: bold 1.8rem $font-stack;
   margin: 0;
   padding: 1.2rem 2.4rem 1.6rem;
   transition: box-shadow .2s ease-in-out, background-color .2s ease-in-out, opacity .3s;
@@ -375,7 +410,7 @@ $widthDesktop: $widthXL;
   &:disabled, &.disabled {
     background-color: #ccc;
     box-shadow: none;
-    color: $darkText;
+    color: lighten($darkText, 20%);
     cursor: default;
 
 

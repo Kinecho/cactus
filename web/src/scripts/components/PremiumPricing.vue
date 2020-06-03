@@ -49,7 +49,10 @@
                                     :is-restoring-purchases="isRestoringPurchases"
                                     :class="{active: activetab === i}"
                                     :showFooter="showFooter"
-                                    :startTrial="startTrial"/>
+                                    :startTrial="startTrial"
+                                    :checkout-cancel-url="checkoutCancelUrl"
+                                    :checkout-success-url="checkoutSuccessUrl"
+                            />
                         </template>
 
                     </div>
@@ -81,6 +84,8 @@
     import { isAndroidApp } from "@web/DeviceUtil";
     import AndroidService from "@web/android/AndroidService";
     import { restoreAndroidPurchases } from "@web/checkoutService";
+    import { pushRoute } from "@web/NavigationUtil";
+    import { logPresentSubscriptionOffers } from "@web/analytics";
 
     const copy = CopyService.getSharedInstance().copy;
     const logger = new Logger("PremiumPricing");
@@ -93,7 +98,10 @@
             tabsOnMobile: { type: Boolean, default: true },
             learnMoreLinks: { type: Boolean, default: false },
             showFooter: { type: Boolean, default: true },
-            startTrial: { type: Boolean, default: false }
+            startTrial: { type: Boolean, default: false },
+            promotionName: {type: String, default: "Pricing Page"},
+            checkoutSuccessUrl: { type: String, required: false },
+            checkoutCancelUrl: { type: String, required: false },
         },
         data(): {
             isProcessing: boolean,
@@ -145,6 +153,18 @@
             this.productGroups = await SubscriptionProductGroupService.sharedInstance.getSortedProductGroupEntries();
             this.productsLoaded = true;
 
+            this.productGroups.forEach((groupEntry: SubscriptionProductGroupEntry) => {
+                const items = groupEntry.products.map(product => {
+                    return {
+                        subscriptionProductId: product?.entryId,
+                        name: product?.displayName,
+                        billingPeriod: product?.billingPeriod
+                    }
+                });
+
+                logPresentSubscriptionOffers({ products: items, promotionName: this.promotionName });
+            })
+
             const prem = getQueryParam(QueryParam.PREMIUM_DEFAULT);
 
             if (prem) {
@@ -183,8 +203,8 @@
             }
         },
         methods: {
-            goToSignup() {
-                this.$router.push(PageRoute.SIGNUP);
+            async goToSignup() {
+                await pushRoute(PageRoute.SIGNUP);
             },
             getGroupDisplayName(entry: SubscriptionProductGroupEntry): string | undefined {
                 return entry.productGroup?.title ?? entry.tierDisplayName;
@@ -234,7 +254,7 @@
     }
 
     .tabset {
-        background: $dolphin url(assets/images/grainy.png) repeat;
+        background: $dolphin url(/assets/images/grainy.png) repeat;
         border-radius: 1.2rem;
         margin: 0 auto;
         max-width: 48rem;
@@ -272,7 +292,7 @@
         }
 
         &.plus {
-            background: $dolphin url(assets/images/grainy.png) repeat;
+            background: $dolphin url(/assets/images/grainy.png) repeat;
             color: $white;
         }
     }
@@ -347,7 +367,7 @@
         }
 
         &.active {
-            background: $dolphin url(assets/images/grainy.png) repeat;
+            background: $dolphin url(/assets/images/grainy.png) repeat;
 
             @include r(768) {
                 background-image: none;
@@ -368,14 +388,14 @@
             border-radius: 0 1.6rem 0 0;
 
             @include r(768) {
-                background: $dolphin url(assets/images/grainy.png) repeat;
+                background: $dolphin url(/assets/images/grainy.png) repeat;
                 border-radius: $cardBorderRadius $cardBorderRadius 0 0;
                 color: $white;
             }
         }
 
         &:only-child {
-            background: $dolphin url(assets/images/grainy.png) repeat;
+            background: $dolphin url(/assets/images/grainy.png) repeat;
             border-radius: $cardBorderRadius $cardBorderRadius 0 0;
             flex-basis: 100%;
             padding-left: 1.6rem;

@@ -31,12 +31,14 @@
             document.body.classList.add("simplyCentered")
 
             const subscriptionProductId = getQueryParam(QueryParam.SUBSCRIPTION_PRODUCT_ID);
+            const successUrl = getQueryParam(QueryParam.CHECKOUT_SUCCESS_URL) ?? undefined;
+            const cancelUrl = getQueryParam(QueryParam.CHECKOUT_CANCEL_URL) ?? undefined;
             if (!subscriptionProductId) {
                 logger.warn("No subscription product ID found on query param. Can not forward to checkout. Showing error message");
                 this.errorMessage = "It looks like this plan is no longer valid. Please try again later.";
             } else {
                 this.subscriptionProductId = subscriptionProductId;
-                await startCheckout({ subscriptionProductId });
+                await startCheckout({ subscriptionProductId, stripeSuccessUrl: successUrl, stripeCancelUrl: cancelUrl });
             }
             this.loading = false;
         },

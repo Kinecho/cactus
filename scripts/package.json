@@ -36,10 +36,10 @@
         "camelcase": "^5.3.1",
         "chalk": "^2.4.2",
         "csvtojson": "^2.0.10",
-        "firebase": "^7.14.0",
-        "firebase-admin": "^8.10.0",
+        "firebase": "^7.14.6",
+        "firebase-admin": "^8.12.1",
         "firebase-functions": "^3.6.0",
-        "firebase-tools": "^8.0.3",
+        "firebase-tools": "^8.4.0",
         "fs-extra": "^8.1.0",
         "get-urls": "^9.1.0",
         "googleapis": "^42.0.0",
@@ -53,7 +53,7 @@
         "yesno": "^0.2.0"
     },
     "engines": {
-        "node": "8"
+        "node": "10"
     },
     "devDependencies": {
         "@firebase/testing": "^0.11.6",
@@ -65,9 +65,9 @@
         "jest": "^24.8.0",
         "jest-junit": "^6.4.0",
         "ts-jest": "^24.1.0",
-        "ts-node": "^8.5.2",
+        "ts-node": "^8.10.1",
         "tsconfig-paths": "^3.8.0",
         "tslint": "^5.20.1",
-        "typescript": "^3.7.2"
+        "typescript": "^3.9.2"
     }
 }

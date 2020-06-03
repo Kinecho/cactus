@@ -1,10 +1,13 @@
 import FlamelinkModel, { FlamelinkData, SchemaName } from "@shared/FlamelinkModel";
 import { CactusElement } from "@shared/models/CactusElement";
-import { preventOrphanedWords } from "@shared/util/StringUtil";
+import { isBlank, preventOrphanedWords } from "@shared/util/StringUtil";
 import { timestampToDate } from "@shared/util/FirestoreUtil";
 import { getFlamelinkDateStringInDenver } from "@shared/util/DateUtil";
 import Logger from "@shared/Logger";
 import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
+import CactusMember from "@shared/models/CactusMember";
+import { CoreValue } from "@shared/models/CoreValueTypes";
+import ReflectionResponse from "@shared/models/ReflectionResponse";
 
 const logger = new Logger("PromptContent.ts");
 
@@ -98,7 +101,6 @@ export enum ContentType {
     invite = "invite",
 }
 
-
 export enum ContentStatus {
     in_progress = "in_progress",
     submitted = "submitted",
@@ -109,10 +111,18 @@ export enum ContentStatus {
 
 /**
  * Removes unneeded fields from the content for easier display
- * @param {Content} content
  * @return {Content}
+ * @param params
  */
-export function processContent(content: Content): Content {
+export function processContent(params: {
+    promptContent: PromptContent,
+    content: Content,
+    member?: CactusMember | null | undefined,
+    reflectionResponse?: ReflectionResponse | undefined
+}): Content {
+    const { content, member, reflectionResponse, promptContent } = params;
+
+    const coreValue = reflectionResponse?.coreValue ?? undefined;
     const processed: Content = {
         contentType: content.contentType,
         label: content.label,
@@ -122,39 +132,41 @@ export function processContent(content: Content): Content {
         backgroundImage: content.backgroundImage,
     };
 
+    const dynamicText = promptContent.getDynamicDisplayText({ content, coreValue, member })?.trim();
+
     switch (content.contentType) {
         case ContentType.text:
-            processed.text = content.text_md || content.text;
+            processed.text = dynamicText
             processed.title = content.title;
             break;
         case ContentType.quote:
             processed.quote = content.quote;
             if (processed.quote?.text_md) {
-                processed.quote.text = processed.quote.text_md;
+                processed.quote.text = processed.quote.text_md.trim();
             }
             break;
         case ContentType.video:
-            processed.text = content.text_md || content.text;
+            processed.text = dynamicText
             processed.video = content.video;
             break;
         case ContentType.photo:
-            processed.text = content.text_md || content.text;
+            processed.text = dynamicText
             processed.photo = content.photo;
             break;
         case ContentType.audio:
-            processed.text = content.text_md || content.text;
+            processed.text = dynamicText
             processed.audio = content.audio;
             break;
         case ContentType.reflect:
-            processed.text = content.text_md || content.text;
+            processed.text = dynamicText
             break;
         case ContentType.share_reflection:
-            processed.text = content.text_md || content.text;
+            processed.text = dynamicText
             processed.title = content.title;
             break;
         case ContentType.elements:
             processed.elements = true;
-            processed.text = content.text_md || content.text;
+            processed.text = dynamicText
             processed.title = content.title;
             break;
         case ContentType.invite:
@@ -170,9 +182,18 @@ export function processContent(content: Content): Content {
     if (processed.quote && processed.quote.text) {
         processed.quote.text = preventOrphanedWords(processed.quote.text)!;
     }
+
+    // const [coreValue] = (member?.coreValues ?? []) as (CoreValue | undefined)[];
+    // if (coreValue && content.coreValues?.textTemplateMd) {
+    //     const coreValueMeta = CoreValuesService.shared.getMeta(coreValue)
+    //     const token = content.coreValues?.valueReplaceToken ?? DEFAULT_CORE_VALUE_REPLACE_TOKEN
+    //     processed.text = preventOrphanedWords(content.coreValues.textTemplateMd.replace(token, coreValueMeta.title));
+    // }
+
     return processed;
 }
 
+export const DEFAULT_CORE_VALUE_REPLACE_TOKEN = "{{CORE_VALUE}}";
 
 export interface Content {
     contentType: ContentType;
@@ -190,6 +211,10 @@ export interface Content {
     invite?: boolean;
     actionButton?: ActionButton;
     showElementIcon?: boolean;
+    coreValues?: {
+        textTemplateMd?: string,
+        valueReplaceToken?: string,
+    }
 }
 
 export enum PromptContentFields {
@@ -216,6 +241,7 @@ export default class PromptContent extends FlamelinkModel {
     topic?: string;
     shareReflectionCopy_md?: string;
     subscriptionTiers: SubscriptionTier[] = [];
+    preferredCoreValueIndex?: number;
 
     constructor(data?: Partial<PromptContent>) {
         super(data);
@@ -227,12 +253,11 @@ export default class PromptContent extends FlamelinkModel {
             this.cactusElement = data.cactusElement;
 
             if (data.scheduledSendAt) {
-                logger.log("PromptContent Constructor, setting scheduled send at from value", data.scheduledSendAt);
                 this.scheduledSendAt = timestampToDate(data.scheduledSendAt) || new Date(data.scheduledSendAt);
-                logger.log("PromptContent constructor, sent scheduledSendAt to ", this.scheduledSendAt)
             }
         }
     }
+
 
     prepareForFirestore(): any {
         const data = super.prepareForFirestore();
@@ -248,28 +273,72 @@ export default class PromptContent extends FlamelinkModel {
         super.updateFromData(data);
         const scheduledDateField = data[PromptContent.Fields.scheduledSendAt];
         if (scheduledDateField) {
-            logger.log("Setting scheduledSendAt from data value", scheduledDateField);
             this.scheduledSendAt = new Date(scheduledDateField);
         } else {
             this.scheduledSendAt = undefined;
         }
     }
 
+    getQuestionContent(): Content | undefined {
+        return this.content?.find(c => c.contentType === ContentType.reflect);
+    }
+
     getQuestion(): string | undefined {
-        if (this.content) {
-            const reflectCard = this.content.find(c => c.contentType === ContentType.reflect);
-            return reflectCard && reflectCard.text;
+        const content = this.getQuestionContent()
+        if (content && !isBlank(content?.text_md)) {
+            return content.text_md;
         }
-        return;
+        return content?.text;
     }
 
     getPreviewText(): string | undefined {
         const [first] = (this.content || []);
+        if (first && !isBlank(first.text_md)) {
+            return first.text_md;
+        }
         return first?.text;
     }
 
     getOpenGraphImageUrl(): string | null {
         const firstImageCard = (this.content || []).find(c => c.backgroundImage?.storageUrl);
         return this.openGraphImage?.storageUrl || firstImageCard?.backgroundImage?.storageUrl || null;
+    }
+
+    getDynamicQuestionText(params: { member?: CactusMember, coreValue?: CoreValue | undefined }): string | undefined {
+        const { member, coreValue } = params;
+        const content = this.content?.find(c => c.contentType === ContentType.reflect);
+        if (!content) {
+            return;
+        }
+        return this.getDynamicDisplayText({ member, coreValue, content });
+    }
+
+    /**
+     * Get text with core values substituted, if applicable. Returns markdown-able text,
+     * @param {{
+     *  content: Content,
+     *  member?: CactusMember | undefined,
+     *  coreValue?: CoreValue | undefined
+     *  }} params
+     * @return {string|undefined}
+     */
+    getDynamicDisplayText(params: {
+        content: Content,
+        member?: CactusMember | undefined | null,
+        coreValue?: CoreValue | null | undefined
+    }): string | undefined {
+        const { content, member, coreValue } = params;
+
+        let text = !isBlank(content.text_md) ? content.text_md : content.text;
+
+        const coreValueTemplate = content.coreValues?.textTemplateMd;
+        const token = content.coreValues?.valueReplaceToken ?? DEFAULT_CORE_VALUE_REPLACE_TOKEN;
+        const coreValueIndex = this.preferredCoreValueIndex ?? 0;
+        const value = coreValue ?? member?.getCoreValueAtIndex(coreValueIndex);
+        if (value && coreValueTemplate && !isBlank(coreValueTemplate)) {
+            text = coreValueTemplate.replace(token, value);
+        }
+
+        return text;
     }
 }

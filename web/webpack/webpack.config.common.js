@@ -8,6 +8,7 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const WebpackNotifierPlugin = require('webpack-notifier')
 const chalk = require('chalk')
 const simplegit = require('simple-git/promise')
+const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
 
 function getCommitHash() {
     const git = simplegit()
@@ -35,8 +36,12 @@ module.exports = (config) => {
 
             let parsedConfig = {}
 
+            // Object.keys(config).forEach(key => {
+            //     parsedConfig[key] = JSON.stringify(config[key])
+            // })
+
             Object.keys(config).forEach(key => {
-                parsedConfig[key] = JSON.stringify(config[key])
+                parsedConfig[`process.env.${key}`] = JSON.stringify(config[key])
             })
 
             let jsEntries = Object.keys(allPages).reduce((entries, title) => {
@@ -45,18 +50,11 @@ module.exports = (config) => {
                 return entries
             }, {})
 
-            //add the little dev pages index
-            // if (isDev) {
-            // jsEntries['pages-index'] = `${helpers.scriptDir}/pages/pages-index.ts`
-            // }
-
             console.log('JS Entries to use', chalk.cyan(JSON.stringify(jsEntries, null, 2)))
 
             const plugins = [new MiniCssExtractPlugin({
-                // filename: isDev ? '[name].css' : '[id].[hash].css',
-                // chunkFilename: isDev ? '[id].css' : '[id].[hash].css',
-                filename: '[name].css',
-                chunkFilename: '[id].css',
+                filename: isDev ? '[name].css' : '[id].[hash].css',
+                chunkFilename: isDev ? '[id].css' : '[id].[hash].css',
 
             })]
 
@@ -71,12 +69,12 @@ module.exports = (config) => {
                 }
             })
 
-            return resolve({
+
+            let finalConfig = {
                 entry: jsEntries,
                 output: {
                     path: helpers.publicDir,
-                    // filename: isDev ? '[name].js' : '[name].[hash].js',
-                    filename: '[name].js',
+                    filename: isDev ? '[name].js' : '[name].[hash].js',
                     publicPath: '/',
                 },
                 stats: 'errors-warnings',
@@ -142,27 +140,74 @@ module.exports = (config) => {
                     },
                 },
                 module: {
+                    noParse: /^(vue|vue-router|vuex|vuex-router-sync)$/,
                     rules: [
                         {
                             test: /\.vue$/,
-                            loader: 'vue-loader',
+                            use: [
+                                // {
+                                //     loader: 'cache-loader',
+                                // },
+                                {
+                                    loader: 'vue-loader',
+                                    options: {
+                                        compilerOptions: {
+                                            whitespace: 'condense',
+                                        },
+                                    },
+                                },
+                            ],
+
                         },
                         {
                             test: /\.ts$/,
-                            loader: 'ts-loader',
-                            options: {
-                                appendTsSuffixTo: [/\.vue$/],
-                            },
+                            use: [
+                                {
+                                    loader: 'cache-loader',
+                                },
+                                isDev ? null : {
+                                    loader: 'thread-loader',
+                                },
+                                {
+                                    loader: 'babel-loader', options: {
+                                        cacheDirectory: true,
+                                    },
+                                },
+                                {
+                                    loader: 'ts-loader',
+                                    options: {
+                                        transpileOnly: true,
+                                        happyPackMode: !isDev,
+                                        appendTsSuffixTo: [/\.vue$/],
+                                    },
+                                },
+                            ].filter(Boolean),
+
                         },
                         {
-                            test: /\.(css|scss)$/,
+                            test: /\.css$/,
+                            use: [
+                                {
+                                    loader: isDev ? 'vue-style-loader' : MiniCssExtractPlugin.loader,
+                                },
+                                {
+                                    loader: 'css-loader',
+                                    options: {sourceMap: true, url: false},
+                                },
+                                {
+                                    loader: 'postcss-loader',
+                                },
+                            ],
+                        },
+                        {
+                            test: /\.(scss)$/,
                             use: [
                                 // 'style-loader',
                                 {
-                                    loader: MiniCssExtractPlugin.loader,
-                                    options: {
-                                        hmr: isDev,
-                                    },
+                                    loader: isDev ? 'vue-style-loader' : MiniCssExtractPlugin.loader,
+                                    // options: {
+                                    //     hmr: isDev,
+                                    // },
                                 },
                                 {
                                     loader: 'css-loader',
@@ -216,7 +261,14 @@ module.exports = (config) => {
                         contentImage: path.join(helpers.webpackDir, 'cactus-square.png'),
                     }),
                 ],
-            })
+            }
+
+            if (!isDev) {
+                const smp = new SpeedMeasurePlugin()
+                resolve(smp.wrap(finalConfig))
+            } else {
+                return resolve(finalConfig)
+            }
         })
     })
 

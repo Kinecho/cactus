@@ -7,12 +7,14 @@ import * as DateUtil from "@shared/util/DateUtil";
 import { getValidTimezoneName } from "@shared/timezones";
 import {
     isOptInTrialing,
+    isOptOutTrialing,
     MemberSubscription,
     needsTrialExpiration,
     subscriptionTierDisplayName
 } from "@shared/models/MemberSubscription";
 import { DEFAULT_SUBSCRIPTION_TIER, SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 import { CoreValue } from "@shared/models/CoreValueTypes";
+import { CactusElement } from "@shared/models/CactusElement";
 
 export enum JournalStatus {
     PREMIUM = "PREMIUM",
@@ -72,10 +74,15 @@ export enum Field {
     subscriptionTrialEndsAt = "subscription.trial.endsAt",
     subscriptionStripeId = "subscription.stripeSubscriptionId",
     subscriptionCancellation = "subscription.cancellation",
+    subscriptionCancellationAccessEndsAt = "subscription.cancellation.accessEndsAt",
+    subscriptionCancellationInitiatedAt = "subscription.cancellation.userInitiatedAt",
     subscriptionActivated = "subscription.activated",
     subscriptionCanceledAccessEndsAt = "subscription.cancellation.accessEndsAt",
+    subscriptionOptOutTrialStartedAt = "subscription.optOutTrial.startedAt",
+    subscriptionOptOutTrialEndsAt = "subscription.optOutTrial.endsAt",
     stripeCustomerId = "stripe.customerId",
     coreValues = "coreValues",
+    focusElement = "focusElement",
 }
 
 export interface PromptSendTime {
@@ -85,13 +92,13 @@ export interface PromptSendTime {
 
 export type QuarterHour = 0 | 15 | 30 | 45;
 
-export const DEFAULT_PROMPT_SEND_TIME: PromptSendTime = {hour: 2, minute: 45};
+export const DEFAULT_PROMPT_SEND_TIME: PromptSendTime = { hour: 2, minute: 45 };
 
 export interface MemberStripeDetails {
     customerId?: string,
 }
 
-export default class CactusMember extends BaseModel {
+export default class  CactusMember extends BaseModel {
     readonly collection = Collection.members;
     static Field = Field;
     firstName?: string;
@@ -143,6 +150,8 @@ export default class CactusMember extends BaseModel {
     wordCloud?: InsightWord[];
     coreValues?: CoreValue[];
 
+    focusElement?: CactusElement | null;
+
     prepareForFirestore(): any {
         super.prepareForFirestore();
         this.email = this.email ? this.email.toLowerCase().trim() : this.email;
@@ -175,7 +184,7 @@ export default class CactusMember extends BaseModel {
     }
 
     getFullName(): string {
-        return `${this.firstName || ""} ${this.lastName || ""}`.trim();
+        return `${ this.firstName || "" } ${ this.lastName || "" }`.trim();
     }
 
     getCurrentLocaleDateObject(date: Date = new Date()): DateObject {
@@ -187,7 +196,7 @@ export default class CactusMember extends BaseModel {
 
     getDefaultPromptSendTimeUTC(): PromptSendTime {
         return {
-            hour: DateTime.utc().minus({hours: 1}).hour,
+            hour: DateTime.utc().minus({ hours: 1 }).hour,
             minute: DateUtil.getCurrentQuarterHour()
         } as PromptSendTime;
     }
@@ -220,7 +229,7 @@ export default class CactusMember extends BaseModel {
     }
 
     get daysLeftInTrial(): number {
-        const end = this.subscription?.trial?.endsAt;
+        const end = this.subscription?.optOutTrial?.endsAt || this.subscription?.trial?.endsAt;
         if (!end) {
             return 0;
         }
@@ -229,6 +238,10 @@ export default class CactusMember extends BaseModel {
 
     get isOptInTrialing(): boolean {
         return isOptInTrialing(this.subscription)
+    }
+
+    get isOptOutTrialing(): boolean {
+        return isOptOutTrialing(this.subscription)
     }
 
     get needsTrialExpiration(): boolean {
@@ -240,8 +253,8 @@ export default class CactusMember extends BaseModel {
     }
 
     get hasUpcomingCancellation(): boolean {
-        return !!this.subscription?.cancellation?.accessEndsAt && 
-            this.subscription.cancellation.accessEndsAt > new Date();
+        return !!this.subscription?.cancellation?.accessEndsAt &&
+        this.subscription.cancellation.accessEndsAt > new Date();
     }
 
     set stripeCustomerId(customerId: string | undefined) {
@@ -252,5 +265,20 @@ export default class CactusMember extends BaseModel {
 
     get stripeCustomerId(): string | undefined {
         return this.stripe?.customerId;
+    }
+
+    /**
+     * Get a core value with a preferred index, or the last value, which ever is smaller.
+     * @param {number} index - the preferred core value index
+     * @return {CoreValue | undefined}
+     */
+    getCoreValueAtIndex(index: number = 0): CoreValue | undefined {
+        const coreValues = this.coreValues;
+        if (!coreValues || coreValues.length === 0) {
+            return undefined;
+        }
+
+        const i = index % coreValues.length;
+        return coreValues[i];
     }
 }

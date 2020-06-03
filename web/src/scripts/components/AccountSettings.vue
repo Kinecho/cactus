@@ -91,7 +91,7 @@
                                 <provider-icon :providerId="provider.providerId" class="provider-icon"/>
                                 <span class="provider-name">{{provider.displayName}}</span>
                                 <button class="red tertiary remove">
-                                    <img src="assets/images/trash.svg" alt=""/>
+                                    <img src="/assets/images/trash.svg" alt=""/>
                                     {{copy.common.REMOVE}}
                                 </button>
                             </div>
@@ -100,7 +100,9 @@
 
                     <div class="settings-group" v-if="showExportData">
                         <h2>Download Data<span class="badge-label">Plus</span></h2>
-                        <p class="subtext">You can export and download your data from Cactus, including all your journal prompts and written reflections. Tap the <strong>Download</strong> button below to create an archive to keep for your records or use the data in another service.
+                        <p class="subtext">You can export and download your data from Cactus, including all your journal
+                            prompts and written reflections. Tap the <strong>Download</strong> button below to create an
+                            archive to keep for your records or use the data in another service.
                         <div class="item">
                             <DataExport :member="member"/>
                         </div>
@@ -109,7 +111,7 @@
                     <div class="settings-group delete">
                         <div class="item">
                             <button class="red tertiary remove" @click="deleteAccountModalVisible = true">
-                                <img src="assets/images/trash.svg" alt=""/>
+                                <img src="/assets/images/trash.svg" alt=""/>
                                 {{copy.account.DELETE_ACCOUNT}}
                             </button>
                         </div>
@@ -183,6 +185,7 @@
     import DataExport from "@components/DataExport.vue";
     import AppSettings from "@shared/models/AppSettings";
     import AppSettingsService from "@web/services/AppSettingsService";
+    import { pushRoute } from "@web/NavigationUtil";
 
     const logger = new Logger("AccountSettings.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -195,7 +198,7 @@
 
     export default Vue.extend({
         components: {
-                NavBar,
+            NavBar,
             Footer,
             Spinner,
             CheckBox,
@@ -217,12 +220,12 @@
         },
         beforeMount() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({ member, user }) => {
+                onData: async ({ member, user }) => {
                     this.member = member;
                     this.user = user;
                     this.authLoaded = true;
                     if (!member) {
-                        this.$router.push(PageRoute.HOME);
+                        await pushRoute(PageRoute.HOME)
                     }
                 }
             });
@@ -519,7 +522,7 @@
     }
 
     h2 {
-        color: $royal;
+        color: $mediumDolphin;
         font-size: 2.4rem;
         margin-bottom: 2.4rem;
 

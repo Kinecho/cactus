@@ -139,7 +139,6 @@ $slow: 1.5s;
 
 @include createAnimation("celebrate", bounce-in, $normal, $reverseOut: false, $outAnimation: fade-out, $outDuration: $normal)
 
-
 @keyframes bounce-in {
   0% {
     transform: scale(0);
@@ -198,4 +197,38 @@ $slow: 1.5s;
 
 .crossfade-leave-to {
   opacity: 0;
+}
+
+
+.component-fade-enter-active, .component-fade-leave-active {
+  transition: opacity .15s ease;
+}
+.component-fade-enter, .component-fade-leave-to
+  /* .component-fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
+}
+
+
+.slide-left-leave-active,
+.slide-left-enter-active {
+  transition: .25s ease-in-out;
+}
+.slide-left-enter {
+  transform: translate(100%, 0);
+}
+.slide-left-leave-to {
+  transform: translate(-100%, 0);
+}
+
+
+
+.slide-right-leave-active,
+.slide-right-enter-active {
+  transition: .25s ease-in-out;
+}
+.slide-right-enter {
+  transform: translate(-100%, 0);
+}
+.slide-right-leave-to {
+  transform: translate(100%, 0);
 }

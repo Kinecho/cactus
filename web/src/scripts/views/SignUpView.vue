@@ -9,7 +9,12 @@
                     :forceTransparent="true"
                     :largeLogoOnDesktop="true"
                     :whiteLogo="true"/>
-            <SignIn :message="message" :title="title"/>
+            <SignIn :message="message"
+                    :title="title"
+                    :twitter-enabled="includeTwitter"
+                    :mode="isSignUp ? 'SIGN_UP' : 'LOG_IN'"
+            />
+
         </div>
         <StandardFooter :isTransparent="true"/>
     </div>
@@ -46,11 +51,25 @@
         destroyed(): void {
             document.body.classList.remove("sign-up-body");
         },
-        data(): { title: string, copy: LocalizedCopy, message: string | null } {
+        data(): { copy: LocalizedCopy, message: string | null } {
             return {
                 copy,
                 message: getQueryParam(QueryParam.MESSAGE),
-                title: window.location.pathname.startsWith(PageRoute.LOGIN) ? copy.common.LOG_IN : copy.common.SIGN_UP,
+            }
+        },
+        computed: {
+            includeTwitter(): boolean {
+                //only show twitter on login screen, not sign up
+                return this.isLogIn;
+            },
+            title(): string {
+                return this.isLogIn ? copy.common.LOG_IN : copy.common.SIGN_UP;
+            },
+            isSignUp(): boolean {
+                return this.$route.path === PageRoute.SIGNUP;
+            },
+            isLogIn(): boolean {
+                return this.$route.path === PageRoute.LOGIN;
             }
         },
         name: "SignUpView"
@@ -67,10 +86,10 @@
 </style>
 
 <style lang="scss">
-    @import "common";
     @import "variables";
-    @import "~styles/modal.scss";
-    @import "~styles/forms.scss";
+    @import "common";
+    @import "forms";
+    @import "modal.scss";
 
     .page-wrapper {
         position: relative;

@@ -11,7 +11,7 @@
             Confirm
         </button>
         <div class="status" v-if="!received">
-            <img class="statusIcon" src="assets/images/clock.svg" alt="" />
+            <img class="statusIcon" src="/assets/images/clock.svg" alt="" />
             Requested
         </div>
     </div>

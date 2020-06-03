@@ -11,6 +11,10 @@ import CactusMemberService from "@web/services/CactusMemberService";
 import Logger from "@shared/Logger";
 import { isAndroidApp } from "@web/DeviceUtil";
 import { Route } from "vue-router";
+import { CactusElement } from "@shared/models/CactusElement";
+import { isNumber } from "@shared/util/ObjectUtil";
+import { ScreenName } from "@components/gapanalysis/GapAssessmentTypes";
+import { BillingPeriod } from "@shared/models/SubscriptionProduct";
 
 const logger = new Logger("Analytics.ts");
 
@@ -57,9 +61,6 @@ export function init() {
 
     getAuth().onAuthStateChanged(user => {
         setUser(user);
-        if (user) {
-            logger.log("User has logged in, removing any tracking/referral info");
-        }
         isFirstAuthLoad = true;
 
     });
@@ -84,11 +85,6 @@ export function init() {
             }
         });
     }
-
-    logger.log("version is ", Config.version);
-
-    // if ()
-
 
     createGTag();
     gtag('js', new Date());
@@ -140,8 +136,10 @@ export function setUser(user?: User | null) {
     }
 }
 
-export async function fireConfirmedSignupEvent(options: { email?: string, userId?: string }): Promise<void> {
+export async function fireConfirmedSignupEvent(options: { email?: string, userId?: string, method?: string }): Promise<void> {
     return new Promise(async resolve => {
+
+        firebaseAnalytics().logEvent("sign_up", { method: options.method })
 
         logger.debug("Firing confirmed signup event");
         /* Facebook */
@@ -156,7 +154,11 @@ export async function fireConfirmedSignupEvent(options: { email?: string, userId
     })
 }
 
-export async function fireSignupEvent() {
+export function fireLoginEvent(options: { method?: string }) {
+    firebaseAnalytics().logEvent("login", { method: options.method });
+}
+
+export async function fireSignupLeadEvent() {
     return new Promise(async resolve => {
         logger.info("Fired 'Lead' Event");
         /* Facebook */
@@ -187,15 +189,33 @@ export async function fireOptInStartTrialEvent(options: { value?: number, predic
                 predicted_ltv: (predicted_ltv?.toString() ?? value?.toString() ?? '0.00')
             });
         }
-
+        const dollar = (options.value ?? 0);
         //if web, it means we checked out via stripe.
         if (!isAndroidApp()) {
-            const dollar = (options.value ?? 0);
             //@ts-ignore
             firebaseAnalytics().logEvent("purchase", { value: dollar, currency: 'USD' })
         }
 
+        firebaseAnalytics().logEvent("trial_start", { value: dollar, currency: 'USD' })
+
         resolve();
+    })
+}
+
+export function logBeginCheckout(params: { valueDollars: number, subscriptionProductId: string }) {
+    // /**
+    //  * Old style analytics..
+    //  */
+    // gtag('event', 'begin_checkout', {
+    //     value: params.valueDollars,
+    //     items: [params.subscriptionProductId],
+    //     currency: 'USD',
+    // });
+
+    firebaseAnalytics().logEvent("begin_checkout", {
+        value: params.valueDollars,
+        currency: 'USD',
+        items: [{ item_id: params.subscriptionProductId }]
     })
 }
 
@@ -204,23 +224,12 @@ export function logCoreValuesAssessmentStarted() {
 }
 
 export function logCoreValuesAssessmentProgress(page: number) {
-    firebaseAnalytics().logEvent("core_values_progress", {page: page});
+    firebaseAnalytics().logEvent("core_values_progress", { page: page });
 }
 
 
 export function logCoreValuesAssessmentCompleted() {
     firebaseAnalytics().logEvent("core_values_completed");
-}
-
-export function findFriendsSocialSharingEvent(options: { type: "open" | "close" | "change", network?: string, url?: string }) {
-    gtag('event', options.type, {
-        event_category: "social_share",
-        event_label: options.network
-    });
-    if (options.type === "open") {
-        firebaseAnalytics().logEvent("share", { content_type: "find_friends", content_id: options.network })
-    }
-
 }
 
 function createGTag() {
@@ -251,4 +260,51 @@ export function logRouteChanged(to: Route): void {
         });
     }
     firstRouteFired = true;
+}
+
+export function logGapAnalysisStarted() {
+    firebaseAnalytics().logEvent("gap_analysis_started")
+}
+
+export function logFocusElementSelected(element: CactusElement | null) {
+    firebaseAnalytics().logEvent("focus_element_selected", { element })
+}
+
+export function logGapAnalysisCompleted() {
+    firebaseAnalytics().logEvent("gap_analysis_completed")
+}
+
+export function logGapAnalysisCanceled(screen?: string | null) {
+    firebaseAnalytics().logEvent("gap_analysis_canceled", { screen });
+}
+
+
+export function logGapAnalysisScreen(screen: ScreenName, questionId?: number) {
+    let params = {};
+    if (!isNumber(questionId)) {
+        params = { question: questionId };
+    }
+    firebaseAnalytics().logEvent(`gap_analysis_screen_${ screen }`, params)
+}
+
+export function logPresentSubscriptionOffers(options: {
+    promotionName?: string,
+    creativeName?: string,
+    products: {
+        subscriptionProductId?: string,
+        billingPeriod?: BillingPeriod,
+        name?: string
+    }[]
+}) {
+    const items = options.products.map(product => ({
+        item_category: product.billingPeriod,
+        item_name: product.name,
+        item_id: product.subscriptionProductId
+    }));
+
+    firebaseAnalytics().logEvent("view_promotion", {
+        items,
+        promotion_name: options.promotionName,
+        creative_name: options.creativeName,
+    })
 }

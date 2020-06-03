@@ -13,18 +13,17 @@
             </button>
             <modal :show="showCloseConfirm" @close="showCloseConfirm = false">
                 <div class="close-confirm-modal paddingContainer" slot="body">
-                    <h3>Close assessment?</h3>
-                    <p class="subtext">Are you sure you want to close the assessment? Your progress will not be
-                        saved.</p>
+                    <h3>Leave Core Values?</h3>
+                    <p class="subtext">Are you sure you want to leave the Core Values exercise? Your progess will be lost.</p>
                     <div class="btnContainer">
-                        <button @click="showCloseConfirm = false">Continue assessment</button>
-                        <button class="secondary" @click="close">Close &amp; discard</button>
+                        <button @click="showCloseConfirm = false">No, keep going</button>
+                        <button class="secondary" @click="close">Leave exercise</button>
                     </div>
                 </div>
             </modal>
 
             <template v-if="completed">
-                <p class="titleMarkdown">The survey is completed.</p>
+                <p class="titleMarkdown">You completed the quiz!</p>
             </template>
 
             <template v-else-if="currentQuestion && currentResponse">
@@ -202,134 +201,7 @@
 </script>
 
 <style scoped lang="scss">
-    @import "variables";
-    @import "mixins";
-
-    .assessment-container {
-        position: relative;
-        text-align: center;
-
-        @include r(768) {
-            @include shadowbox;
-            margin: 6.4rem auto;
-            overflow: hidden;
-        }
-    }
-
-    .paddingContainer {
-        padding: 2.4rem;
-
-        @include r(768) {
-            padding: 3.2rem;
-        }
-    }
-
-    .cvActions {
-        background-color: transparentize($white, .15);
-        bottom: 0;
-        left: 0;
-        padding: 1.6rem;
-        position: fixed;
-        right: 0;
-
-        @include r(768) {
-            background-color: transparent;
-            padding: 0;
-            position: relative;
-        }
-
-        button {
-            width: 100%;
-        }
-    }
-
-    .validation {
-        color: $red;
-        font-size: 1.6rem;
-        padding-bottom: .8rem;
-
-        @include r(768) {
-            left: 0;
-            position: absolute;
-            right: 0;
-            top: -2.8rem;
-        }
-    }
-
-    .backArrowbtn {
-        left: 1.2rem;
-        position: absolute;
-        top: 2rem;
-
-        @include r(768) {
-            left: 1.9rem;
-            top: 3.1rem;
-        }
-    }
-
-    .backArrow {
-        fill: $green;
-        height: 1.4rem;
-        transform: rotate(180deg);
-        width: 1.4rem;
-    }
-
-    button.close {
-        background-color: $white;
-        position: absolute;
-        right: .8rem;
-        top: 1.8rem;
-        z-index: 20;
-
-        @include r(600) {
-            right: 1.6rem;
-            top: 2.8rem;
-        }
-
-        svg {
-            height: 1.8rem;
-            width: 1.8rem;
-        }
-    }
-
-    .close-confirm-modal {
-        @include shadowbox;
-        max-width: 48rem;
-        padding: 2.4rem;
-
-        @include r(600) {
-            max-width: 60rem;
-            padding: 3.2rem;
-        }
-
-        h3 {
-            font-size: 2.8rem;
-        }
-
-        .subtext {
-            margin-bottom: 1.6rem;
-        }
-    }
-
-    .btnContainer {
-        button {
-            margin-bottom: .8rem;
-            white-space: nowrap;
-            width: 100%;
-
-            @include r(600) {
-                flex-grow: 0;
-                margin: 0 .8rem 0 0;
-                width: auto;
-            }
-        }
-
-        @include r(600) {
-            display: flex;
-        }
-    }
-
-    .titleMarkdown {
-        margin: 3.2rem auto 4rem;
-    }
+    @import "~styles/variables";
+    @import "~styles/mixins";
+    @import "~styles/assessment";
 </style>

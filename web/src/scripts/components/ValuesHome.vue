@@ -14,7 +14,7 @@
                         <!--Start Survey Button Logic (logged in state)-->
                         <div v-bind:class="['wrapper', {loading: loading}]">
                             <div class="container logged-in" v-show="member && !loading">
-                                <a class="button" v-show="surveyLink" v-bind:href="surveyLink">Begin Activity</a>
+                                <router-link class="button" v-show="surveyLink" :to="surveyLink">Begin Activity</router-link>
                             </div>
                             <div class="container logged-out" v-show="!member && !loading">
                                 <AuthButton linkText="Sign in to Continue" linkUrl="/values" variant="button"></AuthButton>
@@ -23,10 +23,10 @@
                         <!--END: Start Survey Button Logic (logged in sate)-->
                     </div>
                 </div>
-                <img id="yellowBlob1" src="assets/images/yellowBlob.svg" alt=""/>
-                <img id="greenBlob" src="assets/images/lightGreenBlob.svg" alt=""/>
-                <img id="pinkBlob" src="assets/images/pinkBlob3.svg" alt=""/>
-                <img id="stem" src="assets/images/stem3.svg" alt=""/>
+                <img id="yellowBlob1" src="/assets/images/yellowBlob.svg" alt=""/>
+                <img id="greenBlob" src="/assets/images/lightGreenBlob.svg" alt=""/>
+                <img id="pinkBlob" src="/assets/images/pinkBlob3.svg" alt=""/>
+                <img id="stem" src="/assets/images/stem3.svg" alt=""/>
             </section>
             <section class="threeUp list">
                 <div class="centered">
@@ -43,7 +43,7 @@
                                 you</p>
                         </div>
                         <div class="benefit">
-                            <img src="assets/images/cactusPots.svg" alt="Three cacti in pots" class="illustration"/>
+                            <img src="/assets/images/cactusPots.svg" alt="Three cacti in pots" class="illustration"/>
                             <p class="text">Use your values to better understand yourself and live a happier, healthier
                                 life</p>
                         </div>
@@ -52,7 +52,7 @@
             </section>
             <section class="twoUp pink">
                 <div class="centered">
-                    <img class="graphic flip" src="assets/images/relax2.svg" alt=""/>
+                    <img class="graphic flip" src="/assets/images/relax2.svg" alt=""/>
                     <div class="text">
                         <h2>What is most important for&nbsp;you?</h2>
                         <p>Knowing your core values will help you achieve a higher level of self-awareness. You’ll start
@@ -67,13 +67,13 @@
                         <p>Your core values results will help guide your future Cactus reflections and prompts.</p>
                     </div>
                     <div class="cropped">
-                        <img class="graphic" src="assets/images/personalJournal.png" alt="Personalized question in a journal"/>
+                        <img class="graphic" src="/assets/images/personalJournal.png" alt="Personalized question in a journal"/>
                     </div>
                 </div>
             </section>
             <section class="twoUp green">
                 <div class="centered">
-                    <img class="graphic" src="assets/images/pizza2.svg" alt=""/>
+                    <img class="graphic" src="/assets/images/pizza2.svg" alt=""/>
                     <div class="text">
                         <h2>The best feedback, from those who know you&nbsp;best</h2>
                         <p>Getting feedback from others is a great way to fortify the strengths you see in yourself and
@@ -106,6 +106,7 @@
     // @ts-ignore
     import { ScrollToPlugin } from 'gsap/all';
     import Logger from "@shared/Logger";
+    import { PageRoute } from "@shared/PageRoutes";
 
 
     const logger = new Logger("ValuesHome.vue");
@@ -153,10 +154,7 @@
         },
         computed: {
             surveyLink(): string | undefined {
-                if (this.email) {
-                    return `https://www.surveymonkey.com/r/cactus-core-values?email=${ this.email }`
-                }
-                return undefined;
+                return `${PageRoute.CORE_VALUES}?${QueryParam.CV_LAUNCH}=true`
             },
             loading(): boolean {
                 return !this.authLoaded
@@ -252,7 +250,7 @@
 
         @include h(768) {
             &:before {
-                background-image: url(assets/images/yellowNeedleBlob.svg);
+                background-image: url(/assets/images/yellowNeedleBlob.svg);
                 background-repeat: no-repeat;
                 background-size: 730px;
                 content: "";
@@ -266,7 +264,7 @@
         }
 
         &:after {
-            background-image: url(assets/images/stem2.svg);
+            background-image: url(/assets/images/stem2.svg);
             background-repeat: no-repeat;
             background-size: 170px;
             bottom: 80vh;
@@ -485,6 +483,7 @@
                 display: grid;
                 grid-column-gap: 6.4rem;
                 grid-template-columns: 1fr 1fr;
+                grid-template-rows: auto;
                 justify-items: center;
                 max-width: 120rem;
             }

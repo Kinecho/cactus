@@ -8,23 +8,23 @@
             <div class="no-friends emptyState" v-if="!loading && friends.length === 0">
                 <div class="graphic">
                     <SocialActivityCard
-                        avatarUrl="/assets/images/avatars/blobatar2.png"
-                        date="7 minutes ago"
-                        name="Mary Demoss"
-                        promptContentPath="https://cactus.app/prompts/zTVQbvum95ENWV2Do3xE"
-                        promptQuestion="Who energizes you?"/>
+                            avatarUrl="/assets/images/avatars/blobatar2.png"
+                            date="7 minutes ago"
+                            name="Mary Demoss"
+                            promptContentPath="https://cactus.app/prompts/zTVQbvum95ENWV2Do3xE"
+                            promptQuestion="Who energizes you?"/>
                     <SocialActivityCard
-                        avatarUrl="/assets/images/avatars/blobatar1.png"
-                        date="8 hours ago"
-                        name="Aaron Nichols"
-                        promptContentPath="https://cactus.app/prompts/P0LRm37OKPBwCAHivbXG"
-                        promptQuestion="What helps you feel calm?"/>
+                            avatarUrl="/assets/images/avatars/blobatar1.png"
+                            date="8 hours ago"
+                            name="Aaron Nichols"
+                            promptContentPath="https://cactus.app/prompts/P0LRm37OKPBwCAHivbXG"
+                            promptQuestion="What helps you feel calm?"/>
                     <SocialActivityCard
-                        avatarUrl="/assets/images/avatars/blobatar3.png"
-                        date="1 day ago"
-                        name="Patricia Smith"
-                        promptContentPath="https://cactus.app/prompts/cPOoU4Lfv6z3nEJ5YZoZ"
-                        promptQuestion="What are you grateful for this week?"/>
+                            avatarUrl="/assets/images/avatars/blobatar3.png"
+                            date="1 day ago"
+                            name="Patricia Smith"
+                            promptContentPath="https://cactus.app/prompts/cPOoU4Lfv6z3nEJ5YZoZ"
+                            promptQuestion="What are you grateful for this week?"/>
                 </div>
                 <h1>Mindful Friends</h1>
                 <p class="subtext">Your mindfulness journey is more effective when you share it with&nbsp;others.</p>
@@ -42,22 +42,24 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {ListenerUnsubscriber} from '@web/services/FirestoreService'
+    import { ListenerUnsubscriber } from '@web/services/FirestoreService'
     import CactusMember from "@shared/models/CactusMember"
     import CactusMemberService from "@web/services/CactusMemberService"
     import SocialConnectionService from '@web/services/SocialConnectionService';
     import SocialConnection from "@shared/models/SocialConnection";
-    import {PageRoute} from "@shared/PageRoutes"
-    import {QueryParam} from '@shared/util/queryParams'
+    import { PageRoute } from "@shared/PageRoutes"
+    import { QueryParam } from '@shared/util/queryParams'
     import NavBar from "@components/NavBar.vue";
     import Footer from "@components/StandardFooter.vue";
     import SocialActivityFeed from "@components/SocialActivityFeed.vue"
     import SocialActivityCard from "@components/SocialActivityCard.vue"
     import VueClipboard from "vue-clipboard2";
-    import SocialSharing from "vue-social-sharing";
+    import Logger from "@shared/Logger"
+    import { pushRoute } from "@web/NavigationUtil";
+
+    const logger = new Logger("SocialHome");
 
     Vue.use(VueClipboard);
-    Vue.use(SocialSharing);
 
 
     export default Vue.extend({
@@ -86,9 +88,9 @@
         },
         beforeMount() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({member}) => {
+                onData: ({ member }) => {
                     if (!member) {
-                        this.$router.push(`${PageRoute.LOGIN}?${QueryParam.REDIRECT_URL}=${encodeURIComponent(PageRoute.SOCIAL)}`);
+                        pushRoute(`${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(PageRoute.SOCIAL) }`)
                     } else {
                         if (this.member?.id != member.id) { // only update instance if switching users
                             this.member = member;
@@ -207,7 +209,7 @@
             position: relative;
 
             &:after {
-                background: linear-gradient(rgba(255,255,255,0), $white 98%);
+                background: linear-gradient(rgba(255, 255, 255, 0), $white 98%);
                 bottom: 0;
                 content: '';
                 display: block;

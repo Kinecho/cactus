@@ -3,14 +3,14 @@
 @import "~styles/common";
 
 .hero {
-    background: url(assets/images/plusBg.svg) center bottom/cover no-repeat;
+    background: url(/assets/images/plusBg.svg) center bottom/cover no-repeat;
     color: $white;
     overflow: hidden;
     padding: 4.8rem 2.4rem 16rem;
     position: relative;
 
     &:before {
-        background: url(assets/images/crossesBlue.svg) 0 0/228px 216px no-repeat;
+        background: url(/assets/images/crossesBlue.svg) 0 0/228px 216px no-repeat;
         content: "";
         display: block;
         height: 216px;
@@ -220,10 +220,10 @@
 }
 
 .insights {
-    background: $darkestGreen url(assets/images/grainy.png);
+    background: $darkestGreen url(/assets/images/grainy.png);
 
     &:before {
-        background-image: url(assets/images/blob-outline-right.svg), url(assets/images/blob-magenta-right.svg);
+        background-image: url(/assets/images/blob-outline-right.svg), url(/assets/images/blob-magenta-right.svg);
         background-position: right bottom, right top;
         background-repeat: no-repeat;
         background-size: 240px 275px, 225px 310px;
@@ -261,10 +261,10 @@
 }
 
 .coreValues {
-    background: $indigo url(assets/images/grainy.png);
+    background: $indigo url(/assets/images/grainy.png);
 
     &:before {
-        background-image: url(assets/images/blob-outline.svg), url(assets/images/blob-green.svg);
+        background-image: url(/assets/images/blob-outline.svg), url(/assets/images/blob-green.svg);
         background-position: left bottom, left -2rem top;
         background-repeat: no-repeat;
         background-size: 15rem 14rem, 16rem 19rem;

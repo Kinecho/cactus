@@ -21,6 +21,11 @@
     import { PageRoute } from "@shared/PageRoutes";
     import { getAuth, Unsubscribe } from "@web/firebase";
     import NavBar from "@components/NavBar.vue";
+    import { pushRoute } from "@web/NavigationUtil";
+    import Logger from "@shared/Logger"
+
+    const logger = new Logger("AndroidWelcome");
+
 
     export default Vue.extend({
         components: {
@@ -28,9 +33,11 @@
         },
         beforeMount(): void {
             document.body.classList.add("sign-up-body");
-            this.authListener = getAuth().onAuthStateChanged(user => {
+            this.authListener = getAuth().onAuthStateChanged(async (user) => {
                 if (user) {
-                    this.$router.replace(PageRoute.JOURNAL_HOME);
+                    logger.info("Welcome page, user is logged in, sending them home");
+                    // await pushRoute(PageRoute.JOURNAL_HOME);
+                    window.location.href = PageRoute.JOURNAL_HOME;
                 }
                 this.authLoaded = true;
             })

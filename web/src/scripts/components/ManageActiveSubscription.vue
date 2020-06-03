@@ -49,16 +49,16 @@
                     </div>
                 </div>
                 <div class="card-info" v-if="showCardInfo">
-                    <img class="ccIcon" src="assets/icons/creditCard.svg" alt=""/>
+                    <img class="ccIcon" src="/assets/icons/creditCard.svg" alt=""/>
                     <div class="cardDetails">
                         <span class="brand" v-if="cardBrandName">{{cardBrandName}}</span>
-                        <span class="last4" v-if="last4">ending in {{last4}}</span>
+                        <span class="last4" v-if="last4"> ending in {{last4}}</span>
                         <p class="expires" v-if="cardExpiration">Expires: {{cardExpiration}}</p>
                         <p class="wallet" v-if="digitalWallet && digitalWallet.displayName">
                             {{digitalWallet.displayName}}</p>
                     </div>
                     <button class="tertiary button updateBtn" @click="updatePaymentMethod" :disabled="loadingUpdatePaymentMethod">
-                        <img class="penIcon" src="assets/images/pen.svg" alt="" v-if="!loadingUpdatePaymentMethod"/>
+                        <img class="penIcon" src="/assets/images/pen.svg" alt="" v-if="!loadingUpdatePaymentMethod"/>
                         <span class="btnText" v-if="!loadingUpdatePaymentMethod">Update</span>
                         <span class="btnText loading" v-if="loadingUpdatePaymentMethod">Loading...</span>
                     </button>
@@ -93,8 +93,10 @@
     } from "@shared/util/SubscriptionProductUtil";
     import Spinner from "@components/Spinner.vue";
     import { SnackbarMessage } from "@components/SnackbarContent.vue";
-    import { appendQueryParams } from "@shared/util/StringUtil";
+    import { appendQueryParams, isBlank } from "@shared/util/StringUtil";
+    import Logger from "@shared/Logger"
 
+    const logger = new Logger("ManageActiveSubscription");
     const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
@@ -135,7 +137,7 @@
         watch: {
             member(current: CactusMember | undefined, previous: CactusMember | undefined) {
                 if (current?.subscription?.cancellation?.accessEndsAt !== previous?.subscription?.cancellation?.accessEndsAt ||
-                    current?.subscription?.tier !== previous?.subscription?.tier) {
+                current?.subscription?.tier !== previous?.subscription?.tier) {
                     this.fetchSubscriptionDetails();
                 }
             }
@@ -194,6 +196,12 @@
                 return;
             },
             nextBillAmount(): string | undefined {
+                let applePriceFormatted = this.subscriptionDetails?.upcomingInvoice?.appleProductPrice?.localePriceFormatted
+                if (!isBlank(applePriceFormatted)) {
+                    logger.info("Using apple price of: ", applePriceFormatted)
+                    return applePriceFormatted
+                }
+
                 const amount = this.subscriptionDetails?.upcomingInvoice?.amountCentsUsd;
                 if (!amount) {
                     return;

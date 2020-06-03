@@ -11,7 +11,7 @@ import {
     isBlank, preventOrphanedWords,
     stripQueryParams,
     titleCase,
-    isFeatureAuthUrl
+    isFeatureAuthUrl, isExternalUrl
 } from "@shared/util/StringUtil";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
@@ -166,6 +166,24 @@ describe("appendDomain", () => {
     test("no query params, with localhost", () => {
         const path = "/test?key=value";
         const domain = "cactus.app";
+        expect(appendDomain(path, domain)).toEqual("https://cactus.app/test?key=value");
+    });
+
+    test("path already has domain = localhost", () => {
+        const path = "http://localhost:8080/test?key=value";
+        const domain = "cactus.app";
+        expect(appendDomain(path, domain)).toEqual("http://localhost:8080/test?key=value");
+    });
+
+    test("domain already includes protocol", () => {
+        const path = "http://localhost:8080/test?key=value";
+        const domain = "https://cactus.app";
+        expect(appendDomain(path, domain)).toEqual("http://localhost:8080/test?key=value");
+    });
+
+    test("domain already includes protocol, path doesn't", () => {
+        const path = "/test?key=value";
+        const domain = "https://cactus.app";
         expect(appendDomain(path, domain)).toEqual("https://cactus.app/test?key=value");
     });
 })
@@ -361,5 +379,33 @@ describe("captialize first letters words in a sentence", () => {
         expect(titleCase("hello")).toEqual("Hello");
         expect(titleCase("hello world")).toEqual("Hello World");
         expect(titleCase("hello world, city, and people")).toEqual("Hello World, City, And People");
+    })
+})
+
+describe("is external url", () => {
+    test("only path", () => {
+        expect(isExternalUrl("/this/is/a/path")).toBeFalsy();
+        expect(isExternalUrl("/")).toBeFalsy();
+        expect(isExternalUrl("/test.js")).toBeFalsy();
+    })
+
+    test("external urls", () => {
+        expect(isExternalUrl("cactus.app")).toBeTruthy()
+        expect(isExternalUrl("http://cactus.app")).toBeTruthy()
+        expect(isExternalUrl("https://cactus.app")).toBeTruthy()
+        expect(isExternalUrl("https://cactus.app/this/is/a/path")).toBeTruthy()
+    })
+
+    test("External URL as a query param ", () => {
+        expect(isExternalUrl("/my/path?successUrl=https://cactus.app/this/is/a/path")).toBeFalsy()
+        expect(isExternalUrl(`/my/path?successUrl=${encodeURIComponent("https://cactus.app/this/is/a/path")}`)).toBeFalsy()
+    })
+
+    test("nulls and blanks etc", () => {
+        expect(isExternalUrl(undefined)).toBeFalsy()
+        expect(isExternalUrl("")).toBeFalsy()
+        expect(isExternalUrl("    ")).toBeFalsy()
+        const input:any = null;
+        expect(isExternalUrl(input)).toBeFalsy()
     })
 })

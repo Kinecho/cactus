@@ -1,9 +1,9 @@
-import {getFlamelink} from "@web/firebase";
+import { getFlamelink } from "@web/firebase";
 import flamelink from "flamelink/app";
 import FlamelinkModel from "@shared/FlamelinkModel";
-import {buildQueryResult, fromFlamelinkData, fromFlamelinkQueryResults} from "@shared/util/FlamelinkUtils";
-import {IGetOptions, QueryResult} from "@shared/types/FirestoreTypes";
-import {ListenerUnsubscriber} from "@web/services/FirestoreService";
+import { buildQueryResult, fromFlamelinkData, fromFlamelinkQueryResults } from "@shared/util/FlamelinkUtils";
+import { IGetOptions, QueryResult } from "@shared/types/FirestoreTypes";
+import { ListenerUnsubscriber } from "@web/services/FirestoreService";
 import Logger from "@shared/Logger";
 import SubscriptionProduct from "@shared/models/SubscriptionProduct";
 
@@ -65,9 +65,9 @@ export default class FlamelinkService {
     async getById<T extends FlamelinkModel>(id: string, Type: { new(): T }): Promise<T | undefined> {
         const type = new Type();
         const schema = type.schema;
-        logger.log(`Fetching ${id} from ${schema}`);
+        logger.log(`Fetching ${ id } from ${ schema }`);
 
-        const content = await this.flamelink.content.get({entryId: id, schemaKey: schema});
+        const content = await this.flamelink.content.get({ entryId: id, schemaKey: schema });
         if (!content) {
             return undefined;
         }
@@ -90,7 +90,7 @@ export default class FlamelinkService {
                     return;
                 }
                 if (!data) {
-                    logger.log(`No entry found for ${schema} ${id}`);
+                    logger.log(`No entry found for ${ schema } ${ id }`);
                     options.onData(undefined, undefined);
                     return;
                 }
@@ -108,14 +108,14 @@ export default class FlamelinkService {
         return this.content.subscribe({
             schemaKey: schema,
             populate: options.populate,
-            callback: (error: any, data: {[id: string]: Partial<T>}) => {
+            callback: (error: any, data: { [id: string]: Partial<T> }) => {
                 if (error) {
                     logger.error("Failed to load data from flamelink", error);
                     options.onData(undefined, error);
                     return;
                 }
                 if (!data) {
-                    logger.log(`No data returned for schema ${schema}`);
+                    logger.log(`No data returned for schema ${ schema }`);
                     options.onData(undefined, undefined);
                     return;
                 }
@@ -136,7 +136,7 @@ export default class FlamelinkService {
 
 
     async getFirstByField<T extends FlamelinkModel>(args: { name: string, value: string, Type: { new(): T } }): Promise<T | undefined> {
-        const {name, value, Type} = args;
+        const { name, value, Type } = args;
 
         const type = new Type();
         const schema = type.schema;
@@ -159,9 +159,8 @@ export default class FlamelinkService {
     }
 
 
-
     async getAllWhere<T extends FlamelinkModel>(args: { name: string, value: FlamelinkValue, Type: { new(): T } }): Promise<QueryResult<T>> {
-        const {name, value, Type} = args;
+        const { name, value, Type } = args;
 
         const type = new Type();
         const schema = type.schema;
@@ -175,14 +174,14 @@ export default class FlamelinkService {
             return buildQueryResult(raw, Type);
         } catch (error) {
             logger.error("Error fetching data from flamelink content", error);
-            return {results: [], error: error, size: 0}
+            return { results: [], error: error, size: 0 }
         }
 
     }
 
 
     observeByField<T extends FlamelinkModel>(args: { name: string, value: string, Type: { new(): T } }, options: EntryObserverOptions<T>): ListenerUnsubscriber {
-        const {name, value, Type} = args;
+        const { name, value, Type } = args;
 
         const type = new Type();
         const schema = type.schema;
@@ -204,7 +203,7 @@ export default class FlamelinkService {
                     return;
                 }
                 if (!entry) {
-                    logger.log(`No entry found for ${schema} where ${name}=${value}`);
+                    logger.log(`No entry found for ${ schema } where ${ name }=${ value }`);
                     options.onData(undefined, undefined);
                     return;
                 }
@@ -220,10 +219,44 @@ export default class FlamelinkService {
             const type = new Type();
             const schemaKey = type.schema;
 
-            const raw = await this.content.get({schemaKey});
+            const raw = await this.content.get({ schemaKey });
             return buildQueryResult(raw, Type);
         } catch (error) {
-            return {error, results: [], size: 0}
+            return { error, results: [], size: 0 }
         }
+    }
+
+    async getWhereFields<T extends FlamelinkModel>(fields: { name: string, value: any }[], Type: { new(): T }): Promise<T | undefined> {
+        const type = new Type();
+        const schema = type.schema;
+        const filters = fields.map(({ name, value }) => {
+            return [name, "==", value]
+        });
+
+        // logger.log(`Fetching from ${schema} where ${JSON.stringify(filters, null, 2)}`);
+
+        const results = await this.flamelink.content.get({
+            filters,
+            schemaKey: schema
+        });
+
+        if (!results) {
+            return undefined
+        }
+
+        let content = results;
+
+        const values = Object.values(results);
+        logger.info("Values fetched from get where fields = ", values);
+        if (Array.isArray(values)) {
+            [content] = values;
+        }
+
+        if (!content) {
+            return undefined
+        }
+
+        // logger.log("content found in flamelink", JSON.stringify(content, null, 2))
+        return fromFlamelinkData(content, Type);
     }
 }

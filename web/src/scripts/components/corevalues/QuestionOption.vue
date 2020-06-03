@@ -23,7 +23,7 @@
     import MarkdownText from "@components/MarkdownText.vue";
     import Logger from "@shared/Logger";
     import CheckBox from "@components/CheckBox.vue";
-    import { QuestionType } from "@shared/models/CoreValuesQuestion";
+    import { QuestionType } from "@shared/models/Questions";
 
     const logger = new Logger("QuestionOption");
     export default Vue.extend({

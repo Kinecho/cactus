@@ -19,7 +19,15 @@ export enum PageRoute {
     CORE_VALUES = "/core-values",
     AUTHENTICATE_ACTIONS = "/authenticate-actions",
     PAYMENT_CANCELED = "/cancel",
+    GAP_ANALYSIS = "/gap-analysis",
+
+    /**
+     * @deprecated
+     * This is the legacy core values page. It is now redirected to the /core-values route via vue Router
+     * @type {string}
+     */
     VALUES_HOME = "/values",
     WELCOME = "/welcome",
     INSIGHTS_EMBED = '/insights-embed',
+    INSIGHTS = "/insights",
 }
