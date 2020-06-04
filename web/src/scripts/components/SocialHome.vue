@@ -54,14 +54,12 @@
     import SocialActivityFeed from "@components/SocialActivityFeed.vue"
     import SocialActivityCard from "@components/SocialActivityCard.vue"
     import VueClipboard from "vue-clipboard2";
-    import * as SocialSharing from "vue-social-sharing";
     import Logger from "@shared/Logger"
     import { pushRoute } from "@web/NavigationUtil";
 
     const logger = new Logger("SocialHome");
 
     Vue.use(VueClipboard);
-    Vue.use(SocialSharing);
 
 
     export default Vue.extend({

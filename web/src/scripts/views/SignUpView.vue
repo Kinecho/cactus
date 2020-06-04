@@ -9,12 +9,13 @@
                     :forceTransparent="true"
                     :largeLogoOnDesktop="true"
                     :whiteLogo="true"/>
-            <SignIn :message="message"
-                    :title="title"
-                    :twitter-enabled="includeTwitter"
-                    :mode="isSignUp ? 'SIGN_UP' : 'LOG_IN'"
-            />
-
+            <div class="centered">
+                <SignIn :message="message"
+                        :title="title"
+                        :twitter-enabled="includeTwitter"
+                        :mode="isSignUp ? 'SIGN_UP' : 'LOG_IN'"
+                />
+            </div>
         </div>
         <StandardFooter :isTransparent="true"/>
     </div>
@@ -130,6 +131,21 @@
 
         .firebaseui-link {
             text-decoration: underline;
+        }
+    }
+
+</style>
+
+<style scoped lang="scss">
+    @import "mixins";
+
+    .centered {
+        position: relative;
+        z-index: 1;
+        padding: 6.4rem 2.4rem 0;
+
+        @include r(600) {
+            padding: 12rem 0 0;
         }
     }
 

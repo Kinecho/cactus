@@ -77,8 +77,9 @@ const routes: MetaRouteConfig[] = [
         }
     },
     {
-        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@web/views/SignUpView.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@web/views/GetStartedPage.vue")),
         path: PageRoute.SIGNUP,
+        alias: PageRoute.GET_STARTED,
         name: "Sign Up",
         meta: {
             usePrevious: true,

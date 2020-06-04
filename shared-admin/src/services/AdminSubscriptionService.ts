@@ -81,6 +81,13 @@ interface MailchimpSyncSubscriberResult {
     lastMemberId?: string,
 }
 
+export interface UnsubscribeMemberResult {
+    memberId?: string
+    status: "not_attempted" | "no_active_subscription" | "unsubscribe_success" | "unsubscribe_error" | "not_available" | "already_canceled",
+    billingPlatform?: BillingPlatform,
+    message?: string,
+}
+
 export interface SubscriptionMergeFields {
     [MergeField.SUB_TIER]?: string,
     [MergeField.IN_TRIAL]?: string,
@@ -755,7 +762,7 @@ export default class AdminSubscriptionService {
 
             const subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByAndroidProductId({
                 androidProductId: item.subscriptionProductId,
-                onlyAvailableForSale: true
+                onlyAvailableForSale: false
             });
 
             const subscriptionProductId = subscriptionProduct?.entryId;
@@ -765,7 +772,7 @@ export default class AdminSubscriptionService {
                 await AdminSlackService.getSharedInstance().uploadTextSnippet({
                     channel: ChannelName.cha_ching,
                     message: ":boom: :android: Failed to fulfill Android Checkout",
-                    data: stringifyJSON({ memberId: member.id, email: member.email, params }),
+                    data: stringifyJSON({ memberId: member.id, email: member.email, params, result }, 2),
                     fileType: "json",
                     filename: `failed-purchase-android-${ member.id }.json`,
                 });
@@ -844,6 +851,41 @@ export default class AdminSubscriptionService {
                 }]
             });
             Sentry.captureException(error);
+        }
+
+        return result;
+    }
+
+    async unsubscribeMember(member: CactusMember): Promise<UnsubscribeMemberResult> {
+        const result: UnsubscribeMemberResult = {memberId: member.id, status: "not_attempted"};
+        if (!member.hasActiveSubscription) {
+            result.status = "no_active_subscription";
+            return result;
+        }
+        if (member.hasUpcomingCancellation) {
+            result.status = "already_canceled";
+            return result;
+        }
+
+        const stripeSubscriptionId = member.subscription?.stripeSubscriptionId;
+        const googlePurchaseToken = member.subscription?.googlePurchaseToken;
+        if (stripeSubscriptionId) {
+            result.billingPlatform = BillingPlatform.STRIPE;
+            const subscription = await StripeService.getSharedInstance().cancelSubscriptionImmediately(stripeSubscriptionId);
+            this.logger.info("Canceled stripe subscription", subscription.id);
+            result.status = "unsubscribe_success";
+        } else if (googlePurchaseToken) {
+            const googleResult = await GooglePlayService.getSharedInstance().cancelSubscription(member);
+            result.billingPlatform = BillingPlatform.GOOGLE;
+            if (googleResult.subscriptionFound && googleResult.didCancel) {
+                result.status = "unsubscribe_success";
+            } else if (googleResult.subscriptionFound && !googleResult.didCancel) {
+                result.status = "unsubscribe_error";
+                result.message = "Subscription was found but was unable to cancel it for some reason"
+            } else {
+                result.status = "not_available";
+                result.message = "Unable to cancel the google subscription";
+            }
         }
 
         return result;

@@ -34,12 +34,16 @@ export interface AuthUIConfigOptions {
 export function getAuthUIConfig(opts: AuthUIConfigOptions): firebaseui.auth.Config {
 
     const signInOptions: any[] = [
-        GoogleProvider.PROVIDER_ID,
+        {
+            provider: GoogleProvider.PROVIDER_ID,
+            customParameters: {
+                // Forces account selection even when one account
+                // is available.
+                prompt: 'select_account'
+            }
+        },
         FacebookProvider.PROVIDER_ID,
         "apple.com",
-        // getPhoneProviderConfig(),
-        // emailProvider(opts)
-
     ];
 
     if (opts.includeTwitter) {
@@ -88,6 +92,7 @@ export function getAuthUIConfig(opts: AuthUIConfigOptions): firebaseui.auth.Conf
         signInFlow: 'redirect',
         credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
         signInOptions,
+        siteName: "Cactus",
         tosUrl: `${ Config.domain }/terms-of-service`,
         privacyPolicyUrl: `${ Config.domain }/privacy-policy`
     }
