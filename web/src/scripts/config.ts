@@ -72,7 +72,7 @@ export const Config: {
     isProd: process.env.__BUILD_ENV__ === "prod",
     version: process.env.__SENTRY_VERSION__ as any,
     androidUserAgent: "CactusAndroid",
-    mailchimpSignupFormUrl: process.env.__MAILCHIMP_SIGNUP_FORM_URL__,
+    mailchimpSignupFormUrl: process.env.__MAILCHIMP_SIGNUP_FORM_URL__ as string,
     branchLiveKey: process.env.__BRANCH_LIVE_KEY__ as any,
     revenueCatApiKey: process.env.__REVENUECAT_API_KEY__ as any,
 };
