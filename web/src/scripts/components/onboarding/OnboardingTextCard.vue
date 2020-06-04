@@ -1,7 +1,8 @@
 <template>
-    <div class="onboarding-card">
+    <div class="text-card">
         <h1>Card {{card.id}}</h1>
         <markdown-text v-if="card.text" :source="card.text"/>
+        <img class="image" v-if="card.imageUrl" :src="card.imageUrl" alt="Image" />
     </div>
 </template>
 
@@ -17,19 +18,22 @@
             MarkdownText,
         }
     })
-    export default class OnboardingCard extends Vue {
-        name = "OnboardingCard";
+    export default class OnboardingTextCard extends Vue {
+        name = "OnboardingTextCard.vue";
 
         @Prop({ type: Object as () => OnboardingCardViewModel, required: true })
         card!: OnboardingCardViewModel;
-
-
     }
 </script>
 
 <style scoped lang="scss">
-    .onboarding-card {
-        border: 4px solid blue;
+    .text-card {
         padding: 3rem;
+    }
+
+    img {
+        width: 100%;
+        max-width: 30rem;
+        align-self: center;
     }
 </style>

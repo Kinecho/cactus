@@ -1,14 +1,19 @@
 <template>
-    <div v-touch:swipe="handleSwipeEvent" class="onboarding-main" >
+    <div v-touch:swipe="handleSwipeEvent" class="onboarding-main">
         <ProgressStepper :current="index" :total="totalPages"/>
         <div class="progress-count">
             <span class="current">{{index + 1}}</span>&nbsp;of<span class="total">{{totalPages}}</span>
         </div>
 
         <transition-group :name="cardTransitionName" mode="in-out" tag="div" class="card-container">
-            <Card class="card" v-for="card in cards" :card="card" :key="card.id" v-show="card.id === currentCard.id"/>
+            <OnboardingCard
+                    class="card"
+                    v-for="card in cards"
+                    v-show="card.id === currentCard.id"
+                    :key="card.id"
+                    :card="card"
+            />
         </transition-group>
-
 
         <div class="footer actions">
             <button @click="previous" :disabled="!previousEnabled" class="no-loading">Previous</button>
@@ -22,9 +27,12 @@
     import Component from "vue-class-component"
     import { OnboardingCardViewModel } from "@components/onboarding/OnboardingCardViewModel";
     import Logger from "@shared/Logger"
-    import Card from "@components/onboarding/OnboardingCard.vue";
+    import TextCard from "@components/onboarding/OnboardingTextCard.vue";
     import Vue2TouchEvents from "vue2-touch-events";
     import ProgressStepper from "@components/ProgressStepper.vue";
+    import PhotoCard from "@components/onboarding/OnboardingPhotoCard.vue";
+    import OnboardingCard from "@components/onboarding/OnboardingCardWrapper.vue";
+    import { Prop } from "vue-property-decorator";
 
     const logger = new Logger("Onboarding");
     Vue.use(Vue2TouchEvents)
@@ -36,15 +44,20 @@
 
     @Component({
         components: {
-            Card,
+            TextCard,
+            PhotoCard,
             ProgressStepper,
+            OnboardingCard,
         }
     })
     export default class Onboarding extends Vue {
         name = "Onboarding";
 
         cards: OnboardingCardViewModel[] = OnboardingCardViewModel.createAll();
-        index: number = 0;
+
+        @Prop({ type: Number, default: 0, required: true })
+        index!: number;
+
         cardTransitionName = transitionName.next;
 
         keyListener: any = null;
@@ -75,13 +88,16 @@
             return this.index > 0;
         }
 
+        setIndex(index: number) {
+            this.$emit("index", index);
+        }
+
         handleDocumentKeyUp(event: KeyboardEvent) {
             if (event.key === "ArrowLeft" || event.code === "ArrowLeft" || event.which === 37) {
                 this.previous()
             } else if (event.key === "ArrowRight" || event.code === "ArrowRight" || event.which === 39) {
                 this.next()
             }
-
         }
 
         handleSwipeEvent(direction: string) {
@@ -98,14 +114,16 @@
         next() {
             if (this.nextEnabled) {
                 this.cardTransitionName = transitionName.next;
-                this.index = Math.min(this.cards.length - 1, this.index + 1);
+                const index = Math.min(this.cards.length - 1, this.index + 1);
+                this.setIndex(index);
             }
         }
 
         previous() {
             if (this.previousEnabled) {
                 this.cardTransitionName = transitionName.previous;
-                this.index = Math.max(this.index - 1, 0);
+                const index = Math.max(this.index - 1, 0);
+                this.setIndex(index);
             }
         }
     }
@@ -118,11 +136,17 @@
 
     .onboarding-main {
         background-color: $beige;
-        min-height: 100vh;
+        height: 100vh;
+        display: flex;
+        flex: 1;
+        flex-direction: column;
     }
 
     .card-container {
         position: relative;
+        flex: 1;
+        overflow: auto;
+
         .card {
             width: 100%;
         }
@@ -132,12 +156,13 @@
         display: flex;
         flex-direction: row;
         justify-content: center;
-        position: absolute;
+        /*position: fixed;*/
         background: $pink;
         padding: 1rem;
         bottom: 0;
         left: 0;
         right: 0;
+        flex: 0;
 
         button {
             margin-right: 2rem;

@@ -249,6 +249,17 @@ const routes: MetaRouteConfig[] = [
         component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@web/views/OnboardingPage.vue")),
         name: "Onboarding",
         path: PageRoute.ONBOARDING,
+        props: (route) => {
+            return {
+                index: route.params.index ? Number(route.params.index) : 0,
+            }
+        },
+        children: [
+            {
+                path: ":index",
+                props: true,
+            }
+        ]
     },
     {
         component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@components/404.vue")),

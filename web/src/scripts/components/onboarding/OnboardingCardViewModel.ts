@@ -1,6 +1,11 @@
+import { CactusElement } from "@shared/models/CactusElement";
+
 export enum CardType {
     text = "text",
+    photo = "photo",
+    reflect = "reflect",
 }
+
 
 export class OnboardingCardViewModel {
     id!: string;
@@ -10,6 +15,8 @@ export class OnboardingCardViewModel {
      * Markdown enabled text
      */
     text?: string;
+    imageUrl?: string;
+    element?: CactusElement;
 
     static create(params: Partial<OnboardingCardViewModel>): OnboardingCardViewModel {
         const model = new OnboardingCardViewModel();
@@ -20,15 +27,32 @@ export class OnboardingCardViewModel {
 
     static createAll(): OnboardingCardViewModel[] {
         const cards = [
-            OnboardingCardViewModel.create({ text: "First Card with _italics text_" }),
-            OnboardingCardViewModel.create({ text: "Second Card with **super bold stuff**" }),
             OnboardingCardViewModel.create({
-                text: "Normally, both your asses would be dead as fucking fried chicken, but you happen to pull this shit while I'm in a transitional period so I don't wanna kill you, I wanna help you. But I can't give you this case, it don't belong to me. Besides, I've already been through too much shit this morning over this case to hand it over to your dumb ass.\n" +
-                "\n" +
-                "The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men. Blessed is he who, in the name of charity and good will, shepherds the weak through the valley of darkness, for he is truly his brother's keeper and the finder of lost children. And I will strike down upon thee with great vengeance and furious anger those who would attempt to poison and destroy My brothers. And you will know My name is the Lord when I lay My vengeance upon thee.\n"
+                text: "Emptying your mind and focusing on the breath is **harder** than it sounds.\n\nBut it turns out there's more to mindfulness than meditation.",
+                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200605.png?alt=media&token=e4e8ecef-7aac-4c4a-a4e9-3646247fc53f"
             }),
-            OnboardingCardViewModel.create({ text: "Fourth Card is just normal" }),
-            OnboardingCardViewModel.create({ text: "Fifth Card is just normal" }),
+            OnboardingCardViewModel.create({
+                type: CardType.text,
+                text: "Cactus is a different kind of mindfulness.\n\nIt sends you a quick question every day, prompting you to consider what really matters to _you_, and write it down.",
+                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200603.png?alt=media&token=6c4a7f6e-480f-49ba-8f67-63b16060700c"
+            }),
+            OnboardingCardViewModel.create({
+                text: "Spend a minute writing and Cactus analyzes your words ot reveal surprising insights about your thoughts and emotions.",
+                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard7.png?alt=media&token=591df28c-fbd1-405c-8a37-31e8d1f6af9b"
+            }),
+            OnboardingCardViewModel.create({
+                text: "You'll discover the things that contribute to your happiness. you'll make better decisions and experience greater resilience and optimism.",
+                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard7.png?alt=media&token=591df28c-fbd1-405c-8a37-31e8d1f6af9b"
+            }),
+            OnboardingCardViewModel.create({
+                text: "Let's try it now.",
+                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F2005273.png?alt=media&token=8fc8e1bc-2757-433b-a5b2-75a35f036d02"
+            }),
+            OnboardingCardViewModel.create({
+                type: CardType.reflect,
+                text: "Which physical activities make you feel better?",
+                element: CactusElement.energy,
+            })
         ];
         cards.forEach((card, i) => card.id = `card${ i + 1 }`);
         return cards;
