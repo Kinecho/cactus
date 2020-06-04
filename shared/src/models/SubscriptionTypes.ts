@@ -1,4 +1,6 @@
 import SubscriptionProduct from "@shared/models/SubscriptionProduct";
+import { BillingPlatform } from "@shared/models/MemberSubscription";
+import { AppleProductPrice } from "@shared/api/AppleApi";
 
 export interface SubscriptionDetails {
     upcomingInvoice?: SubscriptionInvoice,
@@ -12,9 +14,31 @@ export interface SubscriptionInvoice {
     periodEnd_epoch_seconds?: number;
     nextPaymentDate_epoch_seconds?: number
     paid?: boolean;
-    status?: InvoiceStatus;
+    invoiceStatus?: InvoiceStatus;
     stripeInvoiceId?: string;
     stripeSubscriptionId?: string;
+    isAppleSubscription?: boolean;
+    isGoogleSubscription?: boolean;
+    billingPlatform?: BillingPlatform;
+    appleProductId?: string
+    androidProductId?: string
+    androidPackageName?: string
+    isAutoRenew?: boolean;
+    isExpired?: boolean;
+    subscriptionStatus: SubscriptionStatus,
+    optOutTrialStartsAt_epoch_seconds?: number,
+    optOutTrialEndsAt_epoch_seconds?: number,
+    appleProductPrice?: AppleProductPrice,
+}
+
+export enum SubscriptionStatus {
+    pending = "pending",
+    in_trial= "in_trial",
+    active = "active",
+    expired ="expired",
+    canceled = "canceled",
+    unknown = "unknown",
+    past_due = "past_due",
 }
 
 export enum CardBrand {

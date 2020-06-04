@@ -1,22 +1,23 @@
-import AdminFirestoreService, {DeleteOptions, Timestamp} from "@admin/services/AdminFirestoreService";
-import SentPrompt, {PromptSendMedium, SentPromptField} from "@shared/models/SentPrompt";
-import {SentToRecipient} from "@shared/mailchimp/models/MailchimpTypes";
+import AdminFirestoreService, { DeleteOptions } from "@admin/services/AdminFirestoreService";
+import SentPrompt, { PromptSendMedium, SentPromptField } from "@shared/models/SentPrompt";
+import { SentToRecipient } from "@shared/mailchimp/models/MailchimpTypes";
 import MailchimpService from "@admin/services/MailchimpService";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
-import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
+import { BaseModelField, Collection } from "@shared/FirestoreBaseModels";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
-import {getDateFromISOString} from "@shared/util/DateUtil";
+import { getDateFromISOString } from "@shared/util/DateUtil";
 import PendingUser from "@shared/models/PendingUser";
 import CactusMember from "@shared/models/CactusMember";
 import User from "@shared/models/User";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
-import {QuerySortDirection} from "@shared/types/FirestoreConstants";
+import { QuerySortDirection } from "@shared/types/FirestoreConstants";
 import * as Sentry from '@sentry/node';
-import {isNonPromptCampaignId} from "@admin/config/configService";
+import { isNonPromptCampaignId } from "@admin/config/configService";
 import PromptContent from "@shared/models/PromptContent";
-import {toTimestamp} from "@shared/util/FirestoreUtil";
+import { TimestampInterface, toTimestamp } from "@shared/util/FirestoreUtil";
 import Logger from "@shared/Logger";
+
 const logger = new Logger("AdminSentPromptService");
 export interface CampaignSentPromptProcessingResult {
     sentPrompt?: SentPrompt,
@@ -401,7 +402,7 @@ export default class AdminSentPromptService {
             return new Promise<boolean>(async resolve => {
                 const ref = doc.ref;
                 try {
-                    const data: { completed: boolean, completedAt?: Timestamp } = {completed};
+                    const data: { completed: boolean, completedAt?: TimestampInterface } = {completed};
                     if (completed && completedAt) {
                         data.completedAt = toTimestamp(completedAt);
                     } else if (completed && !completedAt) {

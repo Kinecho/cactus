@@ -10,7 +10,7 @@ import {
     PronounCopy,
     AccountCopy, CheckoutCopy,
 } from "@shared/copy/CopyTypes";
-import {BillingPeriod} from "@shared/models/SubscriptionProduct";
+import { BillingPeriod } from "@shared/models/SubscriptionProduct";
 
 export default class EnglishCopy extends LocalizedCopy {
     settings: LocaleSettings = {
@@ -25,10 +25,12 @@ export default class EnglishCopy extends LocalizedCopy {
 
     checkout: CheckoutCopy = {
         UPGRADE: "Upgrade",
+        TRY_CACTUS_PLUS: "Try Cactus Plus",
         CURRENT_PLAN: "Current Plan",
         MANAGE_MY_PLAN: "Manage My Plan",
         PURCHASE: "Purchase",
         SIGN_IN_TO_CONTINUE_CHECKOUT: "Please log in to continue the upgrade process.",
+        SIGN_IN_TO_CONTINUE_RESTORING_PURCHASES: "Please sign in to restoring your purchases",
         BILLING_PERIOD: {
             [BillingPeriod.weekly]: "Weekly",
             [BillingPeriod.monthly]: "Monthly",
@@ -101,10 +103,12 @@ export default class EnglishCopy extends LocalizedCopy {
     };
     navigation: NavigationCopy = {
         ACCOUNT: "Account",
+        CORE_VALUES: "Core Values",
         SOCIAL: "Friends",
         MY_JOURNAL: "My Journal",
         JOURNAL: "Journal",
         ACTIVITY: "Activity",
+        INSIGHTS: "Insights",
         HOME: "Home"
     };
     prompts: PromptCopy = {
@@ -121,6 +125,7 @@ export default class EnglishCopy extends LocalizedCopy {
         CELEBRATIONS: ["Well done!", "Nice work!", "Way to go!"],
         REFLECTIONS: "Reflections",
         SECONDS: "Seconds",
+        SECOND: "Second",
         MINUTES: "Minutes",
         DAY_STREAK: "Day Streak",
         WEEK_STREAK: "Week Streak",
@@ -154,10 +159,9 @@ export default class EnglishCopy extends LocalizedCopy {
         CONNECTED_ACCOUNTS: "Connected Accounts",
         DISPLAY_NAME: "Display Name",
         MEMBER_SINCE: "Member Since",
-        AN_ANONYMOUS_USER: "An anonymous user",
         SIGN_UP_FREE: "Sign Up Free",
         magicLinkSuccess(email: string): string {
-            return `To confirm your email address and securely sign in, tap the button in the email sent to ${email}.`
+            return `To confirm your email address and securely sign in, tap the button in the email sent to ${ email }.`
         }
     };
 
@@ -165,7 +169,7 @@ export default class EnglishCopy extends LocalizedCopy {
         if (!input) {
             return "";
         }
-        return `${input}!`;
+        return `${ input }!`;
     }
 
 

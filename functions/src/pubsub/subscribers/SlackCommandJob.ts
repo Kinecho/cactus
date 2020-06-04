@@ -1,8 +1,8 @@
-import {Message} from "firebase-functions/lib/providers/pubsub";
+import { Message } from "firebase-functions/lib/providers/pubsub";
 import * as functions from "firebase-functions";
-import {PubSub} from "@google-cloud/pubsub";
-import {PubSubTopic} from "@shared/types/PubSubTypes";
-import {getConfig} from "@admin/config/configService";
+import { PubSub } from "@google-cloud/pubsub";
+import { PubSubTopic } from "@shared/types/PubSubTypes";
+import { getConfig } from "@admin/config/configService";
 import AdminSlackService, {
     AttachmentColor,
     ChatMessage,
@@ -10,7 +10,7 @@ import AdminSlackService, {
     SlackResponseType,
     SlashCommandResponse
 } from "@admin/services/AdminSlackService";
-import {getActiveUserCountForTrailingDays} from "@api/analytics/BigQueryUtil";
+import { getActiveUserCountForTrailingDays } from "@api/analytics/BigQueryUtil";
 import {
     formatDateTime,
     getDateAtMidnightDenver,
@@ -20,14 +20,16 @@ import {
 } from "@shared/util/DateUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import * as prettyMilliseconds from "pretty-ms";
-import {ListMemberStatus} from "@shared/mailchimp/models/MailchimpTypes";
+import { ListMemberStatus } from "@shared/mailchimp/models/MailchimpTypes";
 import CactusMember from "@shared/models/CactusMember";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
-import {getResponseMediumDisplayName} from "@shared/models/ReflectionResponse";
+import ReflectionResponse, { getResponseMediumDisplayName } from "@shared/models/ReflectionResponse";
 import Logger from "@shared/Logger";
-import {stringifyJSON} from "@shared/util/ObjectUtil";
-import {isValidEmail} from "@shared/util/StringUtil";
-import {CactusElement} from "@shared/models/CactusElement";
+import { stringifyJSON } from "@shared/util/ObjectUtil";
+import { isValidEmail } from "@shared/util/StringUtil";
+import { CactusElement } from "@shared/models/CactusElement";
+import DeletedUser from "@shared/models/DeletedUser";
+import AdminDeletedUserService from "@admin/services/AdminDeletedUserService";
 
 const logger = new Logger("SlackCommandJob");
 const config = getConfig();
@@ -82,19 +84,19 @@ export async function processJob(job: JobRequest) {
         const end = new Date();
 
         const duration = end.getTime() - start.getTime();
-        const slackTimestamp = `${end.getTime() / 1000}`;
+        const slackTimestamp = `${ end.getTime() / 1000 }`;
         const attachments = message.attachments || [];
 
         let lastAttachment = attachments.pop();
         if (!lastAttachment) {
-            lastAttachment = {text: "Task Stats"};
+            lastAttachment = { text: "Task Stats" };
 
         }
 
         lastAttachment = {
             // text: lastAttachment.text || "Task completed",
             ts: slackTimestamp,
-            footer: `\`${job.type}\` took ${prettyMilliseconds(duration)}`,
+            footer: `\`${ job.type }\` took ${ prettyMilliseconds(duration) }`,
             ...lastAttachment,
         };
         attachments.push(lastAttachment);
@@ -111,7 +113,7 @@ export async function processJob(job: JobRequest) {
         }
 
 
-        logger.log(`Finished processing SlackCommand ${job.type}`);
+        logger.log(`Finished processing SlackCommand ${ job.type }`);
     } else {
         logger.warn("No task was created for job", JSON.stringify(job, null, 2));
     }
@@ -123,7 +125,7 @@ async function processMemberStats(job: JobRequest): Promise<SlashCommandResponse
 
     if (!isValidEmail(email)) {
         return {
-            text: `:shrug: Unable to fetch stats for email ${email}. The email was invalid.`,
+            text: `:shrug: Unable to fetch stats for email ${ email }. The email was invalid.`,
             response_type: SlackResponseType.ephemeral
         };
     }
@@ -133,7 +135,7 @@ async function processMemberStats(job: JobRequest): Promise<SlashCommandResponse
     const timeZone = member?.timeZone || undefined;
     if (!memberId) {
         return {
-            text: `:face_with_symbols_on_mouth: Unable to find a member with email ${email}`,
+            text: `:face_with_symbols_on_mouth: Unable to find a member with email ${ email }`,
             response_type: SlackResponseType.ephemeral
         }
     }
@@ -146,7 +148,7 @@ async function processMemberStats(job: JobRequest): Promise<SlashCommandResponse
     ]);
 
     if (!stats) {
-        const message = `Unable to calculate stats for member ${email}. No value was returned from the \`calculateStatsForMember\` method.`
+        const message = `Unable to calculate stats for member ${ email }. No value was returned from the \`calculateStatsForMember\` method.`
         logger.warn(message);
         return {
             text: message,
@@ -159,29 +161,29 @@ async function processMemberStats(job: JobRequest): Promise<SlashCommandResponse
     const fields: SlackAttachmentField[] = [
         {
             title: "Time Zone",
-            value: `${timeZone || "Not Found on Member"}`,
+            value: `${ timeZone || "Not Found on Member" }`,
             short: true
         },
         {
             title: "Streak",
-            value: `${stats.currentStreakDays}`,
+            value: `${ stats.currentStreakDays }`,
             short: true,
         },
         {
             title: "Total Reflections",
-            value: `${stats.totalCount}`,
+            value: `${ stats.totalCount }`,
             short: true
         },
         {
             title: "Minutes Reflected",
-            value: `${millisecondsToMinutes(stats.totalDurationMs)}`,
+            value: `${ millisecondsToMinutes(stats.totalDurationMs) }`,
             short: true,
         },
         {
             title: "Elements",
-            value: `${Object.keys(stats.elementAccumulation).map(key => {
-                return `${key}: ${stats.elementAccumulation[key as CactusElement]}`
-            }).join("\n")}`
+            value: `${ Object.keys(stats.elementAccumulation).map(key => {
+                return `${ key }: ${ stats.elementAccumulation[key as CactusElement] }`
+            }).join("\n") }`
         }
     ];
 
@@ -190,7 +192,7 @@ async function processMemberStats(job: JobRequest): Promise<SlashCommandResponse
         color: AttachmentColor.info,
     }];
     return {
-        text: `Stats for ${email}`,
+        text: `Stats for ${ email }`,
         attachments,
         response_type: SlackResponseType.in_channel
     };
@@ -199,7 +201,7 @@ async function processMemberStats(job: JobRequest): Promise<SlashCommandResponse
 async function processToday(job: JobRequest): Promise<SlashCommandResponse> {
     logger.log("Getting today's stuff");
     const todayDate = getDateAtMidnightDenver(new Date());
-    logger.log(`Date for today: ${formatDateTime(todayDate)}`);
+    logger.log(`Date for today: ${ formatDateTime(todayDate) }`);
 
     const [todayFields, allTimeFields] = await Promise.all([
         getTodayStatFields(todayDate),
@@ -208,7 +210,7 @@ async function processToday(job: JobRequest): Promise<SlashCommandResponse> {
 
     const attachments = [{
         title: `Today's Stats`,
-        text: `Events since ${formatDateTime(todayDate, {timezone: mailchimpTimeZone})}`,
+        text: `Events since ${ formatDateTime(todayDate, { timezone: mailchimpTimeZone }) }`,
         fields: todayFields,
         color: AttachmentColor.info,
     }, {
@@ -228,20 +230,32 @@ async function processToday(job: JobRequest): Promise<SlashCommandResponse> {
 async function getTodayStatFields(todayDate: Date): Promise<SlackAttachmentField[]> {
 
     const todayFields: SlackAttachmentField[] = [];
-    const memberTasks = [
+
+
+    const [allMembers,
+        unsubscriberes,
+        allResponses,
+        deletedUsers,
+        trialStartMembers,
+        cancellationInitiatedMembers,
+    ] = await Promise.all([
         AdminCactusMemberService.getSharedInstance().getMembersCreatedSince(todayDate),
         AdminCactusMemberService.getSharedInstance().getMembersUnsubscribedSince(todayDate),
-    ];
-
-    const responseTasks = [
         AdminReflectionResponseService.getSharedInstance().getResponseSinceDate(todayDate),
+        AdminDeletedUserService.getSharedInstance().getAllSince(todayDate),
+        AdminCactusMemberService.getSharedInstance().getOptOutTrialStartedSince(todayDate),
+        AdminCactusMemberService.getSharedInstance().getCancellationsInitiatedSince(todayDate),
+    ]) as [
+        CactusMember[],
+        CactusMember[],
+        ReflectionResponse[],
+        DeletedUser[],
+        CactusMember[],
+        CactusMember[],
     ];
 
-    const [allMembers, unsubscriberes] = await Promise.all(memberTasks);
-    const [allResponses] = await Promise.all(responseTasks);
 
-
-    logger.log(`All tasks have completed for Today Stats for ${getISODate(todayDate)}`);
+    logger.log(`All tasks have completed for Today Stats for ${ getISODate(todayDate) }`);
 
     const confirmedMemberCount = allMembers.reduce((count, member) => {
         if (!member.signupConfirmedAt) {
@@ -265,7 +279,7 @@ async function getTodayStatFields(todayDate: Date): Promise<SlackAttachmentField
         [medium: string]: number
     }
 
-    const reflectionResponsesByMedium: ResponseByMedium = allResponses.reduce((map: ResponseByMedium, response) => {
+    const reflectionResponsesByMedium: ResponseByMedium = allResponses.reduce((map: ResponseByMedium, response: ReflectionResponse) => {
         const medium = response.responseMedium || "Unknown";
         map[medium] = (map[medium] || 0) + 1;
         return map;
@@ -274,30 +288,45 @@ async function getTodayStatFields(todayDate: Date): Promise<SlackAttachmentField
     const sortedResponseStats = Object.entries(reflectionResponsesByMedium).sort(([, v1], [, v2]) => {
         return v2 - v1
     }).map(([medium, count]) => {
-        return `\`${getResponseMediumDisplayName(medium)}\` - ${count}`
+        return `\`${ getResponseMediumDisplayName(medium) }\` - ${ count }`
     });
 
-    sortedResponseStats.unshift(`\`TOTAL\` - ${allResponses.length}`);
+    const memberIdsReflected = allResponses.map(rr => rr.cactusMemberId);
+    const countMembersReflected = Array.from(new Set(memberIdsReflected)).length;
+
+    sortedResponseStats.unshift(`\`TOTAL\` - ${ allResponses.length } from ${ countMembersReflected } members`);
 
     todayFields.push({
-            title: `Sign Ups`,
-            value: `${confirmedMemberCount}`,
-            short: true,
-        }, {
-            title: `Unsubscribers`,
-            value: `${unsubscriberes.length}`,
-            short: true,
-        },
-        {
-            title: "Reflection Responses",
-            value: `${sortedResponseStats.join("\n")}`,
-            short: true
-        }, {
-            title: "Referrers",
-            value: `${Object.entries(topReferrers).sort(([, v1], [, v2]) => v2 - v1).map(([email, count]) => {
-                return `${email}: ${count}`
-            }).join("\n") || "None"}`
-        },
+        title: `Sign Ups`,
+        value: `${ confirmedMemberCount }`,
+        short: true,
+    }, {
+        title: `Unsubscribers`,
+        value: `${ unsubscriberes.length }`,
+        short: true,
+    },
+    {
+        title: "Reflection Responses",
+        value: `${ sortedResponseStats.join("\n") }`,
+        short: true
+    }, {
+        title: "Referrers",
+        value: `${ Object.entries(topReferrers).sort(([, v1], [, v2]) => v2 - v1).map(([email, count]) => {
+            return `${ email }: ${ count }`
+        }).join("\n") || "None" }`
+    },
+    {
+        title: "Deleted Users",
+        value: `${ deletedUsers.length }`
+    },
+    {
+        title: "Trials Started (Opt Out)",
+        value: `${ trialStartMembers.length }`
+    },
+    {
+        title: "Subscription Cancellations Initiated",
+        value: `${ cancellationInitiatedMembers.length }`
+    }
     );
     return todayFields;
 }
@@ -343,7 +372,7 @@ async function getAllTimeStatFields(): Promise<SlackAttachmentField[]> {
         }
 
         return stats;
-    }, {confirmed: 0, unsubscribed: 0, referrals: 0, referrers: {}});
+    }, { confirmed: 0, unsubscribed: 0, referrals: 0, referrers: {} });
 
     const uniqueReferrers = Object.keys(memberStats.referrers).length;
     // const topReferrersString = Object.entries(memberStats.referrers).sort(([, v1], [, v2]) => v2 - v1).slice(0, 20).map(([email, count]) => {
@@ -353,29 +382,29 @@ async function getAllTimeStatFields(): Promise<SlackAttachmentField[]> {
     return [
         {
             title: "Sign Ups ",
-            value: `${memberStats.confirmed}`,
+            value: `${ memberStats.confirmed }`,
             short: true,
 
         },
         {
             title: "Unsubscribes ",
-            value: `${memberStats.unsubscribed}`,
+            value: `${ memberStats.unsubscribed }`,
             short: true,
         },
         {
             title: "Referral Sign Ups",
-            value: `${(100 * memberStats.referrals / memberStats.confirmed).toFixed(2)}% (${memberStats.referrals}/${memberStats.confirmed})`,
+            value: `${ (100 * memberStats.referrals / memberStats.confirmed).toFixed(2) }% (${ memberStats.referrals }/${ memberStats.confirmed })`,
             short: true,
 
         },
         {
             title: "Unique Referrers ",
-            value: `${(100 * uniqueReferrers / memberStats.confirmed).toFixed(2)}% (${uniqueReferrers}/${memberStats.confirmed})`,
+            value: `${ (100 * uniqueReferrers / memberStats.confirmed).toFixed(2) }% (${ uniqueReferrers }/${ memberStats.confirmed })`,
             short: true,
         },
         {
             title: ":datastudio: DURU/MURU ",
-            value: `${(durumuru.durumuru * 100).toFixed(2)}% (${durumuru.today}/${durumuru.l30})`,
+            value: `${ (durumuru.durumuru * 100).toFixed(2) }% (${ durumuru.today }/${ durumuru.l30 })`,
             short: true,
         },
         // {
@@ -392,7 +421,7 @@ async function processBigQuery(job: JobRequest): Promise<SlashCommandResponse> {
 
 
     return {
-        text: `BigQuery export job started for project ${config.web.domain}. This process typically takes about 5 minutes before results show up in <Data Studio|https://datastudio.google.com/u/0/reporting/13ZD824pAbhdTWyybDzITow4V0vFgIEqC/page/aZQu>`,
+        text: `BigQuery export job started for project ${ config.web.domain }. This process typically takes about 5 minutes before results show up in <Data Studio|https://datastudio.google.com/u/0/reporting/13ZD824pAbhdTWyybDzITow4V0vFgIEqC/page/aZQu>`,
         response_type: SlackResponseType.ephemeral
     };
 }
@@ -402,7 +431,7 @@ async function getDurumuru(): Promise<{ l30: number, today: number, durumuru: nu
     const activeUsersToday = await getActiveUserCountForTrailingDays(1);
     const activeUsersL30 = await getActiveUserCountForTrailingDays(30);
 
-    return {l30: activeUsersL30, today: activeUsersToday, durumuru: activeUsersToday / activeUsersL30}
+    return { l30: activeUsersL30, today: activeUsersToday, durumuru: activeUsersToday / activeUsersL30 }
 }
 
 async function processDurumuru(job: JobRequest): Promise<SlashCommandResponse> {
@@ -418,8 +447,8 @@ async function processDurumuru(job: JobRequest): Promise<SlashCommandResponse> {
         response_type: SlackResponseType.in_channel,
         attachments: [
             {
-                title: `${(durumuruSummary.durumuru).toFixed(3)} (${durumuruSummary.today}/${durumuruSummary.l30}) is today's DURU/MURU :sunny: /:spiral_calendar_pad: `,
-                text: `That is, ${durumuruSummary.today} unique users have reflected in the last 24 hours, and ${durumuruSummary.l30} unique users have reflected in the last 30 days.`
+                title: `${ (durumuruSummary.durumuru).toFixed(3) } (${ durumuruSummary.today }/${ durumuruSummary.l30 }) is today's DURU/MURU :sunny: /:spiral_calendar_pad: `,
+                text: `That is, ${ durumuruSummary.today } unique users have reflected in the last 24 hours, and ${ durumuruSummary.l30 } unique users have reflected in the last 30 days.`
             }
         ]
 
@@ -437,7 +466,7 @@ async function processActiveUsers(job: JobRequest): Promise<SlashCommandResponse
     const activeUsers = await getActiveUserCountForTrailingDays(days);
 
     return {
-        text: `There have been *${activeUsers}* unique users with a reflection response over the last *${days}* days`,
+        text: `There have been *${ activeUsers }* unique users with a reflection response over the last *${ days }* days`,
         response_type: SlackResponseType.ephemeral
     }
 }
@@ -446,16 +475,16 @@ export function getSlackHelpText(): { intro: string, commands: string } {
     const commandDescriptions: string[] = [];
     const commands = getCommandDescriptions();
     Object.keys(commands).forEach(name => {
-        commandDescriptions.push(`\`${name}\` - ${commands[name]}\n`);
+        commandDescriptions.push(`\`${ name }\` - ${ commands[name] }\n`);
     });
 
     const intro = `The \`/cactus\` slash command can be used to interact with Cactus data in different ways. The command format is ` +
-        `\`/cactus [command] [parameters]\` ` +
-        `where multiple \`parameters\` are space separated values.`;
+    `\`/cactus [command] [parameters]\` ` +
+    `where multiple \`parameters\` are space separated values.`;
 
-    const commandText = `\n\n*Available Commands*:\n${commandDescriptions.join("\n").trim()}`;
+    const commandText = `\n\n*Available Commands*:\n${ commandDescriptions.join("\n").trim() }`;
 
-    return {intro, commands: commandText};
+    return { intro, commands: commandText };
 }
 
 export function getCommandDescriptions(): { [name: string]: string } {

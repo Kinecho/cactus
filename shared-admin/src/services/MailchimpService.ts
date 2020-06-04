@@ -1079,7 +1079,7 @@ export default class MailchimpService {
 
         if (member?.subscription?.trial) {
             if (mailchimpMember?.merge_fields[MergeField.TDAYS_LEFT] !== member.daysLeftInTrial.toString() ||
-                mailchimpMember?.merge_fields[MergeField.IN_TRIAL] !== (member.isInTrial ? 'YES' : 'NO')) {
+                mailchimpMember?.merge_fields[MergeField.IN_TRIAL] !== (member.isOptInTrialing ? 'YES' : 'NO')) {
                 return true;
             }
         }

@@ -1,4 +1,4 @@
-![logo](https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/static%2Fog-image-blobs.png?alt=media&token=b9dd66bf-09b1-4dec-b1f1-9532a7b8dd8a)
+![logo](https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/static%2Fog-wall-of-blobs-big.png?alt=media&token=9c2ec0c0-3e76-4603-a5a4-8a79e1373574)
 
 
 # cactus
@@ -7,7 +7,7 @@ Cactus App
 See the [Flamelink Docs](FLAMELINK.md)
 
 ## Versions
-You must use node version >= 8.13.0. The suggested version is v8.15.0
+You must use node version == 10.18.1.
 
 See [Firebase Runtime Environments](https://cloud.google.com/functions/docs/concepts/exec#runtimes) for more information
 

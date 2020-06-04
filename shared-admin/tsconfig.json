@@ -10,17 +10,29 @@
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": false,
         "strict": true,
-        "target": "es2015",
+        "target": "es5",
+        "downlevelIteration": true,
+        "lib": [
+            "es2019"
+        ],
         "baseUrl": ".",
-        "rootDirs": ["src"],
+        "rootDirs": [
+            "src"
+        ],
         "paths": {
-            "@admin/*": ["./src/*"],
-            "@shared/*": ["./../shared/src/*"]
+            "@admin/*": [
+                "./src/*"
+            ],
+            "@shared/*": [
+                "./../shared/src/*"
+            ]
         }
     },
     "compileOnSave": false,
     "include": [
         "src"
     ],
-    "exclude": ["node_modules"]
+    "exclude": [
+        "node_modules"
+    ]
 }

@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin'
-import {CactusConfig} from "@shared/CactusConfig";
+import { CactusConfig } from "@shared/CactusConfig";
 import MailchimpService from "@admin/services/MailchimpService";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
@@ -7,13 +7,13 @@ import AdminUserService from "@admin/services/AdminUserService";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import AdminSlackService from "@admin/services/AdminSlackService";
-import {setTimestamp} from "@shared/util/FirestoreUtil";
+import { setTimestamp } from "@shared/util/FirestoreUtil";
 import AdminSentCampaignService from "@admin/services/AdminSentCampaignService";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
 import AdminPendingUserService from "@admin/services/AdminPendingUserService";
 import GoogleSheetsService from "@admin/services/GoogleSheetsService";
+import GoogleLanguageService from "@admin/services/GoogleLanguageService";
 import * as Sentry from "@sentry/node";
-import chalk from "chalk";
 import AdminFlamelinkService from "@admin/services/AdminFlamelinkService";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
@@ -29,13 +29,19 @@ import AdminCheckoutSessionService from "@admin/services/AdminCheckoutSessionSer
 import AdminPaymentService from "@admin/services/AdminPaymentService";
 import StripeWebhookService from "@admin/services/StripeWebhookService";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
-import {PubSubService} from "@admin/pubsub/PubSubService";
+import { PubSubService } from "@admin/pubsub/PubSubService";
 import AdminEmailLogService from "@admin/services/AdminEmailLogService";
+import AppleService from "@admin/services/AppleService";
+import GooglePlayService from "@admin/services/GooglePlayService";
+import StripeService from "@admin/services/StripeService";
+import AdminDataExportService from "@admin/services/AdminDataExportService";
+import AdminDeletedUserService from "@admin/services/AdminDeletedUserService";
+import AdminRevenueCatService from "@admin/services/AdminRevenueCatService";
 
 const logger = new Logger("AdminServiceConfig");
 
 export function initializeServices(config: CactusConfig, app: admin.app.App, timestampClass: any, functionName: string | undefined) {
-    logger.log(chalk.green("initializing all services"));
+    logger.log("initializing all services");
     setTimestamp(timestampClass || admin.firestore.Timestamp);
 
     //Firestore
@@ -43,6 +49,9 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
 
     //PubSub
     PubSubService.initialize(config);
+
+    //Stripe
+    StripeService.initialize(config);
 
     //model services
     AdminSendgridService.initialize(config);
@@ -56,6 +65,7 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminPendingUserService.initialize();
     AdminSentCampaignService.initialize();
     GoogleSheetsService.initialize(config);
+    GoogleLanguageService.initialize(config);
     AdminEmailReplyService.initialize();
     AdminSocialInviteService.initialize(config);
     AdminMemberProfileService.initialize();
@@ -67,12 +77,22 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminPaymentService.initialize();
     StripeWebhookService.initialize(config);
     AdminEmailLogService.initialize(config);
+    AdminDataExportService.initialize(config);
+    AdminDeletedUserService.initialize();
 
     //Flamelink
     AdminFlamelinkService.initialize(config, app);
     AdminPromptContentService.initialize(config);
     AdminSubscriptionProductService.initialize();
 
+    //Apple
+    AppleService.initialize(config);
+
+    //Google Play
+    GooglePlayService.initialize(config);
+
+    //RevenueCat
+    AdminRevenueCatService.initialize(config);
 
     logger.log("Initializing Sentry");
     const sentryOptions: Sentry.NodeOptions = {

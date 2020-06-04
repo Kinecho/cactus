@@ -9,6 +9,7 @@
                 <path fill="#e6f9f7" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
             </svg>
         </button>
+        <slot name="action">{{action}}</slot>
     </div>
 </template>
 
@@ -25,6 +26,7 @@
         },
         props: {
             text: String,
+            action: {type: String, required: false},
             autoHide: {type: Boolean, default: false},
             durationMs: {type: Number, default: DEFAULT_DURATION_MS},
             closeable: {type: Boolean, default: true},
@@ -120,7 +122,12 @@
         }
 
         &.successAlt {
-            background: $darkerGreen url(assets/images/grainy.png) repeat;
+            background: $darkerGreen url(/assets/images/grainy.png) repeat;
+            color: $white;
+        }
+
+        &.dolphin {
+            background-color: $dolphin;
             color: $white;
         }
 

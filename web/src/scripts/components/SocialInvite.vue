@@ -15,13 +15,16 @@
     import Vue from "vue";
     import NavBar from "@components/NavBar.vue";
     import Footer from "@components/StandardFooter.vue";
-    import SocialActivityFeed from "@components/SocialActivityFeed.vue"
     import SocialFindFriends from "@components/SocialFindFriends.vue"
-    import {ListenerUnsubscriber} from '@web/services/FirestoreService'
+    import { ListenerUnsubscriber } from '@web/services/FirestoreService'
     import CactusMember from "@shared/models/CactusMember"
     import CactusMemberService from "@web/services/CactusMemberService"
-    import {PageRoute} from "@shared/PageRoutes"
-    import {QueryParam} from '@shared/util/queryParams'
+    import { PageRoute } from "@shared/PageRoutes"
+    import { QueryParam } from '@shared/util/queryParams'
+    import Logger from "@shared/Logger"
+    import { pushRoute } from "@web/NavigationUtil";
+
+    const logger = new Logger("SocialInvite");
 
     export default Vue.extend({
         components: {
@@ -32,8 +35,8 @@
         data(): {
             currentChild: string,
             loading: boolean,
-            member: CactusMember|undefined,
-            memberUnsubscriber: ListenerUnsubscriber|undefined,
+            member: CactusMember | undefined,
+            memberUnsubscriber: ListenerUnsubscriber | undefined,
         } {
             return {
                 currentChild: 'findFriends',
@@ -44,9 +47,9 @@
         },
         beforeMount() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({member}) => {
+                onData: async ({ member }) => {
                     if (!member) {
-                        window.location.href = `${PageRoute.LOGIN}?${QueryParam.REDIRECT_URL}=${encodeURIComponent(PageRoute.FRIENDS)}`;
+                        await pushRoute(`${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(PageRoute.FRIENDS) }`)
                     }
                     this.member = member;
                     this.loading = false;

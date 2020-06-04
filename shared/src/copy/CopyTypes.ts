@@ -18,6 +18,7 @@ export interface PromptCopy {
     CELEBRATIONS: string[],
     REFLECTIONS: string,
     SECONDS: string,
+    SECOND: string,
     MINUTES: string,
     DAY_STREAK: string,
     WEEK_STREAK: string,
@@ -85,7 +86,6 @@ export interface AuthenticationCopy {
     MEMBER_SINCE: string,
     DISPLAY_NAME: string,
     CONNECTED_ACCOUNTS: string,
-    AN_ANONYMOUS_USER: string,
     SIGN_UP_FREE: string,
 
     magicLinkSuccess(email: string): string;
@@ -94,10 +94,12 @@ export interface AuthenticationCopy {
 
 export interface NavigationCopy {
     ACCOUNT: string
+    CORE_VALUES: string
     MY_JOURNAL: string,
     SOCIAL: string,
     JOURNAL: string,
     ACTIVITY: string,
+    INSIGHTS: string,
     HOME: string
 }
 
@@ -130,7 +132,9 @@ export interface AccountCopy {
 
 export interface CheckoutCopy {
     SIGN_IN_TO_CONTINUE_CHECKOUT: string,
+    SIGN_IN_TO_CONTINUE_RESTORING_PURCHASES: string,
     UPGRADE: string,
+    TRY_CACTUS_PLUS: string,
     CURRENT_PLAN: string,
     MANAGE_MY_PLAN: string,
     PURCHASE: string,

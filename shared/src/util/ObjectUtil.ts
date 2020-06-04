@@ -28,6 +28,18 @@ export function isNotNull(input: any): boolean {
     return !isNull(input);
 }
 
+export function optionalStringToNumber(input: string | undefined): number | undefined {
+    if (isNull(input)) {
+        return undefined;
+    }
+
+    const num = Number(input);
+    if (isNumber(num)) {
+        return num
+    }
+    return;
+}
+
 export function isDate(input: any): input is Date {
     return isNotNull(input) && input instanceof Date;
 }
@@ -105,7 +117,7 @@ export async function transformObjectAsync(input: any, transform: (value: any) =
  */
 export function transformObjectSync(input: any, transform: (value: any) => any, depth: number = 0, forKey?: string): any {
     if (depth >= 100) {
-        logger.warn(`transformObjectSync method reached a depth greater than 10, Current depth = ${depth}. Key = ${forKey || "rootKey"} Returning witihout processing`);
+        logger.warn(`transformObjectSync method reached a depth greater than 10, Current depth = ${ depth }. Key = ${ forKey || "rootKey" } Returning witihout processing`);
         return input;
     }
     if (isArray(input)) {
@@ -148,6 +160,14 @@ export function transformObjectSync(input: any, transform: (value: any) => any, 
     return input;
 }
 
+export function toPlainObject(input: any): any {
+    return transformObjectSync(input, (value => {
+        if (isNonEmptyObject(value)){
+          return Object.assign({}, value)
+        }
+        return value
+    }))
+}
 
 export function stringifyJSON(input: any, space?: number): string {
     function replacer(key: string, value: any) {
@@ -178,6 +198,6 @@ export function chunkArray<T>(list: T[], batchSize: number): (T[])[] {
     }
 
     return Array(Math.ceil(list.length / batchSize))
-        .fill(0).map((_: any, index: number) => index * batchSize)
-        .map(begin => list.slice(begin, begin + batchSize));
+    .fill(0).map((_: any, index: number) => index * batchSize)
+    .map(begin => list.slice(begin, begin + batchSize));
 }

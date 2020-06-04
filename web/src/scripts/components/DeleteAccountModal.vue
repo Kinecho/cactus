@@ -4,14 +4,18 @@
             :showCloseButton="true"
             v-if="member"
     >
-        <div slot="body" class="modalContainer">
+        <div slot="body" class="modalContainer" v-if="deleteAllowed">
             <h2>Are you sure you want to permanently delete your Cactus account?</h2>
-            <p>This action is <strong>irreversable</strong> and will remove all of your Cactus data, including your journal entries. Enter the email address associated with your account to continue.</p>
+            <p>This action is <strong>irreversible</strong> and will remove all of your Cactus data, including your journal entries. Enter the email address associated with your account to continue.</p>
             <div class="item">
                 <label for="emailConfirm" class="label">Account Email Address</label>
                 <input v-model="confirmedEmail" type="text" name="emailConfirm">
             </div>
-            <button :disabled="isDeleting" class="delete" v-if="isConfirmed" @click="deleteAccount">Delete my Account</button>
+            <button :disabled="isDeleting" class="red" v-if="isConfirmed" @click="deleteAccount">Delete my Account</button>
+        </div>
+        <div slot="body" class="modalContainer" v-else>
+            <h2>First, cancel your subscription</h2>
+            <p>To permenantly delete your Cactus account, first you need to cancel your paid subscription. You can find details in your <a :href="accountUrl">Account Settings</a> under Subscription.</p>
         </div>
     </modal>
 </template>
@@ -24,6 +28,7 @@
     import CactusMember from '@shared/models/CactusMember';
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
     import {deleteCurrentUserPermanently} from '@web/user';
+    import { PageRoute } from '@shared/PageRoutes'
     import {logout} from '@web/auth'
     import Logger from "@shared/Logger";
     const logger = new Logger("DeleteAccountModal.vue");
@@ -64,6 +69,16 @@
         computed: {
           isConfirmed(): boolean {
             return (this.member?.email === this.confirmedEmail)
+          },
+          deleteAllowed(): boolean {
+            if (this.member?.hasActiveSubscription && !this.member.hasUpcomingCancellation) {
+                return false;
+            }
+
+            return true;
+          },
+          accountUrl(): string {
+            return PageRoute.ACCOUNT;
           }
         },
         methods: {
@@ -124,13 +139,8 @@
         width: 100%;
     }
 
-    .delete {
-        background-color: $red;
+    .red {
         display: block;
-
-        &:hover:enabled {
-            background-color: darken($red, 5%);
-        }
     }
 
 </style>

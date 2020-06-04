@@ -20,10 +20,10 @@
         "install:api": "npm --prefix \"functions\" install",
         "install:shared": "npm --prefix \"shared\" install",
         "install:scripts": "npm --prefix \"scripts\" install",
-        "deploy:stage": "firebase deploy --only hosting,functions -P stage",
+        "deploy:stage": "firebase deploy --debug --only hosting,functions -P stage",
         "deploy:stage:api": "npm --prefix \"functions\" run deploy:stage",
         "deploy:stage:web": "npm --prefix \"web\" run deploy:stage",
-        "deploy:prod": "firebase deploy --only hosting,functions -P prod",
+        "deploy:prod": "firebase deploy --debug --only hosting,functions -P prod",
         "deploy:prod:api": "npm --prefix \"functions\" run deploy:prod",
         "deploy:prod:web": "npm --prefix \"web\" run deploy:prod",
         "compile:all": "tsc -p web/ && tsc -p shared/ && tsc -p functions && tsc -p scripts",
@@ -51,19 +51,15 @@
     },
     "homepage": "https://github.com/Kinecho/cactus#readme",
     "dependencies": {
-        "@cloudsponge/address-book-connector.js": "^1.0.9",
-        "firebase": "^6.3.1",
-        "vue-clipboard2": "^0.3.0",
-        "vue-social-sharing": "^2.4.6",
-        "vue2-touch-events": "^2.0.0"
+        "firebase": "^7.14.6"
     },
     "devDependencies": {
-        "firebase-tools": "^7.12.1",
+        "firebase-tools": "^8.4.0",
         "jest": "^24.8.0",
         "ts-jest": "^24.1.0",
-        "ts-node": "^8.5.2",
+        "ts-node": "^8.10.1",
         "tsconfig-paths": "^3.8.0",
         "tslint": "^5.20.1",
-        "typescript": "^3.7.2"
+        "typescript": "^3.9.2"
     }
 }

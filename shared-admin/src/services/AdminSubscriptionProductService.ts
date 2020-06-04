@@ -24,6 +24,11 @@ export default class AdminSubscriptionProductService {
         return this.flamelinkService.save(model);
     }
 
+    async getAll(): Promise<SubscriptionProduct[]> {
+        const result = await this.flamelinkService.getAll(SubscriptionProduct);
+        return result.results;
+    }
+
     async getByEntryId(entryId: string): Promise<SubscriptionProduct | undefined> {
         return await this.flamelinkService.getByEntryId(entryId, SubscriptionProduct);
     }
@@ -43,5 +48,44 @@ export default class AdminSubscriptionProductService {
 
         return this.flamelinkService.getWhereFields(fields, SubscriptionProduct);
     }
+
+    async getByAppleProductId(options: { appleProductId?: string, onlyAvailableForSale?: boolean }): Promise<SubscriptionProduct | undefined> {
+        if (!options.appleProductId) {
+            return undefined;
+        }
+        const fields: { name: string, value: any }[] = [{
+            name: SubscriptionProduct.Fields.appleProductId,
+            value: options.appleProductId,
+        }];
+
+        if (options.onlyAvailableForSale === true) {
+            fields.push({
+                name: SubscriptionProduct.Fields.availableForSale,
+                value: true
+            })
+        }
+
+        return this.flamelinkService.getWhereFields(fields, SubscriptionProduct);
+    }
+
+    async getByAndroidProductId(options: { androidProductId?: string, onlyAvailableForSale?: boolean }): Promise<SubscriptionProduct | undefined> {
+        if (!options.androidProductId) {
+            return undefined;
+        }
+        const fields: { name: string, value: any }[] = [{
+            name: SubscriptionProduct.Fields.androidProductId,
+            value: options.androidProductId,
+        }];
+
+        if (options.onlyAvailableForSale === true) {
+            fields.push({
+                name: SubscriptionProduct.Fields.availableForSale,
+                value: true
+            })
+        }
+
+        return this.flamelinkService.getWhereFields(fields, SubscriptionProduct);
+    }
+
 
 }

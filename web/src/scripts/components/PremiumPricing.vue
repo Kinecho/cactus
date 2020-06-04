@@ -1,72 +1,91 @@
 <template>
-    <div class="centered">
-        <transition appear name="fade-in">
-            <div class="flex-plans" v-if="loaded && !tabsOnMobile && !isAndroidApp">
-                <div v-for="(productGroup, i) in groupEntries" class="plan-container">
-                    <div :class="[productGroup.tier.toLowerCase(), 'heading']">{{getGroupDisplayName(productGroup)}}<span v-if="showTrialBadge(productGroup)">&nbsp;Trial</span>
-                        <span class="trial-badge" v-if="showTrialBadge(productGroup)">{{trialBadgeText}}</span>
-                    </div>
-                    <product-group
-                            :productGroup="productGroup"
-                            :key="productGroup.tier"
-                            :tabs-on-mobile="tabsOnMobile"
-                            :id="`product-tier-${productGroup.tier}`"
-                            :display-index="i"
-                            :member="member"
-                            :class="[`tabPanel`, {active: activetab === i}]"
-                            :learnMoreLinks="learnMoreLinks" />
-                </div>
-            </div>
-            <div id="tabs" class="tabset" v-if="loaded && tabsOnMobile && !isAndroidApp">
-                <div class="tabs">
-                    <template v-for="(productGroup, i) in groupEntries">
-                        <a class="tab-label"
-                                @click.prevent="activetab = i"
-                                v-bind:class="{active: activetab === i}"
-                                aria-controls="basic">
+    <div class="wrapper">
+        <div class="centered">
+            <transition appear name="fade-in">
+                <div class="flex-plans" v-if="loaded && !tabsOnMobile">
+                    <div v-for="(productGroup, i) in groupEntries" class="plan-container">
+                        <div :class="[productGroup.tier.toLowerCase(), 'heading']" v-if="!startTrial">
                             {{getGroupDisplayName(productGroup)}}<span v-if="showTrialBadge(productGroup)">&nbsp;Trial</span>
                             <span class="trial-badge" v-if="showTrialBadge(productGroup)">{{trialBadgeText}}</span>
-                        </a>
-                    </template>
-                </div>
-
-                <div class="tabPanels">
-                    <template v-for="(productGroup, i) in groupEntries">
+                        </div>
                         <product-group
                                 :productGroup="productGroup"
                                 :key="productGroup.tier"
+                                :tabs-on-mobile="tabsOnMobile"
                                 :id="`product-tier-${productGroup.tier}`"
                                 :display-index="i"
                                 :member="member"
-                                class="tabPanel"
-                                :tabs-on-mobile="tabsOnMobile"
-                                :learnMoreLinks="learnMoreLinks"
-                                :class="{active: activetab === i}" />
-                    </template>
+                                :class="[`tabPanel`, {active: activetab === i}]"
+                                :learnMoreLinks="learnMoreLinks || startTrial"
+                                :showFooter="showFooter"
+                                :startTrial="startTrial"/>
+                    </div>
+
                 </div>
-            </div>
-            <div class="android-app" v-if="isAndroidApp">
-                Questions? Email us at <a href="mailto:help@cactus.app">help@cactus.app</a>.
-            </div>
-        </transition>
+                <div id="tabs" class="tabset" v-if="loaded && tabsOnMobile">
+                    <div class="tabs" v-if="!startTrial">
+                        <template v-for="(productGroup, i) in groupEntries">
+                            <a class="tab-label"
+                                    @click.prevent="activetab = i"
+                                    v-bind:class="{active: activetab === i}"
+                                    aria-controls="basic"><span v-if="!startTrial">
+                                {{getGroupDisplayName(productGroup)}}<span v-if="showTrialBadge(productGroup)">&nbsp;Trial</span></span>
+                                <span class="trial-badge" v-if="showTrialBadge(productGroup)">{{trialBadgeText}}</span>
+                            </a>
+                        </template>
+                    </div>
+
+                    <div class="tabPanels">
+                        <template v-for="(productGroup, i) in groupEntries">
+                            <product-group
+                                    :productGroup="productGroup"
+                                    :key="productGroup.tier"
+                                    :id="`product-tier-${productGroup.tier}`"
+                                    :display-index="i"
+                                    :member="member"
+                                    class="tabPanel"
+                                    :tabs-on-mobile="tabsOnMobile"
+                                    :learnMoreLinks="learnMoreLinks || startTrial"
+                                    :is-restoring-purchases="isRestoringPurchases"
+                                    :class="{active: activetab === i}"
+                                    :showFooter="showFooter"
+                                    :startTrial="startTrial"
+                                    :checkout-cancel-url="checkoutCancelUrl"
+                                    :checkout-success-url="checkoutSuccessUrl"
+                            />
+                        </template>
+
+                    </div>
+                </div>
+            </transition>
+        </div>
+        <div class="restore-container" :class="{noTabs: !tabsOnMobile}" v-if="isAndroidApp">
+            <a class="fancyLink" @click.prevent="restorePurchases" :disabled="isRestoringPurchases">
+                Restore Purchases
+            </a>
+        </div>
     </div>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
-    import {PageRoute} from '@shared/PageRoutes';
+    import { PageRoute } from '@shared/PageRoutes';
     import CactusMember from "@shared/models/CactusMember";
     import CactusMemberService from '@web/services/CactusMemberService';
-    import {ListenerUnsubscriber} from '@web/services/FirestoreService';
-    import {getQueryParam} from "@web/util";
-    import {QueryParam} from "@shared/util/queryParams";
+    import { ListenerUnsubscriber } from '@web/services/FirestoreService';
+    import { getQueryParam } from "@web/util";
+    import { QueryParam } from "@shared/util/queryParams";
     import Logger from "@shared/Logger";
     import CopyService from "@shared/copy/CopyService";
     import SubscriptionProductGroupCard from "@components/SubscriptionProductGroupCard.vue";
-    import {SubscriptionProductGroupEntry} from "@shared/util/SubscriptionProductUtil";
+    import { SubscriptionProductGroupEntry } from "@shared/util/SubscriptionProductUtil";
     import SubscriptionProductGroupService from "@web/services/SubscriptionProductGroupService";
-    import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
-    import {isAndroidApp} from '@web/DeviceUtil'
+    import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
+    import { isAndroidApp } from "@web/DeviceUtil";
+    import AndroidService from "@web/android/AndroidService";
+    import { restoreAndroidPurchases } from "@web/checkoutService";
+    import { pushRoute } from "@web/NavigationUtil";
+    import { logPresentSubscriptionOffers } from "@web/analytics";
 
     const copy = CopyService.getSharedInstance().copy;
     const logger = new Logger("PremiumPricing");
@@ -76,11 +95,17 @@
             ProductGroup: SubscriptionProductGroupCard,
         },
         props: {
-            tabsOnMobile: {type: Boolean, default: true},
-            learnMoreLinks: {type: Boolean, default: false},
+            tabsOnMobile: { type: Boolean, default: true },
+            learnMoreLinks: { type: Boolean, default: false },
+            showFooter: { type: Boolean, default: true },
+            startTrial: { type: Boolean, default: false },
+            promotionName: {type: String, default: "Pricing Page"},
+            checkoutSuccessUrl: { type: String, required: false },
+            checkoutCancelUrl: { type: String, required: false },
         },
         data(): {
             isProcessing: boolean,
+            isRestoringPurchases: boolean,
             memberLoaded: boolean,
             member: CactusMember | undefined | null,
             memberEmail: string | undefined,
@@ -93,6 +118,7 @@
             return {
                 memberLoaded: false,
                 isProcessing: false,
+                isRestoringPurchases: false,
                 member: undefined,
                 memberEmail: undefined,
                 memberUnsubscriber: undefined,
@@ -102,10 +128,20 @@
                 productGroups: [],
             }
         },
+        mounted(): void {
+            const fromAuth = getQueryParam(QueryParam.FROM_AUTH);
+            // const fromAuthStorage = StorageService.getJSON(LocalStorageKey.landingQueryParams)[QueryParam.FROM_AUTH];
+            if (isAndroidApp() && fromAuth) {
+                AndroidService.shared.showToast("You are now signed in");
+                logger.info("Showing toast for signed in ");
+            } else {
+                logger.info("Not showing toast");
+            }
+        },
         async beforeMount() {
 
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({member}) => {
+                onData: ({ member }) => {
                     this.member = member;
                     this.memberLoaded = true;
                     if (this.member?.email) {
@@ -116,6 +152,18 @@
 
             this.productGroups = await SubscriptionProductGroupService.sharedInstance.getSortedProductGroupEntries();
             this.productsLoaded = true;
+
+            this.productGroups.forEach((groupEntry: SubscriptionProductGroupEntry) => {
+                const items = groupEntry.products.map(product => {
+                    return {
+                        subscriptionProductId: product?.entryId,
+                        name: product?.displayName,
+                        billingPeriod: product?.billingPeriod
+                    }
+                });
+
+                logPresentSubscriptionOffers({ products: items, promotionName: this.promotionName });
+            })
 
             const prem = getQueryParam(QueryParam.PREMIUM_DEFAULT);
 
@@ -132,10 +180,15 @@
             },
             groupEntries(): SubscriptionProductGroupEntry[] {
                 return this.productGroups.filter(e => {
-                    if (!this.member){
+                    if (!this.member) {
                         return true
                     }
-                    return !((this.member?.isInTrial ?? false) && e.tier === SubscriptionTier.BASIC)
+
+                    // hide basic if we are upselling to opt-out trial
+                    if (this.startTrial && e.tier == SubscriptionTier.BASIC) {
+                        return false;
+                    }
+                    return !((this.member?.isOptInTrialing ?? false) && e.tier === SubscriptionTier.BASIC)
                 })
             },
             trialBadgeText(): string | undefined {
@@ -150,14 +203,31 @@
             }
         },
         methods: {
-            goToSignup() {
-                window.location.href = PageRoute.SIGNUP;
+            async goToSignup() {
+                await pushRoute(PageRoute.SIGNUP);
             },
             getGroupDisplayName(entry: SubscriptionProductGroupEntry): string | undefined {
                 return entry.productGroup?.title ?? entry.tierDisplayName;
             },
             showTrialBadge(entry: SubscriptionProductGroupEntry): boolean {
-                return this.member && this.member.isInTrial && this.member.tier === entry.tier || false
+                return this.member && this.member.isOptInTrialing && this.member.tier === entry.tier || false
+            },
+            async restorePurchases() {
+                try {
+                    if (!isAndroidApp()) {
+                        alert("Restore Purchases can only be done on an android device.");
+                        return;
+                    }
+                    this.isRestoringPurchases = true;
+                    const result = await restoreAndroidPurchases({ member: this.member ?? undefined });
+                    if (result.success) {
+                        AndroidService.shared.showToast("Finished restoring purchases");
+                    }
+                } catch (error) {
+                    logger.error("Failed to init restore purchases flow", error);
+                } finally {
+                    this.isRestoringPurchases = false
+                }
             }
         }
 
@@ -169,6 +239,8 @@
     @import "mixins";
     @import "variables";
     @import "transitions";
+
+    $cardBorderRadius: 1.6rem;
 
     .centered {
         position: relative;
@@ -182,12 +254,15 @@
     }
 
     .tabset {
+        background: $dolphin url(/assets/images/grainy.png) repeat;
+        border-radius: 1.2rem;
         margin: 0 auto;
         max-width: 48rem;
 
         @include r(768) {
-            max-width: none;
-            min-width: 80rem;
+            background: transparent none;
+            max-width: 80rem;
+            width: 100%;
         }
     }
 
@@ -199,7 +274,7 @@
     }
 
     .heading {
-        border-radius: 1.6rem 1.6rem 0 0;
+        border-radius: $cardBorderRadius $cardBorderRadius 0 0;
         font-size: 2.4rem;
         font-weight: bold;
         padding: 2.4rem 1.6rem .8rem;
@@ -217,7 +292,7 @@
         }
 
         &.plus {
-            background: $dolphin url(assets/images/grainy.png) repeat;
+            background: $dolphin url(/assets/images/grainy.png) repeat;
             color: $white;
         }
     }
@@ -237,12 +312,18 @@
         }
 
         .plan-container {
+            margin-bottom: 1.6rem;
             max-width: 40rem;
 
             @include r(768) {
                 display: flex;
                 flex-basis: 49%;
                 flex-direction: column;
+                margin-bottom: 0;
+            }
+
+            &:not(:only-child):first-child {
+                @include shadowbox;
             }
 
             .tab-content {
@@ -286,7 +367,7 @@
         }
 
         &.active {
-            background: $dolphin url(assets/images/grainy.png) repeat;
+            background: $dolphin url(/assets/images/grainy.png) repeat;
 
             @include r(768) {
                 background-image: none;
@@ -294,11 +375,11 @@
         }
 
         &:first-child {
-            border-radius: 1.6rem 0 0 0;
+            border-radius: $cardBorderRadius 0 0 0;
 
             @include r(768) {
                 background-color: $white;
-                border-radius: 1.6rem 1.6rem 0 0;
+                border-radius: $cardBorderRadius $cardBorderRadius 0 0;
                 color: $darkestGreen;
             }
         }
@@ -307,15 +388,15 @@
             border-radius: 0 1.6rem 0 0;
 
             @include r(768) {
-                background: $dolphin url(assets/images/grainy.png) repeat;
-                border-radius: 1.6rem 1.6rem 0 0;
+                background: $dolphin url(/assets/images/grainy.png) repeat;
+                border-radius: $cardBorderRadius $cardBorderRadius 0 0;
                 color: $white;
             }
         }
 
         &:only-child {
-            background: $dolphin url(assets/images/grainy.png) repeat;
-            border-radius: 1.6rem 1.6rem 0 0;
+            background: $dolphin url(/assets/images/grainy.png) repeat;
+            border-radius: $cardBorderRadius $cardBorderRadius 0 0;
             flex-basis: 100%;
             padding-left: 1.6rem;
             padding-bottom: .8rem;
@@ -325,8 +406,16 @@
                 padding-left: 2.4rem;
             }
             @include r(768) {
-                flex-basis: 50%;
+                max-width: 48rem;
             }
+        }
+    }
+
+    .restore-container {
+        padding: 3rem 0;
+
+        &.noTabs {
+            margin-left: 1rem;
         }
     }
 
@@ -337,9 +426,14 @@
 
     .tabPanels {
         justify-content: center;
+        padding: 2.4rem 1.6rem 3.2rem;
 
+        @include r(374) {
+            padding: 2.4rem 2.4rem 3.2rem;
+        }
         @include r(768) {
             display: flex;
+            padding: 0;
         }
     }
 
@@ -348,7 +442,13 @@
 
         &:only-child {
             display: block;
-            padding-top: .8rem;
+            margin-top: -1.6rem;
+            max-width: 48rem;
+
+            @include r(768) {
+                margin-top: 0;
+                padding-top: .8rem;
+            }
         }
 
         @include r(768) {

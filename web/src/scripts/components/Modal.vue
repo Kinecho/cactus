@@ -1,7 +1,7 @@
 <template>
     <MountingPortal v-if="hasShown || show" :mountTo="target">
         <transition name="modal" v-if="show" appear>
-            <div :class="['modal-mask', {show, opaque, light, dark}]">
+            <div :class="['modal-mask', {show, opaque, light, dark, tall}]">
                 <div class="modal-wrapper">
                     <div class="modal-container" :class="{relative: containerPositionRelative}" role="dialog">
                         <div class="modal-header">
@@ -27,7 +27,10 @@
 <script lang="ts">
     import Vue from "vue";
     import * as uuid from "uuid/v4"
-    import {MountingPortal} from "portal-vue"
+    import { MountingPortal } from "portal-vue"
+    import Logger from "@shared/Logger"
+
+    const logger = new Logger("Modal");
 
     export default Vue.extend({
         components: {
@@ -35,13 +38,17 @@
         },
         props: {
             show: Boolean,
-            showCloseButton: {type: Boolean, default: true},
-            hideCloseButtonOnMobile: {type: Boolean, default: false},
+            showCloseButton: { type: Boolean, default: true },
+            hideCloseButtonOnMobile: { type: Boolean, default: false },
             opaque: Boolean,
-            light: {type: Boolean, default: true},
+            light: { type: Boolean, default: true },
             dark: Boolean,
             closeStyles: {
                 type: Object as () => { [name: string]: any }
+            },
+            tall: {
+                type: Boolean,
+                default: false,
             },
             containerPositionRelative: {
                 type: Boolean,
@@ -74,6 +81,13 @@
 
             window.clearInterval(this.cleanupInterval);
             this.removeModal();
+            try {
+                document.body.classList.remove("no-scroll");
+                this.$root.$children[0]?.$el?.classList?.remove("modal-mask-in");
+            } catch (error) {
+                //unable to remove classes from the body;
+            }
+
         },
         data(): {
             escapeListener: any,
@@ -92,7 +106,7 @@
                 this.$emit("close");
             },
             removeModal() {
-                if (this.key){
+                if (this.key) {
                     const wrapper = document.getElementById(this.key);
                     wrapper?.remove();
                 }
@@ -102,7 +116,7 @@
             show(newValue) {
                 window.clearInterval(this.cleanupInterval);
                 if (newValue) {
-                    if (this.key){
+                    if (this.key) {
                         let modal = document.getElementById(this.key);
                         if (!modal) {
                             const wrapper = document.createElement("div");
@@ -115,12 +129,20 @@
                     }
 
                     this.hasShown = true;
+                    try {
+                        document.body.classList.add("no-scroll");
+                        this.$root.$children[0]?.$el?.classList?.add("modal-mask-in")
+                    } catch (error) {
+                        logger.error("Failed to add modal-mask-in on app root", error)
+                    }
 
-                    document.body.classList.add("no-scroll");
-                    this.$root.$el.classList.add("modal-mask-in")
                 } else {
-                    document.body.classList.remove("no-scroll");
-                    this.$root.$el.classList.remove("modal-mask-in");
+                    try {
+                        document.body.classList.remove("no-scroll");
+                        this.$root.$children[0]?.$el?.classList?.remove("modal-mask-in");
+                    } catch (error) {
+                        logger.error("failed to remove modal-mask-in class from the app root", error);
+                    }
 
                     //wait for a bit before removing the wrapper element so that any animations can finish.
                     this.cleanupInterval = window.setTimeout(() => {
@@ -132,11 +154,11 @@
             }
         },
         computed: {
-            key():string|undefined{
-                return this.id ? `modal_${this.id}` : undefined
+            key(): string | undefined {
+                return this.id ? `modal_${ this.id }` : undefined
             },
-            target(): string|undefined {
-                return this.key ? `#${this.key} > .portal-target` : undefined
+            target(): string | undefined {
+                return this.key ? `#${ this.key } > .portal-target` : undefined
             }
         }
     })
@@ -173,6 +195,16 @@
 
             &.opaque {
                 background-color: rgba(0, 0, 0, 1);
+            }
+        }
+
+        &.tall {
+            display: block;
+
+            @include h(960) {
+                align-items: center;
+                display: flex;
+                justify-content: center;
             }
         }
 

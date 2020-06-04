@@ -14,8 +14,9 @@ import {
 import {fromDocumentSnapshot, fromQueryDocumentSnapshot, fromQuerySnapshot} from "@shared/util/FirestoreUtil";
 import {addModal, handleDatabaseError, showModal} from "@web/util";
 export import Transaction = firebaseClient.firestore.Transaction;
+
 import CollectionReference = firebaseClient.firestore.CollectionReference;
-import DocumentReference = firebaseClient.firestore.DocumentReference;
+export import DocumentReference = firebaseClient.firestore.DocumentReference;
 import DocumentSnapshot = firebaseClient.firestore.DocumentSnapshot;
 import Timestamp = firebaseClient.firestore.Timestamp;
 import FieldValue = firebaseClient.firestore.FieldValue;
@@ -185,7 +186,6 @@ export default class FirestoreService {
         return this.observeQuery(originalQuery, Type, {
             onData: (results: T[]) => {
                 const [first] = results;
-                logger.log("[observe first] not sure if it's a m ember but here we go ", typeof ((first as any)?.subscription?.trial?.startedAt));
                 options.onData(first);
             }
         });

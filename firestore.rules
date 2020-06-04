@@ -4,6 +4,7 @@
 // *       NOT IN THE FIREBASE CONSOLE UI         *
 // *                                              *
 // ************************************************
+rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function resourceBelongsToUser() {
@@ -124,7 +125,7 @@ service cloud.firestore {
 
     match /reflectionResponses/{document=**} {
       allow read: if belongsToMember() || resource.data.shared == true;
-      allow update: if belongsToMember() || resource.data.anonymous == true;
+      allow update: if belongsToMember();
       // allow create: if request.resource.data.cactusMemberId == getMemberId() || request.resource.data.mailchimpMemberId == getCurrentMember().data.mailchimpListMember.id;
       allow create: if true;
     }
@@ -140,6 +141,18 @@ service cloud.firestore {
     match /socialConnectionRequests/{document=**} {
       allow create: if request.resource.data.memberId == getMemberId();
       allow read,update: if resource.data.memberId == getMemberId() || resource.data.friendMemberId == getMemberId()
+    }
+
+    match /coreValuesAssessmentResponses/{document=**} {
+        //allow create: if getMemberId() == request.resource.data.memberId;
+        //allow read,update: if getMemberId() == resource.data.memberId;
+        allow read,update,create: if true;
+    }
+
+    match /gapAnalysisAssessmentResults/{document=**} {
+        //allow create: if getMemberId() == request.resource.data.memberId;
+        //allow read,update: if getMemberId() == resource.data.memberId;
+        allow read,update,create: if true;
     }
 
 	  match /socialConnections/{document=**} {

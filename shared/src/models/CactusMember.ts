@@ -1,16 +1,20 @@
-import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
-import {ListMember} from "@shared/mailchimp/models/MailchimpTypes";
-import {ElementAccumulation} from "@shared/models/ElementAccumulation";
-import {DateObject, DateTime} from "luxon";
+import { BaseModel, Collection } from "@shared/FirestoreBaseModels";
+import { ListMember } from "@shared/mailchimp/models/MailchimpTypes";
+import { InsightWord } from "@shared/models/ReflectionResponse";
+import { ElementAccumulation } from "@shared/models/ElementAccumulation";
+import { DateObject, DateTime } from "luxon";
 import * as DateUtil from "@shared/util/DateUtil";
-import {getValidTimezoneName} from "@shared/timezones";
+import { getValidTimezoneName } from "@shared/timezones";
 import {
-    isInTrial,
+    isOptInTrialing,
+    isOptOutTrialing,
     MemberSubscription,
-    subscriptionTierDisplayName,
-    needsTrialExpiration
+    needsTrialExpiration,
+    subscriptionTierDisplayName
 } from "@shared/models/MemberSubscription";
-import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+import { DEFAULT_SUBSCRIPTION_TIER, SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
+import { CoreValue } from "@shared/models/CoreValueTypes";
+import { CactusElement } from "@shared/models/CactusElement";
 
 export enum JournalStatus {
     PREMIUM = "PREMIUM",
@@ -69,7 +73,16 @@ export enum Field {
     subscriptionTier = "subscription.tier",
     subscriptionTrialEndsAt = "subscription.trial.endsAt",
     subscriptionStripeId = "subscription.stripeSubscriptionId",
+    subscriptionCancellation = "subscription.cancellation",
+    subscriptionCancellationAccessEndsAt = "subscription.cancellation.accessEndsAt",
+    subscriptionCancellationInitiatedAt = "subscription.cancellation.userInitiatedAt",
     subscriptionActivated = "subscription.activated",
+    subscriptionCanceledAccessEndsAt = "subscription.cancellation.accessEndsAt",
+    subscriptionOptOutTrialStartedAt = "subscription.optOutTrial.startedAt",
+    subscriptionOptOutTrialEndsAt = "subscription.optOutTrial.endsAt",
+    stripeCustomerId = "stripe.customerId",
+    coreValues = "coreValues",
+    focusElement = "focusElement",
 }
 
 export interface PromptSendTime {
@@ -85,7 +98,7 @@ export interface MemberStripeDetails {
     customerId?: string,
 }
 
-export default class CactusMember extends BaseModel {
+export default class  CactusMember extends BaseModel {
     readonly collection = Collection.members;
     static Field = Field;
     firstName?: string;
@@ -134,6 +147,11 @@ export default class CactusMember extends BaseModel {
     subscription?: MemberSubscription;
     stripe?: MemberStripeDetails = {};
 
+    wordCloud?: InsightWord[];
+    coreValues?: CoreValue[];
+
+    focusElement?: CactusElement | null;
+
     prepareForFirestore(): any {
         super.prepareForFirestore();
         this.email = this.email ? this.email.toLowerCase().trim() : this.email;
@@ -166,7 +184,7 @@ export default class CactusMember extends BaseModel {
     }
 
     getFullName(): string {
-        return `${this.firstName || ""} ${this.lastName || ""}`.trim();
+        return `${ this.firstName || "" } ${ this.lastName || "" }`.trim();
     }
 
     getCurrentLocaleDateObject(date: Date = new Date()): DateObject {
@@ -178,7 +196,7 @@ export default class CactusMember extends BaseModel {
 
     getDefaultPromptSendTimeUTC(): PromptSendTime {
         return {
-            hour: DateTime.utc().minus({hours: 1}).hour,
+            hour: DateTime.utc().minus({ hours: 1 }).hour,
             minute: DateUtil.getCurrentQuarterHour()
         } as PromptSendTime;
     }
@@ -203,23 +221,27 @@ export default class CactusMember extends BaseModel {
     }
 
     get tier(): SubscriptionTier {
-        return this.subscription?.tier ?? SubscriptionTier.PLUS
+        return this.subscription?.tier ?? DEFAULT_SUBSCRIPTION_TIER
     }
 
     get tierDisplayName(): string | undefined {
-        return subscriptionTierDisplayName(this.tier, this.isInTrial)
+        return subscriptionTierDisplayName(this.tier, this.isOptInTrialing)
     }
 
     get daysLeftInTrial(): number {
-        const end = this.subscription?.trial?.endsAt;
+        const end = this.subscription?.optOutTrial?.endsAt || this.subscription?.trial?.endsAt;
         if (!end) {
             return 0;
         }
         return Math.max(DateUtil.daysUntilDate(end), 0);
     }
 
-    get isInTrial(): boolean {
-        return isInTrial(this.subscription)
+    get isOptInTrialing(): boolean {
+        return isOptInTrialing(this.subscription)
+    }
+
+    get isOptOutTrialing(): boolean {
+        return isOptOutTrialing(this.subscription)
     }
 
     get needsTrialExpiration(): boolean {
@@ -227,7 +249,12 @@ export default class CactusMember extends BaseModel {
     }
 
     get hasActiveSubscription(): boolean {
-        return !!this.subscription && !this.isInTrial && this.tier !== SubscriptionTier.BASIC
+        return !!this.subscription && !this.isOptInTrialing && this.tier !== SubscriptionTier.BASIC
+    }
+
+    get hasUpcomingCancellation(): boolean {
+        return !!this.subscription?.cancellation?.accessEndsAt &&
+        this.subscription.cancellation.accessEndsAt > new Date();
     }
 
     set stripeCustomerId(customerId: string | undefined) {
@@ -238,5 +265,20 @@ export default class CactusMember extends BaseModel {
 
     get stripeCustomerId(): string | undefined {
         return this.stripe?.customerId;
+    }
+
+    /**
+     * Get a core value with a preferred index, or the last value, which ever is smaller.
+     * @param {number} index - the preferred core value index
+     * @return {CoreValue | undefined}
+     */
+    getCoreValueAtIndex(index: number = 0): CoreValue | undefined {
+        const coreValues = this.coreValues;
+        if (!coreValues || coreValues.length === 0) {
+            return undefined;
+        }
+
+        const i = index % coreValues.length;
+        return coreValues[i];
     }
 }

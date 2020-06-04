@@ -21,7 +21,12 @@ export enum Endpoint {
     activityFeedSummary = "social/activity-feed-summary",
     userDeletePermanently = "user/delete-permanently",
     subscriptionDetails = "checkout/subscription-details",
-    subscriptionSetup = "checkout/sessions/setup-subscription"
+    subscriptionSetup = "checkout/sessions/setup-subscription",
+    androidFulfilPurchase = "checkout/android/fulfill-purchase",
+    androidFulfilRestoredPurchases = "checkout/android/fulfill-restored-purchases",
+    cancelStripeSubscription = "checkout/stripe/subscriptions/cancel",
+    downloadUserData = "user/download-data",
+    exportData = "user/export-data",
 }
 
 export function initializeAxios(): AxiosInstance {
@@ -39,6 +44,13 @@ export function initializeAxios(): AxiosInstance {
     return _request
 }
 
+export async function getUserToken(): Promise<string|undefined> {
+    const user = getAuth().currentUser;
+    if (user) {
+        return await user.getIdToken();
+    }
+    return;
+}
 
 export async function getAuthHeaders(): Promise<{ Authorization: string } | undefined> {
     const user = getAuth().currentUser;
@@ -62,5 +74,4 @@ export const request = getInstance();
 
 export function isAxiosError(error: any): error is AxiosError {
     return error.isAxiosError
-
 }

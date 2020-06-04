@@ -1,13 +1,22 @@
 <template>
-    <footer v-bind:class="{lifted, transparent: isTransparent}">
+    <footer v-bind:class="{lifted, transparent: isTransparent}" v-if="!isAndroidApp">
         <div class="centered">
             <div class="footerInfo">
-                <img class="logomark" src="/assets/images/logoMark.svg" alt=""/>
+                <router-link to="/">
+                    <img class="logomark" src="/assets/images/logoMark.svg" alt=""/>
+                </router-link>
+
                 <div class="footerContent">
                     <p class="copyright">&copy; 2020 Cactus. All rights reserved.<br>
                         Have questions?&nbsp;&nbsp;<a class="contact" href="mailto:help@cactus.app">Send an
                             email.</a><br>
-                        <a class="legal" href="/pricing">Pricing</a>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<a class="legal" href="/privacy-policy">Privacy</a>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<a class="legal" href="/terms-of-service">Terms</a>
+                        <router-link class="legal" to="/pricing">Pricing</router-link>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<router-link class="legal" to="/sponsor">
+                            Sponsor
+                        </router-link>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<router-link class="legal" to="/privacy-policy">
+                            Privacy
+                        </router-link>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<router-link class="legal" to="/terms-of-service">
+                            Terms
+                        </router-link>
                     </p>
                     <nav class="socialLinks">
                         <a class="link" rel="noreferrer" href="https://www.facebook.com/itscalledcactus" target="_blank"><img class="icon" src="/assets/images/facebook.svg" alt="facebook"/></a>
@@ -19,7 +28,7 @@
                     </nav>
                 </div>
             </div>
-            <div class="app-icons">
+            <div class="app-icons" v-if="!isAndroidApp">
                 <AppStoreIcon/>
                 <PlayStoreIcon/>
             </div>
@@ -31,15 +40,21 @@
     import Vue from "vue"
     import AppStoreIcon from "@web/components/AppStoreIcon.vue";
     import PlayStoreIcon from "@web/components/PlayStoreIcon.vue";
+    import { isAndroidApp } from '@web/DeviceUtil'
 
     export default Vue.extend({
         props: {
-            lifted: {type: Boolean, required: false, default: false},
-            isTransparent: {type: Boolean, default: false},
+            lifted: { type: Boolean, required: false, default: false },
+            isTransparent: { type: Boolean, default: false },
         },
         components: {
             AppStoreIcon,
             PlayStoreIcon
+        },
+        computed: {
+            isAndroidApp(): boolean {
+                return isAndroidApp();
+            }
         }
     })
 

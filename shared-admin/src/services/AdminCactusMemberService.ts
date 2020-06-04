@@ -2,6 +2,7 @@ import AdminFirestoreService, {
     Batch,
     CollectionReference,
     DefaultGetOptions,
+    FieldValue,
     GetBatchOptions,
     GetOptions,
     QueryOptions,
@@ -15,15 +16,23 @@ import CactusMember, {
     PromptSendTime,
     ReflectionStats
 } from "@shared/models/CactusMember";
-import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
-import {getDateAtMidnightDenver, getDateFromISOString, getSendTimeUTC} from "@shared/util/DateUtil";
-import {ListMember, ListMemberStatus, MemberUnsubscribeReport, TagName} from "@shared/mailchimp/models/MailchimpTypes";
-import {QuerySortDirection} from "@shared/types/FirestoreConstants";
+import { InsightWord } from "@shared/models/ReflectionResponse";
+import { BaseModelField, Collection } from "@shared/FirestoreBaseModels";
+import { getDateAtMidnightDenver, getDateFromISOString, getSendTimeUTC } from "@shared/util/DateUtil";
+import {
+    ListMember,
+    ListMemberStatus,
+    MemberUnsubscribeReport,
+    TagName
+} from "@shared/mailchimp/models/MailchimpTypes";
+import { QuerySortDirection } from "@shared/types/FirestoreConstants";
 import Logger from "@shared/Logger";
-import {getValidTimezoneName} from "@shared/timezones";
+import { getValidTimezoneName } from "@shared/timezones";
 import * as admin from "firebase-admin";
-import {QueryWhereClauses} from "@shared/util/FirestoreUtil";
+import { QueryWhereClauses, removeDuplicates } from "@shared/util/FirestoreUtil";
+import { isBlank } from "@shared/util/StringUtil";
 import DocumentReference = admin.firestore.DocumentReference;
+import { CoreValue } from "@shared/models/CoreValueTypes";
 
 const logger = new Logger("AdminCactusMemberService");
 let firestoreService: AdminFirestoreService;
@@ -63,12 +72,28 @@ export default class AdminCactusMemberService {
         return AdminFirestoreService.getSharedInstance().getCollectionRef(Collection.members);
     }
 
+    async deleteField(member: CactusMember, field: Field): Promise<void> {
+        const memberId = member.id;
+        if (!memberId) {
+            return;
+        }
+
+        const docRef = this.getCollectionRef().doc(memberId);
+
+        await docRef.update(field, FieldValue.delete());
+        return;
+    }
+
     async save(model: CactusMember, options?: SaveOptions): Promise<CactusMember> {
         return firestoreService.save(model, options);
     }
 
     async getById(id: string, options?: GetOptions): Promise<CactusMember | undefined> {
         return await firestoreService.getById(id, CactusMember, options);
+    }
+
+    async getByStripeCustomerId(customerId: string, options?: GetOptions): Promise<CactusMember | undefined> {
+        return await firestoreService.getFirst(this.getCollectionRef().where(CactusMember.Field.stripeCustomerId, "==", customerId), CactusMember, options)
     }
 
     async delete(id?: string): Promise<CactusMember | undefined> {
@@ -78,26 +103,55 @@ export default class AdminCactusMemberService {
         return firestoreService.delete(id, CactusMember);
     }
 
-    async setReflectionStats(options: { memberId: string, stats: ReflectionStats, batch?: Batch }, queryOptions?: SaveOptions): Promise<void> {
-        const {memberId, stats} = options;
+    async setStats(options: { memberId: string, stats?: ReflectionStats, wordCloud?: InsightWord[], batch?: Batch }, queryOptions?: SaveOptions): Promise<void> {
+        const { memberId, stats, wordCloud } = options;
         const doc: DocumentReference = this.getCollectionRef().doc(memberId);
-        const data: Partial<CactusMember> = {
-            stats: {
+        const data: Partial<CactusMember> = {};
+
+        if (stats) {
+            data.stats = {
                 reflections: stats
             }
+        }
+
+        if (wordCloud) {
+            data.wordCloud = wordCloud;
+        }
+
+        if (data.stats || data.wordCloud) {
+            try {
+                if (queryOptions?.transaction) {
+                    await queryOptions?.transaction.set(doc, data, { merge: true })
+                } else if (options.batch) {
+                    options.batch.set(doc, data, { merge: true })
+                } else {
+                    await doc.set(data, { merge: true });
+                }
+            } catch (error) {
+                logger.error(`Unable to update member stats for memberId = ${ memberId }. ${ queryOptions?.transaction ? "Used transaction" : "Not using transaction." }`, error)
+            }
+        }
+        return;
+    }
+
+    async setWordInsights(options: { memberId: string, wordCloud: InsightWord[], batch?: Batch }, queryOptions?: SaveOptions): Promise<void> {
+        const { memberId, wordCloud } = options;
+        const doc: DocumentReference = this.getCollectionRef().doc(memberId);
+        const data: Partial<CactusMember> = {
+            wordCloud: wordCloud
         };
         try {
             if (queryOptions?.transaction) {
-                await queryOptions?.transaction.set(doc, data, {merge: true})
+                await queryOptions?.transaction.set(doc, data, { merge: true })
             } else if (options.batch) {
-                options.batch.set(doc, data, {merge: true})
+                options.batch.set(doc, data, { merge: true })
             } else {
-                await doc.set(data, {merge: true});
+                await doc.set(data, { merge: true });
             }
         } catch (error) {
-            logger.error(`Unable to update member stats for memberId = ${memberId}. ${queryOptions?.transaction ? "Used transaction" : "Not using transaction."}`, error)
+            logger.error(`Unable to update member stats for memberId = ${ memberId }. ${ queryOptions?.transaction ? "Used transaction" : "Not using transaction." }`, error)
         }
-
+        return;
     }
 
     async getByMailchimpMemberId(id?: string): Promise<CactusMember | undefined> {
@@ -189,7 +243,7 @@ export default class AdminCactusMemberService {
                 notification = NotificationStatus.NOT_SET;
                 break;
             default:
-                logger.warn(`Unable to handle list member status ${status}`);
+                logger.warn(`Unable to handle list member status ${ status }`);
         }
         return notification;
     }
@@ -256,7 +310,7 @@ export default class AdminCactusMemberService {
     }
 
     async findCactusMember(options: { email?: string, userId?: string, cactusMemberId?: string }, getOptions?: GetOptions): Promise<CactusMember | undefined> {
-        const {email, userId, cactusMemberId} = options;
+        const { email, userId, cactusMemberId } = options;
         let member: CactusMember | undefined = undefined;
         if (cactusMemberId) {
             member = await this.getById(cactusMemberId, getOptions)
@@ -273,29 +327,44 @@ export default class AdminCactusMemberService {
         return member
     }
 
-    async geAllMemberMatchingEmail(emailInput?: string | null, options: GetOptions = DefaultGetOptions): Promise<CactusMember[]> {
-        if (!emailInput) {
+    async findAllMatchingAny(params: { userId?: string | null, email?: string | null }, options: GetOptions = DefaultGetOptions): Promise<CactusMember[]> {
+        let { email } = params;
+        const { userId } = params;
+        if (!email && !userId) {
             return [];
         }
-        const email = emailInput.toLowerCase().trim();
-        const query = firestoreService.getCollectionRef(Collection.members).where(Field.email, "==", email);
-        options.queryName = `AdminCactusMemberService.getMemberByEmail(${email})`;
-        const result = await firestoreService.executeQuery(query, CactusMember, options);
+        email = email?.toLowerCase().trim();
+        const members: CactusMember[] = [];
 
-        return result.results;
+        if (!isBlank(email)) {
+            const emailQuery = firestoreService.getCollectionRef(Collection.members).where(Field.email, "==", email);
+            options.queryName = `AdminCactusMemberService.findAllMatchingAny(${ email })`;
+            const result = await firestoreService.executeQuery(emailQuery, CactusMember, options);
+            members.push(...result.results);
+        }
+
+
+        if (!isBlank(userId)) {
+            const userIdQuery = firestoreService.getCollectionRef(Collection.members).where(Field.userId, "==", userId);
+            options.queryName = `AdminCactusMemberService.findAllMatchingAny(${ userId }`;
+            const result = await firestoreService.executeQuery(userIdQuery, CactusMember, options);
+            members.push(...result.results);
+        }
+
+        return removeDuplicates(members);
     }
 
-    async getMemberByEmail(emailInput?: string | null, options: GetOptions = DefaultGetOptions): Promise<CactusMember | undefined> | never {
+    async getMemberByEmail(emailInput?: string | null, options: GetOptions = DefaultGetOptions): Promise<CactusMember | undefined> {
         if (!emailInput) {
             return undefined;
         }
         const email = emailInput.toLowerCase().trim();
         const query = firestoreService.getCollectionRef(Collection.members).where(Field.email, "==", email);
-        options.queryName = `AdminCactusMemberService.getMemberByEmail(${email})`;
+        options.queryName = `AdminCactusMemberService.getMemberByEmail(${ email })`;
         const result = await firestoreService.executeQuery(query, CactusMember, options);
 
         if (result.error && options?.throwOnError) {
-            const error = result.error instanceof Error ? result.error : new Error(`${result.error}`);
+            const error = result.error instanceof Error ? result.error : new Error(`${ result.error }`);
             error.name = error.name || "getMemberByEmail failed";
             throw error;
         }
@@ -362,7 +431,7 @@ export default class AdminCactusMemberService {
                     sortDirection: QuerySortDirection.asc
                 }
             });
-            logger.log(`Fetched ${results.size} members in batch ${batchNumber}`);
+            logger.log(`Fetched ${ results.size } members in batch ${ batchNumber }`);
             await options.onData(results.results, 0);
             while (results.results.length > 0 && results.lastCursor) {
                 try {
@@ -375,14 +444,15 @@ export default class AdminCactusMemberService {
                             sortDirection: QuerySortDirection.asc
                         }
                     });
-                    logger.log(`Fetched ${results.size} members in batch ${batchNumber}`);
+                    logger.log(`Fetched ${ results.size } members in batch ${ batchNumber }`);
                     await options.onData(results.results, batchNumber);
-                    if (options.pageDelay && options.pageDelay > 0) {
+                    const delay = options.pageDelay;
+                    if (delay && delay > 0) {
                         await new Promise(resolve => {
-                            logger.info(`Waiting ${options.pageDelay}ms before processing next page`);
+                            logger.info(`Waiting ${ options.pageDelay }ms before processing next page`);
                             setTimeout(() => {
                                 resolve()
-                            }, options.pageDelay)
+                            }, delay)
                         })
                     }
                 } catch (batchError) {
@@ -424,9 +494,33 @@ export default class AdminCactusMemberService {
         }
     }
 
+    /**
+     * Get members where the opt-out trial started after the provided Date.
+     * This is typically used to look at members for the previous day in the Slack job.
+     * @param {Date} date - the date to start the query.
+     * @return {Promise<CactusMember[]>}
+     */
+    async getOptOutTrialStartedSince(date: Date): Promise<CactusMember[]> {
+        const ts = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(date));
+        const query = this.getCollectionRef().where(CactusMember.Field.subscriptionOptOutTrialStartedAt, ">=", ts);
+        return (await firestoreService.executeQuery(query, CactusMember)).results;
+    }
+
+    /**
+     * Get members where the cancellation.userInitiatedAt started after the provided Date.
+     * This is typically used to look at members for the previous day in the Slack job.
+     * @param {Date} date - the date to start the query.
+     * @return {Promise<CactusMember[]>}
+     */
+    async getCancellationsInitiatedSince(date: Date): Promise<CactusMember[]> {
+        const ts = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(date));
+        const query = this.getCollectionRef().where(CactusMember.Field.subscriptionCancellationInitiatedAt, ">=", ts);
+        return (await firestoreService.executeQuery(query, CactusMember)).results;
+    }
+
     async getMembersForUTCSendPromptTime(sendTime: PromptSendTime, options?: GetOptions): Promise<CactusMember[]> {
         const query = this.getCollectionRef().where(CactusMember.Field.promptSendTimeUTC_hour, "==", sendTime.hour)
-            .where(CactusMember.Field.promptSendTimeUTC_minute, "==", sendTime.minute);
+        .where(CactusMember.Field.promptSendTimeUTC_minute, "==", sendTime.minute);
 
         const results = await firestoreService.executeQuery(query, CactusMember);
         return results.results;
@@ -434,7 +528,7 @@ export default class AdminCactusMemberService {
 
     async getMembersForUTCSendPromptTimeBatch(sendTime: PromptSendTime, options: GetBatchOptions<CactusMember>): Promise<void> {
         const query = this.getCollectionRef().where(CactusMember.Field.promptSendTimeUTC_hour, "==", sendTime.hour)
-            .where(CactusMember.Field.promptSendTimeUTC_minute, "==", sendTime.minute);
+        .where(CactusMember.Field.promptSendTimeUTC_minute, "==", sendTime.minute);
 
         await firestoreService.executeBatchedQuery({
             query,
@@ -452,20 +546,20 @@ export default class AdminCactusMemberService {
     }): Promise<UpdateSendPromptUTCResult> {
         logger.log("Updating memberUTC Send Prompt Time for member", member.email, member.id);
 
-        const {useDefault} = options;
-        const beforeUTC = member.promptSendTimeUTC ? {...member.promptSendTimeUTC} : undefined;
+        const { useDefault } = options;
+        const beforeUTC = member.promptSendTimeUTC ? { ...member.promptSendTimeUTC } : undefined;
         const memberTimezone = getValidTimezoneName(member.timeZone);
         if (!memberTimezone) {
             logger.log("Member's converted local timezone is unknown. Skipping!");
-            return {updated: false, promptSendTimeUTC: beforeUTC}
+            return { updated: false, promptSendTimeUTC: beforeUTC }
         }
 
         // the member has a default promptSendTimeUTC and a timeZone 
         // but *not* a local promptSendTime
         // we can set their local promptSendTime and return
         if (memberTimezone &&
-            member.promptSendTimeUTC &&
-            !member.promptSendTime) {
+        member.promptSendTimeUTC &&
+        !member.promptSendTime) {
 
             const localPromptSendTime = member.getLocalPromptSendTimeFromUTC();
             logger.log("Member's local promptSendTime is not set but UTC is. Setting from UTC.");
@@ -473,9 +567,9 @@ export default class AdminCactusMemberService {
             logger.log("Member's converted valid timezone is: " + memberTimezone);
             logger.log("PromptSendTime calculated: ", JSON.stringify(localPromptSendTime));
             logger.log("Saving change...");
-            await this.getCollectionRef().doc(member.id!).update({[CactusMember.Field.promptSendTime]: localPromptSendTime});
+            await this.getCollectionRef().doc(member.id!).update({ [CactusMember.Field.promptSendTime]: localPromptSendTime });
             logger.log("Saved changes.");
-            return {updated: true, promptSendTimeUTC: beforeUTC, promptSendTime: localPromptSendTime};
+            return { updated: true, promptSendTimeUTC: beforeUTC, promptSendTime: localPromptSendTime };
         }
 
         const afterUTC = getSendTimeUTC({
@@ -493,24 +587,24 @@ export default class AdminCactusMemberService {
             sendTime: DEFAULT_PROMPT_SEND_TIME(),
         });
 
-        const {minute: afterMin, hour: afterHour} = afterUTC || {};
-        const {minute: beforeMinute, hour: beforeHour} = beforeUTC || {};
+        const { minute: afterMin, hour: afterHour } = afterUTC || {};
+        const { minute: beforeMinute, hour: beforeHour } = beforeUTC || {};
 
         if (afterUTC && (afterMin !== beforeMinute || afterHour !== beforeHour)) {
             logger.log("Member has changes, saving them");
-            await this.getCollectionRef().doc(member.id!).update({[CactusMember.Field.promptSendTimeUTC]: afterUTC});
+            await this.getCollectionRef().doc(member.id!).update({ [CactusMember.Field.promptSendTimeUTC]: afterUTC });
             logger.log("saved changes.");
-            return {updated: true, promptSendTimeUTC: afterUTC};
+            return { updated: true, promptSendTimeUTC: afterUTC };
         } else if (useDefault && !afterUTC && denverUTCDefault) {
             logger.log("No sendPromptTime for UTC found. using the default value");
-            await this.getCollectionRef().doc(member.id!).update({[CactusMember.Field.promptSendTimeUTC]: denverUTCDefault});
-            return {updated: true, promptSendTimeUTC: denverUTCDefault};
+            await this.getCollectionRef().doc(member.id!).update({ [CactusMember.Field.promptSendTimeUTC]: denverUTCDefault });
+            return { updated: true, promptSendTimeUTC: denverUTCDefault };
         } else if (useDefault && !denverUTCDefault) {
             logger.error("No default value was created.");
-            return {updated: false, promptSendTimeUTC: beforeUTC}
+            return { updated: false, promptSendTimeUTC: beforeUTC }
         } else {
             logger.log("No changes, not saving");
-            return {updated: false, promptSendTimeUTC: beforeUTC}
+            return { updated: false, promptSendTimeUTC: beforeUTC }
         }
     }
 
@@ -528,7 +622,7 @@ export default class AdminCactusMemberService {
             return member;
         }
 
-        await this.getCollectionRef().doc(memberId).update({[CactusMember.Field.timeZone]: validTimezoneOrNull});
+        await this.getCollectionRef().doc(memberId).update({ [CactusMember.Field.timeZone]: validTimezoneOrNull });
         member.timeZone = validTimezoneOrNull;
         return member;
     }
@@ -567,4 +661,12 @@ export default class AdminCactusMemberService {
         return result.results;
     }
 
+    async setCoreValues(memberId: string, values: CoreValue[]): Promise<void> {
+        try {
+            await this.getCollectionRef().doc(memberId).set({ [CactusMember.Field.coreValues]: values }, { merge: true });
+        } catch (error) {
+            logger.error(`Failed to update member's core values: memberId = ${ memberId }`)
+        }
+        return
+    }
 }

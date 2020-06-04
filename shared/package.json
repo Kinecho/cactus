@@ -23,17 +23,17 @@
     "camelcase": "^5.3.1",
     "chalk": "^2.4.2",
     "email-addresses": "^3.0.3",
-    "firebase": "^7.7.0",
-    "firebase-admin": "^8.9.2",
-    "firebase-functions": "^3.3.0",
-    "firebase-tools": "^7.13.0",
+    "firebase": "^7.14.6",
+    "firebase-admin": "^8.12.1",
+    "firebase-functions": "^3.6.0",
+    "firebase-tools": "^8.4.0",
     "googleapis": "^42.0.0",
     "luxon": "^1.16.0",
     "md5": "^2.2.1",
     "pretty-ms": "^5.0.0",
     "qs": "^6.7.0",
     "query-string": "^6.8.2",
-    "stripe": "^8.17.0"
+    "stripe": "8.17.0"
   },
   "devDependencies": {
     "@firebase/testing": "^0.11.5",
@@ -47,9 +47,9 @@
     "jest": "^24.8.0",
     "jest-junit": "^6.4.0",
     "ts-jest": "^24.1.0",
-    "ts-node": "^8.5.2",
+    "ts-node": "^8.10.1",
     "tsconfig-paths": "^3.8.0",
     "tslint": "^5.20.1",
-    "typescript": "^3.7.2"
+    "typescript": "^3.9.2"
   }
 }

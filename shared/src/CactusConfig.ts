@@ -22,7 +22,7 @@ export interface CactusConfig {
     app: {
         serverName: string | undefined
         environment: EnvironmentType,
-        fake_email_domain: string
+        fake_email_domain: string,
     },
     mailchimp: {
         api_key: string,
@@ -51,7 +51,7 @@ export interface CactusConfig {
             data_log: string,
             ci: string,
             [key: string]: string,
-        }
+        },
         app: {
             app_id: string,
             client_id: string,
@@ -91,10 +91,18 @@ export interface CactusConfig {
         team_id: string,
         app_id: string,
         custom_scheme: string,
+        verify_receipt_url: string,
+        verify_receipt_sandbox_url: string,
+        iap_shared_secret: string,
     },
     sendgrid: {
         api_key: string,
         template_ids: SendgridTemplateConfig,
+    },
+    language: {
+        client_id: string,
+        client_secret: string,
+        service_account: ServiceAccountCredentials,
     },
     sheets: {
         client_id: string,
@@ -102,9 +110,18 @@ export interface CactusConfig {
         prompt_content_sheet_id: string,
         service_account: ServiceAccountCredentials,
     },
+    android_publisher: {
+        service_account: ServiceAccountCredentials,
+        default_package_name: string
+    },
     flamelink: {
         service_account: ServiceAccountCredentials,
         robot_user_id: string,
         environment_id: string,
+    },
+    revenuecat: {
+        public_key: string,
+        secret_key: string,
+        webhook_bearer_token: string,
     }
 }

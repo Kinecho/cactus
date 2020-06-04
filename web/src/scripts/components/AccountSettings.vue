@@ -97,17 +97,27 @@
                                 <provider-icon :providerId="provider.providerId" class="provider-icon"/>
                                 <span class="provider-name">{{provider.displayName}}</span>
                                 <button class="red tertiary remove">
-                                    <img src="assets/images/trash.svg" alt=""/>
+                                    <img src="/assets/images/trash.svg" alt=""/>
                                     {{copy.common.REMOVE}}
                                 </button>
                             </div>
                         </div>
                     </div>
 
+                    <div class="settings-group" v-if="showExportData">
+                        <h2>Download Data<span class="badge-label">Plus</span></h2>
+                        <p class="subtext">You can export and download your data from Cactus, including all your journal
+                            prompts and written reflections. Tap the <strong>Download</strong> button below to create an
+                            archive to keep for your records or use the data in another service.
+                        <div class="item">
+                            <DataExport :member="member"/>
+                        </div>
+                    </div>
+
                     <div class="settings-group delete">
                         <div class="item">
                             <button class="red tertiary remove" @click="deleteAccountModalVisible = true">
-                                <img src="assets/images/trash.svg" alt=""/>
+                                <img src="/assets/images/trash.svg" alt=""/>
                                 {{copy.account.DELETE_ACCOUNT}}
                             </button>
                         </div>
@@ -125,8 +135,8 @@
                 </div>
             </transition>
             <delete-account-modal
-                :showModal="deleteAccountModalVisible"
-                @close="deleteAccountModalVisible = false" />
+                    :showModal="deleteAccountModalVisible"
+                    @close="deleteAccountModalVisible = false"/>
             <div class="snackbar-container">
 
                 <transition-group name="snackbar" tag="div" @before-leave="beforeLeave">
@@ -161,27 +171,31 @@
     } from "@shared/models/CactusMember";
     import CheckBox from "@components/CheckBox.vue";
     import CactusMemberService from '@web/services/CactusMemberService';
-    import {ListenerUnsubscriber} from '@web/services/FirestoreService';
-    import {formatDate} from '@shared/util/DateUtil';
+    import { ListenerUnsubscriber } from '@web/services/FirestoreService';
+    import { formatDate } from '@shared/util/DateUtil';
     import TimezonePicker from "@components/TimezonePicker.vue"
-    import {findByZoneName, ZoneInfo} from '@shared/timezones'
-    import {updateSubscriptionStatus} from '@web/mailchimp'
-    import {PageRoute} from '@shared/PageRoutes'
-    import {FirebaseUser} from '@web/firebase'
-    import {getProviderDisplayName} from "@shared/util/StringUtil"
+    import { findByZoneName, ZoneInfo } from '@shared/timezones'
+    import { updateSubscriptionStatus } from '@web/mailchimp'
+    import { PageRoute } from '@shared/PageRoutes'
+    import { FirebaseUser } from '@web/firebase'
+    import { getProviderDisplayName } from "@shared/util/StringUtil"
     import ProviderIcon from "@components/ProviderIcon.vue";
     import CopyService from "@shared/copy/CopyService";
     import DeleteAccountModal from "@components/DeleteAccountModal.vue";
-    import {LocalizedCopy} from '@shared/copy/CopyTypes'
+    import { LocalizedCopy } from '@shared/copy/CopyTypes'
     import SnackbarContent from "@components/SnackbarContent.vue";
     import TimePicker from "@components/TimePicker.vue"
     import * as uuid from "uuid/v4";
-    import {getDeviceLocale, getDeviceTimeZone} from '@web/DeviceUtil'
+    import { getDeviceLocale, getDeviceTimeZone } from '@web/DeviceUtil'
     import Logger from "@shared/Logger";
     import PremiumPricing from "@components/PremiumPricing.vue";
     import ManageActiveSubscription from "@components/ManageActiveSubscription.vue";
-    import {getQueryParam, removeQueryParam} from "@web/util";
-    import {QueryParam} from "@shared/util/queryParams";
+    import { getQueryParam, removeQueryParam } from "@web/util";
+    import { QueryParam } from "@shared/util/queryParams";
+    import DataExport from "@components/DataExport.vue";
+    import AppSettings from "@shared/models/AppSettings";
+    import AppSettingsService from "@web/services/AppSettingsService";
+    import { pushRoute } from "@web/NavigationUtil";
     import AccountSettingsFormData, {FormValidator} from "@web/datasource/AccountSettingsFormData";
     import {Config} from "@web/config";
     import {SnackbarMessage, SnackbarMessageType} from "@components/SnackbarTypes";
@@ -204,34 +218,41 @@
             Footer,
             Spinner,
             CheckBox,
+            DataExport,
             TimezonePicker,
             ProviderIcon,
             SnackbarContent,
             TimePicker,
             Upgrade: PremiumPricing,
             ManageSubscription: ManageActiveSubscription,
-            DeleteAccountModal
+            DeleteAccountModal,
         },
         mounted(): void {
             const message = getQueryParam(QueryParam.MESSAGE);
             if (message) {
-                this.addSnackbar({message, timeoutMs: 10000, closeable: true});
+                this.addSnackbar({ message, timeoutMs: 10000, closeable: true });
                 removeQueryParam(QueryParam.MESSAGE);
             }
         },
         beforeMount() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({member, user}) => {
-                    if (!member) {
-                        window.location.href = PageRoute.HOME;
-                        return;
-                    }
-
-                    this.formData.update({member, user});
-
+                onData: async ({ member, user }) => {
                     this.member = member;
                     this.user = user;
                     this.authLoaded = true;
+                    if (!member) {
+                        await pushRoute(PageRoute.HOME)
+                    }
+
+                    this.formData.update({member, user});
+                }
+            });
+
+            this.settingsObserver = AppSettingsService.sharedInstance.observeAppSettings({
+                onData: (settings) => {
+                    if (settings) {
+                        this.settings = settings;
+                    }
                 }
             })
         },
@@ -239,6 +260,7 @@
             if (this.memberUnsubscriber) {
                 this.memberUnsubscriber();
             }
+            this.settingsObserver?.();
             if (this.savingTimeout) {
                 clearTimeout(this.savingTimeout);
             }
@@ -269,6 +291,9 @@
             formData: AccountSettingsFormData,
             complianceStateError: boolean,
             validator: FormValidator,
+            deleteAccountModalVisible: boolean,
+            settingsObserver: ListenerUnsubscriber | undefined,
+            settings: AppSettings | null,
         } {
             const formData = new AccountSettingsFormData();
             return {
@@ -289,17 +314,26 @@
                 deviceTimezone: getDeviceTimeZone(),
                 deviceLocale: getDeviceLocale(),
                 tzAlertDismissed: false,
-                upgradeRoute: PageRoute.PAYMENT_PLANS,
-
                 deleteAccountModalVisible: false,
                 saving: false,
                 savingTimeout: undefined,
                 formData: formData,
                 complianceStateError: false,
                 validator: formData .current.validator,
+                upgradeRoute: PageRoute.PRICING,
+                deleteAccountModalVisible: false,
+                settingsObserver: undefined,
+                settings: AppSettingsService.sharedInstance.currentSettings
             }
         },
         computed: {
+            showExportData(): boolean {
+                const tier = this.member?.tier;
+                if (!tier) {
+                    return false
+                }
+                return this.settings?.dataExportEnabledTiers.includes(tier) ?? false
+            },
             showSaveActions(): boolean {
                 return this.changesToSave || this.formData.hasChanges || this.saving
             },
@@ -324,7 +358,7 @@
             differentTimezone(): boolean {
                 if (this.formData.current?.timeZone) {
                     const d = new Date();
-                    const localeTimeParts = d.toLocaleTimeString('en-us', {timeZoneName: 'short'}).split(' ');
+                    const localeTimeParts = d.toLocaleTimeString('en-us', { timeZoneName: 'short' }).split(' ');
                     const memberTimeParts = d.toLocaleTimeString('en-us', {
                         timeZoneName: 'short',
                         timeZone: this.formData.current.timeZone
@@ -342,7 +376,7 @@
                         return zoneInfo.displayName;
                     } else {
                         const locale = this.deviceLocale;
-                        return new Date().toLocaleTimeString(locale, {timeZoneName: 'long'}).split(' ')[2];
+                        return new Date().toLocaleTimeString(locale, { timeZoneName: 'long' }).split(' ')[2];
                     }
                 }
                 return;
@@ -356,8 +390,8 @@
 
 
                 let info = providerData.filter(provider => provider &&
-                    provider.providerId !== "password" &&
-                    !this.removedProviderIds.includes(provider.providerId)).map(provider => {
+                provider.providerId !== "password" &&
+                !this.removedProviderIds.includes(provider.providerId)).map(provider => {
                     if (provider == null) {
                         return null;
                     }
@@ -376,8 +410,8 @@
                 }
 
                 return user.providerData.filter(provider => provider &&
-                    provider.providerId !== "password" &&
-                    !this.removedProviderIds.includes(provider.providerId)).length > 0;
+                provider.providerId !== "password" &&
+                !this.removedProviderIds.includes(provider.providerId)).length > 0;
             }
         },
         methods: {
@@ -385,7 +419,7 @@
                 if (!this.user) {
                     return;
                 }
-                const c = confirm(`Are you sure you want to remove ${getProviderDisplayName(providerId)}?`);
+                const c = confirm(`Are you sure you want to remove ${ getProviderDisplayName(providerId) }?`);
                 if (c) {
                     this.removedProviderIds.push(providerId);
                     await this.user.unlink(providerId);
@@ -396,18 +430,18 @@
             },
             beforeLeave(el: any): void {
                 const {marginLeft, marginTop, width, height} = window.getComputedStyle(el);
-                el.style.left = `${el.offsetLeft - parseFloat(marginLeft as string)}px`;
+                el.style.left = `${ el.offsetLeft - parseFloat(marginLeft as string) }px`;
                 // el.style.top = `${el.offsetTop - parseFloat(marginTop as string)}px`;
-                el.style.top = `${el.offsetTop}px`;
+                el.style.top = `${ el.offsetTop }px`;
                 el.style.width = width;
                 el.style.height = height;
             },
             addSnackbar(message: SnackbarMessageType): string {
                 const id = uuid();
                 if (typeof message === "string") {
-                    this.snackbars.push({id, message: message, autoHide: true});
+                    this.snackbars.push({ id, message: message, autoHide: true });
                 } else {
-                    this.snackbars.push({id, autoHide: true, closeable: true, ...message});
+                    this.snackbars.push({ id, autoHide: true, closeable: true, ...message });
                 }
 
                 return id;
@@ -576,9 +610,19 @@
     }
 
     h2 {
-        color: $royal;
+        color: $mediumDolphin;
         font-size: 2.4rem;
         margin-bottom: 2.4rem;
+
+        .badge-label {
+            @include trialBadge;
+            color: $white;
+            vertical-align: text-bottom;
+        }
+    }
+
+    .subtext {
+        margin-bottom: 1.6rem;
     }
 
     .label {

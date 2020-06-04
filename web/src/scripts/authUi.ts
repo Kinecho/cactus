@@ -8,13 +8,13 @@ import {
     PhoneProvider,
     TwitterProvider
 } from "@web/firebase";
-import {Config} from "@web/config";
-import {addModal, getQueryParam, showConfirmEmailModal} from "@web/util";
-import {QueryParam} from "@shared/util/queryParams";
-import {SourceApp} from "@shared/api/SignupEndpointTypes";
-import {PageRoute} from "@shared/PageRoutes";
-import {LocalStorageKey} from "@web/services/StorageService";
-import {EmailLinkSignupResult} from "@web/auth";
+import { Config } from "@web/config";
+import { addModal, getQueryParam, showConfirmEmailModal } from "@web/util";
+import { QueryParam } from "@shared/util/queryParams";
+import { SourceApp } from "@shared/api/SignupEndpointTypes";
+import { PageRoute } from "@shared/PageRoutes";
+import { LocalStorageKey } from "@web/services/StorageService";
+import { EmailLinkSignupResult } from "@web/auth";
 import Logger from "@shared/Logger";
 import AuthUI = firebaseui.auth.AuthUI;
 
@@ -28,19 +28,27 @@ export interface AuthUIConfigOptions {
     signInFailure?: ((error: firebaseui.auth.AuthUIError) => Promise<void>),
     uiShown?: () => void;
     includeEmailLink?: boolean,
+    includeTwitter?: boolean,
 }
 
 export function getAuthUIConfig(opts: AuthUIConfigOptions): firebaseui.auth.Config {
 
     const signInOptions: any[] = [
-        GoogleProvider.PROVIDER_ID,
+        {
+            provider: GoogleProvider.PROVIDER_ID,
+            customParameters: {
+                // Forces account selection even when one account
+                // is available.
+                prompt: 'select_account'
+            }
+        },
         FacebookProvider.PROVIDER_ID,
-        TwitterProvider.PROVIDER_ID,
         "apple.com",
-        // getPhoneProviderConfig(),
-        // emailProvider(opts)
-
     ];
+
+    if (opts.includeTwitter) {
+        signInOptions.push(TwitterProvider.PROVIDER_ID);
+    }
 
     if (opts.includeEmailLink) {
         signInOptions.push(emailProvider(opts));
@@ -84,8 +92,9 @@ export function getAuthUIConfig(opts: AuthUIConfigOptions): firebaseui.auth.Conf
         signInFlow: 'redirect',
         credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
         signInOptions,
-        tosUrl: `${Config.domain}/terms-of-service`,
-        privacyPolicyUrl: `${Config.domain}/privacy-policy`
+        siteName: "Cactus",
+        tosUrl: `${ Config.domain }/terms-of-service`,
+        privacyPolicyUrl: `${ Config.domain }/privacy-policy`
     }
 }
 
@@ -106,13 +115,13 @@ export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSi
 
     if (isSignIn && (appSource === SourceApp.ios || appSource === SourceApp.android)) {
         logger.log("Source App is iOS or Android and is magic link");
-        window.location.replace(`${PageRoute.NATIVE_APP_MAGIC_LINK_LOGIN}`);
+        window.location.replace(`${ PageRoute.NATIVE_APP_MAGIC_LINK_LOGIN }`);
 
     }
 
     if (!isSignIn) {
         logger.log("isSignIn is false");
-        return {success: true};
+        return { success: true };
     }
 
     let email: string | undefined | null = window.localStorage.getItem(LocalStorageKey.emailForSignIn);
@@ -123,7 +132,7 @@ export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSi
     }
 
     if (!email || error) {
-        const {email: confirmedEmail, canceled} = await showConfirmEmailModal({
+        const { email: confirmedEmail, canceled } = await showConfirmEmailModal({
             title: "Confirm your email",
             message: "Please enter the email address that you signed up with",
             error,
@@ -156,7 +165,7 @@ export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSi
                 logger.log("successfully completed sign in ", resultUser.toJSON());
             }
 
-            return {success: true, credential: authResult}
+            return { success: true, credential: authResult }
 
         } catch (error) {
             logger.error("failed to login with email", error);
@@ -177,10 +186,10 @@ export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSi
                 };
             }
 
-            return {success: false, error: error.message};
+            return { success: false, error: error.message };
         }
     } else {
-        return {success: false, error: {title: "Whoops!", message: "Unable to complete your registration"}}
+        return { success: false, error: { title: "Whoops!", message: "Unable to complete your registration" } }
     }
 }
 
@@ -204,10 +213,10 @@ export const emailProvider = (opts: AuthUIConfigOptions) => ({
             // Additional state showPromo=1234 can be retrieved from URL on
             // sign-in completion in signInSuccess callback by checking
             // window.location.href.
-            url: `${opts.emailLinkSignInPath}`,
-            continueUrl: `${Config.domain}${PageRoute.SIGNUP}`,
+            url: `${ opts.emailLinkSignInPath }`,
+            continueUrl: `${ Config.domain }${ PageRoute.SIGNUP }`,
             // Custom FDL domain.
-            dynamicLinkDomain: `${Config.firebaseDynamicLink.domain}`,
+            dynamicLinkDomain: `${ Config.firebaseDynamicLink.domain }`,
             // Always true for email link sign-in.
             handleCodeInApp: true,
 
@@ -234,7 +243,7 @@ export function createAuthModal(): string {
     addModal(modalId, {});
 
     const ui = getAuthUI();
-    ui.start(`#${modalId} > div`, getAuthUIConfig({
+    ui.start(`#${ modalId } > div`, getAuthUIConfig({
         signInSuccessPath: PageRoute.SIGNUP_CONFIRMED,
         emailLinkSignInPath: PageRoute.SIGNUP_CONFIRMED
     }));

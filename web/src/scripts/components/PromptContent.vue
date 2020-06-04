@@ -1,5 +1,10 @@
 <template xmlns:v-touch="http://www.w3.org/1999/xhtml">
     <div class="page-wrapper" :class="[slideNumberClass, {isModal}]">
+        <button aria-label="Close" v-if="showCloseButton && !loading && promptContent && responsesLoaded" @click="seePricingOrGoHome" title="Close" class="close tertiary icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
+                <path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
+            </svg>
+        </button>
         <transition appear name="fade-in" mode="out-in">
             <div v-if="show404">
                 <FourOhFour/>
@@ -13,27 +18,6 @@
                 <spinner message="Loading..." :delay="1000"/>
             </div>
             <section class="content-container centered" v-else-if="!loading && promptContent && responsesLoaded">
-                <div class="shareContainer" v-if="!completed">
-                    <button aria-label="Share Today's Prompt" class="share tertiary wiggle" @click="showSharing = true" v-show="!showSharing && sharePromptEnabled">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 22" aria-hidden="true">
-                            <path fill="#29A389" d="M10 3.414V14a1 1 0 0 1-2 0V3.414L5.707 5.707a1 1 0 0 1-1.414-1.414l4-4a1 1 0 0 1 1.414 0l4 4a1 1 0 1 1-1.414 1.414L10 3.414zM0 11a1 1 0 0 1 2 0v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8a1 1 0 0 1 2 0v8a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3v-8z"/>
-                        </svg>
-                        <span class="buttonText">Share Today's Prompt</span>
-                    </button>
-                    <button aria-label="Back" class="share tertiary back" @click="showSharing = false" v-show="showSharing">
-                        <div class="arrow-wrapper">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
-                                <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
-                            </svg>
-                        </div>
-                        <span class="buttonText">Back</span>
-                    </button>
-                </div>
-                <button aria-label="Close" v-if="showCloseButton" @click="close" title="Close" class="close tertiary icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
-                        <path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
-                    </svg>
-                </button>
                 <div class="progress-wrapper" v-if="!completed && !showSharing && !isShareNote">
                     <div class="progress">
                         <span v-for="(content, index) in promptContent.content" :class="['segment', {complete: index <= activeIndex}]"></span>
@@ -44,27 +28,30 @@
                     <div class="front flip-card" v-touch:tap="handleTap">
                         <transition :name="transitionName" mode="out-in" v-if="!completed">
                             <content-card
-                                    v-bind:key="activeIndex"
-                                    v-bind:cactusElement="promptContent.cactusElement"
-                                    v-bind:content="contentItems[activeIndex]"
-                                    v-bind:response="reflectionResponse"
-                                    v-bind:hasNext="hasNext && activeIndex > 0"
-                                    v-bind:reflectionDuration="reflectionDuration"
-                                    v-bind:saving="saving"
-                                    v-bind:saved="saved"
-                                    v-bind:tapAnywhereEnabled="tapAnywhereEnabled"
-                                    v-on:next="next"
-                                    v-on:previous="previous"
-                                    v-on:complete="complete"
-                                    v-on:save="save"
+                                    :key="activeIndex"
+                                    :cactusElement="promptContent.cactusElement"
+                                    :content="contentItems[activeIndex]"
+                                    :response="reflectionResponse"
+                                    :hasNext="hasNext && activeIndex > 0"
+                                    :reflectionDuration="reflectionDuration"
+                                    :saving="saving"
+                                    :saved="saved"
+                                    :tapAnywhereEnabled="tapAnywhereEnabled"
+                                    :member="member"
+                                    :style="cardStyles"
+                                    :prompt-content="promptContent"
+                                    @next="next"
+                                    @previous="previous"
+                                    @complete="complete"
+                                    @save="save"
                                     @navigationDisabled="navigationDisabled = true"
                                     @navigationEnabled="navigationDisabled = false"
-                                    :style="cardStyles"
                             />
                         </transition>
                         <transition name="celebrate" appear mode="out-in" v-if="completed">
                             <celebrate v-on:back="completed = false"
-                                    v-on:restart="restart" v-on:close="close"
+                                    v-on:restart="restart"
+                                    v-on:close="seePricingOrGoHome"
                                     v-bind:reflectionResponse="reflectionResponse"
                                     v-bind:cactusElement="promptContent.cactusElement"
                                     v-bind:isModal="isModal"
@@ -94,37 +81,43 @@
                 </button>
             </section>
         </transition>
+        <PricingModal
+                :showModal="pricingModalVisible"
+                @close="closePricingModal"/>
     </div>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
-    import {PageRoute} from '@shared/PageRoutes'
+    import { Config } from "@web/config";
+    import { PageRoute } from '@shared/PageRoutes'
     import ContentCard from "@components/PromptContentCard.vue"
     import Celebrate from "@components/ReflectionCelebrateCard.vue";
-    import PromptContent, {Content, ContentType} from '@shared/models/PromptContent'
-    import {CactusElement} from '@shared/models/CactusElement';
+    import PromptContent, { Content, ContentType } from '@shared/models/PromptContent'
+    import { CactusElement } from '@shared/models/CactusElement';
     import Spinner from "@components/Spinner.vue";
     import Vue2TouchEvents from 'vue2-touch-events'
-    import {getFlamelink} from '@web/firebase'
-    import {ListenerUnsubscriber} from '@web/services/FirestoreService'
-    import {getQueryParam, pushQueryParam, removeQueryParam, updateQueryParam} from '@web/util'
-    import {getCloudinaryUrlFromStorageUrl} from '@shared/util/ImageUtil'
-    import {QueryParam} from "@shared/util/queryParams"
+    import { getFlamelink } from '@web/firebase'
+    import { ListenerUnsubscriber } from '@web/services/FirestoreService'
+    import { getQueryParam, pushQueryParam, removeQueryParam, updateQueryParam } from '@web/util'
+    import { getCloudinaryUrlFromStorageUrl } from '@shared/util/ImageUtil'
+    import { QueryParam } from "@shared/util/queryParams"
     import PromptContentSharing from "@components/PromptContentSharing.vue";
+    import PricingModal from "@components/PricingModal.vue";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
-    import ReflectionResponse, {getResponseMedium, ResponseMediumType} from '@shared/models/ReflectionResponse'
-    import {MINIMUM_REFLECT_DURATION_MS} from '@web/PromptContentUtil'
+    import ReflectionResponse, { getResponseMedium, ResponseMediumType } from '@shared/models/ReflectionResponse'
+    import { MINIMUM_REFLECT_DURATION_MS } from '@web/PromptContentUtil'
     import CactusMemberService from '@web/services/CactusMemberService'
     import CactusMember from '@shared/models/CactusMember'
-    import StorageService, {LocalStorageKey} from '@web/services/StorageService'
-    import {getAppType, getDeviceDimensions, MOBILE_BREAKPOINT_PX} from '@web/DeviceUtil'
-    import {gtag} from "@web/analytics"
-    import {isBlank} from "@shared/util/StringUtil"
+    import { getAppType, getDeviceDimensions, isPreRender, MOBILE_BREAKPOINT_PX } from '@web/DeviceUtil'
+    import { gtag } from "@web/analytics"
+    import { isBlank } from "@shared/util/StringUtil"
     import CopyService from "@shared/copy/CopyService";
     import PromptContentService from "@web/services/PromptContentService";
     import FourOhFour from "@components/404.vue"
     import Logger from "@shared/Logger";
+    import { RoutePageMeta, setPageMeta } from "@web/router-meta";
+    import { pushRoute } from "@web/NavigationUtil";
 
     const logger = new Logger("PromptContent.vue");
     const flamelink = getFlamelink();
@@ -139,12 +132,13 @@
             Spinner,
             Celebrate,
             PromptContentSharing,
-            FourOhFour
+            FourOhFour,
+            PricingModal
         },
         props: {
             initialIndex: Number,
             promptContentEntryId: String,
-            isModal: {type: Boolean, default: false},
+            isModal: { type: Boolean, default: false },
             onClose: {
                 type: Function, default: function () {
                     removeQueryParam(QueryParam.CONTENT_INDEX);
@@ -153,7 +147,7 @@
             }
         },
         async beforeMount(): Promise<void> {
-
+            window.prerenderReady = false;
             this.usePromptId = !!getQueryParam(QueryParam.USE_PROMPT_ID);
 
             this.keyboardListener = (evt: KeyboardEvent) => {
@@ -172,9 +166,16 @@
 
 
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({member}) => {
+                onData: async ({ member }) => {
                     this.authLoaded = true;
                     this.member = member;
+
+                    if (!this.member && !isPreRender()) {
+                        const afterLoginUrl = window.location.href;
+                        logger.info("redirecting to after login url = ", afterLoginUrl)
+                        logger.info("Pushing to router", `${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(afterLoginUrl) }`);
+                        await pushRoute(`${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(afterLoginUrl) }`)
+                    }
                 }
             });
 
@@ -208,7 +209,7 @@
 
             let promptContentId = this.promptContentEntryId;
             if (!this.promptContentEntryId) {
-                promptContentId = window.location.pathname.split(`${PageRoute.PROMPTS_ROOT}/`)[1];
+                promptContentId = window.location.pathname.split(`${ PageRoute.PROMPTS_ROOT }/`)[1];
                 logger.log("using path for promptContentId", promptContentId);
             } else {
                 logger.log("using prop for promptContentId", promptContentId)
@@ -267,6 +268,7 @@
 
                     this.loading = false;
                     this.updateDocumentMeta();
+                    window.prerenderReady = true;
                 }
             };
 
@@ -277,9 +279,6 @@
                 //this is the default behavior
                 this.promptsUnsubscriber = PromptContentService.sharedInstance.observeByEntryId(promptContentId, flamelinkOptions)
             }
-
-            //TODO: use a promptContentService
-            // this.promptsUnsubscriber = await flamelink.content.subscribe(flamelinkOptions);
         },
         destroyed() {
             if (this.promptsUnsubscriber) {
@@ -316,7 +315,7 @@
             reflectionTimerInterval: any,
             authLoaded: boolean,
             memberUnsubscriber: ListenerUnsubscriber | undefined,
-            member: CactusMember | undefined,
+            member: CactusMember | undefined | null,
             touchStart: MouseEvent | undefined,
             cardStyles: any,
             popStateListener: any | undefined,
@@ -326,6 +325,8 @@
             pendingActiveIndex: number | undefined,
             usePromptId: boolean,
             show404: boolean,
+            pricingModalVisible: boolean,
+            hasSeenPricing: boolean
         } {
             return {
                 error: undefined,
@@ -346,7 +347,7 @@
                 reflectionTimerInterval: undefined,
                 authLoaded: false,
                 memberUnsubscriber: undefined,
-                member: undefined,
+                member: null,
                 touchStart: undefined,
                 cardStyles: {},
                 popStateListener: undefined,
@@ -355,6 +356,8 @@
                 pendingActiveIndex: undefined,
                 usePromptId: false,
                 show404: false,
+                pricingModalVisible: false,
+                hasSeenPricing: false
             };
         },
         computed: {
@@ -390,10 +393,10 @@
                 return false;
             },
             showCloseButton(): boolean {
-                return this.isModal && !this.showSharing && !this.isShareNote;
+                return !this.showSharing;
             },
             slideNumberClass(): string {
-                return `slide-${this.activeIndex}`
+                return `slide-${ this.activeIndex }`
             },
             hasNext(): boolean {
                 return this.contentItems && this.contentItems && this.activeIndex < this.contentItems.length - 1 || false
@@ -424,15 +427,10 @@
             reflectionProgressStyles(): any | undefined {
                 if (this.isReflection) {
                     const styles = {
-                        transform: `rotate(${Math.min(this.reflectionProgress, 1) * 360}deg)`,
+                        transform: `rotate(${ Math.min(this.reflectionProgress, 1) * 360 }deg)`,
                     };
                     logger.log("Style object", styles);
                     return styles;
-                }
-            },
-            storageKey(): string | undefined {
-                if (this.promptContent && this.promptContent.promptId) {
-                    return StorageService.buildKey(LocalStorageKey.anonReflectionResponse, this.promptContent.promptId || "unknown");
                 }
             },
             tapAnywhereEnabled(): boolean {
@@ -445,7 +443,7 @@
                 if (this.promptContent) {
                     return this.promptContent.cactusElement;
                 }
-            },
+            }
         },
         watch: {
             responsesLoaded(loaded) {
@@ -477,9 +475,12 @@
                     this.subscribeToResponse();
                 }
             },
-
         },
         methods: {
+            closePricingModal(): void {
+                this.onClose();
+                this.pricingModalVisible = false;
+            },
             async updatePendingActiveIndex(reflection?: ReflectionResponse) {
                 logger.log("Update pending active index");
                 if (reflection && !isBlank(reflection.content.text) && this.pendingActiveIndex !== undefined) {
@@ -494,56 +495,32 @@
 
             },
             updateDocumentMeta() {
-                const index = this.activeIndex || 0;
-                let title = this.promptContent && this.promptContent.subjectLine;
-                let openGraphImage = this.promptContent && this.promptContent.openGraphImage;
-                let ogTitleTag = document.querySelector("meta[property='og:title']");
-                let twitterTitleTag = document.querySelector("meta[name='twitter:title']");
-                let ogDescriptionTag = document.querySelector("meta[property='og:description']");
-                let twitterDescriptionTag = document.querySelector("meta[name='twitter:description']");
-                let ogImageTag = document.querySelector("meta[property='og:image']");
-                let twitterImageTag = document.querySelector("meta[name='twitter:image']");
+                logger.info("Prompt content updating meta");
+                let title = this.promptContent?.subjectLine ?? this.promptContent?.getPreviewText() ?? 'Cactus Mindful Moment';
 
-                if (!title) {
-                    const [firstContent]: Content[] = this.promptContent ? this.promptContent.content : [] || [];
-                    title = firstContent && firstContent.text;
-                }
-                if (title) {
-                    document.title = `${title} | ${index + 1}`;
-                } else {
-                    document.title = 'Cactus Mindful Moment'
-                }
-                if (ogTitleTag) {
-                    ogTitleTag.setAttribute("content", `${title}`);
-                    if (twitterTitleTag) {
-                        twitterTitleTag.setAttribute("content", `${title}`);
-                    }
-                }
-                if (ogDescriptionTag) {
-                    ogDescriptionTag.setAttribute("content", `Reflect on this mindful moment from Cactus.`);
-                    if (twitterDescriptionTag) {
-                        twitterDescriptionTag.setAttribute("content", `Reflect on this mindful moment from Cactus.`);
-                    }
+                const description = "Reflect on this mindful moment from Cactus.";
+                let pageMeta: RoutePageMeta = {
+                    description,
+                    title,
                 }
 
-                if (!openGraphImage || !openGraphImage.storageUrl) {
-                    const [firstContent]: Content[] = this.promptContent ? this.promptContent.content : [] || [];
-                    openGraphImage = firstContent && firstContent.backgroundImage;
-                }
-
-                if (ogImageTag && openGraphImage && openGraphImage.storageUrl) {
-                    logger.log(openGraphImage.storageUrl);
-                    let pngUrl = getCloudinaryUrlFromStorageUrl({
-                        storageUrl: openGraphImage.storageUrl,
+                const imageUrl = this.promptContent?.getOpenGraphImageUrl();
+                let pngUrl: string | null = null;
+                if (imageUrl) {
+                    pngUrl = getCloudinaryUrlFromStorageUrl({
+                        storageUrl: imageUrl,
                         width: 1200,
                         transforms: ["w_1200", "h_630", "f_png", "c_lpad"]
                     });
-                    ogImageTag.setAttribute("content", `${pngUrl}`);
-
-                    if (twitterImageTag) {
-                        twitterImageTag.setAttribute("content", `${pngUrl}`);
+                    pageMeta.image = {
+                        url: pngUrl,
+                        height: 630,
+                        width: 1200,
+                        type: "image/png",
                     }
                 }
+                logger.info("Prompt Content Meta Image is", pageMeta.image);
+                setPageMeta(pageMeta, title)
             },
             async handleTap(event: TouchEvent) {
                 const excludedTags = ["INPUT", "BUTTON", "A", "TEXTAREA"];
@@ -557,7 +534,7 @@
                     logger.log("tap anywhere is disabled");
                     return;
                 }
-                const {width} = getDeviceDimensions();
+                const { width } = getDeviceDimensions();
                 if (width < MOBILE_BREAKPOINT_PX) {
                     const path = event.composedPath();
                     const foundExcludedTarget = path.find((t) => {
@@ -606,7 +583,7 @@
                 const diffX = args.clientX - startX;
                 this.cardStyles = {
                     transition: "all .2s",
-                    transform: `translateX(${diffX}px)`,
+                    transform: `translateX(${ diffX }px)`,
                 };
 
                 logger.log("Move Handler", args);
@@ -628,53 +605,44 @@
                     logger.log("Reflection response unsubscriber already exists, resetting in now");
                     this.reflectionResponseUnsubscriber();
                 }
+
+                if (this.authLoaded && !this.member) {
+                    this.responsesLoaded = true;
+                    return
+                }
+
                 let promptId = this.promptContent && this.promptContent.promptId;
                 const promptContent = this.promptContent && this.promptContent.content.find(content => content.contentType === ContentType.reflect);
                 const promptQuestion = promptContent ? promptContent.text : undefined;
 
                 if (promptId) {
-
-                    let localResponse = StorageService.getModel(LocalStorageKey.anonReflectionResponse, ReflectionResponse, promptId);
-                    logger.log("local response found in storage", localResponse);
-
-                    this.reflectionResponse = localResponse;
                     this.reflectionDuration = this.reflectionResponse ? (this.reflectionResponse.reflectionDurationMs || 0) : 0;
 
                     // logger.log("subscribing to responses for promptId", promptId);
                     this.reflectionResponseUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(promptId, {
                         onData: async (responses) => {
 
-                            const [first] = responses;
-                            // logger.log("ResponseSubscriber returned data. First in list is: ", first ? first.toJSON() : "no data");
-
-
-                            if (!first && !localResponse) {
-                                // logger.log("No local response and no db response, creating one now");
-                                // logger.log("Using the newly created response for this prompt.");
-                                localResponse = ReflectionResponseService.createPossiblyAnonymousReflectionResponse(promptId as string, getResponseMedium({
-                                    app: getAppType(),
-                                    type: ResponseMediumType.PROMPT
-                                }), promptQuestion);
-                            } else if (first) {
-                            }
-
-                            if (!first && localResponse) {
-                                // logger.log("No data found from database, using the locally created response");
-                            }
-
                             //TODO: combine if there are multiple?
-                            const response = first || localResponse;
+                            const [first] = responses;
+                            const newResponse = ReflectionResponseService.createReflectionResponse(promptId as string, getResponseMedium({
+                                app: getAppType(),
+                                type: ResponseMediumType.PROMPT
+                            }), promptQuestion);
 
-                            await this.updatePendingActiveIndex(response);
-                            this.responsesLoaded = true;
-                            this.reflectionResponses = responses;
-                            this.reflectionResponse = response;
-                            this.reflectionDuration = response.reflectionDurationMs || 0;
+                            const response = first || newResponse;
 
-                            if (this.isFirstCard && !this.saving && !this.saved) {
-                                logger.log("Attempting to save ReflectionResponse when the prompt first loaded...");
-                                const saveTask = this.save({updateReflectionLog: false});
-                                await saveTask;
+                            if (response) {
+                                await this.updatePendingActiveIndex(response);
+                                this.responsesLoaded = true;
+                                this.reflectionResponses = responses;
+                                this.reflectionResponse = response;
+                                this.reflectionDuration = response.reflectionDurationMs || 0;
+
+                                if (this.isFirstCard && !this.saving && !this.saved) {
+                                    logger.log("Attempting to save ReflectionResponse when the prompt first loaded...");
+                                    const saveTask = this.save({ updateReflectionLog: false });
+                                    await saveTask;
+                                }
                             }
                         }
                     })
@@ -683,21 +651,22 @@
                 }
             },
 
-            async save(options: { updateReflectionLog: boolean } = {updateReflectionLog: false}): Promise<ReflectionResponse | undefined> {
+            async save(options: { updateReflectionLog: boolean } = { updateReflectionLog: false }): Promise<ReflectionResponse | undefined> {
                 if (this.reflectionResponse) {
                     this.saving = true;
                     this.saved = false;
                     this.reflectionResponse.reflectionDurationMs = this.reflectionDuration;
                     this.reflectionResponse.cactusElement = this.promptContent && this.promptContent.cactusElement || null;
+
+                    if (!this.reflectionResponse.coreValue) {
+                        this.reflectionResponse.coreValue = this.member?.getCoreValueAtIndex(this.promptContent?.preferredCoreValueIndex ?? 0) ?? null
+                    }
+
                     const saved = await ReflectionResponseService.sharedInstance.save(this.reflectionResponse, {
                         saveIfAnonymous: true,
                         updateReflectionLog: options.updateReflectionLog
                     });
                     this.reflectionResponse = saved;
-                    if (!this.member && saved && saved.promptId) {
-                        logger.log("Member is not logged in, saving to localstorage");
-                        StorageService.saveModel(LocalStorageKey.anonReflectionResponse, saved, saved.promptId);
-                    }
                     this.saved = true;
                     this.saving = false;
                     return saved;
@@ -711,7 +680,7 @@
                 }
 
                 this.transitionName = "slide";
-                const saveTask = this.isReflection ? this.save({updateReflectionLog: true}) : () => undefined;
+                const saveTask = this.isReflection ? this.save({ updateReflectionLog: true }) : () => undefined;
                 const content = this.contentItems || [];
                 if (this.hasNext && !this.isLastCard) {
                     this.activeIndex = Math.min(this.activeIndex + 1, content.length - 1);
@@ -726,7 +695,7 @@
 
                     gtag('event', 'next', {
                         event_category: "prompt_content",
-                        event_label: `Slide ${this.activeIndex}`
+                        event_label: `Slide ${ this.activeIndex }`
                     });
                     await saveTask;
                 } else if (this.isLastCard) {
@@ -735,7 +704,7 @@
 
             },
             async previous() {
-                const saveTask = this.isReflection ? this.save({updateReflectionLog: false}) : () => undefined;
+                const saveTask = this.isReflection ? this.save({ updateReflectionLog: false }) : () => undefined;
                 this.transitionName = "slide-out";
                 const content = this.contentItems || [];
                 if (this.completed) {
@@ -757,35 +726,41 @@
                 // pushQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
                 gtag('event', 'previous', {
                     event_category: "prompt_content",
-                    event_label: `Slide ${this.activeIndex}`
+                    event_label: `Slide ${ this.activeIndex }`
                 });
 
                 await saveTask;
             },
             async complete() {
-                const saveTask = this.save({updateReflectionLog: true});
+                const saveTask = this.save({ updateReflectionLog: true });
                 this.transitionName = "slide";
                 // this.activeIndex = 0;
                 pushQueryParam(QueryParam.CONTENT_INDEX, "done");
                 this.completed = true;
                 gtag('event', 'complete', {
                     event_category: "prompt_content",
-                    event_label: `Slide ${this.activeIndex}`
+                    event_label: `Slide ${ this.activeIndex }`
                 });
                 await saveTask;
             },
             async restart() {
-                const saveTask = this.save({updateReflectionLog: false});
+                const saveTask = this.save({ updateReflectionLog: false });
                 this.activeIndex = 0;
                 this.completed = false;
                 await saveTask;
             },
-            close() {
+            seePricingOrGoHome(): void {
                 gtag('event', 'close', {
                     event_category: "prompt_content",
-                    event_label: `Slide ${this.activeIndex}`
+                    event_label: `Slide ${ this.activeIndex }`
                 });
-                this.onClose();
+                if (this.promptContent?.entryId === Config.firstPromptId &&
+                !this.hasSeenPricing) {
+                    this.pricingModalVisible = true;
+                    this.hasSeenPricing = true;
+                } else {
+                    this.onClose();
+                }
             }
         }
     })
@@ -810,13 +785,13 @@
         background-color: $beige;
         display: flex;
         flex-direction: column;
-        flex-grow: 1;
         position: relative;
         width: 100vw;
+        min-height: 100vh;
 
         @include r(600) {
             background-color: transparent;
-            padding: 6.4rem 0;
+            padding: 8vh 0;
         }
 
         button.secondary {
@@ -831,20 +806,23 @@
             perspective: 1000px;
 
             @include r(600) {
-                margin-bottom: 12rem;
+                max-width: 48rem;
+            }
+            @include r(768) {
+                max-width: none;
             }
 
             .progress-wrapper {
                 left: 0;
+                margin: 0 auto;
                 position: absolute;
                 right: 0;
-                top: 1.6rem;
-                width: 100%;
+                top: .4rem;
+                width: 98%;
                 z-index: 20;
 
                 @include r(600) {
-                    margin: auto;
-                    top: 5.6rem;
+                    top: .8rem;
                     width: 94%;
                 }
 
@@ -878,18 +856,17 @@
 
             .arrow {
                 margin: auto;
+                padding: 1.2rem;
                 position: absolute;
                 top: 50%;
                 z-index: 20;
 
                 &.previous {
-                    left: .8rem;
-                    padding: 2rem 2rem 2rem 0;
+                    left: 0;
                 }
 
                 &.next {
-                    padding: 2rem 0 2rem 2rem;
-                    right: .8rem;
+                    right: 0;
                 }
 
                 @include r(600) {
@@ -939,7 +916,7 @@
     .shareContainer {
         left: 0;
         position: absolute;
-        top: 2.4rem;
+        top: .8rem;
         z-index: 20;
 
         @include r(600) {
@@ -970,7 +947,7 @@
     button.share {
         align-items: center;
         display: flex;
-        padding: 1.2rem 1.6rem;
+        padding: 1.2rem;
 
         &:hover {
             background-color: transparent;
@@ -1004,13 +981,16 @@
     }
 
     button.close {
+        background-color: $beige;
         position: absolute;
-        right: .8rem;
-        top: 2.8rem;
+        right: 0;
+        top: 1.2rem;
         z-index: 20;
 
         @include r(600) {
-            display: none;
+            background-color: transparent;
+            right: 1.6rem;
+            top: 1.6rem;
         }
 
         svg {
@@ -1071,7 +1051,6 @@
 
         @include r(600) {
             min-height: 66rem;
-            max-width: 48rem;
         }
 
         &.flipped {
@@ -1102,7 +1081,6 @@
             border-radius: 12px;
             height: 100%;
             min-height: 66rem;
-            max-width: 48rem;
         }
 
         &.front {

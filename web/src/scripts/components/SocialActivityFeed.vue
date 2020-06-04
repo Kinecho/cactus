@@ -9,8 +9,8 @@
         <div class="activityContainer">
             <div class="flexContainer">
                 <h2>Activity</h2>
-                <a class="secondary wiggle button add-friends" :href="friendsPath"><img src="assets/images/addUser.svg" alt=""/>Add
-                    Friends</a>
+                <router-link class="secondary wiggle button add-friends" :to="friendsPath"><img src="/assets/images/addUser.svg" alt=""/>Add
+                    Friends</router-link>
             </div>
             <template v-for="event in [1,2,3,4,5]" v-if="isLoading">
                 <skeleton-event/>
@@ -41,15 +41,12 @@
     import Spinner from "@components/Spinner.vue";
     import Footer from "@components/StandardFooter.vue";
     import VueClipboard from 'vue-clipboard2';
-    import SocialSharing from 'vue-social-sharing';
     import SocialFriendList from "@components/SocialFriendList.vue";
     import SocialFriendNotifications from "@components/SocialFriendNotifications.vue";
     import SkeletonEvent from "@components/SocialActivityEventSkeleton.vue";
     import SocialActivityEvent from "@components/SocialActivityEvent.vue"
 
     Vue.use(VueClipboard);
-    Vue.use(SocialSharing);
-
 
     export default Vue.extend({
         components: {
@@ -129,7 +126,7 @@
     })
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     @import "common";
     @import "mixins";
     @import "variables";
@@ -148,6 +145,30 @@
             margin: 0;
             max-width: none;
         }
+
+        .flexContainer {
+            align-items: center;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2.4rem;
+            max-width: 64rem;
+
+            a.button.secondary {
+                @include smallButton;
+                display: flex;
+                flex-grow: 0;
+
+                @include r(374) {
+                    @include secondaryButton;
+                }
+
+                img {
+                    height: 2rem;
+                    margin-right: .8rem;
+                    width: 2rem;
+                }
+            }
+        }
     }
 
     .activityContainer {
@@ -165,28 +186,6 @@
         justify-content: center;
     }
 
-    .flexContainer {
-        align-items: center;
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 2.4rem;
-        max-width: 64rem;
 
-        a.button.secondary {
-            @include smallButton;
-            display: flex;
-            flex-grow: 0;
-
-            @include r(374) {
-                @include secondaryButton;
-            }
-
-            img {
-                height: 2rem;
-                margin-right: .8rem;
-                width: 2rem;
-            }
-        }
-    }
 
 </style>

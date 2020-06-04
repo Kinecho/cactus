@@ -1,5 +1,6 @@
-import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
-import {CactusElement} from "@shared/models/CactusElement";
+import { BaseModel, Collection } from "@shared/FirestoreBaseModels";
+import { CactusElement } from "@shared/models/CactusElement";
+import { CoreValue } from "@shared/models/CoreValueTypes";
 
 export enum ResponseMediumType {
     PROMPT = "PROMPT",
@@ -23,11 +24,48 @@ export enum ResponseMedium {
     JOURNAL_ANDROID = "JOURNAL_ANDROID"
 }
 
+export interface InsightWord {
+    word: string,
+    partOfSpeech?: string
+    salience?: number
+    frequency?: number
+}
+
+export interface InsightWordsResult {
+    insightWords: InsightWord[],
+    syntaxRaw?: any,
+    entitiesRaw?: any
+}
+
+export function getAppTypeFromResponseMedium(medium?: ResponseMedium | null): AppType | undefined {
+    let appType: AppType | undefined;
+
+    switch (medium) {
+        case ResponseMedium.EMAIL:
+            appType = AppType.WEB
+            break;
+        case ResponseMedium.PROMPT_ANDROID:
+        case ResponseMedium.JOURNAL_ANDROID:
+            appType = AppType.ANDROID;
+            break;
+        case ResponseMedium.PROMPT_WEB:
+        case ResponseMedium.JOURNAL_WEB:
+            appType = AppType.WEB;
+            break;
+        case ResponseMedium.JOURNAL_IOS:
+        case ResponseMedium.PROMPT_IOS:
+            appType = AppType.IOS
+            break;
+    }
+
+    return appType;
+}
+
 export function getResponseMedium(options: { type: ResponseMediumType, app: AppType }): ResponseMedium {
     switch (options.type) {
         case ResponseMediumType.PROMPT:
         case ResponseMediumType.JOURNAL:
-            return `${options.type}_${options.app}` as ResponseMedium;
+            return `${ options.type }_${ options.app }` as ResponseMedium;
         case ResponseMediumType.EMAIL:
             return ResponseMedium.EMAIL;
     }
@@ -110,7 +148,7 @@ export function getResponseMediumSlackEmoji(medium?: ResponseMedium): string {
             displayName = ":android:";
             break;
         default:
-            displayName = `Unknown (${medium})`;
+            displayName = `Unknown (${ medium })`;
             break;
     }
     return displayName;
@@ -136,7 +174,9 @@ export enum ReflectionResponseField {
     promptQuestion = "promptQuestion",
     reflectionDurationMs = "reflectionDurationMs",
     shared = "shared",
-    cactusElement = "cactusElement"
+    cactusElement = "cactusElement",
+    insights = "insights",
+    updatedAt = "updatedAt"
 }
 
 export default class ReflectionResponse extends BaseModel {
@@ -162,6 +202,8 @@ export default class ReflectionResponse extends BaseModel {
     unsharedAt?: Date;
     cactusElement?: CactusElement | null;
     reflectionDates: Date[] = [];
+    insights?: InsightWordsResult;
+    coreValue?: CoreValue | undefined | null;
 
     /**
      * Only Add a date log if the new date is not within 10 minutes of an existing date
@@ -195,6 +237,6 @@ export default class ReflectionResponse extends BaseModel {
     }
 
     getMemberFullName(): string {
-        return `${this.memberFirstName || ""} ${this.memberLastName || ""}`.trim();
+        return `${ this.memberFirstName || "" } ${ this.memberLastName || "" }`.trim();
     }
 }

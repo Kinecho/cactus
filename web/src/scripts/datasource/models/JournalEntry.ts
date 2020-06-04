@@ -45,7 +45,6 @@ class JournalEntry {
     }
 
     start() {
-        logger.log("Starting listeners for journal entry");
         const promptId = this.promptId;
         this.responsesUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(promptId, {
             onData: (responses) => {
@@ -73,7 +72,6 @@ class JournalEntry {
     }
 
     stop() {
-        logger.log("Stopping entries for prompt id");
         this.promptUnsubscriber?.();
         this.promptUnsubscriber = undefined;
 

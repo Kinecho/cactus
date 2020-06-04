@@ -1,120 +1,100 @@
-import {LocalStorageKey} from '@web/services/StorageService'
 <template>
     <div :class="['flip-container', 'celebrate-container', {flipped: flipped}]">
         <div class="flipper">
             <div :class="['front', 'flip-card']">
-                <upgrade-banner :member="member" />
+                <upgrade-banner :member="member"/>
                 <div class="successText">
                     <h2>{{celebrateText}}</h2>
-                    <img src="/assets/images/celebrate2.svg" class="illustration" alt="Celebrate!" v-if="cactusElement === undefined"/>
-                    <p class="subtext" v-if="cactusElement">Today’s question focused on
-                        <a class="element-name" href="" @click.prevent="showCactusModal(cactusElement)">{{elementName}}</a>,
-                        which is about <span class="meaning">{{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}</span>.
-                    </p>
+                    <p class="subtext" v-if="subscriptionTier == plusTier">Here are words that have come up recently for you. The bubbles update the more you write.</p>
                 </div>
-                <div class="lowerContainer">
-                    <div class="cactusGarden">
-                        <a class="cactusContainer" v-for="(count, element) in elementAccumulations" v-if="count > 0 && cactusElement !== undefined" @click.prevent="showCactusModal(element)">
-                            <img
-                                    :class="['cactusIllustration', `count-${count}`]"
-                                    :src="'/assets/images/cacti/'+ element + '-' + (count > 3 ? 3 : count) + '.svg'"
-                                    :alt="element + ' cactus'"
-                                    :title="elementCopy[element.toUpperCase()]"
-                            />
-                        </a>
-                    </div>
-                    <div class="stats-container">
-                        <section class="metric">
-                            <div class="label">
-                                <transition name="fade-in" mode="out-in" appear>
-                                    <span v-if="reflectionCount !== undefined">{{reflectionCount}}</span>
-                                    <spinner v-if="reflectionCount === undefined" :delay="1000"/>
-                                </transition>
-                            </div>
-                            <p v-show="reflectionCount !== undefined">
-                                {{promptCopy.REFLECTIONS}}
-                            </p>
-                        </section>
-                        <section class="metric">
-                            <div class="label">
-                                <transition name="fade-in" mode="out-in" appear>
-                                    <span v-if="totalDuration !== undefined">{{totalDuration}}</span>
-                                    <spinner v-if="totalDuration === undefined" :delay="1000"/>
-                                </transition>
-                            </div>
-                            <p v-show="totalDuration !== undefined">
-                                {{durationLabel}}
-                            </p>
-                        </section>
-                        <section class="metric" v-if="currentStreak == 'days'">
-                            <div class="label">
-                                <transition name="fade-in" mode="out-in" appear>
-                                    <span v-if="streakDays !== undefined">{{streakDays}}</span>
-                                    <spinner v-if="streakDays === undefined" :delay="1000"/>
-                                </transition>
-                            </div>
-                            <p v-show="streakDays !== undefined">
-                                {{promptCopy.DAY_STREAK}}
-                            </p>
-                        </section>
-                        <section class="metric" v-if="currentStreak == 'weeks'">
-                            <div class="label">
-                                <transition name="fade-in" mode="out-in" appear>
-                                    <span v-if="streakWeeks !== undefined">{{streakWeeks}}</span>
-                                    <spinner v-if="streakWeeks === undefined" :delay="1000"/>
-                                </transition>
-                            </div>
-                            <p v-show="streakWeeks !== undefined">
-                                {{promptCopy.WEEK_STREAK}}
-                            </p>
-                        </section>
-                        <section class="metric" v-if="currentStreak == 'months'">
-                            <div class="label">
-                                <transition name="fade-in" mode="out-in" appear>
-                                    <span v-if="streakMonths !== undefined">{{streakMonths}}</span>
-                                    <spinner v-if="streakMonths === undefined" :delay="1000"/>
-                                </transition>
-                            </div>
-                            <p v-show="streakMonths !== undefined">
-                                {{promptCopy.MONTH_STREAK}}
-                            </p>
-                        </section>
-                    </div>
-                    <div class="btnContainer">
-                        <button class="authBtn" v-bind:class="[loggedIn && !isModal ? 'primary' : 'secondary']" v-if="this.reflectionResponse.content.text" @click="tradeNote">
-                            Share Note
-                        </button>
-                        <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
-                            {{promptCopy.SIGN_UP_MESSAGE}}
-                        </button>
-                        <button class="authBtn" v-bind:class="[this.reflectionResponse.content.text ? 'secondary' : 'primary']"
-                                v-if="authLoaded && loggedIn && !isModal"
-                                @click="goToHome">
-                            {{promptCopy.GO_HOME}}
-                        </button>
-                        <button class="primary authBtn"
-                                v-if="authLoaded && loggedIn && isModal"
-                                @click="close">
-                            {{promptCopy.CLOSE}}
-                        </button>
-                    </div>
+                <div class="insightContainer revealed">
+                    <MemberInsights
+                            :words="wordData"
+                            :didWrite="didWriteReflection"
+                            :subscriptionTier="isOnboardingPrompt ? plusTier : subscriptionTier"
+                            :startGated="subscriptionTier === basicTier"
+                            :startBlurred="subscriptionTier === basicTier"
+                            :loggedIn="loggedIn"/>
+                </div>
+                <div class="stats-container">
+                    <section class="metric">
+                        <svg-icon icon="journal"/>
+                        <div class="label">
+                            <transition name="fade-in" mode="out-in" appear>
+                                <span v-if="reflectionCount !== undefined">{{reflectionCount}}</span>
+                                <spinner v-if="reflectionCount === undefined" :delay="1000"/>
+                            </transition>
+                        </div>
+                        <p v-show="reflectionCount !== undefined">
+                            {{promptCopy.REFLECTIONS}}
+                        </p>
+                    </section>
+                    <section class="metric">
+                        <svg-icon icon="clock"/>
+                        <div class="label">
+                            <transition name="fade-in" mode="out-in" appear>
+                                <span v-if="totalDuration !== undefined">{{totalDuration}}</span>
+                                <spinner v-if="totalDuration === undefined" :delay="1000"/>
+                            </transition>
+                        </div>
+                        <p v-show="totalDuration !== undefined">
+                            {{durationLabel}}
+                        </p>
+                    </section>
+                    <section class="metric" v-if="currentStreak == 'days'">
+                        <svg-icon icon="flame"/>
+                        <div class="label">
+                            <transition name="fade-in" mode="out-in" appear>
+                                <span v-if="streakDays !== undefined">{{streakDays}}</span>
+                                <spinner v-if="streakDays === undefined" :delay="1000"/>
+                            </transition>
+                        </div>
+                        <p v-show="streakDays !== undefined">
+                            {{promptCopy.DAY_STREAK}}
+                        </p>
+                    </section>
+                    <section class="metric" v-if="currentStreak == 'weeks'">
+                        <svg-icon icon="flame"/>
+                        <div class="label">
+                            <transition name="fade-in" mode="out-in" appear>
+                                <span v-if="streakWeeks !== undefined">{{streakWeeks}}</span>
+                                <spinner v-if="streakWeeks === undefined" :delay="1000"/>
+                            </transition>
+                        </div>
+                        <p v-show="streakWeeks !== undefined">
+                            {{promptCopy.WEEK_STREAK}}
+                        </p>
+                    </section>
+                    <section class="metric" v-if="currentStreak == 'months'">
+                        <svg-icon icon="flame"/>
+                        <div class="label">
+                            <transition name="fade-in" mode="out-in" appear>
+                                <span v-if="streakMonths !== undefined">{{streakMonths}}</span>
+                                <spinner v-if="streakMonths === undefined" :delay="1000"/>
+                            </transition>
+                        </div>
+                        <p v-show="streakMonths !== undefined">
+                            {{promptCopy.MONTH_STREAK}}
+                        </p>
+                    </section>
+                </div>
+                <div class="btnContainer">
+                    <button class="lowerBtn authBtn"
+                            v-if="authLoaded && loggedIn && !isModal"
+                            @click="close">
+                        {{promptCopy.GO_HOME}}
+                    </button>
+                    <button class="lowerBtn authBtn secondary" v-if="didWriteReflection && !isOnboardingPrompt" @click="tradeNote">
+                        Share Note
+                    </button>
                 </div>
             </div>
             <div :class="[ 'flip-card', 'back']">
                 <prompt-content-card
                         v-if="showTradeNote"
                         :content="sharingContentCard"
-                        :response="reflectionResponse"/>
-                <div class="auth-card" v-else>
-                    <img src="/assets/images/balloons.svg" class="illustration" alt=""/>
-                    <h2>Become a better version of yourself</h2>
-                    <p class="subtext">
-                        Questions to help you become more mindful and reflect on what makes you happy.
-                    </p>
-                    <div class="auth" v-if="authLoaded && !loggedIn">
-                        <magic-link v-on:success="magicLinkSuccess" @error="magicLinkError"/>
-                    </div>
-                </div>
+                        :response="reflectionResponse"
+                        :promptContent="promptContent" />
                 <div class="flexContainer">
                     <button @click="flipped = false" class="backBtn tertiary">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
@@ -122,7 +102,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
                         </svg>
                         Back
                     </button>
-                    <button class="secondary" @click="goToHome">{{promptCopy.GO_HOME}}</button>
+                    <button class="secondary" @click="close">{{promptCopy.GO_HOME}}</button>
                 </div>
             </div>
         </div>
@@ -141,29 +121,35 @@ import {LocalStorageKey} from '@web/services/StorageService'
 <script lang="ts">
     import Vue from "vue";
     import Spinner from "@components/Spinner.vue";
+    import { Config } from "@web/config";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
-    import {millisecondsToMinutes} from '@shared/util/DateUtil'
-    import {ElementAccumulation} from '@shared/models/ElementAccumulation'
-    import ReflectionResponse from '@shared/models/ReflectionResponse'
+    import { millisecondsToMinutes } from '@shared/util/DateUtil'
+    import { ElementAccumulation } from '@shared/models/ElementAccumulation'
+    import ReflectionResponse, { InsightWord } from '@shared/models/ReflectionResponse'
     import CactusMemberService from '@web/services/CactusMemberService'
-    import {ListenerUnsubscriber} from '@web/services/FirestoreService'
+    import { ListenerUnsubscriber } from '@web/services/FirestoreService'
     import CactusMember from '@shared/models/CactusMember'
-    import {PageRoute} from '@shared/PageRoutes'
+    import { PageRoute } from '@shared/PageRoutes'
     import MagicLink from "@components/MagicLinkInput.vue";
-    import StorageService, {LocalStorageKey} from '@web/services/StorageService'
+    import StorageService, { LocalStorageKey } from '@web/services/StorageService'
     import CopyService from '@shared/copy/CopyService'
-    import {ElementCopy, PromptCopy} from '@shared/copy/CopyTypes'
-    import PromptContent, {Content, ContentType} from '@shared/models/PromptContent'
-    import {isBlank} from "@shared/util/StringUtil"
+    import { ElementCopy, PromptCopy } from '@shared/copy/CopyTypes'
+    import PromptContent, { Content, ContentType } from '@shared/models/PromptContent'
+    import { isBlank } from "@shared/util/StringUtil"
     import PromptContentCard from '@components/PromptContentCard.vue'
     import Modal from "@components/Modal.vue";
-    import {CactusElement} from "@shared/models/CactusElement";
+    import { CactusElement } from "@shared/models/CactusElement";
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
     import ReflectionCelebrateUpgradeBanner from "@components/ReflectionCelebrateUpgradeBanner.vue";
     import InputNameModal from "@components/InputNameModal.vue";
-    import {getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil"
+    // import InsightWordChart from "@components/InsightWordChart.vue";
+    import MemberInsights from "@components/MemberWordCloudInsights.vue";
+    import { getElementAccumulationCounts } from "@shared/util/ReflectionResponseUtil"
+    import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
     import Logger from "@shared/Logger";
-    import {gtag} from "@web/analytics"
+    import { gtag } from "@web/analytics"
+    import { pushRoute } from "@web/NavigationUtil";
+    import SvgIcon from "@components/SvgIcon.vue";
 
     const logger = new Logger("ReflectionCelebrateCard.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -176,11 +162,13 @@ import {LocalStorageKey} from '@web/services/StorageService'
             PromptContentCard,
             ElementDescriptionModal,
             InputNameModal,
-            UpgradeBanner: ReflectionCelebrateUpgradeBanner
+            UpgradeBanner: ReflectionCelebrateUpgradeBanner,
+            MemberInsights,
+            SvgIcon
         },
         async beforeMount() {
             CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: async ({member}) => {
+                onData: async ({ member }) => {
                     this.member = member;
                     this.authLoaded = true;
                     this.loggedIn = !!member;
@@ -209,7 +197,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
             reflectionResponse: {
                 type: Object as () => ReflectionResponse
             },
-            promptContent: {type: Object as () => PromptContent},
+            promptContent: { type: Object as () => PromptContent },
             isModal: Boolean,
             cactusElement: String as () => CactusElement,
         },
@@ -266,8 +254,20 @@ import {LocalStorageKey} from '@web/services/StorageService'
             }
         },
         computed: {
+            isOnboardingPrompt(): boolean {
+                return this.promptContent.documentId === Config.firstPromptId;
+            },
+            plusTier(): SubscriptionTier {
+                return SubscriptionTier.PLUS;
+            },
+            basicTier(): SubscriptionTier {
+                return SubscriptionTier.BASIC;
+            },
+            subscriptionTier(): SubscriptionTier | undefined {
+                return this.member?.tier;
+            },
             loginUrl(): string {
-                const base = `${PageRoute.SIGNUP}`;
+                const base = `${ PageRoute.SIGNUP }`;
                 // const params = {}
                 return base;
             },
@@ -300,6 +300,15 @@ import {LocalStorageKey} from '@web/services/StorageService'
                     default:
                         return this.cactusElement
                 }
+            },
+            hasInsights(): boolean {
+                return this.member?.wordCloud ? true : false;
+            },
+            wordData(): InsightWord[] | undefined {
+                return this.member?.wordCloud;
+            },
+            didWriteReflection(): boolean {
+                return this.reflectionResponse?.content?.text ? true : false;
             }
         },
         methods: {
@@ -322,7 +331,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 this.setDurationMs(totalDuration);
                 this.elementAccumulations = getElementAccumulationCounts(reflections);
                 this.reflectionCount = reflections.length;
-                const {dayStreak, weekStreak, monthStreak} = ReflectionResponseService.getCurrentStreaks(reflections, member);
+                const { dayStreak, weekStreak, monthStreak } = ReflectionResponseService.getCurrentStreaks(reflections, member);
                 this.streakDays = dayStreak;
                 this.streakWeeks = weekStreak;
                 this.streakMonths = monthStreak;
@@ -330,15 +339,12 @@ import {LocalStorageKey} from '@web/services/StorageService'
             },
             setDurationMs(totalDuration: number) {
                 if (totalDuration < (60 * 1000)) {
-                    this.totalDuration = `${Math.round(totalDuration / 1000)}`;
+                    this.totalDuration = `${ Math.round(totalDuration / 1000) }`;
                     this.durationLabel = copy.prompts.SECONDS
                 } else {
                     this.durationLabel = copy.prompts.MINUTES;
-                    this.totalDuration = millisecondsToMinutes(totalDuration);
+                    this.totalDuration = millisecondsToMinutes(totalDuration, 0);
                 }
-            },
-            goToHome() {
-                window.location.href = PageRoute.JOURNAL_HOME;
             },
             back() {
                 this.$emit("back");
@@ -364,9 +370,8 @@ import {LocalStorageKey} from '@web/services/StorageService'
             magicLinkError(message: string | undefined) {
                 logger.error("Celebrate component: Failed to send magic link", message);
             },
-            showLogin() {
-                window.location.href = PageRoute.SIGNUP;
-                window.location.href = PageRoute.SIGNUP + "?message=" + encodeURIComponent("Sign up to save your progress and keep your practice going.")
+            async showLogin() {
+                await pushRoute(PageRoute.SIGNUP + "?message=" + encodeURIComponent("Sign up to save your progress and keep your practice going."));
             },
             showCactusModal(element: keyof typeof CactusElement) {
                 this.cactusModalVisible = true;
@@ -411,7 +416,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
             },
             selectStreak() {
                 this.currentStreak = 'days';
-                
+
                 if (this.streakDays && this.streakWeeks && this.streakMonths) {
                     if (this.streakDays > 1) {
                         this.currentStreak = 'days';
@@ -446,9 +451,6 @@ import {LocalStorageKey} from '@web/services/StorageService'
         }
 
         &.flip-container .flipper {
-            // background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/30rem;
-            // causing issues on safari
-
             @include r(600) {
                 background: transparent;
                 box-shadow: none;
@@ -474,115 +476,68 @@ import {LocalStorageKey} from '@web/services/StorageService'
 
     .successText {
         flex-grow: 1;
-        padding: 4rem 4rem 6.4rem;
+        padding: 4rem 4rem 0;
 
-        @include r(374) {
-            padding: 7.2rem 4rem 9.6rem;
-        }
-        @include r(600) {
-            padding: 6.4rem 4rem;
-        }
-    }
-
-    h2 {
-        color: $magenta;
-        font-size: 3.2rem;
-        margin-bottom: 2.4rem;
-
-        @include r(600) {
-            margin-bottom: 3.2rem;
+        h2 {
+            font-size: 3.2rem;
         }
 
-        &.green {
-            color: $darkestGreen;
+        .subtext {
+            opacity: .8;
         }
     }
 
-    .subtext {
-        margin: -1.6rem 0 .8rem;
-        opacity: .8;
-
-        .meaning, .element-name {
-            text-transform: lowercase;
-        }
-
-        @include r(600) {
-            margin-top: -2.4rem;
-        }
-    }
-
-    .front .illustration {
-        margin: 0 auto;
-        width: 90%;
-    }
-
-    .lowerContainer {
-        background: $darkerGreen url(assets/images/grainy.png);
-        padding: 6.4rem 4rem 4rem;
-    }
-
-    .cactusGarden {
-        align-items: flex-end;
-        display: flex;
-        justify-content: center;
-        margin: -12rem 0 1.6rem;
-
-        @include r(374) {
-            margin-bottom: 2.4rem;
-        }
-    }
-
-    .cactusContainer {
-        cursor: pointer;
-        display: flex;
-        justify-content: center;
-        transition: transform .3s;
-        width: 6rem;
-
-        @include r(600) {
-            &:hover {
-                transform: scale(1.03);
-            }
-        }
-    }
-
-    .cactusIllustration {
-        height: 14rem;
-
-        &.count-2 {
-            height: 12rem;
-        }
-
-        &.count-1 {
-            height: 10rem;
-        }
+    .insightContainer {
+        padding: 0 1.6rem;
+        width: 100%;
     }
 
     .stats-container {
         display: flex;
         justify-content: center;
-        margin-bottom: 1.6rem;
+        padding: 0 2.4rem 3.2rem;
 
-        @include r(374) {
-            margin-bottom: 2.4rem;
+        @include r(600) {
+            justify-content: space-around;
+            padding: 0 3.2rem 4rem;
         }
     }
 
     .metric {
-        color: $lightGreen;
-        padding: 0 .8rem;
+        color: $dolphin;
+        flex-basis: 30%;
+        padding: .8rem;
 
+        @include r(374) {
+            @include shadowbox;
+            margin: 0 .8rem;
+            padding: 1.6rem;
+        }
         @include r(600) {
+            margin: 0;
         }
 
         p {
-            font-size: 1.6rem;
+            font-size: 1.4rem;
+            opacity: .8;
             white-space: nowrap;
+
+            @include r(600) {
+                font-size: 1.6rem;
+            }
+        }
+
+        .icon {
+            display: none;
+
+            @include r(374) {
+                display: inline-block;
+            }
         }
     }
 
     .label {
-        font-size: 4.8rem;
+        font-size: 3.2rem;
         font-weight: bold;
         text-align: center;
     }
@@ -613,10 +568,8 @@ import {LocalStorageKey} from '@web/services/StorageService'
             }
         }
 
-        &.flipped {
-            .flipper {
-                transform: rotateY(180deg);
-            }
+        &.flipped .flipper {
+            transform: rotateY(180deg);
         }
 
         .flip-card {
@@ -636,21 +589,21 @@ import {LocalStorageKey} from '@web/services/StorageService'
             }
 
             &.front {
-                background-color: $beige;
-                box-shadow: 0 11px 15px -7px rgba(0, 0, 0, .16),
-                0 24px 38px 3px rgba(0, 0, 0, .1),
-                0 9px 46px 8px rgba(0, 0, 0, .08);
+                background-color: $bgGreen;
+                box-shadow: 0 30px 160px -6px rgba(6, 69, 76, 0.3);
                 height: 100%;
                 transform: rotateY(0);
                 z-index: 2;
 
                 @include r(600) {
+                    background-position: -55rem -90rem;
+                    background-size: auto;
                     min-height: 66rem;
                 }
             }
 
             &.back {
-                background: $darkerGreen url(assets/images/darkGreenNeedles.svg) 0 0/31rem;
+                background: $darkerGreen url(/assets/images/darkGreenNeedles.svg) 0 0/31rem;
                 transform: rotateY(180deg);
 
                 @include r(600) {
@@ -660,62 +613,35 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 }
             }
         }
-
-        /* Lower Buttons */
-
-        .authBtn {
-            box-shadow: none;
-            bottom: 3.2rem;
-            flex-grow: 0;
-            left: 3.2rem;
-            margin: 3.2rem auto 0;
-            right: 3.2rem;
-            width: calc(100% - 6.4rem);
-
-            @include r(600) {
-                max-width: none;
-                position: static;
-                width: auto;
-            }
-        }
-
-        .authBtn {
-            bottom: 1.2rem; //before changing this bottom setting, the button was covering the metric labels on small screens
-        }
-
-        .secondary,
-        .primary {
-            height: 4.8rem;
-            vertical-align: middle;
-            white-space: nowrap;
-        }
-
-        .secondary {
-            margin-right: .8rem;
-        }
     }
 
     .btnContainer {
         display: flex;
-        flex-direction: column;
+        flex-flow: column wrap;
+        justify-content: center;
+        padding: 0 2.4rem 3.2rem;
 
-        .authBtn {
-            width: 100%;
+        @include r(600) {
+            flex-flow: row nowrap;
+            padding: 0 3.2rem 4rem;
 
-            + .authBtn {
-                margin-top: 1.6rem;
+            .lowerBtn {
+                height: 4.8rem;
             }
         }
 
-        @include r(600) {
-            flex-direction: row;
+        button.lowerBtn {
+            box-shadow: none;
+            margin: .4rem 0;
+            white-space: nowrap;
 
-            .authBtn {
-                width: auto;
+            @include r(600) {
+                margin: 0 .4rem;
+                width: 50%;
+            }
 
-                + .authBtn {
-                    margin-top: 3.2rem;
-                }
+            &.secondary:hover {
+                background-color: $white;
             }
         }
     }
@@ -732,6 +658,10 @@ import {LocalStorageKey} from '@web/services/StorageService'
         button {
             flex-grow: 1;
             margin: 0 .8rem;
+
+            &.secondary:hover {
+                background-color: $white;
+            }
         }
 
         .backBtn {

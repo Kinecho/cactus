@@ -1,5 +1,5 @@
-import FlamelinkModel, {SchemaName} from "@shared/FlamelinkModel";
-import {BillingPeriod} from "@shared/models/SubscriptionProduct";
+import FlamelinkModel, { SchemaName } from "@shared/FlamelinkModel";
+import { BillingPeriod } from "@shared/models/SubscriptionProduct";
 
 
 enum Fields {
@@ -23,12 +23,13 @@ export interface ProductSection {
     features?: ProductFeature[]
 }
 
-
 export enum SubscriptionTier {
     BASIC = "BASIC",
     PLUS = "PLUS",
     PREMIUM = "PREMIUM",
 }
+
+export const DEFAULT_SUBSCRIPTION_TIER = SubscriptionTier.BASIC;
 
 export interface ProductGroupFooter {
     textMarkdown?: string

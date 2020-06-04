@@ -8,14 +8,14 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const HTMLWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin')
 
 module.exports = function (config) {
-    pages.login = {
-        'title': 'Log In',
-        'path': '/login',
-        'name': 'sign_up',
-    }
+    // pages.login = {
+    //     'title': 'Log In',
+    //     'path': '/login',
+    //     'name': 'sign_up',
+    // }
 
-    const indexPath = path.join(helpers.srcDir, 'pages-index.html')
-    createDevIndexPage(indexPath)
+    // const indexPath = path.join(helpers.srcDir, 'pages-index.html')
+    // createDevIndexPage(indexPath)
     return {
         devServer: {
             open: false,
@@ -26,28 +26,30 @@ module.exports = function (config) {
             historyApiFallback: {
                 disableDotRule: true,
                 rewrites: [
-                    {from: new RegExp('^/index$'), to: '/pages-index.html'},
+                    // {from: new RegExp('^/index$'), to: '/pages-index.html'},
                     ...createPageRewrites(),
-                    {from: /./, to: '/404.html'},
+                    {from: /./, to: '/single_page_index.html'},
                 ],
             },
         },
 
-        plugins: [new HtmlWebpackPlugin({
-            chunks: ['common', 'pages-index'],
-            title: 'Page Index',
-            template: indexPath,
-            filename: `pages-index.html`,
-            favicon: `${helpers.srcDir}/favicon.ico`,
-            alwaysWriteToDisk: true,
-        }), new HTMLWebpackHarddiskPlugin({
-            outputPath: helpers.publicDir,
-        })],
+        plugins: [
+            // new HtmlWebpackPlugin({
+            //     chunks: ['common', 'pages-index'],
+            //     title: 'Page Index',
+            //     template: indexPath,
+            //     filename: `pages-index.html`,
+            //     favicon: `${helpers.srcDir}/favicon.ico`,
+            //     alwaysWriteToDisk: true,
+            // })
+            new HTMLWebpackHarddiskPlugin({
+                outputPath: helpers.publicDir,
+            })],
     }
 }
 
 function createPageRewrites() {
-    return Object.keys(pages).filter( filename => {
+    return Object.keys(pages).filter(filename => {
         //ensure the page has a path. 404 will get filtered out
         let page = pages[filename]
         return page.path
@@ -64,12 +66,12 @@ function createPageRewrites() {
 
 function createDevIndexPage(indexPath) {
     const pagesListHtml = Object.values(pages)
-        .filter(page => page.path)
-        .sort((p1, p2) => p1.path.localeCompare(p2.path))
-        .map(page => `<li class="message" style="padding:.5rem 0 .5rem 0;"><a style="text-decoration: none;" href="${page.path}"><strong>${page.path}</strong></a>&nbsp;<span style="color:#757575;">${page.name}.html</span></li>`)
-        .join('\n')
+    .filter(page => page.path)
+    .sort((p1, p2) => p1.path.localeCompare(p2.path))
+    .map(page => `<li class="message" style="padding:.5rem 0 .5rem 0;"><a style="text-decoration: none;" href="${page.path}"><strong>${page.path}</strong></a>&nbsp;<span style="color:#757575;">${page.name}.html</span></li>`)
+    .join('\n')
     writeFile(indexPath,
-        `
+    `
 <html>
 <body>
     <div class="centered">

@@ -1,17 +1,28 @@
 <template>
     <div class="container">
-        <h2>Change Your Plan</h2>
-        <p>To change your plan, please send us an email to <a :href="`mailto:help@cactus.app?subject=${subject}`">help@cactus.app</a>. You&nbsp;can view your options on the <a :href="pricingRoute" target="_blank">{{commonCopy.PRICING}}</a>&nbsp;page. All&nbsp;requests are processed within 24&nbsp;hours.</p>
+        <template v-if="isStripeSubscription">
+            <h2 class="areYouSure" v-if="!showCancelSuccess">Are you sure you want to cancel
+                your&nbsp;subscription?</h2>
+            <p v-if="!showConfirmCancel && !showCancelSuccess">{{message}}</p>
+            <button class="red" @click="cancelStripeSubscription"
+                    :disabled="loading"
+                    v-if="!showCancelSuccess && !showConfirmCancel && !showCancelSuccess">
+                Cancel Subscription
+            </button>
+            <h2 v-if="showCancelSuccess">Your cancellation has been successfully processed.</h2>
+            <button @click="$emit('close')" v-if="showCancelSuccess" >Done</button>
+        </template>
     </div>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
     import CopyService from "@shared/copy/CopyService";
-    import {CommonCopy} from '@shared/copy/CopyTypes';
+    import { CommonCopy } from '@shared/copy/CopyTypes';
     import CactusMember from "@shared/models/CactusMember";
     import CactusMemberService from "@web/services/CactusMemberService";
-    import {PageRoute} from '@shared/PageRoutes';
+    import { PageRoute } from '@shared/PageRoutes';
+    import { cancelStripeSubscription } from "@web/checkoutService";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -21,24 +32,55 @@
         },
         props: {
             member: Object as () => CactusMember,
+            nextBillingDateString: { type: String, required: false },
         },
         data(): {
             pricingRoute: string,
             commonCopy: CommonCopy,
+            showConfirmCancel: boolean,
+            loading: boolean,
+            showCancelSuccess: boolean,
         } {
             return {
-                pricingRoute: PageRoute.PAYMENT_PLANS,
+                pricingRoute: PageRoute.PRICING,
                 commonCopy: copy.common,
+                showConfirmCancel: false,
+                loading: false,
+                showCancelSuccess: false,
             }
         },
         computed: {
             subject(): string {
                 const member = this.member || CactusMemberService.sharedInstance.currentMember;
-                return encodeURIComponent(`Change Plan for ${member.email} (${member.id})`)
+                return encodeURIComponent(`Change Plan for ${ member.email } (${ member.id })`)
+            },
+            isStripeSubscription(): boolean {
+                return !!this.member?.subscription?.stripeSubscriptionId
+            },
+            message(): string {
+                let message = "Please confirm your wish to cancel. You will continue to" +
+                " have access to Cactus Plus until your current billing\xa0period ends";
+                if (this.nextBillingDateString) {
+                    message += " on " + this.nextBillingDateString
+                }
+
+                return message += ".";
             },
             body(): string {
                 const member = this.member || CactusMemberService.sharedInstance.currentMember;
-                return encodeURIComponent(`Hi,\n\nI'd like to cancel my Cactus ${member?.tierDisplayName} subscription.\n\nThe email address on my account is ${member.email} and my member ID is ${member.id}.\n\nThanks,\n${member.getFullName()}`.trim())
+                return encodeURIComponent(`Hi,\n\nI'd like to cancel my Cactus ${ member?.tierDisplayName } subscription.\n\nThe email address on my account is ${ member.email } and my member ID is ${ member.id }.\n\nThanks,\n${ member.getFullName() }`.trim())
+            }
+        },
+        methods: {
+            async cancelStripeSubscription() {
+                this.loading = true;
+                this.showCancelSuccess = false;
+                const cancelResponse = await cancelStripeSubscription();
+                this.loading = false;
+                if (cancelResponse.success) {
+                    this.showCancelSuccess = true;
+                }
+
             }
         }
     })
@@ -51,8 +93,6 @@
 
     .container {
         @include shadowbox();
-        background: $royal url(assets/images/plusBg.svg) center top/135% auto no-repeat;
-        color: $white;
         margin: 2.4rem;
         max-width: 58rem;
         padding: 2.4rem 3.2rem;
@@ -61,26 +101,41 @@
             margin: 0;
         }
         @include r(768) {
-            background-size: 105% auto;
             max-width: 64rem;
             padding: 4.8rem;
         }
 
         h2 {
             border-radius: 1.2rem 1.2rem 0 0;
+            font-size: 2.4rem;
+            line-height: 1.3;
             margin-bottom: .8rem;
 
-            @include r(768) {
-                margin-bottom: 0;
+            &.areYouSure {
+                color: $red;
             }
         }
 
         p {
+            margin-bottom: 1.6rem;
             opacity: .9;
         }
 
         a {
-            color: $white;
+            display: inline-block;
+        }
+    }
+
+    button.remove {
+        align-items: center;
+        color: $red;
+        display: flex;
+        flex-grow: 0;
+
+        img {
+            height: 1.6rem;
+            margin-right: .6rem;
+            width: 1.6rem;
         }
     }
 </style>

@@ -25,13 +25,16 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import ReflectionResponse, {ResponseMedium} from "@shared/models/ReflectionResponse"
+    import ReflectionResponse, { ResponseMedium } from "@shared/models/ReflectionResponse"
     import SentPromptService from "@web/services/SentPromptService"
     import ReflectionResponseService from "@web/services/ReflectionResponseService"
     import ReflectionPrompt from "@shared/models/ReflectionPrompt"
-    import {getResponseText} from "@shared/util/StringUtil"
+    import { getResponseText } from "@shared/util/StringUtil"
     import ResizableTextarea from "@components/ResizableTextarea.vue"
     import Logger from "@shared/Logger";
+    import PromptContent from "@shared/models/PromptContent";
+    import CactusMember from "@shared/models/CactusMember";
+
     const logger = new Logger("ReflectionResponseTextEdit.vue");
     export default Vue.extend({
         components: {
@@ -54,6 +57,10 @@
                 type: Object as () => ReflectionPrompt,
                 required: true,
             },
+            promptContent: {
+                type: Object as () => PromptContent,
+            },
+            member: Object as () => CactusMember,
             responseMedium: {
                 type: String as () => ResponseMedium,
                 default: ResponseMedium.JOURNAL_WEB,
@@ -100,6 +107,8 @@
                 this.editedResponses.forEach(edit => {
                     return new Promise(async resolve => {
                         let response = edit.id ? responsesById[edit.id] : undefined;
+
+
                         if (!response && this.prompt && this.prompt.id) {
                             response = await ReflectionResponseService.createReflectionResponse(this.prompt.id, this.responseMedium, this.prompt.question)
                         }
@@ -107,6 +116,10 @@
                         // This may cause non-ideal experiences if you have more than one response,
                         // but that's an edge case that should not happen in practice
                         if (response) {
+                            if (!response?.coreValue) {
+                                response.coreValue = this.member?.getCoreValueAtIndex(this.promptContent?.preferredCoreValueIndex ?? 0) ?? null
+                            }
+
                             response.content.text = edit.text.trim();
                             //saving will trigger a refresh of the data elsewhere, so we shouldn't need to update anything here;
                             await ReflectionResponseService.sharedInstance.save(response);
@@ -168,11 +181,11 @@
             startEditing() {
                 this.editedText = this.responseText || "";
                 this.editedResponses = this.responses.map(response => {
-                    return {id: response.id || "", text: response.content.text || ""}
+                    return { id: response.id || "", text: response.content.text || "" }
                 });
 
                 if (this.editedResponses.length === 0) {
-                    this.editedResponses = [{id: undefined, text: ""}];
+                    this.editedResponses = [{ id: undefined, text: "" }];
                 }
 
 

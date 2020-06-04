@@ -1,5 +1,6 @@
 import {convertDateToJSON, convertDateToTimestamp} from "@shared/util/FirestoreUtil";
 import Logger from "@shared/Logger";
+import { toPlainObject } from "@shared/util/ObjectUtil";
 const logger = new Logger("FirestoreBaseModels");
 
 export enum Collection {
@@ -20,6 +21,10 @@ export enum Collection {
     checkoutSessions = "checkoutSessions",
     payments = "payments",
     emailLogs = "emailLogs",
+    dataExports = "dataExports",
+    coreValuesAssessmentResponses = "coreValuesAssessmentResponses",
+    deletedUsers = "deletedUsers",
+    gapAnalysisAssessmentResults = "gapAnalysisAssessmentResults",
 }
 
 export interface FirestoreIdentifiable {
@@ -58,7 +63,7 @@ export abstract class BaseModel implements FirestoreIdentifiable {
         if (!prepared) {
             throw new Error("Unable to prepare for firestore");
         }
-        const data = convertDateToTimestamp(prepared);
+        let data = convertDateToTimestamp(prepared);
         // logger.log("data after converting to dates", data);
 
         if (removeKeys && data) {
@@ -66,6 +71,8 @@ export abstract class BaseModel implements FirestoreIdentifiable {
                 delete data[key];
             });
         }
+
+        data = toPlainObject(data);
 
         Object.keys(data).forEach(key => {
             if (data[key] === undefined) {

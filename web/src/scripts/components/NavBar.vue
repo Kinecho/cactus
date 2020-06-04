@@ -1,39 +1,49 @@
 <template lang="html">
     <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent, noborder: largeLogoOnDesktop}" v-if="!hidden">
         <div class="centered">
-            <a :href="logoHref"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" :src="'/assets/images/' + logoSrc" alt="Cactus logo"/></a>
-            <div v-if="" class="anonLinks ">
-                <a v-if="displayLoginButton"
+            <router-link :to="logoHref">
+                <img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" :src="'/assets/images/' + logoSrc" alt="Cactus logo"/>
+            </router-link>
+            <div v-if="!loggedIn" class="anonLinks">
+                <router-link v-if="displayLoginButton"
+                        class="login"
+                        :to="sponsorHref"
+                        type="link"
+                >
+                    <span>Sponsor</span>
+                </router-link>
+                <router-link v-if="displayLoginButton"
                         class="login "
-                        :href="loginHref"
+                        :to="loginHref"
                         @click.prevent="goToLogin"
                         type="link"
                 >
-                    <span class="">{{copy.common.LOG_IN}}</span>
-                </a>
-                <a v-if="displaySignupButton"
-                        data-test="signup-button"
-                        class="jump-to-form button small"
-                        :href="signupHref"
-                        @click.prevent="goToSignup"
-                        type="button"
-                >{{copy.common.TRY_IT_FREE}}</a>
+                    <span>{{copy.common.LOG_IN}}</span>
+                </router-link>
             </div>
             <div class="navContainer" v-if="loggedIn && showLinks">
-                <a class="navbarLink home" :href="journalHref" v-if="loggedIn">
+                <router-link class="navbarLink home" :to="journalHref" v-if="loggedIn">
                     <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Home to My
                         Journal</title>
                         <path fill="#07454C" d="M5 23a3 3 0 01-3-3V9a1 1 0 01.386-.79l9-7a1 1 0 011.228 0l9 7A1 1 0 0122 9v11a3 3 0 01-3 3H5zm7-19.733L4 9.489V20a1 1 0 001 1h3v-9a1 1 0 01.883-.993L9 11h6a1 1 0 011 1v9h3a1 1 0 001-1V9.49l-8-6.223zM14 13h-4v8h4v-8z"/>
                     </svg>
                     <span class="navLabel">{{copy.navigation.HOME}}</span>
-                </a>
-                <a class="navbarLink" :href="socialHref" v-if="loggedIn">
+                </router-link>
+                <!--        Activity        -->
+                <!-- <router-link class="navbarLink" :to="socialHref" v-if="loggedIn">
                     <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Activity</title>
                         <path fill="#07454C" d="M15 17.838L9.949 2.684c-.304-.912-1.594-.912-1.898 0L5.28 11H2a1 1 0 000 2h4a1 1 0 00.949-.684L9 6.162l5.051 15.154c.304.912 1.594.912 1.898 0L18.72 13H22a1 1 0 000-2h-4a1 1 0 00-.949.684L15 17.838z"/>
                     </svg>
                     <span class="navLabel">{{copy.navigation.ACTIVITY}}</span>
                     <span class="badge" v-if="activityBadgeCount > 0" data-test="badge">{{activityBadgeCount}}</span>
-                </a>
+                </router-link> -->
+                <!-- INSIGHTS      -->
+                <router-link class="navbarLink" :to="insightsHref" v-if="loggedIn">
+                    <svg class="navIcon pie" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><title>Insights</title>
+                        <path fill="#07454C" d="M6.601.913a1 1 0 01.8 1.834A9 9 0 1019.29 14.5a1 1 0 011.842.778A11 11 0 116.601.913zm4.4-.913a11 11 0 0111 11 1 1 0 01-1 1h-10a1 1 0 01-1-1V1a1 1 0 011-1zm1 2.056V10h7.944a9 9 0 00-7.944-7.944z"/>
+                    </svg>
+                    <span class="navLabel">{{copy.navigation.INSIGHTS}}</span>
+                </router-link>
                 <dropdown-menu :items="links" v-if="loggedIn" :displayName="displayName" :email="email">
                     <div class="navbar-avatar-container" slot="custom-button">
                         <div v-if="!profileImageUrl" class="initials">{{initials}}</div>
@@ -47,28 +57,27 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {FirebaseUser, getAuth} from '@web/firebase'
-    import {getInitials} from '@shared/util/StringUtil'
-    import {PageRoute} from '@shared/PageRoutes'
-    import {gtag} from "@web/analytics"
-    import {clickOutsideDirective} from '@web/vueDirectives'
-    import {logout} from '@web/auth'
+    import { FirebaseUser, getAuth } from '@web/firebase'
+    import { getInitials, isBlank } from '@shared/util/StringUtil'
+    import { PageRoute } from '@shared/PageRoutes'
+    import { clickOutsideDirective } from '@web/vueDirectives'
+    import { logout } from '@web/auth'
     import DropdownMenu from "@components/DropdownMenu.vue"
-    import {DropdownMenuLink} from "@components/DropdownMenuTypes"
-    import {QueryParam} from '@shared/util/queryParams'
+    import { DropdownMenuLink } from "@components/DropdownMenuTypes"
+    import { QueryParam } from '@shared/util/queryParams'
     import CopyService from '@shared/copy/CopyService'
-    import {LocalizedCopy} from '@shared/copy/CopyTypes'
-    import {getRandomAvatar} from '@web/AvatarUtil'
-    import {getQueryParam} from '@web/util'
+    import { LocalizedCopy } from '@shared/copy/CopyTypes'
+    import { getRandomAvatar } from '@web/AvatarUtil'
+    import { getQueryParam } from '@web/util'
     import CactusMemberService from '@web/services/CactusMemberService'
     import CactusMember from "@shared/models/CactusMember"
-    import {ListenerUnsubscriber} from '@web/services/FirestoreService';
-    import {fetchActivityFeedSummary} from '@web/social';
-    import StorageService, {LocalStorageKey} from "@web/services/StorageService";
+    import { ListenerUnsubscriber } from '@web/services/FirestoreService';
+    import StorageService, { LocalStorageKey } from "@web/services/StorageService";
     import MemberProfile from "@shared/models/MemberProfile"
     import MemberProfileService from '@web/services/MemberProfileService'
     import Logger from "@shared/Logger";
-    import {subscriptionTierDisplayName} from "@shared/models/MemberSubscription";
+    import { isPremiumTier, subscriptionTierDisplayName } from "@shared/models/MemberSubscription";
+    import { pushRoute } from "@web/NavigationUtil";
 
     const logger = new Logger("NavBar.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -95,7 +104,7 @@
         },
         beforeMount() {
             let NO_NAV = getQueryParam(QueryParam.NO_NAV);
-            if (NO_NAV !== undefined) {
+            if (!isBlank(NO_NAV)) {
                 this.hidden = true;
             }
 
@@ -105,7 +114,7 @@
             });
 
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: async ({member}) => {
+                onData: async ({ member }) => {
                     if (member?.id && member?.id !== this.member?.id) {
                         this.memberProfileUnsubscriber?.();
                         this.memberProfileUnsubscriber = MemberProfileService.sharedInstance.observeByMemberId(member?.id, {
@@ -115,11 +124,11 @@
                         })
                     }
 
-                    const oldMember = this.member;
+                    // const oldMember = this.member;
                     this.member = member;
-                    if (member && member.activityStatus?.lastSeenOccurredAt !== oldMember?.activityStatus?.lastSeenOccurredAt || member?.id !== oldMember?.id) {
-                        await this.updateActivityCount();
-                    }
+                    // if (member && member.activityStatus?.lastSeenOccurredAt !== oldMember?.activityStatus?.lastSeenOccurredAt || member?.id !== oldMember?.id) {
+                    //     await this.updateActivityCount();
+                    // }
                 }
             });
         },
@@ -129,17 +138,17 @@
             this.memberProfileUnsubscriber?.();
         },
         props: {
-            showSignup: {type: Boolean, default: false},
+            showSignup: { type: Boolean, default: false },
             signOutRedirectUrl: String,
             redirectOnSignOut: Boolean,
-            signupFormAnchorId: {type: String, default: "signupAnchor"},
+            signupFormAnchorId: { type: String, default: "signupAnchor" },
             largeLogoOnDesktop: Boolean,
-            isSticky: {type: Boolean, default: true},
-            whiteLogo: {type: Boolean, default: false},
-            showLogin: {type: Boolean, default: true},
-            forceTransparent: {type: Boolean, default: false},
+            isSticky: { type: Boolean, default: true },
+            whiteLogo: { type: Boolean, default: false },
+            showLogin: { type: Boolean, default: true },
+            forceTransparent: { type: Boolean, default: false },
             loginRedirectUrl: String,
-            showLinks: {type: Boolean, default: true},
+            showLinks: { type: Boolean, default: true },
         },
         data(): NavBarData {
             return {
@@ -160,18 +169,21 @@
                 return !!this.user;
             },
             links(): DropdownMenuLink[] {
-                const links: DropdownMenuLink[] = [{
+                return [{
+                    //     title: copy.navigation.CORE_VALUES,
+                    //     href: PageRoute.CORE_VALUES,
+                    //     calloutText: !isPremiumTier(this.member?.tier) ? "Plus" : null
+                    // }, {
                     title: copy.navigation.ACCOUNT,
                     href: PageRoute.ACCOUNT,
-                    badge: subscriptionTierDisplayName(this.member?.tier, this.member?.isInTrial)
+                    badge: subscriptionTierDisplayName(this.member?.tier, this.member?.isOptInTrialing)
                 }, {
                     title: copy.common.LOG_OUT,
                     onClick: async () => {
+                        this.$emit("logging-out")
                         await this.logout()
                     }
                 }];
-
-                return links;
             },
             displayName(): string | undefined | null {
                 return this.member ? this.member.getFullName() : null;
@@ -181,10 +193,6 @@
             },
             profileImageUrl(): string | undefined | null {
                 return (this.memberProfile?.avatarUrl) ? this.memberProfile.avatarUrl : getRandomAvatar(this.member?.id);
-            },
-            displaySignupButton(): boolean {
-                const show = this.showSignup && this.authLoaded && !this.user;
-                return show;
             },
             displayLoginButton(): boolean {
                 return this.showLogin && this.authLoaded && !this.user;
@@ -196,108 +204,144 @@
                 return "";
             },
             loginHref(): string {
-                return `${PageRoute.LOGIN}?${QueryParam.REDIRECT_URL}=${this.loginRedirectUrl || window.location.href}`;
+                return `${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ this.loginRedirectUrl || window.location.href }`;
             },
             logoHref(): string {
                 return this.loggedIn ? PageRoute.JOURNAL_HOME : PageRoute.HOME;
             },
+            isPaidTier(): boolean {
+                return isPremiumTier(this.member?.tier);
+            },
+            sponsorHref(): string {
+                return PageRoute.SPONSOR;
+            },
             signupHref(): string {
                 return PageRoute.SIGNUP;
+            },
+            assessmentHref(): string {
+                return PageRoute.GAP_ANALYSIS;
             },
             journalHref(): string {
                 return PageRoute.JOURNAL_HOME;
             },
-            socialHref(): string {
-                return PageRoute.SOCIAL;
-            },
+            // socialHref(): string {
+            //     return PageRoute.SOCIAL;
+            // },
             logoSrc(): string {
                 return this.whiteLogo ? "logoWhite.svg" : "logo.svg";
+            },
+            insightsHref(): string {
+                return PageRoute.INSIGHTS
             }
         },
         methods: {
             async logout(): Promise<void> {
                 logger.log('Logging out...');
-                await logout({redirectUrl: this.signOutRedirectUrl || "/", redirectOnSignOut: this.redirectOnSignOut})
-            },
-            goToLogin() {
-                window.location.href = this.loginHref;
-            },
-            goToSignup() {
-                window.location.href = this.signupHref;
-            },
-            scrollToSignup() {
-                if (!this.signupFormAnchorId) {
-                    return;
+                try {
+                    await logout({
+                        redirectUrl: this.signOutRedirectUrl || "/",
+                        redirectOnSignOut: this.redirectOnSignOut
+                    })
+                } catch (error) {
+                    logger.error("Log out threw an error", error);
                 }
-
-                const scrollToId = this.signupFormAnchorId;
-
-                const content = document.getElementById(scrollToId);
-                gtag("event", "scroll_to", {formId: this.signupFormAnchorId});
-                if (content) content.scrollIntoView();
             },
-            async updateActivityCount() {
-                logger.log("Refreshing activity count");
-                const member = this.member;
-                if (!member) {
-                    return;
-                }
-
-                const activitySummary = await fetchActivityFeedSummary();
-                if (!activitySummary) {
-                    logger.error("Failed to fetch activity summary");
-                    this.activityBadgeCount = 0;
-                    return;
-                }
-                this.activityBadgeCount = activitySummary.unseenCount;
-                StorageService.saveNumber(LocalStorageKey.activityBadgeCount, activitySummary.unseenCount);
-            }
+            async goToLogin() {
+                await pushRoute(this.loginHref);
+            },
+            async goToSignup() {
+                await pushRoute(this.signupHref);
+            },
+            // scrollToSignup() {
+            //     if (!this.signupFormAnchorId) {
+            //         return;
+            //     }
+            //
+            //     const scrollToId = this.signupFormAnchorId;
+            //
+            //     const content = document.getElementById(scrollToId);
+            //     gtag("event", "scroll_to", { formId: this.signupFormAnchorId });
+            //     if (content) content.scrollIntoView();
+            // },
+            // async updateActivityCount() {
+            //     logger.log("Refreshing activity count");
+            //     const member = this.member;
+            //     if (!member) {
+            //         return;
+            //     }
+            //
+            //     const activitySummary = await fetchActivityFeedSummary();
+            //     if (!activitySummary) {
+            //         logger.error("Failed to fetch activity summary");
+            //         this.activityBadgeCount = 0;
+            //         return;
+            //     }
+            //     this.activityBadgeCount = activitySummary.unseenCount;
+            //     StorageService.saveNumber(LocalStorageKey.activityBadgeCount, activitySummary.unseenCount);
+            // }
         }
     })
 </script>
 
 <style lang="scss">
-    @import "~styles/common";
-    @import "~styles/mixins";
-    @import "~styles/transitions";
+    @import "common";
+    @import "mixins";
+    @import "transitions";
 
-    body.error {
-        header {
-            background: $white;
-        }
+    body.error header {
+        background: $white;
     }
 
-    .login {
-        font-size: 1.6rem;
-        text-decoration: none;
-        transition: background-color .2s ease-in-out;
-        margin: 0 1rem;
-        @include r(600) {
-            font-size: 1.8rem;
+    .anonLinks {
+        align-items: center;
+        display: flex;
+        flex-grow: 1;
+        justify-content: flex-end;
+        white-space: nowrap;
 
-            &:last-child {
-                border: 1px solid $lightGreen;
-                border-radius: 3rem;
-                padding: 1rem 1.6rem;
+        .login {
+            display: block;
+            font-size: 1.6rem;
+            margin: 0;
+            padding-left: 3vw;
+            text-decoration: none;
+            transition: background-color .2s ease-in-out;
 
-                &:hover {
-                    background-color: $lightGreen;
+            @include r(600) {
+                font-size: 1.8rem;
+
+                &:last-child {
+                    border: 1px solid $lightGreen;
+                    border-radius: 3rem;
+                    margin-left: 3.2vw;
+                    padding: .8rem 1.6rem;
+
+                    &:hover, &.router-link-active {
+                        background-color: $lightGreen;
+                    }
                 }
             }
         }
-    }
 
-    a.button.jump-to-form {
-        flex-grow: 0;
-        margin-left: .8rem;
+        a.button.small {
+            background-color: transparent;
+            color: $darkGreen;
+            flex-grow: 0;
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin: 0;
+            padding: 0 0 0 3vw;
 
-        @include r(374) {
-            margin-left: 1.6rem;
-        }
-
-        @include r(600) {
-            font-size: 1.8rem;
-            margin-left: 3.2rem;
+            @include r(374) {
+                background-color: $green;
+                color: $white;
+                margin-left: 2.4vw;
+                padding: .6rem 1.2rem;
+            }
+            @include r(600) {
+                margin-left: 3.2vw;
+                padding: .8rem 1.6rem;
+            }
         }
     }
 
@@ -354,16 +398,8 @@
                 width: 100%;
             }
 
-            &:hover:after {
+            &:hover:after, &.router-link-active:after {
                 transform: scaleX(1);
-            }
-        }
-
-        &.home {
-            display: none;
-
-            @include r(374) {
-                display: block;
             }
         }
 
@@ -371,6 +407,11 @@
             display: block;
             height: 2.4rem;
             width: 2.4rem;
+
+            &.pie {
+                height: 2.2rem;
+                width: 2.2rem;
+            }
 
             @include r(600) {
                 display: none;
@@ -425,7 +466,7 @@
                 width: 5.6rem;
             }
 
-            &:hover:after {
+            &:hover:after, &.router-link-active:after {
                 transform: scaleX(1);
             }
         }

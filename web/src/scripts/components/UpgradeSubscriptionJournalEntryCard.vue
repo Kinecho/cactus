@@ -1,15 +1,8 @@
 <template>
-    <div :class="[`upgradeJournal`, isTrialing ? 'upgrade' : 'basic']">
-        <div class="centered" v-if="isTrialing">
-            <h3>{{trialDaysLeftHeader}}</h3>
-            <p>After your trial of Cactus Plus, you'll continue to get free prompts, but only occasionally. Give your reflection
-                practice momentum by receiving a fresh prompt, every day.</p>
-            <a :href="upgradeRoute" class="btn button primary">Go Plus</a>
-        </div>
-        <div class="centered" v-else>
-            <h3>Cactus Plus</h3>
-            <p>Give your reflection practice momentum by receiving a fresh prompt, every day.</p>
-            <a :href="upgradeRoute" class="btn button primary">{{basicCTA}}</a>
+    <div class="upgradeJournal basic">
+        <div class="centered">
+            <p>Get daily insights, core values, and more.</p>
+            <a :href="upgradeRoute" class="btn button primary">Try Cactus Plus</a>
         </div>
     </div>
 </template>
@@ -33,26 +26,7 @@
             upgradeRoute: string
         } {
             return {
-                upgradeRoute: PageRoute.PAYMENT_PLANS
-            }
-        },
-        computed: {
-            isTrialing(): boolean {
-                return this.member?.isInTrial;
-            },
-            trialDaysLeftHeader(): string {
-                if (this.member?.daysLeftInTrial) {
-                    const days = this.member?.daysLeftInTrial;
-                    return CopyService.getSharedInstance().getTrialDaysLeftLong(days, true);
-                }
-                return '';
-            },
-            basicCTA(): string {
-                if (this.hasPromptToday) {
-                    return "Go Plus";
-                } else {
-                    return "Get Today's Prompt";
-                }
+                upgradeRoute: PageRoute.PRICING
             }
         }
     })
@@ -73,7 +47,7 @@
         }
 
         &.upgrade {
-            background: $royal url(assets/images/plusBg.svg) center top/140vw auto no-repeat;
+            background: $royal url(/assets/images/plusBg.svg) center top/140vw auto no-repeat;
 
             @include r(960) {
                 background-size: 97% auto;
@@ -85,7 +59,7 @@
         }
 
         &.basic {
-            background: $royal url(assets/images/plusBg.svg) center top/130% auto no-repeat;
+            background: $royal url(/assets/images/plusBg.svg) center top/130% auto no-repeat;
             width: 100%;
 
             @include r(960) {

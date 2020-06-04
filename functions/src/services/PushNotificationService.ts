@@ -21,27 +21,31 @@ export default class PushNotificationService {
         member: CactusMember,
     }): Promise<NewPromptNotificationResult | undefined> {
         const {sentPrompt, prompt, promptContent, member} = options;
+        try {
+            if (sentPrompt.completed) {
+                return {attempted: false, alreadyAnswered: true};
+            }
 
-        if (sentPrompt.completed) {
-            return {attempted: false, alreadyAnswered: true};
-        }
+            const memberTier = member.subscription?.tier;
+            const contentTiers = promptContent?.subscriptionTiers;
 
-        const memberTier = member.subscription?.tier;
-        const contentTiers = promptContent?.subscriptionTiers;
-
-        if (memberTier && contentTiers && 
+            if (memberTier && contentTiers &&
             !contentTiers.includes(memberTier)) {
-            return {attempted: false, notAvailbleToTier: true};
-        }
+                return {attempted: false, notAvailableToTier: true};
+            }
 
-        if (!sentPrompt.containsMedium(PromptSendMedium.PUSH)) {
-            return await this.sendPromptNotification({
-                member,
-                prompt,
-                promptContent
-            });
+            if (!sentPrompt.containsMedium(PromptSendMedium.PUSH)) {
+                return await this.sendPromptNotification({
+                    member,
+                    prompt,
+                    promptContent
+                });
+            }
+            return;
+        } catch (error) {
+            logger.error(`Failed to end push message to ${member.email}`, error);
+            return;
         }
-        return;
     }
 
     async sendPromptNotification(options: { member: CactusMember, prompt?: ReflectionPrompt, promptContent?: PromptContent }): Promise<NewPromptNotificationResult> {

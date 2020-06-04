@@ -14,7 +14,6 @@ import AdminReflectionResponseService from "@admin/services/AdminReflectionRespo
 import MailchimpService from "@admin/services/MailchimpService";
 import AdminSlackService from "@admin/services/AdminSlackService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
-import bodyParser = require("body-parser");
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminSentCampaignService from "@admin/services/AdminSentCampaignService";
 import {getConfig} from "@admin/config/configService";
@@ -48,7 +47,7 @@ app.get('/testModel/:id', async (req, res) => {
 
 });
 
-app.post("/testModel", bodyParser.json(), async (req, res) => {
+app.post("/testModel", async (req, res) => {
 
     try {
         logger.log("body", JSON.stringify(req.body));

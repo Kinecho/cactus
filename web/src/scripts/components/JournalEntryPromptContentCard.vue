@@ -1,6 +1,5 @@
-import {ResponseMediumType} from '@shared/models/ReflectionResponse'
 <template>
-    <skeleton-card v-if="!allLoaded" :sentPrompt="sentPrompt"/>
+    <skeleton-card v-if="!allLoaded" :sentPrompt="entry.sentPrompt"/>
     <div v-else class="journalEntry" v-bind:class="{new: !completed, isDone: completed, hasNote: hasNote}">
         <p class="date">{{dateLabel}}</p>
         <div class="menuParent">
@@ -17,13 +16,18 @@ import {ResponseMediumType} from '@shared/models/ReflectionResponse'
             <p class="subtext" v-show="subText">{{preventOrphan(subText)}}</p>
         </div>
         <div :class="{textContainer: !canReflectInline && hasBackgroundImage}" v-if="entry.promptContent && completed">
-            <h3 class="question" v-show="questionText">{{preventOrphan(questionText)}}</h3>
+
+            <h3 class="question" v-show="questionText">
+                <markdown-text :source="preventOrphan(questionText)"/>
+            </h3>
         </div>
         <div class="entry" v-if="!canReflectInline">{{preventOrphan(responseText)}}</div>
         <edit-reflection
                 :show="canReflectInline"
                 :responses="entry.responses"
+                :prompt-content="entry.promptContent"
                 :prompt="entry.prompt"
+                :member="member"
                 :responseMedium="responseMedium"
                 @close="canReflectInline = false"
         />
@@ -34,9 +38,9 @@ import {ResponseMediumType} from '@shared/models/ReflectionResponse'
         </div>
 
         <nav v-show="!canReflectInline && !hasNote" class="buttonContainer">
-            <a :href="promptContentPath" class="button" v-show="!completed">{{promptCopy.REFLECT}}</a>
+            <router-link :to="promptContentPath" class="button" v-show="!completed">{{promptCopy.REFLECT}}</router-link>
             <button @click.prevent="canReflectInline = true" class="wiggle secondary" v-show="completed && !hasNote">
-                <img src="assets/images/pen.svg" alt=""/>
+                <img src="/assets/images/pen.svg" alt=""/>
                 {{promptCopy.ADD_A_NOTE}}
             </button>
         </nav>
@@ -60,6 +64,7 @@ import {ResponseMediumType} from '@shared/models/ReflectionResponse'
         <modal :show="showShareNote" v-on:close="showShareNote = false" :showCloseButton="true" v-if="!!shareNote">
             <div class="sharing-card note" slot="body">
                 <prompt-content-card
+                        :prompt-content="entry.promptContent"
                         :content="shareNote.content"
                         :response="shareNote.response"/>
             </div>
@@ -69,27 +74,38 @@ import {ResponseMediumType} from '@shared/models/ReflectionResponse'
 
 <script lang="ts">
     import Vue from "vue";
-    import {Content, ContentType, Image} from "@shared/models/PromptContent"
-    import {PageRoute} from "@shared/PageRoutes"
+    import { Content, ContentType, Image } from "@shared/models/PromptContent"
+    import { PageRoute } from "@shared/PageRoutes"
     import PromptContentVue from "@components/PromptContent.vue"
-    import {formatDate} from "@shared/util/DateUtil"
-    import ReflectionResponse, {getResponseMedium, ResponseMedium, ResponseMediumType} from "@shared/models/ReflectionResponse"
-    import {getIntegerFromStringBetween, getResponseText, isBlank, preventOrphanedWords} from "@shared/util/StringUtil"
+    import { formatDate } from "@shared/util/DateUtil"
+    import ReflectionResponse, {
+        getResponseMedium,
+        ResponseMedium,
+        ResponseMediumType
+    } from "@shared/models/ReflectionResponse"
+    import {
+        getIntegerFromStringBetween,
+        getResponseText,
+        isBlank,
+        preventOrphanedWords
+    } from "@shared/util/StringUtil"
     import DropdownMenu from "@components/DropdownMenu.vue";
     import Modal from "@components/Modal.vue"
     import EditReflection from "@components/ReflectionResponseTextEdit.vue"
     import PromptSharing from "@components/PromptContentSharing.vue";
     import FlamelinkImage from "@components/FlamelinkImage.vue";
-    import {removeQueryParam, updateQueryParam} from '@web/util'
-    import {QueryParam} from "@shared/util/queryParams"
+    import { removeQueryParam, updateQueryParam } from '@web/util'
+    import { QueryParam } from "@shared/util/queryParams"
     import SkeletonCard from "@components/JournalEntrySkeleton.vue";
-    import {hasImage} from '@shared/util/FlamelinkUtils'
+    import { hasImage } from '@shared/util/FlamelinkUtils'
     import CopyService from "@shared/copy/CopyService";
-    import {PromptCopy} from "@shared/copy/CopyTypes"
+    import { PromptCopy } from "@shared/copy/CopyTypes"
     import PromptContentCard from "@components/PromptContentCard.vue"
     import JournalEntry from '@web/datasource/models/JournalEntry'
     import Logger from "@shared/Logger";
-    import {getAppType} from "@web/DeviceUtil";
+    import { getAppType } from "@web/DeviceUtil";
+    import CactusMember from "@shared/models/CactusMember";
+    import MarkdownText from "@components/MarkdownText.vue";
 
     const logger = new Logger("JournalEntryPromptContentCard.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -103,10 +119,12 @@ import {ResponseMediumType} from '@shared/models/ReflectionResponse'
             EditReflection,
             PromptSharing,
             FlamelinkImage,
-            SkeletonCard
+            SkeletonCard,
+            MarkdownText,
         },
         props: {
-            entryId: {type: String, required: true},
+            entryId: { type: String, required: true },
+            member: Object as () => CactusMember,
             entry: {
                 type: Object as () => JournalEntry,
                 required: true,
@@ -132,7 +150,7 @@ import {ResponseMediumType} from '@shared/models/ReflectionResponse'
                 showContent: false,
                 editedText: "",
                 editedResponses: [],
-                responseMedium: getResponseMedium({app: getAppType(), type: ResponseMediumType.JOURNAL}),
+                responseMedium: getResponseMedium({ app: getAppType(), type: ResponseMediumType.JOURNAL }),
                 showSharing: false,
                 promptCopy: copy.prompts,
                 initialIndex: undefined,
@@ -153,7 +171,7 @@ import {ResponseMediumType} from '@shared/models/ReflectionResponse'
 
                 const [response] = this.entry.responses;
                 if (response) {
-                    return {content: sharingCard, response: response}
+                    return { content: sharingCard, response: response }
                 } else {
                     return
                 }
@@ -171,18 +189,21 @@ import {ResponseMediumType} from '@shared/models/ReflectionResponse'
 
                 return {
                     randomBackground: showRandomBackground,
-                    [`bg${getIntegerFromStringBetween(id, NUM_RANDO_BACKGROUND_IMAGES - 1)}`]: showRandomBackground
+                    [`bg${ getIntegerFromStringBetween(id, NUM_RANDO_BACKGROUND_IMAGES - 1) }`]: showRandomBackground
                 };
 
             },
             questionText(): string | undefined {
                 let contentList = this.entry.promptContent?.content || [];
-                if (contentList) {
-                    const reflectCard = contentList.find(c => c.contentType === ContentType.reflect);
-                    return reflectCard && preventOrphanedWords(reflectCard.text);
+                const reflectCard = contentList?.find(c => c.contentType === ContentType.reflect);
+                if (reflectCard) {
+                    return this.entry.promptContent?.getDynamicDisplayText({
+                        content: reflectCard,
+                        member: this.member,
+                        coreValue: this.entry.responses?.find(r => r.coreValue)?.coreValue
+                    })
                 }
                 return
-                // return this.promptContent && this.promptContent.getQuestion();
             },
             backgroundImage(): Image | undefined {
                 const [first]: Content[] = this.entry.promptContent?.content || [];
@@ -206,7 +227,7 @@ import {ResponseMediumType} from '@shared/models/ReflectionResponse'
                 return first && first.text
             },
             promptContentPath(): string {
-                return `${PageRoute.PROMPTS_ROOT}/${this.entryId}`
+                return `${ PageRoute.PROMPTS_ROOT }/${ this.entryId }`
             },
             isTodaysPrompt(): boolean {
                 return (this.promptDate == formatDate(new Date(), copy.settings.dates.longFormat))
@@ -317,7 +338,7 @@ import {ResponseMediumType} from '@shared/models/ReflectionResponse'
         }
 
         &.note {
-            background: $darkerGreen url(assets/images/darkGreenNeedles.svg) 0 0/31rem;
+            background: $darkerGreen url(/assets/images/darkGreenNeedles.svg) 0 0/31rem;
             padding: 2.4rem 0;
             text-align: center;
         }

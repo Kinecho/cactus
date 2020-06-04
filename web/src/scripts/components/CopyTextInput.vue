@@ -18,7 +18,7 @@
     import Logger from "@shared/Logger";
 
     const logger = new Logger("CopyTextInput.vue");
-    
+
     Vue.use(VueClipboard);
 
     export default Vue.extend({
@@ -73,6 +73,7 @@
 
     .link-input {
         @include textInput;
+        background-color: $white;
         color: $lightText;
         margin-bottom: .8rem;
         max-width: none;

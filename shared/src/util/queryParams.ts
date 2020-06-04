@@ -29,10 +29,27 @@ export enum QueryParam {
     PREMIUM_DEFAULT = 'prem',
     SELECTED_PRODUCT = 'productId',
     SELECTED_TIER = "tier",
+    SELECTED_ELEMENT = "element",
     SELECTED_PERIOD = "period",
     SOURCE_APP = "source-app",
     USE_PROMPT_ID = "prompt",
-    UPGRADE_SUCCESS = "upgrade"
+    UPGRADE_SUCCESS = "upgrade",
+    CHART_TYPE = "chart_type",
+    CHART_DATA = "chart_data",
+    CACTUS_MEMBER_ID = "memberId",
+    CORE_VALUES = "coreValues",
+    FROM_AUTH = "fromAuth",
+    ABBREVIATED = "short",
+    AUTH_TOKEN = "token",
+    DOWNLOAD_TOKEN = "download_token",
+    EMBED="embed",
+    CV_LAUNCH = "cvlaunch",
+    BG_INDEX = "bg",
+    TIER = "tier",
+    DISPLAY_NAME = "displayName",
+    CLEAR_CACHE = "cc",
+    CHECKOUT_SUCCESS_URL = "checkoutSuccessUrl",
+    CHECKOUT_CANCEL_URL = "checkoutCancelUrl",
 }
 
 export function includesLandingQueryParams(params: object | undefined): boolean {

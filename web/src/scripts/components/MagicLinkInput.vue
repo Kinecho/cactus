@@ -16,7 +16,7 @@
     import {addModal, getQueryParam, showModal} from "@web/util"
     import {QueryParam} from "@shared/util/queryParams"
     import StorageService, {LocalStorageKey} from "@web/services/StorageService"
-    import {fireSignupEvent, gtag} from "@web/analytics"
+    import {fireSignupLeadEvent, gtag} from "@web/analytics"
     import CopyService from '@shared/copy/CopyService'
     import {CommonCopy} from '@shared/copy/CopyTypes'
     import Logger from "@shared/Logger";
@@ -107,7 +107,7 @@
                             event_label: `MagicLinkInput`
                         });
                         showModal(modalId);
-                        await fireSignupEvent();
+                        await fireSignupLeadEvent();
                         this.email = "";
 
                     } else if (signupResult.error) {
@@ -152,12 +152,12 @@
         display: flex;
         flex-flow: column wrap;
         margin: 0 auto;
-        max-width: 70rem;
-        padding: 2.4rem 0;
+        max-width: 64rem;
+        padding: 3.2rem 0;
 
         @include r(600) {
             flex-direction: row;
-            padding: 2.4rem;
+            padding: 4rem 2.4rem;
         }
     }
 

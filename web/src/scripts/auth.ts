@@ -1,9 +1,10 @@
+import SignupRequest from "@shared/mailchimp/models/SignupRequest";
+import { AdditionalUserInfo, FirebaseUser, FirebaseUserCredential, getAuth, initializeFirebase, } from "@web/firebase";
+import { PageRoute } from "@shared/PageRoutes";
+import { Endpoint, getAuthHeaders, request } from "@web/requestUtils";
 import {Config} from "@web/config";
 import {addModal, getAllQueryParams, getQueryParam, showConfirmEmailModal} from "@web/util";
-import {AdditionalUserInfo, FirebaseUser, FirebaseUserCredential, getAuth, initializeFirebase,} from "@web/firebase";
 import * as firebaseui from "firebaseui";
-import {PageRoute} from "@shared/PageRoutes";
-import {Endpoint, getAuthHeaders, request} from "@web/requestUtils";
 import {
     EmailStatusRequest,
     EmailStatusResponse,
@@ -12,15 +13,14 @@ import {
     MagicLinkResponse,
     SourceApp
 } from "@shared/api/SignupEndpointTypes";
-import {QueryParam} from "@shared/util/queryParams";
-import StorageService, {LocalStorageKey} from "@web/services/StorageService";
-import ReflectionResponse from "@shared/models/ReflectionResponse";
+import { QueryParam } from "@shared/util/queryParams";
+import StorageService, { LocalStorageKey } from "@web/services/StorageService";
 import CactusMemberService from "@web/services/CactusMemberService";
-import {fireConfirmedSignupEvent, fireSignupEvent} from "@web/analytics";
+import { fireConfirmedSignupEvent, fireLoginEvent, fireSignupLeadEvent } from "@web/analytics";
 import Logger from "@shared/Logger";
+import { getAppType, isAndroidApp } from "@web/DeviceUtil";
+import { pushRoute } from "@web/NavigationUtil";
 import AuthUI = firebaseui.auth.AuthUI;
-import SignupRequest from "@shared/mailchimp/models/SignupRequest";
-import {getAppType, isAndroidApp} from "@web/DeviceUtil";
 
 const logger = new Logger("auth.ts");
 const firebase = initializeFirebase();
@@ -31,13 +31,16 @@ export interface LogoutOptions {
     redirectUrl?: string
 }
 
-export const DefaultLogoutOptions = {redirectOnSignOut: true, redirectUrl: "/"};
+export const DefaultLogoutOptions = { redirectOnSignOut: true, redirectUrl: "/" };
 
 export async function logout(options: LogoutOptions = DefaultLogoutOptions) {
-    await getAuth().signOut();
-    StorageService.clear();
-    if (options.redirectUrl) {
-        window.location.href = options.redirectUrl || '/';
+    try {
+        await getAuth().signOut();
+        StorageService.clear();
+        const url = options.redirectUrl ?? DefaultLogoutOptions.redirectUrl;
+        await pushRoute(url);
+    } catch (error) {
+        logger.error("Exception thrown while logging out", error);
     }
 }
 
@@ -291,7 +294,7 @@ export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSi
 
 export async function getEmailStatus(email: string): Promise<EmailStatusResponse> {
     try {
-        const statusRequest: EmailStatusRequest = {email};
+        const statusRequest: EmailStatusRequest = { email };
         const emailResponse = await request.post(Endpoint.signupEmailStatus, statusRequest);
         return emailResponse.data;
     } catch (e) {
@@ -321,17 +324,12 @@ export async function sendMagicLink(options: MagicLinkRequest): Promise<MagicLin
     }
 }
 
-export function getAnonymousReflectionResponseIds(): string[] {
-    const anonReflectionResponses = StorageService.getDecodeModelMap(LocalStorageKey.anonReflectionResponse, ReflectionResponse);
-    return anonReflectionResponses ? Object.values(anonReflectionResponses).map(r => r.id).filter(Boolean) as string[] : [];
-}
-
 export async function sendEmailLinkSignIn(subscription: SignupRequest): Promise<EmailLinkSignupResult> {
     const email = subscription.email;
     const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
     let emailLinkRedirectUrl: string = PageRoute.SIGNUP_CONFIRMED;
     if (redirectUrlParam) {
-        emailLinkRedirectUrl = `${emailLinkRedirectUrl}?${QueryParam.REDIRECT_URL}=${redirectUrlParam}`
+        emailLinkRedirectUrl = `${ emailLinkRedirectUrl }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(redirectUrlParam) }`
     }
 
     const landingParams = StorageService.getJSON(LocalStorageKey.landingQueryParams);
@@ -343,7 +341,6 @@ export async function sendEmailLinkSignIn(subscription: SignupRequest): Promise<
         email: email,
         referredBy: subscription.referredByEmail,
         continuePath: emailLinkRedirectUrl,
-        reflectionResponseIds: getAnonymousReflectionResponseIds(),
         queryParams: landingParams,
         sourceApp: sourceApp
     });
@@ -362,7 +359,7 @@ export async function sendLoginEvent(args: {
 }): Promise<void> {
     return new Promise(async resolve => {
         const unsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-            onData: async ({member}) => {
+            onData: async ({ member }) => {
                 if (member) {
                     try {
                         logger.log("[auth.sendLoginEvent] member subscription created at typeof = ", typeof (member?.subscription?.trial?.startedAt));
@@ -383,26 +380,28 @@ export async function sendLoginEvent(args: {
                             userId: args.user && args.user.uid,
                             isNewUser: (args.additionalUserInfo && args.additionalUserInfo.isNewUser) || false,
                             referredByEmail: referredByEmail,
-                            signupQueryParams: {...getAllQueryParams(), ...landingParams},
-                            reflectionResponseIds: getAnonymousReflectionResponseIds(),
+                            signupQueryParams: { ...getAllQueryParams(), ...landingParams },
                             app: getAppType(),
                         };
                         logger.log("login-event payload", JSON.stringify(event, null, 2));
                         const headers = await getAuthHeaders();
-                        await request.post(Endpoint.loginEvent, event, {headers});
+                        await request.post(Endpoint.loginEvent, event, { headers });
 
                         /* Note: This may move to the backend later when we have time to 
                            implement the Facebook Ads API */
                         if (event.isNewUser && isThirdPartySignIn(event.providerId)) {
                             // new user who did not previous enter their email address
-                            await fireSignupEvent();
+                            await fireSignupLeadEvent();
                         }
                         if (event.isNewUser) {
                             // all new users
                             await fireConfirmedSignupEvent({
                                 email: args.user?.email || undefined,
-                                userId: args.user?.uid
+                                userId: args.user?.uid,
+                                method: event.providerId,
                             });
+                        } else {
+                            fireLoginEvent({ method: event.providerId });
                         }
                     } catch (error) {
                         logger.error("failed to send login event", error);

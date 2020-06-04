@@ -14,6 +14,7 @@ export enum LocalStorageKey {
     contactsImportEnabled = "contactsImportEnabled",
     activityBadgeCount = "activityBadgeCount",
     androidFCMToken = "androidFCMToken",
+    subscriptionPriceCents = "subscriptionPriceCents"
 }
 
 const logger = new Logger("StorageService.ts");

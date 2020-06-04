@@ -1,5 +1,5 @@
-import FlamelinkModel, {SchemaName} from "@shared/FlamelinkModel";
-import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+import FlamelinkModel, { SchemaName } from "@shared/FlamelinkModel";
+import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 
 export enum BillingPeriod {
     weekly = "weekly",
@@ -13,6 +13,8 @@ enum Fields {
     availableForSale = "availableForSale",
     stripePlanId = "stripePlanId",
     appleProductId = "appleProductId",
+    androidProductId = "androidProductId",
+    billingPeriod = "billingPeriod",
 }
 
 export default class SubscriptionProduct extends FlamelinkModel {
@@ -22,10 +24,12 @@ export default class SubscriptionProduct extends FlamelinkModel {
     priceCentsUsd: number = 0;
     billingPeriod: BillingPeriod = BillingPeriod.monthly;
     appleProductId?: string;
+    androidProductId?: string;
     stripePlanId?: string;
     availableForSale: boolean = false;
     subscriptionTier: SubscriptionTier = SubscriptionTier.PLUS;
     savingsCopy?: string;
+    trialDays?: number | undefined;
 
     constructor(data?: Partial<SubscriptionProduct>) {
         super(data);
