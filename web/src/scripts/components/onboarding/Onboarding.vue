@@ -1,14 +1,14 @@
 <template>
-    <div v-touch:swipe="handleSwipeEvent">
+    <div v-touch:swipe="handleSwipeEvent" class="onboarding-main">
         <ProgressStepper :current="index" :total="totalPages"/>
         <div class="progress-count">
             <span class="current">{{index + 1}}</span>&nbsp;of<span class="total">{{totalPages}}</span>
         </div>
-        <div class="card-container">
-            <transition-group :name="cardTransitionName" mode="in-out" appear>
-                <Card class="card" v-for="card in cards" :card="card" :key="card.id" v-show="card.id === currentCard.id"/>
-            </transition-group>
-        </div>
+
+        <transition-group :name="cardTransitionName" mode="in-out" tag="div" class="card-container">
+            <Card class="card" v-for="card in cards" :card="card" :key="card.id" v-show="card.id === currentCard.id"/>
+        </transition-group>
+
 
         <div class="footer actions">
             <button @click="previous" :disabled="!previousEnabled" class="no-loading">Previous</button>
@@ -29,6 +29,11 @@
     const logger = new Logger("Onboarding");
     Vue.use(Vue2TouchEvents)
 
+    const transitionName = {
+        next: "slide-left-absolute",
+        previous: "slide-right-absolute"
+    }
+
     @Component({
         components: {
             Card,
@@ -40,7 +45,7 @@
 
         cards: OnboardingCardViewModel[] = OnboardingCardViewModel.createAll();
         index: number = 0;
-        cardTransitionName = "slide-left";
+        cardTransitionName = transitionName.next;
 
         get totalPages() {
             return this.cards.length;
@@ -73,14 +78,14 @@
 
         next() {
             if (this.nextEnabled) {
-                this.cardTransitionName = "slide-left";
+                this.cardTransitionName = transitionName.next;
                 this.index = Math.min(this.cards.length - 1, this.index + 1);
             }
         }
 
         previous() {
             if (this.previousEnabled) {
-                this.cardTransitionName = "slide-right";
+                this.cardTransitionName = transitionName.previous;
                 this.index = Math.max(this.index - 1, 0);
             }
         }
@@ -92,11 +97,14 @@
     @import "mixins";
     @import "transitions";
 
+    .onboarding-main {
+        background-color: $beige;
+        min-height: 100vh;
+    }
+
     .card-container {
         position: relative;
-
         .card {
-            position: absolute;
             width: 100%;
         }
     }

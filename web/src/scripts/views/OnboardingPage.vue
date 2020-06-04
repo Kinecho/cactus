@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="main">
         <onboarding/>
     </div>
 </template>
@@ -18,5 +18,6 @@
 </script>
 
 <style scoped lang="scss">
+    @import "variables";
 
 </style>

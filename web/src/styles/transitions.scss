@@ -232,3 +232,38 @@ $slow: 1.5s;
 .slide-right-leave-to {
   transform: translate(100%, 0);
 }
+
+
+
+
+.slide-left-absolute-leave-active,
+.slide-left-absolute-enter-active {
+  transition: .25s ease-in-out;
+}
+.slide-left-absolute-enter {
+  transform: translate(100%, 0);
+  position: absolute;
+}
+.slide-left-absolute-leave-to {
+  transform: translate(-100%, 0);
+  position: absolute;
+}
+
+
+
+.slide-right-absolute-leave-active,
+.slide-right-absolute-enter-active {
+  transition: .25s ease-in-out;
+}
+.slide-right-absolute-enter {
+  transform: translate(-100%, 0);
+  position: absolute;
+}
+.slide-right-absolute-leave-to {
+  transform: translate(100%, 0);
+  position: absolute;
+}
+
+.slide-right-absolute-enter-active {
+  position: absolute;
+}
