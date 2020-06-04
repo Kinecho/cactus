@@ -316,7 +316,7 @@ app.get("/user", async (req, resp) => {
     }
     try {
         logger.log("Fetching user with email", email);
-        const user = await admin.auth().getUserByEmail(email);
+        const user = await admin.auth().getUserByEmail(email as string);
         resp.send(user.toJSON());
     } catch (error) {
         logger.error("Failed to find user", error);

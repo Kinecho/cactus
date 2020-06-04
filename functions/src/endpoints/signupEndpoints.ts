@@ -36,8 +36,6 @@ import { stringifyJSON } from "@shared/util/ObjectUtil";
 import AdminRevenueCatService from "@admin/services/AdminRevenueCatService";
 import UserRecord = admin.auth.UserRecord;
 import ActionCodeSettings = admin.auth.ActionCodeSettings;
-import UserRecord = admin.auth.UserRecord;
-import ActionCodeSettings = admin.auth.ActionCodeSettings;
 
 const logger = new Logger("signupEndpoints");
 const Config = getConfig();
