@@ -24,6 +24,11 @@ export default class AdminSubscriptionProductService {
         return this.flamelinkService.save(model);
     }
 
+    async getAll(): Promise<SubscriptionProduct[]> {
+        const result = await this.flamelinkService.getAll(SubscriptionProduct);
+        return result.results;
+    }
+
     async getByEntryId(entryId: string): Promise<SubscriptionProduct | undefined> {
         return await this.flamelinkService.getByEntryId(entryId, SubscriptionProduct);
     }

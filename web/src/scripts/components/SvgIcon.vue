@@ -30,6 +30,7 @@
     @import "mixins";
 
     .default {
+        height: 2.4rem;
         width: 2.4rem;
     }
 </style>

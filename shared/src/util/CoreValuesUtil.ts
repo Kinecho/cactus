@@ -14,35 +14,35 @@ export interface CoreValuesBlob {
 export const blobs: CoreValuesBlob[] = [
     {
         backgroundColor: "#47445E",
-        imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fsized%2F375_9999_99%2F200411.png?alt=media&token=6f2c2d46-d282-4c1a-87de-9259136c79a0"
+        imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200602.png?alt=media&token=54c1ba6c-8445-4a5e-a387-21c08c719fb9"
+    },
+    {
+        backgroundColor: "#5e5a7c",
+        imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F2006013.png?alt=media&token=f3e08a6f-9c0f-4558-8975-692f6f256a04"
     },
     {
         backgroundColor: "#47445E",
-        imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200402.png?alt=media&token=28cea680-63f3-4ece-b983-46ee0b5cc174"
+        imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200531.png?alt=media&token=46d0e04e-818d-4d04-849a-a670f8764e52"
     },
     {
-        backgroundColor: "#6590ED",
-        imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F2005171.TTRQzP1gxXdEdBY7gZOU.png?alt=media&token=8e257b31-bc36-42a6-ba85-bc2e7d784fbd"
+        backgroundColor: "#5e5a7c",
+        imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200526.png?alt=media&token=75a7de2c-a1a3-4b9a-8ff7-2c0639793354"
     },
     {
-        backgroundColor: "#294FA3",
-        imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F2003252.png?alt=media&token=a4a38fbd-73ac-478d-a4cf-5d6b1d890140"
-    },
-    {
-        backgroundColor: "#294FA3",
-        imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F2004084.png?alt=media&token=285da530-2e50-49e7-8bc7-9997e8593d8a"
-    },
-    {
-        backgroundColor: "#294FA3",
-        imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F2005111.png?alt=media&token=a7aa0084-7f5f-4be0-88bc-f08a8c3e55af"
+        backgroundColor: "#5e5a7c",
+        imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200524.4obqQP2rUQFS0IB0QrEC.png?alt=media&token=4d1a0983-91a8-47d6-b4d7-f0ca4084ff6f"
     },
     {
         backgroundColor: "#47445E",
-        imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200416.png?alt=media&token=32a014e0-10f3-4d07-bf01-9aa813b0a5e6"
+        imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200523.png?alt=media&token=a1ce93a0-699c-4d62-b8ed-65981e9f9484"
     },
     {
-        backgroundColor: "#0DADB1",
-        imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F2004291.png?alt=media&token=3f7c029d-8aec-4ad2-98b3-aa6d9d6fd9a4"
+        backgroundColor: "#5e5a7c",
+        imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200522.png?alt=media&token=c208bc62-c146-4a33-a70e-5006ba453a4d"
+    },
+    {
+        backgroundColor: "#5e5a7c",
+        imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200514.png?alt=media&token=6c91d271-93e7-438e-8bd9-20ec8d8fa37b"
     }
 ]
 

@@ -1,11 +1,11 @@
-import {FirebaseCommand} from "@scripts/CommandTypes";
+import { FirebaseCommand } from "@scripts/CommandTypes";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import * as admin from "firebase-admin";
-import {CactusConfig} from "@shared/CactusConfig";
-import {Project} from "@scripts/config";
+import { CactusConfig } from "@shared/CactusConfig";
+import { Project } from "@scripts/config";
 import * as prompts from "prompts";
-import {ExpireMembershipTrialJob} from "@api/pubsub/subscribers/ExpireMembershipTrialJob";
-import {ExpireMembersJob} from "@admin/services/AdminSubscriptionService";
+import { ExpireMembershipTrialJob } from "@api/pubsub/subscribers/ExpireMembershipTrialJob";
+import { ExpireMembersJob } from "@admin/services/AdminSubscriptionService";
 
 interface UserInput {
     email?: string | undefined,
@@ -47,17 +47,16 @@ export default class ExpireMembersCommand extends FirebaseCommand {
             };
 
             while (payload) {
-                job = new ExpireMembershipTrialJob();
+                const job = new ExpireMembershipTrialJob();
                 await job.expireBatch(payload);
                 await job.sendDataLogMessage();
                 payload = job.createNextBatchJob();
                 console.log("result");
                 console.log(job.getResult());
-
             }
         } else {
             const job = new ExpireMembershipTrialJob();
-            await job.expireOne({email: userInput.email});
+            await job.expireOne({ email: userInput.email });
             console.log("result");
             console.log(job.getResult());
         }

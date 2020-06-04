@@ -80,7 +80,7 @@
                 </div>
                 <p class="selectedElementText" v-if="selectedElement">You chose <strong>{{selectedElement}}</strong>.
                 </p>
-                <p class="validationText" v-if="!selectedElement">Tap a cactus to continue. You can always change this&nbsp;later.</p>
+                <p class="validationText" v-if="!selectedElement">Tap an element to continue. You can always change this&nbsp;later.</p>
                 <div class="cvActions flexActions">
                     <button class="no-loading" @click="focusSelected" :disabled="!selectedElement">
                         {{chooseFocusScreenCta}}

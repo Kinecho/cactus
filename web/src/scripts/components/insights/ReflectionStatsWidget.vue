@@ -97,9 +97,13 @@
 
     .statsContainer {
         display: flex;
-        margin: 0 -2.4rem 2.4rem 0;
+        margin: 0 -2.4rem 2.4rem 2.4rem;
         overflow: auto;
         padding-bottom: 1.6rem;
+
+        @include r(374) {
+            margin: 0 -2.4rem 2.4rem 0;
+        }
 
         @include r(960) {
             margin: 0 0 2.4rem;

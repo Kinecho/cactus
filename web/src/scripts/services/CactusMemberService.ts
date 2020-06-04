@@ -6,6 +6,7 @@ import { getDeviceLocale, getDeviceTimeZone, getUserAgent, isAndroidApp } from "
 import Logger from "@shared/Logger";
 import StorageService, { LocalStorageKey } from "@web/services/StorageService";
 import { CactusElement } from "@shared/models/CactusElement";
+import RevenueCatService from "@web/services/RevenueCatService";
 
 const logger = new Logger("CactusMemberService");
 
@@ -30,7 +31,10 @@ export default class CactusMemberService {
                         this.currentMember = member;
                         this.memberHasLoaded = true;
                         if (member) {
-                            await this.updateMemberSettingsIfNeeded(member)
+                            await Promise.all([
+                                this.updateMemberSettingsIfNeeded(member),
+                                RevenueCatService.shared.updateLastSeen(member)
+                            ]);
                         }
                     }
                 })
@@ -45,41 +49,45 @@ export default class CactusMemberService {
      * @return {Promise<void>}
      */
     async updateMemberSettingsIfNeeded(member?: CactusMember): Promise<CactusMember | undefined> {
-        if (!member) {
+        try {
+            if (!member) {
+                return;
+            }
+            const zoneName = getDeviceTimeZone();
+            const localeName = getDeviceLocale();
+            let doSave = false;
+            //Only update timezone if the member doesn't have one set
+            if (zoneName && !member.timeZone) {
+                member.timeZone = zoneName;
+                doSave = true
+            }
+
+            //only update locale if no locale is present
+            if (localeName && !member.locale) {
+                member.locale = localeName;
+                doSave = true
+            }
+
+            const fcmToken = StorageService.getString(LocalStorageKey.androidFCMToken);
+            const currentTokens: string[] = member.fcmTokens ?? [];
+            if (fcmToken && !currentTokens.includes(fcmToken)) {
+                console.log("Adding FCM token to member");
+                currentTokens.push(fcmToken);
+                member.fcmTokens = currentTokens;
+                StorageService.removeItem(LocalStorageKey.androidFCMToken);
+                doSave = true;
+            }
+
+            if (doSave) {
+                logger.log("[update settings if needed] member trial started at type of = ", typeof (member.subscription?.trial?.startedAt))
+                logger.log("Updating member settings for member", member);
+
+                await this.save(member)
+            }
+        } catch (error) {
+            logger.error("Failed to update member settings, an unexpected error occurred", error);
             return;
         }
-        const zoneName = getDeviceTimeZone();
-        const localeName = getDeviceLocale();
-        let doSave = false;
-        //Only update timezone if the member doesn't have one set
-        if (zoneName && !member.timeZone) {
-            member.timeZone = zoneName;
-            doSave = true
-        }
-
-        //only update locale if no locale is present
-        if (localeName && !member.locale) {
-            member.locale = localeName;
-            doSave = true
-        }
-
-        const fcmToken = StorageService.getString(LocalStorageKey.androidFCMToken);
-        const currentTokens: string[] = member.fcmTokens ?? [];
-        if (fcmToken && !currentTokens.includes(fcmToken)) {
-            console.log("Adding FCM token to member");
-            currentTokens.push(fcmToken);
-            member.fcmTokens = currentTokens;
-            StorageService.removeItem(LocalStorageKey.androidFCMToken);
-            doSave = true;
-        }
-
-        if (doSave) {
-            logger.log("[update settings if needed] member trial started at type of = ", typeof (member.subscription?.trial?.startedAt))
-            logger.log("Updating member settings for member", member);
-
-            await this.save(member)
-        }
-
     }
 
     async registerFCMToken(token: string) {
@@ -117,7 +125,7 @@ export default class CactusMemberService {
             const authUnsubscriber = getAuth().onAuthStateChanged(async user => {
                 authUnsubscriber();
                 if (user) {
-                    const member = this.getByUserId(user.uid);
+                    const member = await this.getByUserId(user.uid);
                     resolve(member);
                 } else {
                     resolve(undefined)

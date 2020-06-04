@@ -141,8 +141,8 @@
     }
 
     .energy {
-        right: -1rem;
-        top: 35%;
+        right: 0;
+        top: 33%;
     }
 
     .emotions {
@@ -152,12 +152,12 @@
     }
 
     .meaning {
-        left: -1rem;
-        top: 35%;
+        left: 0;
+        top: 33%;
     }
 
     .experience {
-        bottom: 1rem;
+        bottom: 3rem;
         left: 12%;
 
         .noCacti & {
@@ -166,7 +166,7 @@
     }
 
     .relationships {
-        bottom: 1rem;
+        bottom: 3rem;
         right: 12%;
 
         .noCacti & {
@@ -178,7 +178,7 @@
         padding: 6.4rem 3.2rem 3.2rem;
 
         .withLabel & {
-            padding: 6.4rem 5.6rem 3.2rem;
+            padding: 6.4rem;
         }
 
         .noCacti & {

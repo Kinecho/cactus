@@ -118,6 +118,15 @@
                             "value": "application/json"
                         }
                     ]
+                },
+                {
+                    "source": "**/*.@(js|css)",
+                    "headers": [
+                        {
+                            "key": "Cache-Control",
+                            "value": "max-age=5184000"
+                        }
+                    ]
                 }
             ],
             "rewrites": [

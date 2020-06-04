@@ -46,6 +46,7 @@ module.exports = {
     __APP_STORE_URL__: "https://apps.apple.com/us/app/cactus-mindfulness-journal/id1474513514?ls=1",
     __PLAY_STORE_URL__: "https://play.google.com/store/apps/details?id=app.cactus.stage",
     __BRANCH_LIVE_KEY__: 'key_test_hnUHuOjICDVjjN3W0PIRxlnfsyeXRjbe',
+    __REVENUECAT_API_KEY__: 'GJqLQgWbsSOINNAjEApbhYVWHDzmYfXA',
 }
 
 

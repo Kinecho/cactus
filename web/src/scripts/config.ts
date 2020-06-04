@@ -47,6 +47,7 @@ export const Config: {
     version: string | undefined,
     androidUserAgent: string,
     branchLiveKey: string,
+    revenueCatApiKey: string,
 } = {
     appCustomScheme: process.env.__APP_CUSTOM_SCHEME__ as any,
     googleAnalyticsID: process.env.__GOOGLE_ANALYTICS_ID__ as any,
@@ -71,4 +72,5 @@ export const Config: {
     version: process.env.__SENTRY_VERSION__ as any,
     androidUserAgent: "CactusAndroid",
     branchLiveKey: process.env.__BRANCH_LIVE_KEY__ as any,
+    revenueCatApiKey: process.env.__REVENUECAT_API_KEY__ as any,
 };

@@ -57,7 +57,8 @@ export enum CancellationReasonCode {
     EXPIRED = "EXPIRED",
     SYSTEM_CANCELED = "SYSTEM_CANCELED",
     UNKNOWN = "UNKNOWN",
-    UNAVAILABLE = "UNAVAILABLE"
+    UNAVAILABLE = "UNAVAILABLE",
+    USER_DELETED = "USER_DELETED",
 }
 
 export interface SubscriptionCancellation {

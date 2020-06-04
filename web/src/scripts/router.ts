@@ -47,8 +47,8 @@ const routes: MetaRouteConfig[] = [
         path: "/",
         name: "Cactus",
         meta: {
-            title: "Cactus | What makes you happy?",
-            description: "Questions designed to improve how you think about work, life, relationships, and emotions",
+            title: "Cactus | Boost your mental fitness",
+            description: "Research-backed prompts to increase self-awareness and resilience",
             metaTags: [],
             image: {
                 url: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/static%2Fog-wall-of-blobs-big.png?alt=media&token=9c2ec0c0-3e76-4603-a5a4-8a79e1373574",
@@ -77,8 +77,9 @@ const routes: MetaRouteConfig[] = [
         }
     },
     {
-        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@web/views/SignUpView.vue")),
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@web/views/GetStartedPage.vue")),
         path: PageRoute.SIGNUP,
+        alias: PageRoute.GET_STARTED,
         name: "Sign Up",
         meta: {
             usePrevious: true,

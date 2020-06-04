@@ -6,9 +6,7 @@
         <div slot="body" class="modalContainer">
             <div class="slide">
                 <div class="slideContent">
-                    <div v-show="slide.element" class="elementIcon">
-                        <img :src="'/assets/images/cacti/'+ slide.element + '-3.svg'"/>
-                    </div>
+                    <img class="elementIcon" v-show="slide.element" :src="'/assets/images/elements/'+ slide.element + '.svg'"/>
                     <h3 v-if="slide.element">
                         {{elementCopy[(slide.element).toUpperCase()]}}
                     </h3>
@@ -142,21 +140,9 @@
     @import "variables";
 
     .elementIcon {
-        align-items: center;
-        background-color: $pink;
-        border-radius: 50%;
-        display: inline-flex;
-        height: 6.4rem;
-        justify-content: center;
-        margin-bottom: 1.6rem;
-        padding: .4rem;
-        width: 6.4rem;
-
-        img {
-            $avatarSize: 5.6rem;
-            height: $avatarSize;
-            width: $avatarSize;
-        }
+        $avatarSize: 5.6rem;
+        height: $avatarSize;
+        width: $avatarSize;
     }
 
     .modalContainer {
@@ -201,6 +187,7 @@
     .btnContainer {
         display: flex;
         opacity: 1;
+
         button.disabled {
             opacity: 0;
             transition: opacity .1s;

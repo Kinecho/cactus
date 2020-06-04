@@ -56,7 +56,7 @@
 
     .statIcon {
         align-items: center;
-        background-color: lighten($beige, 3%);
+        background-color: $bgGreen;
         border-radius: 50%;
         display: flex;
         flex-shrink: 0;
@@ -72,7 +72,7 @@
     }
 
     .statValue {
-        color: $green;
+        color: $mediumDolphin;
         font-size: 5.6rem;
         font-weight: bold;
         line-height: 1;

@@ -45,6 +45,8 @@ import StripeService from "@admin/services/StripeService";
 import { GooglePaymentState, subscriptionStatusFromGooglePaymentState } from "@shared/api/GooglePlayBillingTypes";
 import { formatDateTime, fromMillisecondsString } from "@shared/util/DateUtil";
 import { microDollarsStringToCents } from "@shared/util/StringUtil";
+import SubscriptionProduct from "@shared/models/SubscriptionProduct";
+import AdminRevenueCatService from "@admin/services/AdminRevenueCatService";
 
 export interface ExpireTrialResult {
     member: CactusMember,
@@ -77,6 +79,13 @@ interface MailchimpSyncSubscriberResult {
     lastTrialEndsAt?: Date,
     batchSize?: number,
     lastMemberId?: string,
+}
+
+export interface UnsubscribeMemberResult {
+    memberId?: string
+    status: "not_attempted" | "no_active_subscription" | "unsubscribe_success" | "unsubscribe_error" | "not_available" | "already_canceled",
+    billingPlatform?: BillingPlatform,
+    message?: string,
 }
 
 export interface SubscriptionMergeFields {
@@ -510,10 +519,10 @@ export default class AdminSubscriptionService {
         if (!unifiedReceipt) {
             this.logger.error("Unable to get unified receipt info from apple payment");
             await AdminSlackService.getSharedInstance().uploadTextSnippet({
-                message: `:ios: Unable to get a unified apple receipt object from a payment record while building the Cactus SubscriptionInvoice object. \nPaymentID = \`${payment.id}\`\nMember = \`${member.email} (${member.id})\``,
+                message: `:ios: Unable to get a unified apple receipt object from a payment record while building the Cactus SubscriptionInvoice object. \nPaymentID = \`${ payment.id }\`\nMember = \`${ member.email } (${ member.id })\``,
                 data: stringifyJSON(payment, 2),
                 fileType: "json",
-                filename: `apple-subscription-invoice-failed-payment-${payment.id}.json`,
+                filename: `apple-subscription-invoice-failed-payment-${ payment.id }.json`,
                 channel: ChannelName.engineering,
             });
             return undefined;
@@ -528,10 +537,20 @@ export default class AdminSubscriptionService {
         }
 
         const [autoRenewInfo] = receiptInfo?.pending_renewal_info as (PendingRenewalInfo | undefined)[];
-        const subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByAppleProductId({
-            appleProductId: latestInfo.product_id,
-            onlyAvailableForSale: false
-        });
+
+
+        const memberSubscriptionProductId = member.subscription?.subscriptionProductId;
+
+        let subscriptionProduct: SubscriptionProduct | undefined;
+        if (memberSubscriptionProductId) {
+            subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByEntryId(memberSubscriptionProductId)
+        }
+        if (!subscriptionProduct) {
+            subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByAppleProductId({
+                appleProductId: latestInfo.product_id,
+                onlyAvailableForSale: false
+            });
+        }
 
         const expiresAtSeconds = latestInfo.expires_date_ms ? Number(latestInfo.expires_date_ms) / 1000 : undefined;
 
@@ -559,6 +578,7 @@ export default class AdminSubscriptionService {
             periodStart_epoch_seconds: optionalStringToNumber(latestInfo.purchase_date_ms),
             periodEnd_epoch_seconds: expiresAtSeconds,
             optOutTrialEndsAt_epoch_seconds: subscriptionStatus === SubscriptionStatus.in_trial ? expiresAtSeconds : undefined,
+            appleProductPrice: payment?.apple?.productPrice,
         };
         return invoice;
     }
@@ -742,7 +762,7 @@ export default class AdminSubscriptionService {
 
             const subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByAndroidProductId({
                 androidProductId: item.subscriptionProductId,
-                onlyAvailableForSale: true
+                onlyAvailableForSale: false
             });
 
             const subscriptionProductId = subscriptionProduct?.entryId;
@@ -752,14 +772,14 @@ export default class AdminSubscriptionService {
                 await AdminSlackService.getSharedInstance().uploadTextSnippet({
                     channel: ChannelName.cha_ching,
                     message: ":boom: :android: Failed to fulfill Android Checkout",
-                    data: stringifyJSON({ memberId: member.id, email: member.email, params }),
+                    data: stringifyJSON({ memberId: member.id, email: member.email, params, result }, 2),
                     fileType: "json",
                     filename: `failed-purchase-android-${ member.id }.json`,
                 });
                 this.logger.error("Failed to complete android purchase - no cactus product was found", result);
                 return result;
             }
-            
+
             const payment = Payment.fromAndroidPurchase({
                 memberId: memberId,
                 subscriptionProductId,
@@ -768,6 +788,13 @@ export default class AdminSubscriptionService {
             });
 
             await AdminPaymentService.getSharedInstance().save(payment);
+
+            await AdminRevenueCatService.shared.updateGoogleSubscription({
+                memberId,
+                token: item.token,
+                isRestore: !isNewPurchase,
+                sku: item.subscriptionProductId
+            })
 
             //Do the upgrade
             const isOptOutTrial = androidSubscriptionPurchase.paymentState === GooglePaymentState.FREE_TRIAL;
@@ -809,7 +836,7 @@ export default class AdminSubscriptionService {
                 await AdminSlackService.getSharedInstance().sendChaChingMessage({
                     text: `:android: ${ member.email } has completed an in-app purchase \`${ subscriptionProduct.displayName } (${ item.subscriptionProductId })\`\n` +
                     `*In Opt-Out Trial*: \`${ isOptOutTrial ? "Yes" : "No" }\`\n` +
-                    `${ (isOptOutTrial && !!periodEndDate ) ? `*Trial End Date*: ${ formatDateTime(periodEndDate) ?? "Not Set"}` : "" }`
+                    `${ (isOptOutTrial && !!periodEndDate) ? `*Trial End Date*: ${ formatDateTime(periodEndDate) ?? "Not Set" }` : "" }`
                 })
             }
 
@@ -824,6 +851,41 @@ export default class AdminSubscriptionService {
                 }]
             });
             Sentry.captureException(error);
+        }
+
+        return result;
+    }
+
+    async unsubscribeMember(member: CactusMember): Promise<UnsubscribeMemberResult> {
+        const result: UnsubscribeMemberResult = {memberId: member.id, status: "not_attempted"};
+        if (!member.hasActiveSubscription) {
+            result.status = "no_active_subscription";
+            return result;
+        }
+        if (member.hasUpcomingCancellation) {
+            result.status = "already_canceled";
+            return result;
+        }
+
+        const stripeSubscriptionId = member.subscription?.stripeSubscriptionId;
+        const googlePurchaseToken = member.subscription?.googlePurchaseToken;
+        if (stripeSubscriptionId) {
+            result.billingPlatform = BillingPlatform.STRIPE;
+            const subscription = await StripeService.getSharedInstance().cancelSubscriptionImmediately(stripeSubscriptionId);
+            this.logger.info("Canceled stripe subscription", subscription.id);
+            result.status = "unsubscribe_success";
+        } else if (googlePurchaseToken) {
+            const googleResult = await GooglePlayService.getSharedInstance().cancelSubscription(member);
+            result.billingPlatform = BillingPlatform.GOOGLE;
+            if (googleResult.subscriptionFound && googleResult.didCancel) {
+                result.status = "unsubscribe_success";
+            } else if (googleResult.subscriptionFound && !googleResult.didCancel) {
+                result.status = "unsubscribe_error";
+                result.message = "Subscription was found but was unable to cancel it for some reason"
+            } else {
+                result.status = "not_available";
+                result.message = "Unable to cancel the google subscription";
+            }
         }
 
         return result;

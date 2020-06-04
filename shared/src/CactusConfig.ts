@@ -51,7 +51,7 @@ export interface CactusConfig {
             data_log: string,
             ci: string,
             [key: string]: string,
-        }
+        },
         app: {
             app_id: string,
             client_id: string,
@@ -111,11 +111,17 @@ export interface CactusConfig {
         service_account: ServiceAccountCredentials,
     },
     android_publisher: {
-        service_account: ServiceAccountCredentials
+        service_account: ServiceAccountCredentials,
+        default_package_name: string
     },
     flamelink: {
         service_account: ServiceAccountCredentials,
         robot_user_id: string,
         environment_id: string,
+    },
+    revenuecat: {
+        public_key: string,
+        secret_key: string,
+        webhook_bearer_token: string,
     }
 }
