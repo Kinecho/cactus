@@ -1,0 +1,39 @@
+{
+    "fields": [
+        {
+            "name": "cactusMemberId",
+            "type": "string"
+        },
+        {
+            "name": "userId",
+            "type": "string"
+        }, {
+            "name": "lastSentAt",
+            "type": "timestamp"
+        },
+        {
+            "name": "firstSentAt",
+            "type": "timestamp"
+        },
+        {
+            "name": "promptId",
+            "type": "string"
+        },
+        {
+            "name": "sendHistory",
+            "type": "array"
+        },
+        {
+            "name": "promptContentEntryId",
+            "type": "string"
+        },
+        {
+            "name": "completed",
+            "type": "boolean"
+        },
+        {
+            "name": "completedAt",
+            "type": "timestamp"
+        }
+    ]
+}

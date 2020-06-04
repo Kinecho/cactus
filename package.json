@@ -51,6 +51,7 @@
     },
     "homepage": "https://github.com/Kinecho/cactus#readme",
     "dependencies": {
+        "@firebaseextensions/fs-bq-schema-views": "^0.1.8",
         "firebase": "^7.14.6"
     },
     "devDependencies": {

@@ -28,6 +28,7 @@
     "author": "Neil Poulin",
     "license": "ISC",
     "dependencies": {
+        "@firebaseextensions/fs-bq-schema-views": "^0.1.8",
         "@google-cloud/pubsub": "^0.30.1",
         "@sentry/node": "^5.9.0",
         "@types/luxon": "^1.15.1",
