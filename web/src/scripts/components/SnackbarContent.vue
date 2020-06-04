@@ -15,41 +15,41 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {SnackbarColors} from "@components/SnackbarTypes";
+    import { SnackbarColor, SnackbarColors } from "@components/SnackbarTypes";
+    import Component from "vue-class-component";
+    import { Prop, Watch } from "vue-property-decorator";
 
     const DEFAULT_DURATION_MS = 5000;
 
+    @Component
+    export default class extends Vue {
 
-    export default Vue.extend({
-        created() {
+        @Prop({ type: String })
+        text: string | undefined | null;
 
-        },
-        props: {
-            text: String,
-            action: {type: String, required: false},
-            autoHide: {type: Boolean, default: false},
-            durationMs: {type: Number, default: DEFAULT_DURATION_MS},
-            closeable: {type: Boolean, default: true},
-            color: {
-                default: "default",
-                required: false,
-                validator: function (value: string) {
-                    // The value must match one of these strings
-                    return SnackbarColors.indexOf(value) !== -1
-                }
+        @Prop({ type: String, required: false, default: null })
+        action!: string | null;
+
+        @Prop({ type: Boolean, default: false })
+        autoHide!: boolean;
+
+        @Prop({ type: Number, default: DEFAULT_DURATION_MS })
+        durationMs!: number;
+
+        @Prop({ type: Boolean, default: true })
+        closeable!: boolean;
+
+        @Prop({
+            type: String as () => SnackbarColor, default: "default", validator(value: any): boolean {
+                return SnackbarColors.includes(value)
             }
-        },
-        data(): {
-            hideTimer: any | undefined,
-            timedOut: boolean,
-            dismissed: boolean,
-        } {
-            return {
-                hideTimer: undefined,
-                timedOut: false,
-                dismissed: false,
-            }
-        },
+        })
+        color!: SnackbarColor;
+
+        hideTimer: number | null = null;
+        timedOut = false;
+        dismissed = false;
+
         beforeMount() {
             if (this.autoHide) {
                 this.hideTimer = setTimeout(() => {
@@ -57,41 +57,45 @@
                     this.remove();
                 }, this.durationMs || DEFAULT_DURATION_MS)
             }
-        },
+        }
+
         destroyed() {
             if (this.hideTimer) {
                 clearInterval(this.hideTimer);
             }
-        },
-        computed: {
-            hidden(): boolean {
-                return this.timedOut || this.dismissed;
-            }
-        },
-        watch: {
-            autoHide(autoHide: boolean) {
-                if (this.hideTimer) {
-                    clearInterval(this.hideTimer);
-                }
-                if (autoHide) {
-                    this.hideTimer = setTimeout(() => {
-                        this.timedOut = true;
-                        this.remove();
-                    }, this.durationMs || DEFAULT_DURATION_MS)
-                }
-            }
-        },
-        methods: {
-            remove() {
-                this.$emit("close")
-            },
-            dismiss() {
-                this.dismissed = true;
-                this.remove();
-            }
-        },
+        }
 
-    })
+        get hidden(): boolean {
+            return this.timedOut || this.dismissed;
+        }
+
+
+        @Watch("autoHide")
+        onAutoHide(autoHide: boolean) {
+            if (this.hideTimer) {
+                clearInterval(this.hideTimer);
+                this.hideTimer = null;
+            }
+            if (autoHide) {
+                this.hideTimer = window.setTimeout(() => {
+                    this.timedOut = true;
+                    this.remove();
+                }, this.durationMs || DEFAULT_DURATION_MS)
+            }
+        }
+
+
+        remove() {
+            this.$emit("close")
+        }
+
+        dismiss() {
+            this.dismissed = true;
+            this.remove();
+        }
+
+
+    }
 </script>
 
 <style lang="scss">

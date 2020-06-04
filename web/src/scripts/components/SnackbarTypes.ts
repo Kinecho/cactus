@@ -1,6 +1,6 @@
-export const SnackbarColors: (SnackbarColor|string)[] = ['success', 'successAlt', 'warning', 'danger', "info", "default"];
+export const SnackbarColors: (SnackbarColor|string)[] = ['success', 'successAlt', 'warning', 'danger', "info", "default", "dolphin"];
 
-export type SnackbarColor = 'success' | 'successAlt' | 'warning' | 'danger' | "info" | "default";
+export type SnackbarColor = 'success' | 'successAlt' | 'warning' | 'danger' | "info" | "default" | "dolphin";
 
 export interface SnackbarMessage {
     id?: string,
