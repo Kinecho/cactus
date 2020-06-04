@@ -74,10 +74,12 @@ let firestoreService: AdminFirestoreService;
 
 export default class AdminUserService {
     config: CactusConfig;
+    app: admin.app.App;
     protected static sharedInstance: AdminUserService;
 
-    constructor(config: CactusConfig) {
+    constructor(config: CactusConfig, app: admin.app.App) {
         this.config = config;
+        this.app = app;
     }
 
     static getSharedInstance(): AdminUserService {
@@ -87,9 +89,9 @@ export default class AdminUserService {
         return AdminUserService.sharedInstance;
     }
 
-    static initialize(config: CactusConfig) {
+    static initialize(config: CactusConfig, app: admin.app.App) {
         firestoreService = AdminFirestoreService.getSharedInstance();
-        AdminUserService.sharedInstance = new AdminUserService(config);
+        AdminUserService.sharedInstance = new AdminUserService(config, app);
     }
 
     getCollectionRef() {
@@ -107,7 +109,7 @@ export default class AdminUserService {
         }
 
         try {
-            const signinUrl = await admin.auth().generateSignInWithEmailLink(email, {
+            const signinUrl = await this.app.auth().generateSignInWithEmailLink(email, {
                 url: `${ this.config.web.domain }${ successPath }`,
                 handleCodeInApp: true,
                 dynamicLinkDomain: this.config.dynamic_links.domain,
@@ -121,7 +123,7 @@ export default class AdminUserService {
 
     async getAuthUserByEmail(email: string): Promise<UserRecord | undefined> {
         try {
-            const user = await admin.auth().getUserByEmail(email);
+            const user = await this.app.auth().getUserByEmail(email);
             console.log(`Found AuthUser (${user.uid}) for email ${email}`);
             return user;
         } catch (error) {
@@ -132,7 +134,7 @@ export default class AdminUserService {
 
     async getAuthUserById(userId: string): Promise<UserRecord | undefined> {
         try {
-            const user = await admin.auth().getUser(userId);
+            const user = await this.app.auth().getUser(userId);
             console.log(`Found AuthUser (${user.uid}) for userId ${userId}`);
             return user;
         } catch (error) {

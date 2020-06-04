@@ -354,6 +354,11 @@ export default class AdminCactusMemberService {
         return removeDuplicates(members);
     }
 
+    async setEmail(memberId: string, email: string) {
+        const ref = this.getCollectionRef().doc(memberId);
+        await ref.update({ [CactusMember.Field.email]: email })
+    }
+
     async getMemberByEmail(emailInput?: string | null, options: GetOptions = DefaultGetOptions): Promise<CactusMember | undefined> {
         if (!emailInput) {
             return undefined;

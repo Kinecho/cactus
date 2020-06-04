@@ -58,7 +58,7 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminSlackService.initialize(config);
     MailchimpService.initialize(config);
     AdminCactusMemberService.initialize();
-    AdminUserService.initialize(config);
+    AdminUserService.initialize(config, app);
     AdminReflectionPromptService.initialize();
     AdminReflectionResponseService.initialize();
     AdminSentPromptService.initialize();
