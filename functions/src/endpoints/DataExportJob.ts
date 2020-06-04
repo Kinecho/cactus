@@ -14,6 +14,7 @@ import IJob = bigqueryTypes.IJob;
 import AdminSlackService, {SlackAttachment} from "@admin/services/AdminSlackService";
 import {JobMetadataResponse} from "@google-cloud/bigquery/build/src/table";
 import Logger from "@shared/Logger";
+import { Collection } from "@shared/FirestoreBaseModels";
 
 const logger = new Logger("DataExportJob");
 
@@ -44,7 +45,7 @@ export const latestBigQueryExportFileName = "latest-prefix.txt";
  */
 export async function exportFirestoreToBigQuery() {
     // await slackService.sendEngineeringMessage(`*BigQuery Ingest* Starting Job`);
-    const collectionIds = await getCollectionIds();
+    const collectionIds = (await getCollectionIds()).filter(id => id !== Collection.sentPrompts);
     logger.log("fetched collection IDs from Firestore. collectionIds", JSON.stringify(collectionIds));
 
     const startTime = new Date();
