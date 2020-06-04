@@ -251,12 +251,12 @@ const routes: MetaRouteConfig[] = [
         path: PageRoute.ONBOARDING,
         props: (route) => {
             return {
-                index: route.params.index ? Number(route.params.index) : 0,
+                page: route.params.page ? Number(route.params.page) : 1,
             }
         },
         children: [
             {
-                path: ":index",
+                path: ":page",
                 props: true,
             }
         ]

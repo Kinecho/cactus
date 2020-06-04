@@ -1,6 +1,6 @@
 <template>
     <div class="main">
-        <onboarding :index="index" @index="setIndex"/>
+        <onboarding :index="page - 1" @index="setIndex"/>
     </div>
 </template>
 
@@ -18,15 +18,15 @@
     export default class OnboardingPage extends Vue {
         name = "OnboardingPage";
 
-        @Prop({ type: Number, required: false, default: 0 })
-        index: number;
+        @Prop({ type: Number, required: false, default: 1 })
+        page: number;
 
         async setIndex(index: number) {
             if (index === 0) {
                 await pushRoute(PageRoute.ONBOARDING);
                 return
             }
-            await pushRoute(`${ PageRoute.ONBOARDING }/${ index }`);
+            await pushRoute(`${ PageRoute.ONBOARDING }/${ index + 1 }`);
         }
     }
 </script>
