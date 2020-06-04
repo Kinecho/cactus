@@ -1,5 +1,5 @@
 <template>
-    <div v-touch:swipe="handleSwipeEvent" class="onboarding-main">
+    <div v-touch:swipe="handleSwipeEvent" class="onboarding-main" >
         <ProgressStepper :current="index" :total="totalPages"/>
         <div class="progress-count">
             <span class="current">{{index + 1}}</span>&nbsp;of<span class="total">{{totalPages}}</span>
@@ -47,6 +47,16 @@
         index: number = 0;
         cardTransitionName = transitionName.next;
 
+        keyListener: any = null;
+
+        mounted() {
+            this.keyListener = document.addEventListener("keyup", this.handleDocumentKeyUp)
+        }
+
+        destroyed() {
+            document.removeEventListener("keyup", this.handleDocumentKeyUp);
+        }
+
         get totalPages() {
             return this.cards.length;
         }
@@ -63,6 +73,15 @@
 
         get previousEnabled(): boolean {
             return this.index > 0;
+        }
+
+        handleDocumentKeyUp(event: KeyboardEvent) {
+            if (event.key === "ArrowLeft" || event.code === "ArrowLeft" || event.which === 37) {
+                this.previous()
+            } else if (event.key === "ArrowRight" || event.code === "ArrowRight" || event.which === 39) {
+                this.next()
+            }
+
         }
 
         handleSwipeEvent(direction: string) {
