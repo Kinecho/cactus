@@ -21,9 +21,8 @@ import Logger from "@shared/Logger";
 import { runMemberStatsJob } from "@api/pubsub/subscribers/MemberStatsJob";
 
 const logger = new Logger("testApp");
-// const Config = getConfig();
+
 const app = express();
-// app.use(cors({origin: Config.allowedOrigins}));
 app.use(cors({ origin: true }));
 app.get('/', (req, res) => {
     res.status(200).json({ status: 'ok', queryParams: req.query });
@@ -64,11 +63,11 @@ app.get("/fcm", async (req, res) => {
 app.get("/stats", async (req, res) => {
     try {
         const size = req.query.size || 1000;
-        console.log("starting member batches");
+        logger.log("starting member batches");
         const result = await runMemberStatsJob(Number(size));
         // let total = 0;
 
-        console.log("finished all");
+        logger.log("finished all");
         res.send(result);
         return;
     } catch (error) {
@@ -316,11 +315,11 @@ app.get("/user", async (req, resp) => {
         return
     }
     try {
-        console.log("Fetching user with email", email);
+        logger.log("Fetching user with email", email);
         const user = await admin.auth().getUserByEmail(email);
         resp.send(user.toJSON());
     } catch (error) {
-        console.error("Failed to find user", error);
+        logger.error("Failed to find user", error);
         resp.sendStatus(404);
         return
     }

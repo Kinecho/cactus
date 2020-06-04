@@ -13,7 +13,6 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 
 const logger = new Logger("ChangeUserEmail");
 
-
 interface UserInput {
     oldEmail: string,
     newEmail: string,
