@@ -246,6 +246,11 @@ const routes: MetaRouteConfig[] = [
         path: PageRoute.INSIGHTS,
     },
     {
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@web/views/OnboardingPage.vue")),
+        name: "Onboarding",
+        path: PageRoute.ONBOARDING,
+    },
+    {
         component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@components/404.vue")),
         path: "*",
         name: "Page Not Found",
