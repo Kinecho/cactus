@@ -1,5 +1,5 @@
 <template>
-    <div class="upsellContainer" v-if="product">
+    <div class="onboardingUpsellCard" v-if="product">
         <template v-if="upgradeSuccess">
             <h1>Upgrade Success!</h1>
             <p>You have successfully started your trial of Cactus Plus.</p>
@@ -7,23 +7,36 @@
         </template>
         <template v-else>
             <div class="alert error" v-if="errorMessage">{{errorMessage}}</div>
-            <div class="textBox">
+            <div class="upsellContainer">
                 <h2><markdown-text v-if="markdownText" :source="markdownText"/></h2>
+                <ul class="upsellInfo">
+                    <li>
+                        <svg-icon icon="heartOutline" class="icon"/>
+                        <span>Personalized journal app with daily questions to reflect&nbsp;on</span>
+                    </li>
+                    <li>
+                        <svg-icon icon="pie" class="icon"/>
+                        <span>Insights dashboard, showing the things that make you&nbsp;happy</span>
+                    </li>
+                    <li>
+                        <svg-icon icon="checkCircle" class="icon"/>
+                        <span>Personality tests to help you better know&nbsp;yourself</span>
+                    </li>
+                </ul>
                 <div class="btnContainer">
                     <button class="tryIt" @click="checkout" :disabled="checkoutLoading">{{ctaText}}</button>
                     <router-link :to="pricingHref" tag="a" class="button tertiary" target="_blank">More info & other plans</router-link>
+                    <p class="finePrint" v-if="product.trialDays && product.trialDays > 0">
+                        Cactus Plus is free for {{product.trialDays}} days, then {{pricePerMonth}} /
+                        {{displayPeriod}}<span v-if="isAnnualBilling"> (billed annually)</span>. No commitment. Cancel
+                        anytime.
+                    </p>
+                    <p class="finePrint" v-else>
+                        Cactus Plus is {{pricePerMonth}} /
+                        {{displayPeriod}}<span v-if="isAnnualBilling"> (billed annually)</span>. Cancel&nbsp;anytime.
+                    </p>
                 </div>
-                <p class="small">
-                    Cactus Plus is free for days...
-                </p>
             </div>
-            <product-upsell-mini
-                    class="upsellInfo"
-                    :subscription-product="product"
-                    cta-text="Try it free"
-                    :checkout-loading="checkoutLoading"
-                    @checkout="startCheckout"
-            />
         </template>
     </div>
 </template>
@@ -34,19 +47,22 @@
     import MarkdownText from "@components/MarkdownText.vue";
     import OnboardingCardViewModel from "@components/onboarding/OnboardingCardViewModel";
     import { Prop } from "vue-property-decorator";
-    import SubscriptionProduct from "@shared/models/SubscriptionProduct";
+    import SubscriptionProduct, { BillingPeriod } from "@shared/models/SubscriptionProduct";
     import LoadableUpsell from "@components/gapanalysis/LoadableGapAnalysisUpsell.vue";
     import ProductUpsellMini from "@components/ProductUpsellMini.vue";
     import { CheckoutInfo } from "@components/onboarding/OnboardingTypes";
     import CactusMember from "@shared/models/CactusMember";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
     import { PageRoute } from "@shared/PageRoutes";
+    import { formatPriceCentsUsd } from "@shared/util/StringUtil";
+    import SvgIcon from "@components/SvgIcon.vue";
 
     @Component({
         components: {
             ProductUpsellMini,
             MarkdownText,
             LoadableUpsell,
+            SvgIcon,
         }
     })
     export default class OnboardingUpsellCard extends Vue {
@@ -87,6 +103,29 @@
             return PageRoute.PRICING
         }
 
+        get pricePerMonth(): string | undefined {
+            if (!this.product) {
+                return;
+            }
+
+            if (this.product?.billingPeriod === BillingPeriod.yearly) {
+                return formatPriceCentsUsd(this.product.priceCentsUsd / 12);
+            } else {
+                return formatPriceCentsUsd(this.product.priceCentsUsd);
+            }
+        }
+
+        get displayPeriod(): string {
+            if (this.product?.billingPeriod !== BillingPeriod.weekly) {
+                return "month"
+            }
+            return this.product.billingPeriod;
+        }
+
+        get isAnnualBilling(): boolean {
+            return this.product?.billingPeriod === BillingPeriod.yearly;
+        }
+
         startCheckout() {
             this.$emit('checkout');
 
@@ -109,9 +148,18 @@
 <style scoped lang="scss">
     @import "mixins";
 
-    .small {
-        font-size: 1.6rem;
-        opacity: .8;
+    .upsellContainer {
+        padding: 0 2.4rem;
+
+        @include r(768) {
+            display: grid;
+            grid-template-rows: 1fr 1fr;
+            grid-template-columns: 60% 40%;
+            padding: 0 6.4rem;
+        }
+        @include r(1140) {
+            grid-column-gap: 6.4rem;
+        }
     }
 
     h2 {
@@ -119,47 +167,58 @@
         margin-bottom: 2rem;
 
         @include r(768) {
-            margin-bottom: 2.4rem;
-        }
-    }
-
-    .upsellContainer {
-        padding: 0 2.4rem;
-
-        @include r(768) {
-            align-items: center;
-            display: flex;
-            padding: 0 6.4rem;
-        }
-    }
-
-    .textBox {
-        @include r(768) {
-            padding-right: 6.4rem;
-            width: 66%;
+            align-self: end;
+            margin: 0 1.6rem 2.4rem 0;
         }
     }
 
     .upsellInfo {
         @include shadowbox;
         font-size: 1.8rem;
-        max-width: 30rem;
+        list-style: none;
+        margin: 0 0 3.2rem;
         padding: 3.2rem;
+        text-align: left;
         width: 100%;
 
         @include r(768) {
             align-self: center;
-            max-width: 33%;
+            grid-area: 1 / 2 / 3 / 2;
+            margin: 0;
+        }
+
+        li {
+            align-items: flex-start;
+            display: flex;
+
+            &:not(:last-child) {
+                margin-bottom: 2.4rem;
+            }
+
+            img {
+                flex-shrink: 0;
+                height: 2.8rem;
+                margin: .4rem 1.6rem 0 0;
+                width: 2.8rem;
+            }
         }
     }
 
     .btnContainer {
-        font-size: 1.8rem;
-        margin-bottom: 4rem;
-
         @include r(768) {
             align-items: center;
+            align-self: start;
             display: flex;
+            flex-wrap: wrap;
+            font-size: 1.8rem;
+            margin-bottom: 4rem;
+        }
+
+        .tryIt {
+            @include r(768) {
+                margin-right: 1.6rem;
+                min-width: 24rem;
+            }
         }
 
         .tryIt,
@@ -169,10 +228,16 @@
 
             @include r(768) {
                 flex-grow: 0;
-                margin-right: 1.6rem;
-                min-width: 24rem;
                 width: auto;
             }
         }
     }
+
+    .finePrint {
+        font-size: 1.6rem;
+        opacity: .8;
+        padding: 3.2rem 0;
+        width: 100%;
+    }
+
 </style>
