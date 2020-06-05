@@ -18,7 +18,7 @@ export interface WordBubbleConfig {
     colorRange: string[];
     selectable: boolean,
     selectedFillColor: string,
-    hoverFillColor: string,
+    hoverFillColor?: string | undefined,
     wordClicked?: (word: InsightWord, selected: boolean,) => void,
 }
 
@@ -27,7 +27,7 @@ export const DEFAULT_WORD_BUBBLE_CONFIG = (): WordBubbleConfig => {
         maxDiameter: 375,
         selectable: false,
         selectedFillColor: "#0DADB1",
-        hoverFillColor: "#00cee5",
+        // hoverFillColor: "#00cee5",
         colorRange: [
             "#47445E",
             "#5E5A7C",
@@ -57,6 +57,7 @@ const createExtraBubbles = (): InsightWord[] => {
 
 interface BubbleData extends InsightWord {
     selected?: boolean;
+    originalValue: number;
 }
 
 type Datum = { children: BubbleData[] };
@@ -89,7 +90,11 @@ export function drawWordBubbleChart(parentSelector: string, words: InsightWord[]
     .style("display", "block");
 
     const extras = createExtraBubbles();
-    const dataset: BubbleData[] = words.slice(0, 7).concat(extras).map(d => ({ ...d, selected: false }));
+    const dataset: BubbleData[] = words.slice(0, 7).concat(extras).map(d => ({
+        ...d,
+        selected: false,
+        originalValue: d.frequency ?? 0
+    }));
     logger.info("dataset", dataset);
 
     const radiusScale = scaleSqrt().domain([0, 100]).range([10, 50]);
@@ -136,14 +141,29 @@ export function drawWordBubbleChart(parentSelector: string, words: InsightWord[]
         if (isBubbleData(d.data)) {
             if (!isBlank(d.data.word)) {
                 const selection = d3Select(this as any)
-                selection.style("fill", config.hoverFillColor).style("cursor", "pointer");
+                const originalRadius = d.r;
+
+                selection.style("cursor", "pointer");
+                if (config.hoverFillColor) {
+                    selection.style("fill", config.hoverFillColor)
+                }
+
+                if (!d.data.selected) {
+                    selection.transition().duration(300).attr("r", function () {
+                        return originalRadius * 1.05;
+                    })
+                }
             }
         }
     })
     .on("mouseout", function (d) {
         if (isBubbleData(d.data)) {
             if (!isBlank(d.data.word) && !d.data.selected) {
-                d3Select(this as any).style("fill", color(`${ d.value ?? 0 }`) as string);
+                const radius = d.r;
+                d3Select(this as any).style("fill", color(`${ d.value ?? 0 }`) as string)
+                .transition().duration(300).attr("r", function () {
+                    return radius;
+                });
             }
         }
     })
@@ -156,6 +176,7 @@ export function drawWordBubbleChart(parentSelector: string, words: InsightWord[]
         }
 
         const data = d.data;
+        const radius = d.r;
         if (isBubbleData(data)) {
             const selected = !data.selected;
             // parent.select("circle").each(c => c.style("fill", color(`${ c.data.value ?? 0 }`) as string))
@@ -167,10 +188,17 @@ export function drawWordBubbleChart(parentSelector: string, words: InsightWord[]
             parent.selectAll("circle").style("fill", function (v) {
                 v.data.selected = false;
                 return color(`${ v.value ?? 0 }`) as string
-            });
+            }).each(function (e) {
+                const r = e.r;
+                d3Select(this as any).transition().attr("r", r);
+            })
             data.selected = selected;
-            const newColor = selected ? config.selectedFillColor : color(`${ d.value ?? 0 }`) as string;
+            const newColor = selected && config.selectedFillColor ? config.selectedFillColor : color(`${ d.value ?? 0 }`) as string;
+
             selection.style("fill", newColor)
+            selection.transition().duration(200).attr("r", function () {
+                return radius * 1.15;
+            })
         }
 
     });
@@ -197,6 +225,7 @@ export function drawWordBubbleChart(parentSelector: string, words: InsightWord[]
         return Math.min(2 * d.r, (2 * d.r - 8) / (this as SVGTextElement).getComputedTextLength() * 14) + "px";
     })
     .style("fill", "#FFF")
+    .style("cursor", "pointer")
     .append("title")
     .text(d => {
         if (isBubbleData(d.data)) {
