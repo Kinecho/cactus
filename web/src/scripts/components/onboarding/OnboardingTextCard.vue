@@ -39,8 +39,12 @@
     @import "mixins";
 
     .text-card {
+        padding: 0 2.4rem;
+
         @include r(600) {
+            align-items: center;
             display: flex;
+            padding: 0 6.4rem;
         }
     }
 

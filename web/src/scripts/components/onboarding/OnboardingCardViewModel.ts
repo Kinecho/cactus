@@ -65,15 +65,15 @@ export default class OnboardingCardViewModel {
             }),
             OnboardingCardViewModel.create({
                 type: CardType.text,
-                text: "Cactus is a different kind of mindfulness.\n\nIt sends you a quick question every day, prompting you to consider what really matters to _you_, and write it down.",
+                text: "Cactus is a different kind of mindfulness.\n\nIt sends you a quick question every day, prompting you to consider what really matters to you, and write it down.",
                 imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard2.png?alt=media&token=198b352b-c074-4577-8971-1a340054efee"
             }),
             OnboardingCardViewModel.create({
-                text: "Spend a minute writing and Cactus analyzes your words ot reveal surprising insights about your thoughts and emotions.",
+                text: "Spend a minute writing and Cactus analyzes your words to reveal surprising insights about your thoughts and emotions.",
                 imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard3.png?alt=media&token=3ea75e15-0759-4c5e-8021-09f55c5497b0"
             }),
             OnboardingCardViewModel.create({
-                text: "You'll discover the things that contribute to your happiness. you'll make better decisions and experience greater resilience and optimism.",
+                text: "You'll discover the things that contribute to your happiness. You'll make better decisions and experience greater resilience and optimism.",
                 imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard4.png?alt=media&token=44045a9c-1e23-4ab9-8d4a-ec8e57e75576"
             }),
             OnboardingCardViewModel.create({
@@ -87,10 +87,10 @@ export default class OnboardingCardViewModel {
             }),
             OnboardingCardViewModel.create({
                 type: CardType.elements,
-                text: "Cactus is build on your awareness and care of five elements"
+                text: "Great! Cactus is built on your awareness and care of five elements:"
             }),
             OnboardingCardViewModel.create({
-                text: "As cactus learns more about you, questions become increasingly about you.",
+                text: "As Cactus learns more about you, questions become increasingly about you.",
                 imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard6.png?alt=media&token=f103da10-62a7-4a45-92f1-60039bd171d6"
             }),
             OnboardingCardViewModel.create({
@@ -106,16 +106,17 @@ export default class OnboardingCardViewModel {
             }),
             OnboardingCardViewModel.create({
                 type: CardType.text,
-                text: "Nice work. Take a moment ot appreciate the role that **{{value}}** plays in your life.",
+                text: "Nice work! Take a moment to appreciate the role that **{{value}}** plays in your life.",
                 textReplacementType: TextReplacementType.selected_insight_word,
                 defaultReplacementValue: "Physical Activity",
-                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F2005202.png?alt=media&token=872220d3-f3de-410b-9c8a-07237020b8f8"
+                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard2.png?alt=media&token=198b352b-c074-4577-8971-1a340054efee"
             }),
             OnboardingCardViewModel.create({
                 type: CardType.text,
                 text: "Besides **{{value}}**, knowing your core values helps you make better, healthier decisions in all aspects of your life.\n\nDo you know your core values?",
                 textReplacementType: TextReplacementType.selected_insight_word,
                 defaultReplacementValue: "Physical Activity",
+                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard1.png?alt=media&token=e36e050c-7564-44c5-8c48-64d64484b3f6"
             }),
             OnboardingCardViewModel.create({
                 type: CardType.upsell,
@@ -124,7 +125,7 @@ export default class OnboardingCardViewModel {
             OnboardingCardViewModel.create({
                 type: CardType.text,
                 text: "You completed your first activity with Cactus! We are excited to be your co-pilot on your journey of self-understanding.",
-                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F2005202.png?alt=media&token=872220d3-f3de-410b-9c8a-07237020b8f8"
+                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard7.png?alt=media&token=591df28c-fbd1-405c-8a37-31e8d1f6af9b"
             }),
             OnboardingCardViewModel.create({
                 type: CardType.celebrate,
