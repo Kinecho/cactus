@@ -2,22 +2,32 @@ import {
     hierarchy as d3Hierarchy,
     pack as d3Pack,
     scaleOrdinal as d3ScaleOrdinal,
-    select as d3Select
+    select as d3Select,
+    selectAll,
+    scaleSqrt,
 } from "d3";
 import { HierarchyCircularNode } from "d3-hierarchy";
 import { InsightWord } from "@shared/models/ReflectionResponse";
 import Logger from "@shared/Logger"
+import { isBlank } from "@shared/util/StringUtil";
 
 const logger = new Logger("wordBubbles");
 
 export interface WordBubbleConfig {
     maxDiameter: number;
     colorRange: string[];
+    selectable: boolean,
+    selectedFillColor: string,
+    hoverFillColor: string,
+    wordClicked?: (word: InsightWord, selected: boolean,) => void,
 }
 
 export const DEFAULT_WORD_BUBBLE_CONFIG = (): WordBubbleConfig => {
     return {
         maxDiameter: 375,
+        selectable: false,
+        selectedFillColor: "#0DADB1",
+        hoverFillColor: "#00cee5",
         colorRange: [
             "#47445E",
             "#5E5A7C",
@@ -45,17 +55,21 @@ const createExtraBubbles = (): InsightWord[] => {
     ];
 }
 
-type Datum = { children: InsightWord[] };
-type BubbleNode = Datum | InsightWord;
+interface BubbleData extends InsightWord {
+    selected?: boolean;
+}
+
+type Datum = { children: BubbleData[] };
+type BubbleNode = Datum | BubbleData;
 
 
-function isInsightWord(d: BubbleNode): d is InsightWord {
-    return !(d as Datum).children && (d as InsightWord).word !== undefined
+function isBubbleData(d: BubbleNode): d is BubbleData {
+    return !(d as Datum).children && (d as BubbleData).word !== undefined
 }
 
 export function drawWordBubbleChart(parentSelector: string, words: InsightWord[], options?: Partial<WordBubbleConfig>) {
     const config: WordBubbleConfig = Object.assign(DEFAULT_WORD_BUBBLE_CONFIG(), options);
-    const { maxDiameter, colorRange } = config;
+    const { maxDiameter, colorRange, selectable } = config;
     const color = d3ScaleOrdinal().range(colorRange);
 
     const bubble = d3Pack()
@@ -75,14 +89,16 @@ export function drawWordBubbleChart(parentSelector: string, words: InsightWord[]
     .style("display", "block");
 
     const extras = createExtraBubbles();
-    const dataset = words.slice(0, 7).concat(extras);
+    const dataset: BubbleData[] = words.slice(0, 7).concat(extras).map(d => ({ ...d, selected: false }));
     logger.info("dataset", dataset);
+
+    const radiusScale = scaleSqrt().domain([0, 100]).range([10, 50]);
 
     //Sets up a hierarchy of data object
     const root = d3Hierarchy({ children: dataset })
     .sum((d: BubbleNode) => {
         let t = 0;
-        if (isInsightWord(d)) {
+        if (isBubbleData(d)) {
             // never take a value greater than six, to control colors
             t = Math.min(Math.max(d.frequency || 1, d.salience || 0), 6) ?? 0
         }
@@ -114,8 +130,49 @@ export function drawWordBubbleChart(parentSelector: string, words: InsightWord[]
         return d.y;
     })
     .style("fill", (d) => {
-        let fillColor = color(`${ d.value ?? 0 }`);
+        const fillColor = color(`${ d.value ?? 0 }`);
         return fillColor as string;
+    }).on("mouseover", function (d) {
+        if (isBubbleData(d.data)) {
+            if (!isBlank(d.data.word)) {
+                const selection = d3Select(this as any)
+                selection.style("fill", config.hoverFillColor).style("cursor", "pointer");
+            }
+        }
+    })
+    .on("mouseout", function (d) {
+        if (isBubbleData(d.data)) {
+            if (!isBlank(d.data.word) && !d.data.selected) {
+                d3Select(this as any).style("fill", color(`${ d.value ?? 0 }`) as string);
+            }
+        }
+    })
+    .on("click", function (d) {
+        if (!selectable) {
+            return;
+        }
+        if (!isBubbleData(d.data) || isBlank(d.data.word)) {
+            return;
+        }
+
+        const data = d.data;
+        if (isBubbleData(data)) {
+            const selected = !data.selected;
+            // parent.select("circle").each(c => c.style("fill", color(`${ c.data.value ?? 0 }`) as string))
+            logger.info("Data is selected = ", selected);
+            config.wordClicked?.(data, selected);
+            const selection = d3Select(this as any)
+            logger.info("selection", selection);
+
+            parent.selectAll("circle").style("fill", function (v) {
+                v.data.selected = false;
+                return color(`${ v.value ?? 0 }`) as string
+            });
+            data.selected = selected;
+            const newColor = selected ? config.selectedFillColor : color(`${ d.value ?? 0 }`) as string;
+            selection.style("fill", newColor)
+        }
+
     });
 
     //format the text for each bubble
@@ -129,7 +186,7 @@ export function drawWordBubbleChart(parentSelector: string, words: InsightWord[]
     .attr("text-anchor", "middle")
     .attr("dominant-baseline", "middle")
     .text((d) => {
-        if (isInsightWord(d.data)) {
+        if (isBubbleData(d.data)) {
             return d.data.word
         }
         return " "
@@ -142,10 +199,9 @@ export function drawWordBubbleChart(parentSelector: string, words: InsightWord[]
     .style("fill", "#FFF")
     .append("title")
     .text(d => {
-        if (isInsightWord(d.data)) {
+        if (isBubbleData(d.data)) {
             return d.data.word
         }
         return " "
     });
-
 }

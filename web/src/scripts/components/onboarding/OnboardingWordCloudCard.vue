@@ -3,7 +3,8 @@
         <div class="textBox">
             <markdown-text :source="card.text"/>
         </div>
-        <word-chart :words="words" :blurry="false"/>
+        <h3 v-if="selectedWord">Chart Word: {{selectedWord.word}}</h3>
+        <word-chart :words="words" :blurry="false" :selectable="true" @selected="wordSelected"/>
     </div>
 </template>
 
@@ -30,6 +31,12 @@
 
         @Prop({ type: Array as () => InsightWord[], default: [], required: false })
         words!: InsightWord[]
+
+        selectedWord: InsightWord | null = null;
+
+        wordSelected(word: InsightWord | null) {
+            this.selectedWord = word;
+        }
     }
 </script>
 
