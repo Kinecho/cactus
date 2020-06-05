@@ -1,6 +1,7 @@
 <template>
     <div class="main">
-        <onboarding :index="page - 1"
+        <onboarding :index="index"
+                :cards="cards"
                 @index="setIndex"
                 :product="product"
                 :page-status="pageStatus"
@@ -21,6 +22,9 @@
     import Logger from "@shared/Logger"
     import { PageStatus } from "@components/onboarding/OnboardingTypes";
     import CactusMember from "@shared/models/CactusMember";
+    import { isNumber } from "@shared/util/ObjectUtil";
+    import OnboardingCardViewModel, { CardType } from "@components/onboarding/OnboardingCardViewModel";
+    import { isPremiumTier } from "@shared/models/MemberSubscription";
 
     const logger = new Logger("OnboardingPage");
 
@@ -30,14 +34,17 @@
     export default class OnboardingPage extends Vue {
         name = "OnboardingPage";
 
-        @Prop({ type: Number, required: false, default: 1 })
-        page: number;
+        // @Prop({ type: Number, required: false, default: 1 })
+        // page: number;
 
         @Prop({ type: String as () => PageStatus, required: false, default: null })
         pageStatus: PageStatus | null;
 
         @Prop({ type: Object as () => CactusMember, required: true })
         member!: CactusMember;
+
+        @Prop({ type: String, required: false, default: null })
+        slug!: string | null;
 
         product: SubscriptionProduct | null = null;
         billingPeriod = BillingPeriod.yearly;
@@ -52,8 +59,35 @@
                 await pushRoute(PageRoute.ONBOARDING);
                 return
             }
-            await pushRoute(`${ PageRoute.ONBOARDING }/${ index + 1 }`);
+            let card = this.cards[index];
+            const slug = card?.slug ?? (index + 1);
+            await pushRoute(`${ PageRoute.ONBOARDING }/${ slug }`);
         }
+
+        get index(): number {
+            if (!this.slug) {
+                return 0;
+            }
+            try {
+                let pageNumber = Number(this.slug);
+                if (isNumber(pageNumber) && !isNaN(pageNumber)) {
+                    return Math.max(pageNumber - 1, 0);
+                }
+            } catch (error) {
+                //no op
+            }
+            return Math.max(this.cards.findIndex(card => card.slug === this.slug), 0);
+        }
+
+        get cards(): OnboardingCardViewModel[] {
+            let cards = OnboardingCardViewModel.createAll();
+            if (isPremiumTier(this.member.tier) && this.pageStatus !== PageStatus.success) {
+                cards = cards.filter(card => card.type !== CardType.upsell)
+            }
+
+            return cards;
+        }
+
 
         async fetchProduct() {
             this.productLoaded = false;

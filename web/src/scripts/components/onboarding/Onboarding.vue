@@ -71,6 +71,9 @@
     export default class Onboarding extends Vue {
         name = "Onboarding";
 
+        @Prop({type: Array as () => OnboardingCardViewModel[], required: true})
+        cards!: OnboardingCardViewModel[];
+
         @Prop({ type: Number, default: 0, required: true })
         index!: number;
 
@@ -93,15 +96,6 @@
                 loading: this.checkoutLoading && !success,
                 success: success,
             }
-        }
-
-        get cards(): OnboardingCardViewModel[] {
-            let cards = OnboardingCardViewModel.createAll();
-            if (isPremiumTier(this.member.tier) && !this.checkoutInfo.success) {
-                cards = cards.filter(card => card.type !== CardType.upsell)
-            }
-
-            return cards;
         }
 
         mounted() {

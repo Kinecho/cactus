@@ -257,13 +257,14 @@ const routes: MetaRouteConfig[] = [
         },
         props: (route) => {
             return {
-                page: route.params.page ? Number(route.params.page) : 1,
+                // page: route.params.page ? Number(route.params.page) : 1,
                 pageStatus: route.params.status ?? null,
+                slug: route.params.slug,
             }
         },
         children: [
             {
-                path: ":page",
+                path: ":slug",
                 props: true,
                 children: [{
                     path: ":status",
