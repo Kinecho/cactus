@@ -46,6 +46,7 @@
         padding: 0 .8rem;
 
         @include r(374) {
+            justify-content: center;
             padding: 0 2.4rem;
         }
         @include r(600) {

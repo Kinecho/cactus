@@ -145,6 +145,12 @@
         right: 1.6rem;
         width: calc(100% - 3.2rem);
 
+        @include r(374) {
+            bottom: 2.4rem;
+            left: 2.4rem;
+            right: 2.4rem;
+            width: calc(100% - 4.8rem);
+        }
         @include r(768) {
             position: static;
         }
