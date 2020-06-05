@@ -5,6 +5,7 @@ export enum CardType {
     // photo = "photo",
     reflect = "reflect",
     elements = "elements",
+    word_cloud = "word_cloud",
 }
 
 
@@ -57,7 +58,15 @@ export class OnboardingCardViewModel {
             OnboardingCardViewModel.create({
                 type: CardType.elements,
                 text: "Cactus is build on your awareness and care of five elements"
-            })
+            }),
+            OnboardingCardViewModel.create({
+                text: "As cactus learns more about you, questions become increasingly about you.",
+                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F2005273.png?alt=media&token=8fc8e1bc-2757-433b-a5b2-75a35f036d02"
+            }),
+            OnboardingCardViewModel.create({
+                type: CardType.word_cloud,
+                text: "Choose the physical activity that **best** improves how you feel:",
+            }),
         ];
         cards.forEach((card, i) => card.id = `card${ i + 1 }`);
         return cards;
