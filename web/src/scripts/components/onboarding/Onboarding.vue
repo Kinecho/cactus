@@ -161,13 +161,12 @@
         @include r(600) {
             align-items: center;
             display: flex;
-            font-size: 3.2rem;
         }
         @include r(768) {
-            font-size: 4rem;
+            font-size: 3.2rem;
         }
         @include r(960) {
-            font-size: 4.8rem;
+            font-size: 4rem;
         }
     }
 
@@ -201,9 +200,24 @@
     }
 
     .tertiary {
+        cursor: pointer;
         position: absolute;
         top: 50vh;
         z-index: 1;
+
+        @include r(600) {
+            opacity: .5;
+            transition: opacity .3s;
+
+            &:hover {
+                background: transparent;
+                opacity: 1;
+            }
+        }
+
+        &:disabled {
+            display: none;
+        }
 
         svg {
             fill: $darkestGreen;

@@ -1,8 +1,8 @@
 <template>
-    <div>
-        <result-element :element="card.element" :selectable="false" :selected="false" :pulsing="false"/>
-        <markdown-text :source="markdownText"/>
-        <textarea v-model="responseText"/>
+    <div class="elementReflectContainer">
+        <result-element :element="card.element" :selectable="false" :selected="false" :pulsing="false" :withLabel="false"/>
+        <strong><markdown-text :source="markdownText"/></strong>
+        <textarea placeholder="Write something..." v-model="responseText"/>
     </div>
 </template>
 
@@ -42,5 +42,46 @@
 </script>
 
 <style scoped lang="scss">
+    @import "variables";
+    @import "mixins";
 
+    .elementReflectContainer {
+        align-self: center;
+        padding: 0 4rem;
+
+        @include r(600) {
+            padding: 0 6.4rem;
+        }
+    }
+
+    .element-icon {
+        align-items: flex-start;
+    }
+
+    strong {
+        display: block;
+        margin-bottom: .8rem;
+
+        @include r(768) {
+            margin-bottom: 1.6rem;
+        }
+    }
+
+    textarea {
+        font-family: $font-stack;
+        background: transparent;
+        border: 0;
+        font-size: 1.8rem;
+        width: 100%;
+
+        @include r(374) {
+            font-size: 2rem;
+        }
+        @include r(768) {
+            font-size: 2.4rem;
+        }
+        @include r(960) {
+            font-size: 3.2rem;
+        }
+    }
 </style>
