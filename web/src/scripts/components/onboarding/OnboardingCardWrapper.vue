@@ -21,6 +21,7 @@
     import { InsightWord } from "@shared/models/ReflectionResponse";
     import SubscriptionProduct from "@shared/models/SubscriptionProduct";
     import UpsellCard from "@components/onboarding/OnboardingUpsellCard.vue";
+    import CelebrateCard from "@components/onboarding/OnboardingCelebrateCard.vue";
 
     interface CardProps {
         type: string,
@@ -35,6 +36,7 @@
             ElementsCard,
             WordCloudCard,
             UpsellCard,
+            CelebrateCard,
         }
     })
     export default class OnboardingCardWrapper extends Vue {
@@ -52,9 +54,9 @@
                 case CardType.text:
                     info.type = "text-card";
                     break;
-                case CardType.photo:
-                    info.type = "photo-card";
-                    break;
+            // case CardType.photo:
+            //     info.type = "photo-card";
+            //     break;
                 case CardType.reflect:
                     info.type = "reflect-card";
                     // info.props.selectedInsight = "Test Value";
@@ -73,6 +75,9 @@
                 case CardType.upsell:
                     info.type = "upsell-card";
                     info.props.product = this.product ?? null;
+                    break;
+                case CardType.celebrate:
+                    info.type = "celebrate-card"
                     break;
                 default:
                     break;

@@ -1,5 +1,4 @@
 import { CactusElement } from "@shared/models/CactusElement";
-import { isBlank } from "@shared/util/StringUtil";
 
 export enum CardType {
     text = "text",
@@ -8,6 +7,7 @@ export enum CardType {
     elements = "elements",
     word_cloud = "word_cloud",
     upsell = "upsell",
+    celebrate = "celebrate",
 }
 
 export enum TextReplacementType {
@@ -33,7 +33,7 @@ export default class OnboardingCardViewModel {
     defaultReplacementValue?: string;
     textReplacementType?: TextReplacementType;
 
-    getMarkdownText(options: { selectedInsight?: string | undefined }): string | undefined {
+    getMarkdownText(options: { selectedInsight?: string | undefined | null }): string | undefined {
         if (!this.textReplacementType) {
             return this.text;
         }
@@ -45,8 +45,9 @@ export default class OnboardingCardViewModel {
         }
     }
 
-    private replaceText(replacementValue?: string): string | undefined {
-        return this.text?.replace(this.textReplacerToken, replacementValue ?? this.defaultReplacementValue ?? "").replace(/\s\s+/g, ' ')
+    private replaceText(replacementValue?: string | null | undefined): string | undefined {
+        const value = replacementValue ?? this.defaultReplacementValue ?? "";
+        return this.text?.replace(this.textReplacerToken, value).replace(/\s\s+/g, ' ');
     }
 
     static create(params: Partial<OnboardingCardViewModel>): OnboardingCardViewModel {
@@ -122,7 +123,11 @@ export default class OnboardingCardViewModel {
             }),
             OnboardingCardViewModel.create({
                 type: CardType.text,
-                text: "Upgrade success",
+                text: "You completed your first activity with Cactus! We are excited to be your co-pilot on your journey of self-understanding.",
+                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F2005202.png?alt=media&token=872220d3-f3de-410b-9c8a-07237020b8f8"
+            }),
+            OnboardingCardViewModel.create({
+                type: CardType.celebrate,
             }),
         ];
         cards.forEach((card, i) => card.id = `card${ i + 1 }`);

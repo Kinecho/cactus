@@ -1,7 +1,12 @@
 <template>
     <div v-if="product">
         <markdown-text v-if="markdownText" :source="markdownText"/>
-        <product-upsell-mini :subscription-product="product" cta-text="Try it free" :checkout-loading="checkoutLoading"/>
+        <product-upsell-mini
+                :subscription-product="product"
+                cta-text="Try it free"
+                :checkout-loading="checkoutLoading"
+                @checkout="startCheckout"
+        />
     </div>
 </template>
 

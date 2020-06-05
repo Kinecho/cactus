@@ -1,10 +1,9 @@
 <template>
     <div class="text-card">
         <div class="textBox">
-            <h1>Card {{card.id}}</h1>
             <markdown-text v-if="markdownText" :source="markdownText"/>
         </div>
-        <img class="image" v-if="card.imageUrl" :src="card.imageUrl" alt="Image" />
+        <img class="image" v-if="card.imageUrl" :src="card.imageUrl" alt="Image"/>
     </div>
 </template>
 
@@ -25,6 +24,9 @@
 
         @Prop({ type: Object as () => OnboardingCardViewModel, required: true })
         card!: OnboardingCardViewModel;
+
+        @Prop({ type: String, required: false, default: null })
+        selectedInsight!: string | null;
 
         get markdownText() {
             return this.card.getMarkdownText({ selectedInsight: this.selectedInsight })
