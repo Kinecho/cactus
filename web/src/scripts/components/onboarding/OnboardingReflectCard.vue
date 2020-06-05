@@ -4,7 +4,7 @@
         <strong>
             <markdown-text :source="markdownText"/>
         </strong>
-        <textarea placeholder="Write something..." v-model="responseText" autofocus/>
+        <textarea placeholder="Write something..." v-model="responseText" ref="textInput"/>
     </div>
 </template>
 
@@ -34,12 +34,20 @@
         @Prop({ type: String, required: false, default: null })
         selectedInsightWord!: string | null;
 
+        @Prop({ type: Boolean, default: true })
+        autofocusInput: boolean;
         responseText = ""
 
         get markdownText(): string | undefined {
             return this.card.getMarkdownText({ selectedInsight: this.selectedInsightWord })
         }
 
+        mounted() {
+            logger.info("Reflect card mounted");
+            if (this.autofocusInput) {
+                (this.$refs.textInput as HTMLElement).focus();
+            }
+        }
     }
 </script>
 
