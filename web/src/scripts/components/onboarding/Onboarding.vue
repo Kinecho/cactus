@@ -37,7 +37,7 @@
 <script lang="ts">
     import Vue from "vue";
     import Component from "vue-class-component"
-    import OnboardingCardViewModel from "@components/onboarding/OnboardingCardViewModel";
+    import OnboardingCardViewModel, { CardType } from "@components/onboarding/OnboardingCardViewModel";
     import Logger from "@shared/Logger"
     import TextCard from "@components/onboarding/OnboardingTextCard.vue";
     import Vue2TouchEvents from "vue2-touch-events";
@@ -50,6 +50,7 @@
     import { pushRoute } from "@web/NavigationUtil";
     import { PageRoute } from "@shared/PageRoutes";
     import CactusMember from "@shared/models/CactusMember";
+    import { isPremiumTier } from "@shared/models/MemberSubscription";
 
     const logger = new Logger("Onboarding");
     Vue.use(Vue2TouchEvents)
@@ -70,8 +71,6 @@
     export default class Onboarding extends Vue {
         name = "Onboarding";
 
-        cards: OnboardingCardViewModel[] = OnboardingCardViewModel.createAll();
-
         @Prop({ type: Number, default: 0, required: true })
         index!: number;
 
@@ -91,9 +90,18 @@
         get checkoutInfo(): CheckoutInfo {
             const success = this.pageStatus === PageStatus.success;
             return {
-                loading: this.checkoutLoading,
+                loading: this.checkoutLoading && !success,
                 success: success,
             }
+        }
+
+        get cards(): OnboardingCardViewModel[] {
+            let cards = OnboardingCardViewModel.createAll();
+            if (isPremiumTier(this.member.tier) && !this.checkoutInfo.success) {
+                cards = cards.filter(card => card.type !== CardType.upsell)
+            }
+
+            return cards;
         }
 
         mounted() {
@@ -165,6 +173,7 @@
             this.checkoutLoading = true;
 
             setTimeout(() => {
+                this.checkoutLoading = false;
                 pushRoute(`${ PageRoute.ONBOARDING }/${ this.index + 1 }/success`)
             }, 2000)
         }
