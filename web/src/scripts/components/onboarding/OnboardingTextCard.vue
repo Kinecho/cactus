@@ -26,10 +26,10 @@
         card!: OnboardingCardViewModel;
 
         @Prop({ type: String, required: false, default: null })
-        selectedInsight!: string | null;
+        selectedInsightWord!: string | null;
 
         get markdownText() {
-            return this.card.getMarkdownText({ selectedInsight: this.selectedInsight })
+            return this.card.getMarkdownText({ selectedInsight: this.selectedInsightWord })
         }
     }
 </script>

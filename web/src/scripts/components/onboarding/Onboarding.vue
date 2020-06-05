@@ -15,6 +15,8 @@
                     :product="product"
                     :member="member"
                     :checkout-info="checkoutInfo"
+                    :selected-word="selectedWord"
+                    @selectedWord="setSelectedWord"
                     @next="next"
                     @previous="previous"
                     @checkout="startCheckout"
@@ -47,11 +49,11 @@
     import { Prop } from "vue-property-decorator";
     import SubscriptionProduct from "@shared/models/SubscriptionProduct";
     import { CheckoutInfo, PageStatus } from "@components/onboarding/OnboardingTypes";
-    import { pushRoute } from "@web/NavigationUtil";
     import { PageRoute } from "@shared/PageRoutes";
     import CactusMember from "@shared/models/CactusMember";
     import { startCheckout } from "@web/checkoutService";
     import { stringifyJSON } from "@shared/util/ObjectUtil";
+    import { InsightWord } from "@shared/models/ReflectionResponse";
 
     const logger = new Logger("Onboarding");
     Vue.use(Vue2TouchEvents)
@@ -87,6 +89,7 @@
         @Prop({ type: Object as () => CactusMember, required: true })
         member!: CactusMember
 
+        selectedWord: InsightWord|null = null;
         checkoutLoading = false;
         checkoutError: string | null = null;
         cardTransitionName = transitionName.next;
@@ -125,6 +128,10 @@
 
         get previousEnabled(): boolean {
             return this.index > 0;
+        }
+
+        setSelectedWord(word: InsightWord|null) {
+            this.selectedWord = word;
         }
 
         setIndex(index: number) {

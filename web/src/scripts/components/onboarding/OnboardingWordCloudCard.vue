@@ -3,7 +3,7 @@
         <div class="textBox">
             <markdown-text :source="card.text"/>
         </div>
-        <word-chart :words="words" :blurry="false"/>
+        <word-chart :words="words" :blurry="false" :selectable="true" @selected="wordSelected"/>
     </div>
 </template>
 
@@ -30,6 +30,13 @@
 
         @Prop({ type: Array as () => InsightWord[], default: [], required: false })
         words!: InsightWord[]
+
+        selectedWord: InsightWord | null = null;
+
+        wordSelected(word: InsightWord | null) {
+            this.selectedWord = word;
+            this.$emit('selectedWord', word);
+        }
     }
 </script>
 
