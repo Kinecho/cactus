@@ -222,7 +222,7 @@ export function drawWordBubbleChart(parentSelector: string, words: InsightWord[]
     // Note: This one needs to have the anonymous function
     // syntax because we need the "this" context that gets lost with the arrow syntax
     .style("font-size", function (d) {
-        return Math.min(2 * d.r, (2 * d.r - 8) / (this as SVGTextElement).getComputedTextLength() * 14) + "px";
+        return Math.min(2 * d.r, (2 * d.r - 8) / this.getComputedTextLength() * 14) + "px";
     })
     .style("fill", "#FFF")
     .style("cursor", "pointer")
