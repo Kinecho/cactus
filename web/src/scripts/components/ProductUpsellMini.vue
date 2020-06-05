@@ -1,12 +1,11 @@
 <template>
-    <div>
+    <div class="upsellInner">
         <transition name="component-fade" appear mode="out-in">
             <div v-if="loading" :key="'product-loading'">
                 <spinner message="Loading..." :delay="1200"/>
             </div>
             <div v-else :key="'checkout-info'" class="checkout-info">
-                <button @click="checkout" :disabled="checkoutLoading">{{ctaText}}</button>
-                <p class="small" v-if="subscriptionProduct.trialDays && subscriptionProduct.trialDays > 0">
+                <!-- <p class="small" v-if="subscriptionProduct.trialDays && subscriptionProduct.trialDays > 0">
                     Cactus Plus is free for {{subscriptionProduct.trialDays}} days, then {{pricePerMonth}} /
                     {{displayPeriod}}<span v-if="isAnnualBilling"> (billed annually)</span>. No commitment. Cancel
                     anytime.
@@ -14,7 +13,22 @@
                 <p class="small" v-else>
                     Cactus Plus is {{pricePerMonth}} /
                     {{displayPeriod}}<span v-if="isAnnualBilling"> (billed annually)</span>. Cancel&nbsp;anytime.
-                </p>
+                </p> -->
+                <ul>
+                    <li>
+                        <svg-icon icon="heartOutline" class="icon"/>
+                        <span>Personalized journal app with daily questions to reflect&nbsp;on</span>
+                    </li>
+                    <li>
+                        <svg-icon icon="pie" class="icon"/>
+                        <span>Insights dashboard, showing the things that make you&nbsp;happy</span>
+                    </li>
+                    <li>
+                        <svg-icon icon="checkCircle" class="icon"/>
+                        <span>Personality tests to help you better know&nbsp;yourself</span>
+                    </li>
+                </ul>
+
             </div>
         </transition>
     </div>
@@ -26,8 +40,13 @@
     import { Prop } from "vue-property-decorator";
     import SubscriptionProduct, { BillingPeriod } from "@shared/models/SubscriptionProduct";
     import { formatPriceCentsUsd } from "@shared/util/StringUtil";
+    import SvgIcon from "@components/SvgIcon.vue";
 
-    @Component
+    @Component({
+        components: {
+            SvgIcon,
+        }
+    })
     export default class ProductUpsellMini extends Vue {
         name = "ProductUpsellMini";
 
@@ -78,27 +97,32 @@
     @import "mixins";
     @import "variables";
 
-
-    .small {
-        font-size: 1.4rem;
-        margin-bottom: 0;
-        opacity: .8;
-    }
-
-    button {
-        margin: 0 auto 2.4rem;
-        max-width: 40rem;
-        width: 100%;
+    ul {
+        list-style: none;
+        margin: 0 0 3.2rem;
+        padding: 0;
+        text-align: left;
 
         @include r(768) {
-            margin-bottom: .8rem;
+            margin: 0 auto .8rem;
+            max-width: 40rem;
         }
     }
 
-    .checkout-info {
-        p {
-            max-width: 40rem;
-            margin: 0 auto;
+    li {
+        align-items: flex-start;
+        display: flex;
+
+        &:not(:last-child) {
+            margin-bottom: 2.4rem;
+        }
+
+        img {
+            flex-shrink: 0;
+            height: 2.8rem;
+            margin: .4rem 1.6rem 0 0;
+            width: 2.8rem;
         }
     }
+
 </style>

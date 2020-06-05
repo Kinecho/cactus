@@ -1,23 +1,29 @@
 <template>
-    <div v-if="product">
+    <div class="upsellContainer" v-if="product">
         <template v-if="upgradeSuccess">
             <h1>Upgrade Success!</h1>
             <p>You have successfully started your trial of Cactus Plus.</p>
-
             <button @click="$emit('next')">Continue</button>
         </template>
         <template v-else>
             <div class="alert error" v-if="errorMessage">{{errorMessage}}</div>
-            <markdown-text v-if="markdownText" :source="markdownText"/>
+            <div class="textBox">
+                <h2><markdown-text v-if="markdownText" :source="markdownText"/></h2>
+                <div class="btnContainer">
+                    <button class="tryIt" @click="checkout" :disabled="checkoutLoading">{{ctaText}}</button>
+                    <router-link :to="pricingHref" tag="a" class="button tertiary" target="_blank">More info & other plans</router-link>
+                </div>
+                <p class="small">
+                    Cactus Plus is free for days...
+                </p>
+            </div>
             <product-upsell-mini
+                    class="upsellInfo"
                     :subscription-product="product"
                     cta-text="Try it free"
                     :checkout-loading="checkoutLoading"
                     @checkout="startCheckout"
             />
-
-            <router-link :to="pricingHref" tag="a" class="fancyLink" target="_blank">More info & other plans
-            </router-link>
         </template>
     </div>
 </template>
@@ -58,6 +64,9 @@
         @Prop({ type: Object as () => CactusMember, required: true })
         member!: CactusMember;
 
+        @Prop({ type: String, default: "Try it free" })
+        ctaText!: string;
+
         get upgradeSuccess(): boolean {
             return isPremiumTier(this.member.tier) || this.checkoutInfo?.success ?? false
         }
@@ -91,14 +100,71 @@
             this.$emit("next");
         }
 
+        checkout() {
+            this.$emit('checkout', this.subscriptionProduct);
+        }
     }
 </script>
 
 <style scoped lang="scss">
     @import "mixins";
 
-    .fancyLink {
-        @include fancyLink;
-        font-size: 1.4rem;
+    .small {
+        font-size: 1.6rem;
+        opacity: .8;
+    }
+
+    h2 {
+        line-height: 1.2;
+        margin-bottom: 2.4rem;
+    }
+
+
+
+    .upsellContainer {
+        padding: 0 2.4rem;
+
+        @include r(768) {
+            align-items: center;
+            display: flex;
+            padding: 0 6.4rem;
+        }
+    }
+
+    .textBox {
+        @include r(768) {
+            padding-right: 6.4rem;
+            width: 66%;
+        }
+    }
+
+    .upsellInfo {
+        @include shadowbox;
+        font-size: 1.8rem;
+        max-width: 30rem;
+        padding: 3.2rem;
+        width: 100%;
+
+        @include r(768) {
+            align-self: center;
+            max-width: 33%;
+        }
+    }
+
+    .btnContainer {
+        align-items: center;
+        display: flex;
+        font-size: 1.8rem;
+        margin-bottom: 4rem;
+
+        .button {
+            flex-grow: 0;
+        }
+    }
+
+    .tryIt {
+        flex-grow: 0;
+        margin-right: 1.6rem;
+        min-width: 24rem;
     }
 </style>
