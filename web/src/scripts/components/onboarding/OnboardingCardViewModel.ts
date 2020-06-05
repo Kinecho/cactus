@@ -1,4 +1,5 @@
 import { CactusElement } from "@shared/models/CactusElement";
+import { ActionButton, ContentAction, LinkStyle } from "@shared/models/PromptContent";
 
 export enum CardType {
     text = "text",
@@ -12,6 +13,11 @@ export enum CardType {
 
 export enum TextReplacementType {
     selected_insight_word = "selected_insight_word"
+}
+
+export interface LinkableActionButton extends ActionButton {
+    href?: string;
+    target?: "_blank" | null | "" | undefined;
 }
 
 export default class OnboardingCardViewModel {
@@ -42,6 +48,8 @@ export default class OnboardingCardViewModel {
      * @type {boolean}
      */
     defaultNextActionsEnabled: boolean = true;
+
+    buttons: LinkableActionButton[] = [];
 
     getMarkdownText(options?: { selectedInsight?: string | undefined | null }): string | undefined {
         if (!this.textReplacementType) {
@@ -155,7 +163,17 @@ export default class OnboardingCardViewModel {
                 slug: "activity-completed",
                 type: CardType.text,
                 text: "You completed your first activity with Cactus! We are excited to be your co-pilot on your journey of self-understanding.",
-                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard7.png?alt=media&token=591df28c-fbd1-405c-8a37-31e8d1f6af9b"
+                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard7.png?alt=media&token=591df28c-fbd1-405c-8a37-31e8d1f6af9b",
+                buttons: [{
+                    action: ContentAction.complete,
+                    label: "Explore Cactus",
+                    linkStyle: LinkStyle.buttonPrimary,
+                }, {
+                    action: ContentAction.showPricing,
+                    label: "Pricing Page",
+                    linkStyle: LinkStyle.fancyLink,
+                    target: "_blank",
+                }]
             }),
         ];
         cards.forEach((card, i) => card.id = `card${ i + 1 }`);

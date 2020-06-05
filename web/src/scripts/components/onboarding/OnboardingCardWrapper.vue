@@ -8,6 +8,7 @@
                 @next="$emit('next')"
                 @previous="$emit('previous')"
                 @checkout="$emit('checkout')"
+                @close="$emit('close')"
         />
     </div>
 </template>

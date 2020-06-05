@@ -20,6 +20,7 @@
                     @next="nextAction"
                     @previous="previous"
                     @checkout="startCheckout"
+                    @close="closeOnboarding"
             />
         </transition-group>
 
@@ -33,6 +34,14 @@
                 <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
             </svg>
         </button>
+
+        <Modal :show="showCloseConfirm" :show-close-button="false">
+            <div slot="body" class="confirm-body">
+                <h2>Are you sure you want to exit? Any unsaved progress will be lost.</h2>
+                <button @click="showCloseConfirm = false">No, continue</button>
+                <button @click="closeOnboarding">Yes, exit.</button>
+            </div>
+        </Modal>
     </div>
 </template>
 
@@ -54,8 +63,11 @@
     import { startCheckout } from "@web/checkoutService";
     import { stringifyJSON } from "@shared/util/ObjectUtil";
     import { InsightWord } from "@shared/models/ReflectionResponse";
+    import Modal from "@components/Modal.vue";
+    import { pushRoute } from "@web/NavigationUtil";
 
     const logger = new Logger("Onboarding");
+
     Vue.use(Vue2TouchEvents)
 
     const transitionName = {
@@ -69,6 +81,7 @@
             PhotoCard,
             ProgressStepper,
             OnboardingCard,
+            Modal,
         }
     })
     export default class Onboarding extends Vue {
@@ -89,6 +102,7 @@
         @Prop({ type: Object as () => CactusMember, required: true })
         member!: CactusMember
 
+        showCloseConfirm = false;
         selectedWord: InsightWord | null = null;
         checkoutLoading = false;
         checkoutError: string | null = null;
@@ -190,6 +204,14 @@
                 const index = Math.max(this.index - 1, 0);
                 this.setIndex(index);
             }
+        }
+
+        async closeOnboarding() {
+            if (this.showCloseConfirm) {
+                await pushRoute(PageRoute.JOURNAL_HOME);
+                return;
+            }
+            this.showCloseConfirm = true;
         }
 
         async startCheckout() {
@@ -318,5 +340,10 @@
         &.next {
             right: 0;
         }
+    }
+
+    .confirm-body {
+        background-color: $lightDolphin;
+        padding: 2rem;
     }
 </style>
