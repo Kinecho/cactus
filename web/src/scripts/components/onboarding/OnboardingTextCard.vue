@@ -29,13 +29,29 @@
 </script>
 
 <style scoped lang="scss">
+    @import "variables";
+    @import "mixins";
+
     .text-card {
-        padding: 3rem;
+        @include r(600) {
+            display: flex;
+        }
     }
 
-    img {
-        width: 100%;
+    .textBox {
+        @include r(600) {
+            padding-right: 6.4rem;
+            width: 66%;
+        }
+    }
+
+    .image {
         max-width: 30rem;
-        align-self: center;
+        width: 100%;
+
+        @include r(600) {
+            align-self: center;
+            max-width: 33%;
+        }
     }
 </style>

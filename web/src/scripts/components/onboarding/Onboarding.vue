@@ -7,7 +7,7 @@
 
         <transition-group :name="cardTransitionName" mode="in-out" tag="div" class="card-container">
             <OnboardingCard
-                    class="card"
+                    class="cardi"
                     v-for="card in cards"
                     v-show="card.id === currentCard.id"
                     :key="card.id"
@@ -15,10 +15,16 @@
             />
         </transition-group>
 
-        <div class="footer actions">
-            <button @click="previous" :disabled="!previousEnabled" class="no-loading">Previous</button>
-            <button :disabled="!nextEnabled" @click="next" class="no-loading">Next</button>
-        </div>
+        <button aria-label="Previous slide" @click="previous" :disabled="!previousEnabled" class="previous tertiary no-loading">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+            </svg>
+        </button>
+        <button aria-label="Next slide" :disabled="!nextEnabled" @click="next" class="next tertiary no-loading">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+            </svg>
+        </button>
     </div>
 </template>
 
@@ -136,37 +142,77 @@
 
     .onboarding-main {
         background-color: $beige;
-        height: 100vh;
-        display: flex;
-        flex: 1;
-        flex-direction: column;
-    }
-
-    .card-container {
-        position: relative;
-        flex: 1;
+        font-size: 2rem;
+        min-height: 100vh;
         overflow: auto;
+        position: relative;
+        width: 100%;
 
-        .card {
-            width: 100%;
+        @include r(374) {
+            font-size: 2.4rem;
+        }
+        @include r(600) {
+            align-items: center;
+            display: flex;
+            font-size: 3.2rem;
+        }
+        @include r(768) {
+            font-size: 4rem;
+        }
+        @include r(960) {
+            font-size: 4.8rem;
         }
     }
 
-    .footer {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        /*position: fixed;*/
-        background: $pink;
-        padding: 1rem;
-        bottom: 0;
+    .progress {
         left: 0;
+        position: absolute;
         right: 0;
-        flex: 0;
+        top: 0;
+        width: 100%;
+    }
 
-        button {
-            margin-right: 2rem;
-            flex: 1;
+    .card-container {
+        padding: 2.4rem;
+
+        @include r(374) {
+            padding: 3.2rem;
+        }
+        @include r(600) {
+            align-items: center;
+            display: flex;
+            flex-grow: 1;
+            margin: 0 auto;
+            max-width: 110rem;
+            padding: 0;
+        }
+    }
+
+    .cardi {
+        max-width: 110rem; //must have to keep transition smooth
+        width: 100%;
+    }
+
+    .tertiary {
+        position: absolute;
+        top: 50vh;
+        z-index: 1;
+
+        svg {
+            fill: $darkestGreen;
+            height: 1.6rem;
+            width: 1.6rem;
+        }
+
+        &.previous {
+            left: 0;
+
+            svg {
+                transform: scale(-1);
+            }
+        }
+        &.next {
+            right: 0;
         }
     }
 </style>
