@@ -1,7 +1,7 @@
 <template>
     <div>
-        <h3>YAAAS</h3>
-        <cactus-confetti running="true"/>
+        <h1>YAAAS</h1>
+        <cactus-confetti :running="true"/>
     </div>
 </template>
 

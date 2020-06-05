@@ -1,10 +1,10 @@
 <template>
     <div>
         <transition name="component-fade" appear mode="out-in">
-            <div v-if="loading" key="loading">
+            <div v-if="loading" :key="'product-loading'">
                 <spinner message="Loading..." :delay="1200"/>
             </div>
-            <div v-else key="checkout-info" class="checkout-info">
+            <div v-else :key="'checkout-info'" class="checkout-info">
                 <button @click="checkout" :disabled="checkoutLoading">{{ctaText}}</button>
                 <p class="small" v-if="subscriptionProduct.trialDays && subscriptionProduct.trialDays > 0">
                     Cactus Plus is free for {{subscriptionProduct.trialDays}} days, then {{pricePerMonth}} /
@@ -38,7 +38,7 @@
         @Prop({ type: Boolean, required: false, default: false })
         checkoutLoading!: boolean;
 
-        @Prop({type: String, default: "Try it free"})
+        @Prop({ type: String, default: "Try it free" })
         ctaText!: string;
 
         get loading(): boolean {
@@ -75,5 +75,30 @@
 </script>
 
 <style scoped lang="scss">
+    @import "mixins";
+    @import "variables";
 
+
+    .small {
+        font-size: 1.4rem;
+        margin-bottom: 0;
+        opacity: .8;
+    }
+
+    button {
+        margin: 0 auto 2.4rem;
+        max-width: 40rem;
+        width: 100%;
+
+        @include r(768) {
+            margin-bottom: .8rem;
+        }
+    }
+
+    .checkout-info {
+        p {
+            max-width: 40rem;
+            margin: 0 auto;
+        }
+    }
 </style>
