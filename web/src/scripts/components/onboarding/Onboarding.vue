@@ -37,7 +37,7 @@
 <script lang="ts">
     import Vue from "vue";
     import Component from "vue-class-component"
-    import OnboardingCardViewModel, { CardType } from "@components/onboarding/OnboardingCardViewModel";
+    import OnboardingCardViewModel from "@components/onboarding/OnboardingCardViewModel";
     import Logger from "@shared/Logger"
     import TextCard from "@components/onboarding/OnboardingTextCard.vue";
     import Vue2TouchEvents from "vue2-touch-events";
@@ -50,7 +50,8 @@
     import { pushRoute } from "@web/NavigationUtil";
     import { PageRoute } from "@shared/PageRoutes";
     import CactusMember from "@shared/models/CactusMember";
-    import { isPremiumTier } from "@shared/models/MemberSubscription";
+    import { startCheckout } from "@web/checkoutService";
+    import { stringifyJSON } from "@shared/util/ObjectUtil";
 
     const logger = new Logger("Onboarding");
     Vue.use(Vue2TouchEvents)
@@ -71,7 +72,7 @@
     export default class Onboarding extends Vue {
         name = "Onboarding";
 
-        @Prop({type: Array as () => OnboardingCardViewModel[], required: true})
+        @Prop({ type: Array as () => OnboardingCardViewModel[], required: true })
         cards!: OnboardingCardViewModel[];
 
         @Prop({ type: Number, default: 0, required: true })
@@ -163,13 +164,30 @@
             }
         }
 
-        startCheckout() {
+        async startCheckout() {
             this.checkoutLoading = true;
+            try {
+                const successPath = `${ PageRoute.ONBOARDING }/${ this.currentCard.slug ?? this.index }/success`
+                const cancelPath = `${ PageRoute.ONBOARDING }/${ this.currentCard.slug ?? this.index }`
 
-            setTimeout(() => {
+                if (!this.product) {
+                    logger.error("No product was found, this is bad");
+                    return;
+                }
+                const result = await startCheckout({
+                    subscriptionProductId: this.product.entryId!,
+                    subscriptionProduct: this.product,
+                    member: this.member,
+                    stripeSuccessUrl: successPath,
+                    stripeCancelUrl: cancelPath,
+                })
                 this.checkoutLoading = false;
-                pushRoute(`${ PageRoute.ONBOARDING }/${ this.index + 1 }/success`)
-            }, 2000)
+                logger.info("Checkout result", stringifyJSON(result, 2));
+            } catch (error) {
+                logger.error("An error was thrown during Onboarding checkout.", error);
+                this.checkoutLoading = false;
+            }
+
         }
     }
 </script>
