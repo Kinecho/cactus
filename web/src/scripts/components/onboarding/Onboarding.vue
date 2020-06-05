@@ -242,10 +242,10 @@
     }
 
     .card-container {
-        padding: 2.4rem;
+        padding: 4rem 2.4rem;
 
         @include r(374) {
-            padding: 3.2rem;
+            padding: 5.6rem 3.2rem;
         }
         @include r(600) {
             align-items: center;

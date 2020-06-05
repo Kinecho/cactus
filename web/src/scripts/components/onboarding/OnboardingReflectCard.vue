@@ -59,9 +59,15 @@
     @import "mixins";
 
     .element {
-        height: 16vw;
-        margin-left: -1.6rem;
-        width: 16vw;
+        height: 30vw;
+        margin-left: -.8rem;
+        width: 30vw;
+
+        @include r(600) {
+            height: 16vw;
+            margin-left: -1.6rem;
+            width: 16vw;
+        }
 
         .path {
             stroke-dasharray: 0 100;
@@ -85,7 +91,7 @@
 
     strong {
         display: block;
-        margin-bottom: .8rem;
+        margin-bottom: 1.2rem;
 
         @include r(768) {
             margin-bottom: 1.6rem;
@@ -96,7 +102,12 @@
         font-family: $font-stack;
         background: transparent;
         border: 0;
+        color: $darkestGreen;
         font-size: 1.8rem;
+        min-height: 50vh;
+        opacity: .8;
+        padding: 0;
+        transition: padding .6s;
         width: 100%;
 
         @include r(374) {
@@ -107,6 +118,11 @@
         }
         @include r(960) {
             font-size: 3.2rem;
+        }
+
+        &:focus {
+            outline-color: rgba(0,0,0,.3);
+            padding: .8rem 1.6rem;
         }
     }
 </style>

@@ -34,11 +34,16 @@
     @import "mixins";
 
     .elements-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 80vh;
         padding: 0 2.4rem;
 
         @include r(600) {
             align-items: center;
-            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
             padding: 0 6.4rem;
         }
     }
