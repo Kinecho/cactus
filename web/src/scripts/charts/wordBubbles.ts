@@ -224,6 +224,7 @@ export function drawWordBubbleChart(parentSelector: string, words: InsightWord[]
     .style("font-size", function (d) {
         return Math.min(2 * d.r, (2 * d.r - 8) / this.getComputedTextLength() * 14) + "px";
     })
+    .style("pointer-events", "none")
     .style("fill", "#FFF")
     .style("cursor", "pointer")
     .append("title")
