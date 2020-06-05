@@ -8,7 +8,7 @@
                 @next="$emit('next')"
                 @previous="$emit('previous')"
                 @checkout="$emit('checkout')"
-                @close="$emit('close')"
+                @close="handleClose"
         />
     </div>
 </template>
@@ -66,6 +66,10 @@
 
         setSelectedWord(word: InsightWord | null) {
             this.$emit('selectedWord', word);
+        }
+
+        handleClose(force:boolean=false) {
+            this.$emit('close', force)
         }
 
         get cardInfo(): CardProps {

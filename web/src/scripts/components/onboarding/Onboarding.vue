@@ -206,8 +206,8 @@
             }
         }
 
-        async closeOnboarding() {
-            if (this.showCloseConfirm) {
+        async closeOnboarding(force: boolean=false) {
+            if (this.showCloseConfirm || force) {
                 await pushRoute(PageRoute.JOURNAL_HOME);
                 return;
             }

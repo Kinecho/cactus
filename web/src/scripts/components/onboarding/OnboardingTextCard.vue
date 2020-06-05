@@ -22,7 +22,6 @@
     import { Prop } from "vue-property-decorator";
     import MarkdownText from "@components/MarkdownText.vue";
     import ActionButton from "@components/ActionButton.vue";
-    import { pushRoute } from "@web/NavigationUtil";
 
     @Component({
         components: {
@@ -44,7 +43,7 @@
         }
 
         closeOnboarding(){
-            this.$emit('close')
+            this.$emit('close', true)
         }
     }
 </script>
