@@ -24,7 +24,7 @@ export default class OnboardingCardViewModel {
     text?: string;
     imageUrl?: string;
     element?: CactusElement;
-
+    promptContentEntryId?: string;
     /**
      * A string token to use to replace values in the text string
      * @type {string}
@@ -32,6 +32,16 @@ export default class OnboardingCardViewModel {
     textReplacerToken: string = "{{value}}"
     defaultReplacementValue?: string;
     textReplacementType?: TextReplacementType;
+
+    /**
+     * True if the default next button actions are enabled,
+     * such as keyboard inputs, swipe or the onboarding arrows.
+     *
+     * When false, it will be up to the component to emit the "next" event in order to continue.
+     *
+     * @type {boolean}
+     */
+    defaultNextActionsEnabled: boolean = true;
 
     getMarkdownText(options?: { selectedInsight?: string | undefined | null }): string | undefined {
         if (!this.textReplacementType) {
@@ -88,7 +98,10 @@ export default class OnboardingCardViewModel {
             OnboardingCardViewModel.create({
                 slug: "first-question",
                 type: CardType.reflect,
+                defaultNextActionsEnabled: false,
                 text: "Which physical activities make you feel better?",
+                //TODO: Make this dynamic basic on configs of some sort
+                promptContentEntryId: "Nno8gimhC22Q0wjJUqyq",
                 element: CactusElement.energy,
             }),
             OnboardingCardViewModel.create({
@@ -109,7 +122,10 @@ export default class OnboardingCardViewModel {
             OnboardingCardViewModel.create({
                 slug: "how-does-it-make-you-feel",
                 type: CardType.reflect,
+                defaultNextActionsEnabled: false,
                 text: "How does **{{value}}** make you feel?",
+                //TODO: Make this dynamic basic on configs of some sort
+                promptContentEntryId: "8ryd9iko0mTsefgQLVJW",
                 element: CactusElement.energy,
                 defaultReplacementValue: "Physical Activity",
                 textReplacementType: TextReplacementType.selected_insight_word,

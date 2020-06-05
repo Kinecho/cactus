@@ -17,7 +17,7 @@
                     :checkout-info="checkoutInfo"
                     :selected-word="selectedWord"
                     @selectedWord="setSelectedWord"
-                    @next="next"
+                    @next="nextAction"
                     @previous="previous"
                     @checkout="startCheckout"
             />
@@ -28,7 +28,7 @@
                 <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
             </svg>
         </button>
-        <button aria-label="Next slide" :disabled="!nextEnabled" @click="next" class="next tertiary no-loading">
+        <button v-if="showNextButton" aria-label="Next slide" :disabled="!nextEnabled" @click="next" class="next tertiary no-loading">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
                 <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
             </svg>
@@ -39,7 +39,7 @@
 <script lang="ts">
     import Vue from "vue";
     import Component from "vue-class-component"
-    import OnboardingCardViewModel from "@components/onboarding/OnboardingCardViewModel";
+    import OnboardingCardViewModel, { CardType } from "@components/onboarding/OnboardingCardViewModel";
     import Logger from "@shared/Logger"
     import TextCard from "@components/onboarding/OnboardingTextCard.vue";
     import Vue2TouchEvents from "vue2-touch-events";
@@ -84,12 +84,12 @@
         product?: SubscriptionProduct | null;
 
         @Prop({ type: String as () => PageStatus, required: false, default: null })
-        pageStatus: PageStatus | null;
+        pageStatus!: PageStatus | null;
 
         @Prop({ type: Object as () => CactusMember, required: true })
         member!: CactusMember
 
-        selectedWord: InsightWord|null = null;
+        selectedWord: InsightWord | null = null;
         checkoutLoading = false;
         checkoutError: string | null = null;
         cardTransitionName = transitionName.next;
@@ -112,6 +112,14 @@
             document.removeEventListener("keyup", this.handleDocumentKeyUp);
         }
 
+        get showNextButton(): boolean {
+            return this.defaultNextActionEnabled && this.nextEnabled;
+        }
+
+        get defaultNextActionEnabled(): boolean {
+            return this.currentCard.defaultNextActionsEnabled
+        }
+
         get totalPages() {
             return this.cards.length;
         }
@@ -130,7 +138,7 @@
             return this.index > 0;
         }
 
-        setSelectedWord(word: InsightWord|null) {
+        setSelectedWord(word: InsightWord | null) {
             this.selectedWord = word;
         }
 
@@ -148,6 +156,10 @@
 
         handleSwipeEvent(direction: string) {
             logger.info("Handling swipe event", direction);
+            if (!this.defaultNextActionEnabled) {
+                logger.info("swipe is not enabled")
+                return;
+            }
             if (direction === "left") {
                 this.next()
             }
@@ -157,8 +169,15 @@
             }
         }
 
-        next() {
-            if (this.nextEnabled) {
+        /**
+         * Action for when the component fires "Next".
+         */
+        nextAction() {
+            this.next(true);
+        }
+
+        next(force = false) {
+            if ((this.nextEnabled && this.defaultNextActionEnabled) || force) {
                 this.cardTransitionName = transitionName.next;
                 const index = Math.min(this.cards.length - 1, this.index + 1);
                 this.setIndex(index);
