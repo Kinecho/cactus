@@ -36,6 +36,7 @@
 
         wordSelected(word: InsightWord | null) {
             this.selectedWord = word;
+            this.$emit('selectedWord', word);
         }
     }
 </script>

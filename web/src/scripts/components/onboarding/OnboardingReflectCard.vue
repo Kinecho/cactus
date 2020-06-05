@@ -1,7 +1,9 @@
 <template>
     <div class="elementReflectContainer">
         <result-element :element="card.element" :selectable="false" :selected="false" :pulsing="false" :withLabel="false"/>
-        <strong><markdown-text :source="markdownText"/></strong>
+        <strong>
+            <markdown-text :source="markdownText"/>
+        </strong>
         <textarea placeholder="Write something..." v-model="responseText"/>
     </div>
 </template>
@@ -29,13 +31,13 @@
         @Prop({ type: Object as () => OnboardingCardViewModel, required: true })
         card!: OnboardingCardViewModel;
 
-        @Prop({ type: String, required: false })
-        selectedInsight?: string;
+        @Prop({ type: String, required: false, default: null })
+        selectedInsightWord!: string | null;
 
         responseText = ""
 
-        get markdownText(): string|undefined {
-            return this.card.getMarkdownText({ selectedInsight: this.selectedInsight })
+        get markdownText(): string | undefined {
+            return this.card.getMarkdownText({ selectedInsight: this.selectedInsightWord })
         }
 
     }

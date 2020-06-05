@@ -4,6 +4,7 @@
                 :is="cardInfo.type"
                 :member="member"
                 v-bind="cardInfo.props"
+                @selectedWord="setSelectedWord"
                 @next="$emit('next')"
                 @previous="$emit('previous')"
                 @checkout="$emit('checkout')"
@@ -59,14 +60,23 @@
         @Prop({ type: Object as () => CactusMember, required: true })
         member!: CactusMember;
 
+        @Prop({ type: Object as () => InsightWord, required: false, default: null })
+        selectedWord!: InsightWord | null;
+
+        setSelectedWord(word: InsightWord | null) {
+            this.$emit('selectedWord', word);
+        }
+
         get cardInfo(): CardProps {
             let info: CardProps = { type: "text-card", props: { card: this.card } }
             switch (this.card.type) {
                 case CardType.text:
                     info.type = "text-card";
+                    info.props.selectedInsightWord = this.selectedWord?.word;
                     break;
                 case CardType.reflect:
                     info.type = "reflect-card";
+                    info.props.selectedInsightWord = this.selectedWord?.word;
                     // info.props.selectedInsight = "Test Value";
                     break;
                 case CardType.elements:
