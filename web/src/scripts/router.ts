@@ -8,6 +8,8 @@ import LoadingPage from "@web/views/LoadingPage.vue";
 import ErrorPage from "@web/views/ErrorPage.vue";
 import { Component } from "vue";
 import { Screen } from "@components/gapanalysis/GapAssessmentTypes";
+import CactusMemberService from "@web/services/CactusMemberService";
+import { QueryParam } from "@shared/util/queryParams";
 
 const logger = new Logger("router.ts");
 
@@ -249,15 +251,24 @@ const routes: MetaRouteConfig[] = [
         component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@web/views/OnboardingPage.vue")),
         name: "Onboarding",
         path: PageRoute.ONBOARDING,
+        meta: {
+            passMember: true,
+            authRequired: true,
+        },
         props: (route) => {
             return {
                 page: route.params.page ? Number(route.params.page) : 1,
+                pageStatus: route.params.status ?? null,
             }
         },
         children: [
             {
                 path: ":page",
                 props: true,
+                children: [{
+                    path: ":status",
+                    props: true,
+                }]
             }
         ]
     },
@@ -288,6 +299,7 @@ router.beforeEach((to, from, next) => {
     }
 });
 
+//we now can trust the member has been loaded from auth during app start
 router.beforeEach((to, from, next) => {
     try {
         const extUrl = to.fullPath.startsWith("/") ? to.fullPath.substring(1) : to.fullPath
@@ -295,6 +307,11 @@ router.beforeEach((to, from, next) => {
             window.location.href = extUrl;
             next();
             return;
+        } else if (to.meta.authRequired && !CactusMemberService.sharedInstance.isLoggedIn) {
+            next({
+                path: PageRoute.SIGNUP,
+                query: { [QueryParam.MESSAGE]: "Please log in to continue", [QueryParam.REDIRECT_URL]: to.fullPath }
+            })
         } else {
             next();
         }

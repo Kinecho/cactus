@@ -17,14 +17,19 @@ export default class CactusMemberService {
     authUnsubscriber?: Unsubscribe;
     protected currentMemberUnsubscriber?: ListenerUnsubscriber;
     currentMember?: CactusMember;
+    currentUser?: FirebaseUser | null;
     protected memberHasLoaded = false;
+
+    get isLoggedIn(): boolean {
+        return !!this.currentMember;
+    }
 
     constructor() {
         this.authUnsubscriber = getAuth().onAuthStateChanged(async user => {
             if (this.currentMemberUnsubscriber) {
                 this.currentMemberUnsubscriber();
             }
-
+            this.currentUser = user;
             if (user) {
                 this.currentMemberUnsubscriber = this.observeByUserId(user.uid, {
                     onData: async member => {
@@ -124,8 +129,11 @@ export default class CactusMemberService {
         return new Promise<CactusMember | undefined>(resolve => {
             const authUnsubscriber = getAuth().onAuthStateChanged(async user => {
                 authUnsubscriber();
+                this.currentUser = user;
                 if (user) {
                     const member = await this.getByUserId(user.uid);
+                    this.currentMember = member;
+                    this.memberHasLoaded = true;
                     resolve(member);
                 } else {
                     resolve(undefined)
@@ -174,6 +182,10 @@ export default class CactusMemberService {
 
     observeCurrentMember(options: { onData: (args: { user: FirebaseUser | undefined, member: CactusMember | undefined }) => void }): ListenerUnsubscriber {
         let memberUnsubscriber: ListenerUnsubscriber | undefined;
+        //Give instant feedback if the member has already been loaded
+        if (this.memberHasLoaded) {
+            options.onData({ member: this.currentMember, user: this.currentUser ?? undefined })
+        }
         const authUnsubscriber = getAuth().onAuthStateChanged(async user => {
             //reset subscriber
             if (memberUnsubscriber) {

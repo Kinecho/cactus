@@ -7,14 +7,17 @@
 
         <transition-group :name="cardTransitionName" mode="in-out" tag="div" class="card-container">
             <OnboardingCard
-                    class="cardi"
+                    class="card"
                     v-for="card in cards"
                     v-if="card.id === currentCard.id"
                     :key="card.id"
                     :card="card"
                     :product="product"
+                    :member="member"
+                    :checkout-info="checkoutInfo"
                     @next="next"
                     @previous="previous"
+                    @checkout="startCheckout"
             />
         </transition-group>
 
@@ -43,6 +46,10 @@
     import OnboardingCard from "@components/onboarding/OnboardingCardWrapper.vue";
     import { Prop } from "vue-property-decorator";
     import SubscriptionProduct from "@shared/models/SubscriptionProduct";
+    import { CheckoutInfo, PageStatus } from "@components/onboarding/OnboardingTypes";
+    import { pushRoute } from "@web/NavigationUtil";
+    import { PageRoute } from "@shared/PageRoutes";
+    import CactusMember from "@shared/models/CactusMember";
 
     const logger = new Logger("Onboarding");
     Vue.use(Vue2TouchEvents)
@@ -71,9 +78,23 @@
         @Prop({ type: Object as () => SubscriptionProduct, required: false, default: null })
         product?: SubscriptionProduct | null;
 
-        cardTransitionName = transitionName.next;
+        @Prop({ type: String as () => PageStatus, required: false, default: null })
+        pageStatus: PageStatus | null;
 
+        @Prop({ type: Object as () => CactusMember, required: true })
+        member!: CactusMember
+
+        checkoutLoading = false;
+        cardTransitionName = transitionName.next;
         keyListener: any = null;
+
+        get checkoutInfo(): CheckoutInfo {
+            const success = this.pageStatus === PageStatus.success;
+            return {
+                loading: this.checkoutLoading,
+                success: success,
+            }
+        }
 
         mounted() {
             this.keyListener = document.addEventListener("keyup", this.handleDocumentKeyUp)
@@ -138,6 +159,14 @@
                 const index = Math.max(this.index - 1, 0);
                 this.setIndex(index);
             }
+        }
+
+        startCheckout() {
+            this.checkoutLoading = true;
+
+            setTimeout(() => {
+                pushRoute(`${ PageRoute.ONBOARDING }/${ this.index + 1 }/success`)
+            }, 2000)
         }
     }
 </script>
@@ -218,6 +247,7 @@
                 transform: scale(-1);
             }
         }
+
         &.next {
             right: 0;
         }

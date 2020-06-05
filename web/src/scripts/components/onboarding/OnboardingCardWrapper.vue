@@ -2,9 +2,12 @@
     <div class="card-wrapper">
         <component class="content"
                 :is="cardInfo.type"
+                :member="member"
                 v-bind="cardInfo.props"
                 @next="$emit('next')"
-                @previous="$emit('previous')"/>
+                @previous="$emit('previous')"
+                @checkout="$emit('checkout')"
+        />
     </div>
 </template>
 
@@ -22,6 +25,8 @@
     import SubscriptionProduct from "@shared/models/SubscriptionProduct";
     import UpsellCard from "@components/onboarding/OnboardingUpsellCard.vue";
     import CelebrateCard from "@components/onboarding/OnboardingCelebrateCard.vue";
+    import { CheckoutInfo } from "@components/onboarding/OnboardingTypes";
+    import CactusMember from "@shared/models/CactusMember";
 
     interface CardProps {
         type: string,
@@ -48,15 +53,18 @@
         @Prop({ type: Object as () => SubscriptionProduct, required: false, default: null })
         product?: SubscriptionProduct | null;
 
+        @Prop(({ type: Object as () => CheckoutInfo, required: false, default: null }))
+        checkoutInfo!: CheckoutInfo | null;
+
+        @Prop({ type: Object as () => CactusMember, required: true })
+        member!: CactusMember;
+
         get cardInfo(): CardProps {
             let info: CardProps = { type: "text-card", props: { card: this.card } }
             switch (this.card.type) {
                 case CardType.text:
                     info.type = "text-card";
                     break;
-            // case CardType.photo:
-            //     info.type = "photo-card";
-            //     break;
                 case CardType.reflect:
                     info.type = "reflect-card";
                     // info.props.selectedInsight = "Test Value";
@@ -65,16 +73,14 @@
                     info.type = "elements-card";
                     break;
                 case CardType.word_cloud:
-                    let words: InsightWord[] = [{ word: "Shadow", frequency: 0.8 }, {
-                        word: "Dogs",
-                        frequency: 0.7
-                    }, { word: "Cats", frequency: 1 }]
                     info.type = "word-cloud-card";
-                    info.props.words = words;
+                    info.props.words = this.member?.wordCloud ?? [];
                     break;
                 case CardType.upsell:
                     info.type = "upsell-card";
                     info.props.product = this.product ?? null;
+                    info.props.checkoutInfo = this.checkoutInfo;
+                    info.props.member = this.member;
                     break;
                 case CardType.celebrate:
                     info.type = "celebrate-card"

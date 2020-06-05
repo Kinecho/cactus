@@ -1,6 +1,11 @@
 <template>
     <div class="main">
-        <onboarding :index="page - 1" @index="setIndex" :product="product"/>
+        <onboarding :index="page - 1"
+                @index="setIndex"
+                :product="product"
+                :page-status="pageStatus"
+                :member="member"
+        />
     </div>
 </template>
 
@@ -14,6 +19,8 @@
     import SubscriptionProductService from "@web/services/SubscriptionProductService";
     import SubscriptionProduct, { BillingPeriod } from "@shared/models/SubscriptionProduct";
     import Logger from "@shared/Logger"
+    import { PageStatus } from "@components/onboarding/OnboardingTypes";
+    import CactusMember from "@shared/models/CactusMember";
 
     const logger = new Logger("OnboardingPage");
 
@@ -26,7 +33,13 @@
         @Prop({ type: Number, required: false, default: 1 })
         page: number;
 
-        product: SubscriptionProduct|null = null;
+        @Prop({ type: String as () => PageStatus, required: false, default: null })
+        pageStatus: PageStatus | null;
+
+        @Prop({ type: Object as () => CactusMember, required: true })
+        member!: CactusMember;
+
+        product: SubscriptionProduct | null = null;
         billingPeriod = BillingPeriod.yearly;
         productLoaded = false;
 

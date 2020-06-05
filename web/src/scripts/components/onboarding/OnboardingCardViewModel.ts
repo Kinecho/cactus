@@ -33,13 +33,13 @@ export default class OnboardingCardViewModel {
     defaultReplacementValue?: string;
     textReplacementType?: TextReplacementType;
 
-    getMarkdownText(options: { selectedInsight?: string | undefined | null }): string | undefined {
+    getMarkdownText(options?: { selectedInsight?: string | undefined | null }): string | undefined {
         if (!this.textReplacementType) {
             return this.text;
         }
         switch (this.textReplacementType) {
             case TextReplacementType.selected_insight_word:
-                return this.replaceText(options.selectedInsight);
+                return this.replaceText(options?.selectedInsight);
             default:
                 return this.text;
         }
