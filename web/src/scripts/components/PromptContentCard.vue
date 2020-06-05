@@ -229,7 +229,7 @@
     import { QueryParam } from "@shared/util/queryParams"
     import SnackbarContent from "@components/SnackbarContent.vue"
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
-    import PromptContentCardElements from "@components/PromptContentCardElements.vue";
+    import PromptContentCardElements from "@components/ElementsOverview.vue";
     import PromptContentCardInviteFriend from "@components/PromptContentCardInviteFriend.vue";
     import SharedReflectionCard from "@components/SharedReflectionCard.vue";
     import { CactusElement } from "@shared/models/CactusElement";

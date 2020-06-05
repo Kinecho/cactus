@@ -11,7 +11,7 @@
     import MarkdownText from "@components/MarkdownText.vue";
     import { OnboardingCardViewModel } from "@components/onboarding/OnboardingCardViewModel";
     import { Prop } from "vue-property-decorator";
-    import Elements from "@components/PromptContentCardElements.vue";
+    import Elements from "@components/ElementsOverview.vue";
 
     @Component({
         components: {
