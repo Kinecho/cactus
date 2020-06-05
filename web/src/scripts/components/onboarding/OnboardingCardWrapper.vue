@@ -1,14 +1,12 @@
 <template>
-    <div class="card-wrapper">
-        <component class="content"
-                :is="cardInfo.type"
-                :member="member"
-                v-bind="cardInfo.props"
-                @next="$emit('next')"
-                @previous="$emit('previous')"
-                @checkout="$emit('checkout')"
-        />
-    </div>
+    <component
+            :is="cardInfo.type"
+            :member="member"
+            v-bind="cardInfo.props"
+            @next="$emit('next')"
+            @previous="$emit('previous')"
+            @checkout="$emit('checkout')"
+    />
 </template>
 
 <script lang="ts">
