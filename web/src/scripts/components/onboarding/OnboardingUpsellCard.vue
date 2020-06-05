@@ -7,6 +7,7 @@
             <button @click="$emit('next')">Continue</button>
         </template>
         <template v-else>
+            <div class="alert error" v-if="errorMessage">{{errorMessage}}</div>
             <markdown-text v-if="markdownText" :source="markdownText"/>
             <product-upsell-mini
                     :subscription-product="product"
@@ -14,6 +15,9 @@
                     :checkout-loading="checkoutLoading"
                     @checkout="startCheckout"
             />
+
+            <router-link :to="pricingHref" tag="a" class="fancyLink" target="_blank">More info & other plans
+            </router-link>
         </template>
     </div>
 </template>
@@ -30,6 +34,7 @@
     import { CheckoutInfo } from "@components/onboarding/OnboardingTypes";
     import CactusMember from "@shared/models/CactusMember";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
+    import { PageRoute } from "@shared/PageRoutes";
 
     @Component({
         components: {
@@ -65,6 +70,14 @@
             return this.card.getMarkdownText();
         }
 
+        get errorMessage(): string | null {
+            return this.checkoutInfo?.error ?? null;
+        }
+
+        get pricingHref(): string {
+            return PageRoute.PRICING
+        }
+
         startCheckout() {
             this.$emit('checkout');
 
@@ -82,5 +95,10 @@
 </script>
 
 <style scoped lang="scss">
+    @import "mixins";
 
+    .fancyLink {
+        @include fancyLink;
+        font-size: 1.4rem;
+    }
 </style>

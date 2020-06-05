@@ -88,6 +88,7 @@
         member!: CactusMember
 
         checkoutLoading = false;
+        checkoutError: string | null = null;
         cardTransitionName = transitionName.next;
         keyListener: any = null;
 
@@ -96,6 +97,7 @@
             return {
                 loading: this.checkoutLoading && !success,
                 success: success,
+                error: this.checkoutError
             }
         }
 
@@ -182,9 +184,13 @@
                     stripeCancelUrl: cancelPath,
                 })
                 this.checkoutLoading = false;
+                if (!result.success && !result.canceled) {
+                    this.checkoutError = "Oops! We were unable to start the checkout process. Please try again later."
+                }
                 logger.info("Checkout result", stringifyJSON(result, 2));
             } catch (error) {
                 logger.error("An error was thrown during Onboarding checkout.", error);
+                this.checkoutError = "Oops! We were unable to start the checkout process. Please try again later."
                 this.checkoutLoading = false;
             }
 
