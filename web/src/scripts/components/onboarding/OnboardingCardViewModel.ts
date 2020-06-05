@@ -1,4 +1,5 @@
 import { CactusElement } from "@shared/models/CactusElement";
+import { isBlank } from "@shared/util/StringUtil";
 
 export enum CardType {
     text = "text",
@@ -6,10 +7,14 @@ export enum CardType {
     reflect = "reflect",
     elements = "elements",
     word_cloud = "word_cloud",
+    upsell = "upsell",
 }
 
+export enum TextReplacementType {
+    selected_insight_word = "selected_insight_word"
+}
 
-export class OnboardingCardViewModel {
+export default class OnboardingCardViewModel {
     id!: string;
     type: CardType = CardType.text;
 
@@ -19,6 +24,30 @@ export class OnboardingCardViewModel {
     text?: string;
     imageUrl?: string;
     element?: CactusElement;
+
+    /**
+     * A string token to use to replace values in the text string
+     * @type {string}
+     */
+    textReplacerToken: string = "{{value}}"
+    defaultReplacementValue?: string;
+    textReplacementType?: TextReplacementType;
+
+    getMarkdownText(options: { selectedInsight?: string | undefined }): string | undefined {
+        if (!this.textReplacementType) {
+            return this.text;
+        }
+        switch (this.textReplacementType) {
+            case TextReplacementType.selected_insight_word:
+                return this.replaceText(options.selectedInsight);
+            default:
+                return this.text;
+        }
+    }
+
+    private replaceText(replacementValue?: string): string | undefined {
+        return this.text?.replace(this.textReplacerToken, replacementValue ?? this.defaultReplacementValue ?? "").replace(/\s\s+/g, ' ')
+    }
 
     static create(params: Partial<OnboardingCardViewModel>): OnboardingCardViewModel {
         const model = new OnboardingCardViewModel();
@@ -61,11 +90,39 @@ export class OnboardingCardViewModel {
             }),
             OnboardingCardViewModel.create({
                 text: "As cactus learns more about you, questions become increasingly about you.",
-                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F2005273.png?alt=media&token=8fc8e1bc-2757-433b-a5b2-75a35f036d02"
+                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200519.png?alt=media&token=d4497465-eae3-4e0a-ad6c-b75c586ae143"
             }),
             OnboardingCardViewModel.create({
                 type: CardType.word_cloud,
                 text: "Choose the physical activity that **best** improves how you feel:",
+            }),
+            OnboardingCardViewModel.create({
+                type: CardType.reflect,
+                text: "How does **{{value}}** make you feel?",
+                element: CactusElement.energy,
+                defaultReplacementValue: "Physical Activity",
+                textReplacementType: TextReplacementType.selected_insight_word,
+            }),
+            OnboardingCardViewModel.create({
+                type: CardType.text,
+                text: "Nice work. Take a moment ot appreciate the role that **{{value}}** plays in your life.",
+                textReplacementType: TextReplacementType.selected_insight_word,
+                defaultReplacementValue: "Physical Activity",
+                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F2005202.png?alt=media&token=872220d3-f3de-410b-9c8a-07237020b8f8"
+            }),
+            OnboardingCardViewModel.create({
+                type: CardType.text,
+                text: "Besides **{{value}}**, knowing your core values helps you make better, healthier decisions in all aspects of your life.\n\nDo you know your core values?",
+                textReplacementType: TextReplacementType.selected_insight_word,
+                defaultReplacementValue: "Physical Activity",
+            }),
+            OnboardingCardViewModel.create({
+                type: CardType.upsell,
+                text: "Discover your core values when you start a free 7-day trial. We'll send you questions tailored uniquely to your core values.\n\nThe trial includes other features, too.",
+            }),
+            OnboardingCardViewModel.create({
+                type: CardType.text,
+                text: "Upgrade success",
             }),
         ];
         cards.forEach((card, i) => card.id = `card${ i + 1 }`);

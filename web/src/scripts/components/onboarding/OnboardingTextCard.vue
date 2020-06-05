@@ -1,15 +1,15 @@
 <template>
     <div class="text-card">
         <h1>Card {{card.id}}</h1>
-        <markdown-text v-if="card.text" :source="card.text"/>
-        <img class="image" v-if="card.imageUrl" :src="card.imageUrl" alt="Image" />
+        <markdown-text v-if="markdownText" :source="markdownText"/>
+        <img class="image" v-if="card.imageUrl" :src="card.imageUrl" alt="Image"/>
     </div>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
     import Component from "vue-class-component"
-    import { OnboardingCardViewModel } from "@components/onboarding/OnboardingCardViewModel";
+    import OnboardingCardViewModel from "@components/onboarding/OnboardingCardViewModel";
     import { Prop } from "vue-property-decorator";
     import MarkdownText from "@components/MarkdownText.vue";
 
@@ -23,6 +23,10 @@
 
         @Prop({ type: Object as () => OnboardingCardViewModel, required: true })
         card!: OnboardingCardViewModel;
+
+        get markdownText() {
+            return this.card.getMarkdownText({ selectedInsight: this.selectedInsight })
+        }
     }
 </script>
 

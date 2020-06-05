@@ -1,6 +1,6 @@
 <template>
     <div class="main">
-        <onboarding :index="page - 1" @index="setIndex"/>
+        <onboarding :index="page - 1" @index="setIndex" :product="product"/>
     </div>
 </template>
 
@@ -11,6 +11,11 @@
     import { Prop } from "vue-property-decorator";
     import { pushRoute } from "@web/NavigationUtil";
     import { PageRoute } from "@shared/PageRoutes";
+    import SubscriptionProductService from "@web/services/SubscriptionProductService";
+    import SubscriptionProduct, { BillingPeriod } from "@shared/models/SubscriptionProduct";
+    import Logger from "@shared/Logger"
+
+    const logger = new Logger("OnboardingPage");
 
     @Component({
         components: { Onboarding }
@@ -21,12 +26,28 @@
         @Prop({ type: Number, required: false, default: 1 })
         page: number;
 
+        product: SubscriptionProduct|null = null;
+        billingPeriod = BillingPeriod.yearly;
+        productLoaded = false;
+
+        beforeMount() {
+            this.fetchProduct();
+        }
+
         async setIndex(index: number) {
             if (index === 0) {
                 await pushRoute(PageRoute.ONBOARDING);
                 return
             }
             await pushRoute(`${ PageRoute.ONBOARDING }/${ index + 1 }`);
+        }
+
+        async fetchProduct() {
+            this.productLoaded = false;
+            this.product = await SubscriptionProductService.sharedInstance.getByBillingPeriod(this.billingPeriod) ?? null;
+            logger.info("Fetched subscription product for billing period: ", this.billingPeriod, this.product);
+            this.$emit('product', this.product);
+            this.productLoaded = true;
         }
     }
 </script>

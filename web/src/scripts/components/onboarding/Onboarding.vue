@@ -9,9 +9,12 @@
             <OnboardingCard
                     class="card"
                     v-for="card in cards"
-                    v-show="card.id === currentCard.id"
+                    v-if="card.id === currentCard.id"
                     :key="card.id"
                     :card="card"
+                    :product="product"
+                    @next="next"
+                    @previous="previous"
             />
         </transition-group>
 
@@ -25,7 +28,7 @@
 <script lang="ts">
     import Vue from "vue";
     import Component from "vue-class-component"
-    import { OnboardingCardViewModel } from "@components/onboarding/OnboardingCardViewModel";
+    import OnboardingCardViewModel from "@components/onboarding/OnboardingCardViewModel";
     import Logger from "@shared/Logger"
     import TextCard from "@components/onboarding/OnboardingTextCard.vue";
     import Vue2TouchEvents from "vue2-touch-events";
@@ -33,6 +36,7 @@
     import PhotoCard from "@components/onboarding/OnboardingPhotoCard.vue";
     import OnboardingCard from "@components/onboarding/OnboardingCardWrapper.vue";
     import { Prop } from "vue-property-decorator";
+    import SubscriptionProduct from "@shared/models/SubscriptionProduct";
 
     const logger = new Logger("Onboarding");
     Vue.use(Vue2TouchEvents)
@@ -57,6 +61,9 @@
 
         @Prop({ type: Number, default: 0, required: true })
         index!: number;
+
+        @Prop({ type: Object as () => SubscriptionProduct, required: false, default: null })
+        product?: SubscriptionProduct | null;
 
         cardTransitionName = transitionName.next;
 
