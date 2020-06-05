@@ -153,6 +153,7 @@
 
         @include r(768) {
             display: grid;
+            grid-column-gap: 1.6rem;
             grid-template-rows: 1fr 1fr;
             grid-template-columns: 60% 40%;
             padding: 0 6.4rem;
@@ -168,7 +169,7 @@
 
         @include r(768) {
             align-self: end;
-            margin: 0 1.6rem 2.4rem 0;
+            margin-bottom: 2.4rem;
         }
     }
 
