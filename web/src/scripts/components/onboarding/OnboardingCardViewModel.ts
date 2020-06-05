@@ -141,10 +141,6 @@ export default class OnboardingCardViewModel {
                 text: "You completed your first activity with Cactus! We are excited to be your co-pilot on your journey of self-understanding.",
                 imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard7.png?alt=media&token=591df28c-fbd1-405c-8a37-31e8d1f6af9b"
             }),
-            OnboardingCardViewModel.create({
-                slug: "summary",
-                type: CardType.celebrate,
-            }),
         ];
         cards.forEach((card, i) => card.id = `card${ i + 1 }`);
         return cards;

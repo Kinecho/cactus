@@ -3,18 +3,24 @@
         <div class="textBox">
             <markdown-text :source="card.text"/>
         </div>
-        <word-chart :words="words" :blurry="false" :selectable="true" @selected="wordSelected"/>
+        <word-chart :words="words"
+                :blurry="false"
+                :selectable="true"
+                :chart-config="chartConfig"
+                @selected="wordSelected"
+        />
     </div>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
     import Component from "vue-class-component"
-    import { OnboardingCardViewModel } from "@components/onboarding/OnboardingCardViewModel";
+    import OnboardingCardViewModel from "@components/onboarding/OnboardingCardViewModel";
     import { Prop } from "vue-property-decorator";
     import MarkdownText from "@components/MarkdownText.vue";
     import { InsightWord } from "@shared/models/ReflectionResponse";
     import WordChart from "@components/InsightWordChart.vue";
+    import { WordBubbleConfig } from "@web/charts/wordBubbles";
 
     @Component({
         components: {
@@ -36,6 +42,10 @@
         wordSelected(word: InsightWord | null) {
             this.selectedWord = word;
             this.$emit('selectedWord', word);
+        }
+
+        get chartConfig(): Partial<WordBubbleConfig> {
+            return {numFillerBubbles: 0}
         }
     }
 </script>

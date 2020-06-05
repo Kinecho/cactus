@@ -38,7 +38,7 @@
         selectedInsightWord!: string | null;
 
         @Prop({ type: Boolean, default: true })
-        autofocusInput: boolean;
+        autofocusInput!: boolean;
         responseText = ""
 
         get markdownText(): string | undefined {
