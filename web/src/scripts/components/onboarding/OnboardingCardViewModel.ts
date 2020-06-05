@@ -29,7 +29,7 @@ export default class OnboardingCardViewModel {
      * A string token to use to replace values in the text string
      * @type {string}
      */
-    textReplacerToken: string = "{{value}}"
+    textReplacerToken: string = "{{VALUE}}"
     defaultReplacementValue?: string;
     textReplacementType?: TextReplacementType;
 
@@ -123,7 +123,7 @@ export default class OnboardingCardViewModel {
                 slug: "how-does-it-make-you-feel",
                 type: CardType.reflect,
                 defaultNextActionsEnabled: false,
-                text: "How does **{{value}}** make you feel?",
+                text: "How does **{{VALUE}}** make you feel?",
                 //TODO: Make this dynamic basic on configs of some sort
                 promptContentEntryId: "8ryd9iko0mTsefgQLVJW",
                 element: CactusElement.energy,
@@ -133,7 +133,7 @@ export default class OnboardingCardViewModel {
             OnboardingCardViewModel.create({
                 slug: "take-a-moment",
                 type: CardType.text,
-                text: "Nice work. Take a moment to appreciate the role that **{{value}}** plays in your life.",
+                text: "Nice work. Take a moment to appreciate the role that **{{VALUE}}** plays in your life.",
                 textReplacementType: TextReplacementType.selected_insight_word,
                 defaultReplacementValue: "Physical Activity",
                 imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard2.png?alt=media&token=198b352b-c074-4577-8971-1a340054efee"
@@ -141,7 +141,7 @@ export default class OnboardingCardViewModel {
             OnboardingCardViewModel.create({
                 slug: "core-values-intro",
                 type: CardType.text,
-                text: "Besides **{{value}}**, knowing your core values helps you make better, healthier decisions in all aspects of your life.\n\nDo you know your core values?",
+                text: "Besides **{{VALUE}}**, knowing your core values helps you make better, healthier decisions in all aspects of your life.\n\nDo you know your core values?",
                 textReplacementType: TextReplacementType.selected_insight_word,
                 defaultReplacementValue: "Physical Activity",
                 imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard1.png?alt=media&token=e36e050c-7564-44c5-8c48-64d64484b3f6"

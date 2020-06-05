@@ -7,7 +7,8 @@ import Logger from "@shared/Logger";
 import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 import CactusMember from "@shared/models/CactusMember";
 import { CoreValue } from "@shared/models/CoreValueTypes";
-import ReflectionResponse from "@shared/models/ReflectionResponse";
+import ReflectionResponse, { DynamicResponseValues } from "@shared/models/ReflectionResponse";
+import { isString } from "@shared/util/ObjectUtil";
 
 const logger = new Logger("PromptContent.ts");
 
@@ -123,6 +124,7 @@ export function processContent(params: {
     const { content, member, reflectionResponse, promptContent } = params;
 
     const coreValue = reflectionResponse?.coreValue ?? undefined;
+    const dynamicValues = reflectionResponse?.dynamicValues
     const processed: Content = {
         contentType: content.contentType,
         label: content.label,
@@ -132,7 +134,7 @@ export function processContent(params: {
         backgroundImage: content.backgroundImage,
     };
 
-    const dynamicText = promptContent.getDynamicDisplayText({ content, coreValue, member })?.trim();
+    const dynamicText = promptContent.getDynamicDisplayText({ content, coreValue, member, dynamicValues })?.trim();
 
     switch (content.contentType) {
         case ContentType.text:
@@ -195,6 +197,33 @@ export function processContent(params: {
 
 export const DEFAULT_CORE_VALUE_REPLACE_TOKEN = "{{CORE_VALUE}}";
 
+
+export interface DynamicPromptValue {
+    /**
+     * The string to replace in the template.
+     * Default: {{VALUE}}
+     */
+    token: string;
+    /**
+     * The default value to use when valueRequired is false.
+     */
+    defaultValue?: string;
+    /**
+     * If TRUE, the client must be able to supply the substitution values -- using the default will not be used.
+     * If a Dynamic Value is required but no value is provided, the fallback text will be used instead.
+     */
+    valueRequired?: boolean;
+}
+
+export interface DynamicContent {
+    /**
+     * The enabled flag must be set to TRUE or else the fallback value (`text` or `text_md`) will be used
+     */
+    enabled?: boolean;
+    templateTextMd?: string
+    dynamicValues?: DynamicPromptValue[]
+}
+
 export interface Content {
     contentType: ContentType;
     quote?: Quote;
@@ -215,6 +244,7 @@ export interface Content {
         textTemplateMd?: string,
         valueReplaceToken?: string,
     }
+    dynamicContent?: DynamicContent;
 }
 
 export enum PromptContentFields {
@@ -304,13 +334,17 @@ export default class PromptContent extends FlamelinkModel {
         return this.openGraphImage?.storageUrl || firstImageCard?.backgroundImage?.storageUrl || null;
     }
 
-    getDynamicQuestionText(params: { member?: CactusMember, coreValue?: CoreValue | undefined }): string | undefined {
-        const { member, coreValue } = params;
+    getDynamicQuestionText(params: {
+        member?: CactusMember,
+        coreValue?: CoreValue | undefined,
+        dynamicValues?: DynamicResponseValues
+    }): string | undefined {
+        const { member, coreValue, dynamicValues } = params;
         const content = this.content?.find(c => c.contentType === ContentType.reflect);
         if (!content) {
             return;
         }
-        return this.getDynamicDisplayText({ member, coreValue, content });
+        return this.getDynamicDisplayText({ member, coreValue, content, dynamicValues });
     }
 
     /**
@@ -325,9 +359,10 @@ export default class PromptContent extends FlamelinkModel {
     getDynamicDisplayText(params: {
         content: Content,
         member?: CactusMember | undefined | null,
-        coreValue?: CoreValue | null | undefined
+        coreValue?: CoreValue | null | undefined,
+        dynamicValues?: DynamicResponseValues,
     }): string | undefined {
-        const { content, member, coreValue } = params;
+        const { content, member, coreValue, dynamicValues } = params;
 
         let text = !isBlank(content.text_md) ? content.text_md : content.text;
 
@@ -338,7 +373,77 @@ export default class PromptContent extends FlamelinkModel {
         if (value && coreValueTemplate && !isBlank(coreValueTemplate)) {
             text = coreValueTemplate.replace(token, value);
         }
+        const dynamicText = this.buildDynamicContent({ content, member, coreValue, dynamicValues })
+        return dynamicText ?? text;
+    }
 
-        return text;
+    buildDynamicContent(params: {
+        content: Content,
+        member?: CactusMember | undefined | null,
+        coreValue?: CoreValue | null | undefined,
+        dynamicValues?: DynamicResponseValues,
+    }): string | undefined {
+        const {
+            content,
+            dynamicValues = {}
+        } = params;
+        logger.info("Building dynamic text");
+        const dynamicContent = content.dynamicContent;
+        const enabled = dynamicContent?.enabled === true;
+        //if not enabled, return undefined
+        if (!dynamicContent || !enabled) {
+            logger.info("Dynamic content was not enabled");
+            return undefined;
+        }
+
+        //if the dynamic content does not have a template string or is blank, return undefined
+        const templateTextMd = dynamicContent.templateTextMd
+        if (!isString(templateTextMd) || isBlank(templateTextMd)) {
+            logger.info("template text was blank or did not exist");
+            return undefined;
+        }
+
+        //if the replacer values list is empty, return undefined (nothing to substitute)
+        const replacements = dynamicContent.dynamicValues ?? []
+        if (replacements.length === 0) {
+            return undefined;
+        }
+
+        //ensure all required values have a replacer
+        const allReplacementsValid = replacements.every(r => {
+            const validToken = !isBlank(r.token);
+            const hasValue = !isBlank(dynamicValues[r.token]);
+            const hasDefault = !isBlank(r.defaultValue);
+            if (!validToken) {
+                logger.info(`The token "${ r.token }" was invalid, returning error`)
+                return false
+            }
+            if (hasValue) {
+                logger.info(`"The token has as value, "${ r.token }" is valid!"`)
+                return true;
+            } else if (r.valueRequired) {
+                logger.info(`A value is required for the token ${ r.token } but it was not found. Invalid replacer`)
+                return false;
+            }
+
+            if (!hasDefault) {
+                logger.info(`The default value of ${ r.defaultValue } was not valid for token ${ r.token }`);
+            }
+            return hasDefault;
+        })
+        if (!allReplacementsValid) {
+            logger.info("Not all replacement values were valid")
+            return undefined;
+        }
+
+        //process all replacements
+        const processedText = replacements.reduce((text, replacement) => {
+            const token = replacement.token;
+            const value = dynamicValues[token] ?? replacement.defaultValue ?? ""
+            return text?.replace(token, value);
+        }, templateTextMd);
+
+        logger.info(`Dynamic Content Processed Text\nTemplate=${ templateTextMd }\nProcessed=${ processedText }`);
+        return processedText;
     }
 }
