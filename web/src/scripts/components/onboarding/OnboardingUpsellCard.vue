@@ -116,10 +116,12 @@
 
     h2 {
         line-height: 1.2;
-        margin-bottom: 2.4rem;
+        margin-bottom: 2rem;
+
+        @include r(768) {
+            margin-bottom: 2.4rem;
+        }
     }
-
-
 
     .upsellContainer {
         padding: 0 2.4rem;
@@ -152,19 +154,25 @@
     }
 
     .btnContainer {
-        align-items: center;
-        display: flex;
         font-size: 1.8rem;
         margin-bottom: 4rem;
 
-        .button {
-            flex-grow: 0;
+        @include r(768) {
+            align-items: center;
+            display: flex;
         }
-    }
 
-    .tryIt {
-        flex-grow: 0;
-        margin-right: 1.6rem;
-        min-width: 24rem;
+        .tryIt,
+        .button {
+            display: block;
+            width: 100%;
+
+            @include r(768) {
+                flex-grow: 0;
+                margin-right: 1.6rem;
+                min-width: 24rem;
+                width: auto;
+            }
+        }
     }
 </style>

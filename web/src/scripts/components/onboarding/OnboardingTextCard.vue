@@ -3,7 +3,7 @@
         <div class="textBox">
             <markdown-text v-if="markdownText" :source="markdownText"/>
         </div>
-        <img class="image" v-if="card.imageUrl" :src="card.imageUrl" alt="Image"/>
+        <img height="100%" width="100%" class="image" v-if="card.imageUrl" :src="card.imageUrl" alt="Image"/>
     </div>
 </template>
 
@@ -39,17 +39,25 @@
     @import "mixins";
 
     .text-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 80vh;
         padding: 0 2.4rem;
 
         @include r(600) {
             align-items: center;
-            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
             padding: 0 6.4rem;
         }
     }
 
     .textBox {
+        margin-bottom: 5.6rem;
+
         @include r(600) {
+            margin-bottom: 0;
             padding-right: 6.4rem;
             width: 66%;
         }
