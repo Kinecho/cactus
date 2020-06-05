@@ -3,7 +3,6 @@
         <div class="textBox">
             <markdown-text :source="card.text"/>
         </div>
-        <h3 v-if="selectedWord">Chart Word: {{selectedWord.word}}</h3>
         <word-chart :words="words" :blurry="false" :selectable="true" @selected="wordSelected"/>
     </div>
 </template>

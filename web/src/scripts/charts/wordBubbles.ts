@@ -2,9 +2,8 @@ import {
     hierarchy as d3Hierarchy,
     pack as d3Pack,
     scaleOrdinal as d3ScaleOrdinal,
-    select as d3Select,
-    selectAll,
     scaleSqrt,
+    select as d3Select,
 } from "d3";
 import { HierarchyCircularNode } from "d3-hierarchy";
 import { InsightWord } from "@shared/models/ReflectionResponse";

@@ -4,7 +4,7 @@
         <strong>
             <markdown-text :source="markdownText"/>
         </strong>
-        <textarea placeholder="Write something..." v-model="responseText"/>
+        <textarea placeholder="Write something..." v-model="responseText" autofocus/>
     </div>
 </template>
 
