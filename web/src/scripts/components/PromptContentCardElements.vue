@@ -1,7 +1,7 @@
 <template>
     <div class="elements-container">
         <a href="#" class="element-icon" v-for="element in elements" @click="showCactusModal(element)">
-            <img :src="'/assets/images/elements/'+ element + '.svg'" alt=""/>
+            <img :src="getImageUrl(element)" alt=""/>
             <h4 class="label">{{element}}</h4>
         </a>
         <element-description-modal
@@ -13,11 +13,9 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {CactusElement} from "@shared/models/CactusElement"
-    import {formatDate} from '@shared/util/DateUtil'
+    import { CactusElement } from "@shared/models/CactusElement"
     import CopyService from "@shared/copy/CopyService"
-    import {getDeviceDimensions, MOBILE_BREAKPOINT_PX} from "@web/DeviceUtil"
-    import {Image} from '@shared/models/PromptContent'
+    import { getDeviceDimensions } from "@web/DeviceUtil"
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue"
 
     const copy = CopyService.getSharedInstance().copy;
@@ -59,11 +57,14 @@
             })
         },
         computed: {
-            elements(): Array<string> {
+            elements(): Array<CactusElement> {
                 return Object.values(CactusElement);
-            }
+            },
         },
         methods: {
+            getImageUrl(element: CactusElement): string {
+                return `/assets/images/elements/${element}.svg`
+            },
             showCactusModal(element: keyof typeof CactusElement) {
                 this.cactusModalElement = CactusElement[element];
                 this.cactusModalVisible = true;

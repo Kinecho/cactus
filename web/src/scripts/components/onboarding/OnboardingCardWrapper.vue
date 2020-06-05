@@ -12,12 +12,14 @@
     import PhotoCard from "@components/onboarding/OnboardingPhotoCard.vue";
     import TextCard from "@components/onboarding/OnboardingTextCard.vue";
     import ReflectCard from "@components/onboarding/OnboardingReflectCard.vue";
+    import ElementsCard from "@components/onboarding/OnboardingElementsCard.vue";
 
     @Component({
         components: {
             TextCard,
             PhotoCard,
             ReflectCard,
+            ElementsCard,
         }
     })
     export default class OnboardingCardWrapper extends Vue {
@@ -34,6 +36,8 @@
                     return "photo-card";
                 case CardType.reflect:
                     return "reflect-card";
+                case CardType.elements:
+                    return "elements-card";
                 default:
                     return "text-card";
             }

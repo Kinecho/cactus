@@ -2,8 +2,9 @@ import { CactusElement } from "@shared/models/CactusElement";
 
 export enum CardType {
     text = "text",
-    photo = "photo",
+    // photo = "photo",
     reflect = "reflect",
+    elements = "elements",
 }
 
 
@@ -52,6 +53,10 @@ export class OnboardingCardViewModel {
                 type: CardType.reflect,
                 text: "Which physical activities make you feel better?",
                 element: CactusElement.energy,
+            }),
+            OnboardingCardViewModel.create({
+                type: CardType.elements,
+                text: "Cactus is build on your awareness and care of five elements"
             })
         ];
         cards.forEach((card, i) => card.id = `card${ i + 1 }`);
