@@ -8,7 +8,7 @@ import {
 import { HierarchyCircularNode } from "d3-hierarchy";
 import { InsightWord } from "@shared/models/ReflectionResponse";
 import Logger from "@shared/Logger"
-import { isBlank } from "@shared/util/StringUtil";
+import { getRandomNumberBetween, isBlank } from "@shared/util/StringUtil";
 
 const logger = new Logger("wordBubbles");
 
@@ -18,6 +18,7 @@ export interface WordBubbleConfig {
     selectable: boolean,
     selectedFillColor: string,
     hoverFillColor?: string | undefined,
+    numFillerBubbles: number,
     wordClicked?: (word: InsightWord, selected: boolean,) => void,
 }
 
@@ -26,6 +27,7 @@ export const DEFAULT_WORD_BUBBLE_CONFIG = (): WordBubbleConfig => {
         maxDiameter: 375,
         selectable: false,
         selectedFillColor: "#0DADB1",
+        numFillerBubbles: 11,
         // hoverFillColor: "#00cee5",
         colorRange: [
             "#47445E",
@@ -37,21 +39,21 @@ export const DEFAULT_WORD_BUBBLE_CONFIG = (): WordBubbleConfig => {
     };
 }
 
-const createExtraBubbles = (): InsightWord[] => {
-    return [
-        { word: "", frequency: .5, salience: .5 },
-        { word: "", frequency: .5, salience: .5 },
-        { word: "", frequency: .5, salience: .5 },
-        { word: "", frequency: .5, salience: .5 },
-        { word: "", frequency: .3, salience: .3 },
-        { word: "", frequency: .3, salience: .3 },
-        { word: "", frequency: .3, salience: .3 },
-        { word: "", frequency: .3, salience: .3 },
-        { word: "", frequency: .1, salience: .1 },
-        { word: "", frequency: .1, salience: .1 },
-        { word: "", frequency: .1, salience: .1 },
-        { word: "", frequency: .1, salience: .1 },
-    ];
+/**
+ *
+ * @param {number} count - number of bubbles to create
+ * @param {number} [min=0.1] - minimum value to use for generating a random frequency/salience (both will be random)
+ * @param {number} [max=0.5] - maximum value to use for generating a random frequency/salience (both will be random)
+ * @return {InsightWord[]}
+ */
+const createExtraBubbles = (count: number, min: number = 0.1, max: number = 0.5): InsightWord[] => {
+    const words: InsightWord[] = []
+    for (let i = 0; i < count; i++) {
+        const frequency = getRandomNumberBetween(min, max, 1);
+        const salience = getRandomNumberBetween(min, max, 1);
+        words.push({ word: "", frequency, salience });
+    }
+    return words;
 }
 
 interface BubbleData extends InsightWord {
@@ -88,7 +90,7 @@ export function drawWordBubbleChart(parentSelector: string, words: InsightWord[]
     .attr("viewBox", "0 0 375 375")
     .style("display", "block");
 
-    const extras = createExtraBubbles();
+    const extras = createExtraBubbles(config.numFillerBubbles);
     const dataset: BubbleData[] = words.slice(0, 7).concat(extras).map(d => ({
         ...d,
         selected: false,
@@ -117,7 +119,7 @@ export function drawWordBubbleChart(parentSelector: string, words: InsightWord[]
     bubble(root);
 
     //setup the chart
-    const bubbles = svg.selectAll(".bubble")
+    const bubbles = svg.selectAll<SVGElement, HierarchyCircularNode<BubbleData>>(".bubble")
     .data(root.children!)
     .enter();
 
@@ -181,15 +183,15 @@ export function drawWordBubbleChart(parentSelector: string, words: InsightWord[]
             // parent.select("circle").each(c => c.style("fill", color(`${ c.data.value ?? 0 }`) as string))
             logger.info("Data is selected = ", selected);
             config.wordClicked?.(data, selected);
-            const selection = d3Select(this as any)
+            const selection = d3Select(this)
             logger.info("selection", selection);
 
-            parent.selectAll("circle").style("fill", function (v) {
+            parent.selectAll<SVGElement, HierarchyCircularNode<BubbleData>>("circle").style("fill", function (v) {
                 v.data.selected = false;
                 return color(`${ v.value ?? 0 }`) as string
             }).each(function (e) {
                 const r = e.r;
-                d3Select(this as any).transition().attr("r", r);
+                d3Select(this).transition().attr("r", r);
             })
             data.selected = selected;
             const newColor = selected && config.selectedFillColor ? config.selectedFillColor : color(`${ d.value ?? 0 }`) as string;
