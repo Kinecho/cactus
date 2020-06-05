@@ -8,6 +8,7 @@
                 @next="$emit('next')"
                 @previous="$emit('previous')"
                 @checkout="$emit('checkout')"
+                @close="handleClose"
         />
     </div>
 </template>
@@ -67,6 +68,10 @@
             this.$emit('selectedWord', word);
         }
 
+        handleClose(force: boolean = false) {
+            this.$emit('close', force)
+        }
+
         get cardInfo(): CardProps {
             let info: CardProps = { type: "text-card", props: { card: this.card } }
             switch (this.card.type) {
@@ -104,4 +109,13 @@
 </script>
 
 <style scoped lang="scss">
+    @import "mixins";
+
+    .card-wrapper {
+        padding: 4rem 2.4rem;
+
+        @include r(374) {
+            padding: 5.6rem 3.2rem;
+        }
+    }
 </style>

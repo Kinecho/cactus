@@ -370,6 +370,13 @@ describe("prevent orphaned words", () => {
         expect(preventOrphanedWords("hello world and people")).not.toEqual("hello world and people");
         expect(preventOrphanedWords("hello world and people", "nbsp;")).toEqual("hello world andnbsp;people");
     })
+
+    test("Don't double escape a string", () => {
+        const code = "\xa0";
+        expect(preventOrphanedWords(`Test${ code }string`)).toEqual(`Test${ code }string`);
+        expect(preventOrphanedWords(`My Test${ code }string`)).toEqual(`My Test${ code }string`);
+        expect(preventOrphanedWords(`My Test${ code }string Code`)).toEqual(`My Test${ code }string${ code }Code`);
+    })
 })
 
 describe("captialize first letters words in a sentence", () => {

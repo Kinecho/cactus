@@ -39,6 +39,10 @@ export function preventOrphanedWords<T>(input?: T | string, escapeCode: string =
         return input;
     }
     const lastIndex = input.lastIndexOf(" ");
+    const escapeIndex = input.lastIndexOf(escapeCode);
+    if (escapeIndex > -1 && escapeIndex > lastIndex) {
+        return input;
+    }
     if (lastIndex > 0) {
         return input.substr(0, lastIndex) + escapeCode + input.substr(lastIndex + 1);
     }

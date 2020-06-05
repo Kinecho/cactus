@@ -238,7 +238,7 @@ $slow: 1.5s;
 
 .slide-left-absolute-leave-active,
 .slide-left-absolute-enter-active {
-  transition: .25s ease-in-out;
+  transition: 0.25s ease-in-out;
 }
 .slide-left-absolute-enter {
   transform: translate(100%, 0);
@@ -249,11 +249,9 @@ $slow: 1.5s;
   position: absolute;
 }
 
-
-
 .slide-right-absolute-leave-active,
 .slide-right-absolute-enter-active {
-  transition: .25s ease-in-out;
+  transition: 0.25s ease-in-out;
 }
 .slide-right-absolute-enter {
   transform: translate(-100%, 0);

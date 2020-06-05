@@ -7,8 +7,9 @@
         <strong>
             <markdown-text :source="markdownText"/>
         </strong>
+
         <textarea placeholder="Write something..." v-model="responseText" ref="textInput" :disabled="saving"/>
-        <button class="doneBtn" @click="saveAndContinue" :disabled="saving">{{saving ? "Saving...." : "Done"}}</button>
+        <button class="doneBtn" @click="saveAndContinue" :disabled="saving">{{saving ? 'Saving....' : 'Done'}}</button>
     </div>
 </template>
 
@@ -20,6 +21,10 @@
     import MarkdownText from "@components/MarkdownText.vue";
     import Logger from "@shared/Logger"
     import ResultElement from "@components/gapanalysis/ResultElement.vue";
+    import { ListenerUnsubscriber } from "@web/services/FirestoreService";
+    import ReflectionResponse, { ResponseMedium } from "@shared/models/ReflectionResponse";
+    import ReflectionResponseService from "@web/services/ReflectionResponseService";
+    import Spinner from "@components/Spinner.vue";
 
     const logger = new Logger("OnboardingReflectCard");
 
@@ -27,6 +32,7 @@
         components: {
             ResultElement,
             MarkdownText,
+            Spinner,
         }
     })
     export default class OnboardingReflectCard extends Vue {
@@ -43,24 +49,92 @@
         responseText = ""
         saving = false;
 
+        reflectionUnsubscriber?: ListenerUnsubscriber;
+        responsesLoading: boolean = false;
+        reflectionResponses: ReflectionResponse[] | null = null;
+        errorMessage: string | null = null;
+
         get markdownText(): string | undefined {
             return this.card.getMarkdownText({ selectedInsight: this.selectedInsightWord })
+        }
+
+        get loading(): boolean {
+            return this.responsesLoading;
+        }
+
+        beforeMount() {
+            this.observeResponses();
+        }
+
+        observeResponses() {
+            this.responsesLoading = true;
+            this.reflectionUnsubscriber?.();
+            if (this.card.promptContentEntryId) {
+                this.reflectionUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(this.card.promptContentEntryId, {
+                    onData: (responses) => {
+                        this.reflectionResponses = responses ?? null;
+                        this.responsesLoading = false;
+                        this.responseText = this.reflectionResponsesText;
+                        logger.info("Set response text to ", this.reflectionResponsesText);
+                    }
+                })
+            }
+        }
+
+        get reflectionResponsesText(): string {
+            const responses = this.reflectionResponses ?? []
+            if (responses.length > 0) {
+                return responses.map(r => r.content.text).join("\n\n").trim();
+            }
+            return ""
         }
 
         mounted() {
             logger.info("Reflect card mounted");
             if (this.autofocusInput) {
-                (this.$refs.textInput as HTMLElement).focus();
+                (this.$refs.textInput as HTMLElement | undefined)?.focus();
             }
         }
 
-        saveAndContinue() {
+        beforeDestroy() {
+            this.reflectionUnsubscriber?.();
+        }
+
+        async saveAndContinue() {
+            this.errorMessage = null;
             const entryId = this.card.promptContentEntryId;
             logger.info("Saving and continuing for entryId", entryId);
             this.saving = true;
-            setTimeout(() => {
-                this.$emit('next');
-            }, 2500)
+
+            let response: ReflectionResponse | undefined;
+
+            if (this.reflectionResponses && this.reflectionResponses.length > 0) {
+                response = this.reflectionResponses[0];
+            }
+
+            if (!response && this.card.promptContentEntryId) {
+                response = ReflectionResponseService.createReflectionResponse(this.card.promptContentEntryId, ResponseMedium.PROMPT_WEB);
+            }
+
+            if (!response) {
+                logger.error("Unable to fetch or create a response... can not save");
+                this.errorMessage = "Oops! We were unable to save your response. Please try again later.";
+                this.saving = false;
+                return;
+            }
+
+            response.content.text = this.responseText;
+            if (this.selectedInsightWord) {
+                response.dynamicValues = {
+                    ...response.dynamicValues,
+                    [this.card.textReplacerToken]: this.selectedInsightWord
+                }
+            }
+
+            await ReflectionResponseService.sharedInstance.save(response);
+            this.saving = false;
+            this.$emit('next');
+
         }
     }
 </script>
@@ -68,6 +142,7 @@
 <style scoped lang="scss">
     @import "variables";
     @import "mixins";
+    @import "transitions";
 
     .element {
         height: 30vw;

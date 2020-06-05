@@ -1,4 +1,5 @@
 import { CactusElement } from "@shared/models/CactusElement";
+import { ActionButton, ContentAction, LinkStyle } from "@shared/models/PromptContent";
 
 export enum CardType {
     text = "text",
@@ -12,6 +13,11 @@ export enum CardType {
 
 export enum TextReplacementType {
     selected_insight_word = "selected_insight_word"
+}
+
+export interface LinkableActionButton extends ActionButton {
+    href?: string;
+    target?: "_blank" | null | "" | undefined;
 }
 
 export default class OnboardingCardViewModel {
@@ -29,7 +35,7 @@ export default class OnboardingCardViewModel {
      * A string token to use to replace values in the text string
      * @type {string}
      */
-    textReplacerToken: string = "{{value}}"
+    textReplacerToken: string = "{{VALUE}}"
     defaultReplacementValue?: string;
     textReplacementType?: TextReplacementType;
 
@@ -42,6 +48,8 @@ export default class OnboardingCardViewModel {
      * @type {boolean}
      */
     defaultNextActionsEnabled: boolean = true;
+
+    buttons: LinkableActionButton[] = [];
 
     getMarkdownText(options?: { selectedInsight?: string | undefined | null }): string | undefined {
         if (!this.textReplacementType) {
@@ -123,7 +131,7 @@ export default class OnboardingCardViewModel {
                 slug: "how-does-it-make-you-feel",
                 type: CardType.reflect,
                 defaultNextActionsEnabled: false,
-                text: "How does **{{value}}** make you feel?",
+                text: "How does **{{VALUE}}** make you feel?",
                 //TODO: Make this dynamic basic on configs of some sort
                 promptContentEntryId: "8ryd9iko0mTsefgQLVJW",
                 element: CactusElement.energy,
@@ -133,7 +141,7 @@ export default class OnboardingCardViewModel {
             OnboardingCardViewModel.create({
                 slug: "take-a-moment",
                 type: CardType.text,
-                text: "Nice work. Take a moment to appreciate the role that **{{value}}** plays in your life.",
+                text: "Nice work. Take a moment to appreciate the role that **{{VALUE}}** plays in your life.",
                 textReplacementType: TextReplacementType.selected_insight_word,
                 defaultReplacementValue: "Physical Activity",
                 imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard2.png?alt=media&token=198b352b-c074-4577-8971-1a340054efee"
@@ -141,7 +149,7 @@ export default class OnboardingCardViewModel {
             OnboardingCardViewModel.create({
                 slug: "core-values-intro",
                 type: CardType.text,
-                text: "Besides **{{value}}**, knowing your core values helps you make better, healthier decisions in all aspects of your life.\n\nDo you know your core values?",
+                text: "Besides **{{VALUE}}**, knowing your core values helps you make better, healthier decisions in all aspects of your life.\n\nDo you know your core values?",
                 textReplacementType: TextReplacementType.selected_insight_word,
                 defaultReplacementValue: "Physical Activity",
                 imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard1.png?alt=media&token=e36e050c-7564-44c5-8c48-64d64484b3f6"
@@ -155,7 +163,17 @@ export default class OnboardingCardViewModel {
                 slug: "activity-completed",
                 type: CardType.text,
                 text: "You completed your first activity with Cactus! We are excited to be your co-pilot on your journey of self-understanding.",
-                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard7.png?alt=media&token=591df28c-fbd1-405c-8a37-31e8d1f6af9b"
+                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard7.png?alt=media&token=591df28c-fbd1-405c-8a37-31e8d1f6af9b",
+                buttons: [{
+                    action: ContentAction.complete,
+                    label: "Explore Cactus",
+                    linkStyle: LinkStyle.buttonPrimary,
+                }, {
+                    action: ContentAction.showPricing,
+                    label: "Pricing Page",
+                    linkStyle: LinkStyle.fancyLink,
+                    target: "_blank",
+                }]
             }),
         ];
         cards.forEach((card, i) => card.id = `card${ i + 1 }`);

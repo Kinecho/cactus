@@ -2,6 +2,14 @@
     <div class="text-card">
         <div class="textBox">
             <markdown-text v-if="markdownText" :source="markdownText"/>
+            <div class="actions" v-if="card.buttons && card.buttons.length > 0">
+                <ActionButton v-for="(button, index) in card.buttons"
+                        :key="index"
+                        :button="button"
+                        @complete="closeOnboarding"
+                />
+            </div>
+
         </div>
         <img height="100%" width="100%" class="image" v-if="card.imageUrl" :src="card.imageUrl" alt="Image"/>
     </div>
@@ -13,10 +21,13 @@
     import OnboardingCardViewModel from "@components/onboarding/OnboardingCardViewModel";
     import { Prop } from "vue-property-decorator";
     import MarkdownText from "@components/MarkdownText.vue";
+    import ActionButton from "@components/ActionButton.vue";
+    import CactusMember from "@shared/models/CactusMember";
 
     @Component({
         components: {
             MarkdownText,
+            ActionButton,
         }
     })
     export default class OnboardingTextCard extends Vue {
@@ -25,11 +36,18 @@
         @Prop({ type: Object as () => OnboardingCardViewModel, required: true })
         card!: OnboardingCardViewModel;
 
+        @Prop({ type: Object as () => CactusMember, required: true })
+        member!: CactusMember;
+
         @Prop({ type: String, required: false, default: null })
         selectedInsightWord!: string | null;
 
         get markdownText() {
             return this.card.getMarkdownText({ selectedInsight: this.selectedInsightWord })
+        }
+
+        closeOnboarding() {
+            this.$emit('close', true)
         }
     }
 </script>
@@ -75,5 +93,19 @@
             align-self: center;
             max-width: 33%;
         }
+    }
+
+    .actions {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        margin: 2rem 0;
+
+        > * {
+            margin-bottom: 2rem;
+        }
+
+        font-size: 2rem;
     }
 </style>

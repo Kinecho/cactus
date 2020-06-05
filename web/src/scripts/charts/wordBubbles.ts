@@ -139,7 +139,7 @@ export function drawWordBubbleChart(parentSelector: string, words: InsightWord[]
         const fillColor = color(`${ d.value ?? 0 }`);
         return fillColor as string;
     }).on("mouseover", function (d) {
-        if (isBubbleData(d.data)) {
+        if (isBubbleData(d.data) && selectable) {
             if (!isBlank(d.data.word)) {
                 const selection = d3Select(this as any)
                 const originalRadius = d.r;
@@ -158,7 +158,7 @@ export function drawWordBubbleChart(parentSelector: string, words: InsightWord[]
         }
     })
     .on("mouseout", function (d) {
-        if (isBubbleData(d.data)) {
+        if (isBubbleData(d.data) && selectable) {
             if (!isBlank(d.data.word) && !d.data.selected) {
                 const radius = d.r;
                 d3Select(this as any).style("fill", color(`${ d.value ?? 0 }`) as string)
