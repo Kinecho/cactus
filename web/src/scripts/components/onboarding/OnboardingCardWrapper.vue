@@ -83,25 +83,4 @@
 </script>
 
 <style scoped lang="scss">
-    @import "variables";
-    @import "mixins";
-
-    .card-wrapper {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        flex: 1;
-    }
-
-    .content {
-        border: 4px solid blue;
-        width: 100%;
-
-        @include r(600) {
-            max-width: 70rem;
-        }
-
-    }
 </style>
