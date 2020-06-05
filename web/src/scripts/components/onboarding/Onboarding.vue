@@ -1,7 +1,7 @@
 <template>
     <div v-touch:swipe="handleSwipeEvent" class="onboarding-main">
         <ProgressStepper :current="index" :total="totalPages"/>
-        <div class="progress-count">
+        <div class="progress-count" v-if="false">
             <span class="current">{{index + 1}}</span>&nbsp;of<span class="total">{{totalPages}}</span>
         </div>
 

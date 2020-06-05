@@ -1,7 +1,9 @@
 <template>
     <div class="text-card">
-        <h1>Card {{card.id}}</h1>
-        <markdown-text v-if="card.text" :source="card.text"/>
+        <div class="textBox">
+            <h1>Card {{card.id}}</h1>
+            <markdown-text v-if="card.text" :source="card.text"/>
+        </div>
         <img class="image" v-if="card.imageUrl" :src="card.imageUrl" alt="Image" />
     </div>
 </template>
