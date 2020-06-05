@@ -28,7 +28,7 @@
         @Prop({ type: Object as () => OnboardingCardViewModel, required: true })
         card!: OnboardingCardViewModel;
 
-        @Prop({ type: Array as () => InsightWord[], default: [] })
+        @Prop({ type: Array as () => InsightWord[], default: [], required: false })
         words!: InsightWord[]
     }
 </script>

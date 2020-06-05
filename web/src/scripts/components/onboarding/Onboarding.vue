@@ -7,14 +7,17 @@
 
         <transition-group :name="cardTransitionName" mode="in-out" tag="div" class="card-container">
             <OnboardingCard
-                    class="cardi"
+                    class="card"
                     v-for="card in cards"
                     v-if="card.id === currentCard.id"
                     :key="card.id"
                     :card="card"
                     :product="product"
+                    :member="member"
+                    :checkout-info="checkoutInfo"
                     @next="next"
                     @previous="previous"
+                    @checkout="startCheckout"
             />
         </transition-group>
 
@@ -43,6 +46,12 @@
     import OnboardingCard from "@components/onboarding/OnboardingCardWrapper.vue";
     import { Prop } from "vue-property-decorator";
     import SubscriptionProduct from "@shared/models/SubscriptionProduct";
+    import { CheckoutInfo, PageStatus } from "@components/onboarding/OnboardingTypes";
+    import { pushRoute } from "@web/NavigationUtil";
+    import { PageRoute } from "@shared/PageRoutes";
+    import CactusMember from "@shared/models/CactusMember";
+    import { startCheckout } from "@web/checkoutService";
+    import { stringifyJSON } from "@shared/util/ObjectUtil";
 
     const logger = new Logger("Onboarding");
     Vue.use(Vue2TouchEvents)
@@ -63,7 +72,8 @@
     export default class Onboarding extends Vue {
         name = "Onboarding";
 
-        cards: OnboardingCardViewModel[] = OnboardingCardViewModel.createAll();
+        @Prop({ type: Array as () => OnboardingCardViewModel[], required: true })
+        cards!: OnboardingCardViewModel[];
 
         @Prop({ type: Number, default: 0, required: true })
         index!: number;
@@ -71,9 +81,25 @@
         @Prop({ type: Object as () => SubscriptionProduct, required: false, default: null })
         product?: SubscriptionProduct | null;
 
-        cardTransitionName = transitionName.next;
+        @Prop({ type: String as () => PageStatus, required: false, default: null })
+        pageStatus: PageStatus | null;
 
+        @Prop({ type: Object as () => CactusMember, required: true })
+        member!: CactusMember
+
+        checkoutLoading = false;
+        checkoutError: string | null = null;
+        cardTransitionName = transitionName.next;
         keyListener: any = null;
+
+        get checkoutInfo(): CheckoutInfo {
+            const success = this.pageStatus === PageStatus.success;
+            return {
+                loading: this.checkoutLoading && !success,
+                success: success,
+                error: this.checkoutError
+            }
+        }
 
         mounted() {
             this.keyListener = document.addEventListener("keyup", this.handleDocumentKeyUp)
@@ -138,6 +164,36 @@
                 const index = Math.max(this.index - 1, 0);
                 this.setIndex(index);
             }
+        }
+
+        async startCheckout() {
+            this.checkoutLoading = true;
+            try {
+                const successPath = `${ PageRoute.ONBOARDING }/${ this.currentCard.slug ?? this.index }/success`
+                const cancelPath = `${ PageRoute.ONBOARDING }/${ this.currentCard.slug ?? this.index }`
+
+                if (!this.product) {
+                    logger.error("No product was found, this is bad");
+                    return;
+                }
+                const result = await startCheckout({
+                    subscriptionProductId: this.product.entryId!,
+                    subscriptionProduct: this.product,
+                    member: this.member,
+                    stripeSuccessUrl: successPath,
+                    stripeCancelUrl: cancelPath,
+                })
+                this.checkoutLoading = false;
+                if (!result.success && !result.canceled) {
+                    this.checkoutError = "Oops! We were unable to start the checkout process. Please try again later."
+                }
+                logger.info("Checkout result", stringifyJSON(result, 2));
+            } catch (error) {
+                logger.error("An error was thrown during Onboarding checkout.", error);
+                this.checkoutError = "Oops! We were unable to start the checkout process. Please try again later."
+                this.checkoutLoading = false;
+            }
+
         }
     }
 </script>
@@ -232,6 +288,7 @@
                 transform: scale(-1);
             }
         }
+
         &.next {
             right: 0;
         }
