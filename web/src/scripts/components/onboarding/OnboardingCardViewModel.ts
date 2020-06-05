@@ -133,7 +133,7 @@ export default class OnboardingCardViewModel {
             OnboardingCardViewModel.create({
                 slug: "discover-core-values",
                 type: CardType.upsell,
-                text: "Discover your core values when you start a free 7-day trial. We'll send you questions tailored uniquely to your core values.\n\nThe trial includes other features, too.",
+                text: "Discover your core values when you start a free 7-day trial. We'll send you questions tailored uniquely to your core values.",
             }),
             OnboardingCardViewModel.create({
                 slug: "activity-completed",
