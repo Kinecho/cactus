@@ -68,7 +68,7 @@
             this.$emit('selectedWord', word);
         }
 
-        handleClose(force:boolean=false) {
+        handleClose(force: boolean = false) {
             this.$emit('close', force)
         }
 
@@ -109,4 +109,13 @@
 </script>
 
 <style scoped lang="scss">
+    @import "mixins";
+
+    .card-wrapper {
+        padding: 4rem 2.4rem;
+
+        @include r(374) {
+            padding: 5.6rem 3.2rem;
+        }
+    }
 </style>

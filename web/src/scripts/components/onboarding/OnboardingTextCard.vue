@@ -22,6 +22,7 @@
     import { Prop } from "vue-property-decorator";
     import MarkdownText from "@components/MarkdownText.vue";
     import ActionButton from "@components/ActionButton.vue";
+    import CactusMember from "@shared/models/CactusMember";
 
     @Component({
         components: {
@@ -35,6 +36,9 @@
         @Prop({ type: Object as () => OnboardingCardViewModel, required: true })
         card!: OnboardingCardViewModel;
 
+        @Prop({ type: Object as () => CactusMember, required: true })
+        member!: CactusMember;
+
         @Prop({ type: String, required: false, default: null })
         selectedInsightWord!: string | null;
 
@@ -42,7 +46,7 @@
             return this.card.getMarkdownText({ selectedInsight: this.selectedInsightWord })
         }
 
-        closeOnboarding(){
+        closeOnboarding() {
             this.$emit('close', true)
         }
     }
@@ -93,6 +97,7 @@
         justify-content: center;
         align-items: flex-start;
         margin: 2rem 0;
+
         > * {
             margin-bottom: 2rem;
         }

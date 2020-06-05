@@ -283,24 +283,18 @@
     }
 
     .card-container {
-        padding: 4rem 2.4rem;
-
-        @include r(374) {
-            padding: 5.6rem 3.2rem;
-        }
+        position: relative;
         @include r(600) {
             align-items: center;
             display: flex;
             flex-grow: 1;
             margin: 0 auto;
             max-width: 110rem;
-            padding: 0;
         }
     }
 
     .onboardingCard {
         max-width: 110rem; //must have to keep transition smooth
-        width: 100%;
     }
 
     .tertiary {
