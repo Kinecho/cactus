@@ -59,7 +59,11 @@
         flex-direction: column;
         justify-content: center;
         min-height: 80vh;
-        padding: 0 2.4rem;
+        padding: 0 .8rem;
+
+        @include r(374) {
+            padding: 0 2.4rem;
+        }
 
         @include r(600) {
             align-items: center;
@@ -77,11 +81,14 @@
     }
 
     .insight-word-chart {
-        width: 100%;
+        margin: 0 -2.4rem;
+        width: calc(100% + 4.8rem);
 
         @include r(600) {
             align-self: center;
+            margin: 0 auto;
             max-width: 50%;
+            width: 100%;
         }
     }
 

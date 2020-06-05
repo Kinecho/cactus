@@ -8,7 +8,7 @@
             <markdown-text :source="markdownText"/>
         </strong>
         <textarea placeholder="Write something..." v-model="responseText" ref="textInput" :disabled="saving"/>
-        <button @click="saveAndContinue" :disabled="saving">{{saving ? "Saving...." : "Done"}}</button>
+        <button class="doneBtn" @click="saveAndContinue" :disabled="saving">{{saving ? "Saving...." : "Done"}}</button>
     </div>
 </template>
 
@@ -89,7 +89,7 @@
 
     .elementReflectContainer {
         align-self: center;
-        padding: 0 4rem;
+        padding: 0 1.6rem;
 
         @include r(600) {
             padding: 0 6.4rem;
@@ -115,7 +115,7 @@
         border: 0;
         color: $darkestGreen;
         font-size: 1.8rem;
-        min-height: 50vh;
+        min-height: 40vh;
         opacity: .8;
         padding: 0;
         transition: padding .6s;
@@ -134,6 +134,19 @@
         &:focus {
             outline-color: rgba(0, 0, 0, .3);
             padding: .8rem 1.6rem;
+        }
+    }
+
+    .doneBtn {
+        bottom: 1.6rem;
+        left: 1.6rem;
+        margin: auto;
+        position: fixed;
+        right: 1.6rem;
+        width: calc(100% - 3.2rem);
+
+        @include r(768) {
+            position: static;
         }
     }
 </style>

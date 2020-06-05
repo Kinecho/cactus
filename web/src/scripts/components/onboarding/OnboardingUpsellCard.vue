@@ -149,8 +149,9 @@
     @import "mixins";
 
     .upsellContainer {
-        padding: 0 2.4rem;
-
+        @include r(374) {
+            padding: 0 2.4rem;
+        }
         @include r(768) {
             display: grid;
             grid-column-gap: 1.6rem;
@@ -175,13 +176,21 @@
 
     .upsellInfo {
         @include shadowbox;
-        font-size: 1.8rem;
+        font-size: 1.6rem;
         list-style: none;
         margin: 0 0 3.2rem;
-        padding: 3.2rem;
+        padding: 2.4rem;
         text-align: left;
         width: 100%;
 
+        @include r(374) {
+            margin: 0 0 3.2rem;
+            width: 100%;
+        }
+        @include r(600) {
+            font-size: 1.8rem;
+            padding: 3.2rem;
+        }
         @include r(768) {
             align-self: center;
             grid-area: 1 / 2 / 3 / 2;
@@ -193,14 +202,23 @@
             display: flex;
 
             &:not(:last-child) {
-                margin-bottom: 2.4rem;
+                margin-bottom: 1.6rem;
+
+                @include r(600) {
+                    margin-bottom: 2.4rem;
+                }
             }
 
             img {
                 flex-shrink: 0;
-                height: 2.8rem;
+                height: 1.8rem;
                 margin: .4rem 1.6rem 0 0;
-                width: 2.8rem;
+                width: 1.8rem;
+
+                @include r(600) {
+                    height: 2.8rem;
+                    width: 2.8rem;
+                }
             }
         }
     }
@@ -235,10 +253,17 @@
     }
 
     .finePrint {
-        font-size: 1.6rem;
+        font-size: 1.4rem;
         opacity: .8;
-        padding: 3.2rem 0;
+        padding-top: 2.4rem;
+        text-align: center;
         width: 100%;
+
+        @include r(600) {
+            font-size: 1.6rem;
+            padding-top: 3.2rem;
+            text-align: left;
+        }
     }
 
 </style>

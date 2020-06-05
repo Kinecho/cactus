@@ -43,8 +43,11 @@
         flex-direction: column;
         justify-content: space-between;
         min-height: 80vh;
-        padding: 0 2.4rem;
+        padding: 0 .8rem;
 
+        @include r(374) {
+            padding: 0 2.4rem;
+        }
         @include r(600) {
             align-items: center;
             flex-direction: row;

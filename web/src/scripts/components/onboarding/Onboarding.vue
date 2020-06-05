@@ -283,12 +283,14 @@
 
     .tertiary {
         cursor: pointer;
+        padding: 1.6rem;
         position: absolute;
         top: 50vh;
         z-index: 1;
 
         @include r(600) {
             opacity: .5;
+            padding: 2rem;
             transition: opacity .3s;
 
             &:hover {
