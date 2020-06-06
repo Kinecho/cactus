@@ -26,7 +26,7 @@ export const DEFAULT_WORD_BUBBLE_CONFIG = (): WordBubbleConfig => {
     return {
         maxDiameter: 375,
         selectable: false,
-        selectedFillColor: "#0DADB1",
+        selectedFillColor: "#33CCAB",
         numFillerBubbles: 11,
         // hoverFillColor: "#00cee5",
         colorRange: [
@@ -198,7 +198,7 @@ export function drawWordBubbleChart(parentSelector: string, words: InsightWord[]
 
             selection.style("fill", newColor)
             selection.transition().duration(200).attr("r", function () {
-                return radius * 1.15;
+                return radius * 1.2;
             })
         }
 

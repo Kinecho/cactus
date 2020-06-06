@@ -9,7 +9,6 @@
                         @complete="closeOnboarding"
                 />
             </div>
-
         </div>
         <img height="100%" width="100%" class="image" v-if="card.imageUrl" :src="card.imageUrl" alt="Image"/>
     </div>
@@ -98,16 +97,23 @@
     }
 
     .actions {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: flex-start;
-        margin: 2rem 0;
+        bottom: 2.4rem;
+        left: 2.4rem;
+        position: fixed;
+        right: 2.4rem;
 
-        > * {
-            margin-bottom: 2rem;
+        @include r(768) {
+            margin-top: 3.2rem;
+            position: static;
         }
 
-        font-size: 2rem;
+        button {
+            width: 100%;
+
+            @include r(768) {
+                min-width: 24rem;
+                width: auto;
+            }
+        }
     }
 </style>

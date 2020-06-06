@@ -154,7 +154,7 @@
             max-width: 44rem;
             padding: 0 2.4rem;
         }
-        @include r(768) {
+        @include r(960) {
             display: grid;
             grid-column-gap: 1.6rem;
             grid-template-rows: 1fr 1fr;
@@ -164,6 +164,8 @@
         }
         @include r(1140) {
             grid-column-gap: 6.4rem;
+            grid-template-columns: 66% 33%;
+            grid-template-rows: 1fr 1fr;
         }
     }
 
@@ -171,7 +173,7 @@
         line-height: 1.2;
         margin-bottom: 2rem;
 
-        @include r(768) {
+        @include r(960) {
             align-self: end;
             margin-bottom: 2.4rem;
         }
@@ -194,7 +196,7 @@
             font-size: 1.8rem;
             padding: 3.2rem;
         }
-        @include r(768) {
+        @include r(960) {
             align-self: center;
             grid-area: 1 / 2 / 3 / 2;
             margin: 0;
@@ -227,17 +229,15 @@
     }
 
     .btnContainer {
-        @include r(768) {
+        @include r(960) {
             align-items: center;
             align-self: start;
             display: flex;
             flex-wrap: wrap;
             font-size: 1.8rem;
             margin-bottom: 4rem;
-        }
 
-        .tryIt {
-            @include r(768) {
+            .tryIt {
                 margin-right: 1.6rem;
                 min-width: 24rem;
             }
@@ -249,7 +249,11 @@
             width: 100%;
 
             @include r(768) {
+                max-width: none;
+            }
+            @include r(960) {
                 flex-grow: 0;
+                max-width: 28rem;
                 width: auto;
             }
         }
@@ -262,7 +266,7 @@
         text-align: center;
         width: 100%;
 
-        @include r(600) {
+        @include r(960) {
             font-size: 1.6rem;
             padding-top: 3.2rem;
             text-align: left;
