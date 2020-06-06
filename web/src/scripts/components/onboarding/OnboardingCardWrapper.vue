@@ -117,6 +117,7 @@
         @include r(374) {
             //do not add margin: auto here as it makes the cards jumpy
             padding: 5.6rem 3.2rem;
+            width: 100%;
         }
     }
 </style>

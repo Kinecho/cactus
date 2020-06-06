@@ -163,11 +163,14 @@
     }
 
     .elementReflectContainer {
-        align-self: center;
         padding: 0 1.6rem;
+        width: 100%;
 
         @include r(600) {
             padding: 0 6.4rem;
+        }
+        @include r(1140) {
+            min-width: 60vw;
         }
     }
 

@@ -276,25 +276,26 @@
     }
 
     .index-0,
-    .index-4,
+    .index-6,
     .index-8,
     .index-12 {
         background-position: left 50vw bottom 50vh, left -50vw top 50vh;
     }
     .index-1,
     .index-5,
-    .index-9,
+    .index-7,
+    .index-11,
     .index-13 {
         background-position: left -30vw bottom 60vh, left 0vw top 70vh;
     }
     .index-2,
-    .index-6,
+    .index-4,
+    .index-8,
     .index-10 {
         background-position: left -30vw bottom -40vh, left 80vw top -30vh;
     }
     .index-3,
-    .index-7,
-    .index-11 {
+    .index-9 {
         background-position: left 40vw bottom -70vh, left -10vw top -70vh;
     }
 
