@@ -190,7 +190,7 @@
         border: 0;
         color: $darkestGreen;
         font-size: 1.8rem;
-        min-height: 40vh;
+        height: 24vh;
         opacity: .8;
         padding: 0;
         transition: padding .6s;
@@ -213,19 +213,13 @@
     }
 
     .doneBtn {
-        bottom: 1.6rem;
-        left: 1.6rem;
+        bottom: 2.4rem;
+        left: 2.4rem;
         margin: auto;
         position: fixed;
-        right: 1.6rem;
-        width: calc(100% - 3.2rem);
+        right: 2.4rem;
+        width: calc(100% - 4.8rem);
 
-        @include r(374) {
-            bottom: 2.4rem;
-            left: 2.4rem;
-            right: 2.4rem;
-            width: calc(100% - 4.8rem);
-        }
         @include r(768) {
             position: static;
         }

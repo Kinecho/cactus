@@ -7,7 +7,6 @@
 
         <transition-group :name="cardTransitionName" mode="in-out" tag="div" class="card-container">
             <OnboardingCard
-                    class="onboardingCard"
                     v-for="card in cards"
                     v-if="card.id === currentCard.id"
                     :key="card.id"
@@ -291,10 +290,6 @@
             margin: 0 auto;
             max-width: 110rem;
         }
-    }
-
-    .onboardingCard {
-        max-width: 110rem; //must have to keep transition smooth
     }
 
     .tertiary {
