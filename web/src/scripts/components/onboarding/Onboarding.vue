@@ -1,5 +1,5 @@
 <template>
-    <div v-touch:swipe="handleSwipeEvent" class="onboarding-main">
+    <div v-touch:swipe="handleSwipeEvent" class="onboarding-main" :class="`index-${index}`">
         <ProgressStepper :current="index" :total="totalPages"/>
         <div class="progress-count" v-if="false">
             <span class="current">{{index + 1}}</span>&nbsp;of<span class="total">{{totalPages}}</span>
@@ -251,11 +251,13 @@
     @import "transitions";
 
     .onboarding-main {
-        background-color: $beige;
+        background: $beige no-repeat;
+        background-image: url(/assets/images/transparentBlob1.svg), url(/assets/images/transparentBlob2.svg);
         font-size: 2rem;
         min-height: 100vh;
         overflow: auto;
         position: relative;
+        transition: background-position 1s, background-color 1s;
         width: 100%;
 
         @include r(374) {
@@ -271,6 +273,41 @@
         @include r(960) {
             font-size: 4rem;
         }
+    }
+
+    .index-0,
+    .index-4,
+    .index-8,
+    .index-12 {
+        background-position: left 50vw bottom 50vh, left -50vw top 50vh;
+    }
+    .index-1,
+    .index-5,
+    .index-9,
+    .index-13 {
+        background-position: left -30vw bottom 60vh, left 0vw top 70vh;
+    }
+    .index-2,
+    .index-6,
+    .index-10 {
+        background-position: left -30vw bottom -40vh, left 80vw top -30vh;
+    }
+    .index-3,
+    .index-7,
+    .index-11 {
+        background-position: left 40vw bottom -70vh, left -10vw top -70vh;
+    }
+
+    .index-4,
+    .index-8 {
+        background-color: $lightDolphin;
+    }
+    .index-5,
+    .index-9 {
+        background-color: lighten($pink, 15%);
+    }
+    .index-13 {
+        background-color: lighten($green, 20%);
     }
 
     .progress {

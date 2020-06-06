@@ -65,12 +65,15 @@
 
         @include r(374) {
             justify-content: center;
+            margin: 0 auto;
+            max-width: 48rem;
             padding: 0 2.4rem;
         }
-        @include r(600) {
+        @include r(768) {
             align-items: center;
             flex-direction: row;
             justify-content: flex-start;
+            max-width: none;
             padding: 0 6.4rem;
         }
     }
@@ -78,7 +81,7 @@
     .textBox {
         margin-bottom: 5.6rem;
 
-        @include r(600) {
+        @include r(768) {
             margin-bottom: 0;
             padding-right: 6.4rem;
             width: 66%;
@@ -86,10 +89,9 @@
     }
 
     .image {
-        max-width: 30rem;
         width: 100%;
 
-        @include r(600) {
+        @include r(768) {
             align-self: center;
             max-width: 33%;
         }
