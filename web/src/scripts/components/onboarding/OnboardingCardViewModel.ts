@@ -168,11 +168,11 @@ export default class OnboardingCardViewModel {
                     action: ContentAction.complete,
                     label: "Explore Cactus",
                     linkStyle: LinkStyle.buttonPrimary,
-                }, {
-                    action: ContentAction.showPricing,
-                    label: "Pricing Page",
-                    linkStyle: LinkStyle.fancyLink,
-                    target: "_blank",
+                // }, {
+                //     action: ContentAction.showPricing,
+                //     label: "Pricing Page",
+                //     linkStyle: LinkStyle.fancyLink,
+                //     target: "_blank",
                 }]
             }),
         ];

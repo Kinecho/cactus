@@ -150,6 +150,8 @@
 
     .upsellContainer {
         @include r(374) {
+            margin: 0 auto;
+            max-width: 44rem;
             padding: 0 2.4rem;
         }
         @include r(768) {
@@ -157,6 +159,7 @@
             grid-column-gap: 1.6rem;
             grid-template-rows: 1fr 1fr;
             grid-template-columns: 60% 40%;
+            max-width: 110rem;
             padding: 0 6.4rem;
         }
         @include r(1140) {

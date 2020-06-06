@@ -1,6 +1,6 @@
 <template>
-    <div class="card-wrapper">
-        <component class="content"
+    <div class="onboardingCard">
+        <component
                 :is="cardInfo.type"
                 :member="member"
                 v-bind="cardInfo.props"
@@ -111,10 +111,11 @@
 <style scoped lang="scss">
     @import "mixins";
 
-    .card-wrapper {
+    .onboardingCard {
         padding: 4rem 2.4rem;
 
         @include r(374) {
+            //do not add margin: auto here as it makes the cards jumpy
             padding: 5.6rem 3.2rem;
         }
     }
