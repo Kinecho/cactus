@@ -60,12 +60,12 @@
 
         async setIndex(index: number) {
             if (index === 0) {
-                await pushRoute(PageRoute.ONBOARDING);
+                await pushRoute(PageRoute.HELLO_ONBOARDING);
                 return
             }
             let card = this.cards[index];
             const slug = card?.slug ?? (index + 1);
-            await pushRoute(`${ PageRoute.ONBOARDING }/${ slug }`);
+            await pushRoute(`${ PageRoute.HELLO_ONBOARDING }/${ slug }`);
         }
 
         get index(): number {

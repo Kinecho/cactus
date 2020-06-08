@@ -221,8 +221,8 @@
         async startCheckout() {
             this.checkoutLoading = true;
             try {
-                const successPath = `${ PageRoute.ONBOARDING }/${ this.currentCard.slug ?? this.index }/success`
-                const cancelPath = `${ PageRoute.ONBOARDING }/${ this.currentCard.slug ?? this.index }`
+                const successPath = `${ PageRoute.HELLO_ONBOARDING }/${ this.currentCard.slug ?? this.index }/success`
+                const cancelPath = `${ PageRoute.HELLO_ONBOARDING }/${ this.currentCard.slug ?? this.index }`
 
                 if (!this.product) {
                     logger.error("No product was found, this is bad");
