@@ -304,15 +304,15 @@
         background-position: left 40vw bottom -70vh, left -10vw top -70vh;
     }
 
-    .index-4,
-    .index-8 {
+    .index-3,
+    .index-7 {
         background-color: lighten($lightDolphin, 10%);
     }
-    .index-5,
-    .index-9 {
+    .index-4,
+    .index-8 {
         background-color: lighten($pink, 12%);
     }
-    .index-13 {
+    .index-12 {
         background-color: lighten($green, 20%);
     }
 
