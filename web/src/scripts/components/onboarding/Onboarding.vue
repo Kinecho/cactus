@@ -1,6 +1,11 @@
 <template>
     <div v-touch:swipe="handleSwipeEvent" class="onboarding-main" :class="`index-${index}`">
         <ProgressStepper :current="index" :total="totalPages"/>
+        <button aria-label="Close" @click="closeOnboarding" title="Close" class="close tertiary icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
+                <path d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
+            </svg>
+        </button>
         <div class="progress-count" v-if="false">
             <span class="current">{{index + 1}}</span>&nbsp;of<span class="total">{{totalPages}}</span>
         </div>
@@ -23,12 +28,12 @@
             />
         </transition-group>
 
-        <button aria-label="Previous slide" @click="previous" :disabled="!previousEnabled" class="previous tertiary no-loading">
+        <button aria-label="Previous slide" @click="previous" :disabled="!previousEnabled" class="arrow previous tertiary no-loading">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
                 <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
             </svg>
         </button>
-        <button v-if="showNextButton" aria-label="Next slide" :disabled="!nextEnabled" @click="next" class="next tertiary no-loading">
+        <button v-if="showNextButton" aria-label="Next slide" :disabled="!nextEnabled" @click="next" class="arrow next tertiary no-loading">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
                 <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
             </svg>
@@ -301,7 +306,7 @@
 
     .index-4,
     .index-8 {
-        background-color: $lightDolphin;
+        background-color: lighten($lightDolphin, 10%);
     }
     .index-5,
     .index-9 {
@@ -321,6 +326,7 @@
 
     .card-container {
         position: relative;
+
         @include r(600) {
             align-items: center;
             display: flex;
@@ -333,9 +339,6 @@
     .tertiary {
         cursor: pointer;
         padding: 1.6rem;
-        position: absolute;
-        top: 50vh;
-        z-index: 1;
 
         @include r(600) {
             opacity: .5;
@@ -348,14 +351,27 @@
             }
         }
 
-        &:disabled {
-            display: none;
-        }
-
         svg {
             fill: $darkestGreen;
             height: 1.6rem;
             width: 1.6rem;
+        }
+    }
+
+    .close {
+        position: absolute;
+        right: 0;
+        top: 1.2rem;
+        z-index: 20;
+    }
+
+    .arrow {
+        position: absolute;
+        top: 50vh;
+        z-index: 1;
+
+        &:disabled {
+            display: none;
         }
 
         &.previous {
