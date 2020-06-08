@@ -223,7 +223,11 @@ export function drawWordBubbleChart(parentSelector: string, words: InsightWord[]
     // Note: This one needs to have the anonymous function
     // syntax because we need the "this" context that gets lost with the arrow syntax
     .style("font-size", function (d) {
-        return Math.min(2 * d.r, (2 * d.r - 8) / this.getComputedTextLength() * 14) + "px";
+        const len = d.data.word.substring(0, d.r / 3).length;
+        const size = d.r/3;
+        size *= 9 / len;
+        size += 1;
+        return Math.round(size)+'px'
     })
     .style("pointer-events", "none")
     .style("fill", "#FFF")
