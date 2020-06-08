@@ -58,7 +58,6 @@ export default class AppSettingsService {
     observeAppSettings(options: EntryObserverOptions<AppSettings>): ListenerUnsubscriber {
         return this.flamelinkService.observeSingle(AppSettings, options)
     }
-
 }
 
 

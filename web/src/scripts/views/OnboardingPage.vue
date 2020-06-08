@@ -2,10 +2,10 @@
     <div class="main">
         <onboarding :index="index"
                 :cards="cards"
-                @index="setIndex"
                 :product="product"
                 :page-status="pageStatus"
                 :member="member"
+                @index="setIndex"
         />
     </div>
 </template>
@@ -25,6 +25,8 @@
     import { isNumber } from "@shared/util/ObjectUtil";
     import OnboardingCardViewModel, { CardType } from "@components/onboarding/OnboardingCardViewModel";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
+    import AppSettingsService from "@web/services/AppSettingsService";
+    import AppSettings from "@shared/models/AppSettings";
 
     const logger = new Logger("OnboardingPage");
 
@@ -49,19 +51,21 @@
         product: SubscriptionProduct | null = null;
         billingPeriod = BillingPeriod.yearly;
         productLoaded = false;
+        settings: AppSettings|null = null;
 
-        beforeMount() {
-            this.fetchProduct();
+        async beforeMount() {
+            await this.fetchProduct();
+            this.settings = await AppSettingsService.sharedInstance.getCurrentSettings()
         }
 
         async setIndex(index: number) {
             if (index === 0) {
-                await pushRoute(PageRoute.ONBOARDING);
+                await pushRoute(PageRoute.HELLO_ONBOARDING);
                 return
             }
             let card = this.cards[index];
             const slug = card?.slug ?? (index + 1);
-            await pushRoute(`${ PageRoute.ONBOARDING }/${ slug }`);
+            await pushRoute(`${ PageRoute.HELLO_ONBOARDING }/${ slug }`);
         }
 
         get index(): number {
@@ -80,14 +84,12 @@
         }
 
         get cards(): OnboardingCardViewModel[] {
-            let cards = OnboardingCardViewModel.createAll();
+            let cards = OnboardingCardViewModel.createAll(this.settings);
             if (isPremiumTier(this.member.tier) && this.pageStatus !== PageStatus.success) {
                 cards = cards.filter(card => card.type !== CardType.upsell)
             }
-
             return cards;
         }
-
 
         async fetchProduct() {
             this.productLoaded = false;

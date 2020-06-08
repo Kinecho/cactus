@@ -250,7 +250,7 @@ const routes: MetaRouteConfig[] = [
     {
         component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@web/views/OnboardingPage.vue")),
         name: "Onboarding",
-        path: PageRoute.ONBOARDING,
+        path: PageRoute.HELLO_ONBOARDING,
         meta: {
             passMember: true,
             authRequired: true,
