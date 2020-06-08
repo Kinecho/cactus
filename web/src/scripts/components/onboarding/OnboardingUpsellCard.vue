@@ -1,10 +1,10 @@
 <template>
     <div class="onboardingUpsellCard" v-if="product">
-        <template v-if="upgradeSuccess">
-            <h1>Upgrade Success!</h1>
-            <p>You have successfully started your trial of Cactus Plus.</p>
-            <button @click="$emit('next')">Continue</button>
-        </template>
+        <div class="successContainer" v-if="upgradeSuccess">
+            <h1>Success!</h1>
+            <p class="subtext">You have successfully started your trial of Cactus Plus.</p>
+            <button class="continue" @click="$emit('next')">Continue</button>
+        </div>
         <template v-else>
             <div class="alert error" v-if="errorMessage">{{errorMessage}}</div>
             <div class="upsellContainer">
@@ -147,6 +147,52 @@
 
 <style scoped lang="scss">
     @import "mixins";
+
+    .successContainer {
+        align-items: flex-start;
+        display: flex;
+        flex-flow: column wrap;
+        justify-content: center;
+        min-height: 80vh;
+        padding: 0 .8rem;
+
+        @include r(374) {
+            margin: 0 auto;
+            max-width: 48rem;
+            padding: 0 2.4rem;
+        }
+        @include r(768) {
+            max-width: 84rem;
+            padding: 0 6.4rem;
+        }
+
+        button {
+            bottom: 2.4rem;
+            left: 2.4rem;
+            margin: auto;
+            position: fixed;
+            right: 2.4rem;
+            width: calc(100% - 4.8rem);
+
+            @include r(374) {
+                bottom: 4rem;
+                left: 4rem;
+                right: 4rem;
+                width: calc(100% - 8rem);
+            }
+            @include r(600) {
+                flex-grow: 0;
+                margin: 0;
+                min-width: 24rem;
+                position: static;
+                width: auto;
+            }
+        }
+    }
+
+    .subtext {
+        margin-bottom: 2.4rem;
+    }
 
     .upsellContainer {
         @include r(374) {
