@@ -175,7 +175,7 @@
                     </div>
                 </transition>
                 <div class="flexContainer">
-                    <resizable-textarea v-bind:maxLines="4">
+                    <resizable-textarea :max-height-px="200">
                     <textarea ref="reflectionInput"
                             type="text"
                             rows="1"
@@ -894,11 +894,12 @@
         border-width: 0;
         border-radius: 2.4rem;
         cursor: pointer;
-        max-height: 10rem;
+
         position: relative;
         transition: background-color .3s;
         width: 100%;
         z-index: 1;
+        /*max-height: 10rem;*/
 
         &:focus {
             background-color: $white;
