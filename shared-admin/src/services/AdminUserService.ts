@@ -66,14 +66,14 @@ const DefaultSendMagicLinkOptions = {
     successPath: '/success',
 };
 
-let firestoreService: AdminFirestoreService;
-
 export default class AdminUserService {
     config: CactusConfig;
+    firestoreService: AdminFirestoreService;
     protected static sharedInstance: AdminUserService;
 
     constructor(config: CactusConfig) {
         this.config = config;
+        this.firestoreService = AdminFirestoreService.getSharedInstance();
     }
 
     static getSharedInstance(): AdminUserService {
@@ -84,7 +84,6 @@ export default class AdminUserService {
     }
 
     static initialize(config: CactusConfig) {
-        firestoreService = AdminFirestoreService.getSharedInstance();
         AdminUserService.sharedInstance = new AdminUserService(config);
     }
 
@@ -93,7 +92,7 @@ export default class AdminUserService {
     }
 
     async save(model: User, options?: SaveOptions): Promise<User> {
-        return firestoreService.save(model, options);
+        return this.firestoreService.save(model, options);
     }
 
     async getMagicLinkUrl(email: string, options: SendMagicLinkOptions = DefaultSendMagicLinkOptions): Promise<SendMagicLinkResult> {
@@ -122,8 +121,8 @@ export default class AdminUserService {
         }
 
 
-        const query = firestoreService.getCollectionRef(Collection.users).where(Field.email, "==", searchEmail).limit(1);
-        const result = await firestoreService.executeQuery(query, User);
+        const query = this.firestoreService.getCollectionRef(Collection.users).where(Field.email, "==", searchEmail).limit(1);
+        const result = await this.firestoreService.executeQuery(query, User);
 
         const [foundUser] = result.results;
 
@@ -136,8 +135,8 @@ export default class AdminUserService {
             searchEmail = email.trim().toLowerCase();
         }
 
-        const query = firestoreService.getCollectionRef(Collection.users).where(Field.email, "==", searchEmail);
-        const result = await firestoreService.executeQuery(query, User, options);
+        const query = this.firestoreService.getCollectionRef(Collection.users).where(Field.email, "==", searchEmail);
+        const result = await this.firestoreService.executeQuery(query, User, options);
 
         return result.results;
     }
@@ -146,7 +145,7 @@ export default class AdminUserService {
         if (!id) {
             return undefined;
         }
-        return await firestoreService.getById(id, User, options);
+        return await this.firestoreService.getById(id, User, options);
     }
 
     /**
@@ -155,7 +154,7 @@ export default class AdminUserService {
      * @return {Promise<User | undefined>}
      */
     async delete(id: string): Promise<User | undefined> {
-        const deletedUser = await firestoreService.delete(id, User);
+        const deletedUser = await this.firestoreService.delete(id, User);
 
         return deletedUser;
     }
@@ -256,33 +255,37 @@ export default class AdminUserService {
             })
         };
 
-        const tasks: Promise<DeleteTaskResult>[] = [
-            ...(members.map(member => generator(Collection.reflectionResponses, AdminReflectionResponseService.getSharedInstance().deletePermanentlyForMember(member)))),
-            ...(members.map(member => generator(Collection.sentPrompts, AdminSentPromptService.getSharedInstance().deletePermanentlyForMember(member || { email })))),
-            ...(members.map(member => singleGenerator(Collection.members, AdminFirestoreService.getSharedInstance().deletePermanently(member)))),
-            ...(memberIds.map(memberId => generator(Collection.memberProfiles, AdminMemberProfileService.getSharedInstance().deletePermanently(memberId)))),
-            ...(memberIds.map(memberId => generator(Collection.socialConnections, AdminSocialConnectionService.getSharedInstance().deleteConnectionsPermanentlyForMember(memberId)))),
-            ...(memberIds.map(memberId => generator(Collection.socialConnectionRequests, AdminSocialConnectionRequestService.getSharedInstance().deleteConnectionRequestsPermanentlyForMember(memberId)))),
-            ...(users.map(user => singleGenerator(Collection.users, AdminFirestoreService.getSharedInstance().deletePermanently(user)))),
-            generator(Collection.pendingUsers, AdminPendingUserService.getSharedInstance().deletePermanentlyForEmail(email)),
-            generator(Collection.emailReply, AdminEmailReplyService.getSharedInstance().deletePermanentlyByEmail(email)),
-            generator(Collection.socialInvites, AdminSocialInviteService.getSharedInstance().deleteSocialInvitesPermanently({
-                memberIds: memberIds,
-                email
-            }))
-        ];
+        try {
+            const tasks: Promise<DeleteTaskResult>[] = [
+                ...(members.map(member => generator(Collection.reflectionResponses, AdminReflectionResponseService.getSharedInstance().deletePermanentlyForMember(member)))),
+                ...(members.map(member => generator(Collection.sentPrompts, AdminSentPromptService.getSharedInstance().deletePermanentlyForMember(member || { email })))),
+                ...(members.map(member => singleGenerator(Collection.members, AdminFirestoreService.getSharedInstance().deletePermanently(member)))),
+                ...(memberIds.map(memberId => generator(Collection.memberProfiles, AdminMemberProfileService.getSharedInstance().deletePermanently(memberId)))),
+                ...(memberIds.map(memberId => generator(Collection.socialConnections, AdminSocialConnectionService.getSharedInstance().deleteConnectionsPermanentlyForMember(memberId)))),
+                ...(memberIds.map(memberId => generator(Collection.socialConnectionRequests, AdminSocialConnectionRequestService.getSharedInstance().deleteConnectionRequestsPermanentlyForMember(memberId)))),
+                ...(users.map(user => singleGenerator(Collection.users, AdminFirestoreService.getSharedInstance().deletePermanently(user)))),
+                generator(Collection.pendingUsers, AdminPendingUserService.getSharedInstance().deletePermanentlyForEmail(email)),
+                generator(Collection.emailReply, AdminEmailReplyService.getSharedInstance().deletePermanentlyByEmail(email)),
+                generator(Collection.socialInvites, AdminSocialInviteService.getSharedInstance().deleteSocialInvitesPermanently({
+                    memberIds: memberIds,
+                    email
+                }))
+            ];
 
-        const taskResults = await Promise.all(tasks);
+            const taskResults = await Promise.all(tasks);
 
-        logger.log("AdminUserService.deleteAllData: task results", taskResults);
+            logger.log("AdminUserService.deleteAllData: task results", taskResults);
 
-        taskResults.reduce((agg, r) => {
-            agg.errors?.concat(r.errors || []);
-            agg.documentsDeleted[r.collectionName] = r.numDocuments;
-            return agg;
-        }, results);
+            taskResults.reduce((agg, r) => {
+                agg.errors?.concat(r.errors || []);
+                agg.documentsDeleted[r.collectionName] = r.numDocuments;
+                return agg;
+            }, results);
 
-        results.success = true;
+            results.success = true;
+        } catch (error) {
+            logger.error("An unexpected error was thrown while deleting member data", error);
+        }
 
         try {
             const adminRecord = results.userRecord || await adminApp.auth().getUserByEmail(email);
@@ -324,7 +327,7 @@ export default class AdminUserService {
                 documentsDeleted: results.documentsDeleted,
                 errors: results.errors
             });
-            await firestoreService.save(deletedUser);
+            await this.firestoreService.save(deletedUser);
             resolve(deletedUser);
         }))
 
