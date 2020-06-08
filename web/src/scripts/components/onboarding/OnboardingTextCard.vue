@@ -10,7 +10,7 @@
                 />
             </div>
         </div>
-        <img height="100%" width="100%" class="image" v-if="card.imageUrl" :src="card.imageUrl" alt="Image"/>
+        <img height="300" width="300" class="image" v-if="card.imageUrl" :src="card.imageUrl" alt="Image"/>
     </div>
 </template>
 
@@ -88,6 +88,7 @@
     }
 
     .image {
+        height: auto;
         width: 100%;
 
         @include r(768) {
