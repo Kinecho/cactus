@@ -25,6 +25,7 @@
                     @previous="previous"
                     @checkout="startCheckout"
                     @close="closeOnboarding"
+                    @enableKeyboardNavigation="enableKeyboardNavigation"
             />
         </transition-group>
 
@@ -112,6 +113,7 @@
         checkoutError: string | null = null;
         cardTransitionName = transitionName.next;
         keyListener: any = null;
+        keyboardNavigationEnabled = true;
 
         get checkoutInfo(): CheckoutInfo {
             const success = this.pageStatus === PageStatus.success;
@@ -156,6 +158,10 @@
             return this.index > 0;
         }
 
+        enableKeyboardNavigation(enabled: boolean) {
+            this.keyboardNavigationEnabled = enabled;
+        }
+
         setSelectedWord(word: InsightWord | null) {
             this.selectedWord = word;
         }
@@ -165,6 +171,9 @@
         }
 
         handleDocumentKeyUp(event: KeyboardEvent) {
+            if (!this.keyboardNavigationEnabled) {
+                return;
+            }
             if (event.key === "ArrowLeft" || event.code === "ArrowLeft" || event.which === 37) {
                 this.previous()
             } else if (event.key === "ArrowRight" || event.code === "ArrowRight" || event.which === 39) {
@@ -210,7 +219,7 @@
             }
         }
 
-        async closeOnboarding(force: boolean=false) {
+        async closeOnboarding(force: boolean = false) {
             if (this.showCloseConfirm || force) {
                 await pushRoute(PageRoute.JOURNAL_HOME);
                 return;
@@ -286,6 +295,7 @@
     .index-12 {
         background-position: left 50vw bottom 50vh, left -50vw top 50vh;
     }
+
     .index-1,
     .index-5,
     .index-7,
@@ -293,12 +303,14 @@
     .index-13 {
         background-position: left -30vw bottom 75vh, left 0vw top 70vh;
     }
+
     .index-2,
     .index-4,
     .index-8,
     .index-10 {
         background-position: left -30vw bottom -40vh, left 80vw top -30vh;
     }
+
     .index-3,
     .index-9 {
         background-position: left 40vw bottom -70vh, left -10vw top -70vh;
@@ -308,10 +320,12 @@
     .index-7 {
         background-color: lighten($lightDolphin, 10%);
     }
+
     .index-4,
     .index-8 {
         background-color: lighten($pink, 12%);
     }
+
     .index-12 {
         background-color: lighten($green, 20%);
     }

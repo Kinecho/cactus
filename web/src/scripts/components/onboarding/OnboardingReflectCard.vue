@@ -1,6 +1,5 @@
 <template>
     <div class="elementReflectContainer">
-        <!-- <result-element :element="card.element" :selectable="false" :selected="false" :pulsing="false" :withLabel="false"/> -->
         <svg class="element" xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56">
             <path vector-effect="non-scaling-stroke" class="path" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6.07718848,33.0659031 C16.9034833,54.199668 20.7179299,20.251021 15.8579151,21.0429343 C10.9979002,21.8348476 13.8625604,37.5930451 19.6773127,37.9894412 C27.6775161,38.5348211 28.0221585,13.1185703 24.5423886,12.1275006 C19.4091615,10.6655114 24.3895721,41.7614486 30.3431156,42.9097293 C36.3335467,44.0651857 38.3505895,18.5270842 34.1893654,16.9067124 C29.4631525,15.0663352 32.4072958,35.8238194 37.147521,38.1746579 C44.9090376,42.0239099 46.864989,20.9520616 43.4838166,19.9890733 C38.3505895,18.5270842 43.573142,45.2571484 50.0771885,28.1235674" transform="rotate(9 28.077 27.513)"/>
         </svg>
@@ -8,8 +7,19 @@
             <markdown-text :source="markdownText"/>
         </strong>
 
-        <textarea placeholder="Write something..." v-model="responseText" ref="textInput" :disabled="saving"/>
-        <button :class="responseText ? 'show' : 'hide'" class="doneBtn" @click="saveAndContinue" :disabled="saving">{{saving ? 'Saving....' : 'Done'}}</button>
+        <resizable-textarea :max-height-px="maxTextareaHeight">
+        <textarea placeholder="Write something..."
+                v-model="responseText"
+                ref="textInput"
+                type="text"
+                :disabled="saving"
+                @focus="$emit('enableKeyboardNavigation', false)"
+                @blur="$emit('enableKeyboardNavigation', true)"
+        />
+        </resizable-textarea>
+        <button :class="responseText ? 'show' : 'hide'" class="doneBtn" @click="saveAndContinue" :disabled="saving">
+            {{saving ? 'Saving....' : 'Done'}}
+        </button>
     </div>
 </template>
 
@@ -25,6 +35,9 @@
     import ReflectionResponse, { ResponseMedium } from "@shared/models/ReflectionResponse";
     import ReflectionResponseService from "@web/services/ReflectionResponseService";
     import Spinner from "@components/Spinner.vue";
+    import ResizableTextarea from "@components/ResizableTextarea.vue";
+    import { getDeviceDimensions } from "@web/DeviceUtil";
+    import { debounce } from "debounce";
 
     const logger = new Logger("OnboardingReflectCard");
 
@@ -33,6 +46,7 @@
             ResultElement,
             MarkdownText,
             Spinner,
+            ResizableTextarea
         }
     })
     export default class OnboardingReflectCard extends Vue {
@@ -53,6 +67,8 @@
         responsesLoading: boolean = false;
         reflectionResponses: ReflectionResponse[] | null = null;
         errorMessage: string | null = null;
+        maxTextareaHeight = 200;
+        debounceWindowSizeHandler: any;
 
         get markdownText(): string | undefined {
             return this.card.getMarkdownText({ selectedInsight: this.selectedInsightWord })
@@ -62,8 +78,16 @@
             return this.responsesLoading;
         }
 
+        updateMaxTextareaHeight() {
+            this.maxTextareaHeight = getDeviceDimensions().height / 2;
+            logger.info("set max text height to ", this.maxTextareaHeight);
+        }
+
         beforeMount() {
             this.observeResponses();
+            this.updateMaxTextareaHeight();
+            this.debounceWindowSizeHandler = debounce(this.updateMaxTextareaHeight, 500)
+            window.addEventListener("resize", this.debounceWindowSizeHandler);
         }
 
         observeResponses() {
@@ -98,6 +122,7 @@
 
         beforeDestroy() {
             this.reflectionUnsubscriber?.();
+            window.removeEventListener("resize", this.debounceWindowSizeHandler);
         }
 
         async saveAndContinue() {
@@ -196,8 +221,8 @@
         font-size: 1.8rem;
         height: 24vh;
         opacity: .8;
-        padding: 0;
-        transition: padding .6s;
+        /*padding: 0;*/
+        transition: all .6s;
         width: 100%;
 
         @include r(374) {
@@ -209,10 +234,12 @@
         @include r(960) {
             font-size: 3.2rem;
         }
+        padding: .8rem 1.6rem;
+        margin: -0.8rem -1.6rem;
 
         &:focus {
             outline-color: rgba(0, 0, 0, .3);
-            padding: .8rem 1.6rem;
+            /*padding: .8rem 1.6rem;*/
         }
     }
 

@@ -8,14 +8,13 @@
             additionalOffsetPx: {
                 type: Number,
                 default: 2,
-            }
+            },
         },
         methods: {
             resizeTextarea(event) {
                 event.target.style.height = 'auto'
                 const newHeight = event.target.scrollHeight + this.additionalOffsetPx //adding 2 to combat the weird scrolling when it is initially rendered
                 event.target.style.height = (Math.min(this.maxHeightPx, newHeight)) + 'px'
-
             },
         },
         mounted() {

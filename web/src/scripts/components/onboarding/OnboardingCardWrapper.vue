@@ -9,6 +9,7 @@
                 @previous="$emit('previous')"
                 @checkout="$emit('checkout')"
                 @close="handleClose"
+                @enableKeyboardNavigation="handleKeyboardNavigation"
         />
     </div>
 </template>
@@ -70,6 +71,10 @@
 
         handleClose(force: boolean = false) {
             this.$emit('close', force)
+        }
+
+        handleKeyboardNavigation(enabled: boolean) {
+            this.$emit('enableKeyboardNavigation', enabled)
         }
 
         get cardInfo(): CardProps {
