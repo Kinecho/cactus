@@ -157,8 +157,8 @@
 
         .path {
             stroke: $pink;
-            stroke-dasharray: 0 1000;
-            stroke-dashoffset: 1;
+            stroke-dasharray: 1500;
+            stroke-dashoffset: 1500;
             animation: dash 60s ease-out forwards;
         }
     }
