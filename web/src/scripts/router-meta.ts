@@ -23,6 +23,7 @@ export interface RoutePageMeta {
     usePrevious?: boolean,
     passMember?: boolean,
     authRequired?: boolean,
+    authContinueMessage?: string,
 }
 
 export interface MetaImage {

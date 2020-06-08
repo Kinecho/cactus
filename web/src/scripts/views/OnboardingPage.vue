@@ -40,7 +40,7 @@
         // page: number;
 
         @Prop({ type: String as () => PageStatus, required: false, default: null })
-        pageStatus: PageStatus | null;
+        pageStatus!: PageStatus | null;
 
         @Prop({ type: Object as () => CactusMember, required: true })
         member!: CactusMember;
@@ -51,11 +51,11 @@
         product: SubscriptionProduct | null = null;
         billingPeriod = BillingPeriod.yearly;
         productLoaded = false;
-        settings: AppSettings|null = null;
+        settings: AppSettings | null = null;
 
         async beforeMount() {
             await this.fetchProduct();
-            this.settings = await AppSettingsService.sharedInstance.getCurrentSettings()
+            this.settings = await AppSettingsService.sharedInstance.getCurrentSettings() ?? null;
         }
 
         async setIndex(index: number) {

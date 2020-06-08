@@ -36,7 +36,7 @@ export default class OnboardingCardViewModel {
      * A string token to use to replace values in the text string
      * @type {string}
      */
-    textReplacerToken: string = "{{VALUE}}"
+    textReplacerToken: string = "{{ONBOARDING_SELECTION}}"
     defaultReplacementValue?: string;
     textReplacementType?: TextReplacementType;
 
@@ -78,11 +78,6 @@ export default class OnboardingCardViewModel {
 
     static createAll(settings: AppSettings|null): OnboardingCardViewModel[] {
         const cards = [
-            OnboardingCardViewModel.create({
-                slug: "welcome",
-                text: "Emptying your mind and focusing on the breath is **harder** than it sounds.\n\nBut it turns out there's more to mindfulness than meditation.",
-                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard1.png?alt=media&token=e36e050c-7564-44c5-8c48-64d64484b3f6"
-            }),
             OnboardingCardViewModel.create({
                 type: CardType.text,
                 slug: "how-it-works",
@@ -131,7 +126,7 @@ export default class OnboardingCardViewModel {
                 slug: "how-does-it-make-you-feel",
                 type: CardType.reflect,
                 defaultNextActionsEnabled: false,
-                text: "How does **{{VALUE}}** make you feel?",
+                text: "How does **{{ONBOARDING_SELECTION}}** make you feel?",
                 //TODO: Make this dynamic basic on configs of some sort
                 promptContentEntryId: settings?.onboarding.promptEntryId2,
                 element: CactusElement.energy,
@@ -141,7 +136,7 @@ export default class OnboardingCardViewModel {
             OnboardingCardViewModel.create({
                 slug: "take-a-moment",
                 type: CardType.text,
-                text: "Nice work. Take a moment to appreciate the role that **{{VALUE}}** plays in your life.",
+                text: "Nice work. Take a moment to appreciate the role that **{{ONBOARDING_SELECTION}}** plays in your life.",
                 textReplacementType: TextReplacementType.selected_insight_word,
                 defaultReplacementValue: "Physical Activity",
                 imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard2.png?alt=media&token=198b352b-c074-4577-8971-1a340054efee"
@@ -149,7 +144,7 @@ export default class OnboardingCardViewModel {
             OnboardingCardViewModel.create({
                 slug: "core-values-intro",
                 type: CardType.text,
-                text: "Besides **{{VALUE}}**, knowing your core values helps you make better, healthier decisions in all aspects of your life.\n\nDo you know your core values?",
+                text: "Besides **{{ONBOARDING_SELECTION}}**, knowing your core values helps you make better, healthier decisions in all aspects of your life.\n\nDo you know your core values?",
                 textReplacementType: TextReplacementType.selected_insight_word,
                 defaultReplacementValue: "Physical Activity",
                 imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard1.png?alt=media&token=e36e050c-7564-44c5-8c48-64d64484b3f6"

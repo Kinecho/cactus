@@ -3,7 +3,7 @@ import { PageRoute } from "@shared/PageRoutes";
 import { logRouteChanged } from "@web/analytics";
 import Logger from "@shared/Logger";
 import { MetaRouteConfig, updateRouteMeta } from "@web/router-meta";
-import { isExternalUrl } from "@shared/util/StringUtil";
+import { isBlank, isExternalUrl } from "@shared/util/StringUtil";
 import LoadingPage from "@web/views/LoadingPage.vue";
 import ErrorPage from "@web/views/ErrorPage.vue";
 import { Component } from "vue";
@@ -309,9 +309,15 @@ router.beforeEach((to, from, next) => {
             next();
             return;
         } else if (to.meta.authRequired && !CactusMemberService.sharedInstance.isLoggedIn) {
+            const query: Record<string, string> = {
+                [QueryParam.REDIRECT_URL]: to.fullPath
+            }
+            if (!isBlank(to.meta.authContinueMessage)) {
+                query[QueryParam.MESSAGE] = to.meta.authContinueMessage;
+            }
             next({
                 path: PageRoute.SIGNUP,
-                query: { [QueryParam.MESSAGE]: "Please log in to continue", [QueryParam.REDIRECT_URL]: to.fullPath }
+                query,
             })
         } else {
             next();
