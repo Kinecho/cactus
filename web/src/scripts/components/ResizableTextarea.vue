@@ -25,13 +25,12 @@
                 textarea.style.height = 'auto'
                 const newHeight = textarea.scrollHeight + this.additionalOffsetPx //adding 2 to combat the weird scrolling when it is initially rendered
                 textarea.style.height = (Math.min(this.maxHeightPx, newHeight)) + 'px'
-                logger.info('Set text area height to ', textarea.style.height)
             },
         },
         mounted() {
-            // this.$nextTick(() => {
-            //     this.$el.setAttribute('style', 'height:' + (this.$el.scrollHeight + this.additionalOffsetPx) + 'px;overflow-y:auto;')
-            // })
+            this.$nextTick(() => {
+                this.$el.setAttribute('style', 'height:' + (this.$el.scrollHeight + this.additionalOffsetPx) + 'px;overflow-y:auto;')
+            })
 
             this.$el.addEventListener('input', this.resizeTextarea)
             this.resizeTextarea()

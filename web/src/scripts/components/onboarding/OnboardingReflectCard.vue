@@ -7,16 +7,18 @@
             <markdown-text :source="markdownText"/>
         </strong>
 
-        <resizable-textarea :max-height-px="maxTextareaHeight">
-        <textarea placeholder="Write something..."
-                v-model="responseText"
-                ref="textInput"
-                type="text"
-                :disabled="saving"
-                @focus="$emit('enableKeyboardNavigation', false)"
-                @blur="$emit('enableKeyboardNavigation', true)"
-        />
-        </resizable-textarea>
+        <transition name="component-fade" appear>
+            <resizable-textarea :max-height-px="maxTextareaHeight" ref="resizableTextArea" v-if="!responsesLoading">
+                <textarea placeholder="Write something..."
+                        v-model="responseText"
+                        ref="textInput"
+                        type="text"
+                        :disabled="saving"
+                        @focus="$emit('enableKeyboardNavigation', false)"
+                        @blur="$emit('enableKeyboardNavigation', true)"
+                />
+            </resizable-textarea>
+        </transition>
         <button :class="responseText ? 'show' : 'hide'" class="doneBtn" @click="saveAndContinue" :disabled="saving">
             {{saving ? 'Saving....' : 'Done'}}
         </button>
@@ -83,13 +85,6 @@
             logger.info("set max text height to ", this.maxTextareaHeight);
         }
 
-        beforeMount() {
-            this.observeResponses();
-            this.updateMaxTextareaHeight();
-            this.debounceWindowSizeHandler = debounce(this.updateMaxTextareaHeight, 500)
-            window.addEventListener("resize", this.debounceWindowSizeHandler);
-        }
-
         observeResponses() {
             this.responsesLoading = true;
             this.reflectionUnsubscriber?.();
@@ -118,6 +113,11 @@
             if (this.autofocusInput) {
                 (this.$refs.textInput as HTMLElement | undefined)?.focus();
             }
+
+            this.observeResponses();
+            this.updateMaxTextareaHeight();
+            this.debounceWindowSizeHandler = debounce(this.updateMaxTextareaHeight, 500)
+            window.addEventListener("resize", this.debounceWindowSizeHandler);
         }
 
         beforeDestroy() {

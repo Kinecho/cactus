@@ -1,6 +1,7 @@
 <template>
     <div class="main">
         <onboarding :index="index"
+                v-if="!!settings"
                 :cards="cards"
                 :product="product"
                 :page-status="pageStatus"
@@ -53,6 +54,8 @@
         productLoaded = false;
         settings: AppSettings | null = null;
 
+
+
         async beforeMount() {
             await this.fetchProduct();
             this.settings = await AppSettingsService.sharedInstance.getCurrentSettings() ?? null;
@@ -88,6 +91,7 @@
             if (isPremiumTier(this.member.tier) && this.pageStatus !== PageStatus.success) {
                 cards = cards.filter(card => card.type !== CardType.upsell)
             }
+
             return cards;
         }
 
