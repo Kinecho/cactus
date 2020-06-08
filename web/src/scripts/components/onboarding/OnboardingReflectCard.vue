@@ -177,6 +177,7 @@
         @include r(600) {
             height: 16vw;
             margin-left: -1.5vw;
+            margin-top: -5rem;
             width: 16vw;
         }
 
@@ -219,10 +220,9 @@
         border: 0;
         color: $darkestGreen;
         font-size: 1.8rem;
-        height: 24vh;
+        margin: -1.2rem 0 3.2rem -.8rem;
         opacity: .8;
-        /*padding: 0;*/
-        transition: all .6s;
+        padding: .8rem;
         width: 100%;
 
         @include r(374) {
@@ -230,16 +230,15 @@
         }
         @include r(768) {
             font-size: 2.4rem;
+            margin: -1.6rem 0 3.2rem -1.6rem;
+            padding: 1.6rem;
         }
         @include r(960) {
             font-size: 3.2rem;
         }
-        padding: .8rem 1.6rem;
-        margin: -0.8rem -1.6rem;
 
         &:focus {
             outline-color: rgba(0, 0, 0, .3);
-            /*padding: .8rem 1.6rem;*/
         }
     }
 
@@ -252,6 +251,12 @@
         transition: opacity .3s;
         width: calc(100% - 4.8rem);
 
+        @include r(374) {
+            bottom: 4rem;
+            left: 4rem;
+            right: 4rem;
+            width: calc(100% - 8rem);
+        }
         @include r(768) {
             position: static;
         }
