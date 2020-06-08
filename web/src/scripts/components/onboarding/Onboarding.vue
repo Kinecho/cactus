@@ -291,7 +291,7 @@
     .index-7,
     .index-11,
     .index-13 {
-        background-position: left -30vw bottom 60vh, left 0vw top 70vh;
+        background-position: left -30vw bottom 75vh, left 0vw top 70vh;
     }
     .index-2,
     .index-4,
@@ -310,7 +310,7 @@
     }
     .index-5,
     .index-9 {
-        background-color: lighten($pink, 15%);
+        background-color: lighten($pink, 12%);
     }
     .index-13 {
         background-color: lighten($green, 20%);
