@@ -1,5 +1,6 @@
 import { CactusElement } from "@shared/models/CactusElement";
 import { ActionButton, ContentAction, LinkStyle } from "@shared/models/PromptContent";
+import AppSettings from "@shared/models/AppSettings";
 
 export enum CardType {
     text = "text",
@@ -75,7 +76,7 @@ export default class OnboardingCardViewModel {
         return model;
     }
 
-    static createAll(): OnboardingCardViewModel[] {
+    static createAll(settings: AppSettings|null): OnboardingCardViewModel[] {
         const cards = [
             OnboardingCardViewModel.create({
                 slug: "welcome",
@@ -108,8 +109,7 @@ export default class OnboardingCardViewModel {
                 type: CardType.reflect,
                 defaultNextActionsEnabled: false,
                 text: "Which physical activities make you feel better?",
-                //TODO: Make this dynamic basic on configs of some sort
-                promptContentEntryId: "Nno8gimhC22Q0wjJUqyq",
+                promptContentEntryId: settings?.onboarding.promptEntryId1,
                 element: CactusElement.energy,
             }),
             OnboardingCardViewModel.create({
@@ -133,7 +133,7 @@ export default class OnboardingCardViewModel {
                 defaultNextActionsEnabled: false,
                 text: "How does **{{VALUE}}** make you feel?",
                 //TODO: Make this dynamic basic on configs of some sort
-                promptContentEntryId: "8ryd9iko0mTsefgQLVJW",
+                promptContentEntryId: settings?.onboarding.promptEntryId2,
                 element: CactusElement.energy,
                 defaultReplacementValue: "Physical Activity",
                 textReplacementType: TextReplacementType.selected_insight_word,

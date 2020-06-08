@@ -18,10 +18,12 @@ export default class AppSettings extends FlamelinkModel {
     }
 
     schema = SchemaName.appSettings;
-
     dataExportEnabledTiers: SubscriptionTier[] = [];
-
     gapAnalysisOnboarding!: GapAnalysisOnboardingSettings;
+    onboarding!: {
+        promptEntryId1: string,
+        promptEntryId2: string,
+    }
 
     constructor(data?: Partial<AppSettings>) {
         super(data);
