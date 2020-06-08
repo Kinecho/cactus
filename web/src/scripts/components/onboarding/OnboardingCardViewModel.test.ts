@@ -4,7 +4,7 @@ describe("get replacer text", () => {
     test("insight word with a value", () => {
         const m = Model.create({
             type: CardType.reflect,
-            text: "This is {{VALUE}} text",
+            text: "This is {{ONBOARDING_SELECTION}} text",
             textReplacementType: TextReplacementType.selected_insight_word,
         })
 
@@ -15,7 +15,7 @@ describe("get replacer text", () => {
     test("Insight word, no value provided", () => {
         const m = Model.create({
             type: CardType.reflect,
-            text: "This is {{VALUE}} text",
+            text: "This is {{ONBOARDING_SELECTION}} text",
             textReplacementType: TextReplacementType.selected_insight_word,
         })
 
@@ -26,7 +26,7 @@ describe("get replacer text", () => {
     test("Insight word, no value provided, with default value", () => {
         const m = Model.create({
             type: CardType.reflect,
-            text: "This is {{VALUE}} text",
+            text: "This is {{ONBOARDING_SELECTION}} text",
             defaultReplacementValue: "DEFAULT",
             textReplacementType: TextReplacementType.selected_insight_word,
         })
