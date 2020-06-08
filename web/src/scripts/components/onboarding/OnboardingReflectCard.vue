@@ -220,6 +220,7 @@
         border: 0;
         color: $darkestGreen;
         font-size: 1.8rem;
+        line-height: 1.4;
         margin: -1.2rem 0 3.2rem -.8rem;
         opacity: .8;
         padding: .8rem;
