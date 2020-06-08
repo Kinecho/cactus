@@ -11,13 +11,13 @@
             },
         },
         watch: {
-          maxHeightPx() {
-              this.resizeTextarea();
-          }
+            maxHeightPx() {
+                this.resizeTextarea()
+            },
         },
         methods: {
-            resizeTextarea () {
-                let textarea = this.$el;
+            resizeTextarea() {
+                let textarea = this.$el
                 textarea.style.height = 'auto'
                 const newHeight = textarea.scrollHeight + this.additionalOffsetPx //adding 2 to combat the weird scrolling when it is initially rendered
                 textarea.style.height = (Math.min(this.maxHeightPx, newHeight)) + 'px'
@@ -29,7 +29,10 @@
             })
 
             this.$el.addEventListener('input', this.resizeTextarea)
-            this.resizeTextarea();
+            this.resizeTextarea()
+            window.setInterval(() => {
+                this.resizeTextarea()
+            }, 10)
         },
         beforeDestroy() {
             this.$el.removeEventListener('input', this.resizeTextarea)
