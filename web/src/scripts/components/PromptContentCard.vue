@@ -678,8 +678,6 @@
     }
 
     .content {
-        text-align: left;
-
         @include r(600) {
             display: flex;
             flex: 1;
