@@ -19,8 +19,9 @@
                 />
             </resizable-textarea>
         </transition>
-        <button :class="responseText ? 'show' : 'hide'" class="doneBtn" @click="saveAndContinue" :disabled="saving">
-            {{saving ? 'Saving....' : 'Done'}}
+        <button :class="responseText ? 'show' : 'hide'" class="doneBtn icon no-loading" @click="saveAndContinue" :disabled="saving">
+            <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13"><path fill="#fff" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/></svg>
+            <span class="doneText">{{saving ? 'Saving....' : 'Done'}}</span>
         </button>
     </div>
 </template>
@@ -245,21 +246,33 @@
 
     .doneBtn {
         bottom: 2.4rem;
-        left: 2.4rem;
-        margin: auto;
         position: fixed;
         right: 2.4rem;
         transition: opacity .3s;
-        width: calc(100% - 4.8rem);
 
-        @include r(374) {
-            bottom: 4rem;
-            left: 4rem;
-            right: 4rem;
-            width: calc(100% - 8rem);
-        }
         @include r(768) {
+            min-width: 20rem;
+            padding: 1.2rem 1.6rem 1.6rem;
             position: static;
+            width: auto;
+        }
+
+        .check {
+            fill: $white;
+            height: 1.8rem;
+            width: 1.8rem;
+
+            @include r(768) {
+                display: none;
+            }
+        }
+
+        .doneText {
+            display: none;
+
+            @include r(768) {
+                display: inline;
+            }
         }
 
         &.hide {
