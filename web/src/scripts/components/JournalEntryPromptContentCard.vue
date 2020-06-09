@@ -200,7 +200,8 @@
                     return this.entry.promptContent?.getDynamicDisplayText({
                         content: reflectCard,
                         member: this.member,
-                        coreValue: this.entry.responses?.find(r => r.coreValue)?.coreValue
+                        coreValue: this.entry.responses?.find(r => r.coreValue)?.coreValue,
+                        dynamicValues: this.entry.responses?.find(r => !!r.dynamicValues)?.dynamicValues,
                     })
                 }
                 return

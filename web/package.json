@@ -43,8 +43,9 @@
   "author": "Neil Poulin",
   "license": "ISC",
   "dependencies": {
-    "@sentry/browser": "5.12.4",
+    "@sentry/browser": "5.17.0",
     "@sentry/integrations": "5.11.1",
+    "@types/d3-hierarchy": "^1.1.6",
     "atob": "^2.1.2",
     "axios": "^0.19.2",
     "branch-sdk": "^2.52.4",
@@ -52,6 +53,7 @@
     "canvas-confetti": "^1.2.0",
     "chalk": "^2.4.2",
     "d3": "^5.7.2",
+    "d3-hierarchy": "^1.1.9",
     "debounce": "^1.2.0",
     "firebase": "^7.14.6",
     "firebase-admin": "^8.12.1",

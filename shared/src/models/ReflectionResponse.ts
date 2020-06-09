@@ -179,6 +179,8 @@ export enum ReflectionResponseField {
     updatedAt = "updatedAt"
 }
 
+export type DynamicResponseValues = Record<string, string|null|undefined>;
+
 export default class ReflectionResponse extends BaseModel {
     readonly collection = Collection.reflectionResponses;
     static Field = ReflectionResponseField;
@@ -204,6 +206,13 @@ export default class ReflectionResponse extends BaseModel {
     reflectionDates: Date[] = [];
     insights?: InsightWordsResult;
     coreValue?: CoreValue | undefined | null;
+
+    /**
+     * Map of tokens strings, like "{{VALUE}}" to actual values on {DynamicContent} on {{PromptContent}}
+     *
+     * See {{DynamicContent}}
+     */
+    dynamicValues?: DynamicResponseValues;
 
     /**
      * Only Add a date log if the new date is not within 10 minutes of an existing date

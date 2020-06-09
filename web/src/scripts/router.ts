@@ -3,11 +3,13 @@ import { PageRoute } from "@shared/PageRoutes";
 import { logRouteChanged } from "@web/analytics";
 import Logger from "@shared/Logger";
 import { MetaRouteConfig, updateRouteMeta } from "@web/router-meta";
-import { isExternalUrl } from "@shared/util/StringUtil";
+import { isBlank, isExternalUrl } from "@shared/util/StringUtil";
 import LoadingPage from "@web/views/LoadingPage.vue";
 import ErrorPage from "@web/views/ErrorPage.vue";
 import { Component } from "vue";
 import { Screen } from "@components/gapanalysis/GapAssessmentTypes";
+import CactusMemberService from "@web/services/CactusMemberService";
+import { QueryParam } from "@shared/util/queryParams";
 
 const logger = new Logger("router.ts");
 
@@ -246,6 +248,32 @@ const routes: MetaRouteConfig[] = [
         path: PageRoute.INSIGHTS,
     },
     {
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@web/views/OnboardingPage.vue")),
+        name: "Onboarding",
+        path: PageRoute.HELLO_ONBOARDING,
+        meta: {
+            passMember: true,
+            authRequired: true,
+        },
+        props: (route) => {
+            return {
+                // page: route.params.page ? Number(route.params.page) : 1,
+                pageStatus: route.params.status ?? null,
+                slug: route.params.slug,
+            }
+        },
+        children: [
+            {
+                path: ":slug",
+                props: true,
+                children: [{
+                    path: ":status",
+                    props: true,
+                }]
+            }
+        ]
+    },
+    {
         component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@components/404.vue")),
         path: "*",
         name: "Page Not Found",
@@ -272,6 +300,7 @@ router.beforeEach((to, from, next) => {
     }
 });
 
+//we now can trust the member has been loaded from auth during app start
 router.beforeEach((to, from, next) => {
     try {
         const extUrl = to.fullPath.startsWith("/") ? to.fullPath.substring(1) : to.fullPath
@@ -279,6 +308,17 @@ router.beforeEach((to, from, next) => {
             window.location.href = extUrl;
             next();
             return;
+        } else if (to.meta.authRequired && !CactusMemberService.sharedInstance.isLoggedIn) {
+            const query: Record<string, string> = {
+                [QueryParam.REDIRECT_URL]: to.fullPath
+            }
+            if (!isBlank(to.meta.authContinueMessage)) {
+                query[QueryParam.MESSAGE] = to.meta.authContinueMessage;
+            }
+            next({
+                path: PageRoute.SIGNUP,
+                query,
+            })
         } else {
             next();
         }

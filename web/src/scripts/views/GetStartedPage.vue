@@ -17,6 +17,7 @@
                     <sign-in
                             spinner-color="light"
                             mode="SIGN_UP"
+                            :message="message"
                             :twitter-enabled="false"
                             :show-magic-link="false"
                             :show-title="false"
@@ -34,6 +35,11 @@
     import Component from "vue-class-component"
     import SignIn from "@components/SignIn.vue";
     import NavBar from "@components/NavBar.vue";
+    import { getQueryParam } from "@web/util";
+    import { QueryParam } from "@shared/util/queryParams";
+    import Logger from "@shared/Logger"
+
+    const logger = new Logger("GetStartedPage");
 
     @Component({
         components: {
@@ -45,6 +51,12 @@
         name = "GetStartedPage";
 
         signupLoading: boolean = false;
+
+        get message(): string | null {
+            const message = getQueryParam(QueryParam.MESSAGE) ?? this.$route.query.message as string | undefined | null ?? null;
+            logger.info("message is", message);
+            return message;
+        }
 
         onSignupLoading(loading: boolean) {
             this.signupLoading = loading;

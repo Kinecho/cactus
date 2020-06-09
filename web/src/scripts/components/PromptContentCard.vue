@@ -136,7 +136,7 @@
                 </svg>
                 <svg v-else-if="cactusElement === 'relationships'" class="element relationships" xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56">
                   <g fill="none" fill-rule="evenodd" stroke="#9490B0" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" transform="translate(10 8.178)">
-                    <path vector-effect="non-scaling-stroke" class="path d2" d="M35.874371,34.351703 C34.713319,40.0878378 18.2480616,43.0005306 12.8375568,33.8422947 C6.64205763,23.3553171 10.6404816,1.5077001 24.356678,4.9626552 C31.3984645,6.73640177 25.3746425,14.5323352 26.7630404,19.2317315 C28.3915017,24.7436852 37.1453874,28.0779378 35.874371,34.351703 Z"/>
+                    <path vector-effect="non-scaling-stroke" class="path d1" d="M35.874371,34.351703 C34.713319,40.0878378 18.2480616,43.0005306 12.8375568,33.8422947 C6.64205763,23.3553171 10.6404816,1.5077001 24.356678,4.9626552 C31.3984645,6.73640177 25.3746425,14.5323352 26.7630404,19.2317315 C28.3915017,24.7436852 37.1453874,28.0779378 35.874371,34.351703 Z"/>
                     <path vector-effect="non-scaling-stroke" class="path" d="M0.290253649,4.41142771 C-1.25170394,8.51510034 3.82624276,11.7627979 4.36943236,15.4747757 C5.1742875,20.9816774 -0.234357991,29.2728826 7.0409907,32.4706823 C18.4009703,37.4638366 21.6346848,14.3404456 19.2761906,7.61823771 C18.0251022,4.05302893 14.846928,0.972130686 10.5820772,0.17883273 C6.3172264,-0.614465225 1.45723519,1.30916733 0.290253649,4.41142771 Z"/>
                   </g>
                 </svg>
@@ -175,7 +175,7 @@
                     </div>
                 </transition>
                 <div class="flexContainer">
-                    <resizable-textarea v-bind:maxLines="4">
+                    <resizable-textarea :max-height-px="200">
                     <textarea ref="reflectionInput"
                             type="text"
                             rows="1"
@@ -229,7 +229,7 @@
     import { QueryParam } from "@shared/util/queryParams"
     import SnackbarContent from "@components/SnackbarContent.vue"
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
-    import PromptContentCardElements from "@components/PromptContentCardElements.vue";
+    import PromptContentCardElements from "@components/ElementsOverview.vue";
     import PromptContentCardInviteFriend from "@components/PromptContentCardInviteFriend.vue";
     import SharedReflectionCard from "@components/SharedReflectionCard.vue";
     import { CactusElement } from "@shared/models/CactusElement";
@@ -814,33 +814,33 @@
         }
 
         .path {
-            stroke-dasharray: 0 1000;
-            stroke-dashoffset: 1;
-            animation: dash 35s ease-out 1s forwards;
+            stroke-dasharray: 700;
+            stroke-dashoffset: 700;
+            animation: dash 35s ease-out .5s forwards;
         }
 
         .experience .path {
-            animation-duration: 130s;
+            animation-duration: 60s;
+            stroke-dasharray: 275;
+            stroke-dashoffset: 275;
+
+            &.d0 {
+                animation-delay: 7s;
+            }
+            &.d2 {
+                animation-delay: 16s;
+            }
+            &.d3 {
+                animation-delay: 22s;
+            }
         }
 
         .relationships .path {
             animation-duration: 60s;
         }
 
-        .d0 {
-            animation-delay: 4s;
-        }
-
         .d1 {
-            animation-delay: 8s;
-        }
-
-        .d2 {
             animation-delay: 12s;
-        }
-
-        .d3 {
-            animation-delay: 16s;
         }
     }
 
@@ -894,11 +894,12 @@
         border-width: 0;
         border-radius: 2.4rem;
         cursor: pointer;
-        max-height: 10rem;
+
         position: relative;
         transition: background-color .3s;
         width: 100%;
         z-index: 1;
+        /*max-height: 10rem;*/
 
         &:focus {
             background-color: $white;

@@ -39,6 +39,10 @@ export function preventOrphanedWords<T>(input?: T | string, escapeCode: string =
         return input;
     }
     const lastIndex = input.lastIndexOf(" ");
+    const escapeIndex = input.lastIndexOf(escapeCode);
+    if (escapeIndex > -1 && escapeIndex > lastIndex) {
+        return input;
+    }
     if (lastIndex > 0) {
         return input.substr(0, lastIndex) + escapeCode + input.substr(lastIndex + 1);
     }
@@ -309,4 +313,14 @@ export const StringTransforms = {
 
 export function formatPriceCentsUsd(priceCents: number): string {
     return `$${ (priceCents / 100).toFixed(2) }`.replace(".00", "")
+}
+
+export function getRandomNumberBetween(min: number, max: number, fractionDigits = 0, inclusive = true): number {
+    const precision = Math.pow(10, Math.max(fractionDigits, 0));
+    const scaledMax = max * precision;
+    const scaledMin = min * precision;
+    const offset = inclusive ? 1 : 0;
+    const num = Math.floor(Math.random() * (scaledMax - scaledMin + offset)) + scaledMin;
+
+    return num / precision;
 }

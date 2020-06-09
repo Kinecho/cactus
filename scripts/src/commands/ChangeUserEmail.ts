@@ -90,7 +90,7 @@ export default class ChangeUserEmail extends FirebaseCommand {
             logger.info("changed user's email to ", newEmail);
             logger.info("Updating member profile");
             const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(user.uid);
-            const memberId = member.id;
+            const memberId = member?.id;
             if (!memberId) {
                 logger.warn("No member id found on cactus member");
                 return;

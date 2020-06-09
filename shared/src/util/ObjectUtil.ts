@@ -52,7 +52,7 @@ export function isString(input: any): input is string {
     }
 }
 
-export function isNumber(input: any): input is Number {
+export function isNumber(input: any): input is number {
     try {
         const number = Number(input);
         return isNotNull(number) && typeof (input) === "number";

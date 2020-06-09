@@ -31,6 +31,9 @@
     import StandardFooter from "@components/StandardFooter.vue";
     import { getQueryParam } from "@web/util";
     import { QueryParam } from "@shared/util/queryParams";
+    import Logger from "@shared/Logger"
+
+    const logger = new Logger("SignUpView");
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -52,13 +55,17 @@
         destroyed(): void {
             document.body.classList.remove("sign-up-body");
         },
-        data(): { copy: LocalizedCopy, message: string | null } {
+        data(): { copy: LocalizedCopy } {
             return {
                 copy,
-                message: getQueryParam(QueryParam.MESSAGE),
             }
         },
         computed: {
+            message(): string | null {
+                const message = getQueryParam(QueryParam.MESSAGE) ?? this.$route.query.message as string;
+                logger.info("message is", message);
+                return message;
+            },
             includeTwitter(): boolean {
                 //only show twitter on login screen, not sign up
                 return this.isLogIn;

@@ -5,8 +5,7 @@
                 <div class="heroText">
                     <h1>Boost your mental&nbsp;fitness</h1>
                     <p class="subtext">Research-backed prompts to increase self-awareness and resilience</p>
-<!--                    <router-link :to="assessmentHref" tag="button" class="quizBtn primary">Take the quiz</router-link>-->
-                    <router-link :to="getStartedPath" tag="button" class="quizBtn primary">Try It Free</router-link>
+                    <router-link :to="mainCtaPath" tag="button" class="quizBtn primary">Try It Free</router-link>
                 </div>
                 <aside class="graphicContainer">
                     <p class="sampleQuestion">What helps you unwind and recuperate?</p>
@@ -127,8 +126,7 @@
             <section class="email">
                 <h2 class="emailHeader">A reflection a day…</h2>
                 <p class="subtext">Cactus is a different kind of mindfulness.</p>
-<!--                <router-link :to="assessmentHref" tag="button" class="quizBtn primary">Take the quiz</router-link>-->
-                <router-link :to="getStartedPath" tag="button" class="quizBtn primary">Try It Free</router-link>
+                <router-link :to="mainCtaPath" tag="button" class="quizBtn primary">Try It Free</router-link>
             </section>
         </div>
     </div>
@@ -164,8 +162,8 @@
             return PageRoute.GAP_ANALYSIS;
         }
 
-        get getStartedPath(): string {
-            return PageRoute.GET_STARTED
+        get mainCtaPath(): string {
+            return PageRoute.HELLO_ONBOARDING
         }
 
         get showTryItHeader(): boolean {
