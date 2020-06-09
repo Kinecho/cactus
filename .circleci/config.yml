@@ -32,8 +32,6 @@ aliases:
   - &func-apis2 "functions:slack,functions:flamelink,functions:inbound,functions:apple"
   - &func-apis3 "functions:checkout,functions:signup,functions:social,functions:user"
 
-
-
   - &api-1-stage "Funcs: Api 1 Stage"
   - &api-2-stage "Funcs: Api 2 Stage"
   - &api-3-stage "Funcs: Api 3 Stage"
@@ -234,7 +232,8 @@ jobs:
               exit 0
             else
               echo "Starting firebase deploy for --only ${MODULES}"
-              firebase deploy --only $MODULES -P stage
+              firebase --version
+              npx firebase deploy --only $MODULES -P stage
             fi
       - notify-on-failure:
           env: "stage"
