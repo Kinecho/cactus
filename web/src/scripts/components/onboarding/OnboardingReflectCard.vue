@@ -246,6 +246,7 @@
 
     .doneBtn {
         bottom: 2.4rem;
+        padding: 1.6rem;
         position: fixed;
         right: 2.4rem;
         transition: opacity .3s;
