@@ -76,7 +76,7 @@ export default class OnboardingCardViewModel {
         return model;
     }
 
-    static createAll(settings: AppSettings|null): OnboardingCardViewModel[] {
+    static createAll(settings: AppSettings | null): OnboardingCardViewModel[] {
         const cards = [
             OnboardingCardViewModel.create({
                 type: CardType.text,
@@ -127,7 +127,6 @@ export default class OnboardingCardViewModel {
                 type: CardType.reflect,
                 defaultNextActionsEnabled: false,
                 text: "How does **{{ONBOARDING_SELECTION}}** make you feel?",
-                //TODO: Make this dynamic basic on configs of some sort
                 promptContentEntryId: settings?.onboarding.promptEntryId2,
                 element: CactusElement.energy,
                 defaultReplacementValue: "this physical activity",
@@ -163,11 +162,6 @@ export default class OnboardingCardViewModel {
                     action: ContentAction.complete,
                     label: "Explore Cactus",
                     linkStyle: LinkStyle.buttonPrimary,
-                // }, {
-                //     action: ContentAction.showPricing,
-                //     label: "Pricing Page",
-                //     linkStyle: LinkStyle.fancyLink,
-                //     target: "_blank",
                 }]
             }),
         ];
