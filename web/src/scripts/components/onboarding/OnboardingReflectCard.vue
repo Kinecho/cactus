@@ -172,11 +172,14 @@
 
     .element {
         height: 30vw;
+        margin-bottom: -1.6rem;
         margin-left: -3vw;
+        margin-top: -2.4rem;
         width: 30vw;
 
         @include r(600) {
             height: 16vw;
+            margin-bottom: 0;
             margin-left: -1.5vw;
             margin-top: -5rem;
             width: 16vw;
