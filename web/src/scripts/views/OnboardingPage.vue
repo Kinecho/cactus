@@ -55,7 +55,6 @@
         settings: AppSettings | null = null;
 
 
-
         async beforeMount() {
             await this.fetchProduct();
             this.settings = await AppSettingsService.sharedInstance.getCurrentSettings() ?? null;

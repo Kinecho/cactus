@@ -96,7 +96,6 @@
     import PromptContent, { Content, ContentType } from '@shared/models/PromptContent'
     import { CactusElement } from '@shared/models/CactusElement';
     import Spinner from "@components/Spinner.vue";
-    import Vue2TouchEvents from 'vue2-touch-events'
     import { getFlamelink } from '@web/firebase'
     import { ListenerUnsubscriber } from '@web/services/FirestoreService'
     import { getQueryParam, pushQueryParam, removeQueryParam, updateQueryParam } from '@web/util'
@@ -121,7 +120,6 @@
 
     const logger = new Logger("PromptContent.vue");
     const flamelink = getFlamelink();
-    Vue.use(Vue2TouchEvents);
 
     const MIN_REFLECTION_MS = MINIMUM_REFLECT_DURATION_MS;
     const REFLECT_UPDATE_INTERVAL_MS = 100;

@@ -26,7 +26,7 @@ function lazyLoadView(AsyncView: any): Promise<Component<any>> {
         error: ErrorPage,
         // Time before giving up trying to load the component.
         // Default: Infinity (milliseconds).
-        timeout: 10000,
+        timeout: 20000,
     })
 
     return Promise.resolve<Component<any>>({

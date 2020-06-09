@@ -51,10 +51,8 @@
     import { DEFAULT_CONFIG, RadarChartConfig } from "@web/charts/radarChart";
     import Logger from "@shared/Logger"
     import Results from "@components/gapanalysis/Results.vue";
-    import Vue2TouchEvents from "vue2-touch-events";
 
     const logger = new Logger("ResultsOnboarding");
-    Vue.use(Vue2TouchEvents)
 
     @Component({
         components: {

@@ -53,10 +53,9 @@
 <script lang="ts">
     import Vue from "vue";
     import Component from "vue-class-component"
-    import OnboardingCardViewModel, { CardType } from "@components/onboarding/OnboardingCardViewModel";
+    import OnboardingCardViewModel from "@components/onboarding/OnboardingCardViewModel";
     import Logger from "@shared/Logger"
     import TextCard from "@components/onboarding/OnboardingTextCard.vue";
-    import Vue2TouchEvents from "vue2-touch-events";
     import ProgressStepper from "@components/ProgressStepper.vue";
     import PhotoCard from "@components/onboarding/OnboardingPhotoCard.vue";
     import OnboardingCard from "@components/onboarding/OnboardingCardWrapper.vue";
@@ -72,8 +71,6 @@
     import { pushRoute } from "@web/NavigationUtil";
 
     const logger = new Logger("Onboarding");
-
-    Vue.use(Vue2TouchEvents)
 
     const transitionName = {
         next: "slide-left-absolute",
