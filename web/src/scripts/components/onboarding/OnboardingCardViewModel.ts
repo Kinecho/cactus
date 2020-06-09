@@ -130,7 +130,7 @@ export default class OnboardingCardViewModel {
                 //TODO: Make this dynamic basic on configs of some sort
                 promptContentEntryId: settings?.onboarding.promptEntryId2,
                 element: CactusElement.energy,
-                defaultReplacementValue: "Physical Activity",
+                defaultReplacementValue: "this physical activity",
                 textReplacementType: TextReplacementType.selected_insight_word,
             }),
             OnboardingCardViewModel.create({
@@ -138,7 +138,7 @@ export default class OnboardingCardViewModel {
                 type: CardType.text,
                 text: "Nice work. Take a moment to appreciate the role that **{{ONBOARDING_SELECTION}}** plays in your life.",
                 textReplacementType: TextReplacementType.selected_insight_word,
-                defaultReplacementValue: "Physical Activity",
+                defaultReplacementValue: "this physical activity",
                 imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard2.png?alt=media&token=198b352b-c074-4577-8971-1a340054efee"
             }),
             OnboardingCardViewModel.create({
@@ -146,7 +146,7 @@ export default class OnboardingCardViewModel {
                 type: CardType.text,
                 text: "Besides **{{ONBOARDING_SELECTION}}**, knowing your core values helps you make better, healthier decisions in all aspects of your life.\n\nDo you know your core values?",
                 textReplacementType: TextReplacementType.selected_insight_word,
-                defaultReplacementValue: "Physical Activity",
+                defaultReplacementValue: "this physical activity",
                 imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard1.png?alt=media&token=e36e050c-7564-44c5-8c48-64d64484b3f6"
             }),
             OnboardingCardViewModel.create({
