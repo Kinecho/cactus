@@ -15,7 +15,9 @@
         "page": "npm run cmd CreateLandingPage",
         "page:delete": "npm run cmd DeletePage",
         "firebase:postdeploy": "ts-node -r tsconfig-paths/register src/postdeploy.ts",
-        "firebase:predeploy": "ts-node -r tsconfig-paths/register src/predeploy.ts"
+        "firebase:predeploy": "ts-node -r tsconfig-paths/register src/predeploy.ts",
+        "postdeploy:test": "GCLOUD_PROJECT=cactus-app-stage npm run firebase:postdeploy -- hosting:webapp",
+        "postdeploy:test:prod": "GCLOUD_PROJECT=cactus-app-prod npm run firebase:postdeploy -- hosting:webapp"
     },
     "_moduleAliases": {
         "@scripts": "lib/scripts/src",
