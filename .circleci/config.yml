@@ -839,8 +839,8 @@ workflows:
   cactus_release_pipeline:
     jobs:
       - notify-workflow-started:
-          name: &workflow_name Notify Cactus Release Pipeline Started
-          workflow_name: *workflow_name
+          name: "Notify Workflow Started"
+          workflow_name: "Cactus Release Pipeline"
           filters:
             branches:
               only:
