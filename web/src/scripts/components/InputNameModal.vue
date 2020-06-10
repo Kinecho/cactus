@@ -9,11 +9,11 @@
             <p>Your name is shown on notes you share and to people you invite.</p>
             <div class="item">
                 <label for="fname" class="label">First Name</label>
-                <input v-model="member.firstName" type="text" name="fname">
+                <input v-model="member.firstName" type="text" name="fname" id="fname">
             </div>
             <div class="item">
                 <label for="lname" class="label">Last Name</label>
-                <input v-model="member.lastName" type="text" name="lname">
+                <input v-model="member.lastName" type="text" name="lname" id="lname">
             </div>
             <button class="item save" @click="save">Save</button>
         </div>

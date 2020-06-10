@@ -339,6 +339,7 @@
     .last4 {
         display: inline-block;
         font-weight: bold;
+        padding-right: .4rem;
     }
 
     .wallet,

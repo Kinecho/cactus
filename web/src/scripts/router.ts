@@ -3,11 +3,13 @@ import { PageRoute } from "@shared/PageRoutes";
 import { logRouteChanged } from "@web/analytics";
 import Logger from "@shared/Logger";
 import { MetaRouteConfig, updateRouteMeta } from "@web/router-meta";
-import { isExternalUrl } from "@shared/util/StringUtil";
+import { isBlank, isExternalUrl } from "@shared/util/StringUtil";
 import LoadingPage from "@web/views/LoadingPage.vue";
 import ErrorPage from "@web/views/ErrorPage.vue";
 import { Component } from "vue";
 import { Screen } from "@components/gapanalysis/GapAssessmentTypes";
+import CactusMemberService from "@web/services/CactusMemberService";
+import { QueryParam } from "@shared/util/queryParams";
 
 const logger = new Logger("router.ts");
 
@@ -24,7 +26,7 @@ function lazyLoadView(AsyncView: any): Promise<Component<any>> {
         error: ErrorPage,
         // Time before giving up trying to load the component.
         // Default: Infinity (milliseconds).
-        timeout: 10000,
+        timeout: 20000,
     })
 
     return Promise.resolve<Component<any>>({
@@ -47,8 +49,8 @@ const routes: MetaRouteConfig[] = [
         path: "/",
         name: "Cactus",
         meta: {
-            title: "Cactus | What makes you happy?",
-            description: "Questions designed to improve how you think about work, life, relationships, and emotions",
+            title: "Cactus | Boost your mental fitness",
+            description: "Research-backed prompts to increase self-awareness and resilience",
             metaTags: [],
             image: {
                 url: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/static%2Fog-wall-of-blobs-big.png?alt=media&token=9c2ec0c0-3e76-4603-a5a4-8a79e1373574",
@@ -246,6 +248,32 @@ const routes: MetaRouteConfig[] = [
         path: PageRoute.INSIGHTS,
     },
     {
+        component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@web/views/OnboardingPage.vue")),
+        name: "Onboarding",
+        path: PageRoute.HELLO_ONBOARDING,
+        meta: {
+            passMember: true,
+            authRequired: true,
+        },
+        props: (route) => {
+            return {
+                // page: route.params.page ? Number(route.params.page) : 1,
+                pageStatus: route.params.status ?? null,
+                slug: route.params.slug,
+            }
+        },
+        children: [
+            {
+                path: ":slug",
+                props: true,
+                children: [{
+                    path: ":status",
+                    props: true,
+                }]
+            }
+        ]
+    },
+    {
         component: () => lazyLoadView(import(/* webpackPrefetch: true */ "@components/404.vue")),
         path: "*",
         name: "Page Not Found",
@@ -272,6 +300,7 @@ router.beforeEach((to, from, next) => {
     }
 });
 
+//we now can trust the member has been loaded from auth during app start
 router.beforeEach((to, from, next) => {
     try {
         const extUrl = to.fullPath.startsWith("/") ? to.fullPath.substring(1) : to.fullPath
@@ -279,6 +308,17 @@ router.beforeEach((to, from, next) => {
             window.location.href = extUrl;
             next();
             return;
+        } else if (to.meta.authRequired && !CactusMemberService.sharedInstance.isLoggedIn) {
+            const query: Record<string, string> = {
+                [QueryParam.REDIRECT_URL]: to.fullPath
+            }
+            if (!isBlank(to.meta.authContinueMessage)) {
+                query[QueryParam.MESSAGE] = to.meta.authContinueMessage;
+            }
+            next({
+                path: PageRoute.SIGNUP,
+                query,
+            })
         } else {
             next();
         }

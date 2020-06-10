@@ -21,6 +21,9 @@ export interface RoutePageMeta {
     image?: MetaImage,
     metaTags?: MetaTag[],
     usePrevious?: boolean,
+    passMember?: boolean,
+    authRequired?: boolean,
+    authContinueMessage?: string,
 }
 
 export interface MetaImage {

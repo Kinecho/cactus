@@ -1,4 +1,8 @@
 <script>
+    import Logger from '@shared/Logger'
+
+    const logger = new Logger('ResizableTextarea')
+
     export default {
         props: {
             maxHeightPx: {
@@ -8,14 +12,19 @@
             additionalOffsetPx: {
                 type: Number,
                 default: 2,
-            }
+            },
+        },
+        watch: {
+            maxHeightPx() {
+                this.resizeTextarea()
+            },
         },
         methods: {
-            resizeTextarea(event) {
-                event.target.style.height = 'auto'
-                const newHeight = event.target.scrollHeight + this.additionalOffsetPx //adding 2 to combat the weird scrolling when it is initially rendered
-                event.target.style.height = (Math.min(this.maxHeightPx, newHeight)) + 'px'
-
+            resizeTextarea() {
+                let textarea = this.$el
+                textarea.style.height = 'auto'
+                const newHeight = textarea.scrollHeight + this.additionalOffsetPx //adding 2 to combat the weird scrolling when it is initially rendered
+                textarea.style.height = (Math.min(this.maxHeightPx, newHeight)) + 'px'
             },
         },
         mounted() {
@@ -24,6 +33,10 @@
             })
 
             this.$el.addEventListener('input', this.resizeTextarea)
+            this.resizeTextarea()
+            window.setTimeout(() => {
+                this.resizeTextarea()
+            }, 10)
         },
         beforeDestroy() {
             this.$el.removeEventListener('input', this.resizeTextarea)

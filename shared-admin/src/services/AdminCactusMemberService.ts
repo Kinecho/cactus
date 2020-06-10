@@ -209,6 +209,15 @@ export default class AdminCactusMemberService {
         return member;
     }
 
+    async setEmail(memberId: string, email: string) {
+        const ref = this.getCollectionRef().doc(memberId);
+        try {
+            await ref.update({ [CactusMember.Field.email]: email });
+        } catch (error) {
+            logger.error("Failed to set user email", error);
+        }
+    }
+
     async updateUnsubscribe(unsubscribeReport?: Partial<MemberUnsubscribeReport>): Promise<CactusMember | undefined> {
         if (!unsubscribeReport || !unsubscribeReport.email_address) {
             return undefined;

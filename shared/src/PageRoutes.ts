@@ -21,6 +21,7 @@ export enum PageRoute {
     AUTHENTICATE_ACTIONS = "/authenticate-actions",
     PAYMENT_CANCELED = "/cancel",
     GAP_ANALYSIS = "/gap-analysis",
+    HELLO_ONBOARDING = "/hello",
 
     /**
      * @deprecated

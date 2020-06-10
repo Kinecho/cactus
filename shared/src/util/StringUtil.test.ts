@@ -11,11 +11,11 @@ import {
     isBlank, preventOrphanedWords,
     stripQueryParams,
     titleCase,
-    isFeatureAuthUrl, isExternalUrl
+    isFeatureAuthUrl, isExternalUrl, getRandomNumberBetween
 } from "@shared/util/StringUtil";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
-import PromptContent, {ContentType} from "@shared/models/PromptContent";
+import PromptContent, { ContentType } from "@shared/models/PromptContent";
 
 describe("get filename from input", () => {
     test("all lowercase, valid", () => {
@@ -113,42 +113,42 @@ describe("Destructure displayName", () => {
     test("Neil Poulin", () => {
         const input = "Neil Poulin";
         const output = destructureDisplayName(input);
-        expect(output).toEqual({firstName: "Neil", lastName: "Poulin"});
+        expect(output).toEqual({ firstName: "Neil", lastName: "Poulin" });
     });
 
     test("Neil   Poulin lots of spaces", () => {
         const input = "  Neil   Poulin   ";
         const output = destructureDisplayName(input);
-        expect(output).toEqual({firstName: "Neil", lastName: "Poulin"});
+        expect(output).toEqual({ firstName: "Neil", lastName: "Poulin" });
     });
 
     test("Neil James Poulin lots of spaces", () => {
         const input = "  Neil  James   Poulin   ";
         const output = destructureDisplayName(input);
-        expect(output).toEqual({firstName: "Neil", middleName: "James", lastName: "Poulin"});
+        expect(output).toEqual({ firstName: "Neil", middleName: "James", lastName: "Poulin" });
     });
 
     test("Neil King James Poulin lots of spaces", () => {
         const input = "  Neil  King James   Poulin   ";
         const output = destructureDisplayName(input);
-        expect(output).toEqual({firstName: "Neil", lastName: "Poulin"});
+        expect(output).toEqual({ firstName: "Neil", lastName: "Poulin" });
     });
 });
 
 describe("Parse query string from url", () => {
     test("plain path", () => {
         const input = "/test";
-        expect(stripQueryParams(input)).toEqual({url: "/test", query: {}});
+        expect(stripQueryParams(input)).toEqual({ url: "/test", query: {} });
     });
 
     test("single param", () => {
         const input = "/test?one=1";
-        expect(stripQueryParams(input)).toEqual({url: "/test", query: {one: "1"}});
+        expect(stripQueryParams(input)).toEqual({ url: "/test", query: { one: "1" } });
     });
 
     test("multiple params", () => {
         const input = "/test?one=1&url=test.com";
-        expect(stripQueryParams(input)).toEqual({url: "/test", query: {one: "1", url: "test.com"}});
+        expect(stripQueryParams(input)).toEqual({ url: "/test", query: { one: "1", url: "test.com" } });
     });
 });
 
@@ -217,20 +217,20 @@ describe("isFeatureAuthUrl", () => {
 describe("Combine query strings", () => {
     test("url with no params", () => {
         const url = "/test";
-        const params = {test: "value"};
+        const params = { test: "value" };
 
         expect(appendQueryParams(url, params)).toEqual("/test?test=value")
     });
     test("url with one params", () => {
         const url = "/test?my=code";
-        const params = {test: "value"};
+        const params = { test: "value" };
 
         expect(appendQueryParams(url, params)).toEqual("/test?my=code&test=value")
     });
 
     test("url with multiple params", () => {
         const url = "/test?my=code&foo=bar";
-        const params = {test: "value", other: "stuff"};
+        const params = { test: "value", other: "stuff" };
 
         expect(appendQueryParams(url, params)).toEqual("/test?foo=bar&my=code&other=stuff&test=value")
     });
@@ -324,13 +324,13 @@ describe("Get question text", () => {
     test("only prompt", () => {
         const prompt = new ReflectionPrompt();
         prompt.question = "test question";
-        expect(getPromptQuestion({prompt})).toEqual("test question");
+        expect(getPromptQuestion({ prompt })).toEqual("test question");
     });
 
     test("only prompt - trims spaces", () => {
         const prompt = new ReflectionPrompt();
         prompt.question = "  test question  ";
-        expect(getPromptQuestion({prompt})).toEqual("test question");
+        expect(getPromptQuestion({ prompt })).toEqual("test question");
     });
 
     test("prompt & response", () => {
@@ -339,7 +339,7 @@ describe("Get question text", () => {
 
         const prompt = new ReflectionPrompt();
         prompt.question = "test question";
-        expect(getPromptQuestion({prompt, response})).toEqual("test question");
+        expect(getPromptQuestion({ prompt, response })).toEqual("test question");
     });
 
     test("prompt & response & content", () => {
@@ -347,11 +347,11 @@ describe("Get question text", () => {
         response.promptQuestion = "response question";
 
         const promptContent = new PromptContent();
-        promptContent.content = [{contentType: ContentType.reflect, text: "Content Question"}];
+        promptContent.content = [{ contentType: ContentType.reflect, text: "Content Question" }];
 
         const prompt = new ReflectionPrompt();
         prompt.question = "test question";
-        expect(getPromptQuestion({prompt, response, promptContent})).toEqual("Content Question");
+        expect(getPromptQuestion({ prompt, response, promptContent })).toEqual("Content Question");
     });
 
 
@@ -369,6 +369,13 @@ describe("prevent orphaned words", () => {
         expect(preventOrphanedWords("hello world and people")).toEqual("hello world and\xa0people");
         expect(preventOrphanedWords("hello world and people")).not.toEqual("hello world and people");
         expect(preventOrphanedWords("hello world and people", "nbsp;")).toEqual("hello world andnbsp;people");
+    })
+
+    test("Don't double escape a string", () => {
+        const code = "\xa0";
+        expect(preventOrphanedWords(`Test${ code }string`)).toEqual(`Test${ code }string`);
+        expect(preventOrphanedWords(`My Test${ code }string`)).toEqual(`My Test${ code }string`);
+        expect(preventOrphanedWords(`My Test${ code }string Code`)).toEqual(`My Test${ code }string${ code }Code`);
     })
 })
 
@@ -398,14 +405,34 @@ describe("is external url", () => {
 
     test("External URL as a query param ", () => {
         expect(isExternalUrl("/my/path?successUrl=https://cactus.app/this/is/a/path")).toBeFalsy()
-        expect(isExternalUrl(`/my/path?successUrl=${encodeURIComponent("https://cactus.app/this/is/a/path")}`)).toBeFalsy()
+        expect(isExternalUrl(`/my/path?successUrl=${ encodeURIComponent("https://cactus.app/this/is/a/path") }`)).toBeFalsy()
     })
 
     test("nulls and blanks etc", () => {
         expect(isExternalUrl(undefined)).toBeFalsy()
         expect(isExternalUrl("")).toBeFalsy()
         expect(isExternalUrl("    ")).toBeFalsy()
-        const input:any = null;
+        const input: any = null;
         expect(isExternalUrl(input)).toBeFalsy()
+    })
+})
+
+describe("random number generator", () => {
+    test("fractional between 0 and 1", () => {
+        for (let i = 0; i < 10; i++) {
+            const random1 = getRandomNumberBetween(0, 1, 1);
+            console.log("Random number =", random1);
+            expect(random1).toBeGreaterThanOrEqual(0)
+            expect(random1).toBeLessThanOrEqual(1);
+        }
+    })
+
+    test("fractional between 0.2 and 0.5", () => {
+        for (let i = 0; i < 10; i++) {
+            const random1 = getRandomNumberBetween(0.2, 0.5, 1);
+            console.log("Random number =", random1);
+            expect(random1).toBeGreaterThanOrEqual(0.2)
+            expect(random1).toBeLessThanOrEqual(0.5);
+        }
     })
 })
