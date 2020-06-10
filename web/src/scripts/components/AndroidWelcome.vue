@@ -23,6 +23,7 @@
     import NavBar from "@components/NavBar.vue";
     import { pushRoute } from "@web/NavigationUtil";
     import Logger from "@shared/Logger"
+    import { QueryParam } from "@shared/util/queryParams";
 
     const logger = new Logger("AndroidWelcome");
 
@@ -51,12 +52,12 @@
         },
         data(): {
             authLoaded: boolean,
-            continuePath: PageRoute,
+            continuePath: PageRoute|string,
             authListener: Unsubscribe | undefined,
         } {
             return {
                 authLoaded: false,
-                continuePath: PageRoute.SIGNUP,
+                continuePath: `${ PageRoute.GET_STARTED }?${ QueryParam.REDIRECT_URL }=${ PageRoute.HELLO_ONBOARDING }`,
                 authListener: undefined,
             }
         },

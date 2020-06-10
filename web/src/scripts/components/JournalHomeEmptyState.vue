@@ -12,7 +12,7 @@
             </p>
         </template>
         <img class="graphic" src="/assets/images/emptyState.png" alt="Three friends welcoming you"/>
-        <router-link class="button primary" tag="button" :to="firstPromptPath">Let's begin</router-link>
+        <router-link class="button primary" tag="button" :to="onboardingPath">Let's begin</router-link>
     </section>
 </template>
 
@@ -48,6 +48,10 @@
 
         get isPlusMember(): boolean {
             return !!this.tier && isPremiumTier(this.tier);
+        }
+
+        get onboardingPath(): PageRoute {
+            return PageRoute.HELLO_ONBOARDING;
         }
 
         get firstPromptPath(): string {
