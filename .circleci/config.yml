@@ -490,7 +490,7 @@ jobs:
             echo "Starting firebase deploy for << parameters.modules >> on project << parameters.project >>"
             npx firebase deploy --only << parameters.modules >> -P << parameters.project >> -f
       - notify-on-failure:
-              env: << parameters.project >>
+          env: << parameters.project >>
 
   firebase-deploy-all:
     description: "Deploy selected modules to the selected project"
@@ -620,6 +620,10 @@ jobs:
         type: string
         default: "Release Pipeline"
         description: "The message to send to slack"
+      env_name:
+        type: string
+        default: "Stage"
+        description: "The name of the environment the functions were deployed to"
     executor: cactus-web
     resource_class: small
     steps:
@@ -631,7 +635,30 @@ jobs:
           include_visit_job_action: false
           include_project_field: false
           ts: "$(date +%s)"
-          message: ":white_check_mark: \\`master\\` <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > All functions were deployed successfully."
+          message: ":white_check_mark: \\`master\\` <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > All functions were deployed to \\`<< parameters.env_name >>\\` successfully."
+  notify-branch-functions-deployed:
+    description: "Notify slack that a functions on master deployed successfully"
+    parameters:
+      workflow_name:
+        type: string
+        default: "Feature Branch Pipeline"
+        description: "The message to send to slack"
+      env_name:
+        type: string
+        default: "Stage"
+        description: "The name of the environment the functions were deployed to"
+    executor: cactus-web
+    resource_class: small
+    steps:
+      - get-repo-link
+      - slack/notify:
+          <<: *webhook-engineering-ci
+          color: "good"
+          include_job_number_field: false
+          include_visit_job_action: false
+          include_project_field: false
+          ts: "$(date +%s)"
+          message: ":white_check_mark: \\`${CIRCLE_BRANCH}\\` <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > All functions were deployed to \\`<< parameters.env_name >>\\` successfully."
 
 workflows:
   version: 2.1
@@ -775,10 +802,11 @@ workflows:
           modules: *func-pubsub3
           requires:
             - *notify-all-started
-      - firebase-deploy-some:
-          name: &branch_deploy_hosting_name "Deploy Hosting to Stage"
-          project: "stage"
-          modules: "hosting,firestore:rules,firestore:indexes"
+
+      - notify-branch-functions-deployed:
+          name: &branch_stage_funcs_finished "Functions Stage Deployed Successfully"
+          env_name: "stage"
+          workflow_name: *workflow_name
           requires:
             - *api-1
             - *api-2
@@ -790,10 +818,23 @@ workflows:
             - *pubsub-1
             - *pubsub-2
             - *pubsub-3
+      - firebase-deploy-some:
+          name: &branch_deploy_webapp_name "Deploy Webapp to Stage"
+          project: "stage"
+          modules: "hosting:webapp,firestore:rules,firestore:indexes"
+          requires:
+            - *branch_stage_funcs_finished
+      - firebase-deploy-some:
+          name: &branch_deploy_storybook_name "Deploy Storybook to Stage"
+          project: "stage"
+          modules: "hosting:storybook"
+          requires:
+            - *branch_stage_funcs_finished
       - branch-deploy-finished:
           name: "Notify Finished"
           requires:
-            - *branch_deploy_hosting_name
+            - *branch_deploy_webapp_name
+            - *branch_deploy_storybook_name
 
   cactus_release_pipeline:
     jobs:
@@ -899,6 +940,7 @@ workflows:
       #       Notify functions deployed, and use as a group for future steps
       - notify-master-functions-deployed:
           name: &functions-deployed-notification-stage "Notify Functions Deployed - Stage"
+          env_name: "Stage"
           requires:
             - *api-1-stage
             - *api-2-stage
@@ -912,27 +954,34 @@ workflows:
             - *pubsub-3-stage
       #     Deploy the frontend, requires notification to be sent as a grouping function
       - firebase-deploy-some:
-          name: &stage_deploy_hosting_name "Deploy Hosting to Stage"
+          name: &stage_deploy_webapp_name "Deploy Webapp to Stage"
           project: "stage"
-          modules: "hosting,firestore:rules,firestore:indexes"
+          modules: "hosting:webapp,firestore:rules,firestore:indexes"
           requires:
             - *functions-deployed-notification-stage
-
+      - firebase-deploy-some:
+          name: &stage_deploy_storybook_name "Deploy Storybook to Stage"
+          project: "stage"
+          modules: "hosting:storybook"
+          requires:
+            - *functions-deployed-notification-stage
       - ready-for-deploy:
           name: "Notify Promotion Ready"
           requires:
-            - *stage_deploy_hosting_name
+            - *stage_deploy_webapp_name
+            - *stage_deploy_storybook_name
       - prod_deploy_approval:
           type: approval
           name: &prod_approval_name "Deploy To Prod Approval"
           requires:
-            - *stage_deploy_hosting_name
-#            - *functions-deployed-notification-stage
-#            - *install_all_name
-#            - *test_web_name
-#            - *test_shared_name
-#            - *test_functions_name
-#            - *test_scripts_name
+            - *stage_deploy_webapp_name
+            - *stage_deploy_storybook_name
+      #            - *functions-deployed-notification-stage
+      #            - *install_all_name
+      #            - *test_web_name
+      #            - *test_shared_name
+      #            - *test_functions_name
+      #            - *test_scripts_name
       - prod-deploy-started:
           name: &notify_promoted "Notify Promotion"
           requires:
@@ -1002,6 +1051,7 @@ workflows:
       #       Notify functions deployed, and use as a group for future steps
       - notify-master-functions-deployed:
           name: &functions-deployed-notification-prod "Notify Functions Deployed - Prod"
+          env_name: "Prod"
           requires:
             - *api-1-prod
             - *api-2-prod
@@ -1013,15 +1063,21 @@ workflows:
             - *pubsub-1-prod
             - *pubsub-2-prod
             - *pubsub-3-prod
-
       - firebase-deploy-some:
-          name: &release_deploy_hosting_name "Deploy Hosting to Prod"
+          name: &release_deploy_hosting_webapp_name "Deploy Webapp to Prod"
           project: "prod"
-          modules: "hosting,firestore:rules,firestore:indexes"
+          modules: "hosting:webapp,firestore:rules,firestore:indexes"
+          requires:
+            - *functions-deployed-notification-prod
+      - firebase-deploy-some:
+          name: &release_deploy_hosting_storybook_name "Deploy Storybook to Prod"
+          project: "prod"
+          modules: "hosting:storybook"
           requires:
             - *functions-deployed-notification-prod
       - notify-workflow-finished:
           name: "Release Finished Notification"
           workflow_name: "Release Pipeline - Prod"
           requires:
-            - *release_deploy_hosting_name
+            - *release_deploy_hosting_webapp_name
+            - *release_deploy_hosting_storybook_name
