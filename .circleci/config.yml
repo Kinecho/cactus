@@ -363,7 +363,7 @@ jobs:
           include_visit_job_action: false
           include_project_field: false
           ts: "$(date +%s)"
-          message: "A Stage Build is <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|ready for promotion>"
+          message: "\\`master\\` has been deployed to stage. This build may be to be <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|promoted to production>."
   prod-deploy-started:
     executor: cactus-web
     resource_class: small
@@ -976,14 +976,8 @@ workflows:
           requires:
             - *stage_deploy_webapp_name
             - *stage_deploy_storybook_name
-      #            - *functions-deployed-notification-stage
-      #            - *install_all_name
-      #            - *test_web_name
-      #            - *test_shared_name
-      #            - *test_functions_name
-      #            - *test_scripts_name
       - prod-deploy-started:
-          name: &notify_promoted "Notify Promotion"
+          name: &notify_promoted "Notify Promotion Approved"
           requires:
             - *prod_approval_name
       #      DEPLOY FUNCTIONS TO STAGE START
