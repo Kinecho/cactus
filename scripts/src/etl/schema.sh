@@ -1,6 +1,6 @@
 PROJECT_ID="cactus-app-stage"
 DATASET_ID="cactus_stage"
-TABLE_ID="test_sent_prompts"
+TABLE_ID="sent_prompts_schema"
 npx @firebaseextensions/fs-bq-schema-views \
   --non-interactive \
   --project=${PROJECT_ID} \
