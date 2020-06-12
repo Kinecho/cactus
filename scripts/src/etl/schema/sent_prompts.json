@@ -1,6 +1,22 @@
 {
     "fields": [
         {
+            "name": "createdAt",
+            "type": "timestamp"
+        },
+        {
+            "name": "updatedAt",
+            "type": "timestamp"
+        },
+        {
+            "name": "deletedAt",
+            "type": "timestamp"
+        },
+        {
+            "name": "deleted",
+            "type": "boolean"
+        },
+        {
             "name": "cactusMemberId",
             "type": "string"
         },
@@ -19,10 +35,6 @@
         {
             "name": "promptId",
             "type": "string"
-        },
-        {
-            "name": "sendHistory",
-            "type": "array"
         },
         {
             "name": "promptContentEntryId",

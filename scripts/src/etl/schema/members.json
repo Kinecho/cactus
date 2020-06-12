@@ -1,0 +1,290 @@
+{
+    "fields": [
+        {
+            "name": "createdAt",
+            "type": "timestamp"
+        },
+        {
+            "name": "updatedAt",
+            "type": "timestamp"
+        },
+        {
+            "name": "deletedAt",
+            "type": "timestamp"
+        },
+        {
+            "name": "deleted",
+            "type": "boolean"
+        },
+        {
+            "name": "userId",
+            "type": "string"
+        },
+        {
+            "name": "firstName",
+            "type": "string"
+        },
+        {
+            "name": "lastName",
+            "type": "string"
+        },
+        {
+            "name": "email",
+            "type": "string"
+        },
+        {
+            "name": "signupAt",
+            "type": "timestamp"
+        },
+        {
+            "name": "signupConfirmedAt",
+            "type": "timestamp"
+        },
+        {
+            "name": "lastSyncedAt",
+            "type": "timestamp"
+        },
+        {
+            "name": "lastReplyAt",
+            "type": "timestamp"
+        },
+        {
+            "name": "unsubscribeReason",
+            "type": "string"
+        },
+        {
+            "name": "unsubscribedAt",
+            "type": "timestamp"
+        },
+        {
+            "name": "unsubscribeCampaignId",
+            "type": "string"
+        },
+        {
+            "name": "journalStatus",
+            "type": "string"
+        },
+        {
+            "name": "notificationSettings",
+            "type": "map",
+            "fields": [
+                {
+                    "name": "email",
+                    "type": "string"
+                },
+                {
+                    "name": "push",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "timeZone",
+            "type": "string"
+        },
+        {
+            "name": "locale",
+            "type": "string"
+        },
+        {
+            "name": "promptSendTime",
+            "type": "map",
+            "fields": [
+                {
+                    "name": "hour",
+                    "type": "number"
+                },
+                {
+                    "name": "minute",
+                    "type": "number"
+                }
+            ]
+        },
+        {
+            "name": "promptSendTimeUTC",
+            "type": "map",
+            "fields": [
+                {
+                    "name": "hour",
+                    "type": "number"
+                },
+                {
+                    "name": "minute",
+                    "type": "number"
+                }
+            ]
+        },
+        {
+            "name": "referredByEmail",
+            "type": "string"
+        },
+        {
+            "name": "signupQueryParams",
+            "type": "record"
+        },
+        {
+            "name": "stats",
+            "type": "map",
+            "fields": [
+                {
+                    "name": "reflections",
+                    "type": "map",
+                    "fields": [
+                        {
+                            "name": "currentStreakDays",
+                            "type": "number"
+                        },
+                        {
+                            "name": "currentStreakWeeks",
+                            "type": "number"
+                        },
+                        {
+                            "name": "currentStreakMonths",
+                            "type": "number"
+                        },
+                        {
+                            "name": "totalDurationMs",
+                            "type": "number"
+                        },
+                        {
+                            "name": "totalCount",
+                            "type": "number"
+                        },
+                        {
+                            "name": "elementAccumulation",
+                            "type": "string"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "activityStatus",
+            "type": "map",
+            "fields": [
+                {
+                    "name": "lastSeenOccurredAt",
+                    "type": "timestamp"
+                }
+            ]
+        },
+        {
+            "name": "subscription",
+            "type": "map",
+            "fields": [
+                {
+                    "name": "legacyConversion",
+                    "type": "boolean"
+                },
+                {
+                    "name": "tier",
+                    "type": "string"
+                },
+                {
+                    "name": "trial",
+                    "type": "map",
+                    "fields": [
+                        {
+                            "name": "startedAt",
+                            "type": "timestamp"
+                        },
+                        {
+                            "name": "endsAt",
+                            "type": "timestamp"
+                        },
+                        {
+                            "name": "activatedAt",
+                            "type": "timestamp"
+                        }
+                    ]
+                },
+                {
+                    "name": "optOutTrial",
+                    "type": "map",
+                    "fields": [
+                        {
+                            "name": "startedAt",
+                            "type": "timestamp"
+                        },
+                        {
+                            "name": "endsAt",
+                            "type": "timestamp"
+                        },
+                        {
+                            "name": "billingPlatform",
+                            "type": "string"
+                        }
+                    ]
+                },
+                {
+                    "name": "cancellation",
+                    "type": "map",
+                    "fields": [
+                        {
+                            "name": "initiatedAt",
+                            "type": "timestamp"
+                        },
+                        {
+                            "name": "accessEndsAt",
+                            "type": "timestamp"
+                        },
+                        {
+                            "name": "reasonCode",
+                            "type": "string"
+                        },
+                        {
+                            "name": "processedAt",
+                            "type": "timestamp"
+                        }
+                    ]
+                },
+                {
+                    "name": "activated",
+                    "type": "boolean"
+                },
+                {
+                    "name": "subscriptionProductId",
+                    "type": "string"
+                },
+                {
+                    "name": "stripeSubscriptionId",
+                    "type": "string"
+                },
+                {
+                    "name": "appleOriginalTransactionId",
+                    "type": "string"
+                },
+                {
+                    "name": "googleOriginalOrderId",
+                    "type": "string"
+                },
+                {
+                    "name": "googlePurchaseToken",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "stripe",
+            "type": "map",
+            "fields": [
+                {
+                    "name": "customerId",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "wordCloud",
+            "type": "array"
+        },
+        {
+            "name": "coreValues",
+            "type": "array"
+        },
+        {
+            "name": "focusElement",
+            "type": "string"
+        }
+    ]
+}
