@@ -138,6 +138,14 @@ export default class Payment extends BaseModel {
 interface StripePayment {
     raw?: any;
     checkoutSession?: Stripe.Checkout.Session;
+    /**
+     * Used for manual backfills- shouldn't be used unless as a fallback
+     */
+    subscriptionId?: string;
+    /**
+     * Useed for manual backfills, shouldn't be used unless as a fallback
+     */
+    planId?: string;
 }
 
 interface ApplePayment {

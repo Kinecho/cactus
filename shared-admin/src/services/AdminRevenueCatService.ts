@@ -286,7 +286,7 @@ export default class AdminRevenueCatService {
     async processStripePayment(payment: Payment): Promise<void> {
         logger.log("Processing payment", payment.id);
         const memberId = payment.memberId;
-        const stripeSubscriptionId = getStripeId(payment.stripe?.checkoutSession?.subscription);
+        const stripeSubscriptionId = getStripeId(payment.stripe?.checkoutSession?.subscription) ?? payment.stripe?.subscriptionId;
         if (!stripeSubscriptionId) {
             logger.info("Not processing member as there is no stripe subscription id", memberId);
             return;

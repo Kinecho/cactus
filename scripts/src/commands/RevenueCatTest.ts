@@ -79,7 +79,7 @@ export default class RevenueCatTest extends FirebaseCommand {
         console.log("running job", jobType);
         switch (jobType) {
             case RevenueCatType.syncStripeSubscription:
-                await this.updateStripSubscription(member!);
+                await this.updateStripeSubscription(member!);
                 break;
             case RevenueCatType.updateSubscriberAttributes:
                 await this.updateSubscriberAttributes(member!);
@@ -161,7 +161,7 @@ export default class RevenueCatTest extends FirebaseCommand {
         })
     }
 
-    async updateStripSubscription(member: CactusMember): Promise<void> {
+    async updateStripeSubscription(member: CactusMember): Promise<void> {
         const memberId = member.id!;
 
         const stripeSubscriptionId = member.subscription?.stripeSubscriptionId;
