@@ -138,7 +138,6 @@ export default class PushNotificationService {
             const result = await this.messaging.sendToDevice(token, payload);
             logger.log("Send Message Result", result);
             return {token, success: true};
-
         } catch (error) {
             logger.error(`Failed to send the push notification to ${member?.id} ${member?.email}:`, error.code ? error.code : error);
             Sentry.captureException(error);

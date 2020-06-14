@@ -19,6 +19,7 @@ import CactusMember, { PromptSendTime } from "@shared/models/CactusMember";
 import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
 import Logger from "@shared/Logger";
 import { runMemberStatsJob } from "@api/pubsub/subscribers/MemberStatsJob";
+import { stringifyJSON } from "@shared/util/ObjectUtil";
 
 const logger = new Logger("testApp");
 // const Config = getConfig();
@@ -35,24 +36,30 @@ app.get("/fcm", async (req, res) => {
         const title = (req.query.title as string | undefined) || "Cactus Test Push Message";
         const body = (req.query.body as string | undefined) || "This is the body of the request";
 
-        const token = (req.query.token as string | undefined) || "f2SB0VUqdaA:APA91bGV1o6f4UzsXOlwX_LYqCIKsH-STA4HCIIbMoUwzUd7zobmaICShlUchVvB2qPYjoZAmnjLl5fI6ntvrxSNfyWvWmkMkCGIGcqps0B-zl0dDci1aP9mEFmX0GvH7GmIflGgHCY6";
+        // const token = (req.query.token as string | undefined) || "f2SB0VUqdaA:APA91bGV1o6f4UzsXOlwX_LYqCIKsH-STA4HCIIbMoUwzUd7zobmaICShlUchVvB2qPYjoZAmnjLl5fI6ntvrxSNfyWvWmkMkCGIGcqps0B-zl0dDci1aP9mEFmX0GvH7GmIflGgHCY6";
 
-        const payload: admin.messaging.MessagingPayload = {
-            notification: {
-                title: title,
-                body: body,
-                badge: (req.query.badge as string | undefined) || "1",
-            }, data: {
-                promptId: (req.query.promptId as string | undefined) || "123",
-                promptEntryId: (req.query.entryId as string | undefined) || "entry123"
-            }
-        };
-        const result = await admin.messaging().sendToDevice(token, payload);
+        const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail("neil@neilpoulin.com");
+        let tokens = member?.fcmTokens ?? []
 
-        logger.log("Send Message Result", result);
+        const tasks = tokens.map(token => {
+            const payload: admin.messaging.MessagingPayload = {
+                notification: {
+                    title: title,
+                    body: body,
+                    badge: (req.query.badge as string | undefined) || "1",
+                }, data: {
+                    promptId: (req.query.promptId as string | undefined) || "123",
+                    promptEntryId: (req.query.entryId as string | undefined) || "entry123"
+                }
+            };
+            return admin.messaging().sendToDevice(token, payload);
+        })
+        const allResults = await Promise.all(tasks);
 
+        logger.info(stringifyJSON(allResults));
+        // logger.log("Send Message Result", result);
 
-        return res.sendStatus(201);
+        return res.send(stringifyJSON(allResults));
     } catch (error) {
         logger.error("failed to send message", error);
         res.send(error);
