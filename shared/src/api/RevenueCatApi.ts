@@ -257,7 +257,7 @@ export function getPlatformHeader(appType?: AppType): Record<string, string> | u
     let platform: string | undefined;
     switch (appType) {
         case AppType.WEB:
-            platform = "web";
+            platform = "stripe";
             break;
         case AppType.ANDROID:
             platform = "android";

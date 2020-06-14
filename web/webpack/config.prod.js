@@ -46,4 +46,6 @@ module.exports = {
     __PLAY_STORE_URL__: 'https://play.google.com/store/apps/details?id=app.cactus',
     __BRANCH_LIVE_KEY__: 'key_live_heLJqNeQvEOgkUX3XUF92hadCFi7uWW0',
     __REVENUECAT_API_KEY__: 'dlWuxUOEBonywlmBlOMQtTfUQGZXAKbJ',
+    __FACEBOOK_APP_ID__: "1303868239764571",
+    __FACEBOOK_VERSION__: "v7.0",
 }

@@ -1,5 +1,5 @@
 import { init as initAnalytics } from '@web/analytics';
-import { startFacebookPixel } from '@web/facebook.js';
+import { initFacebookSdk } from './facebook.js';
 import { initializeFirebase } from "@web/firebase";
 import { getAllQueryParams, getQueryParam } from "@web/util";
 import { includesLandingQueryParams, QueryParam } from "@shared/util/queryParams";
@@ -22,13 +22,13 @@ window.registerFCMToken = async (token?: string) => {
     await CactusMemberService.sharedInstance.registerFCMToken(token);
 };
 
-export function commonInit() {
+export async function commonInit() {
+
     if (hasCommonInit) {
         return;
     }
 
-    initAnalytics();
-    startFacebookPixel();
+    const analyticsTask = initAnalytics();
 
     initializeFirebase();
 
@@ -70,12 +70,11 @@ export function commonInit() {
         logger.error("Failed to get landing page query parameters", error);
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        //Nothing to do here
 
-    });
-
+    await analyticsTask;
     hasCommonInit = true;
 }
 
-commonInit();
+document.addEventListener('DOMContentLoaded', function () {
+    commonInit().then(() => logger.log("common init finished")).catch(error => logger.error("Failed to init common elements", error));
+})

@@ -47,6 +47,8 @@ module.exports = {
     __PLAY_STORE_URL__: "https://play.google.com/store/apps/details?id=app.cactus.stage",
     __BRANCH_LIVE_KEY__: 'key_test_hnUHuOjICDVjjN3W0PIRxlnfsyeXRjbe',
     __REVENUECAT_API_KEY__: 'GJqLQgWbsSOINNAjEApbhYVWHDzmYfXA',
+    __FACEBOOK_APP_ID__: "679884582534737",
+    __FACEBOOK_VERSION__: "v7.0",
 }
 
 

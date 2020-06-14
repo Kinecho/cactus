@@ -15,6 +15,7 @@ import { CactusElement } from "@shared/models/CactusElement";
 import { isNumber } from "@shared/util/ObjectUtil";
 import { ScreenName } from "@components/gapanalysis/GapAssessmentTypes";
 import { BillingPeriod } from "@shared/models/SubscriptionProduct";
+import { FacebookEventNames, FacebookParameterNames, initFacebookSdk } from "./facebook";
 
 const logger = new Logger("Analytics.ts");
 
@@ -53,16 +54,15 @@ let isFirstAuthLoad = false;
  *
  * returns function
  */
-export function init() {
+export async function init() {
     if (hasInit) {
         logger.warn("Analytics already initialized, not reinitializing");
         return;
     }
-
+    await initFacebookSdk();
     getAuth().onAuthStateChanged(user => {
         setUser(user);
         isFirstAuthLoad = true;
-
     });
 
     const sentryIntegrations: any[] = []; //using any because it doesn't look like sentry's Integration interface is exported
@@ -129,10 +129,12 @@ export function setUser(user?: User | null) {
             email: email || undefined,
         };
         Sentry.setUser(sentryUser);
+        FB.AppEvents.setUserID(user.uid)
 
     } else {
         setUserId(undefined);
         Sentry.setUser(null);
+        FB.AppEvents.clearUserID();
     }
 }
 
@@ -141,15 +143,14 @@ export async function fireConfirmedSignupEvent(options: { email?: string, userId
 
         firebaseAnalytics().logEvent("sign_up", { method: options.method })
 
-        logger.debug("Firing confirmed signup event");
-        /* Facebook */
-        if (window.fbq) {
-            logger.debug("Sending CompleteRegistration event to facebook");
-            window.fbq('track', 'CompleteRegistration', {
-                value: 0.00,
-                currency: 'USD'
-            });
+        try {
+            logger.debug("Firing confirmed signup event");
+            const params = { [FacebookParameterNames.REGISTRATION_METHOD]: options.method };
+            FB.AppEvents.logEvent(FacebookEventNames.COMPLETED_REGISTRATION, null, params);
+        } catch (error) {
+            logger.error("Failed to log facebook signup event", error);
         }
+
         resolve();
     })
 }
@@ -184,9 +185,9 @@ export async function fireOptInStartTrialEvent(options: { value?: number, predic
         if (window.fbq) {
             logger.debug("Sending StartTrial event to Facebook");
             window.fbq('track', 'StartTrial', {
-                value: (value?.toString() ?? '0.00'),
+                value: value ?? 0,
                 currency: 'USD',
-                predicted_ltv: (predicted_ltv?.toString() ?? value?.toString() ?? '0.00')
+                predicted_ltv: predicted_ltv ?? value ?? 0
             });
         }
         const dollar = (options.value ?? 0);
@@ -258,6 +259,8 @@ export function logRouteChanged(to: Route): void {
             page_location: window.location.href,
             name: to.name
         });
+
+        window.fbq('track', 'PageView')
     }
     firstRouteFired = true;
 }

@@ -7,7 +7,7 @@ declare global {
         androidCheckoutFinished?: (success: boolean, message?: string | undefined) => void
         branch: any,
         cloudsponge: any,
-
+        fbq: Function,
         [key: string]: any; // Add index signature
     }
 
@@ -23,5 +23,3 @@ declare global {
         hot: any,
     }
 }
-
-

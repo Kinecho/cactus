@@ -25,6 +25,7 @@
     "chalk": "^2.4.2",
     "email-addresses": "^3.0.3",
     "express": "^4.17.1",
+    "facebook-nodejs-business-sdk": "^7.0.0",
     "firebase": "^7.14.6",
     "firebase-admin": "^8.12.1",
     "firebase-functions": "^3.6.0",

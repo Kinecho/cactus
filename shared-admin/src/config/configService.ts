@@ -240,6 +240,12 @@ const defaultTestConfig: CactusConfig = {
         public_key: "public_key",
         secret_key: "secret_key",
         webhook_bearer_token: "test_bearer_token",
+    },
+    facebook: {
+        access_token: "access_token",
+        system_user_id: "system_user_id",
+        app_id: "app_id",
+        web_pixel_id: "pixel_id",
     }
 };
 

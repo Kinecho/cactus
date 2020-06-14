@@ -6,7 +6,6 @@
     <title><%= htmlWebpackPlugin.options.title %></title>
 
 
-
     <!--  Meta to get overwritten by vue router  -->
     <meta data-vue-router-controlled name="description" content="Questions designed to improve how you think about work, life, relationships, and emotions">
     <meta data-vue-router-controlled name="og:site_name" content="Cactus">
@@ -33,9 +32,30 @@
     <!--note CSS is included via webpack-->
     <script async src="https://www.googletagmanager.com/gtag/js"></script>
     <script src="https://js.stripe.com/v3"></script>
+    <script>
+        !function (f, b, e, v, n, t, s) {
+            if (f.fbq) return
+            n = f.fbq = function () {
+                // noinspection JSUnresolvedVariable
+                n.callMethod ?
+                n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+            }
+            if (!f._fbq) f._fbq = n
+            n.push = n
+            n.loaded = !0
+            n.version = '2.0'
+            n.queue = []
+            t = b.createElement(e)
+            t.async = !0
+            t.src = v
+            s = b.getElementsByTagName(e)[0]
+            s.parentNode.insertBefore(t, s)
+        }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js')
+    </script>
 </head>
 
 <body>
-    <div id="app"></div>
+
+<div id="app"></div>
 </body>
 </html>

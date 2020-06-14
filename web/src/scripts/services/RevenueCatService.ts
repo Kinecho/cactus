@@ -1,8 +1,8 @@
 import _axios, { AxiosInstance } from "axios";
 import {
     apiDomain,
-    AttributesInput,
-    getPlatformHeader, getSubscriberAttributes,
+    getPlatformHeader,
+    getSubscriberAttributes,
     processAttributeInputForUpdate,
     RevenueCatEndpoints
 } from "@shared/api/RevenueCatApi";
@@ -10,7 +10,6 @@ import { Config } from "@web/config";
 import CactusMember from "@shared/models/CactusMember";
 import { getAppType } from "@web/DeviceUtil";
 import Logger from "@shared/Logger"
-import { stringifyJSON } from "@shared/util/ObjectUtil";
 import { isAxiosError } from "@shared/api/ApiTypes";
 
 const logger = new Logger("RevenueCatService");
@@ -47,7 +46,7 @@ export default class RevenueCatService {
             const appType = getAppType();
             const headers = getPlatformHeader(appType);
             await this.client.get(RevenueCatEndpoints.subscriber(memberId), { headers: { ...headers } });
-
+            logger.info("Updated last seen for member");
             await this.updateAttributes(member);
         } catch (error) {
             logger.error("Unexpected error when updating RevenueCat member activity", error);
@@ -76,9 +75,9 @@ export default class RevenueCatService {
             await this.client.post(path, { attributes });
         } catch (error) {
             if (isAxiosError(error)) {
-                logger.error("Failed to update RevenueCat user attributes", error.response?.data ?? error);
+                logger.error(`Failed to update RevenueCat user attributes for member ${ memberId }`, error.response?.data ?? error);
             } else {
-                logger.error("Failed to update RevenueCat user attributes", error);
+                logger.error(`Failed to update RevenueCat user attributes for member ${ memberId }`, error);
             }
         }
     }

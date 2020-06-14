@@ -37,6 +37,7 @@ import StripeService from "@admin/services/StripeService";
 import AdminDataExportService from "@admin/services/AdminDataExportService";
 import AdminDeletedUserService from "@admin/services/AdminDeletedUserService";
 import AdminRevenueCatService from "@admin/services/AdminRevenueCatService";
+import AdminFacebookAdsService from "@admin/services/AdminFacebookAdsService";
 
 const logger = new Logger("AdminServiceConfig");
 
@@ -93,6 +94,9 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
 
     //RevenueCat
     AdminRevenueCatService.initialize(config);
+
+    //Facebook
+    AdminFacebookAdsService.initalize(config);
 
     logger.log("Initializing Sentry");
     const sentryOptions: Sentry.NodeOptions = {

@@ -123,5 +123,11 @@ export interface CactusConfig {
         public_key: string,
         secret_key: string,
         webhook_bearer_token: string,
+    },
+    facebook: {
+        system_user_id: string,
+        web_pixel_id: string,
+        app_id: string,
+        access_token: string,
     }
 }

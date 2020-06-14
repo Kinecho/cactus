@@ -27,3 +27,7 @@ fi
 echo "current node version is $(node -v)"
 nvm install 10.18.1
 nvm alias default 10.18.1
+
+cd ~/.nvm/versions/node/v10.18.1/lib
+echo "Updating NPM to latest version"
+npm install npm

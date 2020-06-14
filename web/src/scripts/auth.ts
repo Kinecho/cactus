@@ -158,6 +158,7 @@ export async function sendLoginEvent(args: {
                         }
                         if (event.isNewUser) {
                             // all new users
+                            logger.info("New user just signed up, firing analytics event");
                             await fireConfirmedSignupEvent({
                                 email: args.user?.email || undefined,
                                 userId: args.user?.uid,
