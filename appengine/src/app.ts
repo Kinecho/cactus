@@ -11,7 +11,7 @@ const PORT = Number(process.env.PORT) || 8080;
 const app = express();
 
 app.get("/", (req: express.Request, res: express.Response) => {
-    res.send("🎉 What is up TypeScript WIth changes! 🎉");
+    res.send("🌵 Cactus will be deployed here.");
 });
 
 app.use("/slack", slackRoutes);

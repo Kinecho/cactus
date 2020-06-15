@@ -6,15 +6,12 @@
 # For more information, run:
 #   $ gcloud topic gcloudignore
 #
-**/.gcloudignore
+.gcloudignore
 # If you would like to upload your .git directory, .gitignore file or files
 # from your .gitignore file, remove the corresponding line
 # below:
-**/.git
-**/.gitignore
+.git
+.gitignore
 
 # Node.js dependencies:
 node_modules/
-**/node_modules/
-web/
-.idea/
