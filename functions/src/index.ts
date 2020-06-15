@@ -4,6 +4,7 @@ import inboundApp from "@api/endpoints/inboundApp";
 import checkoutApp from "@api/endpoints/checkoutApp";
 import manageNotificationApp from "@api/endpoints/manageNotificationsEndpoints";
 import testApp from "@api/endpoints/testApp";
+import taskEndpoints from "@api/endpoints/taskEndpoints";
 import * as EmailRecipientsJob from "@api/pubsub/subscribers/ProcessMailchimpCampaignRecipientsJob";
 import { backupFirestore, exportFirestoreToBigQuery } from "@api/endpoints/DataExportJob";
 import * as BridgeToMondayJob from "@api/pubsub/subscribers/BridgeToMondayJob";
@@ -55,6 +56,7 @@ export const cloudFunctions = {
     test: functions.https.onRequest(testApp),
     notificationPreferences: functions.https.onRequest(manageNotificationApp),
     apple: functions.https.onRequest(appleEndpoints),
+    tasks: functions.https.onRequest(taskEndpoints),
 
     //PubSub topics
     pubsub1: {

@@ -1,0 +1,7 @@
+queue:
+  - name: user-prompt-notifications
+    bucket_size: 100
+    rate: 50/s
+    retry_parameters:
+      task_retry_limit: 5
+      task_age_limit: 1d
