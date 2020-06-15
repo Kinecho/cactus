@@ -1,5 +1,6 @@
 .idea/
 .firebase/
+build/
 web/public/
 web/build
 scripts/lib/
@@ -11,7 +12,7 @@ web/storybook-static/
 # This is generated at deploy time
 apple-app-site-association
 apple-developer-domain-association.txt
-
+appengine/build/
 tmp/
 
 web/src/pages-index.html
@@ -89,3 +90,4 @@ typings/
 .next
 .DS_Store
 
+/appengine/build/

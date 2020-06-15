@@ -1,0 +1,44 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "noImplicitReturns": true,
+        "noUnusedLocals": true,
+        "outDir": "build",
+        "sourceMap": true,
+        "inlineSources": true,
+        "strict": true,
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": false,
+        "target": "es2016",
+        "downlevelIteration": true,
+        "lib": [
+            "es2019"
+        ],
+        "baseUrl": ".",
+        "rootDirs": [
+            "src",
+            "../shared/src"
+        ],
+        "paths": {
+            "@app/*": [
+                "./src/*"
+            ],
+            "@shared/*": [
+                "../shared/src/*"
+            ],
+            "@admin/*": [
+                "../shared-admin/src/*"
+            ]
+        }
+    },
+    "compileOnSave": false,
+    "include": [
+        "src",
+        ".sql",
+        ".ts"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}

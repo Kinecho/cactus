@@ -1,0 +1,17 @@
+{
+    "extends": "tslint:recommended",
+    "rules": {
+        "no-console": false,
+        "no-implicit-dependencies": [
+            true,
+            [
+                "dev",
+                "@api",
+                "@shared",
+                "@api",
+                "@admin",
+                "@app"
+            ]
+        ]
+    }
+}

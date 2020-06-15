@@ -22,7 +22,8 @@
             "./shared/src",
             "./functions/src",
             "./scripts/src",
-            "./shared-admin/src"
+            "./shared-admin/src",
+            "./appengine/src"
         ]
     }
 }
