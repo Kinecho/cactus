@@ -18,12 +18,26 @@
         ],
         "baseUrl": ".",
         "rootDirs": [
-            "./web/src",
             "./shared/src",
-            "./functions/src",
-            "./scripts/src",
             "./shared-admin/src",
             "./appengine/src"
-        ]
+        ],
+        "paths": {
+            "@api/*": [
+                "./functions/src/*"
+            ],
+            "@shared/*": [
+                "./shared/src/*"
+            ],
+            "@admin/*": [
+                "./shared-admin/src/*"
+            ],
+            "@app/*": [
+                "./appengine/src/*"
+            ],
+            "@web/*": [
+                "./web/src/*"
+            ]
+        }
     }
 }
