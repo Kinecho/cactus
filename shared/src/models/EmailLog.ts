@@ -14,7 +14,8 @@ export enum SendgridTemplate {
     invitation = "invitation",
     friend_request = "friend_request",
     trial_ending = "trial_ending",
-    data_export = "data_export"
+    data_export = "data_export",
+    new_prompt_notification = "new_prompt_notification",
 }
 
 /**
@@ -56,7 +57,6 @@ export default class EmailLog extends BaseModel {
     memberId?: string;
     email!: string;
     templateData?: TemplateData;
-
 
     constructor(email?: string) {
         super();

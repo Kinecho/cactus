@@ -40,6 +40,7 @@ export function buildConfig(configInput: CactusConfig = functions.config() as Ca
         config.web.protocol = 'http';
         // config.stripe.webhook_signing_secrets.main = 'whsec_CQrDcQTFgTr01NtFT4vNI5HawMGX9oHs';
         config.stripe.webhook_signing_secrets.main = 'whsec_skI0PA8KSH2BZWmJEcODQGf6FgEHJEB2';
+        config.tasks.handler_url_base = "http://cactus-api.ngrok.io/cactus-app-stage/us-central1/tasks";
     } else {
         config.web.protocol = 'https'
     }
@@ -185,6 +186,7 @@ const defaultTestConfig: CactusConfig = {
             friend_request: '1234fr',
             trial_ending: '1234te',
             data_export: "1234lj",
+            new_prompt_notification: "test_id",
         }
     },
     language: {
@@ -240,6 +242,18 @@ const defaultTestConfig: CactusConfig = {
         public_key: "public_key",
         secret_key: "secret_key",
         webhook_bearer_token: "test_bearer_token",
+    },
+    tasks: {
+        project_id: "cactus-app-stage",
+        location: "us-central1",
+        handler_url_base: "https://us-central1-cactus-app-stage.cloudfunctions.net/tasks",
+        queues: {
+            user_prompt_notifications: {
+                name: "user-prompt-notifications",
+                handler_path: "/send-prompt-notifications",
+                http_method: "POST"
+            }
+        }
     }
 };
 

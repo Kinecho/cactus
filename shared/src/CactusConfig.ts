@@ -1,4 +1,5 @@
 import {SendgridTemplate} from "@shared/models/EmailLog";
+import { TaskQueueConfigName } from "../../shared-admin/src/services/CloudTaskService";
 
 export interface ServiceAccountCredentials {
     project_id: string,
@@ -15,6 +16,16 @@ export interface ServiceAccountCredentials {
 
 export type EnvironmentType = "test" | "dev" | "prod" | "stage"
 export type SendgridTemplateConfig = { [name in SendgridTemplate]: string };
+
+export interface TaskQueueConfig {
+    name: string,
+    handler_path: string,
+    http_method: "GET"|"POST"|"PUT"
+}
+
+export type TaskQueueConfigMap = {
+    [name in TaskQueueConfigName]: TaskQueueConfig
+}
 
 export interface CactusConfig {
     isEmulator: boolean,
@@ -123,5 +134,11 @@ export interface CactusConfig {
         public_key: string,
         secret_key: string,
         webhook_bearer_token: string,
+    },
+    tasks: {
+        project_id: string,
+        location: string,
+        handler_url_base: string,
+        queues: TaskQueueConfigMap,
     }
 }

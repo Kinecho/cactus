@@ -37,6 +37,7 @@ import StripeService from "@admin/services/StripeService";
 import AdminDataExportService from "@admin/services/AdminDataExportService";
 import AdminDeletedUserService from "@admin/services/AdminDeletedUserService";
 import AdminRevenueCatService from "@admin/services/AdminRevenueCatService";
+import CloudTaskService from "@admin/services/CloudTaskService";
 
 const logger = new Logger("AdminServiceConfig");
 
@@ -66,6 +67,7 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminSentCampaignService.initialize();
     GoogleSheetsService.initialize(config);
     GoogleLanguageService.initialize(config);
+    CloudTaskService.initialize(config);
     AdminEmailReplyService.initialize();
     AdminSocialInviteService.initialize(config);
     AdminMemberProfileService.initialize();
