@@ -1,7 +1,8 @@
-import { PromptSendTime } from "@shared/models/CactusMember";
+import CactusMember, { PromptSendTime } from "@shared/models/CactusMember";
 import { DateObject } from "luxon";
 import PromptContent from "@shared/models/PromptContent";
 import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
+import { SubmitTaskResponse } from "@admin/services/CloudTaskService";
 
 /**
  * An object defining the parameters needed to potentially notify a member of new content.
@@ -33,8 +34,17 @@ export interface MemberPromptNotificationTaskParams {
 export interface MemberPromptNotificationTaskResult {
     memberId?: string;
     success: boolean;
-    promptContent?: PromptContent | null | undefined,
     retryable?: boolean;
+    errorMessage?: string;
+    setupInfo?: MemberPromptNotificationSetupInfo;
+    pushTaskResponse?: SubmitTaskResponse;
+    emailTaskResponse?: SubmitTaskResponse;
+}
+
+export interface MemberPromptNotificationSetupInfo {
+    member?: CactusMember | null,
+    usedCachedMember?: boolean,
+    promptContent?: PromptContent | null | undefined,
     errorMessage?: string;
     memberDateObject?: DateObject,
     isSendTime?: boolean,

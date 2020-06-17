@@ -45,13 +45,13 @@ export default class HoboCache {
         if (!id) {
             return { member: undefined, cached: false };
         }
-        let member = this.memberById[id];
+        let member: CactusMember | undefined | null = this.memberById[id];
         if (member === null) {
             return { member, cached: true };
         }
-        member = await AdminCactusMemberService.getSharedInstance().getById(id);
-        this.memberById[id] = member ?? null;
-        return { member: member ?? null, cached: false };
+        member = await AdminCactusMemberService.getSharedInstance().getById(id) ?? null;
+        this.memberById[id] = member;
+        return { member, cached: false };
     }
 
     async getPromptContentForIsoDateObject(dateObject: DateObject): Promise<{ promptContent: PromptContent | null | undefined, cached: boolean }> {

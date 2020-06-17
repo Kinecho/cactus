@@ -2,6 +2,7 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CloudTaskService, { SubmitTaskResponse, TaskQueueConfigName } from "@admin/services/CloudTaskService";
 import CactusMember, { PromptSendTime } from "@shared/models/CactusMember";
 import {
+    MemberPromptNotificationSetupInfo,
     MemberPromptNotificationTaskParams,
     MemberPromptNotificationTaskResult,
     NextPromptResult
@@ -13,6 +14,7 @@ import { DateObject, DateTime } from "luxon";
 import { getSendTimeUTC } from "@shared/util/DateUtil";
 import { isSendTimeWindow } from "@shared/util/NotificationUtil";
 import HoboCache from "@admin/HoboCache";
+import PromptContent from "@shared/models/PromptContent";
 
 const logger = new Logger("PromptNotificationManager");
 
@@ -67,6 +69,26 @@ export default class PromptNotificationManager {
         });
     }
 
+
+    async createEmailTask(setupInfo: MemberPromptNotificationSetupInfo): Promise<SubmitTaskResponse> {
+        return {
+            alreadyExists: false,
+            success: true,
+            task: undefined,
+            error: "not created"
+        }
+    }
+
+    async createPushTask(setupInfo: MemberPromptNotificationSetupInfo): Promise<SubmitTaskResponse> {
+        return {
+            alreadyExists: false,
+            success: true,
+            task: undefined,
+            error: "not created"
+        }
+    }
+
+
     /**
      * For a given member ID, notify them of the daily new prompts, if needed.
      * This method needs to understand how to prevent sending more than once, as there is no guarantee
@@ -75,14 +97,41 @@ export default class PromptNotificationManager {
      * @return {Promise<MemberPromptNotificationTaskResult>}
      */
     async processMemberPromptNotification(params: MemberPromptNotificationTaskParams): Promise<MemberPromptNotificationTaskResult> {
+        const setupInfo = await this.getMemberPromptNotificationInfo(params);
+        const success = !!setupInfo.promptContent;
+        const errorMessage = setupInfo.errorMessage;
+        const result: MemberPromptNotificationTaskResult = {
+            memberId: params.memberId,
+            success,
+            errorMessage,
+            retryable: false,
+            setupInfo
+        }
+
+        if (!success) {
+            logger.info("Unable to schedule notifications - the setup intent was not successful", stringifyJSON(setupInfo));
+            return result;
+        }
+
+        const [emailResult, pushResult] = await Promise.all([
+            this.createEmailTask(setupInfo),
+            this.createPushTask(setupInfo)
+        ])
+
+        result.emailTaskResponse = emailResult;
+        result.pushTaskResponse = pushResult;
+
+        return result;
+    }
+
+    async getMemberPromptNotificationInfo(params: MemberPromptNotificationTaskParams): Promise<MemberPromptNotificationSetupInfo> {
         const { memberId, systemDateObject } = params;
-        const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+        const { member, cached: memberCached } = await HoboCache.shared.getMemberById(memberId);
 
         if (!member) {
             return {
-                memberId,
-                success: false,
-                retryable: false,
+                member,
+                usedCachedMember: memberCached,
                 errorMessage: `No member was found for memberId ${ memberId }`,
             }
         }
@@ -98,18 +147,15 @@ export default class PromptNotificationManager {
 
         if (!promptContent) {
             return {
-                memberId,
-                success: false,
-                retryable: false,
+                member,
                 isSendTime,
                 memberDateObject,
                 usedCachedPromptContent,
-                errorMessage: `No "next prompt content" could be found for member ${ memberId } for date ${ DateTime.fromObject(memberDateObject).toLocaleString() }`,
+                errorMessage: `No "next prompt content" could be found for member ${ member.id } for date ${ memberDateObject ? DateTime.fromObject(memberDateObject).toLocaleString() : "undefined" }`,
             }
         }
-
         logger.info(`Sending member ${ memberId } prompt entry ${ promptContent.entryId }: "${ promptContent.subjectLine }"`)
-        const result = { memberId: memberId, success: true, promptContent };
+        const result = { memberId: memberId, promptContent };
         logger.info(`Finished processing prompt notification for member ${ memberId }`, stringifyJSON(result, 2));
         return result;
     }
@@ -122,17 +168,20 @@ export default class PromptNotificationManager {
      */
     async notifySlackResults(params: MemberPromptNotificationTaskParams, result: MemberPromptNotificationTaskResult) {
         const { memberId } = params;
-        const { promptContent: pc, ...resultObject } = result;
+        const { promptContent: pc, ...setupObject } = result.setupInfo ?? {};
+        result.setupInfo = {
+            ...setupObject,
+            promptContent: {
+                entryId: pc?.entryId,
+                subjectLine: pc?.subjectLine
+            } as PromptContent,
+
+        }
         await AdminSlackService.getSharedInstance().uploadTextSnippet({
             message: `:squid: Prompt Notification Processed for MemberId \`${ memberId }\``,
             data: stringifyJSON({
-                params, result: {
-                    resultObject,
-                    promptContent: {
-                        entryId: pc?.entryId,
-                        subjectLine: pc?.subjectLine
-                    }
-                }
+                params,
+                result
             }, 2),
             filename: `member-${ memberId }-prompt-notification-results.json`,
             fileType: "json",

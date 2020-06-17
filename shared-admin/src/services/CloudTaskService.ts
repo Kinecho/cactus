@@ -17,7 +17,9 @@ export interface SubmitTaskResponse {
 }
 
 export enum TaskQueueConfigName {
-    user_prompt_notifications = "user_prompt_notifications"
+    user_prompt_notifications = "user_prompt_notifications",
+    send_push_notifications = "send_push_notifications",
+    send_emails = "send_emails",
 }
 
 export default class CloudTaskService {

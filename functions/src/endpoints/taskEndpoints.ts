@@ -6,10 +6,23 @@ import PromptNotificationManager from "@admin/managers/PromptNotificationManager
 import { PromptSendTime } from "@shared/models/CactusMember";
 import { getQuarterHourFromMinute } from "@shared/util/DateUtil";
 import { DateTime } from "luxon";
+import { stringifyJSON } from "@shared/util/ObjectUtil";
 
 const logger = new Logger("taskEndpoints");
 
 const app = express();
+
+app.post("/send-emails", async (req: express.Request, resp: express.Response) => {
+    logger.info("Send Emails task called", stringifyJSON(req.body));
+    resp.sendStatus(204);
+    return;
+})
+
+app.post("/send-push-notifications", async (req: express.Request, resp: express.Response) => {
+    logger.info("Send Push Notifications task called", stringifyJSON(req.body));
+    resp.sendStatus(204);
+    return;
+})
 
 app.post("/send-prompt-notifications", async (req: express.Request, resp: express.Response) => {
     const params: MemberPromptNotificationTaskParams = req.body;
