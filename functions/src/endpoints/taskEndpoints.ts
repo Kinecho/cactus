@@ -11,7 +11,9 @@ import { PromptSendTime } from "@shared/models/CactusMember";
 import { getQuarterHourFromMinute } from "@shared/util/DateUtil";
 import { DateTime } from "luxon";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
-import AdminSlackService from "@admin/services/AdminSlackService";
+import AdminSlackService, { ChannelName } from "@admin/services/AdminSlackService";
+import PushNotificationService from "@api/services/PushNotificationService";
+import HoboCache from "@admin/HoboCache";
 
 const logger = new Logger("taskEndpoints");
 
@@ -28,7 +30,21 @@ app.post("/send-emails", async (req: express.Request, resp: express.Response) =>
 app.post("/send-push-notifications", async (req: express.Request, resp: express.Response) => {
     const params = req.body as SendPushNotificationParams;
     logger.info("Send Push Notifications task called", stringifyJSON(params, 2));
-    await AdminSlackService.getSharedInstance().sendEngineeringMessage(`\`send-push-notifications\` - ${ stringifyJSON(params) }`);
+
+    const { member } = await HoboCache.shared.getMemberById(params.memberId);
+    const { promptContent } = await HoboCache.shared.fetchPromptContent(params.promptContentEntryId);
+    const pushResult = await PushNotificationService.sharedInstance.sendPromptNotification({ member, promptContent })
+
+    const slackData = { pushResult, params };
+    await AdminSlackService.getSharedInstance().uploadTextSnippet({
+        message: `:squid: \`send-push\` results`,
+        data: stringifyJSON(slackData, 2),
+        fileType: "json",
+        filename: "send-push.json",
+        channel: ChannelName.engineering,
+    })
+
+
     resp.sendStatus(204);
     return;
 })

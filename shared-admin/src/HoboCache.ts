@@ -69,13 +69,16 @@ export default class HoboCache {
         return { promptContent, cached: false };
     }
 
-    async fetchPromptContent(entryId: string): Promise<PromptContent | null | undefined> {
+    async fetchPromptContent(entryId?: string): Promise<{ promptContent: PromptContent | null | undefined, cached: boolean }> {
+        if (!entryId) {
+            return { promptContent: undefined, cached: false };
+        }
         if (this.hasCachedPromptContent(entryId)) {
-            return this.getPromptContent(entryId);
+            return { promptContent: this.getPromptContent(entryId), cached: true }
         }
         const promptContent = await AdminPromptContentService.getSharedInstance().getByEntryId(entryId);
         this.setPromptContent(entryId, promptContent);
-        return promptContent;
+        return { promptContent, cached: false };
     }
 
     resetShared() {
