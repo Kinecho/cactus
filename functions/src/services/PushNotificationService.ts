@@ -1,12 +1,17 @@
 import CactusMember from "@shared/models/CactusMember";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import * as admin from "firebase-admin";
-import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import * as Sentry from "@sentry/node";
 import PromptContent from "@shared/models/PromptContent";
-import {NewPromptNotificationResult, SendPushResult} from "@admin/PushNotificationTypes";
-import SentPrompt, {PromptSendMedium} from "@shared/models/SentPrompt";
+import { NewPromptNotificationResult } from "@admin/PushNotificationTypes";
+import SentPrompt, { PromptSendMedium } from "@shared/models/SentPrompt";
 import Logger from "@shared/Logger";
+import { chunkArray, stringifyJSON } from "@shared/util/ObjectUtil";
+import HoboCache from "@admin/HoboCache";
+import { BaseMessage } from "firebase-admin/lib/messaging";
+import Message = admin.messaging.Message;
+import BatchResponse = admin.messaging.BatchResponse;
+import * as removeMarkdown from "remove-markdown";
 
 const logger = new Logger("PushNotificationService");
 export default class PushNotificationService {
@@ -20,10 +25,10 @@ export default class PushNotificationService {
         prompt?: ReflectionPrompt,
         member: CactusMember,
     }): Promise<NewPromptNotificationResult | undefined> {
-        const {sentPrompt, prompt, promptContent, member} = options;
+        const { sentPrompt, prompt, promptContent, member } = options;
         try {
             if (sentPrompt.completed) {
-                return {attempted: false, alreadyAnswered: true};
+                return { attempted: false, alreadyAnswered: true };
             }
 
             const memberTier = member.subscription?.tier;
@@ -31,7 +36,7 @@ export default class PushNotificationService {
 
             if (memberTier && contentTiers &&
             !contentTiers.includes(memberTier)) {
-                return {attempted: false, notAvailableToTier: true};
+                return { attempted: false, notAvailableToTier: true };
             }
 
             if (!sentPrompt.containsMedium(PromptSendMedium.PUSH)) {
@@ -43,82 +48,88 @@ export default class PushNotificationService {
             }
             return;
         } catch (error) {
-            logger.error(`Failed to end push message to ${member.email}`, error);
+            logger.error(`Failed to end push message to ${ member.email }`, error);
             return;
         }
     }
 
-    async sendPromptNotification(options: { member: CactusMember, prompt?: ReflectionPrompt, promptContent?: PromptContent }): Promise<NewPromptNotificationResult> {
+    /**
+     * For a given PromptContent, build a push notification payload that can be sent to a device.
+     * @param {object} params
+     * @param {CactusMember} params.member - the Member this prompt will be sent to. If included, it may be used to personalize the mssage
+     * @param {PromptContent} params.promptContent - the Prompt Content to notify the user about
+     * @return {Messaging | undefined}
+     */
+    promptContentNotificationMessagePayload(params: { member: CactusMember, promptContent: PromptContent }): BaseMessage {
+        const { member, promptContent } = params;
+        const title = promptContent.subjectLine || "Today's Prompt";
+        const body = promptContent.getDynamicPreviewText({ member }) ?? "It's time to reflect on today's Cactus prompt.";
+        const entryId = promptContent.entryId;
+        const promptId = promptContent.promptId;
+
+        const data: admin.messaging.DataMessagePayload = {};
+        if (entryId) {
+            data.promptContentEntryId = entryId
+        }
+        if (promptId) {
+            data.promptId = promptId;
+        }
+
+        return {
+            notification: {
+                title: title,
+                body: removeMarkdown(body),
+            },
+            data,
+            android: {
+                notification: {
+                    notificationCount: 1,
+                }
+            },
+            apns: {
+                payload: {
+                    aps: {
+                        badge: 1
+                    }
+                }
+            }
+        };
+    }
+
+    async sendPromptNotification(options: { member?: CactusMember, prompt?: ReflectionPrompt, promptContent?: PromptContent | null, dryRun?: boolean }): Promise<NewPromptNotificationResult> {
         let attempted = false;
         try {
-            const {member, prompt} = options;
-            let {promptContent} = options;
-            if (!member.fcmTokens || !member.fcmTokens.length) {
+            const { member, prompt, dryRun } = options;
+            let { promptContent } = options;
+            if (!member || !member.fcmTokens || !member.fcmTokens.length) {
                 logger.log("Member doesn't have any device tokens. Returning");
-                return {attempted: false, error: "Member doesn't have any device tokens"}
+                return { attempted: false, error: "Member doesn't have any device tokens" }
             }
 
             if (!prompt && !promptContent) {
-                return {attempted: false, error: "No prompt or prompt content provided. Can not process message."};
+                return { attempted: false, error: "No prompt or prompt content provided. Can not process message." };
             }
 
             const promptContentEntryId = prompt?.promptContentEntryId;
             if (!promptContent && promptContentEntryId) {
-                promptContent = await AdminPromptContentService.getSharedInstance().getByEntryId(promptContentEntryId);
+                promptContent = await HoboCache.shared.getPromptContent(promptContentEntryId);
             }
 
             if (!promptContent) {
                 logger.warn("No prompt content found, can't send push");
-                return {attempted: false, error: "Unable to find the prompt content. Can not process message"};
+                return { attempted: false, error: "Unable to find the prompt content. Can not process message" };
             }
 
-            const data: admin.messaging.DataMessagePayload = {};
-
-            let title = `Today's Prompt`;
-            let body = `${prompt?.question || ""}`;
-            // let imageUrl: string | undefined = undefined;
-            title = promptContent.subjectLine || title;
-
-            const firstContent = promptContent.content && promptContent.content.length > 0 && promptContent.content[0];
-            if (firstContent && firstContent.text) {
-                body = firstContent.text
-            }
-
-            if (promptContentEntryId) {
-                data.promptContentEntryId = promptContentEntryId
-            }
-
-            const promptId = prompt?.id || promptContent?.promptId;
-            const entryId = promptContent?.entryId;
-            if (promptId) {
-                data.promptId = promptId;
-            }
-            if (entryId) {
-                data.promptContentEntryId = entryId;
-            }
-
-            const payload: admin.messaging.MessagingPayload = {
-                notification: {
-                    title: title,
-                    body: body,
-                    badge: "1",
-                },
-                data
-            };
-
-            const tokens = member.fcmTokens;
+            const payload = this.promptContentNotificationMessagePayload({ member, promptContent })
+            const sendResult = await this.sendPushToMember({ member, message: payload, dryRun })
             attempted = true;
-            const tasks: Promise<SendPushResult>[] = tokens.map(token => this.sendPush({token, payload, member}));
-
-            const results = await Promise.all(tasks);
-            logger.log(`SendPushNotification for prompt Got ${results.length} results`);
-            const numSuccess = results.filter(r => r.success).length;
+            logger.log(`SendPushNotification for prompt ${ stringifyJSON(sendResult) }`);
             return {
                 attempted,
-                atLeastOneSuccess: numSuccess > 0,
+                atLeastOneSuccess: sendResult.successCount > 0,
                 result: {
-                    numSuccess,
-                    numError: results.filter(r => r.error).length,
+                    numSuccess: sendResult.successCount,
+                    numError: sendResult.failureCount,
                 }
             };
         } catch (error) {
@@ -128,24 +139,62 @@ export default class PushNotificationService {
                 attempted,
                 error: "An unexpected error occurred while attempting to send push noticiations"
             };
-
         }
     }
 
-    async sendPush(options: { token: string, payload: admin.messaging.MessagingPayload, member?: CactusMember }): Promise<SendPushResult> {
-        const {token, payload, member} = options;
-        try {
-            const result = await this.messaging.sendToDevice(token, payload);
-            logger.log("Send Message Result", result);
-            return {token, success: true};
-        } catch (error) {
-            logger.error(`Failed to send the push notification to ${member?.id} ${member?.email}:`, error.code ? error.code : error);
-            Sentry.captureException(error);
-            return {
-                success: false,
-                token,
-                error: `Failed to send the push notification to ${member?.id} ${member?.email}: ${error.code ? error.code : error} `
-            }
+    /**
+     * Given a message, send to an array of tokens.
+     * Messages will be sent in batches of 500 tokens (the Firebase max).
+     * Batches of tokens will be sent in serial, after the previous batch finishes.
+     *
+     * @param {object} options
+     * @param { admin.messaging.Message } options.message - the Push Notification message body to send
+     * @param {string[]} options.tokens - the list of tokens to send pushes to. Messages will be sent in batches of 500
+     * @param {boolean} [options.dryRun=false] - Optional. Set to true if this should be a dry run or not. Defaults false
+     * @return {Promise<admin.messaging.BatchResponse>} - combined batch results
+     * @throws Error
+     */
+    async sendMessageToTokens(options: { message: BaseMessage, tokens: string[], dryRun?: boolean }): Promise<BatchResponse> {
+        const { tokens = [], message, dryRun } = options;
+        if (tokens.length === 0) {
+            return { successCount: 0, failureCount: 0, responses: [] }
         }
+
+        const responses: BatchResponse[] = []
+        const messages: Message[] = tokens.map(token => ({
+            token,
+            ...message
+        }))
+
+        const batches = chunkArray(messages, 500);
+        for (const messageBatch of batches) {
+            const batchResponse = await this.messaging.sendAll(messageBatch, dryRun);
+            logger.log("Send Message Result", stringifyJSON(batchResponse));
+            responses.push(batchResponse);
+        }
+
+        return this.combineBatchResponses(responses);
+    }
+
+    combineBatchResponses(results: BatchResponse[]): BatchResponse {
+        const initial: BatchResponse = {
+            failureCount: 0,
+            successCount: 0,
+            responses: []
+        }
+        return results.reduce((total, result) => {
+            total.failureCount += result.failureCount;
+            total.successCount += result.successCount;
+            total.responses.push(...result.responses);
+            return total;
+        }, initial);
+
+    }
+
+    async sendPushToMember(options: { message: BaseMessage, member?: CactusMember, dryRun?: boolean }): Promise<BatchResponse> {
+        const { message, member, dryRun } = options;
+        const tokens = member?.fcmTokens ?? []
+
+        return await this.sendMessageToTokens({ tokens, message, dryRun });
     }
 }

@@ -328,6 +328,20 @@ export default class PromptContent extends FlamelinkModel {
         return first?.text;
     }
 
+    getDynamicPreviewText(params: {
+        member?: CactusMember,
+        coreValue?: CoreValue | undefined,
+        dynamicValues?: DynamicResponseValues
+    }): string | undefined {
+        const { member, coreValue, dynamicValues } = params;
+        const [content] = (this.content || []);
+        if (!content) {
+            return undefined;
+        }
+        return this.getDynamicDisplayText({ member, coreValue, content, dynamicValues });
+    }
+
+
     getOpenGraphImageUrl(): string | null {
         const firstImageCard = (this.content || []).find(c => c.backgroundImage?.storageUrl);
         return this.openGraphImage?.storageUrl || firstImageCard?.backgroundImage?.storageUrl || null;

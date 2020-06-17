@@ -14,6 +14,7 @@ import { stringifyJSON } from "@shared/util/ObjectUtil";
 import AdminSlackService, { ChannelName } from "@admin/services/AdminSlackService";
 import PushNotificationService from "@api/services/PushNotificationService";
 import HoboCache from "@admin/HoboCache";
+import { NewPromptNotificationResult } from "@admin/PushNotificationTypes";
 
 const logger = new Logger("taskEndpoints");
 
@@ -33,7 +34,21 @@ app.post("/send-push-notifications", async (req: express.Request, resp: express.
 
     const { member } = await HoboCache.shared.getMemberById(params.memberId);
     const { promptContent } = await HoboCache.shared.fetchPromptContent(params.promptContentEntryId);
-    const pushResult = await PushNotificationService.sharedInstance.sendPromptNotification({ member, promptContent })
+
+    let pushResult: NewPromptNotificationResult;
+    if (!member || !promptContent) {
+        logger.error("One or both of member, promptContent was not found. Can not send a push notification");
+        pushResult = {
+            attempted: false,
+            error: "required data not present",
+        }
+    } else {
+        //TODO: should use SendPushIfNeeded
+        pushResult = await PushNotificationService.sharedInstance.sendPromptNotification({
+            member,
+            promptContent
+        })
+    }
 
     const slackData = { pushResult, params };
     await AdminSlackService.getSharedInstance().uploadTextSnippet({
