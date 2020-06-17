@@ -26,3 +26,20 @@ export interface TrialEndingEmail {
     link: string,
     firstName: string | undefined
 }
+
+export interface PromptNotificationEmail {
+    email: string,
+    memberId: string,
+    promptContentEntryId: string,
+    reflectUrl: string
+    mainText: string,
+    firstName?: string,
+    isPlus?: boolean,
+    previewText?: string,
+    inOptOutTrial?: boolean,
+    inOptInTrial?: boolean,
+    trialDaysLeft?: number,
+    showTrialBanner?: boolean,
+    trialEndsToday?: boolean,
+    footerText?: string,
+}

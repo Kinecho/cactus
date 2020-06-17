@@ -23,7 +23,18 @@ const app = express();
 app.post("/send-emails", async (req: express.Request, resp: express.Response) => {
     const params = req.body as SendEmailNotificationParams;
     logger.info("Send Emails task called", stringifyJSON(params, 2));
-    await AdminSlackService.getSharedInstance().sendEngineeringMessage(`\`send-emails\` - ${ stringifyJSON(params) }`);
+
+    const result = await PromptNotificationManager.shared.sendPromptNotificationEmail(params);
+
+    const slackData = { params, result };
+
+    await AdminSlackService.getSharedInstance().uploadTextSnippet({
+        message: `:squid: :email: \`send-push\` results`,
+        data: stringifyJSON(slackData, 2),
+        fileType: "json",
+        filename: "send-push.json",
+        channel: ChannelName.engineering,
+    })
     resp.sendStatus(204);
     return;
 })
@@ -52,13 +63,12 @@ app.post("/send-push-notifications", async (req: express.Request, resp: express.
 
     const slackData = { pushResult, params };
     await AdminSlackService.getSharedInstance().uploadTextSnippet({
-        message: `:squid: \`send-push\` results`,
+        message: `:squid: :iphone: \`send-push\` results`,
         data: stringifyJSON(slackData, 2),
         fileType: "json",
         filename: "send-push.json",
         channel: ChannelName.engineering,
     })
-
 
     resp.sendStatus(204);
     return;

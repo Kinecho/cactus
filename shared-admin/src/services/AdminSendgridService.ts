@@ -1,16 +1,17 @@
-import {CactusConfig} from "@shared/CactusConfig";
+import { CactusConfig } from "@shared/CactusConfig";
 import * as sgMail from "@sendgrid/mail";
 import {
     FriendRequestEmail,
     InvitationEmail,
     MagicLinkEmail,
+    PromptNotificationEmail,
     TrialEndingEmail
 } from "@admin/services/SendgridServiceTypes";
 import Logger from "@shared/Logger";
-import EmailLog, {EmailCategory, SendgridTemplate, TemplateData} from "@shared/models/EmailLog";
+import EmailLog, { EmailCategory, SendgridTemplate, TemplateData } from "@shared/models/EmailLog";
 import AdminEmailLogService from "@admin/services/AdminEmailLogService";
-import {stringifyJSON} from "@shared/util/ObjectUtil";
-import {isGeneratedEmailAddress} from "@admin/util/StringUtil";
+import { stringifyJSON } from "@shared/util/ObjectUtil";
+import { isGeneratedEmailAddress } from "@admin/util/StringUtil";
 
 export const SendgridHeaders = {
     MessageID: "x-message-id"
@@ -24,8 +25,9 @@ export interface SendEmailResult {
 
 type SenderAddress = { name: string, email: string };
 export const CactusSender = {
-    RYAN: {name: "Ryan at Cactus", email: "ryan@cactus.app"},
-    SUPPORT: {name: "Cactus Support", email: "support@cactus.app"},
+    RYAN: { name: "Ryan at Cactus", email: "ryan@cactus.app" },
+    SUPPORT: { name: "Cactus Support", email: "support@cactus.app" },
+    HELLO: { name: "Cactus", email: "hello@cactus.app" },
 };
 
 interface SendTemplateOptions {
@@ -82,7 +84,7 @@ export default class AdminSendgridService {
         try {
             const params = {
                 to: options.email,
-                from: {name: "Cactus", email: "help@cactus.app"},
+                from: { name: "Cactus", email: "help@cactus.app" },
                 templateId: this.getSendgridTemplateId(SendgridTemplate.magic_link),
                 categories: [EmailCategory.Authentication],
                 dynamicTemplateData: {
@@ -111,7 +113,7 @@ export default class AdminSendgridService {
         try {
             const mailParams = {
                 to: options.email,
-                from: {name: "Cactus", email: "help@cactus.app"},
+                from: { name: "Cactus", email: "help@cactus.app" },
                 templateId: this.getSendgridTemplateId(SendgridTemplate.magic_link_new_user),
                 categories: [EmailCategory.ConfirmEmail],
                 dynamicTemplateData: {
@@ -141,7 +143,7 @@ export default class AdminSendgridService {
         try {
             const mailParams = {
                 to: options.toEmail,
-                from: {name: "Cactus", email: "help@cactus.app"},
+                from: { name: "Cactus", email: "help@cactus.app" },
                 templateId: this.getSendgridTemplateId(SendgridTemplate.invitation),
                 categories: [EmailCategory.Invitation],
                 dynamicTemplateData: {
@@ -175,7 +177,7 @@ export default class AdminSendgridService {
         try {
             const mailParams = {
                 to: options.toEmail,
-                from: {name: "Cactus", email: "help@cactus.app"},
+                from: { name: "Cactus", email: "help@cactus.app" },
                 templateId: this.config.sendgrid.template_ids.friend_request,
                 categories: [EmailCategory.FriendRequest],
                 dynamicTemplateData: {
@@ -230,8 +232,25 @@ export default class AdminSendgridService {
         return sendResult;
     }
 
+    async sendPromptNotification(params: PromptNotificationEmail): Promise<SendEmailResult> {
+        const { memberId, email } = params;
+        const template: SendTemplateOptions = {
+            template: SendgridTemplate.new_prompt_notification,
+            data: params,
+            email,
+            sender: CactusSender.HELLO,
+            memberId,
+            categories: [EmailCategory.PROMPT_NOTIFICATION],
+            oneTime: false, //TODO: make this more flexible, based on a provided "notification key"
+        }
+
+        const result = await this.sendTemplateAndLog(template);
+        logger.info("Sent prompt notification email", result);
+        return result;
+    }
+
     async sendTemplateAndLog(options: SendTemplateOptions): Promise<SendEmailResult> {
-        const {email, memberId, template, categories, sender, data, oneTime} = options;
+        const { email, memberId, template, categories, sender, data, oneTime } = options;
 
         const templateId = this.getSendgridTemplateId(template);
 
@@ -245,7 +264,7 @@ export default class AdminSendgridService {
 
             if (firstResult) {
                 logger.info("This email has already been sent to the member. Not sending again", stringifyJSON(firstResult, 2));
-                return {emailLog: firstResult, didSend: false};
+                return { emailLog: firstResult, didSend: false };
             }
         }
 
@@ -270,7 +289,7 @@ export default class AdminSendgridService {
             }
 
             const xMessageId = (response?.headers[SendgridHeaders.MessageID]) as string | undefined;
-            logger.log(`Sendgrid email sent successfully. MessageId = ${xMessageId}. TemplateData:\n ${stringifyJSON(data, 2)}`,);
+            logger.log(`Sendgrid email sent successfully. MessageId = ${ xMessageId }. TemplateData:\n ${ stringifyJSON(data, 2) }`,);
 
             const log = EmailLog.sendgridTemplate({
                 email,
@@ -284,11 +303,11 @@ export default class AdminSendgridService {
 
             await AdminEmailLogService.getSharedInstance().save(log);
             logger.info("Saved email log to database", stringifyJSON(log));
-            return {emailLog: log, didSend: true};
+            return { emailLog: log, didSend: true };
         } catch (error) {
             const e = error.response?.body ?? error;
             logger.error("Failed to send TrialEnding email", e);
-            return {error: e, didSend: false};
+            return { error: e, didSend: false };
         }
     }
 }

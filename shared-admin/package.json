@@ -40,6 +40,7 @@
     "pretty-ms": "^5.0.0",
     "qs": "^6.7.0",
     "query-string": "^6.8.2",
+    "remove-markdown": "^0.3.0",
     "stripe": "8.17.0"
   },
   "devDependencies": {
@@ -52,6 +53,7 @@
     "@types/luxon": "^1.15.1",
     "@types/md5": "^2.1.33",
     "@types/qs": "^6.5.3",
+    "@types/remove-markdown": "^0.1.1",
     "jest": "^24.8.0",
     "jest-junit": "^6.4.0",
     "ts-jest": "^24.1.0",

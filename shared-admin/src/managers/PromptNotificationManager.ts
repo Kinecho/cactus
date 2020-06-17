@@ -6,7 +6,7 @@ import {
     MemberPromptNotificationTaskParams,
     MemberPromptNotificationTaskResult,
     NextPromptResult,
-    SendEmailNotificationParams,
+    SendEmailNotificationParams, SendEmailNotificationResult,
     SendPushNotificationParams
 } from "@admin/tasks/PromptNotificationTypes";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
@@ -16,12 +16,30 @@ import { DateObject, DateTime } from "luxon";
 import { getSendTimeUTC } from "@shared/util/DateUtil";
 import { isSendTimeWindow } from "@shared/util/NotificationUtil";
 import HoboCache from "@admin/HoboCache";
+import AdminSendgridService from "@admin/services/AdminSendgridService";
+import { PromptNotificationEmail } from "@admin/services/SendgridServiceTypes";
+import { isBlank } from "@shared/util/StringUtil";
+import { isPremiumTier } from "@shared/models/MemberSubscription";
+import { buildPromptContentURL } from "@admin/util/StringUtil";
+import { CactusConfig } from "@shared/CactusConfig";
 
+const removeMarkdown = require("remove-markdown");
 const logger = new Logger("PromptNotificationManager");
 
 
 export default class PromptNotificationManager {
-    static shared = new PromptNotificationManager();
+
+    static shared: PromptNotificationManager;
+
+    static initialize(config: CactusConfig) {
+        PromptNotificationManager.shared = new PromptNotificationManager(config);
+    }
+
+    config: CactusConfig
+
+    constructor(config: CactusConfig) {
+        this.config = config;
+    }
 
     /**
      * The main processing method for sending prompt notifications.
@@ -182,7 +200,7 @@ export default class PromptNotificationManager {
         const { promptContent: pc, member, ...setupObject } = result.setupInfo ?? {};
 
         await AdminSlackService.getSharedInstance().uploadTextSnippet({
-            message: `:squid: Prompt Notification Processed for MemberId \`${ memberId }\``,
+            message: `:squid: :woman-golfing: Prompt Notification Processed for MemberId \`${ memberId }\``,
             data: stringifyJSON({
                 params,
                 result: {
@@ -261,5 +279,49 @@ export default class PromptNotificationManager {
         const { promptContent, cached } = await HoboCache.shared.getPromptContentForIsoDateObject(memberLocaleDateObject);
 
         return { isSendTime, promptContent, memberDateObject: memberLocaleDateObject, cached }
+    }
+
+    /**
+     * Send an email via SendGrid notifying a user about a new PromptContent available to them.,
+     * @param {SendEmailNotificationParams} params
+     * @return {Promise<SendEmailNotificationResult>}
+     */
+    async sendPromptNotificationEmail(params: SendEmailNotificationParams): Promise<SendEmailNotificationResult> {
+        const { memberId, promptContentEntryId } = params;
+        const { member } = await HoboCache.shared.getMemberById(memberId);
+        const email = member?.email;
+        const { promptContent } = await HoboCache.shared.fetchPromptContent(promptContentEntryId);
+        if (!member || !promptContent || !promptContentEntryId || !memberId || !email || isBlank(email)) {
+            return {
+                sent: false,
+                errorMessage: `unable to get both a member and prompt content from data: ${ stringifyJSON(params) }`
+            };
+        }
+        const introText = removeMarkdown(promptContent.getDynamicPreviewText({ member })) as string;
+        const promptUrl = buildPromptContentURL(promptContent, this.config);
+
+        if (!promptUrl) {
+            return {
+                sent: false,
+                errorMessage: `Unable to build a prompt url from promptContent: ${ stringifyJSON(promptContent) }`,
+            }
+        }
+
+        const data: PromptNotificationEmail = {
+            email,
+            firstName: member.firstName,
+            memberId,
+            promptContentEntryId: promptContentEntryId,
+            reflectUrl: promptUrl,
+            mainText: introText,
+            isPlus: isPremiumTier(member.tier),
+            inOptOutTrial: member.isOptOutTrialing,
+            inOptInTrial: member.isOptInTrialing,
+            trialDaysLeft: member.daysLeftInTrial,
+            previewText: introText
+        }
+        const sendResult = await AdminSendgridService.getSharedInstance().sendPromptNotification(data);
+
+        return { sent: true, sendResult };
     }
 }

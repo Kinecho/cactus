@@ -11,13 +11,13 @@ import HoboCache from "@admin/HoboCache";
 import { BaseMessage } from "firebase-admin/lib/messaging";
 import Message = admin.messaging.Message;
 import BatchResponse = admin.messaging.BatchResponse;
-import * as removeMarkdown from "remove-markdown";
+
+const removeMarkdown = require("remove-markdown");
 
 const logger = new Logger("PushNotificationService");
 export default class PushNotificationService {
     static sharedInstance = new PushNotificationService();
     private messaging = admin.messaging();
-
 
     async sendNewPromptPushIfNeeded(options: {
         sentPrompt: SentPrompt,

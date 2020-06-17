@@ -3,6 +3,7 @@ import { DateObject } from "luxon";
 import PromptContent from "@shared/models/PromptContent";
 import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 import { SubmitTaskResponse } from "@admin/services/CloudTaskService";
+import { SendEmailResult } from "@admin/services/AdminSendgridService";
 
 /**
  * An object defining the parameters needed to potentially notify a member of new content.
@@ -78,6 +79,12 @@ export interface NextPromptResult {
 export interface SendEmailNotificationParams {
     memberId?: string;
     promptContentEntryId?: string;
+}
+
+export interface SendEmailNotificationResult {
+    sent: boolean,
+    errorMessage?: string,
+    sendResult?: SendEmailResult,
 }
 
 export interface SendPushNotificationParams {
