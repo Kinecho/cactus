@@ -73,3 +73,14 @@ export interface NextPromptResult {
     memberDateObject?: DateObject,
     isSendTime?: boolean,
 }
+
+
+export interface SendEmailNotificationParams {
+    memberId?: string;
+    promptContentEntryId?: string;
+}
+
+export interface SendPushNotificationParams {
+    memberId?: string;
+    promptContentEntryId?: string;
+}

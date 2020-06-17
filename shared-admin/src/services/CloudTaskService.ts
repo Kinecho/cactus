@@ -78,7 +78,7 @@ export default class CloudTaskService {
     }
 
     encodeBody(body: any): string {
-        return Buffer.from(JSON.stringify(body)).toString("base64");
+        return Buffer.from(stringifyJSON(body)).toString("base64");
     }
 
     async submitHttpTask(params: { taskId?: string, queue: TaskQueueConfigName, payload: any, processAt?: Date }): Promise<SubmitTaskResponse> {

@@ -5,7 +5,9 @@ import {
     MemberPromptNotificationSetupInfo,
     MemberPromptNotificationTaskParams,
     MemberPromptNotificationTaskResult,
-    NextPromptResult
+    NextPromptResult,
+    SendEmailNotificationParams,
+    SendPushNotificationParams
 } from "@admin/tasks/PromptNotificationTypes";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
 import Logger from "@shared/Logger"
@@ -14,7 +16,6 @@ import { DateObject, DateTime } from "luxon";
 import { getSendTimeUTC } from "@shared/util/DateUtil";
 import { isSendTimeWindow } from "@shared/util/NotificationUtil";
 import HoboCache from "@admin/HoboCache";
-import PromptContent from "@shared/models/PromptContent";
 
 const logger = new Logger("PromptNotificationManager");
 
@@ -70,22 +71,29 @@ export default class PromptNotificationManager {
     }
 
 
-    async createEmailTask(setupInfo: MemberPromptNotificationSetupInfo): Promise<SubmitTaskResponse> {
-        return {
-            alreadyExists: false,
-            success: true,
-            task: undefined,
-            error: "not created"
-        }
+    async createEmailTask(setupInfo: MemberPromptNotificationSetupInfo, processAt?: Date): Promise<SubmitTaskResponse> {
+        const payload: SendEmailNotificationParams = {
+            memberId: setupInfo.member?.id,
+            promptContentEntryId: setupInfo.promptContent?.entryId
+        };
+        return await CloudTaskService.shared.submitHttpTask({
+            queue: TaskQueueConfigName.send_emails,
+            payload,
+            processAt
+        });
     }
 
-    async createPushTask(setupInfo: MemberPromptNotificationSetupInfo): Promise<SubmitTaskResponse> {
-        return {
-            alreadyExists: false,
-            success: true,
-            task: undefined,
-            error: "not created"
-        }
+    async createPushTask(setupInfo: MemberPromptNotificationSetupInfo, processAt?: Date): Promise<SubmitTaskResponse> {
+        const payload: SendPushNotificationParams = {
+            memberId: setupInfo.member?.id,
+            promptContentEntryId: setupInfo.promptContent?.entryId
+        };
+
+        return await CloudTaskService.shared.submitHttpTask({
+            queue: TaskQueueConfigName.send_push_notifications,
+            payload,
+            processAt
+        });
     }
 
 
@@ -145,17 +153,20 @@ export default class PromptNotificationManager {
             logger.warn("It's not currently the member's send time, but will send anyway")
         }
 
+        let errorMessage: string | undefined;
         if (!promptContent) {
-            return {
-                member,
-                isSendTime,
-                memberDateObject,
-                usedCachedPromptContent,
-                errorMessage: `No "next prompt content" could be found for member ${ member.id } for date ${ memberDateObject ? DateTime.fromObject(memberDateObject).toLocaleString() : "undefined" }`,
-            }
+            errorMessage = `No "next prompt content" could be found for member ${ member.id } for date ${ memberDateObject ? DateTime.fromObject(memberDateObject).toLocaleString() : "undefined" }`;
         }
-        logger.info(`Sending member ${ memberId } prompt entry ${ promptContent.entryId }: "${ promptContent.subjectLine }"`)
-        const result = { memberId: memberId, promptContent };
+        logger.info(`Sending member ${ memberId } prompt entry ${ promptContent?.entryId ?? "[none]" }: "${ promptContent?.subjectLine ?? "[none]" }"`)
+        const result = {
+            member,
+            usedCachedMember: memberCached,
+            isSendTime,
+            promptContent,
+            memberDateObject,
+            usedCachedPromptContent,
+            errorMessage,
+        }
         logger.info(`Finished processing prompt notification for member ${ memberId }`, stringifyJSON(result, 2));
         return result;
     }
@@ -168,20 +179,26 @@ export default class PromptNotificationManager {
      */
     async notifySlackResults(params: MemberPromptNotificationTaskParams, result: MemberPromptNotificationTaskResult) {
         const { memberId } = params;
-        const { promptContent: pc, ...setupObject } = result.setupInfo ?? {};
-        result.setupInfo = {
-            ...setupObject,
-            promptContent: {
-                entryId: pc?.entryId,
-                subjectLine: pc?.subjectLine
-            } as PromptContent,
+        const { promptContent: pc, member, ...setupObject } = result.setupInfo ?? {};
 
-        }
         await AdminSlackService.getSharedInstance().uploadTextSnippet({
             message: `:squid: Prompt Notification Processed for MemberId \`${ memberId }\``,
             data: stringifyJSON({
                 params,
-                result
+                result: {
+                    ...result,
+                    setupInfo: {
+                        ...setupObject,
+                        promptContent: {
+                            entryId: pc?.entryId,
+                            subjectLine: pc?.subjectLine
+                        },
+                        member: {
+                            id: member?.id,
+                            email: member?.email,
+                        }
+                    }
+                }
             }, 2),
             filename: `member-${ memberId }-prompt-notification-results.json`,
             fileType: "json",

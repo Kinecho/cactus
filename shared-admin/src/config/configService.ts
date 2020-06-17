@@ -252,6 +252,16 @@ const defaultTestConfig: CactusConfig = {
                 name: "user-prompt-notifications",
                 handler_path: "/send-prompt-notifications",
                 http_method: "POST"
+            },
+            send_push_notifications: {
+                name: "send-push-notifications",
+                handler_path: "/send-push-notifications",
+                http_method: "POST"
+            },
+            send_emails: {
+                name: "send-emails",
+                handler_path: "/send-emails",
+                http_method: "POST"
             }
         }
     }

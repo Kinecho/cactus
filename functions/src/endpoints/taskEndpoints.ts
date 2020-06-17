@@ -1,25 +1,34 @@
 import * as express from "express";
 import Logger from "@shared/Logger"
 import { SubmitTaskResponse } from "@admin/services/CloudTaskService";
-import { MemberPromptNotificationTaskParams } from "@admin/tasks/PromptNotificationTypes";
+import {
+    MemberPromptNotificationTaskParams,
+    SendEmailNotificationParams,
+    SendPushNotificationParams
+} from "@admin/tasks/PromptNotificationTypes";
 import PromptNotificationManager from "@admin/managers/PromptNotificationManager";
 import { PromptSendTime } from "@shared/models/CactusMember";
 import { getQuarterHourFromMinute } from "@shared/util/DateUtil";
 import { DateTime } from "luxon";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
+import AdminSlackService from "@admin/services/AdminSlackService";
 
 const logger = new Logger("taskEndpoints");
 
 const app = express();
 
 app.post("/send-emails", async (req: express.Request, resp: express.Response) => {
-    logger.info("Send Emails task called", stringifyJSON(req.body));
+    const params = req.body as SendEmailNotificationParams;
+    logger.info("Send Emails task called", stringifyJSON(params, 2));
+    await AdminSlackService.getSharedInstance().sendEngineeringMessage(`\`send-emails\` - ${ stringifyJSON(params) }`);
     resp.sendStatus(204);
     return;
 })
 
 app.post("/send-push-notifications", async (req: express.Request, resp: express.Response) => {
-    logger.info("Send Push Notifications task called", stringifyJSON(req.body));
+    const params = req.body as SendPushNotificationParams;
+    logger.info("Send Push Notifications task called", stringifyJSON(params, 2));
+    await AdminSlackService.getSharedInstance().sendEngineeringMessage(`\`send-push-notifications\` - ${ stringifyJSON(params) }`);
     resp.sendStatus(204);
     return;
 })
