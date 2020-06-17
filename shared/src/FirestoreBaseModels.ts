@@ -1,6 +1,7 @@
-import {convertDateToJSON, convertDateToTimestamp} from "@shared/util/FirestoreUtil";
+import { convertDateToJSON, convertDateToTimestamp } from "@shared/util/FirestoreUtil";
 import Logger from "@shared/Logger";
 import { toPlainObject } from "@shared/util/ObjectUtil";
+
 const logger = new Logger("FirestoreBaseModels");
 
 export enum Collection {
@@ -96,7 +97,7 @@ export abstract class BaseModel implements FirestoreIdentifiable {
             return data;
         } catch (error) {
             logger.error("Error processing this model toJSON", error);
-            return {message: "Error processing this model toJSON", error};
+            return { message: "Error processing this model toJSON", error };
         }
     }
 
@@ -108,8 +109,24 @@ export abstract class BaseModel implements FirestoreIdentifiable {
     decodeJSON(json: any) {
         Object.assign(this, json);
 
-        this.createdAt = json.createdAt ? new Date(json.createdAt) : undefined;
-        this.updatedAt = json.updatedAt ? new Date(json.updatedAt) : undefined;
-        this.deletedAt = json.deletedAt ? new Date(json.deletedAt) : undefined;
+        this.createdAt = this.decodeDate(json.createdAt);
+        this.updatedAt = this.decodeDate(json.updatedAt);
+        this.deletedAt = this.decodeDate(json.deletedAt);
+    }
+
+    decodeDate(input?: number | null | undefined | string | Date): Date | undefined {
+        if (!input) {
+            return undefined;
+        }
+
+        try {
+            const d = new Date(input)
+            if (isNaN(d.getTime())) {
+                return undefined;
+            }
+            return d;
+        } catch (error) {
+            return undefined;
+        }
     }
 }

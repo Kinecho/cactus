@@ -288,7 +288,6 @@ export default class PromptContent extends FlamelinkModel {
         }
     }
 
-
     prepareForFirestore(): any {
         const data = super.prepareForFirestore();
 

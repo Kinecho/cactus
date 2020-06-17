@@ -88,7 +88,10 @@ export default class AdminCactusMemberService {
         return firestoreService.save(model, options);
     }
 
-    async getById(id: string, options?: GetOptions): Promise<CactusMember | undefined> {
+    async getById(id?: string, options?: GetOptions): Promise<CactusMember | undefined> {
+        if (!id) {
+            return undefined;
+        }
         return await firestoreService.getById(id, CactusMember, options);
     }
 

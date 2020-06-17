@@ -1,60 +1,64 @@
 import * as express from "express";
 import Logger from "@shared/Logger"
-import chalk from "chalk";
-import CloudTaskService, { SubmitTaskResponse, TaskQueueConfigName } from "@admin/services/CloudTaskService";
-import { getRandomNumberBetween } from "@shared/util/StringUtil";
-import { stringifyJSON } from "@shared/util/ObjectUtil";
+import { SubmitTaskResponse } from "@admin/services/CloudTaskService";
+import { MemberPromptNotificationTaskParams } from "@admin/tasks/PromptNotificationTypes";
+import PromptNotificationManager from "@admin/managers/PromptNotificationManager";
+import { PromptSendTime } from "@shared/models/CactusMember";
+import { getQuarterHourFromMinute } from "@shared/util/DateUtil";
+import { DateTime } from "luxon";
 
 const logger = new Logger("taskEndpoints");
 
 const app = express();
 
 app.post("/send-prompt-notifications", async (req: express.Request, resp: express.Response) => {
-    const randomNumber = getRandomNumberBetween(0, 10);
-    if (randomNumber === 5) {
-        logger.error(chalk.red("Forcing a failure"));
-        resp.sendStatus(500);
-        return;
+    const params: MemberPromptNotificationTaskParams = req.body;
+    if (!params.memberId) {
+        logger.info("No member ID was found, can not process task. Removing from queue");
+        resp.status(200).send({
+            success: false,
+            error: "No m ember ID was found on the task. Can ont process it.",
+            retryable: false
+        });
     }
-    logger.info("Notification payload", stringifyJSON(req.body));
-    resp.sendStatus(200);
+
+    const result = await PromptNotificationManager.shared.processMemberPromptNotification(params);
+
+    await PromptNotificationManager.shared.notifySlackResults(params, result);
+
+    if (result.success) {
+        resp.status(200).send(result);
+    } else if (result.retryable) {
+        resp.status(500).send(result);
+    } else {
+        logger.error("Unable to process result and it is not retryable", JSON.stringify(result, null, 2));
+        resp.status(200).send(result);
+    }
     return;
 })
 
-app.post("/test", async (req: express.Request, resp: express.Response) => {
-    logger.info("Got the task request", req.body);
-
-    // resp.send("OK, got it");
-    return new Promise(resolve => {
-        setTimeout(() => {
-            resp.sendStatus(200);
-            resolve();
-        }, 5000)
-    })
-})
-
 app.get("/create", async (req: express.Request, resp: express.Response) => {
-    // const baseUrl = "https://cactus-api.ngrok.io/cactus-app-stage/us-central1"
-    const payload = { email: "neil@cactus.appp" }
-    // const body = Buffer.from(JSON.stringify(payload)).toString("base64");
     const numToCreate = Number(req.query.num ?? "1");
     const numSeconds = Number(req.query.s ?? "10");
-    const scheduledDate = new Date(Date.now() + 1000 * numSeconds);
+    const processAt = new Date(Date.now() + 1000 * numSeconds);
+    const today = new Date();
+    const utcHour = today.getUTCHours()
+    const utcMinutes = getQuarterHourFromMinute(today.getUTCMinutes());
+
+    const memberId = "s4RMQ186oVFvNbJan41b" //neil@cactus.app
+    const promptSendTimeUTC: PromptSendTime = { hour: utcHour, minute: utcMinutes };
 
     try {
-        const responses: SubmitTaskResponse[] = [];
+        const tasks: Promise<SubmitTaskResponse>[] = [];
         for (let i = 0; i < numToCreate; i++) {
-            const response = await CloudTaskService.shared.submitHttpTask({
-                queue: TaskQueueConfigName.user_prompt_notifications,
-                payload,
-                processAt: scheduledDate,
-            });
-
-            logger.info(`[task_${ i + 1 }] Created task ${ response.task?.name }`);
-            responses.push(response);
+            const createTask = PromptNotificationManager.shared.createMemberNotificationTask({
+                memberId,
+                promptSendTimeUTC,
+                systemDateObject: DateTime.utc().toObject()
+            }, processAt)
+            tasks.push(createTask);
         }
-        // const [response] = await client.createTask({ parent, task });
-
+        const responses = await Promise.all(tasks);
         resp.send(responses);
     } catch (error) {
         logger.error("Failed to send message", Error(error.message));
