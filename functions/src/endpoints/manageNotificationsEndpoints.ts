@@ -1,6 +1,5 @@
 import * as express from "express";
 import * as cors from "cors";
-import * as functions from "firebase-functions";
 import { getConfig, getHostname } from "@admin/config/configService";
 import { PageRoute } from "@shared/PageRoutes";
 import { QueryParam } from "@shared/util/queryParams";
@@ -8,14 +7,15 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import MailchimpService from "@admin/services/MailchimpService";
 import { ListMember, ListMemberStatus } from "@shared/mailchimp/models/MailchimpTypes";
 import Logger from "@shared/Logger";
-import { isString, stringifyJSON } from "@shared/util/ObjectUtil";
+import { isString } from "@shared/util/ObjectUtil";
 import SecurityService from "@api/SecurityService";
+import * as functions from "firebase-functions";
 
 const logger = new Logger("manageNotificationsEndpoints");
 const app = express();
-// const config = getConfig();
-// Automatically allow cross-origin requests
 
+
+// app.use(bodyParser.text({ type: 'application/json' }))
 // TODO: This didn't setup the CORS with allowedOrigins because we
 // expect this to get hit from HTML links in emails and stuff. Maybe we should still do it. Not sure
 // Neil Poulin, 2020-01-08
@@ -77,37 +77,19 @@ app.get("/manage-notifications/email/unsubscribe", async (req: express.Request, 
 
 
 app.post("/sendgrid/webhook", async (req, resp) => {
-    // logger.info("Sendgrid webhook Request body", stringifyJSON(req.body, 2));
-    logger.info("Sendgrid webhook headers", stringifyJSON(req.headers, 2));
     try {
-
         const signature = req.header("x-twilio-email-event-webhook-signature")!;
-        const timestamp = req.header("X-Twilio-Email-Event-Webhook-Signature")!;
-        const rawBody = (req as functions.https.Request).rawBody;
-        const config = getConfig()
-        // crypto.
-
-        // const verify = crypto.createVerify('SHA256');
-        const payload: Buffer = Buffer.concat([Buffer.from(timestamp), rawBody]);
-        // const payload = `${ timestamp }${ rawBody }`;
-        // const verified = crypto.verify("sha256", payload, config.sendgrid.webhook_verification_key, new Buffer(signature));
-        // verify.write(timestamp)
-        // verify.write(rawBody);
-        // verify.end();
-        const key = config.sendgrid.webhook_verification_key
-
-        // logger.info("rawBody");
-        logger.info(rawBody);
-        // logger.info("raw body to string", rawBody.toString("utf8"));
-        // const verified = verify.verify(config.sendgrid.webhook_verification_key, decodedSignature)
-        const verified = await SecurityService.shared.nodeVerify(payload, timestamp, signature, key)
+        const timestamp = req.header("X-Twilio-Email-Event-Webhook-Timestamp")!;
+        logger.info("signature", signature);
+        logger.info("timestamp", timestamp);
+        const key = getConfig().sendgrid.webhook_verification_key
+        const bodyPayload = (req as functions.https.Request).rawBody.toString();
+        const verified = await SecurityService.shared.verifySendgrid(bodyPayload, timestamp, signature, key)
         logger.info("Sendgrid key verified", verified);
         if (!verified) {
             resp.sendStatus(403);
             return
         }
-
-        // const hash = crypto.createHmac('sha256', ).update(base).digest('hex');
         resp.send(204);
     } catch (error) {
         logger.error("Failed to process webhook", error);
