@@ -179,6 +179,7 @@ const defaultTestConfig: CactusConfig = {
     },
     sendgrid: {
         api_key: "test-api-key",
+        webhook_verification_key: "testkey",
         template_ids: {
             magic_link: "1234",
             magic_link_new_user: '1234ra',
@@ -187,6 +188,30 @@ const defaultTestConfig: CactusConfig = {
             trial_ending: '1234te',
             data_export: "1234lj",
             new_prompt_notification: "test_id",
+        },
+        templates: {
+            new_prompt_notification: {
+                template_id: "test_template_id",
+                unsubscribe_group_id: "14282"
+            },
+            magic_link_new_user: {
+                template_id: "test_template_id"
+            },
+            magic_link: {
+                template_id: "test_template_id"
+            },
+            data_export: {
+                template_id: "test_template_id"
+            },
+            trial_ending: {
+                template_id: "test_template_id"
+            },
+            friend_request: {
+                template_id: "test_template_id"
+            },
+            invitation: {
+                template_id: "test_template_id"
+            }
         }
     },
     language: {

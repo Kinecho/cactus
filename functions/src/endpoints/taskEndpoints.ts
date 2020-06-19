@@ -29,7 +29,7 @@ app.post("/send-emails", async (req: express.Request, resp: express.Response) =>
     const slackData = { params, result };
 
     await AdminSlackService.getSharedInstance().uploadTextSnippet({
-        message: `:squid: :email: \`send-push\` results`,
+        message: `:squid: :email: \`send-email\` results`,
         data: stringifyJSON(slackData, 2),
         fileType: "json",
         filename: "send-push.json",

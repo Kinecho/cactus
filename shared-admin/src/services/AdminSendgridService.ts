@@ -1,5 +1,7 @@
 import { CactusConfig } from "@shared/CactusConfig";
 import * as sgMail from "@sendgrid/mail";
+import * as EmailAddressTypes from "@sendgrid/helpers/classes/email-address";
+import * as MailTypes from "@sendgrid/helpers/classes/mail"
 import {
     FriendRequestEmail,
     InvitationEmail,
@@ -8,10 +10,14 @@ import {
     TrialEndingEmail
 } from "@admin/services/SendgridServiceTypes";
 import Logger from "@shared/Logger";
-import EmailLog, { EmailCategory, SendgridTemplate, TemplateData } from "@shared/models/EmailLog";
+import EmailLog, { EmailCategory, SendgridTemplate, TemplateData, TemplateName } from "@shared/models/EmailLog";
 import AdminEmailLogService from "@admin/services/AdminEmailLogService";
-import { stringifyJSON } from "@shared/util/ObjectUtil";
+import { isArray, isNumber, isString, stringifyJSON } from "@shared/util/ObjectUtil";
 import { isGeneratedEmailAddress } from "@admin/util/StringUtil";
+export import EmailData = EmailAddressTypes.EmailData;
+export import ASMOptions = MailTypes.ASMOptions;
+export import MailDataRequired = MailTypes.MailDataRequired;
+import { isBlank } from "@shared/util/StringUtil";
 
 export const SendgridHeaders = {
     MessageID: "x-message-id"
@@ -30,6 +36,33 @@ export const CactusSender = {
     HELLO: { name: "Cactus", email: "hello@cactus.app" },
 };
 
+
+export const Helpers = {
+    getEmailAddressFromEmailData(data?: EmailData | EmailData[]): string | undefined {
+        if (!data) {
+            return undefined;
+        }
+        if (isString(data)) {
+            return data;
+        }
+        if (isArray(data)) {
+            const [first] = (data as EmailData[]);
+            if (!isString(first)) {
+                return first.email
+            } else {
+                return first;
+            }
+        } else {
+            const d = data as EmailData;
+            if (!isString(d)) {
+                return d.email;
+            }
+        }
+        return undefined;
+    }
+
+}
+
 interface SendTemplateOptions {
     email: string,
     memberId?: string,
@@ -40,7 +73,6 @@ interface SendTemplateOptions {
     oneTime: boolean
 }
 
-// declare type MailService = sgMail.MailService;
 const logger = new Logger("AdminSendgridService");
 export default class AdminSendgridService {
     apiKey: string;
@@ -68,11 +100,36 @@ export default class AdminSendgridService {
     }
 
     getSendgridTemplateId(templateName: SendgridTemplate): string {
-        return this.config.sendgrid.template_ids[templateName];
+        return this.config.sendgrid.templates[templateName].template_id;
     }
 
-    async sendMail(mailParams: any) {
-        const toAddress = mailParams?.to;
+    getUnsubscribeGroupId(templateName: SendgridTemplate): number | undefined {
+        let value = this.config.sendgrid.templates[templateName].unsubscribe_group_id;
+        if (!isBlank(value)) {
+            const num = Number(value);
+            if (isNumber(num)) {
+                return num
+            }
+        }
+        return undefined;
+    }
+
+    getUnsubscribeGroupsToDisplay(templateName: SendgridTemplate): number[] | undefined {
+        const allGroups: number[] = []
+        Object.values(this.config.sendgrid.templates).forEach(t => {
+            if (isBlank(t.unsubscribe_group_id)) {
+                return;
+            }
+            const groupNumber = Number(t.unsubscribe_group_id);
+            if (groupNumber && isNumber(groupNumber)) {
+                allGroups.push(groupNumber);
+            }
+        })
+        return allGroups;
+    }
+
+    async sendMail(mailParams: MailDataRequired) {
+        const toAddress = Helpers.getEmailAddressFromEmailData(mailParams.to);
         if (!isGeneratedEmailAddress(toAddress)) {
             return await sgMail.send(mailParams);
         } else {
@@ -249,10 +306,26 @@ export default class AdminSendgridService {
         return result;
     }
 
+    getAdvancedSubscriptionConfiguration(templateName: TemplateName): ASMOptions | undefined {
+        const groupId = this.getUnsubscribeGroupId(templateName);
+        const displayIds = this.getUnsubscribeGroupsToDisplay(templateName)
+
+        if (groupId) {
+            return {
+                groupId,
+                groupsToDisplay: displayIds,
+            }
+        }
+
+        return undefined;
+    }
+
     async sendTemplateAndLog(options: SendTemplateOptions): Promise<SendEmailResult> {
         const { email, memberId, template, categories, sender, data, oneTime } = options;
 
         const templateId = this.getSendgridTemplateId(template);
+
+        const asm = this.getAdvancedSubscriptionConfiguration(template);
 
         if (oneTime) {
             const [firstResult] = await AdminEmailLogService.getSharedInstance().search({
@@ -268,12 +341,13 @@ export default class AdminSendgridService {
             }
         }
 
-        const mailParams = {
+        const mailParams: MailDataRequired = {
             to: email,
             from: sender,
             templateId,
             categories: [EmailCategory.TrialEnding],
             dynamicTemplateData: data,
+            asm,
         };
 
         logger.log("Sending email with params", JSON.stringify(mailParams, null, 2));

@@ -33,6 +33,7 @@ export interface PromptNotificationEmail {
     promptContentEntryId: string,
     reflectUrl: string
     mainText: string,
+    subjectLine: string,
     firstName?: string,
     isPlus?: boolean,
     previewText?: string,

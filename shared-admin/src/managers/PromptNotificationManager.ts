@@ -318,7 +318,8 @@ export default class PromptNotificationManager {
             inOptOutTrial: member.isOptOutTrialing,
             inOptInTrial: member.isOptInTrialing,
             trialDaysLeft: member.daysLeftInTrial,
-            previewText: introText
+            previewText: introText,
+            subjectLine: promptContent.subjectLine ?? "Cactus: Daily Prompt"
         }
         const sendResult = await AdminSendgridService.getSharedInstance().sendPromptNotification(data);
 

@@ -16,6 +16,12 @@ export interface ServiceAccountCredentials {
 
 export type EnvironmentType = "test" | "dev" | "prod" | "stage"
 export type SendgridTemplateConfig = { [name in SendgridTemplate]: string };
+export type SendgridTemplateUnsubscribeGroupConfig = { [name in SendgridTemplate]?: string };
+
+export type SendgridTemplateGroupConfig = { [name in SendgridTemplate]: {
+    template_id: string,
+    unsubscribe_group_id?: string,
+}}
 
 export interface TaskQueueConfig {
     name: string,
@@ -108,7 +114,12 @@ export interface CactusConfig {
     },
     sendgrid: {
         api_key: string,
+        webhook_verification_key: string,
+        /**
+         * @Deprecated - please use the sendgrid.templates.template_id config instead
+         */
         template_ids: SendgridTemplateConfig,
+        templates: SendgridTemplateGroupConfig,
     },
     language: {
         client_id: string,
