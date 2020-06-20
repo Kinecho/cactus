@@ -261,7 +261,7 @@ export async function updateEmailPreferences(req: express.Request, resp: express
     const mailchimpResponse = await MailchimpService.getSharedInstance().updateMemberStatus(statusRequest);
     logger.info("Mailchimp response", mailchimpResponse);
 
-    const sendgridResult = await AdminSendgridService.getSharedInstance().updateUnsubscribeGroupForMember(statusRequest.email, !isUnsubscribe);
+    const sendgridResult = await AdminSendgridService.getSharedInstance().updateNewPromptNotificationPreference(statusRequest.email, !isUnsubscribe);
     logger.info("unsubscribe user from email notifications result", stringifyJSON(sendgridResult, 2));
 
     resp.send({ success: true });

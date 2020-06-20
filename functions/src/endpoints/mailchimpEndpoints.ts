@@ -35,15 +35,16 @@ import { UnsubscribeRequest, UpdateStatusRequest } from "@shared/mailchimp/model
 import { getConfig, isNonPromptCampaignId } from "@admin/config/configService";
 import Logger from "@shared/Logger";
 import { updateEmailPreferences } from "@api/endpoints/userEndpoints";
+import AdminSendgridService from "@admin/services/AdminSendgridService";
 
 const logger = new Logger("mailchimpEndpoints");
 const app = express();
 const Config = getConfig();
 // Automatically allow cross-origin requests
-app.use(cors({origin: Config.allowedOrigins}));
+app.use(cors({ origin: Config.allowedOrigins }));
 
 app.get("/", async (req: express.Request, res: express.Response) => {
-    return res.send({success: true, message: "got the get request"})
+    return res.send({ success: true, message: "got the get request" })
 });
 
 
@@ -52,7 +53,7 @@ app.post("/webhook", async (req: express.Request, res: express.Response) => {
     logger.log("webhook event", JSON.stringify(event));
     const date = new Date();
     const dateId = date.getTime();
-    await writeToFile(`output/webhook/${dateId}-mailchimp.json`, JSON.stringify(event));
+    await writeToFile(`output/webhook/${ dateId }-mailchimp.json`, JSON.stringify(event));
 
     // let message: string | SlackMessage = "";
     // let data = event.data;
@@ -87,7 +88,7 @@ app.post("/webhook", async (req: express.Request, res: express.Response) => {
             break;
     }
 
-    res.send({success: true})
+    res.send({ success: true })
 });
 
 app.post("/", async (req: express.Request, res: express.Response) => {
@@ -119,14 +120,14 @@ app.post("/", async (req: express.Request, res: express.Response) => {
 
             const attachmentSummary: SlackAttachment = {
                 color: "#33CCAB",
-                ts: `${(new Date()).getTime() / 1000}`,
+                ts: `${ (new Date()).getTime() / 1000 }`,
                 fields: fields
             };
 
             if (subscription.firstName || subscription.lastName) {
                 fields.push({
                     title: "Name",
-                    value: `${subscription.firstName} ${subscription.lastName}`.trim(),
+                    value: `${ subscription.firstName } ${ subscription.lastName }`.trim(),
                     short: false
                 });
             }
@@ -143,7 +144,7 @@ app.post("/", async (req: express.Request, res: express.Response) => {
             logger.log("subscription", JSON.stringify(subscription, null, 2));
             if (subscription.subscriptionLocation) {
                 logger.log("adding footer to message");
-                attachmentSummary.footer = `${subscription.subscriptionLocation.page} - ${subscription.subscriptionLocation.formId}`;
+                attachmentSummary.footer = `${ subscription.subscriptionLocation.page } - ${ subscription.subscriptionLocation.formId }`;
             } else {
                 logger.log("Not adding footer to message");
             }
@@ -156,7 +157,7 @@ app.post("/", async (req: express.Request, res: express.Response) => {
             const slackResult = await slackService.sendActivityNotification(message);
             logger.log("slack result", slackResult);
         } else if (!signupResult.success) {
-            await slackService.sendActivityNotification(`An error occurred while signing up \`${subscription.email}\`. They were not added to mailchimp. \n\n \`\`\`${JSON.stringify(signupResult.error)}\`\`\``)
+            await slackService.sendActivityNotification(`An error occurred while signing up \`${ subscription.email }\`. They were not added to mailchimp. \n\n \`\`\`${ JSON.stringify(signupResult.error) }\`\`\``)
         }
 
         return res.send(signupResult);
@@ -183,14 +184,14 @@ app.post("/", async (req: express.Request, res: express.Response) => {
  */
 app.post("/unsubscribe/confirm", async (req: express.Request, res: express.Response) => {
     const payload = req.body as UnsubscribeRequest;
-    const {email, mcuid} = payload;
+    const { email, mcuid } = payload;
 
-    logger.log(`handing unsubscribe confirm email: ${email}, mcuid: ${mcuid}`);
+    logger.log(`handing unsubscribe confirm email: ${ email }, mcuid: ${ mcuid }`);
 
     const mailchimpMember = await MailchimpService.getSharedInstance().getMemberByUniqueEmailId(mcuid);
 
     if (!mailchimpMember) {
-        res.status(404).send({error: "No member was found for the given ID.", success: false});
+        res.status(404).send({ error: "No member was found for the given ID.", success: false });
         return;
     }
 
@@ -207,11 +208,11 @@ app.post("/unsubscribe/confirm", async (req: express.Request, res: express.Respo
         member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
     }
     if (!member) {
-        res.status(404).send({success: false, error: "No member found"});
+        res.status(404).send({ success: false, error: "No member found" });
         return;
     }
 
-    const statusRequest: UpdateStatusRequest = {email: email, status: ListMemberStatus.unsubscribed};
+    const statusRequest: UpdateStatusRequest = { email: email, status: ListMemberStatus.unsubscribed };
     const response = await MailchimpService.getSharedInstance().updateMemberStatus(statusRequest);
 
     if (response.success) {
@@ -225,7 +226,7 @@ app.post("/unsubscribe/confirm", async (req: express.Request, res: express.Respo
         logger.log("Updating the cactus member with the new mailchimp member");
         member.mailchimpListMember = response.listMember;
     } else {
-        logger.log(`No mailchimp list member found. Can't update the cactus member. email = ${email}. mcuid = ${mcuid}`);
+        logger.log(`No mailchimp list member found. Can't update the cactus member. email = ${ email }. mcuid = ${ mcuid }`);
     }
 
     await AdminCactusMemberService.getSharedInstance().save(member);
@@ -236,7 +237,7 @@ app.post("/unsubscribe/confirm", async (req: express.Request, res: express.Respo
         status: statusRequest.status
     });
 
-    res.send({success: response.success, error: response.error})
+    res.send({ success: response.success, error: response.error })
 
 });
 
@@ -250,7 +251,7 @@ app.post("/unsubscribe/confirm", async (req: express.Request, res: express.Respo
 app.put("/status", updateEmailPreferences);
 
 async function sendSlackUserUnsubscribedEmail(options: { email: string, status: ListMemberStatus, cactusMember?: CactusMember }) {
-    const {cactusMember, email, status} = options;
+    const { cactusMember, email, status } = options;
     const attachments: SlackAttachment[] = [];
     const fields: SlackAttachmentField[] = [
         {
@@ -260,7 +261,7 @@ async function sendSlackUserUnsubscribedEmail(options: { email: string, status: 
         },
         {
             title: "Reason Code",
-            value: `Manually ${status === ListMemberStatus.unsubscribed ? "Unsubscribed" : "Re-Subscribed"} from the App`,
+            value: `Manually ${ status === ListMemberStatus.unsubscribed ? "Unsubscribed" : "Re-Subscribed" } from the App`,
             short: false,
         },
 
@@ -276,12 +277,12 @@ async function sendSlackUserUnsubscribedEmail(options: { email: string, status: 
     ];
 
     attachments.push({
-        title: `${email} ${status === ListMemberStatus.unsubscribed ? "Unsubscribed" : "Re-Subscribed"}`,
+        title: `${ email } ${ status === ListMemberStatus.unsubscribed ? "Unsubscribed" : "Re-Subscribed" }`,
         fields: fields
     });
 
     const message = {
-        text: `User Has manually ${status === ListMemberStatus.unsubscribed ? "Unsubscribed" : "Re-Subscribed"}`,
+        text: `User Has manually ${ status === ListMemberStatus.unsubscribed ? "Unsubscribed" : "Re-Subscribed" }`,
         attachments
     };
 
@@ -323,21 +324,21 @@ export async function handleCampaignEvent(campaignData: CampaignEventData): Prom
 
     if (campaign) {
         fields.push(
-            {
-                title: "Send Type",
-                value: campaign.type,
-                short: true,
-            },
-            {
-                title: "Email URL",
-                value: campaign.archive_url,
-                short: true,
-            },
-            {
-                title: "Emails Sent",
-                value: `${campaign.emails_sent}`,
-                short: true,
-            })
+        {
+            title: "Send Type",
+            value: campaign.type,
+            short: true,
+        },
+        {
+            title: "Email URL",
+            value: campaign.archive_url,
+            short: true,
+        },
+        {
+            title: "Emails Sent",
+            value: `${ campaign.emails_sent }`,
+            short: true,
+        })
     }
 
     const message = {
@@ -346,7 +347,7 @@ export async function handleCampaignEvent(campaignData: CampaignEventData): Prom
             title: `:email: An email campaign was sent!`,
             color: "#29A389",
             fields: fields,
-            ts: campaign ? `${(new Date(campaign.send_time)).getTime() / 1000}` : undefined,
+            ts: campaign ? `${ (new Date(campaign.send_time)).getTime() / 1000 }` : undefined,
         }]
     };
 
@@ -357,15 +358,16 @@ export async function handleSubscribeEvent(eventData: SubscribeEventData): Promi
     const mailchimpService = MailchimpService.getSharedInstance();
     const slackService = AdminSlackService.getSharedInstance();
     const listMember = await mailchimpService.getMemberByEmail(eventData.email);
+    const sendgridResult = await AdminSendgridService.getSharedInstance().updateNewPromptNotificationPreference(eventData.email, true);
     if (listMember) {
         const cactusMember = await AdminCactusMemberService.getSharedInstance().updateFromMailchimpListMember(listMember);
         if (cactusMember) {
-            await slackService.sendActivityNotification(`${eventData.email} has confirmed their subscription. They have been added to the database. CactusMember ID = ${cactusMember.id}`)
+            await slackService.sendActivityNotification(`${ eventData.email } has confirmed their subscription. They have been added to the database. CactusMember ID = ${ cactusMember.id }. Synced with Sendgrid Success = ${ sendgridResult.success }`);
         } else {
-            await slackService.sendActivityNotification(`:warning: Unable to sync listMember with database for ${eventData.email}`);
+            await slackService.sendActivityNotification(`:warning: Unable to sync listMember with database for ${ eventData.email }`);
         }
     } else {
-        await slackService.sendActivityNotification(`:warning: Unable to sync listMember with database for ${eventData.email}`);
+        await slackService.sendActivityNotification(`:warning: Unable to sync listMember with database for ${ eventData.email }`);
     }
 
 }
@@ -398,7 +400,7 @@ export async function handleEmailUpdatedEvent(update: EmailChangeEventData): Pro
             ]
         }
     ];
-    const message: ChatMessage = {text: "Mailchimp Webhook Event: Email Updated", attachments};
+    const message: ChatMessage = { text: "Mailchimp Webhook Event: Email Updated", attachments };
     await AdminSlackService.getSharedInstance().sendActivityMessage(message);
 }
 
@@ -418,25 +420,25 @@ export async function handleProfileEvent(profile: ProfileUpdateEventData): Promi
         const cactusMember = await AdminCactusMemberService.getSharedInstance().updateFromMailchimpListMember(profileMember);
         if (cactusMember) {
             attachments.push({
-                text: `Synced ${profile.email} in our database. CactusMember ID = ${cactusMember.id}`,
+                text: `Synced ${ profile.email } in our database. CactusMember ID = ${ cactusMember.id }`,
                 color: "good"
             })
         } else {
             attachments.push({
-                text: `:warning: Unable to sync listMember with database for ${profile.email}`,
+                text: `:warning: Unable to sync listMember with database for ${ profile.email }`,
                 color: "warning",
             });
         }
     } else {
         // await slackService.sendActivityNotification();
         attachments.push({
-            text: `:warning: Unable to sync listMember with database for ${profile.email}`,
+            text: `:warning: Unable to sync listMember with database for ${ profile.email }`,
             color: "warning",
         })
     }
 
     const message = {
-        text: `Mailchimp Webhook Event: Profile Update\n${profile.email}'s profile was updated.`,
+        text: `Mailchimp Webhook Event: Profile Update\n${ profile.email }'s profile was updated.`,
         attachments: attachments,
     };
 
@@ -445,7 +447,7 @@ export async function handleProfileEvent(profile: ProfileUpdateEventData): Promi
 }
 
 export async function handleUnsubscribeEvent(event: UnsubscribeEventData): Promise<void> {
-    const {email, campaign_id: campaignId, reason} = event;
+    const { email, campaign_id: campaignId, reason } = event;
     //TODO: get the unsub reason
 
     let unsubData: Partial<MemberUnsubscribeReport | undefined> = await MailchimpService.getSharedInstance().getUnsubscribeReportForMember({
@@ -454,8 +456,11 @@ export async function handleUnsubscribeEvent(event: UnsubscribeEventData): Promi
     });
     const mailchimpMember = await MailchimpService.getSharedInstance().getMemberByEmail(email);
 
+    //sync with sendgrid
+    const sendgridResult = await AdminSendgridService.getSharedInstance().updateNewPromptNotificationPreference(email, false);
+
     if (!unsubData) {
-        unsubData = {timestamp: (new Date()).toISOString()}
+        unsubData = { timestamp: (new Date()).toISOString() }
     }
 
     let updatedCactusMember: CactusMember | undefined = undefined;
@@ -490,15 +495,18 @@ export async function handleUnsubscribeEvent(event: UnsubscribeEventData): Promi
         {
             title: "Sign Up Date",
             value: (updatedCactusMember && updatedCactusMember.signupConfirmedAt) ? getISODate(updatedCactusMember.signupConfirmedAt) : "Unknown"
+        }, {
+            title: "Sendgrid Sync",
+            value: `Unsubscribe Success: \`${ sendgridResult.success }\``
         }
     ];
 
     attachments.push({
-        title: `${email} unsubscribed`,
+        title: `${ email } unsubscribed`,
         fields: fields
     });
 
-    const message = {text: "Mailchimp Webhook Event: User Unsubscribed", attachments};
+    const message = { text: "Mailchimp Webhook Event: User Unsubscribed", attachments };
 
     await AdminSlackService.getSharedInstance().sendActivityMessage(message);
 }
@@ -527,13 +535,13 @@ export async function handleCleanedEvent(event: CleanedEmailEventData): Promise<
                 },
                 {
                     title: "Campaign/Prompt",
-                    value: (prompt && prompt.question) ? prompt.question : `No Prompt found. Campaign ID ${event.campaign_id}`,
+                    value: (prompt && prompt.question) ? prompt.question : `No Prompt found. Campaign ID ${ event.campaign_id }`,
                     short: false,
                 }
             ]
         }
     ];
-    const message: ChatMessage = {text: "Mailchimp Webhook Event: Email Cleaned", attachments};
+    const message: ChatMessage = { text: "Mailchimp Webhook Event: Email Cleaned", attachments };
     await AdminSlackService.getSharedInstance().sendActivityMessage(message);
 }
 

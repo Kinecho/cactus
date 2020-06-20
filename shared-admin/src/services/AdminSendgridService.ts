@@ -404,7 +404,7 @@ export default class AdminSendgridService {
     }
 
 
-    async updateUnsubscribeGroupForMember(email: string, isSubscribed: boolean): Promise<{ success: boolean }> {
+    async updateNewPromptNotificationPreference(email: string, isSubscribed: boolean): Promise<{ success: boolean }> {
         try {
             const unsubscribeGroupId = Number(this.config.sendgrid.templates.new_prompt_notification.unsubscribe_group_id);
             if (!unsubscribeGroupId) {
