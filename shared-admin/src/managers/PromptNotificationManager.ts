@@ -92,6 +92,7 @@ export default class PromptNotificationManager {
 
     async createEmailTask(setupInfo: MemberPromptNotificationSetupInfo, processAt?: Date): Promise<SubmitTaskResponse> {
         if (setupInfo.member?.notificationSettings?.email === NotificationStatus.INACTIVE) {
+            logger.info("Not creating email task as the user's email preference is to INACTIVE");
             return {
                 success: true,
                 skipped: true,
@@ -193,7 +194,17 @@ export default class PromptNotificationManager {
             usedCachedPromptContent,
             errorMessage,
         }
-        logger.info(`Finished processing prompt notification for member ${ memberId }`, stringifyJSON(result, 2));
+
+        const logInfo = {
+            ...result,
+            member: { id: member.id, email: member.email },
+            promptContent: {
+                entryId: promptContent?.entryId,
+                subjectLine: promptContent?.subjectLine,
+            }
+        }
+
+        logger.info(`Finished processing prompt notification for member ${ memberId }`, stringifyJSON(logInfo, 2));
         return result;
     }
 
@@ -299,6 +310,8 @@ export default class PromptNotificationManager {
         const { member } = await HoboCache.shared.getMemberById(memberId);
         const email = member?.email;
         const { promptContent } = await HoboCache.shared.fetchPromptContent(promptContentEntryId);
+
+        logger.info("Member notification settings: ", stringifyJSON(member?.notificationSettings, 2));
 
         if (member?.notificationSettings.email === NotificationStatus.INACTIVE) {
             logger.info("Member has opted out of emails, not sending");

@@ -75,7 +75,6 @@ export interface NextPromptResult {
     isSendTime?: boolean,
 }
 
-
 export interface SendEmailNotificationParams {
     memberId?: string;
     promptContentEntryId?: string;

@@ -25,7 +25,7 @@ export default class HoboCache {
     constructor(maxAge: number) {
         this.maxAge = maxAge;
         setTimeout(() => {
-            this.resetShared()
+            this.purge()
         }, this.maxAge);
     }
 
@@ -81,8 +81,13 @@ export default class HoboCache {
         return { promptContent, cached: false };
     }
 
-    resetShared() {
+    purge() {
         logger.info("Resetting HoboCache");
         HoboCache.initialize(this.maxAge)
+    }
+
+    static purge(){
+        logger.info("Purging the hobo cache")
+        HoboCache.initialize(HoboCache.shared.maxAge);
     }
 }

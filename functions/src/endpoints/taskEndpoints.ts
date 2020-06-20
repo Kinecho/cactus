@@ -80,7 +80,7 @@ app.post("/send-prompt-notifications", async (req: express.Request, resp: expres
         logger.info("No member ID was found, can not process task. Removing from queue");
         resp.status(200).send({
             success: false,
-            error: "No m ember ID was found on the task. Can ont process it.",
+            error: "No member ID was found on the task. Can ont process it.",
             retryable: false
         });
     }
@@ -99,6 +99,16 @@ app.post("/send-prompt-notifications", async (req: express.Request, resp: expres
     }
     return;
 })
+
+app.get("/purge-cache", async (req: express.Request, resp: express.Response) => {
+    if (req.query.confirm !== "true") {
+        resp.sendStatus(400);
+        return
+    }
+    HoboCache.purge();
+    resp.send("Cache purged");
+    return;
+});
 
 app.get("/create", async (req: express.Request, resp: express.Response) => {
     const numToCreate = Number(req.query.num ?? "1");

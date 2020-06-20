@@ -695,6 +695,7 @@ export default class AdminCactusMemberService {
         }
 
         member.notificationSettings.email = subscribed ? NotificationStatus.ACTIVE : NotificationStatus.INACTIVE;
+        logger.info("Setting member's email preference to ", member.notificationSettings.email);
         await this.save(member);
         return member;
     }

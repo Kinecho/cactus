@@ -258,6 +258,9 @@ export async function updateEmailPreferences(req: express.Request, resp: express
         return;
     }
     const isUnsubscribe = statusRequest.status === ListMemberStatus.unsubscribed;
+    await AdminCactusMemberService.getSharedInstance().setEmailNotificationPreference(statusRequest.email, !isUnsubscribe);
+    logger.info("Updated member status in the DB");
+
     const mailchimpResponse = await MailchimpService.getSharedInstance().updateMemberStatus(statusRequest);
     logger.info("Mailchimp response", mailchimpResponse);
 

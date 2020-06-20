@@ -11,7 +11,7 @@ describe("Ensure hobo cache resets", () => {
     test("Reset function is called after the max age times out", async () => {
 
         const resetFn = jest.fn()
-        HoboCache.shared.resetShared = resetFn;
+        HoboCache.shared.purge = resetFn;
         expect(setTimeout).toHaveBeenCalledTimes(1);
 
         jest.runOnlyPendingTimers()
@@ -31,7 +31,7 @@ describe("Ensure hobo cache resets", () => {
         expect(cache.getPromptContent("test1")).toBe(p1);
         expect(cache.getPromptContent("not-found")).toBeNull()
 
-        cache.resetShared();
+        cache.purge();
         expect(HoboCache.shared.getPromptContent("test1")).toBeUndefined()
         expect(HoboCache.shared.getPromptContent("not-found")).toBeUndefined()
         expect(HoboCache.shared.promptContentByEntryId).toEqual({});
