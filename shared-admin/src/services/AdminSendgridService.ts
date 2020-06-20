@@ -27,6 +27,8 @@ import { getAxiosError } from "@shared/api/ApiTypes";
 export import EmailData = EmailAddressTypes.EmailData;
 export import ASMOptions = MailTypes.ASMOptions;
 export import MailDataRequired = MailTypes.MailDataRequired;
+import MailchimpService from "@admin/services/MailchimpService";
+import { ListMemberStatus } from "@shared/mailchimp/models/MailchimpTypes";
 
 export const SendgridHeaders = {
     MessageID: "x-message-id"
@@ -412,10 +414,10 @@ export default class AdminSendgridService {
                 return { success: true };
             }
             if (isSubscribed) {
-                logger.info(`Attempting to remove (re-subscribe) ${email} from groupId ${unsubscribeGroupId}`);
-                await this.api.delete(`asm/groups/${ unsubscribeGroupId }/suppressions/${email}`)
+                logger.info(`Attempting to remove (re-subscribe) ${ email } from groupId ${ unsubscribeGroupId }`);
+                await this.api.delete(`asm/groups/${ unsubscribeGroupId }/suppressions/${ email }`)
             } else {
-                logger.info(`Attempting to add (unsubscbribe) ${email} to groupId ${unsubscribeGroupId}`);
+                logger.info(`Attempting to add (unsubscbribe) ${ email } to groupId ${ unsubscribeGroupId }`);
                 await this.api.post(`asm/groups/${ unsubscribeGroupId }/suppressions`, {
                     recipient_emails: [email]
                 })
@@ -450,7 +452,7 @@ export default class AdminSendgridService {
     async handleSubscriptionManagementEvent(event: AdvancedSubscriptionManagementEvent): Promise<WebhookEventResult> {
         const groupId = event.asm_group_id;
         const templateName = this.getTemplateNameFromAsmGroupId(groupId);
-
+        const { email } = event;
         if (!templateName) {
             logger.info("No template found for given unsubscribe group. Can not process. Returning success.")
             return { success: true, event: event.event };
@@ -462,8 +464,17 @@ export default class AdminSendgridService {
         switch (templateName) {
             case SendgridTemplate.new_prompt_notification:
                 const member = await AdminCactusMemberService.getSharedInstance().setEmailNotificationPreference(event.email, isSubscribed);
+
+                const mcStatus = isSubscribed ? ListMemberStatus.subscribed : ListMemberStatus.unsubscribed;
+                const mailchimpResponse = await MailchimpService.getSharedInstance().updateMemberStatus({
+                    status: mcStatus,
+                    email
+                });
+
+                logger.info("MailChimp sync status result:", stringifyJSON(mailchimpResponse, 2));
+
                 if (member) {
-                    await AdminSlackService.getSharedInstance().sendActivityMessage(`${ member.email } has ${ isSubscribed ? "re-subscribed" : "unsubscribed" } from email notifications`);
+                    await AdminSlackService.getSharedInstance().sendActivityMessage(`${ member.email } has ${ isSubscribed ? "re-subscribed" : "unsubscribed" } from email notifications via sendgrid. Synced with Mailchimp success = ${ mailchimpResponse.success }.`);
                 }
 
                 logger.info("Updated member to have email notification prefernece of true");
