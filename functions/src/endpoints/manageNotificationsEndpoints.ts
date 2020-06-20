@@ -7,9 +7,11 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import MailchimpService from "@admin/services/MailchimpService";
 import { ListMember, ListMemberStatus } from "@shared/mailchimp/models/MailchimpTypes";
 import Logger from "@shared/Logger";
-import { isString } from "@shared/util/ObjectUtil";
-import SecurityService from "@api/SecurityService";
+import { isString, stringifyJSON } from "@shared/util/ObjectUtil";
+import CryptoService from "@api/CryptoService";
 import * as functions from "firebase-functions";
+import AdminSendgridService from "@admin/services/AdminSendgridService";
+import { SendgridWebhookEvent } from "@admin/services/SendgridServiceTypes";
 
 const logger = new Logger("manageNotificationsEndpoints");
 const app = express();
@@ -84,12 +86,18 @@ app.post("/sendgrid/webhook", async (req, resp) => {
         logger.info("timestamp", timestamp);
         const key = getConfig().sendgrid.webhook_verification_key
         const bodyPayload = (req as functions.https.Request).rawBody.toString();
-        const verified = await SecurityService.shared.verifySendgrid(bodyPayload, timestamp, signature, key)
+        const verified = await CryptoService.shared.verifySendgrid(bodyPayload, timestamp, signature, key)
         logger.info("Sendgrid key verified", verified);
         if (!verified) {
             resp.sendStatus(403);
             return
         }
+
+        const events = req.body as SendgridWebhookEvent[];
+        const allTasks = events.map(event => AdminSendgridService.getSharedInstance().handleWebhookEvent(event))
+        const results = await Promise.all(allTasks);
+        logger.info("Processed all events", stringifyJSON(results, 2));
+
         resp.send(204);
     } catch (error) {
         logger.error("Failed to process webhook", error);

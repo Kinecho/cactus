@@ -1,4 +1,4 @@
-import SecurityService from "@api/SecurityService";
+import CryptoService from "@api/CryptoService";
 
 const publicKey = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE4FOaQZJBIHYOlVwFteqt3L2EkYQvSI9ZxlnPzCigUbON79BBsydcWQZogQampPDiFv6hB1nNb1/nHf1RhSCN5A==";
 
@@ -26,19 +26,19 @@ const Data3 = {
 }
 
 test("verify sendgrid", async () => {
-    const verified = SecurityService.shared.verifySendgrid(Data.rawBody, Data.timeStamp, Data.signature, Data.publicKey);
+    const verified = CryptoService.shared.verifySendgrid(Data.rawBody, Data.timeStamp, Data.signature, Data.publicKey);
     expect(verified).toBeTruthy();
 })
 
 test("verify sendgrid 2", async () => {
     const d = Data2;
-    const verified = SecurityService.shared.verifySendgrid(d.body, d.timeStamp, d.signature, d.publicKey);
+    const verified = CryptoService.shared.verifySendgrid(d.body, d.timeStamp, d.signature, d.publicKey);
     expect(verified).toBeTruthy();
 })
 
 test("verify sendgrid 3", async () => {
     const d = Data3;
-    const verified = SecurityService.shared.verifySendgrid(d.body, d.timeStamp, d.signature, d.publicKey);
+    const verified = CryptoService.shared.verifySendgrid(d.body, d.timeStamp, d.signature, d.publicKey);
     expect(verified).toBeTruthy();
 })
 

@@ -2,22 +2,31 @@ import { CactusConfig } from "@shared/CactusConfig";
 import * as sgMail from "@sendgrid/mail";
 import * as EmailAddressTypes from "@sendgrid/helpers/classes/email-address";
 import * as MailTypes from "@sendgrid/helpers/classes/mail"
+import _axios, { AxiosInstance } from "axios";
 import {
+    AdvancedSubscriptionManagementEvent,
     FriendRequestEmail,
     InvitationEmail,
+    isAdvancedSubscriptionManagementEvent,
     MagicLinkEmail,
     PromptNotificationEmail,
-    TrialEndingEmail
+    SendgridEventType,
+    SendgridWebhookEvent,
+    TrialEndingEmail,
+    WebhookEventResult
 } from "@admin/services/SendgridServiceTypes";
 import Logger from "@shared/Logger";
 import EmailLog, { EmailCategory, SendgridTemplate, TemplateData, TemplateName } from "@shared/models/EmailLog";
 import AdminEmailLogService from "@admin/services/AdminEmailLogService";
 import { isArray, isNumber, isString, stringifyJSON } from "@shared/util/ObjectUtil";
 import { isGeneratedEmailAddress } from "@admin/util/StringUtil";
+import { isBlank } from "@shared/util/StringUtil";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
+import AdminSlackService from "@admin/services/AdminSlackService";
+import { getAxiosError } from "@shared/api/ApiTypes";
 export import EmailData = EmailAddressTypes.EmailData;
 export import ASMOptions = MailTypes.ASMOptions;
 export import MailDataRequired = MailTypes.MailDataRequired;
-import { isBlank } from "@shared/util/StringUtil";
 
 export const SendgridHeaders = {
     MessageID: "x-message-id"
@@ -77,6 +86,8 @@ const logger = new Logger("AdminSendgridService");
 export default class AdminSendgridService {
     apiKey: string;
     config: CactusConfig;
+    api: AxiosInstance;
+    apiDomain = "https://api.sendgrid.com/v3";
 
     protected static sharedInstance: AdminSendgridService;
 
@@ -97,6 +108,13 @@ export default class AdminSendgridService {
         this.apiKey = config.sendgrid.api_key;
         this.config = config;
         sgMail.setApiKey(this.apiKey);
+        this.api = _axios.create({
+            baseURL: this.apiDomain,
+            headers: {
+                'Authorization': `Bearer ${ this.apiKey }`,
+                "Content-Type": "application/json",
+            }
+        });
     }
 
     getSendgridTemplateId(templateName: SendgridTemplate): string {
@@ -104,7 +122,7 @@ export default class AdminSendgridService {
     }
 
     getUnsubscribeGroupId(templateName: SendgridTemplate): number | undefined {
-        let value = this.config.sendgrid.templates[templateName].unsubscribe_group_id;
+        const value = this.config.sendgrid.templates[templateName].unsubscribe_group_id;
         if (!isBlank(value)) {
             const num = Number(value);
             if (isNumber(num)) {
@@ -384,4 +402,80 @@ export default class AdminSendgridService {
             return { error: e, didSend: false };
         }
     }
+
+
+    async updateUnsubscribeGroupForMember(email: string, isSubscribed: boolean): Promise<{ success: boolean }> {
+        try {
+            const unsubscribeGroupId = Number(this.config.sendgrid.templates.new_prompt_notification.unsubscribe_group_id);
+            if (!unsubscribeGroupId) {
+                logger.info("No unsubscribe group could be found. Not unsubscribing user", email);
+                return { success: true };
+            }
+            if (isSubscribed) {
+                logger.info(`Attempting to remove (re-subscribe) ${email} from groupId ${unsubscribeGroupId}`);
+                await this.api.delete(`asm/groups/${ unsubscribeGroupId }/suppressions/${email}`)
+            } else {
+                logger.info(`Attempting to add (unsubscbribe) ${email} to groupId ${unsubscribeGroupId}`);
+                await this.api.post(`asm/groups/${ unsubscribeGroupId }/suppressions`, {
+                    recipient_emails: [email]
+                })
+            }
+
+            return { success: true };
+        } catch (error) {
+            logger.error("Failed to unsubscribe user from emails", getAxiosError(error));
+            return { success: false }
+        }
+    }
+
+
+    async handleWebhookEvent(event: SendgridWebhookEvent): Promise<WebhookEventResult> {
+        logger.info("Handling webhook event", event);
+        if (isAdvancedSubscriptionManagementEvent(event)) {
+            return await this.handleSubscriptionManagementEvent(event);
+        } else {
+            logger.info("Not handling event type", event.event);
+        }
+
+        return { success: true, event: event.event };
+    }
+
+    getTemplateNameFromAsmGroupId(groupId: number): SendgridTemplate | undefined {
+        const groupIdString = String(groupId);
+        return (Object.keys(this.config.sendgrid.templates) as SendgridTemplate[]).find((name: SendgridTemplate) => {
+            return groupIdString === this.config.sendgrid.templates[name].unsubscribe_group_id;
+        })
+    }
+
+    async handleSubscriptionManagementEvent(event: AdvancedSubscriptionManagementEvent): Promise<WebhookEventResult> {
+        const groupId = event.asm_group_id;
+        const templateName = this.getTemplateNameFromAsmGroupId(groupId);
+
+        if (!templateName) {
+            logger.info("No template found for given unsubscribe group. Can not process. Returning success.")
+            return { success: true, event: event.event };
+        }
+
+        const isSubscribed = event.event === SendgridEventType.group_resubscribe;
+
+        let success = true;
+        switch (templateName) {
+            case SendgridTemplate.new_prompt_notification:
+                const member = await AdminCactusMemberService.getSharedInstance().setEmailNotificationPreference(event.email, isSubscribed);
+                if (member) {
+                    await AdminSlackService.getSharedInstance().sendActivityMessage(`${ member.email } has ${ isSubscribed ? "re-subscribed" : "unsubscribed" } from email notifications`);
+                }
+
+                logger.info("Updated member to have email notification prefernece of true");
+                success = true;
+                break;
+            default:
+                logger.info(`Not processing ${ event.event } for email template name ${ templateName }`);
+                break;
+        }
+
+        return { success, event: event.event };
+    }
+
+
 }

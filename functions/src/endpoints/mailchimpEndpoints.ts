@@ -2,9 +2,9 @@
 import * as express from "express";
 import * as cors from "cors";
 import SignupRequest from "@shared/mailchimp/models/SignupRequest";
-import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
+import SubscriptionResult, { SubscriptionResultStatus } from "@shared/mailchimp/models/SubscriptionResult";
 import ApiError from "@shared/api/ApiError";
-import {writeToFile} from "@api/util/FileUtil";
+import { writeToFile } from "@api/util/FileUtil";
 import {
     CampaignEventData,
     CleanedEmailEventData,
@@ -17,10 +17,10 @@ import {
     UnsubscribeEventData,
     WebhookEvent
 } from "@shared/mailchimp/models/MailchimpTypes";
-import {saveSentCampaign} from "@api/services/sentCampaignService";
+import { saveSentCampaign } from "@api/services/sentCampaignService";
 import MailchimpService from "@admin/services/MailchimpService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
-import {submitJob} from "@api/pubsub/subscribers/ProcessMailchimpCampaignRecipientsJob";
+import { submitJob } from "@api/pubsub/subscribers/ProcessMailchimpCampaignRecipientsJob";
 import AdminSlackService, {
     ChannelName,
     ChatMessage,
@@ -29,12 +29,12 @@ import AdminSlackService, {
     SlackMessage
 } from "@admin/services/AdminSlackService";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
-import CactusMember, {NotificationStatus} from "@shared/models/CactusMember";
-import {getISODate} from "@shared/util/DateUtil";
-import {UnsubscribeRequest, UpdateStatusRequest} from "@shared/mailchimp/models/UpdateStatusTypes";
-import {getAuthUser} from "@api/util/RequestUtil";
-import {getConfig, isNonPromptCampaignId} from "@admin/config/configService";
+import CactusMember, { NotificationStatus } from "@shared/models/CactusMember";
+import { getISODate } from "@shared/util/DateUtil";
+import { UnsubscribeRequest, UpdateStatusRequest } from "@shared/mailchimp/models/UpdateStatusTypes";
+import { getConfig, isNonPromptCampaignId } from "@admin/config/configService";
 import Logger from "@shared/Logger";
+import { updateEmailPreferences } from "@api/endpoints/userEndpoints";
 
 const logger = new Logger("mailchimpEndpoints");
 const app = express();
@@ -240,38 +240,14 @@ app.post("/unsubscribe/confirm", async (req: express.Request, res: express.Respo
 
 });
 
-app.put("/status", async (req: express.Request, res: express.Response) => {
-    const statusRequest = req.body as UpdateStatusRequest;
-    const isUnsubscribe = statusRequest.status === ListMemberStatus.unsubscribed;
-    const user = await getAuthUser(req);
-    if (!user) {
-        res.sendStatus(401);
-        return;
-    }
-
-    if (user.email !== statusRequest.email) {
-        res.sendStatus(403);
-        return;
-    }
-
-    const response = await MailchimpService.getSharedInstance().updateMemberStatus(statusRequest);
-    let cactusMember: CactusMember | undefined = undefined;
-    if (response.listMember) {
-        cactusMember = await AdminCactusMemberService.getSharedInstance().updateFromMailchimpListMember(response.listMember);
-        if (cactusMember) {
-            cactusMember.mailchimpListMember = response.listMember;
-            cactusMember.unsubscribedAt = isUnsubscribe ? new Date() : undefined;
-            cactusMember.notificationSettings.email = isUnsubscribe ? NotificationStatus.INACTIVE : NotificationStatus.ACTIVE;
-            await AdminCactusMemberService.getSharedInstance().save(cactusMember);
-            logger.log("updated member after changing the status", cactusMember);
-        }
-    }
-
-    await sendSlackUserUnsubscribedEmail({cactusMember, email: statusRequest.email, status: statusRequest.status});
-
-    res.send(response);
-
-});
+/**
+ * @deprecated - use the /users/update-email-preferences endpoint instead
+ * We now use both sendgrid and mailchimp for emails, so we need to keep them in both in sync.
+ * The users endpoint is more generic and will handle all email services.
+ *
+ * Because of iOS apps, we need to support this endpoint still. So, just use the correct handler to process the request.
+ */
+app.put("/status", updateEmailPreferences);
 
 async function sendSlackUserUnsubscribedEmail(options: { email: string, status: ListMemberStatus, cactusMember?: CactusMember }) {
     const {cactusMember, email, status} = options;

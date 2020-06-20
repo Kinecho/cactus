@@ -18,6 +18,10 @@ import AdminDataExportService from "@admin/services/AdminDataExportService";
 import { EmailDataParams, EmailDataResult } from "@shared/api/DataExportTypes";
 import AdminSendgridService, { CactusSender, SendEmailResult } from "@admin/services/AdminSendgridService";
 import { SendgridTemplate } from "@shared/models/EmailLog";
+import { UpdateStatusRequest } from "@shared/mailchimp/models/UpdateStatusTypes";
+import { ListMemberStatus } from "@shared/mailchimp/models/MailchimpTypes";
+import MailchimpService from "@admin/services/MailchimpService";
+import { stringifyJSON } from "@shared/util/ObjectUtil";
 
 const logger = new Logger("userEndpoints");
 const app = express();
@@ -239,8 +243,30 @@ app.get("/feature-auth/core-values", async (req: functions.https.Request | any, 
     }
 });
 
-app.post("/update-email-preferences", async (req, resp) => {
+
+export async function updateEmailPreferences(req: express.Request, resp: express.Response) {
+    const statusRequest = req.body as UpdateStatusRequest;
+    logger.info("Running update email preferences", stringifyJSON(statusRequest, 2));
+    const user = await getAuthUser(req);
+    if (!user) {
+        resp.sendStatus(401);
+        return;
+    }
+    if (user.email !== statusRequest.email) {
+
+        resp.sendStatus(403);
+        return;
+    }
+    const isUnsubscribe = statusRequest.status === ListMemberStatus.unsubscribed;
+    const mailchimpResponse = await MailchimpService.getSharedInstance().updateMemberStatus(statusRequest);
+    logger.info("Mailchimp response", mailchimpResponse);
+
+    const sendgridResult = await AdminSendgridService.getSharedInstance().updateUnsubscribeGroupForMember(statusRequest.email, !isUnsubscribe);
+    logger.info("unsubscribe user from email notifications result", stringifyJSON(sendgridResult, 2));
+
     resp.send({ success: true });
-})
+}
+
+app.put("/update-email-preferences", updateEmailPreferences)
 
 export default app

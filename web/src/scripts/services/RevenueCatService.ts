@@ -1,8 +1,8 @@
 import _axios, { AxiosInstance } from "axios";
 import {
     apiDomain,
-    AttributesInput,
-    getPlatformHeader, getSubscriberAttributes,
+    getPlatformHeader,
+    getSubscriberAttributes,
     processAttributeInputForUpdate,
     RevenueCatEndpoints
 } from "@shared/api/RevenueCatApi";
@@ -10,7 +10,6 @@ import { Config } from "@web/config";
 import CactusMember from "@shared/models/CactusMember";
 import { getAppType } from "@web/DeviceUtil";
 import Logger from "@shared/Logger"
-import { stringifyJSON } from "@shared/util/ObjectUtil";
 import { isAxiosError } from "@shared/api/ApiTypes";
 
 const logger = new Logger("RevenueCatService");
