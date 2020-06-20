@@ -13,7 +13,9 @@ export interface SubmitTaskResponse {
     task?: ITask,
     success: boolean,
     error?: any,
-    alreadyExists?: boolean
+    alreadyExists?: boolean,
+    skipped?: boolean,
+    message?: string,
 }
 
 export enum TaskQueueConfigName {

@@ -1,12 +1,13 @@
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CloudTaskService, { SubmitTaskResponse, TaskQueueConfigName } from "@admin/services/CloudTaskService";
-import CactusMember, { PromptSendTime } from "@shared/models/CactusMember";
+import CactusMember, { NotificationStatus, PromptSendTime } from "@shared/models/CactusMember";
 import {
     MemberPromptNotificationSetupInfo,
     MemberPromptNotificationTaskParams,
     MemberPromptNotificationTaskResult,
     NextPromptResult,
-    SendEmailNotificationParams, SendEmailNotificationResult,
+    SendEmailNotificationParams,
+    SendEmailNotificationResult,
     SendPushNotificationParams
 } from "@admin/tasks/PromptNotificationTypes";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
@@ -90,6 +91,13 @@ export default class PromptNotificationManager {
 
 
     async createEmailTask(setupInfo: MemberPromptNotificationSetupInfo, processAt?: Date): Promise<SubmitTaskResponse> {
+        if (setupInfo.member?.notificationSettings?.email === NotificationStatus.INACTIVE) {
+            return {
+                success: true,
+                skipped: true,
+                message: "Member has email notification settings INACTIVE",
+            }
+        }
         const payload: SendEmailNotificationParams = {
             memberId: setupInfo.member?.id,
             promptContentEntryId: setupInfo.promptContent?.entryId
@@ -291,6 +299,15 @@ export default class PromptNotificationManager {
         const { member } = await HoboCache.shared.getMemberById(memberId);
         const email = member?.email;
         const { promptContent } = await HoboCache.shared.fetchPromptContent(promptContentEntryId);
+
+        if (member?.notificationSettings.email === NotificationStatus.INACTIVE) {
+            logger.info("Member has opted out of emails, not sending");
+            return {
+                sent: false,
+                message: "User has opted out of emails, not sending",
+            }
+        }
+
         if (!member || !promptContent || !promptContentEntryId || !memberId || !email || isBlank(email)) {
             return {
                 sent: false,
