@@ -1,4 +1,4 @@
-import CactusMember, { NotificationSettings, PromptSendTime } from "@shared/models/CactusMember";
+import CactusMember, { PromptSendTime } from "@shared/models/CactusMember";
 import { DateObject } from "luxon";
 import PromptContent from "@shared/models/PromptContent";
 import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
