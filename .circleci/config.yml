@@ -269,9 +269,6 @@ jobs:
           name: "TSLint"
           command: npm --prefix web run lint:ci
       - run:
-          name: "Compile TypeScript"
-          command: npm --prefix web run tsc
-      - run:
           name: "Run Unit Tests"
           command: npm --prefix web run test:ci
       - store_test_results:

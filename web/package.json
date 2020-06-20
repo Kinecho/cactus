@@ -32,7 +32,7 @@
     "page:delete": "echo \"*********************\nThis command has been moved to the scripts directory\n*********************\n\"",
     "test": "JEST_JUNIT_OUTPUT=reports/tests/jest/results.xml jest",
     "test:ci": "FIRESTORE_EMULATOR_HOST=localhost:5005 TZ=America/Denver JEST_JUNIT_OUTPUT=reports/tests/jest/results.xml jest --silent --ci --coverageDirectory reports/coverage --coverage --runInBand --reporters=default --reporters=jest-junit",
-    "tsc": "tsc",
+    "tsc": "tsc -p .",
     "tslint": "tslint -p tsconfig.json",
     "ngrok": "ngrok http -subdomain=cactus-web --host-header=rewrite 8080 ",
     "storybook": "start-storybook -p 6006 --ci -s ./src",
