@@ -5,7 +5,7 @@ import SentPrompt, { PromptSendMedium } from "@shared/models/SentPrompt";
 import { DateObject, DateTime } from "luxon";
 import PromptContent from "@shared/models/PromptContent";
 import AdminSentPromptService, { CreateSentPromptResult } from "@admin/services/AdminSentPromptService";
-import PushNotificationService from "@api/services/PushNotificationService";
+import PushNotificationService from "@admin/services/PushNotificationService";
 import { NewPromptNotificationPushResult } from "@admin/PushNotificationTypes";
 import { convertDateToSendTimeUTC } from "@shared/util/DateUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";

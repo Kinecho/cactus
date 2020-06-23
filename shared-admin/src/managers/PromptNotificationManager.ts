@@ -35,7 +35,7 @@ import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import PromptContent from "@shared/models/PromptContent";
 import { SendgridTemplate } from "@shared/models/EmailLog";
 import { NewPromptNotificationPushResult } from "@admin/PushNotificationTypes";
-import PushNotificationService from "../../../functions/src/services/PushNotificationService";
+import PushNotificationService from "@admin/services/PushNotificationService";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 import ReflectionResponse from "@shared/models/ReflectionResponse";

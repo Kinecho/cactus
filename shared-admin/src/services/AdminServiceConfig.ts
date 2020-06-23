@@ -40,7 +40,7 @@ import AdminRevenueCatService from "@admin/services/AdminRevenueCatService";
 import CloudTaskService from "@admin/services/CloudTaskService";
 import PromptNotificationManager from "@admin/managers/PromptNotificationManager";
 import AdminNotificationService from "@admin/services/AdminNotificationService";
-import PushNotificationService from "../../../functions/src/services/PushNotificationService";
+import PushNotificationService from "@admin/services/PushNotificationService";
 
 const logger = new Logger("AdminServiceConfig");
 
