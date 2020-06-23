@@ -165,7 +165,7 @@ export default class PromptNotificationManager {
             return {
                 success: true,
                 skipped: true,
-                message: "Sent prompt included a restricted type - which means they may have been sent the email already."
+                message: "Sent prompt included a restricted type - which means they may have been sent the push already."
             }
         }
 
@@ -240,15 +240,21 @@ export default class PromptNotificationManager {
     async createSentPromptFromSetupInfo(params: { setupInfo: MemberPromptNotificationSetupInfo, pushResult: SubmitTaskResponse, emailResult: SubmitTaskResponse }): Promise<SentPrompt | undefined> {
         const { setupInfo, pushResult, emailResult } = params;
         const { member, promptContent } = setupInfo;
-        if (member && promptContent) {
-            const { sentPrompt } = AdminSentPromptService.createSentPrompt({
+        let sentPrompt = setupInfo.sentPrompt;
+        if (member && promptContent && !sentPrompt) {
+            const createdResult = AdminSentPromptService.createSentPrompt({
                 member,
                 promptContent,
             });
+            sentPrompt = createdResult.sentPrompt;
+
             if (!sentPrompt) {
                 return undefined;
             }
-            const history: SentPromptHistoryItem[] = []
+        }
+
+        if (sentPrompt) {
+            const history: SentPromptHistoryItem[] = sentPrompt.sendHistory
             if (pushResult.success && pushResult.task) {
                 history.push({ usedMemberCustomTime: true, medium: PromptSendMedium.PUSH, sendDate: new Date() })
             }
@@ -334,15 +340,17 @@ export default class PromptNotificationManager {
      * Given input params and the result params, notify slack of the results.
      * @param {MemberPromptNotificationTaskParams} params
      * @param {MemberPromptNotificationTaskResult} result
+     * @param {object} other - any other params to add to the message
      * @return {Promise<void>}
      */
-    async notifySlackResults(params: MemberPromptNotificationTaskParams, result: MemberPromptNotificationTaskResult) {
+    async notifySlackResults(params: MemberPromptNotificationTaskParams, result: MemberPromptNotificationTaskResult, other?: any) {
         const { memberId } = params;
         const { promptContent: pc, member, ...setupObject } = result.setupInfo ?? {};
 
         await AdminSlackService.getSharedInstance().uploadTextSnippet({
             message: `:squid: :woman-golfing: \`daily-prompt-setup\` Prompt Notification Setup Completed for MemberId \`${ memberId }\``,
             data: stringifyJSON({
+                other,
                 params,
                 result: {
                     ...result,

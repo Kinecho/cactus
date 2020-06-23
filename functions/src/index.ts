@@ -14,7 +14,6 @@ import {
     updateInsightWordsOnReflectionWrite
 } from "@api/triggers/ReflectionResponseTriggers";
 import * as SlackCommandJob from "@api/pubsub/subscribers/SlackCommandJob";
-import * as DailySentPromptJob from "@api/pubsub/subscribers/DailySentPromptJob";
 import * as MemberStatsJob from "@api/pubsub/subscribers/MemberStatsJob";
 import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
 import * as SentPromptTriggers from "@api/triggers/SentPromptTriggers";
@@ -58,7 +57,6 @@ export const cloudFunctions = {
 
     //PubSub topics
     pubsub1: {
-        dailySentPromptJob: functions.pubsub.topic(PubSubTopic.create_daily_sent_prompts).onPublish(DailySentPromptJob.onPublish),
         backupFirestore: functions.pubsub.topic(PubSubTopic.firestore_backup).onPublish(backupFirestore),
         exportToBigQuery: functions.pubsub.topic(PubSubTopic.firestore_export_bigquery).onPublish(exportFirestoreToBigQuery),
     },

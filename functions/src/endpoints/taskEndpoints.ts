@@ -11,7 +11,6 @@ import { PromptSendTime } from "@shared/models/CactusMember";
 import { getQuarterHourFromMinute } from "@shared/util/DateUtil";
 import { DateTime } from "luxon";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
-import AdminSlackService, { ChannelName } from "@admin/services/AdminSlackService";
 import HoboCache from "@admin/HoboCache";
 
 const logger = new Logger("taskEndpoints");
@@ -19,43 +18,39 @@ const logger = new Logger("taskEndpoints");
 const app = express();
 
 app.post("/daily-prompt-email", async (req: express.Request, resp: express.Response) => {
+    const taskId = req.header("x-cloudtasks-taskname");
+    const retryCount = req.header("x-cloudtasks-taskretrycount");
+    const executionCount = req.header("x-cloudtasks-taskexecutioncount");
     const params = req.body as SendEmailNotificationParams;
     logger.info("Send Emails task called", stringifyJSON(params, 2));
 
     const result = await PromptNotificationManager.shared.sendPromptNotificationEmail(params);
 
-    const slackData = { params, result };
-
-    await AdminSlackService.getSharedInstance().uploadTextSnippet({
-        message: `:squid: :email: \`daily-prompt-email\` results`,
-        data: stringifyJSON(slackData, 2),
-        fileType: "json",
-        filename: "send-push.json",
-        channel: ChannelName.engineering,
-    })
+    const logData = { taskInfo: { taskId, retryCount, executionCount }, params, result };
+    logger.info(stringifyJSON(logData, 2));
     resp.sendStatus(204);
     return;
 })
 
 app.post("/daily-prompt-push", async (req: express.Request, resp: express.Response) => {
+    const taskId = req.header("x-cloudtasks-taskname");
+    const retryCount = req.header("x-cloudtasks-taskretrycount");
+    const executionCount = req.header("x-cloudtasks-taskexecutioncount");
     const params = req.body as SendPushNotificationParams;
 
     const pushResult = await PromptNotificationManager.shared.sendPromptNotificationPush(params);
 
-    const slackData = { pushResult, params };
-    await AdminSlackService.getSharedInstance().uploadTextSnippet({
-        message: `:squid: :iphone: \`daily-prompt-push\` results`,
-        data: stringifyJSON(slackData, 2),
-        fileType: "json",
-        filename: "send-push.json",
-        channel: ChannelName.engineering,
-    })
-
+    const logData = { taskInfo: { taskId, retryCount, executionCount }, pushResult, params, };
+    logger.info(stringifyJSON(logData, 2));
     resp.sendStatus(204);
     return;
 })
 
 app.post("/daily-prompt-setup", async (req: express.Request, resp: express.Response) => {
+    logger.info("Create Daily Prompt Headers", stringifyJSON(req.headers, 2));
+    const taskId = req.header("x-cloudtasks-taskname");
+    const retryCount = req.header("x-cloudtasks-taskretrycount");
+    const executionCount = req.header("x-cloudtasks-taskexecutioncount");
     const params: MemberPromptNotificationTaskParams = req.body;
     if (!params.memberId) {
         logger.info("No member ID was found, can not process task. Removing from queue");
@@ -68,7 +63,12 @@ app.post("/daily-prompt-setup", async (req: express.Request, resp: express.Respo
 
     const result = await PromptNotificationManager.shared.processMemberPromptNotification(params);
 
-    await PromptNotificationManager.shared.notifySlackResults(params, result);
+    logger.info(stringifyJSON({
+        params, result,
+        taskInfo: {
+            taskId, retryCount, executionCount
+        }
+    }, 2))
 
     if (result.success) {
         resp.status(200).send(result);
