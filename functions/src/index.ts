@@ -5,7 +5,6 @@ import checkoutApp from "@api/endpoints/checkoutApp";
 import manageNotificationApp from "@api/endpoints/manageNotificationsEndpoints";
 import testApp from "@api/endpoints/testApp";
 import taskEndpoints from "@api/endpoints/taskEndpoints";
-import * as EmailRecipientsJob from "@api/pubsub/subscribers/ProcessMailchimpCampaignRecipientsJob";
 import { backupFirestore, exportFirestoreToBigQuery } from "@api/endpoints/DataExportJob";
 import * as UnsubscriberReportSyncJob from "@api/pubsub/subscribers/UnsubscriberReportSyncJob";
 import {

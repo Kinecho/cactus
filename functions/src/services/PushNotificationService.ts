@@ -223,8 +223,8 @@ export default class PushNotificationService {
         const { body, title, badgeCount, data } = pushData;
         return {
             notification: {
-                title: removeMarkdown(title),
-                body: removeMarkdown(body),
+                title: removeMarkdown(title ?? ""),
+                body: removeMarkdown(body ?? ""),
             },
             data,
             android: {

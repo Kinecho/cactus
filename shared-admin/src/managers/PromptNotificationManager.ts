@@ -110,8 +110,20 @@ export default class PromptNotificationManager {
     async createDailyPromptEmailTask(setupInfo: MemberPromptNotificationSetupInfo, processAt?: Date): Promise<SubmitTaskResponse> {
         const { member, promptContent, memberDateObject, sentPrompt } = setupInfo;
 
-        if (sentPrompt && sentPrompt.containsMedium(PromptSendMedium.EMAIL_MAILCHIMP)) {
-            return {success: true, skipped: true, message: "Member was already sent email via mailchimp"}
+        //This guard is mostly to prevent sending emails to people that already have been sent an email
+        const sentPromptMediums: PromptSendMedium[] = sentPrompt?.sendHistory.map(h => h.medium) ?? [];
+        const restrictedMediums: PromptSendMedium[] = [
+            PromptSendMedium.EMAIL_MAILCHIMP,
+            PromptSendMedium.CRON_JOB,
+            PromptSendMedium.PROMPT_CONTENT,
+            PromptSendMedium.EMAIL_SENDGRID
+        ];
+        if (sentPromptMediums.some(m => restrictedMediums.includes(m))) {
+            return {
+                success: true,
+                skipped: true,
+                message: "Sent prompt included a restricted type - which means they may have been sent the email already."
+            }
         }
 
         if (member?.notificationSettings?.email === NotificationStatus.INACTIVE) {
@@ -135,12 +147,25 @@ export default class PromptNotificationManager {
     }
 
     async createDailyPromptPushTask(setupInfo: MemberPromptNotificationSetupInfo, processAt?: Date): Promise<SubmitTaskResponse> {
-        const { member, promptContent, memberDateObject } = setupInfo;
+        const { member, promptContent, memberDateObject, sentPrompt } = setupInfo;
         if ((member?.fcmTokens ?? []).length === 0) {
             return {
                 success: true,
                 skipped: true,
                 message: "Member has no FCM tokens. Not sending push notifications",
+            }
+        }
+
+        //This guard is mostly to prevent sending emails to people that already have been sent an email
+        const sentPromptMediums: PromptSendMedium[] = sentPrompt?.sendHistory.map(h => h.medium) ?? [];
+        const restrictedMediums: PromptSendMedium[] = [
+            PromptSendMedium.PUSH,
+        ];
+        if (sentPromptMediums.some(m => restrictedMediums.includes(m))) {
+            return {
+                success: true,
+                skipped: true,
+                message: "Sent prompt included a restricted type - which means they may have been sent the email already."
             }
         }
 
@@ -185,10 +210,9 @@ export default class PromptNotificationManager {
         // Note: this assumes that a member should only answer a given PromptContent once, and should not be notified of it again.
         const hasReflections = (setupInfo.reflectionResponses ?? []).length > 0;
         if (hasReflections) {
-            logger.info(`Member has ${ [alreadySent && "a SentPrompt", hasReflections && "existing reflections"].filter(Boolean).join(" and ") }. Not sending notifications`);
+            logger.info(`Member has ${ [hasReflections && "existing reflections"].filter(Boolean).join(" and ") }. Not sending notifications`);
             result.success = true;
             result.alreadyReflected = hasReflections;
-            result.alreadyNotified = alreadySent;
             return result;
         }
 
@@ -236,7 +260,7 @@ export default class PromptNotificationManager {
                 })
             }
 
-            sentPrompt.history = history;
+            sentPrompt.sendHistory = history;
             await AdminSentPromptService.getSharedInstance().save(sentPrompt);
             return sentPrompt;
         }
@@ -438,7 +462,9 @@ export default class PromptNotificationManager {
             memberSendDate
         });
 
-        if (notificationExisted && [SendStatus.SENDING, SendStatus.SENT].includes(notification?.status)) {
+        const status = notification?.status;
+        const restrictedStatuses: SendStatus[] = [SendStatus.SENDING, SendStatus.SENT];
+        if (notificationExisted && status && restrictedStatuses.includes(status)) {
             logger.info("Notification is currently sending or has already sent", stringifyJSON(notification, 2));
             return { sent: false, message: `email notification already exists and status is ${ notification.status }` };
         }
@@ -545,7 +571,7 @@ export default class PromptNotificationManager {
 
     buildEmailNotificationTemplateData(params: { member: CactusMember, promptContent: PromptContent }): PromptNotificationEmail | null {
         const { member, promptContent } = params;
-        const introText = removeMarkdown(promptContent.getDynamicPreviewText({ member })) as string;
+        const introText = removeMarkdown(promptContent.getDynamicPreviewText({ member }) ?? "") as string;
         const promptUrl = buildPromptContentURL(promptContent, this.config);
 
         if (!promptUrl || !member.id || !member.email) {
@@ -573,7 +599,7 @@ export default class PromptNotificationManager {
 
     buildPushData(params: { member: CactusMember, promptContent: PromptContent }): PushNotificationData {
         const { member, promptContent } = params;
-        const introText = removeMarkdown(promptContent.getDynamicPreviewText({ member }));
+        const introText = removeMarkdown(promptContent.getDynamicPreviewText({ member }) ?? "");
 
         const dataPayload: Record<string, string> = {};
         if (promptContent.entryId) {
@@ -623,7 +649,9 @@ export default class PromptNotificationManager {
             promptContent
         })
 
-        if (notificationExisted && [SendStatus.SENDING, SendStatus.SENT].includes(notification?.status)) {
+        const restrictedStatuses: SendStatus[] = [SendStatus.SENDING, SendStatus.SENT]
+        const status = notification?.status;
+        if (notificationExisted && status && restrictedStatuses.includes(status)) {
             logger.info("Notification is currently sending or has already sent", stringifyJSON(notification, 2));
             return {
                 attempted: false,

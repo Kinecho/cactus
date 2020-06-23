@@ -6,7 +6,6 @@ import SubscriptionResult, { SubscriptionResultStatus } from "@shared/mailchimp/
 import ApiError from "@shared/api/ApiError";
 import { writeToFile } from "@api/util/FileUtil";
 import {
-    CampaignEventData,
     CleanedEmailEventData,
     EmailChangeEventData,
     EventType,
@@ -17,12 +16,9 @@ import {
     UnsubscribeEventData,
     WebhookEvent
 } from "@shared/mailchimp/models/MailchimpTypes";
-import { saveSentCampaign } from "@api/services/sentCampaignService";
 import MailchimpService from "@admin/services/MailchimpService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
-import { submitJob } from "@api/pubsub/subscribers/ProcessMailchimpCampaignRecipientsJob";
 import AdminSlackService, {
-    ChannelName,
     ChatMessage,
     SlackAttachment,
     SlackAttachmentField,
@@ -32,7 +28,7 @@ import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptS
 import CactusMember, { NotificationStatus } from "@shared/models/CactusMember";
 import { getISODate } from "@shared/util/DateUtil";
 import { UnsubscribeRequest, UpdateStatusRequest } from "@shared/mailchimp/models/UpdateStatusTypes";
-import { getConfig, isNonPromptCampaignId } from "@admin/config/configService";
+import { getConfig } from "@admin/config/configService";
 import Logger from "@shared/Logger";
 import { updateEmailPreferences } from "@api/endpoints/userEndpoints";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
@@ -83,8 +79,7 @@ app.post("/webhook", async (req: express.Request, res: express.Response) => {
             // message = `Cleaned email ${cleaned.email} from list. Reason = ${cleaned.reason}`;
             break;
         case EventType.campaign:
-            const campaignData = event.data as CampaignEventData;
-            await handleCampaignEvent(campaignData);
+            logger.info("Not handling campaign events anymore.");
             break;
     }
 
@@ -290,70 +285,6 @@ async function sendSlackUserUnsubscribedEmail(options: { email: string, status: 
 
 }
 
-export async function handleCampaignEvent(campaignData: CampaignEventData): Promise<void> {
-    const mailchimpService = MailchimpService.getSharedInstance();
-    if (campaignData.id && isNonPromptCampaignId(campaignData.id)) {
-        logger.log("Skipping campaign as it is not a prompt email");
-        return;
-    }
-    const campaign = await mailchimpService.getCampaign(campaignData.id);
-    const content = await mailchimpService.getCampaignContent(campaignData.id);
-
-
-    //this will create the link in the reflection prompt;
-    const sentCampaign = await saveSentCampaign(campaign, campaignData, content);
-    if (sentCampaign) {
-        await submitJob({
-            campaignId: campaignData.id,
-            reflectionPromptId: sentCampaign.reflectionPromptId
-        });
-    }
-
-    const fields = [
-        {
-            title: "Subject",
-            value: campaignData.subject,
-            short: true,
-        },
-        {
-            title: "Campaign ID",
-            value: campaignData.id,
-            short: true,
-        },
-    ];
-
-    if (campaign) {
-        fields.push(
-        {
-            title: "Send Type",
-            value: campaign.type,
-            short: true,
-        },
-        {
-            title: "Email URL",
-            value: campaign.archive_url,
-            short: true,
-        },
-        {
-            title: "Emails Sent",
-            value: `${ campaign.emails_sent }`,
-            short: true,
-        })
-    }
-
-    const message = {
-        text: "Mailchimp Webhook Activity",
-        attachments: [{
-            title: `:email: An email campaign was sent!`,
-            color: "#29A389",
-            fields: fields,
-            ts: campaign ? `${ (new Date(campaign.send_time)).getTime() / 1000 }` : undefined,
-        }]
-    };
-
-    await AdminSlackService.getSharedInstance().sendMessage(ChannelName.email_sends, message)
-}
-
 export async function handleSubscribeEvent(eventData: SubscribeEventData): Promise<void> {
     const mailchimpService = MailchimpService.getSharedInstance();
     const slackService = AdminSlackService.getSharedInstance();
@@ -450,7 +381,7 @@ export async function handleUnsubscribeEvent(event: UnsubscribeEventData): Promi
     const { email, campaign_id: campaignId, reason } = event;
     //TODO: get the unsub reason
 
-    let unsubData: Partial<MemberUnsubscribeReport | undefined> = await MailchimpService.getSharedInstance().getUnsubscribeReportForMember({
+    let unsubData: Partial<MemberUnsubscribeReport> | undefined = await MailchimpService.getSharedInstance().getUnsubscribeReportForMember({
         campaignId,
         email
     });

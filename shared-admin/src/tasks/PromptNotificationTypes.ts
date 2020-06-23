@@ -39,11 +39,6 @@ export interface MemberPromptNotificationTaskResult {
      * If the member has already reflected on this prompt content.
      */
     alreadyReflected?: boolean;
-    /**
-     * If the member was already notified of this prompt.
-     * This is mostly a legacy field to prevent existing SentPrompts from Mailchimp from being sent again
-     */
-    alreadyNotified?: boolean;
     memberId?: string;
     success: boolean;
     retryable?: boolean;

@@ -39,7 +39,7 @@ export default class MailchimpSyncMembersCommand extends FirebaseCommand {
                     if ((!existingCactusMember || !existingCactusMember.unsubscribedAt)
                         && listMember.status === ListMemberStatus.unsubscribed
                         && listMember.email_address) {
-                        console.log(chalk.yellow("Getting unsubscribe activity"));
+                        console.log(chalk.yellow('Getting unsubscribe activity'));
                         const unsubActivity = await this.getUnsubActivity(listMember.email_address, mailchimpService);
                         if (unsubActivity) {
                             if (unsubActivity.campaign_id) {
