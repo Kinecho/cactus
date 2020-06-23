@@ -1,4 +1,4 @@
-export interface NewPromptNotificationResult {
+export interface NewPromptNotificationPushResult {
     result?: {
         numSuccess: number,
         numError: number,

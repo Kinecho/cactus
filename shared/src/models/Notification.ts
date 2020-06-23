@@ -29,7 +29,12 @@ export enum NotificationType {
     NEW_PROMPT = "NEW_PROMPT",
 }
 
-export type PushNotificationData = { title?: string, body?: string, badgeCount: number, data?: { [name: string]: any } };
+export type PushNotificationData = {
+    title?: string,
+    body?: string,
+    badgeCount: number,
+    data?: { [name: string]: any }
+};
 export type NotificationData = PushNotificationData | { [name: string]: any };
 
 export enum NotificationField {
@@ -66,6 +71,7 @@ export interface EmailCreateParams extends CreateParams {
 
 export interface PushCreateParams extends CreateParams {
     fcmTokens?: string[],
+    email?: string,
     data: PushNotificationData,
 }
 
@@ -235,9 +241,9 @@ export default class Notification extends BaseModel {
      */
     static createPush(params: PushCreateParams): Notification {
         const log = Notification.commonInit(NotificationChannel.PUSH, params);
-        const { fcmTokens } = params;
+        const { fcmTokens, email } = params;
         log.fcmTokens = fcmTokens;
-
+        log.email = email;
         return log;
     }
 

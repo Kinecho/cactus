@@ -3,7 +3,7 @@ import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import * as admin from "firebase-admin";
 import * as Sentry from "@sentry/node";
 import PromptContent from "@shared/models/PromptContent";
-import { NewPromptNotificationResult } from "@admin/PushNotificationTypes";
+import { NewPromptNotificationPushResult } from "@admin/PushNotificationTypes";
 import SentPrompt, { PromptSendMedium } from "@shared/models/SentPrompt";
 import Logger from "@shared/Logger";
 import { chunkArray, stringifyJSON } from "@shared/util/ObjectUtil";
@@ -11,20 +11,30 @@ import HoboCache from "@admin/HoboCache";
 import { BaseMessage } from "firebase-admin/lib/messaging";
 import Message = admin.messaging.Message;
 import BatchResponse = admin.messaging.BatchResponse;
+import { PushNotificationData } from "@shared/models/Notification";
 
 const removeMarkdown = require("remove-markdown");
 
 const logger = new Logger("PushNotificationService");
 export default class PushNotificationService {
-    static sharedInstance = new PushNotificationService();
-    private messaging = admin.messaging();
+    static sharedInstance: PushNotificationService;
+
+    static initialize() {
+        PushNotificationService.sharedInstance = new PushNotificationService();
+    }
+
+    private messaging: admin.messaging.Messaging;
+
+    constructor() {
+        this.messaging = admin.messaging();
+    }
 
     async sendNewPromptPushIfNeeded(options: {
         sentPrompt: SentPrompt,
         promptContent?: PromptContent,
         prompt?: ReflectionPrompt,
         member: CactusMember,
-    }): Promise<NewPromptNotificationResult | undefined> {
+    }): Promise<NewPromptNotificationPushResult | undefined> {
         const { sentPrompt, prompt, promptContent, member } = options;
         try {
             if (sentPrompt.completed) {
@@ -96,7 +106,13 @@ export default class PushNotificationService {
         };
     }
 
-    async sendPromptNotification(options: { member?: CactusMember, prompt?: ReflectionPrompt, promptContent?: PromptContent | null, dryRun?: boolean }): Promise<NewPromptNotificationResult> {
+
+    async sendPromptNotification(options: {
+        member?: CactusMember,
+        prompt?: ReflectionPrompt,
+        promptContent?: PromptContent | null,
+        dryRun?: boolean
+    }): Promise<NewPromptNotificationPushResult> {
         let attempted = false;
         try {
             const { member, prompt, dryRun } = options;
@@ -121,7 +137,7 @@ export default class PushNotificationService {
             }
 
             const payload = this.promptContentNotificationMessagePayload({ member, promptContent })
-            const sendResult = await this.sendPushToMember({ member, message: payload, dryRun })
+            const sendResult = await this.sendFCMToMember({ member, message: payload, dryRun })
             attempted = true;
             logger.log(`SendPushNotification for prompt ${ stringifyJSON(sendResult) }`);
             return {
@@ -191,10 +207,68 @@ export default class PushNotificationService {
 
     }
 
-    async sendPushToMember(options: { message: BaseMessage, member?: CactusMember, dryRun?: boolean }): Promise<BatchResponse> {
+    /**
+     * Send a Firebase message to a member. Uses already formatted firebase.Message data.
+     * @param {{message: BaseMessage, member?: CactusMember, dryRun?: boolean}} options
+     * @return {Promise<admin.messaging.BatchResponse>}
+     */
+    async sendFCMToMember(options: { message: BaseMessage, member?: CactusMember, dryRun?: boolean }): Promise<BatchResponse> {
         const { message, member, dryRun } = options;
         const tokens = member?.fcmTokens ?? []
 
         return await this.sendMessageToTokens({ tokens, message, dryRun });
+    }
+
+    notificationPushDataToBaseMessage(pushData: PushNotificationData): BaseMessage {
+        const { body, title, badgeCount, data } = pushData;
+        return {
+            notification: {
+                title: removeMarkdown(title),
+                body: removeMarkdown(body),
+            },
+            data,
+            android: {
+                notification: {
+                    notificationCount: badgeCount,
+                }
+            },
+            apns: {
+                payload: {
+                    aps: {
+                        badge: badgeCount
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Send an arbitrary push notification to a member. Uses Cactus Push Data as the payload.
+     * This method will transform data into correct firebase format.
+     *
+     * As of 2020-06-22, This is the preferred way to send push notifications to members.
+     * @param {object} params
+     * @param {PushNotificationData} params.data
+     * @param {CactusMember} params.member
+     * @param {boolean} params.dryRun
+     */
+    async sendPushDataToMember(params: { data: PushNotificationData, member: CactusMember, dryRun?: boolean }): Promise<BatchResponse> {
+        const { data, member, dryRun } = params;
+        const tokens = member.fcmTokens ?? [];
+
+        const message: BaseMessage = this.notificationPushDataToBaseMessage(data);
+        try {
+            return await this.sendMessageToTokens({ tokens, message, dryRun });
+        } catch (error) {
+            logger.error("A runtime error occurred while trying to send a push notification", error);
+            Sentry.captureException(error);
+            return {
+                failureCount: tokens.length,
+                successCount: 0,
+                responses: [],
+            }
+        }
+
+
     }
 }

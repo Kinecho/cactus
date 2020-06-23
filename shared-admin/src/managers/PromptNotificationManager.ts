@@ -28,11 +28,14 @@ import Notification, {
     NotificationChannel,
     NotificationContentType,
     NotificationType,
+    PushNotificationData,
     SendStatus
 } from "@shared/models/Notification";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import PromptContent from "@shared/models/PromptContent";
 import { SendgridTemplate } from "@shared/models/EmailLog";
+import { NewPromptNotificationPushResult } from "@admin/PushNotificationTypes";
+import PushNotificationService from "../../../functions/src/services/PushNotificationService";
 
 const removeMarkdown = require("remove-markdown");
 const logger = new Logger("PromptNotificationManager");
@@ -375,6 +378,48 @@ export default class PromptNotificationManager {
         return { sent: true, sendResult };
     }
 
+    async getOrCreatePushNotification(params: {
+        member: CactusMember,
+        promptContent: PromptContent,
+        data: PushNotificationData,
+        memberSendDate?: DateObject,
+    }): Promise<{ notification: Notification, existing: boolean }> {
+        const { member, promptContent, data, memberSendDate } = params;
+        return await AdminFirestoreService.getSharedInstance().firestore.runTransaction<{ notification: Notification, existing: boolean }>(async transaction => {
+            const uniqueBy = memberSendDate ? Notification.uniqueByDateObject(memberSendDate) : undefined;
+            let existing = false;
+            let notification: Notification | undefined = await AdminNotificationService.getSharedInstance().findFirst({
+                uniqueBy,
+                type: NotificationType.NEW_PROMPT,
+                contentType: NotificationContentType.promptContent,
+                contentId: promptContent.entryId,
+                channel: NotificationChannel.PUSH,
+                memberId: member.id!,
+            }, { transaction })
+
+            if (!notification) {
+                notification = Notification.createPush({
+                    memberId: member.id!,
+                    email: member.email!,
+                    type: NotificationType.NEW_PROMPT,
+                    contentType: NotificationContentType.promptContent,
+                    contentId: promptContent.entryId,
+                    fcmTokens: member.fcmTokens,
+                    uniqueBy,
+                    data,
+                })
+                notification.status = SendStatus.SENDING; //set to sending because we'll be sending this notification shortly
+                notification = await AdminNotificationService.getSharedInstance().save(notification, { transaction });
+            } else {
+                existing = true;
+                logger.info("Found existing PUSH notification:", stringifyJSON(notification, 2));
+
+            }
+            return { notification, existing };
+        });
+    }
+
+
     /**
      * Using Firestore transaction, get existing Notification, or create a new one.
      * @param {object} params
@@ -418,7 +463,7 @@ export default class PromptNotificationManager {
                 notification = await AdminNotificationService.getSharedInstance().save(notification, { transaction });
             } else {
                 existing = true;
-                logger.info("Found existing notification:", stringifyJSON(notification, 2));
+                logger.info("Found existing EMAIL notification:", stringifyJSON(notification, 2));
 
             }
             return { notification, existing };
@@ -451,5 +496,82 @@ export default class PromptNotificationManager {
         }
         logger.info("Created Prompt Notification Template Data", data);
         return data;
+    }
+
+    buildPushData(params: { member: CactusMember, promptContent: PromptContent }): PushNotificationData {
+        const { member, promptContent } = params;
+        const introText = removeMarkdown(promptContent.getDynamicPreviewText({ member }));
+
+        const dataPayload: Record<string, string> = {};
+        if (promptContent.entryId) {
+            dataPayload.promptContentEntryId = promptContent.entryId;
+        }
+        if (promptContent.promptId) {
+            dataPayload.promptId = promptContent.promptId;
+        }
+
+        const pushData: PushNotificationData = {
+            body: introText,
+            title: promptContent.subjectLine,
+            badgeCount: 1,
+            data: dataPayload
+        }
+        logger.info("Built push notification for prompt content", pushData);
+        return pushData;
+
+    }
+
+    /**
+     * Process a Push task to send a single member push notifications about a new prompt.
+     * @param {SendPushNotificationParams} params
+     * @return {Promise<NewPromptNotificationPushResult>}
+     */
+    async sendPromptNotificationPush(params: SendPushNotificationParams): Promise<NewPromptNotificationPushResult> {
+        const { memberId, promptContentEntryId, memberSendDate } = params;
+        logger.info("Send Push Notifications task called", stringifyJSON(params, 2));
+
+        const { member } = await HoboCache.shared.getMemberById(memberId);
+        const { promptContent } = await HoboCache.shared.fetchPromptContent(promptContentEntryId);
+
+        if (!member || !promptContent) {
+            logger.error("One or both of member, promptContent was not found. Can not send a push notification");
+            return {
+                attempted: false,
+                error: "required data not present",
+            }
+        }
+
+        const data: PushNotificationData = this.buildPushData({ member, promptContent });
+
+        const { notification, existing: notificationExisted } = await this.getOrCreatePushNotification({
+            member,
+            memberSendDate,
+            data,
+            promptContent
+        })
+
+        if (notificationExisted && [SendStatus.SENDING, SendStatus.SENT].includes(notification?.status)) {
+            logger.info("Notification is currently sending or has already sent", stringifyJSON(notification, 2));
+            return {
+                attempted: false,
+                error: `push notification already exists and status is ${ notification.status }`
+            };
+        }
+
+        const pushResult = await PushNotificationService.sharedInstance.sendPushDataToMember({ data, member })
+        logger.info("Push result completed", pushResult);
+
+
+        notification.status = SendStatus.SENT;
+        await AdminNotificationService.getSharedInstance().save(notification);
+
+        return {
+            attempted: true,
+            result: {
+                numSuccess: pushResult.successCount,
+                numError: pushResult.failureCount,
+            },
+            atLeastOneSuccess: pushResult.successCount > 0,
+        };
     }
 }

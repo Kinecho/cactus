@@ -12,9 +12,7 @@ import { getQuarterHourFromMinute } from "@shared/util/DateUtil";
 import { DateTime } from "luxon";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
 import AdminSlackService, { ChannelName } from "@admin/services/AdminSlackService";
-import PushNotificationService from "@api/services/PushNotificationService";
 import HoboCache from "@admin/HoboCache";
-import { NewPromptNotificationResult } from "@admin/PushNotificationTypes";
 
 const logger = new Logger("taskEndpoints");
 
@@ -41,25 +39,8 @@ app.post("/send-emails", async (req: express.Request, resp: express.Response) =>
 
 app.post("/send-push-notifications", async (req: express.Request, resp: express.Response) => {
     const params = req.body as SendPushNotificationParams;
-    logger.info("Send Push Notifications task called", stringifyJSON(params, 2));
 
-    const { member } = await HoboCache.shared.getMemberById(params.memberId);
-    const { promptContent } = await HoboCache.shared.fetchPromptContent(params.promptContentEntryId);
-
-    let pushResult: NewPromptNotificationResult;
-    if (!member || !promptContent) {
-        logger.error("One or both of member, promptContent was not found. Can not send a push notification");
-        pushResult = {
-            attempted: false,
-            error: "required data not present",
-        }
-    } else {
-        //TODO: should use SendPushIfNeeded
-        pushResult = await PushNotificationService.sharedInstance.sendPromptNotification({
-            member,
-            promptContent
-        })
-    }
+    const pushResult = await PromptNotificationManager.shared.sendPromptNotificationPush(params);
 
     const slackData = { pushResult, params };
     await AdminSlackService.getSharedInstance().uploadTextSnippet({

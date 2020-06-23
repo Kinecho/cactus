@@ -7,7 +7,7 @@ import CactusMember, {DEFAULT_PROMPT_SEND_TIME} from "@shared/models/CactusMembe
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import PushNotificationService from "@api/services/PushNotificationService";
-import {NewPromptNotificationResult} from "@admin/PushNotificationTypes";
+import {NewPromptNotificationPushResult} from "@admin/PushNotificationTypes";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import {isSendTimeWindow} from "@shared/util/NotificationUtil";
 import Logger from "@shared/Logger";
@@ -47,7 +47,7 @@ export const sentPromptPushNotificationTrigger = functions.firestore
     });
 
 
-async function sendPush(options: { member: CactusMember, prompt: ReflectionPrompt, sentPrompt: SentPrompt }): Promise<NewPromptNotificationResult | undefined> {
+async function sendPush(options: { member: CactusMember, prompt: ReflectionPrompt, sentPrompt: SentPrompt }): Promise<NewPromptNotificationPushResult | undefined> {
     const {member, sentPrompt, prompt} = options;
     const userDateObject = member.getCurrentLocaleDateObject();
     const userPromptSendTime = member.promptSendTime || DEFAULT_PROMPT_SEND_TIME;

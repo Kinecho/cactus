@@ -6,7 +6,7 @@ import { DateObject, DateTime } from "luxon";
 import PromptContent from "@shared/models/PromptContent";
 import AdminSentPromptService, { CreateSentPromptResult } from "@admin/services/AdminSentPromptService";
 import PushNotificationService from "@api/services/PushNotificationService";
-import { NewPromptNotificationResult } from "@admin/PushNotificationTypes";
+import { NewPromptNotificationPushResult } from "@admin/PushNotificationTypes";
 import { convertDateToSendTimeUTC } from "@shared/util/DateUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminSlackService, { ChannelName } from "@admin/services/AdminSlackService";
@@ -56,7 +56,7 @@ export interface MemberResult {
     memberDate?: DateObject,
     errors?: string[],
     message?: string,
-    pushResult?: NewPromptNotificationResult
+    pushResult?: NewPromptNotificationPushResult
     alreadyPushed?: boolean
     memberSendTimeUTC?: PromptSendTime
     memberSendTimeLocal?: PromptSendTime
@@ -337,12 +337,12 @@ async function getOrCreateSentPrompt(options: { promptContent: PromptContent, pr
 /**
  * Handle the push notification result
  * @param {{sentPrompt: SentPrompt,
- *  pushResult?: NewPromptNotificationResult,
+ *  pushResult?: NewPromptNotificationPushResult,
  *  result: MemberResult,
  *  errors: string[]}} options
  * @return {Promise<void>}
  */
-async function handlePushResult(options: { sentPrompt: SentPrompt, pushResult?: NewPromptNotificationResult, result: MemberResult, errors: string[] }) {
+async function handlePushResult(options: { sentPrompt: SentPrompt, pushResult?: NewPromptNotificationPushResult, result: MemberResult, errors: string[] }) {
     const { result, pushResult, sentPrompt, errors } = options;
     result.pushResult = pushResult;
     result.sentPush = result.pushResult?.atLeastOneSuccess || false;
