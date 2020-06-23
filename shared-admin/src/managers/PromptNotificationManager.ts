@@ -23,6 +23,16 @@ import { isBlank } from "@shared/util/StringUtil";
 import { isPremiumTier } from "@shared/models/MemberSubscription";
 import { buildPromptContentURL } from "@admin/util/StringUtil";
 import { CactusConfig } from "@shared/CactusConfig";
+import AdminNotificationService from "@admin/services/AdminNotificationService";
+import Notification, {
+    NotificationChannel,
+    NotificationContentType,
+    NotificationType,
+    SendStatus
+} from "@shared/models/Notification";
+import AdminFirestoreService from "@admin/services/AdminFirestoreService";
+import PromptContent from "@shared/models/PromptContent";
+import { SendgridTemplate } from "@shared/models/EmailLog";
 
 const removeMarkdown = require("remove-markdown");
 const logger = new Logger("PromptNotificationManager");
@@ -91,7 +101,8 @@ export default class PromptNotificationManager {
 
 
     async createEmailTask(setupInfo: MemberPromptNotificationSetupInfo, processAt?: Date): Promise<SubmitTaskResponse> {
-        if (setupInfo.member?.notificationSettings?.email === NotificationStatus.INACTIVE) {
+        const { member, promptContent, memberDateObject } = setupInfo;
+        if (member?.notificationSettings?.email === NotificationStatus.INACTIVE) {
             logger.info("Not creating email task as the user's email preference is to INACTIVE");
             return {
                 success: true,
@@ -100,8 +111,9 @@ export default class PromptNotificationManager {
             }
         }
         const payload: SendEmailNotificationParams = {
-            memberId: setupInfo.member?.id,
-            promptContentEntryId: setupInfo.promptContent?.entryId
+            memberId: member?.id,
+            promptContentEntryId: promptContent?.entryId,
+            memberSendDate: memberDateObject,
         };
         return await CloudTaskService.shared.submitHttpTask({
             queue: TaskQueueConfigName.send_emails,
@@ -111,9 +123,19 @@ export default class PromptNotificationManager {
     }
 
     async createPushTask(setupInfo: MemberPromptNotificationSetupInfo, processAt?: Date): Promise<SubmitTaskResponse> {
+        const { member, promptContent, memberDateObject } = setupInfo;
+        if ((member?.fcmTokens ?? []).length === 0) {
+            return {
+                success: true,
+                skipped: true,
+                message: "Member has no FCM tokens. Not sending push notifications",
+            }
+        }
+
         const payload: SendPushNotificationParams = {
-            memberId: setupInfo.member?.id,
-            promptContentEntryId: setupInfo.promptContent?.entryId
+            memberId: member?.id,
+            promptContentEntryId: promptContent?.entryId,
+            memberSendDate: memberDateObject,
         };
 
         return await CloudTaskService.shared.submitHttpTask({
@@ -301,15 +323,21 @@ export default class PromptNotificationManager {
     }
 
     /**
-     * Send an email via SendGrid notifying a user about a new PromptContent available to them.,
+     * Send an email via SendGrid notifying a user about a new PromptContent available to them.
      * @param {SendEmailNotificationParams} params
      * @return {Promise<SendEmailNotificationResult>}
      */
     async sendPromptNotificationEmail(params: SendEmailNotificationParams): Promise<SendEmailNotificationResult> {
-        const { memberId, promptContentEntryId } = params;
+        const { memberId, promptContentEntryId, memberSendDate } = params;
         const { member } = await HoboCache.shared.getMemberById(memberId);
         const email = member?.email;
         const { promptContent } = await HoboCache.shared.fetchPromptContent(promptContentEntryId);
+        if (!member || !promptContent || !promptContentEntryId || !memberId || !email || isBlank(email)) {
+            return {
+                sent: false,
+                errorMessage: `unable to get both a member and prompt content from data: ${ stringifyJSON(params) }`
+            };
+        }
 
         logger.info("Member notification settings: ", stringifyJSON(member?.notificationSettings, 2));
 
@@ -319,29 +347,99 @@ export default class PromptNotificationManager {
                 sent: false,
                 message: "User has opted out of emails, not sending",
             }
+
         }
 
-        if (!member || !promptContent || !promptContentEntryId || !memberId || !email || isBlank(email)) {
-            return {
-                sent: false,
-                errorMessage: `unable to get both a member and prompt content from data: ${ stringifyJSON(params) }`
-            };
+        const emailData = this.buildEmailNotificationTemplateData({ member, promptContent });
+        if (!emailData) {
+            return { sent: false, errorMessage: "Unable to build email data for the notification." };
         }
+
+        const { notification, existing: notificationExisted } = await this.getOrCreateEmailNotification({
+            member,
+            promptContent,
+            emailData,
+            memberSendDate
+        });
+
+        if (notificationExisted && [SendStatus.SENDING, SendStatus.SENT].includes(notification?.status)) {
+            logger.info("Notification is currently sending or has already sent", stringifyJSON(notification, 2));
+            return { sent: false, message: `email notification already exists and status is ${ notification.status }` };
+        }
+
+        const sendResult = await AdminSendgridService.getSharedInstance().sendPromptNotification(emailData);
+
+        notification.status = SendStatus.SENT;
+        await AdminNotificationService.getSharedInstance().save(notification);
+
+        return { sent: true, sendResult };
+    }
+
+    /**
+     * Using Firestore transaction, get existing Notification, or create a new one.
+     * @param {object} params
+     * @param  {CactusMember} params.member
+     * @param {promptContent} params.promptContent
+     * @param {emailData} params.emailData
+     * @param {[DateObject]} params.memberSendDate
+     * @return {Notification}
+     */
+    async getOrCreateEmailNotification(params: {
+        member: CactusMember,
+        promptContent: PromptContent,
+        emailData: PromptNotificationEmail,
+        memberSendDate?: DateObject
+    }): Promise<{ notification: Notification, existing: boolean }> {
+        const { member, promptContent, emailData, memberSendDate } = params;
+        return await AdminFirestoreService.getSharedInstance().firestore.runTransaction<{ notification: Notification, existing: boolean }>(async transaction => {
+            const uniqueBy = memberSendDate ? Notification.uniqueByDateObject(memberSendDate) : undefined;
+            let existing = false;
+            let notification: Notification | undefined = await AdminNotificationService.getSharedInstance().findFirst({
+                uniqueBy,
+                type: NotificationType.NEW_PROMPT,
+                contentType: NotificationContentType.promptContent,
+                contentId: promptContent.entryId,
+                channel: NotificationChannel.EMAIL,
+                memberId: member.id!,
+            }, { transaction })
+
+            if (!notification) {
+                notification = Notification.createEmail({
+                    memberId: member.id!,
+                    email: member.email!,
+                    type: NotificationType.NEW_PROMPT,
+                    contentType: NotificationContentType.promptContent,
+                    contentId: promptContent.entryId,
+                    uniqueBy,
+                    data: emailData,
+                    sendgridTemplateId: SendgridTemplate.new_prompt_notification,
+                })
+                notification.status = SendStatus.SENDING; //set to sending because we'll be sending this notification shortly
+                notification = await AdminNotificationService.getSharedInstance().save(notification, { transaction });
+            } else {
+                existing = true;
+                logger.info("Found existing notification:", stringifyJSON(notification, 2));
+
+            }
+            return { notification, existing };
+        });
+    }
+
+    buildEmailNotificationTemplateData(params: { member: CactusMember, promptContent: PromptContent }): PromptNotificationEmail | null {
+        const { member, promptContent } = params;
         const introText = removeMarkdown(promptContent.getDynamicPreviewText({ member })) as string;
         const promptUrl = buildPromptContentURL(promptContent, this.config);
 
-        if (!promptUrl) {
-            return {
-                sent: false,
-                errorMessage: `Unable to build a prompt url from promptContent: ${ stringifyJSON(promptContent) }`,
-            }
+        if (!promptUrl || !member.id || !member.email) {
+            logger.error("Unable to build prompt data");
+            return null
         }
 
         const data: PromptNotificationEmail = {
-            email,
+            email: member.email!,
             firstName: member.firstName,
-            memberId,
-            promptContentEntryId: promptContentEntryId,
+            memberId: member.id!,
+            promptContentEntryId: promptContent.entryId!,
             reflectUrl: promptUrl,
             mainText: introText,
             isPlus: isPremiumTier(member.tier),
@@ -351,8 +449,7 @@ export default class PromptNotificationManager {
             previewText: introText,
             subjectLine: promptContent.subjectLine ?? "Cactus: Daily Prompt"
         }
-        const sendResult = await AdminSendgridService.getSharedInstance().sendPromptNotification(data);
-
-        return { sent: true, sendResult };
+        logger.info("Created Prompt Notification Template Data", data);
+        return data;
     }
 }

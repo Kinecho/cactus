@@ -39,6 +39,7 @@ import AdminDeletedUserService from "@admin/services/AdminDeletedUserService";
 import AdminRevenueCatService from "@admin/services/AdminRevenueCatService";
 import CloudTaskService from "@admin/services/CloudTaskService";
 import PromptNotificationManager from "@admin/managers/PromptNotificationManager";
+import AdminNotificationService from "@admin/services/AdminNotificationService";
 
 const logger = new Logger("AdminServiceConfig");
 
@@ -82,6 +83,8 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminEmailLogService.initialize(config);
     AdminDataExportService.initialize(config);
     AdminDeletedUserService.initialize();
+    AdminNotificationService.initialize();
+
 
     //Flamelink
     AdminFlamelinkService.initialize(config, app);

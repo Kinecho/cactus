@@ -36,7 +36,9 @@ enum Fields {
     sendgridMessageId = "sendgridMessageId",
 }
 
-
+/**
+ * @Deprecated - use NotificationLog instead
+ */
 export default class EmailLog extends BaseModel {
     static Fields = Fields;
     collection = Collection.emailLogs;
