@@ -1,5 +1,5 @@
 import {SendgridTemplate} from "@shared/models/EmailLog";
-import { TaskQueueConfigName } from "../../shared-admin/src/services/CloudTaskService";
+import { TaskQueueConfigName } from "@admin/services/CloudTaskService";
 
 export interface ServiceAccountCredentials {
     project_id: string,
@@ -44,7 +44,7 @@ export interface CactusConfig {
     mailchimp: {
         api_key: string,
         audience_id: string,
-        bridge_to_monday_segment_id: string,
+        bridge_to_monday_segment_id: string, //no longer used - can be removed in a future release
         non_prompt_campaign_ids: string //this is a comma separated string
         segment_id_all_tiers: string,
         segment_id_plus_tier: string,

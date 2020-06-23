@@ -1,4 +1,4 @@
-import { CactusConfig } from "@shared/CactusConfig";
+import { CactusConfig } from "@admin/CactusConfig";
 import { Request } from "express";
 import Stripe from "stripe";
 import Logger from "@shared/Logger";

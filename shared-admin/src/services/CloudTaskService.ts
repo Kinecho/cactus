@@ -1,4 +1,4 @@
-import { CactusConfig, TaskQueueConfig } from "@shared/CactusConfig";
+import { CactusConfig, TaskQueueConfig } from "@admin/CactusConfig";
 import Logger from "@shared/Logger"
 import { v2beta3 } from "@google-cloud/tasks";
 import { google } from "@google-cloud/tasks/build/protos/protos";
@@ -19,9 +19,9 @@ export interface SubmitTaskResponse {
 }
 
 export enum TaskQueueConfigName {
-    user_prompt_notifications = "user_prompt_notifications",
-    send_push_notifications = "send_push_notifications",
-    send_emails = "send_emails",
+    daily_prompt_setup = "daily_prompt_setup",
+    daily_prompt_push = "daily_prompt_push",
+    daily_prompt_email = "daily_prompt_email",
 }
 
 export default class CloudTaskService {

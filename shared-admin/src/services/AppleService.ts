@@ -16,7 +16,7 @@ import {
     isReceiptInTrial,
     ReceiptStatusCode
 } from "@shared/api/AppleApi";
-import { CactusConfig } from "@shared/CactusConfig";
+import { CactusConfig } from "@admin/CactusConfig";
 import axios from "axios";
 import Logger from "@shared/Logger";
 import { isNotNull, optionalStringToNumber, stringifyJSON } from "@shared/util/ObjectUtil";

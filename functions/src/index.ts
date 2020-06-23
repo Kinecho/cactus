@@ -7,7 +7,6 @@ import testApp from "@api/endpoints/testApp";
 import taskEndpoints from "@api/endpoints/taskEndpoints";
 import * as EmailRecipientsJob from "@api/pubsub/subscribers/ProcessMailchimpCampaignRecipientsJob";
 import { backupFirestore, exportFirestoreToBigQuery } from "@api/endpoints/DataExportJob";
-import * as BridgeToMondayJob from "@api/pubsub/subscribers/BridgeToMondayJob";
 import * as UnsubscriberReportSyncJob from "@api/pubsub/subscribers/UnsubscriberReportSyncJob";
 import {
     onReflectionResponseCreated,
@@ -60,11 +59,9 @@ export const cloudFunctions = {
 
     //PubSub topics
     pubsub1: {
-        bridgeToMondayJob: functions.pubsub.topic(PubSubTopic.bridge_to_monday_prune).onPublish(BridgeToMondayJob.onPublish),
         dailySentPromptJob: functions.pubsub.topic(PubSubTopic.create_daily_sent_prompts).onPublish(DailySentPromptJob.onPublish),
         backupFirestore: functions.pubsub.topic(PubSubTopic.firestore_backup).onPublish(backupFirestore),
         exportToBigQuery: functions.pubsub.topic(PubSubTopic.firestore_export_bigquery).onPublish(exportFirestoreToBigQuery),
-        processMailchimpEmailRecipients: functions.pubsub.topic(PubSubTopic.process_mailchimp_email_recipients).onPublish(EmailRecipientsJob.onPublish),
     },
     pubsub2: {
         slackCommandJob: functions.pubsub.topic(PubSubTopic.slack_command).onPublish(SlackCommandJob.onPublish),

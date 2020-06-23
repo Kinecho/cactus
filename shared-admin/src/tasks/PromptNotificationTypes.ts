@@ -4,6 +4,8 @@ import PromptContent from "@shared/models/PromptContent";
 import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 import { SubmitTaskResponse } from "@admin/services/CloudTaskService";
 import { SendEmailResult } from "@admin/services/AdminSendgridService";
+import SentPrompt from "@shared/models/SentPrompt";
+import ReflectionResponse from "@shared/models/ReflectionResponse";
 
 /**
  * An object defining the parameters needed to potentially notify a member of new content.
@@ -33,6 +35,15 @@ export interface MemberPromptNotificationTaskParams {
  * The data needed to send notifications to a member about prompt content
  */
 export interface MemberPromptNotificationTaskResult {
+    /**
+     * If the member has already reflected on this prompt content.
+     */
+    alreadyReflected?: boolean;
+    /**
+     * If the member was already notified of this prompt.
+     * This is mostly a legacy field to prevent existing SentPrompts from Mailchimp from being sent again
+     */
+    alreadyNotified?: boolean;
     memberId?: string;
     success: boolean;
     retryable?: boolean;
@@ -40,6 +51,11 @@ export interface MemberPromptNotificationTaskResult {
     setupInfo?: MemberPromptNotificationSetupInfo;
     pushTaskResponse?: SubmitTaskResponse;
     emailTaskResponse?: SubmitTaskResponse;
+    /**
+     * The SentPrompt that was created as a result of this task.
+     * Note: if a sent prompt already existed prior to the task being run, this will be undefined.
+     */
+    sentPrompt?: SentPrompt;
 }
 
 export interface MemberPromptNotificationSetupInfo {
@@ -50,6 +66,8 @@ export interface MemberPromptNotificationSetupInfo {
     memberDateObject?: DateObject,
     isSendTime?: boolean,
     usedCachedPromptContent?: boolean,
+    sentPrompt?: SentPrompt,
+    reflectionResponses?: ReflectionResponse[],
 }
 
 /**

@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin'
-import { CactusConfig } from "@shared/CactusConfig";
+import { CactusConfig } from "@admin/CactusConfig";
 import MailchimpService from "@admin/services/MailchimpService";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";

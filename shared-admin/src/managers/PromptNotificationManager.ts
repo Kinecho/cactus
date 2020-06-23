@@ -22,7 +22,7 @@ import { PromptNotificationEmail } from "@admin/services/SendgridServiceTypes";
 import { isBlank } from "@shared/util/StringUtil";
 import { isPremiumTier } from "@shared/models/MemberSubscription";
 import { buildPromptContentURL } from "@admin/util/StringUtil";
-import { CactusConfig } from "@shared/CactusConfig";
+import { CactusConfig } from "@admin/CactusConfig";
 import AdminNotificationService from "@admin/services/AdminNotificationService";
 import Notification, {
     NotificationChannel,
@@ -36,6 +36,10 @@ import PromptContent from "@shared/models/PromptContent";
 import { SendgridTemplate } from "@shared/models/EmailLog";
 import { NewPromptNotificationPushResult } from "@admin/PushNotificationTypes";
 import PushNotificationService from "../../../functions/src/services/PushNotificationService";
+import AdminSentPromptService from "@admin/services/AdminSentPromptService";
+import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
+import ReflectionResponse from "@shared/models/ReflectionResponse";
+import SentPrompt, { PromptSendMedium, SentPromptHistoryItem } from "@shared/models/SentPrompt";
 
 const removeMarkdown = require("remove-markdown");
 const logger = new Logger("PromptNotificationManager");
@@ -78,7 +82,7 @@ export default class PromptNotificationManager {
                         promptSendTimeUTC: sendTimeUTC,
                         systemDateObject: DateTime.utc().toObject()
                     }
-                    return this.createMemberNotificationTask(payload)
+                    return this.createDailyPromptSetupTask(payload)
                 }));
                 memberResults.push(...memberBatchResult);
                 const endTime = (new Date()).getTime();
@@ -94,17 +98,22 @@ export default class PromptNotificationManager {
      * @param {Date|undefined} processAt - Optional date in which this task should be processed. If omitted, it will process immediately.
      * @return {SubmitTaskResponse}
      */
-    async createMemberNotificationTask(payload: MemberPromptNotificationTaskParams, processAt?: Date | undefined): Promise<SubmitTaskResponse> {
+    async createDailyPromptSetupTask(payload: MemberPromptNotificationTaskParams, processAt?: Date | undefined): Promise<SubmitTaskResponse> {
         return await CloudTaskService.shared.submitHttpTask({
-            queue: TaskQueueConfigName.user_prompt_notifications,
+            queue: TaskQueueConfigName.daily_prompt_setup,
             payload,
             processAt
         });
     }
 
 
-    async createEmailTask(setupInfo: MemberPromptNotificationSetupInfo, processAt?: Date): Promise<SubmitTaskResponse> {
-        const { member, promptContent, memberDateObject } = setupInfo;
+    async createDailyPromptEmailTask(setupInfo: MemberPromptNotificationSetupInfo, processAt?: Date): Promise<SubmitTaskResponse> {
+        const { member, promptContent, memberDateObject, sentPrompt } = setupInfo;
+
+        if (sentPrompt && sentPrompt.containsMedium(PromptSendMedium.EMAIL_MAILCHIMP)) {
+            return {success: true, skipped: true, message: "Member was already sent email via mailchimp"}
+        }
+
         if (member?.notificationSettings?.email === NotificationStatus.INACTIVE) {
             logger.info("Not creating email task as the user's email preference is to INACTIVE");
             return {
@@ -119,13 +128,13 @@ export default class PromptNotificationManager {
             memberSendDate: memberDateObject,
         };
         return await CloudTaskService.shared.submitHttpTask({
-            queue: TaskQueueConfigName.send_emails,
+            queue: TaskQueueConfigName.daily_prompt_email,
             payload,
             processAt
         });
     }
 
-    async createPushTask(setupInfo: MemberPromptNotificationSetupInfo, processAt?: Date): Promise<SubmitTaskResponse> {
+    async createDailyPromptPushTask(setupInfo: MemberPromptNotificationSetupInfo, processAt?: Date): Promise<SubmitTaskResponse> {
         const { member, promptContent, memberDateObject } = setupInfo;
         if ((member?.fcmTokens ?? []).length === 0) {
             return {
@@ -142,7 +151,7 @@ export default class PromptNotificationManager {
         };
 
         return await CloudTaskService.shared.submitHttpTask({
-            queue: TaskQueueConfigName.send_push_notifications,
+            queue: TaskQueueConfigName.daily_prompt_push,
             payload,
             processAt
         });
@@ -157,7 +166,7 @@ export default class PromptNotificationManager {
      * @return {Promise<MemberPromptNotificationTaskResult>}
      */
     async processMemberPromptNotification(params: MemberPromptNotificationTaskParams): Promise<MemberPromptNotificationTaskResult> {
-        const setupInfo = await this.getMemberPromptNotificationInfo(params);
+        const setupInfo = await this.getMemberPromptNotificationSetupInfo(params);
         const success = !!setupInfo.promptContent;
         const errorMessage = setupInfo.errorMessage;
         const result: MemberPromptNotificationTaskResult = {
@@ -173,18 +182,68 @@ export default class PromptNotificationManager {
             return result;
         }
 
-        const [emailResult, pushResult] = await Promise.all([
-            this.createEmailTask(setupInfo),
-            this.createPushTask(setupInfo)
-        ])
+        // Note: this assumes that a member should only answer a given PromptContent once, and should not be notified of it again.
+        const hasReflections = (setupInfo.reflectionResponses ?? []).length > 0;
+        if (hasReflections) {
+            logger.info(`Member has ${ [alreadySent && "a SentPrompt", hasReflections && "existing reflections"].filter(Boolean).join(" and ") }. Not sending notifications`);
+            result.success = true;
+            result.alreadyReflected = hasReflections;
+            result.alreadyNotified = alreadySent;
+            return result;
+        }
 
+        const [emailResult, pushResult] = await Promise.all([
+            this.createDailyPromptEmailTask(setupInfo),
+            this.createDailyPromptPushTask(setupInfo),
+
+        ])
+        const sentPrompt = await this.createSentPromptFromSetupInfo({ setupInfo, pushResult, emailResult });
         result.emailTaskResponse = emailResult;
         result.pushTaskResponse = pushResult;
+        result.sentPrompt = sentPrompt
 
         return result;
     }
 
-    async getMemberPromptNotificationInfo(params: MemberPromptNotificationTaskParams): Promise<MemberPromptNotificationSetupInfo> {
+    /**
+     * Even if no email or push tasks were created, the prompt should still be logged and show up in the user's feed.
+     * @param {object} params
+     * @param {MemberPromptNotificationSetupInfo} params.setupInfo
+     * @param {SubmitTaskResponse} params.pushResult
+     * @param {SubmitTaskResponse} params.emailResult
+     * @return {Promise<SentPrompt | undefined>}
+     */
+    async createSentPromptFromSetupInfo(params: { setupInfo: MemberPromptNotificationSetupInfo, pushResult: SubmitTaskResponse, emailResult: SubmitTaskResponse }): Promise<SentPrompt | undefined> {
+        const { setupInfo, pushResult, emailResult } = params;
+        const { member, promptContent } = setupInfo;
+        if (member && promptContent) {
+            const { sentPrompt } = AdminSentPromptService.createSentPrompt({
+                member,
+                promptContent,
+            });
+            if (!sentPrompt) {
+                return undefined;
+            }
+            const history: SentPromptHistoryItem[] = []
+            if (pushResult.success && pushResult.task) {
+                history.push({ usedMemberCustomTime: true, medium: PromptSendMedium.PUSH, sendDate: new Date() })
+            }
+            if (emailResult.success && emailResult.task) {
+                history.push({
+                    usedMemberCustomTime: true,
+                    medium: PromptSendMedium.EMAIL_SENDGRID,
+                    sendDate: new Date()
+                })
+            }
+
+            sentPrompt.history = history;
+            await AdminSentPromptService.getSharedInstance().save(sentPrompt);
+            return sentPrompt;
+        }
+        return undefined;
+    }
+
+    async getMemberPromptNotificationSetupInfo(params: MemberPromptNotificationTaskParams): Promise<MemberPromptNotificationSetupInfo> {
         const { memberId, systemDateObject } = params;
         const { member, cached: memberCached } = await HoboCache.shared.getMemberById(memberId);
 
@@ -201,6 +260,8 @@ export default class PromptNotificationManager {
             systemDateObject
         });
 
+        /* TODO: Do we need this check anymore? If we trust that this job will only run at the appropriate time, we can remove it
+         *  If it's possible that the job could run at times that are not appropriate for the user, we may want to keep this check. */
         if (!isSendTime) {
             logger.warn("It's not currently the member's send time, but will send anyway")
         }
@@ -209,9 +270,21 @@ export default class PromptNotificationManager {
         if (!promptContent) {
             errorMessage = `No "next prompt content" could be found for member ${ member.id } for date ${ memberDateObject ? DateTime.fromObject(memberDateObject).toLocaleString() : "undefined" }`;
         }
+
+        //Check on the current sent prompt status for this user. Do not notify if the prompt is completed
+        const [sentPrompt, reflectionResponses] = await Promise.all([AdminSentPromptService.getSharedInstance().getSentPromptForCactusMemberId({
+            cactusMemberId: memberId,
+            promptId: promptContent?.promptId
+        }), AdminReflectionResponseService.getSharedInstance().getMemberResponsesForPromptId({
+            memberId, promptId: promptContent?.promptId, limit: 1,
+        })]) as [SentPrompt | undefined, ReflectionResponse[]];
+
+
         logger.info(`Sending member ${ memberId } prompt entry ${ promptContent?.entryId ?? "[none]" }: "${ promptContent?.subjectLine ?? "[none]" }"`)
         const result = {
             member,
+            sentPrompt,
+            reflectionResponses,
             usedCachedMember: memberCached,
             isSendTime,
             promptContent,
@@ -244,7 +317,7 @@ export default class PromptNotificationManager {
         const { promptContent: pc, member, ...setupObject } = result.setupInfo ?? {};
 
         await AdminSlackService.getSharedInstance().uploadTextSnippet({
-            message: `:squid: :woman-golfing: Prompt Notification Processed for MemberId \`${ memberId }\``,
+            message: `:squid: :woman-golfing: \`daily-prompt-setup\` Prompt Notification Setup Completed for MemberId \`${ memberId }\``,
             data: stringifyJSON({
                 params,
                 result: {

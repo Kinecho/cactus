@@ -1,6 +1,6 @@
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import EmailLog, {SendgridTemplate, TemplateName} from "@shared/models/EmailLog";
-import {CactusConfig} from "@shared/CactusConfig";
+import {CactusConfig} from "@admin/CactusConfig";
 import {flattenUnique} from "@shared/util/FirestoreUtil";
 import Logger from "@shared/Logger";
 import {Collection} from "@shared/FirestoreBaseModels";

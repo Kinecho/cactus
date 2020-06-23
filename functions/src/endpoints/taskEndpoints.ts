@@ -18,7 +18,7 @@ const logger = new Logger("taskEndpoints");
 
 const app = express();
 
-app.post("/send-emails", async (req: express.Request, resp: express.Response) => {
+app.post("/daily-prompt-email", async (req: express.Request, resp: express.Response) => {
     const params = req.body as SendEmailNotificationParams;
     logger.info("Send Emails task called", stringifyJSON(params, 2));
 
@@ -27,7 +27,7 @@ app.post("/send-emails", async (req: express.Request, resp: express.Response) =>
     const slackData = { params, result };
 
     await AdminSlackService.getSharedInstance().uploadTextSnippet({
-        message: `:squid: :email: \`send-email\` results`,
+        message: `:squid: :email: \`daily-prompt-email\` results`,
         data: stringifyJSON(slackData, 2),
         fileType: "json",
         filename: "send-push.json",
@@ -37,14 +37,14 @@ app.post("/send-emails", async (req: express.Request, resp: express.Response) =>
     return;
 })
 
-app.post("/send-push-notifications", async (req: express.Request, resp: express.Response) => {
+app.post("/daily-prompt-push", async (req: express.Request, resp: express.Response) => {
     const params = req.body as SendPushNotificationParams;
 
     const pushResult = await PromptNotificationManager.shared.sendPromptNotificationPush(params);
 
     const slackData = { pushResult, params };
     await AdminSlackService.getSharedInstance().uploadTextSnippet({
-        message: `:squid: :iphone: \`send-push\` results`,
+        message: `:squid: :iphone: \`daily-prompt-push\` results`,
         data: stringifyJSON(slackData, 2),
         fileType: "json",
         filename: "send-push.json",
@@ -55,7 +55,7 @@ app.post("/send-push-notifications", async (req: express.Request, resp: express.
     return;
 })
 
-app.post("/send-prompt-notifications", async (req: express.Request, resp: express.Response) => {
+app.post("/daily-prompt-setup", async (req: express.Request, resp: express.Response) => {
     const params: MemberPromptNotificationTaskParams = req.body;
     if (!params.memberId) {
         logger.info("No member ID was found, can not process task. Removing from queue");
@@ -87,13 +87,13 @@ app.get("/purge-cache", async (req: express.Request, resp: express.Response) => 
         return
     }
     HoboCache.purge();
-    resp.send("Cache purged");
+    resp.send(`Cache purged at ${ new Date().toISOString() } `);
     return;
 });
 
 app.get("/create", async (req: express.Request, resp: express.Response) => {
     const numToCreate = Number(req.query.num ?? "1");
-    const numSeconds = Number(req.query.s ?? "10");
+    const numSeconds = Number(req.query.s ?? "5");
     const processAt = new Date(Date.now() + 1000 * numSeconds);
     const today = new Date();
     const utcHour = today.getUTCHours()
@@ -105,7 +105,7 @@ app.get("/create", async (req: express.Request, resp: express.Response) => {
     try {
         const tasks: Promise<SubmitTaskResponse>[] = [];
         for (let i = 0; i < numToCreate; i++) {
-            const createTask = PromptNotificationManager.shared.createMemberNotificationTask({
+            const createTask = PromptNotificationManager.shared.createDailyPromptSetupTask({
                 memberId,
                 promptSendTimeUTC,
                 systemDateObject: DateTime.utc().toObject()

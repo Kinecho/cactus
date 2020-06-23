@@ -1,6 +1,6 @@
 import PromptContent, { ContentStatus, ContentType } from "@shared/models/PromptContent";
 import { appendDomain, isBlank } from "@shared/util/StringUtil";
-import { CactusConfig } from "@shared/CactusConfig";
+import { CactusConfig } from "@admin/CactusConfig";
 import chalk from "chalk";
 import AdminFlamelinkService from "@admin/services/AdminFlamelinkService";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";

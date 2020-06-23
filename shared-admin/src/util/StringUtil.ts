@@ -9,7 +9,7 @@ import {getConfig, getHostname} from "@admin/config/configService";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import PromptContent from "@shared/models/PromptContent";
 import {PageRoute} from "@shared/PageRoutes";
-import {CactusConfig} from "@shared/CactusConfig";
+import {CactusConfig} from "@admin/CactusConfig";
 
 export function splitOnFirst(input: string, delimiter: string, trimValues: boolean = true): [string?, string?] {
 

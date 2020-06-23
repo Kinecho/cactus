@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import { getCactusConfig, Project } from "@scripts/config";
 import helpers from "@scripts/helpers";
-import { CactusConfig } from "@shared/CactusConfig";
+import { CactusConfig } from "@admin/CactusConfig";
 import { getAppSiteConfig } from "@scripts/appleAppSiteAssociation";
 import { copyFileSync, writeFileSync } from "fs";
 import * as path from "path";

@@ -1,5 +1,5 @@
 import {PubSub} from "@google-cloud/pubsub";
-import {CactusConfig} from "@shared/CactusConfig";
+import {CactusConfig} from "@admin/CactusConfig";
 
 export class PubSubService {
     protected static sharedInstance: PubSubService;

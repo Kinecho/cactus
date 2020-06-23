@@ -8,7 +8,7 @@ import AdminPromptContentService from "@admin/services/AdminPromptContentService
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import { formatDate, formatDateTime } from "@shared/util/DateUtil";
-import { CactusConfig } from "@shared/CactusConfig";
+import { CactusConfig } from "@admin/CactusConfig";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
 import Logger from "@shared/Logger";
 import { ArchiverError } from "archiver";

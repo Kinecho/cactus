@@ -6,7 +6,7 @@ import MailchimpService from "@admin/services/MailchimpService";
 import {CampaignStatus} from "@shared/mailchimp/models/MailchimpTypes";
 import {PubSub} from "@google-cloud/pubsub";
 import {CampaignRecipientJobPayload, PubSubTopic} from "@shared/types/PubSubTypes";
-import {CactusConfig} from "@shared/CactusConfig";
+import {CactusConfig} from "@admin/CactusConfig";
 
 const prompts = require("prompts");
 

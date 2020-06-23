@@ -1,4 +1,4 @@
-import { CactusConfig } from "@shared/CactusConfig";
+import { CactusConfig } from "@admin/CactusConfig";
 import { androidpublisher_v3, google } from "googleapis";
 import Logger from "@shared/Logger";
 import { stringifyJSON } from "@shared/util/ObjectUtil";

@@ -1,4 +1,4 @@
-import { CactusConfig } from "@shared/CactusConfig";
+import { CactusConfig } from "@admin/CactusConfig";
 import * as sgMail from "@sendgrid/mail";
 import * as EmailAddressTypes from "@sendgrid/helpers/classes/email-address";
 import * as MailTypes from "@sendgrid/helpers/classes/mail"

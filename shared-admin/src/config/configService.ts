@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions"
 import { Environment, getEnvironment } from "@admin/config/environmentManager";
-import { CactusConfig } from "@shared/CactusConfig";
+import { CactusConfig } from "@admin/CactusConfig";
 
 let _config: CactusConfig;
 let _testConfigOverrides: Partial<CactusConfig> = {};
@@ -273,19 +273,19 @@ const defaultTestConfig: CactusConfig = {
         location: "us-central1",
         handler_url_base: "https://us-central1-cactus-app-stage.cloudfunctions.net/tasks",
         queues: {
-            user_prompt_notifications: {
-                name: "user-prompt-notifications",
-                handler_path: "/send-prompt-notifications",
+            daily_prompt_setup: {
+                name: "daily-prompt-setup",
+                handler_path: "/daily-prompt-setup",
                 http_method: "POST"
             },
-            send_push_notifications: {
-                name: "send-push-notifications",
-                handler_path: "/send-push-notifications",
+            daily_prompt_push: {
+                name: "daily-prompt-push",
+                handler_path: "/daily-prompt-push",
                 http_method: "POST"
             },
-            send_emails: {
-                name: "send-emails",
-                handler_path: "/send-emails",
+            daily_prompt_email: {
+                name: "daily-prompt-email",
+                handler_path: "/daily-prompt-email",
                 http_method: "POST"
             }
         }

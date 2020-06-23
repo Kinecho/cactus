@@ -6,7 +6,7 @@ import * as Sentry from "@sentry/node"
 import AdminSlackService from "@admin/services/AdminSlackService";
 import { QuerySortDirection } from "@shared/types/FirestoreConstants";
 import Logger from "@shared/Logger";
-import { CactusConfig } from "@shared/CactusConfig";
+import { CactusConfig } from "@admin/CactusConfig";
 export import DocumentReference = firebaseAdmin.firestore.DocumentReference;
 export import DocumentSnapshot = firebaseAdmin.firestore.DocumentSnapshot;
 export import Timestamp = firebaseAdmin.firestore.Timestamp;

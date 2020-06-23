@@ -60,7 +60,7 @@ import * as md5 from "md5";
 import SignupRequest from "@shared/mailchimp/models/SignupRequest";
 import MailchimpSubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
 import ApiError from "@shared/api/ApiError";
-import {CactusConfig} from "@shared/CactusConfig";
+import {CactusConfig} from "@admin/CactusConfig";
 import {UpdateStatusRequest, UpdateStatusResponse} from "@shared/mailchimp/models/UpdateStatusTypes";
 import Logger from "@shared/Logger";
 import {chunkArray} from "@shared/util/ObjectUtil";

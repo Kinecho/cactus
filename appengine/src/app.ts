@@ -2,8 +2,6 @@
 require("module-alias/register");
 import { getConfig } from "@admin/config/configService";
 import { initializeServices } from "@admin/services/AdminServiceConfig";
-import slackRoutes from "@app/routes/slackRoutes";
-import userRoutes from "@app/routes/userRoutes";
 import Logger from "@shared/Logger";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
 import * as express from "express";
@@ -22,8 +20,8 @@ app.get("/", (req: express.Request, res: express.Response) => {
     res.send("🌵 Cactus will be deployed here.");
 });
 
-app.use("/slack", slackRoutes);
-app.use("/users", userRoutes);
+// When we have routes to register, this is how we'd do it.
+// app.use("/users", userRoutes);
 
 const server = app.listen(PORT, () => {
     console.log(`App listening on port ${ PORT }`);

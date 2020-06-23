@@ -23,7 +23,7 @@ import {
     TemplateType
 } from "@shared/mailchimp/models/MailchimpTypes";
 import {getUrlFromInput, isValidEmail, appendDomain} from "@shared/util/StringUtil";
-import {CactusConfig} from "@shared/CactusConfig";
+import {CactusConfig} from "@admin/CactusConfig";
 import {mailchimpTimeZone, makeUTCDateIntoMailchimpDate} from "@shared/util/DateUtil";
 import {DateTime} from "luxon";
 import {Command} from "@scripts/CommandTypes";

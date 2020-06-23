@@ -1,4 +1,4 @@
-import { CactusConfig } from "@shared/CactusConfig";
+import { CactusConfig } from "@admin/CactusConfig";
 import _axios, { AxiosInstance } from "axios";
 import Logger from "@shared/Logger"
 import { isAxiosError } from "@shared/api/ApiTypes";

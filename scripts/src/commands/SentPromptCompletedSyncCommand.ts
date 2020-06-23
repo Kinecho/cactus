@@ -1,7 +1,7 @@
 import {FirebaseCommand} from "@scripts/CommandTypes";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import * as admin from "firebase-admin";
-import {CactusConfig} from "@shared/CactusConfig";
+import {CactusConfig} from "@admin/CactusConfig";
 import {Project} from "@scripts/config";
 import chalk from "chalk";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";

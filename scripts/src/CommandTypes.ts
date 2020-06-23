@@ -3,7 +3,7 @@ import * as admin from "firebase-admin";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import chalk from "chalk";
 import { resetConsole } from "@scripts/util/ConsoleUtil";
-import { CactusConfig } from "@shared/CactusConfig";
+import { CactusConfig } from "@admin/CactusConfig";
 import { initializeServices } from "@admin/services/AdminServiceConfig";
 import { setTimestamp } from "@shared/util/FirestoreUtil";
 import { setConfig } from "@admin/config/configService";

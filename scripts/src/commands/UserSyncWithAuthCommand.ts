@@ -2,7 +2,7 @@ import {FirebaseCommand} from "@scripts/CommandTypes";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import * as admin from "firebase-admin";
 import {Project} from "@scripts/config";
-import {CactusConfig} from "@shared/CactusConfig";
+import {CactusConfig} from "@admin/CactusConfig";
 import {Collection} from "@shared/FirestoreBaseModels";
 import User from "@shared/models/User";
 

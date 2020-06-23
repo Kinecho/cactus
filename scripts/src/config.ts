@@ -2,7 +2,7 @@ import { buildConfig } from "@admin/config/configService";
 import * as admin from "firebase-admin";
 import chalk from "chalk";
 import helpers from "@scripts/helpers";
-import { CactusConfig } from "@shared/CactusConfig";
+import { CactusConfig } from "@admin/CactusConfig";
 
 const firebaseTools = require("firebase-tools");
 
