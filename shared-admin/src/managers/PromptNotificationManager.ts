@@ -481,9 +481,9 @@ export default class PromptNotificationManager {
         }
 
         const data: PromptNotificationEmail = {
-            email: member.email!,
+            email: member.email,
             firstName: member.firstName,
-            memberId: member.id!,
+            memberId: member.id,
             promptContentEntryId: promptContent.entryId!,
             reflectUrl: promptUrl,
             mainText: introText,
