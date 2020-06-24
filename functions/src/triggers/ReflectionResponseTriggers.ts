@@ -83,7 +83,7 @@ export const updateReflectionStatsTrigger = functions.firestore
     await AdminRevenueCatService.shared.updateSubscriberAttributes(member);
 });
 
-export const updateInsightWordsOnReflectionWrite = functions.firestore
+export const updateInsightWordsOnReflectionWrite = functions.runWith({ memory: "512MB", timeoutSeconds: 120 }).firestore
 .document(`${ Collection.reflectionResponses }/{responseId}`)
 .onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
     logger.log("starting updateInsightWordsOnReflectionWrite");

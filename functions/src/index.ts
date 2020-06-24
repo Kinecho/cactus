@@ -50,27 +50,45 @@ export const cloudFunctions = {
     slack: functions.https.onRequest(slackEndpoints),
     signup: functions.https.onRequest(signupEndpoints),
     social: functions.https.onRequest(socialEndpoints),
-    user: functions.https.onRequest(userEndpoints),
-    test: functions.https.onRequest(testApp),
+    user: functions.runWith({ memory: "512MB", timeoutSeconds: 60 }).https.onRequest(userEndpoints),
+    test: functions.runWith({ memory: "1GB", timeoutSeconds: 300 }).https.onRequest(testApp),
     notificationPreferences: functions.https.onRequest(manageNotificationApp),
     apple: functions.https.onRequest(appleEndpoints),
-    tasks: functions.https.onRequest(taskEndpoints),
+    tasks: functions.runWith({ memory: "1GB", timeoutSeconds: 120, maxInstances: 10 }).https.onRequest(taskEndpoints),
 
     //PubSub topics
     pubsub1: {
         backupFirestore: functions.pubsub.topic(PubSubTopic.firestore_backup).onPublish(backupFirestore),
-        dailySentPromptJob: functions.pubsub.topic(PubSubTopic.create_daily_sent_prompts).onPublish(DailySentPromptJob.onPublish),
-        exportToBigQuery: functions.pubsub.topic(PubSubTopic.firestore_export_bigquery).onPublish(exportFirestoreToBigQuery),
+        dailySentPromptJob: functions.runWith({
+            memory: "2GB",
+            timeoutSeconds: 540
+        }).pubsub.topic(PubSubTopic.create_daily_sent_prompts).onPublish(DailySentPromptJob.onPublish),
+        exportToBigQuery: functions.runWith({ timeoutSeconds: 540 }).pubsub.topic(PubSubTopic.firestore_export_bigquery).onPublish(exportFirestoreToBigQuery),
     },
     pubsub2: {
-        slackCommandJob: functions.pubsub.topic(PubSubTopic.slack_command).onPublish(SlackCommandJob.onPublish),
+        slackCommandJob: functions.runWith({
+            memory: "2GB",
+            timeoutSeconds: 540
+        }).pubsub.topic(PubSubTopic.slack_command).onPublish(SlackCommandJob.onPublish),
         unsubscriberSyncJob: functions.pubsub.topic(PubSubTopic.unsubscriber_sync).onPublish(UnsubscriberReportSyncJob.onPublish),
-        memberStatsJob: functions.pubsub.topic(PubSubTopic.member_stats_sync).onPublish(MemberStatsJob.onPublish),
-        customSentPromptNotifications: functions.pubsub.topic(PubSubTopic.custom_sent_prompt_notifications).onPublish(CustomSentPromptNotificationsJob.onPublish),
-        expireTrials: functions.pubsub.topic(PubSubTopic.expire_subscription_trials).onPublish(expireMembershipJob),
+        memberStatsJob: functions.runWith({
+            memory: "1GB",
+            timeoutSeconds: 540
+        }).pubsub.topic(PubSubTopic.member_stats_sync).onPublish(MemberStatsJob.onPublish),
+        customSentPromptNotifications: functions.runWith({
+            memory: "1GB",
+            timeoutSeconds: 540
+        }).pubsub.topic(PubSubTopic.custom_sent_prompt_notifications).onPublish(CustomSentPromptNotificationsJob.onPublish),
+        expireTrials: functions.runWith({
+            memory: "1GB",
+            timeoutSeconds: 540
+        }).pubsub.topic(PubSubTopic.expire_subscription_trials).onPublish(expireMembershipJob),
     },
     pubsub3: {
-        syncTrailMembersToMailchimp: functions.pubsub.topic(PubSubTopic.sync_trial_members_to_mailchimp).onPublish(syncTrailToMailchimpMembersJob),
+        syncTrailMembersToMailchimp: functions.runWith({
+            memory: "1GB",
+            timeoutSeconds: 540
+        }).pubsub.topic(PubSubTopic.sync_trial_members_to_mailchimp).onPublish(syncTrailToMailchimpMembersJob),
         googlePlayBillingEvents: functions.pubsub.topic(PubSubTopic.android_google_play_billing_events).onPublish(GooglePlayBillingJob),
         processCancellations: functions.pubsub.topic(PubSubTopic.process_cancellations).onPublish(CancellationJob),
         revenueCatEvents: functions.pubsub.topic(PubSubTopic.revenuecat_events).onPublish(RevenueCatEventJob),
