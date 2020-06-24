@@ -34,11 +34,9 @@ app.get("/fcm", async (req, res) => {
         logger.log("Staring the message send process");
         const title = (req.query.title as string | undefined) || "Cactus Test Push Message";
         const body = (req.query.body as string | undefined) || "This is the body of the request";
-
         // const token = (req.query.token as string | undefined) || "f2SB0VUqdaA:APA91bGV1o6f4UzsXOlwX_LYqCIKsH-STA4HCIIbMoUwzUd7zobmaICShlUchVvB2qPYjoZAmnjLl5fI6ntvrxSNfyWvWmkMkCGIGcqps0B-zl0dDci1aP9mEFmX0GvH7GmIflGgHCY6";
-
         const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail("neil@neilpoulin.com");
-        let tokens = member?.fcmTokens ?? []
+        const tokens = member?.fcmTokens ?? []
 
         const tasks = tokens.map(token => {
             const payload: admin.messaging.MessagingPayload = {
