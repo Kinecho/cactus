@@ -15,6 +15,7 @@ export import Batch = firebaseAdmin.firestore.WriteBatch;
 export import CollectionReference = firebaseAdmin.firestore.CollectionReference;
 export import FieldValue = firebaseAdmin.firestore.FieldValue;
 import { isNull } from "@shared/util/ObjectUtil";
+import { isBlank } from "@shared/util/StringUtil";
 
 export type QueryCursor = string | number | DocumentSnapshot | Timestamp | any;
 
@@ -191,7 +192,9 @@ export default class AdminFirestoreService {
 
             return model;
         } catch (e) {
-            logger.error(`[${ this.config.app.serverName || "unknown_server" }] failed to save firestore document ${ model.id } to collection ${ model.collection }. ${ opts.transaction ? "Using transaction." : "" }`, e);
+            const msgBase = `[${ this.config.app.serverName || "unknown_server" }] failed to save firestore document ${ model.id } to collection ${ model.collection }. ${ opts.transaction ? "Using transaction." : "" }`;
+            logger.error(msgBase, e);
+            await AdminSlackService.getSharedInstance().sendDbAlertsMessage(`${ msgBase }\n\`\`\`${ e }\`\`\``);
             throw e;
         }
     }
@@ -267,12 +270,21 @@ export default class AdminFirestoreService {
 
             return queryResult;
         } catch (e) {
-            // const serverName = config.serv
-            const errorMessage = `[${ this.config.app.serverName }] Failed to execute query ${ options.queryName || "" }`.trim()
-            + (options.transaction ? " while using a transaction" : "").trim();
+            const messageParts: string [] = []
+            if (!isBlank(this.config.app.serverName)) {
+                messageParts.push(`\`[${ this.config.app.serverName }]\``);
+            }
+
+            messageParts.push(`An error occurred while executing a query${ options.transaction ? " while using a transaction." : "." }`);
+            if (options.queryName) {
+                messageParts.push(`\nQueryName: \`${ options.queryName }\``);
+            }
+
+            messageParts.push(`\n\`\`\`${ e }\`\`\``);
+            const errorMessage = messageParts.join(" ");
             logger.error(errorMessage, e);
             Sentry.captureException(e);
-            await AdminSlackService.getSharedInstance().sendEngineeringMessage(`${ errorMessage }\n\`\`\`${ e }\`\`\``);
+            await AdminSlackService.getSharedInstance().sendDbAlertsMessage(errorMessage);
             return { size: 0, results: [], error: e };
         }
 

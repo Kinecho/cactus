@@ -1,4 +1,4 @@
-import {CactusConfig} from "@admin/CactusConfig";
+import { CactusConfig } from "@admin/CactusConfig";
 import {
     IncomingWebhook,
     IncomingWebhookSendArguments,
@@ -50,6 +50,7 @@ export interface SlackMessageResult {
 
 export enum ChannelName {
     engineering = "engineering",
+    db_alerts = "db-alerts",
     general = "general",
     activity = "activity",
     data_log = "data_log",
@@ -123,14 +124,14 @@ export default class AdminSlackService {
         const isEnabled = this.enabled();
         logger.log("slack enabled: ", isEnabled);
         if (!isEnabled) {
-            return Promise.resolve({enabled: false, success: true});
+            return Promise.resolve({ enabled: false, success: true });
         }
 
         try {
             const result = await this.cactusActivityWebhook.send(message);
-            return {enabled: true, success: true, response: result.text};
+            return { enabled: true, success: true, response: result.text };
         } catch (error) {
-            return {enabled: true, success: false, error: error};
+            return { enabled: true, success: false, error: error };
         }
     }
 
@@ -138,33 +139,33 @@ export default class AdminSlackService {
     static getAttachmentForObject(data: any): SlackAttachment {
         const fields: SlackAttachmentField[] = [];
         Object.keys(data)
-            .filter(key => {
-                return data[key] || "";
-            })
-            .forEach((key) => {
-                function processField(title: string, field: any) {
-                    if (typeof field === "object" && !Array.isArray(field)) {
-                        Object.entries(field).forEach(([objectKey, value]) => {
-                            processField(objectKey, value);
-                        })
-                    } else if (Array.isArray(field)) {
-                        fields.push({
-                            title: title,
-                            value: JSON.stringify(field),
-                            short: true,
-                        })
-                    } else {
-                        fields.push({
-                            title: title,
-                            value: `${field}`,
-                            short: true,
-                        })
-                    }
+        .filter(key => {
+            return data[key] || "";
+        })
+        .forEach((key) => {
+            function processField(title: string, field: any) {
+                if (typeof field === "object" && !Array.isArray(field)) {
+                    Object.entries(field).forEach(([objectKey, value]) => {
+                        processField(objectKey, value);
+                    })
+                } else if (Array.isArray(field)) {
+                    fields.push({
+                        title: title,
+                        value: JSON.stringify(field),
+                        short: true,
+                    })
+                } else {
+                    fields.push({
+                        title: title,
+                        value: `${ field }`,
+                        short: true,
+                    })
                 }
+            }
 
-                const merge = data[key] || "";
-                processField(key, merge);
-            });
+            const merge = data[key] || "";
+            processField(key, merge);
+        });
 
         const attachment: SlackAttachment = {
             fields: fields
@@ -181,7 +182,7 @@ export default class AdminSlackService {
 
         const channel = name.replace("_", "-");
         if (this.config.web.domain !== "cactus.app") {
-            return `${channel}-test`;
+            return `${ channel }-test`;
         } else {
             return channel;
         }
@@ -209,7 +210,7 @@ export default class AdminSlackService {
                 return;
             }
         } catch (error) {
-            logger.error(`Failed to send message to channel ${channelId}`, error);
+            logger.error(`Failed to send message to channel ${ channelId }`, error);
             if (error.data.error === "not_in_channel") {
                 console.log("Attempting to join channel and retry the message");
                 const joined = await this.joinChannel(channelId);
@@ -222,10 +223,10 @@ export default class AdminSlackService {
                         return;
                     }
                 } else {
-                    logger.error(`was unable to join channel ${channelId}, not retrying`, JSON.stringify(error, null, 2));
+                    logger.error(`was unable to join channel ${ channelId }, not retrying`, JSON.stringify(error, null, 2));
                 }
             } else {
-                logger.error(`Failed to send slack message to ${channelId}`, error);
+                logger.error(`Failed to send slack message to ${ channelId }`, error);
             }
         }
     }
@@ -297,7 +298,7 @@ export default class AdminSlackService {
 
     async joinChannel(channel: string): Promise<boolean> {
         try {
-            await this.web.channels.join({name: channel});
+            await this.web.channels.join({ name: channel });
             return true;
         } catch (error) {
             logger.error("Failed to join channel", error);
@@ -308,6 +309,10 @@ export default class AdminSlackService {
 
     async sendEngineeringMessage(message: string | ChatMessage): Promise<void> {
         await this.sendMessage(ChannelName.engineering, message);
+    }
+
+    async sendDbAlertsMessage(message: string | ChatMessage): Promise<void> {
+        await this.sendMessage(ChannelName.db_alerts, message);
     }
 
     async sendChaChingMessage(message: string | ChatMessage): Promise<void> {
@@ -377,7 +382,7 @@ export default class AdminSlackService {
         title?: string
         message?: string,
     }) {
-        const {data, channel, filename, fileType, title, message} = options;
+        const { data, channel, filename, fileType, title, message } = options;
         return this.web.files.upload({
             channels: this.getChannel(channel),
             content: data,

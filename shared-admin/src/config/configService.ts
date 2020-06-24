@@ -32,7 +32,7 @@ export function buildConfig(configInput: CactusConfig = functions.config() as Ca
     // const functionsConfig = functions.config() as CactusConfig;
 
     const config = { ...configInput };
-    config.app.serverName = process.env.FUNCTION_NAME || undefined;
+    config.app.serverName = process.env.FUNCTION_NAME || process.env.K_SERVICE || undefined;
     config.isEmulator = process.env.IS_EMULATOR === "true";
     if (config.isEmulator) {
         config.app.environment = "dev";
