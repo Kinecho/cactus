@@ -1,15 +1,11 @@
 import * as express from "express";
 import Logger from "@shared/Logger"
-import { SubmitTaskResponse } from "@admin/services/CloudTaskService";
 import {
     MemberPromptNotificationTaskParams,
     SendEmailNotificationParams,
     SendPushNotificationParams
 } from "@admin/tasks/PromptNotificationTypes";
 import PromptNotificationManager from "@admin/managers/PromptNotificationManager";
-import { PromptSendTime } from "@shared/models/CactusMember";
-import { getQuarterHourFromMinute } from "@shared/util/DateUtil";
-import { DateTime } from "luxon";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
 import HoboCache from "@admin/HoboCache";
 
@@ -91,37 +87,37 @@ app.get("/purge-cache", async (req: express.Request, resp: express.Response) => 
     return;
 });
 
-app.get("/create", async (req: express.Request, resp: express.Response) => {
-    const numToCreate = Number(req.query.num ?? "1");
-    const numSeconds = Number(req.query.s ?? "5");
-    const processAt = new Date(Date.now() + 1000 * numSeconds);
-    const today = new Date();
-    const utcHour = today.getUTCHours()
-    const utcMinutes = getQuarterHourFromMinute(today.getUTCMinutes());
-
-    const memberId = "s4RMQ186oVFvNbJan41b" //neil@cactus.app
-    const promptSendTimeUTC: PromptSendTime = { hour: utcHour, minute: utcMinutes };
-
-    try {
-        const tasks: Promise<SubmitTaskResponse>[] = [];
-        for (let i = 0; i < numToCreate; i++) {
-            const createTask = PromptNotificationManager.shared.createDailyPromptSetupTask({
-                memberId,
-                promptSendTimeUTC,
-                systemDateObject: DateTime.utc().toObject()
-            }, processAt)
-            tasks.push(createTask);
-        }
-        const responses = await Promise.all(tasks);
-        resp.send(responses);
-    } catch (error) {
-        logger.error("Failed to send message", Error(error.message));
-        logger.error(error);
-        resp.status(400).send({ error })
-    }
-
-    return;
-})
+// app.get("/create", async (req: express.Request, resp: express.Response) => {
+//     const numToCreate = Number(req.query.num ?? "1");
+//     const numSeconds = Number(req.query.s ?? "5");
+//     const processAt = new Date(Date.now() + 1000 * numSeconds);
+//     const today = new Date();
+//     const utcHour = today.getUTCHours()
+//     const utcMinutes = getQuarterHourFromMinute(today.getUTCMinutes());
+//
+//     const memberId = "s4RMQ186oVFvNbJan41b" //neil@cactus.app
+//     const promptSendTimeUTC: PromptSendTime = { hour: utcHour, minute: utcMinutes };
+//
+//     try {
+//         const tasks: Promise<SubmitTaskResponse>[] = [];
+//         for (let i = 0; i < numToCreate; i++) {
+//             const createTask = PromptNotificationManager.shared.createDailyPromptSetupTask({
+//                 memberId,
+//                 promptSendTimeUTC,
+//                 systemDateObject: DateTime.utc().toObject()
+//             }, processAt)
+//             tasks.push(createTask);
+//         }
+//         const responses = await Promise.all(tasks);
+//         resp.send(responses);
+//     } catch (error) {
+//         logger.error("Failed to send message", Error(error.message));
+//         logger.error(error);
+//         resp.status(400).send({ error })
+//     }
+//
+//     return;
+// })
 
 
 export default app;

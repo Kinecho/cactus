@@ -21,9 +21,7 @@ import { runMemberStatsJob } from "@api/pubsub/subscribers/MemberStatsJob";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
 
 const logger = new Logger("testApp");
-// const Config = getConfig();
 const app = express();
-// app.use(cors({origin: Config.allowedOrigins}));
 app.use(cors({ origin: true }));
 app.get('/', (req, res) => {
     res.status(200).json({ status: 'ok', queryParams: req.query });
@@ -54,8 +52,6 @@ app.get("/fcm", async (req, res) => {
         const allResults = await Promise.all(tasks);
 
         logger.info(stringifyJSON(allResults));
-        // logger.log("Send Message Result", result);
-
         return res.send(stringifyJSON(allResults));
     } catch (error) {
         logger.error("failed to send message", error);
@@ -127,62 +123,6 @@ app.get("/send-time", async (req, res) => {
     logger.log("result", result);
 
     res.send(result)
-});
-
-app.get("/next-prompt", async (req, res) => {
-    let memberId = req.query.memberId as string | undefined;
-    const email = req.query.email as string | undefined;
-    const runJob: boolean = !!req.query.run;
-    let member: CactusMember | undefined;
-    if (!memberId && email) {
-        member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
-    } else if (memberId) {
-        member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
-    }
-
-    if (!member) {
-        res.status(404);
-        res.send("No member found");
-        return;
-    }
-
-    memberId = member.id;
-
-    logger.log("Got member", memberId, member.email);
-    logger.log("getting next prompt for member Id", memberId);
-
-    const userTZ = member.timeZone;
-    // let systemDate = new Date();
-    const systemDate = new Date();
-    const systemDateObject = DateTime.local().toObject();
-    let userDateObject: DateObject = systemDateObject;
-    if (userTZ) {
-        logger.log("timezone =", userTZ);
-        userDateObject = DateUtil.getDateObjectForTimezone(systemDate, userTZ);
-        logger.log("user date obj", userDateObject);
-        logger.log("user date (locale)", userDateObject.toLocaleString())
-    }
-
-
-    let memberResult: CustomSentPromptNotificationsJob.MemberResult | undefined;
-    if (runJob) {
-        const job = { dryRun: false };
-        memberResult = await CustomSentPromptNotificationsJob.processMember({ job, member });
-    }
-
-    res.send({
-        memberTimeZone: userTZ,
-        userDate: DateTime.fromObject(userDateObject).toJSDate().toLocaleString(),
-        systemDate: systemDate.toLocaleString(),
-        userDateObject: userDateObject,
-        systemDateObject: systemDateObject,
-        promptSentTimePreference: member.promptSendTime,
-        memberJobResult: memberResult ? {
-            ...memberResult,
-            promptContent: memberResult?.promptContent?.toJSON(["_fl_meta_"]) || null,
-            sentPrompt: memberResult?.sentPrompt?.toJSON() || undefined,
-        } : "NOT PROCESSED",
-    });
 });
 
 app.get("/member-send-time", async (req, resp) => {
