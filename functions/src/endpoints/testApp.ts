@@ -11,7 +11,6 @@ import * as admin from "firebase-admin"
 import { DateObject, DateTime } from "luxon";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import * as DateUtil from "@shared/util/DateUtil";
-import { runJob as startSentPromptJob } from "@api/pubsub/subscribers/DailySentPromptJob";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
@@ -291,18 +290,6 @@ app.get("/content", async (req, resp) => {
     logger.log("local date ", d);
     const content = await AdminPromptContentService.getSharedInstance().getPromptContentForDate({ systemDate: d });
     return resp.send((content && content.toJSON()) || "none")
-});
-
-app.get("/contentJob", async (req, resp) => {
-    logger.log("Trying to fetch content");
-    const qDate = req.query.d as string | undefined;
-    let d = DateUtil.getDateAtMidnightDenver();
-    if (qDate) {
-        d = DateUtil.localDateFromISOString(qDate) || d;
-    }
-    logger.log("testApi: content Date", DateUtil.getISODate(d));
-    const result = await startSentPromptJob(d, undefined, true);
-    return resp.send(result);
 });
 
 app.get("/error", async (req, resp) => {
