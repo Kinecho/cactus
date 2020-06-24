@@ -86,7 +86,7 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminDeletedUserService.initialize();
     AdminNotificationService.initialize();
 
-    PushNotificationService.initialize();
+    PushNotificationService.initialize(app);
 
     //Flamelink
     AdminFlamelinkService.initialize(config, app);

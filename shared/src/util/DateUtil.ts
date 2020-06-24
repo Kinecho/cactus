@@ -10,7 +10,7 @@ import { isBlank } from "@shared/util/StringUtil";
 
 const logger = new Logger("DateUtil.ts");
 
-export const mailchimpTimeZone = "America/Denver";
+export const AmericaDenverTimezone = "America/Denver";
 
 /**
  *
@@ -18,7 +18,7 @@ export const mailchimpTimeZone = "America/Denver";
  * @return {string}
  */
 export function getMailchimpDateString(date: Date = new Date()): string {
-    return DateTime.fromJSDate(date).setZone(mailchimpTimeZone).toISODate();
+    return DateTime.fromJSDate(date).setZone(AmericaDenverTimezone).toISODate();
 }
 
 export function fromMillisecondsString(input: string | undefined): Date | undefined {
@@ -121,7 +121,7 @@ export function hoursToMilliseconds(hours: number): number {
     return Duration.fromObject({ hours: hours }).valueOf();
 }
 
-export function makeUTCDateIntoMailchimpDate(date: Date, keepTime: boolean = false, timezone = mailchimpTimeZone): string {
+export function makeUTCDateIntoMailchimpDate(date: Date, keepTime: boolean = false, timezone = AmericaDenverTimezone): string {
     let dateWithZone = DateTime.fromJSDate(date).setZone(timezone);
     if (keepTime) {
         dateWithZone = dateWithZone.set({
@@ -140,7 +140,7 @@ export function isoDateStringToFlamelinkDateString(input?: string | undefined): 
         return;
     }
 
-    return DateTime.fromJSDate(date).setZone(mailchimpTimeZone).toISO({
+    return DateTime.fromJSDate(date).setZone(AmericaDenverTimezone).toISO({
         includeOffset: false,
         suppressMilliseconds: true,
         suppressSeconds: true
@@ -152,7 +152,7 @@ export function getFlamelinkDateString(date: Date = new Date()): string {
 }
 
 export function getFlamelinkDateStringInDenver(date: Date = new Date()): string {
-    return DateTime.fromJSDate(date).setZone(mailchimpTimeZone).set({ second: 0 }).toISO({
+    return DateTime.fromJSDate(date).setZone(AmericaDenverTimezone).set({ second: 0 }).toISO({
         includeOffset: true,
         suppressMilliseconds: true,
         suppressSeconds: false
@@ -176,7 +176,7 @@ export function localDateFromISOString(input?: string): Date | undefined {
 
 export function getDateAtMidnightDenver(date: Date = new Date()): Date {
     const dt = DateTime.fromJSDate(date)
-    .setZone(mailchimpTimeZone, { keepLocalTime: false })
+    .setZone(AmericaDenverTimezone, { keepLocalTime: false })
     .set({
         hour: 0,
         minute: 0,

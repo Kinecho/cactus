@@ -16,7 +16,7 @@ import {
     getStreakMonths,
     getStreakWeeks,
     isoDateStringToFlamelinkDateString,
-    mailchimpTimeZone,
+    AmericaDenverTimezone,
     makeUTCDateIntoMailchimpDate,
     numDaysAgoFromMidnights,
     plusDays,
@@ -478,7 +478,7 @@ describe('Get Date at Midnight Denver', function () {
         const date = new Date(1566440539808); //approx 8:22pm denver on 8/21/2019
         console.log("starting date in local time", date);
 
-        const denverOffset = DateTime.fromJSDate(date).setZone(mailchimpTimeZone).offset / 60 * -1;
+        const denverOffset = DateTime.fromJSDate(date).setZone(AmericaDenverTimezone).offset / 60 * -1;
         console.log("denver offset", denverOffset);
         const localTimezoneOffset = date.getTimezoneOffset() / 60;
         console.log("local timezone offset", localTimezoneOffset);
@@ -505,7 +505,7 @@ describe('Get Date at Midnight Denver', function () {
         const date = new Date(1566371847820); //approx 01:17:38am denver on 8/21/2019
         console.log("starting date in local time", date.toLocaleString());
 
-        const denverOffset = DateTime.fromJSDate(date).setZone(mailchimpTimeZone).offset / 60 * -1;
+        const denverOffset = DateTime.fromJSDate(date).setZone(AmericaDenverTimezone).offset / 60 * -1;
         console.log("denver offset", denverOffset);
         const localTimezoneOffset = date.getTimezoneOffset() / 60;
         console.log("local timezone offset", localTimezoneOffset);

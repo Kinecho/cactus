@@ -19,14 +19,14 @@ const logger = new Logger("PushNotificationService");
 export default class PushNotificationService {
     static sharedInstance: PushNotificationService;
 
-    static initialize() {
-        PushNotificationService.sharedInstance = new PushNotificationService();
+    static initialize(app: admin.app.App) {
+        PushNotificationService.sharedInstance = new PushNotificationService(app);
     }
 
     private messaging: admin.messaging.Messaging;
 
-    constructor() {
-        this.messaging = admin.messaging();
+    constructor(app: admin.app.App) {
+        this.messaging = app.messaging();
     }
 
     async sendNewPromptPushIfNeeded(options: {

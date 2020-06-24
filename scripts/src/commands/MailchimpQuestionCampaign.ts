@@ -24,7 +24,7 @@ import {
 } from "@shared/mailchimp/models/MailchimpTypes";
 import {getUrlFromInput, isValidEmail, appendDomain} from "@shared/util/StringUtil";
 import {CactusConfig} from "@admin/CactusConfig";
-import {mailchimpTimeZone, makeUTCDateIntoMailchimpDate} from "@shared/util/DateUtil";
+import {AmericaDenverTimezone, makeUTCDateIntoMailchimpDate} from "@shared/util/DateUtil";
 import {DateTime} from "luxon";
 import {Command} from "@scripts/CommandTypes";
 
@@ -290,7 +290,7 @@ export default class MailchimpQuestionCampaign implements Command {
 
                     return true;
                 },
-                format: (value: Date) => makeUTCDateIntoMailchimpDate(value, true, mailchimpTimeZone)
+                format: (value: Date) => makeUTCDateIntoMailchimpDate(value, true, AmericaDenverTimezone)
             },
             {
                 type: "text",
@@ -517,7 +517,7 @@ export default class MailchimpQuestionCampaign implements Command {
 
                     return true;
                 },
-                format: (value: Date) => makeUTCDateIntoMailchimpDate(value, true, mailchimpTimeZone)
+                format: (value: Date) => makeUTCDateIntoMailchimpDate(value, true, AmericaDenverTimezone)
             },
             {
                 type: "toggle",

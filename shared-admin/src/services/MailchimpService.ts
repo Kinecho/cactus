@@ -1,4 +1,4 @@
-import axios, {AxiosError, AxiosInstance} from "axios";
+import axios, { AxiosError, AxiosInstance } from "axios";
 import {
     CampaignContent,
     CampaignContentRequest,
@@ -58,12 +58,12 @@ import MailchimpListMember from "@shared/mailchimp/models/MailchimpListMember";
 import CactusMember from "@shared/models/CactusMember";
 import * as md5 from "md5";
 import SignupRequest from "@shared/mailchimp/models/SignupRequest";
-import MailchimpSubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
+import MailchimpSubscriptionResult, { SubscriptionResultStatus } from "@shared/mailchimp/models/SubscriptionResult";
 import ApiError from "@shared/api/ApiError";
-import {CactusConfig} from "@admin/CactusConfig";
-import {UpdateStatusRequest, UpdateStatusResponse} from "@shared/mailchimp/models/UpdateStatusTypes";
+import { CactusConfig } from "@admin/CactusConfig";
+import { UpdateStatusRequest, UpdateStatusResponse } from "@shared/mailchimp/models/UpdateStatusTypes";
 import Logger from "@shared/Logger";
-import {chunkArray} from "@shared/util/ObjectUtil";
+import { chunkArray } from "@shared/util/ObjectUtil";
 
 const logger = new Logger("MailchimpService");
 
@@ -115,9 +115,9 @@ export default class MailchimpService {
         const split = this.apiKey.split("-");
         const datacenter = split[split.length - 1] || "";
 
-        this.apiDomain = `https://${datacenter}.api.mailchimp.com/3.0`;
+        this.apiDomain = `https://${ datacenter }.api.mailchimp.com/3.0`;
 
-        this.request = axios.create({baseURL: this.apiDomain, timeout: 5000});
+        this.request = axios.create({ baseURL: this.apiDomain, timeout: 5000 });
         this.request.interceptors.request.use(config => {
             config.auth = this.getAuthConfig();
             return config;
@@ -125,16 +125,16 @@ export default class MailchimpService {
     }
 
     getAuthConfig(): MailchimpAuth {
-        return {username: `cactus`, password: this.apiKey}
+        return { username: `cactus`, password: this.apiKey }
     }
 
     private getCampaignURL(id: string): string {
-        return `/campaigns/${id}`;
+        return `/campaigns/${ id }`;
     }
 
     protected getMemberUrlForEmail(email: string): string {
         const id = getMemberIdFromEmail(email);
-        return `/lists/${this.audienceId}/members/${id}`;
+        return `/lists/${ this.audienceId }/members/${ id }`;
     }
 
     async searchCampaigns(query: string, options: GetCampaignsOptions = getDefaultCampaignFetchOptions()): Promise<CampaignSearchResultListResponse> {
@@ -150,7 +150,7 @@ export default class MailchimpService {
     }
 
     async getMembers(options: GetListMembersOptions = {}, pagination = DEFAULT_PAGINATION): Promise<ListMemberListResponse> {
-        const url = `/lists/${this.audienceId}/members`;
+        const url = `/lists/${ this.audienceId }/members`;
         const response = await this.request.get(url, {
             params: {
                 ...pagination,
@@ -163,7 +163,7 @@ export default class MailchimpService {
     }
 
     async archiveMember(email: string): Promise<any> {
-        const url = `/lists/${this.audienceId}/members/${getMemberIdFromEmail(email)}`;
+        const url = `/lists/${ this.audienceId }/members/${ getMemberIdFromEmail(email) }`;
         try {
             const response = await this.request.delete(url, {
                 params: {
@@ -183,7 +183,7 @@ export default class MailchimpService {
     }
 
     async deleteMemberPermanently(email: string): Promise<any | { error: any }> {
-        const url = `/lists/${this.audienceId}/members/${getMemberIdFromEmail(email)}/actions/delete-permanent`;
+        const url = `/lists/${ this.audienceId }/members/${ getMemberIdFromEmail(email) }/actions/delete-permanent`;
         try {
             const response = await this.request.post(url, {
                 params: {
@@ -195,9 +195,9 @@ export default class MailchimpService {
         } catch (e) {
             if (e.isAxiosError) {
                 const err = e as AxiosError;
-                return {error: err.response && err.response.data}
+                return { error: err.response && err.response.data }
             }
-            return {error: "Unable to delete member from mailchimp"}
+            return { error: "Unable to delete member from mailchimp" }
         }
 
     }
@@ -236,7 +236,7 @@ export default class MailchimpService {
         } catch (error) {
             if (error.isAxiosError) {
                 const axiosError = error as AxiosError;
-                logger.error(`${axiosError.code}: failed to get mailchimp campaign for campaignId=${id}. ${axiosError.response ? JSON.stringify(axiosError.response.data) : "no data found"}`);
+                logger.error(`${ axiosError.code }: failed to get mailchimp campaign for campaignId=${ id }. ${ axiosError.response ? JSON.stringify(axiosError.response.data) : "no data found" }`);
             } else {
                 logger.error("failed to get mailchimp campaign for campaign id", id, error);
             }
@@ -248,8 +248,8 @@ export default class MailchimpService {
     async getCampaigns(options: GetCampaignsOptions = getDefaultCampaignFetchOptions()): Promise<CampaignListResponse> {
         const url = `/campaigns`;
 
-        let exclude_fields = options.params ? options.params.exclude_fields : [] || [];
-        const set_exclude_fields = new Set(exclude_fields);
+        let exclude_fields = options.params?.exclude_fields ?? [];
+        const set_exclude_fields = new Set<string>(exclude_fields);
         set_exclude_fields.add("campaigns._links");
         set_exclude_fields.add("_links");
         exclude_fields = Array.from(set_exclude_fields);
@@ -311,7 +311,7 @@ export default class MailchimpService {
     }
 
     async getCampaignContent(campaignId: string): Promise<CampaignContent | undefined> {
-        const url = `/campaigns/${campaignId}/content`;
+        const url = `/campaigns/${ campaignId }/content`;
         try {
             const response = await this.request.get(url, {
                 params: {
@@ -326,8 +326,8 @@ export default class MailchimpService {
     }
 
     async getAudienceSegmentMembers(segmentId: string, pagination = DEFAULT_PAGINATION): Promise<SegmentMemberListResponse> {
-        const {offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count} = pagination;
-        const url = `/lists/${this.audienceId}/segments/${segmentId}/members`;
+        const { offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count } = pagination;
+        const url = `/lists/${ this.audienceId }/segments/${ segmentId }/members`;
         const response = await this.request.get(url, {
             params: {
                 offset,
@@ -348,22 +348,22 @@ export default class MailchimpService {
         const delayMs = options.pageSize || defaultPageDelay;
 
         return this.getAllPaginatedResults(pagination => this.getAudienceSegmentMembers(segmentId, pagination),
-            (membersResponse: SegmentMemberListResponse) => membersResponse.members,
-            pageSize,
-            delayMs,
-            options.onPage,)
+        (membersResponse: SegmentMemberListResponse) => membersResponse.members,
+        pageSize,
+        delayMs,
+        options.onPage,)
     }
 
 
     async getAudienceSegment(listId: string, segmentId: number): Promise<Segment> {
-        const url = `/lists/${listId}/segments/${segmentId}`;
+        const url = `/lists/${ listId }/segments/${ segmentId }`;
         const response = await this.request.get(url);
         return response.data;
     }
 
     async getSentTo(campaignId: string, pagination = DEFAULT_PAGINATION): Promise<CampaignSentToListResponse> {
-        const {offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count} = pagination;
-        const url = `reports/${campaignId}/sent-to`;
+        const { offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count } = pagination;
+        const url = `reports/${ campaignId }/sent-to`;
         const response = await this.request.get(url, {
             params: {
                 offset,
@@ -384,14 +384,14 @@ export default class MailchimpService {
         const delayMs = options.pageSize || defaultPageDelay;
 
         return this.getAllPaginatedResults(pagination => this.getSentTo(campaignId, pagination),
-            (listResponse: CampaignSentToListResponse) => listResponse.sent_to,
-            pageSize,
-            delayMs,
-            options.onPage,)
+        (listResponse: CampaignSentToListResponse) => listResponse.sent_to,
+        pageSize,
+        delayMs,
+        options.onPage,)
     }
 
     async createCampaign(campaign: CreateCampaignRequest): Promise<Campaign> {
-        const url = `${this.apiDomain}/campaigns`;
+        const url = `${ this.apiDomain }/campaigns`;
         const response = await this.request.post(url, campaign);
 
         // logger.log("created campaign", JSON.stringify(response.data));
@@ -400,22 +400,22 @@ export default class MailchimpService {
     }
 
     async updateCampaign(campaignId: string, campaign: UpdateCampaignRequest): Promise<Campaign> {
-        const url = `/campaigns/${campaignId}`;
+        const url = `/campaigns/${ campaignId }`;
         const response = await this.request.patch(url, campaign);
 
         return response.data;
     }
 
     async updateCampaignContent(campaignId: string | number, content: CampaignContentRequest): Promise<CampaignContent> {
-        const url = `${this.apiDomain}/campaigns/${campaignId}/content`;
+        const url = `${ this.apiDomain }/campaigns/${ campaignId }/content`;
         const response = await this.request.put(url, content);
         // logger.log("updated campaign content", response.data);
         return response.data;
     }
 
     async getSavedSegments(pagination = DEFAULT_PAGINATION): Promise<SegmentListResponse> {
-        const {offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count} = pagination;
-        const url = `${this.apiDomain}/lists/${this.audienceId}/segments`;
+        const { offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count } = pagination;
+        const url = `${ this.apiDomain }/lists/${ this.audienceId }/segments`;
         const response = await this.request.get(url, {
             params: {
                 offset,
@@ -427,8 +427,8 @@ export default class MailchimpService {
     }
 
     async getTags(pagination = DEFAULT_PAGINATION): Promise<SegmentListResponse> {
-        const {offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count} = pagination;
-        const url = `${this.apiDomain}/lists/${this.audienceId}/segments`;
+        const { offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count } = pagination;
+        const url = `${ this.apiDomain }/lists/${ this.audienceId }/segments`;
         const response = await this.request.get(url, {
             params: {
                 type: SegmentType.static,
@@ -466,7 +466,7 @@ export default class MailchimpService {
         });
 
         const results = Promise.all(batchTasks);
-        logger.info(`bulkUpdateMergeFields: Submitted ${mergeRequests.length} mailchimp merge field updates requests in ${batchTasks.length} batch call`);
+        logger.info(`bulkUpdateMergeFields: Submitted ${ mergeRequests.length } mailchimp merge field updates requests in ${ batchTasks.length } batch call`);
 
         return results;
     }
@@ -475,7 +475,7 @@ export default class MailchimpService {
         const operations: BatchOperation[] = tagRequests.map(t => {
             return {
                 method: "POST",
-                path: `/lists/${this.audienceId}/members/${getMemberIdFromEmail(t.email)}/tags`,
+                path: `/lists/${ this.audienceId }/members/${ getMemberIdFromEmail(t.email) }/tags`,
                 body: {
                     tags: t.tags,
                 }
@@ -491,7 +491,7 @@ export default class MailchimpService {
     }
 
     async getBatchStatus(batch: BatchCreateResponse): Promise<BatchCreateResponse> {
-        const url = `/batches/${batch.id}`;
+        const url = `/batches/${ batch.id }`;
         const response = await this.request.get(url);
         return response.data;
     }
@@ -531,7 +531,7 @@ export default class MailchimpService {
 
             }
             const didTimeOut = checkCount * checkInterval > timeoutLimit && status !== OperationStatus.finished;
-            resolve({timedOut: didTimeOut, response: completedBatch});
+            resolve({ timedOut: didTimeOut, response: completedBatch });
             return;
         });
     }
@@ -545,21 +545,21 @@ export default class MailchimpService {
         logger.log("Updating member status with patch", updateRequest);
 
         try {
-            const response = await this.request.patch(`/lists/${this.audienceId}/members/${memberId}?exclude_fields=_links`, {
+            const response = await this.request.patch(`/lists/${ this.audienceId }/members/${ memberId }?exclude_fields=_links`, {
                 status: updateRequest.status
             });
 
             const listMember: ListMember = response.data;
 
-            return {success: true, listMember: listMember};
+            return { success: true, listMember: listMember };
         } catch (error) {
             const axiosError = error as AxiosError;
             if (axiosError.response) {
                 logger.error("failed to update status", error.response);
-                return {success: false, error: error.response.data}
+                return { success: false, error: error.response.data }
             } else {
                 logger.error("Unknown error while updating member status", error);
-                return {success: false, error: error};
+                return { success: false, error: error };
             }
         }
     }
@@ -571,20 +571,20 @@ export default class MailchimpService {
 
         try {
             //this just returns a 204 or an error
-            await this.request.post(`/lists/${this.audienceId}/members/${memberId}/tags`, {
+            await this.request.post(`/lists/${ this.audienceId }/members/${ memberId }/tags`, {
                 tags: tagRequest.tags
             });
 
-            return {success: true};
+            return { success: true };
         } catch (error) {
             const axiosError = error as AxiosError;
             if (axiosError.response) {
                 logger.error("failed to update tags", error.response);
                 const errorData = error.response.data as TagResponseError;
-                return {success: false, error: errorData}
+                return { success: false, error: errorData }
             } else {
                 logger.error("Unknown error while updating tags", error);
-                return {success: false, unknownError: error};
+                return { success: false, unknownError: error };
             }
         }
     }
@@ -595,16 +595,16 @@ export default class MailchimpService {
             await this.request.patch(url, {
                 merge_fields: request.mergeFields
             });
-            return {success: true};
+            return { success: true };
         } catch (error) {
             const axiosError = error as AxiosError;
             if (axiosError.response) {
                 logger.error("failed to update merge fields", error.response);
                 const errorData = error.response.data as TagResponseError;
-                return {success: false, error: errorData}
+                return { success: false, error: errorData }
             } else {
                 logger.error("Unknown error while updating merge fields", error);
-                return {success: false, unknownError: error};
+                return { success: false, unknownError: error };
             }
         }
 
@@ -616,7 +616,7 @@ export default class MailchimpService {
 
         let tagResponse: SegmentListResponse | null = null;
         while (!tagResponse || tagResponse.total_items > (currentOffset + pageSize)) {
-            tagResponse = await this.getTags({offset: currentOffset, count: pageSize});
+            tagResponse = await this.getTags({ offset: currentOffset, count: pageSize });
             segments.push(...tagResponse.segments);
             currentOffset = segments.length;
         }
@@ -626,8 +626,8 @@ export default class MailchimpService {
     }
 
     async getTemplates(type: TemplateType | undefined, pagination = DEFAULT_PAGINATION): Promise<TemplateListResponse> {
-        const {offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count} = pagination;
-        const url = `${this.apiDomain}/templates`;
+        const { offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count } = pagination;
+        const url = `${ this.apiDomain }/templates`;
         const response = await this.request.get(url, {
             params: {
                 sort_field: TemplateSortField.name,
@@ -641,7 +641,7 @@ export default class MailchimpService {
     }
 
     async getTemplate(templateId: number): Promise<Template> {
-        const url = `${this.apiDomain}/templates/${templateId}`;
+        const url = `${ this.apiDomain }/templates/${ templateId }`;
         const response = await this.request.get(url, {
             params: {
                 exclude_fields: ["templates._links"].join(',')
@@ -660,7 +660,7 @@ export default class MailchimpService {
      * @return {Promise<AutomationListResponse>}
      */
     async getAutomation(automationId: string): Promise<Automation | null> {
-        const url = `/automations/${automationId}`;
+        const url = `/automations/${ automationId }`;
         const response = await this.request.get(url, {
             params: {
                 exclude_fields: ["_links"].join(',')
@@ -671,7 +671,7 @@ export default class MailchimpService {
 
     async getAutomationEmail(workflowId: string, emailId: string): Promise<AutomationEmail | undefined> {
         try {
-            const url = `/automations/${workflowId}/emails/${emailId}`;
+            const url = `/automations/${ workflowId }/emails/${ emailId }`;
             const response = await this.request.get(url, {
                 params: {
                     exclude_fields: "_links"
@@ -686,7 +686,7 @@ export default class MailchimpService {
     }
 
     async getAutomationEmails(automationWorkflowId: string, pagination = DEFAULT_PAGINATION): Promise<AutomationEmailListResponse> {
-        const url = `/automations/${automationWorkflowId}/emails`;
+        const url = `/automations/${ automationWorkflowId }/emails`;
         const response = await this.request.get(url, {
             params: {
                 exclude_fields: "emails._links",
@@ -711,7 +711,7 @@ export default class MailchimpService {
 
     async getAutomations(pagination = DEFAULT_PAGINATION): Promise<AutomationListResponse> {
         const url = `/automations`;
-        const {offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count} = pagination;
+        const { offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count } = pagination;
         const response = await this.request.get(url, {
             params: {
                 offset,
@@ -757,7 +757,7 @@ export default class MailchimpService {
     }
 
     async getAudience(audienceId: string): Promise<Audience> {
-        const url = `/lists/${audienceId}`;
+        const url = `/lists/${ audienceId }`;
         const response = await this.request.get(url, {
             params: {
                 exclude_fields: ["lists._links"].join(',')
@@ -768,7 +768,7 @@ export default class MailchimpService {
 
     async getAudiences(pagination = DEFAULT_PAGINATION): Promise<AudienceListResponse> {
         const url = `/lists`;
-        const {offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count} = pagination;
+        const { offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count } = pagination;
         const response = await this.request.get(url, {
             params: {
                 offset,
@@ -780,7 +780,7 @@ export default class MailchimpService {
     }
 
     async getUnsubscribeReportForMember(options: { campaignId: string, email: string }): Promise<MemberUnsubscribeReport | undefined> {
-        const url = `/reports/${options.campaignId}/unsubscribed/${getMemberIdFromEmail(options.email)}`;
+        const url = `/reports/${ options.campaignId }/unsubscribed/${ getMemberIdFromEmail(options.email) }`;
         try {
             const response = await this.request.get(url, {
                 params: {
@@ -792,7 +792,7 @@ export default class MailchimpService {
             if (error.isAxiosError) {
                 const e = error as AxiosError<MailchimpApiError>;
                 if (e.response && e.response.data) {
-                    logger.error(`${e.response.data.title}: ${e.response.data.detail}`, e)
+                    logger.error(`${ e.response.data.title }: ${ e.response.data.detail }`, e)
                 } else {
                     logger.error("Failed to get unsubscribe reason", e);
                 }
@@ -827,7 +827,7 @@ export default class MailchimpService {
         let listResponse: R | null = null;
         let pageNumber = 0;
         while (!listResponse || listResponse.total_items > (currentOffset)) {
-            listResponse = await method({offset: currentOffset, count: pageSize});
+            listResponse = await method({ offset: currentOffset, count: pageSize });
             fetchCount++;
             const values = getValues(listResponse);
 
@@ -840,7 +840,7 @@ export default class MailchimpService {
             logger.log("fetched ", results.length, "/", listResponse.total_items, "items. # Fetches", fetchCount)
 
             if (pageDelay > 0) {
-                logger.log(`delaying between pages for ${pageDelay}ms`);
+                logger.log(`delaying between pages for ${ pageDelay }ms`);
                 await new Promise(resolve => {
                     setTimeout(() => {
                         resolve()
@@ -855,7 +855,7 @@ export default class MailchimpService {
 
 
     async getCampaignSendChecklist(campaignId: string): Promise<SendChecklist> {
-        const url = `/campaigns/${campaignId}/send-checklist`;
+        const url = `/campaigns/${ campaignId }/send-checklist`;
         const response = await this.request.get(url,);
         return response.data;
     }
@@ -868,12 +868,12 @@ export default class MailchimpService {
      * @return {Promise<boolean>} - false if there was a problem scheduling the campaign
      */
     async scheduleCampaign(campaignId: string, config: CampaignScheduleBody, campaignWebId: string): Promise<{ success: boolean, alreadyScheduled: boolean, error?: any }> {
-        const url = `/campaigns/${campaignId}/actions/schedule`;
+        const url = `/campaigns/${ campaignId }/actions/schedule`;
         try {
             logger.log("attempting to schedule campaign with config", config);
             const response = await this.request.post(url, config);
-            logger.log(`scheduled campaign successfully. Response Status = ${response.status}`);
-            return {success: true, alreadyScheduled: false}
+            logger.log(`scheduled campaign successfully. Response Status = ${ response.status }`);
+            return { success: true, alreadyScheduled: false }
         } catch (e) {
             let alreadyScheduled = false;
             let message = e.message || "Unknown error";
@@ -884,7 +884,7 @@ export default class MailchimpService {
                 alreadyScheduled = (body.detail || "").includes("Cannot schedule an already scheduled campaign");
                 const mcErrors = body.errors;
                 if (!alreadyScheduled && mcErrors && mcErrors.length > 0) {
-                    message = "\nErrors: \n" + mcErrors.map((e: { field: string, message: string }) => `${e.field}: ${e.message}`).join("\n");
+                    message = "\nErrors: \n" + mcErrors.map((e: { field: string, message: string }) => `${ e.field }: ${ e.message }`).join("\n");
                 } else {
                     message = JSON.stringify(apiError.response?.data.detail) || message;
                 }
@@ -895,18 +895,18 @@ export default class MailchimpService {
             return {
                 success: false,
                 alreadyScheduled: alreadyScheduled,
-                error: `Unable to schedule campaign: ${message}\n\nSchedule Config: ${JSON.stringify(config)}\n\nPlease check the mailchimp UI for more details https://us20.admin.mailchimp.com/campaigns/edit?id=${campaignWebId}`
+                error: `Unable to schedule campaign: ${ message }\n\nSchedule Config: ${ JSON.stringify(config) }\n\nPlease check the mailchimp UI for more details https://us20.admin.mailchimp.com/campaigns/edit?id=${ campaignWebId }`
             };
         }
     }
 
     async unscheduleCampaign(campaign: Campaign): Promise<{ success: boolean, errorMessage?: string }> {
-        const url = `/campaigns/${campaign.id}/actions/unschedule`;
+        const url = `/campaigns/${ campaign.id }/actions/unschedule`;
         try {
             logger.log("attempting to unschedule campaign");
             const response = await this.request.post(url);
-            logger.log(`Successfully unscheduled campaign. Status Code = ${response.status}`);
-            return {success: true}
+            logger.log(`Successfully unscheduled campaign. Status Code = ${ response.status }`);
+            return { success: true }
         } catch (e) {
             let message = e.message || "Unknown error";
             if (e.isAxiosError) {
@@ -916,7 +916,7 @@ export default class MailchimpService {
             logger.error("Failed to un-schedule campaign", message);
             return {
                 success: false,
-                errorMessage: `Unable to un-schedule campaign: ${message}.\n\nPlease check the mailchimp UI for more details https://us20.admin.mailchimp.com/campaigns/edit?id=${campaign.web_id}`
+                errorMessage: `Unable to un-schedule campaign: ${ message }.\n\nPlease check the mailchimp UI for more details https://us20.admin.mailchimp.com/campaigns/edit?id=${ campaign.web_id }`
             };
         }
     }
@@ -926,7 +926,7 @@ export default class MailchimpService {
             return undefined;
         }
         const id = getMemberIdFromEmail(email);
-        const url = `/lists/${this.audienceId}/members/${id}`;
+        const url = `/lists/${ this.audienceId }/members/${ id }`;
         try {
             const response = await this.request.get(url, {
                 params: {
@@ -937,9 +937,9 @@ export default class MailchimpService {
         } catch (error) {
             if (error.isAxiosError) {
                 const axiosError = error as AxiosError;
-                logger.error(`MailchimpService.getmeMemberByEmail | Failed to get list member for email ${email}`, axiosError.response);
+                logger.error(`MailchimpService.getmeMemberByEmail | Failed to get list member for email ${ email }`, axiosError.response);
             } else {
-                logger.error(`Failed to get list member for email ${email}`, error);
+                logger.error(`Failed to get list member for email ${ email }`, error);
             }
             return undefined;
         }
@@ -950,7 +950,7 @@ export default class MailchimpService {
             return;
         }
 
-        const url = `/lists/${this.audienceId}/members`;
+        const url = `/lists/${ this.audienceId }/members`;
         const response = await this.request.get(url, {
             params: {
                 unique_email_id: uniqueEmailId,
@@ -973,7 +973,7 @@ export default class MailchimpService {
             //TODO: Add the subscription tier merge field here
         }
 
-        const url = `/lists/${this.audienceId}/members`;
+        const url = `/lists/${ this.audienceId }/members`;
 
         const result = new MailchimpSubscriptionResult();
 
@@ -1030,7 +1030,7 @@ export default class MailchimpService {
      */
     async getMemberActivity(email: string): Promise<MemberActivityListResponse | undefined> {
         try {
-            const url = `/lists/${this.audienceId}/members/${getMemberIdFromEmail(email)}/activity`;
+            const url = `/lists/${ this.audienceId }/members/${ getMemberIdFromEmail(email) }/activity`;
             logger.log("fetching activity via", url);
             const response = await this.request.get(url, {
                 params: {
@@ -1042,7 +1042,7 @@ export default class MailchimpService {
             return response.data;
         } catch (e) {
             const error = e as AxiosError;
-            logger.error(`Unable to get member activity for ${email}`, error.response ? {
+            logger.error(`Unable to get member activity for ${ email }`, error.response ? {
                 config: error.config,
                 data: error.response.data
             } : error);
@@ -1058,7 +1058,7 @@ export default class MailchimpService {
         }
 
         if (mailchimpMember?.merge_fields[MergeField.FNAME] !== member.firstName ||
-            mailchimpMember?.merge_fields[MergeField.LNAME] !== member.lastName) {
+        mailchimpMember?.merge_fields[MergeField.LNAME] !== member.lastName) {
             return true;
         }
 
@@ -1073,13 +1073,13 @@ export default class MailchimpService {
         }
 
         if (member?.subscription &&
-            mailchimpMember?.merge_fields[MergeField.SUB_TIER] !== member.subscription.tier) {
+        mailchimpMember?.merge_fields[MergeField.SUB_TIER] !== member.subscription.tier) {
             return true;
         }
 
         if (member?.subscription?.trial) {
             if (mailchimpMember?.merge_fields[MergeField.TDAYS_LEFT] !== member.daysLeftInTrial.toString() ||
-                mailchimpMember?.merge_fields[MergeField.IN_TRIAL] !== (member.isOptInTrialing ? 'YES' : 'NO')) {
+            mailchimpMember?.merge_fields[MergeField.IN_TRIAL] !== (member.isOptInTrialing ? 'YES' : 'NO')) {
                 return true;
             }
         }
