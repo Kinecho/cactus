@@ -1,0 +1,60 @@
+{
+    "name": "appengine",
+    "version": "1.0.0",
+    "description": "Project for an app engine service that will host various APIs",
+    "main": "index.js",
+    "scripts": {
+        "clean": "rm -rf build",
+        "config:get": "firebase functions:config:get > .runtimeconfig.json -P stage",
+        "build": "tsc -p .",
+        "deploy": "npm run clean && npm run build && gcloud app deploy",
+        "start": "node build/appengine/src/app.js",
+        "dev": "npm run config:get && npm run build && PORT=8888 GOOGLE_CLOUD_PROJECT=cactus-app-stage GOOGLE_APPLICATION_CREDENTIALS=../applicationCredentials_stage.json npm start",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Neil Poulin",
+    "license": "ISC",
+    "_moduleAliases": {
+        "@app": "build/appengine/src",
+        "@shared": "build/shared/src",
+        "@admin": "build/shared-admin/src",
+        "@web": "build/web/src"
+    },
+    "dependencies": {
+        "@google-cloud/bigquery": "^4.1.4",
+        "@google-cloud/language": "^3.8.0",
+        "@google-cloud/pubsub": "^2.0.0",
+        "@google-cloud/storage": "^3.0.2",
+        "@google-cloud/tasks": "^2.0.0",
+        "@sendgrid/helpers": "^7.2.0",
+        "@sendgrid/inbound-mail-parser": "^7.2.0",
+        "@sendgrid/mail": "^7.2.0",
+        "@sentry/integrations": "5.11.1",
+        "@sentry/node": "5.9.0",
+        "@slack/client": "^5.0.1",
+        "axios": "^0.19.2",
+        "camelcase": "^5.3.1",
+        "chalk": "^4.1.0",
+        "express": "^4.17.1",
+        "firebase": "^7.14.6",
+        "firebase-admin": "^8.12.1",
+        "firebase-functions": "^3.7.0",
+        "flamelink": "^1.0.0-alpha.28",
+        "googleapis": "^42.0.0",
+        "luxon": "^1.24.1",
+        "md5": "^2.2.1",
+        "module-alias": "^2.2.2",
+        "pretty-ms": "^5.0.0",
+        "query-string": "^6.7.0",
+        "stripe": "8.17.0",
+        "typescript": "^3.9.5",
+        "uuid": "^3.3.2"
+    },
+    "devDependencies": {
+        "firebase-tools": "^8.4.3",
+        "ts-node": "^8.10.1",
+        "tslint": "^5.20.1",
+        "@types/express": "^4.17.6",
+        "@types/express-serve-static-core": "^4.17.7"
+    }
+}

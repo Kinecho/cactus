@@ -18,6 +18,10 @@ import AdminDataExportService from "@admin/services/AdminDataExportService";
 import { EmailDataParams, EmailDataResult } from "@shared/api/DataExportTypes";
 import AdminSendgridService, { CactusSender, SendEmailResult } from "@admin/services/AdminSendgridService";
 import { SendgridTemplate } from "@shared/models/EmailLog";
+import { UpdateStatusRequest } from "@shared/mailchimp/models/UpdateStatusTypes";
+import { ListMemberStatus } from "@shared/mailchimp/models/MailchimpTypes";
+import MailchimpService from "@admin/services/MailchimpService";
+import { stringifyJSON } from "@shared/util/ObjectUtil";
 
 const logger = new Logger("userEndpoints");
 const app = express();
@@ -195,8 +199,6 @@ app.get("/feature-auth/core-values", async (req: functions.https.Request | any, 
     if (!memberId) {
         // show an error message and instructions to upgrade
         logger.log("No memberId provided");
-        resp.status(401).contentType("text/html").send('<html><body style="font-family: sans-serif; text-align: center; padding: 3rem 1rem; line-height: 150%;"><h3>To access Core Values, use must be logged-in to the latest version of Cactus.</h3><br><p><strong>iOS Users:</strong> <a style="color:#29A389" href="https://apps.apple.com/us/app/cactus-mindfulness-journal/id1474513514">Follow this link</a> to upgrade your app.<br><br>Still having problems? Email <a style="color:#29A389" href="mailto:help@cactus.app">help@cactus.app</a></p></body></html>');
-
         try {
             await AdminSlackService.getSharedInstance().sendActivityMessage({
                 text: `Someone without a memberId tried to auth to Core Values.`
@@ -204,7 +206,7 @@ app.get("/feature-auth/core-values", async (req: functions.https.Request | any, 
         } catch (e) {
             logger.error(e);
         }
-
+        resp.status(401).contentType("text/html").send('<html><body style="font-family: sans-serif; text-align: center; padding: 3rem 1rem; line-height: 150%;"><h3>To access Core Values, use must be logged-in to the latest version of Cactus.</h3><br><p><strong>iOS Users:</strong> <a style="color:#29A389" href="https://apps.apple.com/us/app/cactus-mindfulness-journal/id1474513514">Follow this link</a> to upgrade your app.<br><br>Still having problems? Email <a style="color:#29A389" href="mailto:help@cactus.app">help@cactus.app</a></p></body></html>');
         return;
     }
 
@@ -218,8 +220,6 @@ app.get("/feature-auth/core-values", async (req: functions.https.Request | any, 
 
     if (member?.tier === SubscriptionTier.PLUS && member?.email) {
         logger.log('Member is PLUS. Redirecting to Core Values assessment...');
-        resp.redirect(`${ getHostname() }${ PageRoute.CORE_VALUES }?${ QueryParam.CACTUS_MEMBER_ID }=${ memberId }&${ QueryParam.TIER }=${ member.tier }&${ QueryParam.DISPLAY_NAME }=${ encodeURIComponent(member.firstName || '') }`);
-
         try {
             await AdminSlackService.getSharedInstance().sendActivityMessage({
                 text: `PLUS member ${ member.email } authorized to Core Values`
@@ -227,12 +227,10 @@ app.get("/feature-auth/core-values", async (req: functions.https.Request | any, 
         } catch (e) {
             logger.error(e);
         }
-
+        resp.redirect(`${ getHostname() }${ PageRoute.CORE_VALUES }?${ QueryParam.CACTUS_MEMBER_ID }=${ memberId }&${ QueryParam.TIER }=${ member.tier }&${ QueryParam.DISPLAY_NAME }=${ encodeURIComponent(member.firstName || '') }`);
         return;
     } else {
         const pricingUrl = `${ getHostname() }${ PageRoute.PRICING }?${ QueryParam.CORE_VALUES }=true`;
-        resp.redirect(pricingUrl);
-
         try {
             await AdminSlackService.getSharedInstance().sendActivityMessage({
                 text: `BASIC member ${ member.email } authorized to Core Values. Redirected to Upgrade Page.`
@@ -240,12 +238,38 @@ app.get("/feature-auth/core-values", async (req: functions.https.Request | any, 
         } catch (e) {
             logger.error(e);
         }
-
+        resp.redirect(pricingUrl);
         return;
     }
-
-    resp.sendStatus(500);
-    return;
 });
+
+
+export async function updateEmailPreferences(req: express.Request, resp: express.Response) {
+    const statusRequest = req.body as UpdateStatusRequest;
+    logger.info("Running update email preferences", stringifyJSON(statusRequest, 2));
+    const user = await getAuthUser(req);
+    if (!user) {
+        resp.sendStatus(401);
+        return;
+    }
+    if (user.email !== statusRequest.email) {
+
+        resp.sendStatus(403);
+        return;
+    }
+    const isUnsubscribe = statusRequest.status === ListMemberStatus.unsubscribed;
+    await AdminCactusMemberService.getSharedInstance().setEmailNotificationPreference(statusRequest.email, !isUnsubscribe);
+    logger.info("Updated member status in the DB");
+
+    const mailchimpResponse = await MailchimpService.getSharedInstance().updateMemberStatus(statusRequest);
+    logger.info("Mailchimp response", mailchimpResponse);
+
+    const sendgridResult = await AdminSendgridService.getSharedInstance().updateNewPromptNotificationPreference(statusRequest.email, !isUnsubscribe);
+    logger.info("unsubscribe user from email notifications result", stringifyJSON(sendgridResult, 2));
+
+    resp.send({ success: true });
+}
+
+app.put("/update-email-preferences", updateEmailPreferences)
 
 export default app

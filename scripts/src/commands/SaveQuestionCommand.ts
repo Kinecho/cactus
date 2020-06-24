@@ -3,7 +3,7 @@ import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import {Project} from "@scripts/config";
 import * as admin from "firebase-admin";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import {FirebaseCommand} from "@scripts/CommandTypes";
 
 export default class SaveQuestionCommand extends FirebaseCommand {

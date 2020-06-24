@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions"
 import { Environment, getEnvironment } from "@admin/config/environmentManager";
-import { CactusConfig } from "@shared/CactusConfig";
+import { CactusConfig } from "@admin/CactusConfig";
 
 let _config: CactusConfig;
 let _testConfigOverrides: Partial<CactusConfig> = {};
@@ -40,6 +40,7 @@ export function buildConfig(configInput: CactusConfig = functions.config() as Ca
         config.web.protocol = 'http';
         // config.stripe.webhook_signing_secrets.main = 'whsec_CQrDcQTFgTr01NtFT4vNI5HawMGX9oHs';
         config.stripe.webhook_signing_secrets.main = 'whsec_skI0PA8KSH2BZWmJEcODQGf6FgEHJEB2';
+        config.tasks.handler_url_base = "http://cactus-api.ngrok.io/cactus-app-stage/us-central1/tasks";
     } else {
         config.web.protocol = 'https'
     }
@@ -178,6 +179,7 @@ const defaultTestConfig: CactusConfig = {
     },
     sendgrid: {
         api_key: "test-api-key",
+        webhook_verification_key: "testkey",
         template_ids: {
             magic_link: "1234",
             magic_link_new_user: '1234ra',
@@ -185,6 +187,31 @@ const defaultTestConfig: CactusConfig = {
             friend_request: '1234fr',
             trial_ending: '1234te',
             data_export: "1234lj",
+            new_prompt_notification: "test_id",
+        },
+        templates: {
+            new_prompt_notification: {
+                template_id: "test_template_id",
+                unsubscribe_group_id: "14282"
+            },
+            magic_link_new_user: {
+                template_id: "test_template_id"
+            },
+            magic_link: {
+                template_id: "test_template_id"
+            },
+            data_export: {
+                template_id: "test_template_id"
+            },
+            trial_ending: {
+                template_id: "test_template_id"
+            },
+            friend_request: {
+                template_id: "test_template_id"
+            },
+            invitation: {
+                template_id: "test_template_id"
+            }
         }
     },
     language: {
@@ -240,6 +267,28 @@ const defaultTestConfig: CactusConfig = {
         public_key: "public_key",
         secret_key: "secret_key",
         webhook_bearer_token: "test_bearer_token",
+    },
+    tasks: {
+        project_id: "cactus-app-stage",
+        location: "us-central1",
+        handler_url_base: "https://us-central1-cactus-app-stage.cloudfunctions.net/tasks",
+        queues: {
+            daily_prompt_setup: {
+                name: "daily-prompt-setup",
+                handler_path: "/daily-prompt-setup",
+                http_method: "POST"
+            },
+            daily_prompt_push: {
+                name: "daily-prompt-push",
+                handler_path: "/daily-prompt-push",
+                http_method: "POST"
+            },
+            daily_prompt_email: {
+                name: "daily-prompt-email",
+                handler_path: "/daily-prompt-email",
+                http_method: "POST"
+            }
+        }
     }
 };
 

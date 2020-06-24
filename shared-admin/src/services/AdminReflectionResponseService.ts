@@ -1,9 +1,13 @@
-import AdminFirestoreService, {DeleteOptions, QueryOptions, SaveOptions} from "@admin/services/AdminFirestoreService";
-import ReflectionResponse, {ReflectionResponseField, InsightWord, InsightWordsResult} from "@shared/models/ReflectionResponse";
-import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
+import AdminFirestoreService, { DeleteOptions, QueryOptions, SaveOptions } from "@admin/services/AdminFirestoreService";
+import ReflectionResponse, {
+    ReflectionResponseField,
+    InsightWord,
+    InsightWordsResult
+} from "@shared/models/ReflectionResponse";
+import { BaseModelField, Collection } from "@shared/FirestoreBaseModels";
 import MailchimpService from "@admin/services/MailchimpService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
-import {getDateAtMidnightDenver, getDateFromISOString, getMailchimpDateString} from "@shared/util/DateUtil";
+import { getDateAtMidnightDenver, getDateFromISOString, getMailchimpDateString } from "@shared/util/DateUtil";
 import {
     MergeField,
     TagName,
@@ -13,14 +17,18 @@ import {
     UpdateTagResponse,
     UpdateTagsRequest
 } from "@shared/mailchimp/models/MailchimpTypes";
-import {ApiResponse} from "@shared/api/ApiTypes";
-import {WordCloudExclusionList} from "@shared/util/LanguageUtil";
-import CactusMember, {ReflectionStats} from "@shared/models/CactusMember";
-import {calculateDurationMs, calculateStreaks, getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil";
-import {QuerySortDirection} from "@shared/types/FirestoreConstants";
+import { ApiResponse } from "@shared/api/ApiTypes";
+import { WordCloudExclusionList } from "@shared/util/LanguageUtil";
+import CactusMember, { ReflectionStats } from "@shared/models/CactusMember";
+import {
+    calculateDurationMs,
+    calculateStreaks,
+    getElementAccumulationCounts
+} from "@shared/util/ReflectionResponseUtil";
+import { QuerySortDirection } from "@shared/types/FirestoreConstants";
 import * as admin from "firebase-admin";
 import DocumentReference = admin.firestore.DocumentReference;
-import {AxiosError} from "axios";
+import { AxiosError } from "axios";
 import Logger from "@shared/Logger";
 
 const logger = new Logger("AdminReflectionResponseService");
@@ -81,13 +89,18 @@ export default class AdminReflectionResponseService {
         throw new Error("Not implemented");
     }
 
-    async getMemberResponsesForPromptId(opts: { memberId: string, promptId: string }): Promise<ReflectionResponse[]> {
-        const {promptId, memberId} = opts;
-        if (!memberId) {
+    async getMemberResponsesForPromptId(opts: { memberId?: string, promptId?: string, limit?: number }): Promise<ReflectionResponse[]> {
+        const { promptId, memberId, limit } = opts;
+        if (!memberId || !promptId) {
             return [];
         }
-        const query = this.getCollectionRef().where(ReflectionResponse.Field.promptId, "==", promptId)
-            .where(ReflectionResponse.Field.cactusMemberId, "==", memberId);
+        let query = this.getCollectionRef().where(ReflectionResponse.Field.promptId, "==", promptId)
+        .where(ReflectionResponse.Field.cactusMemberId, "==", memberId);
+
+        if (limit) {
+            query = query.limit(limit);
+        }
+
         const results = await this.firestoreService.executeQuery(query, ReflectionResponse);
 
         return results.results
@@ -101,7 +114,7 @@ export default class AdminReflectionResponseService {
     }
 
     async setInsights(options: { reflectionResponseId: string, insightsResult?: InsightWordsResult }): Promise<void> {
-        const {reflectionResponseId, insightsResult} = options;
+        const { reflectionResponseId, insightsResult } = options;
         const doc: DocumentReference = this.getCollectionRef().doc(reflectionResponseId);
         const data: Partial<ReflectionResponse> = {};
 
@@ -111,9 +124,9 @@ export default class AdminReflectionResponseService {
 
         if (data.insights) {
             try {
-                await doc.set(data, {merge: true});
+                await doc.set(data, { merge: true });
             } catch (error) {
-                logger.error(`Unable to update reflection response insights for reflectionResponseId = ${reflectionResponseId}.`, error)
+                logger.error(`Unable to update reflection response insights for reflectionResponseId = ${ reflectionResponseId }.`, error)
             }
         }
         return;
@@ -124,7 +137,7 @@ export default class AdminReflectionResponseService {
 
         if (!email) {
             logger.warn("No email provided to setLastJournalDate function");
-            return {success: false, error: "No email provided"};
+            return { success: false, error: "No email provided" };
         }
 
         const lastJournalString = getMailchimpDateString(date);
@@ -151,8 +164,8 @@ export default class AdminReflectionResponseService {
                 return {
                     success: false,
                     unknownError: "No email provided to resetUser function",
-                    mergeResponse: {success: false},
-                    tagResponse: {success: false}
+                    mergeResponse: { success: false },
+                    tagResponse: { success: false }
                 };
             }
 
@@ -198,8 +211,8 @@ export default class AdminReflectionResponseService {
             return {
                 success: false,
                 unknownError: error.isAxiosError ? error.response : error,
-                mergeResponse: {success: false},
-                tagResponse: {success: false}
+                mergeResponse: { success: false },
+                tagResponse: { success: false }
             }
         }
     }
@@ -219,11 +232,11 @@ export default class AdminReflectionResponseService {
         }
     }
 
-    async getResponsesForMember(options: { memberId: string, limit?: number}, queryOptions: QueryOptions = {}): Promise<ReflectionResponse[]> {
-        const {memberId, limit} = options;
+    async getResponsesForMember(options: { memberId: string, limit?: number }, queryOptions: QueryOptions = {}): Promise<ReflectionResponse[]> {
+        const { memberId, limit } = options;
 
         let query = this.getCollectionRef().where(ReflectionResponse.Field.cactusMemberId, "==", memberId);
-            
+
         if (limit) {
             query = query.limit(limit)
         }
@@ -242,14 +255,14 @@ export default class AdminReflectionResponseService {
 
     async calculateStatsForMember(options: { memberId: string, timeZone?: string }, queryOptions?: QueryOptions): Promise<ReflectionStats | undefined> {
         try {
-            const {memberId, timeZone} = options;
+            const { memberId, timeZone } = options;
             if (!memberId) {
                 logger.error("No memberId provided to calculate stats.");
                 return
             }
 
-            const reflections = await this.getResponsesForMember({memberId}, queryOptions);
-            const {dayStreak, weekStreak, monthStreak} = calculateStreaks(reflections, {timeZone});
+            const reflections = await this.getResponsesForMember({ memberId }, queryOptions);
+            const { dayStreak, weekStreak, monthStreak } = calculateStreaks(reflections, { timeZone });
             const duration = calculateDurationMs(reflections);
 
             const elementAccumulation = getElementAccumulationCounts(reflections);
@@ -271,14 +284,14 @@ export default class AdminReflectionResponseService {
 
     async aggregateWordInsightsForMember(options: { memberId: string }, queryOptions?: QueryOptions): Promise<InsightWord[] | undefined> {
         try {
-            const {memberId} = options;
+            const { memberId } = options;
             if (!memberId) {
                 logger.error("No memberId provided to calculate stats.");
                 return
             }
 
-            const reflections = await this.getResponsesForMember({memberId, limit: 7}, queryOptions);
-            const wordStats: {[key: string]: InsightWord} = {};
+            const reflections = await this.getResponsesForMember({ memberId, limit: 7 }, queryOptions);
+            const wordStats: { [key: string]: InsightWord } = {};
             const wordCloud: InsightWord[] = [];
 
             if (reflections) {
@@ -296,22 +309,22 @@ export default class AdminReflectionResponseService {
 
                             if (wordInsight.word) {
                                 const normalizedWord = wordInsight.word.toLowerCase();
-                                
-                                if(wordStats[normalizedWord]) {
-                                   const aggFrequency = wordStats[normalizedWord].frequency;
-                                   const aggSalience = wordStats[normalizedWord].salience;
-                                   if (aggFrequency) {
-                                       wordStats[normalizedWord].frequency = aggFrequency + 1;
-                                   }
-                                   if (aggSalience && wordInsight.salience) {
-                                       wordStats[normalizedWord].salience = (aggSalience + wordInsight.salience) / 2;
-                                   }
+
+                                if (wordStats[normalizedWord]) {
+                                    const aggFrequency = wordStats[normalizedWord].frequency;
+                                    const aggSalience = wordStats[normalizedWord].salience;
+                                    if (aggFrequency) {
+                                        wordStats[normalizedWord].frequency = aggFrequency + 1;
+                                    }
+                                    if (aggSalience && wordInsight.salience) {
+                                        wordStats[normalizedWord].salience = (aggSalience + wordInsight.salience) / 2;
+                                    }
                                 } else {
-                                   wordStats[normalizedWord] = {
-                                       word: wordInsight.word,
-                                       frequency: 1,
-                                       salience: wordInsight.salience || 0
-                                   }
+                                    wordStats[normalizedWord] = {
+                                        word: wordInsight.word,
+                                        frequency: 1,
+                                        salience: wordInsight.salience || 0
+                                    }
                                 }
                             }
                         });
@@ -320,12 +333,12 @@ export default class AdminReflectionResponseService {
             }
 
             if (wordStats) {
-                for (const word in wordStats){
-                  wordCloud.push({
-                      word: word,
-                      frequency: wordStats[word].frequency,
-                      salience: (wordStats[word].salience || 0) * (wordStats[word].frequency || 1)
-                  });
+                for (const word in wordStats) {
+                    wordCloud.push({
+                        word: word,
+                        frequency: wordStats[word].frequency,
+                        salience: (wordStats[word].salience || 0) * (wordStats[word].frequency || 1)
+                    });
                 }
             }
 
@@ -354,7 +367,7 @@ export default class AdminReflectionResponseService {
             totalDeleted += idNumber;
         }
 
-        logger.log(`Permanently deleted ${totalDeleted} reflection responses for member ${member.email || member.id}`)
+        logger.log(`Permanently deleted ${ totalDeleted } reflection responses for member ${ member.email || member.id }`)
         return totalDeleted
     }
 

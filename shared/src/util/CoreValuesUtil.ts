@@ -1,10 +1,6 @@
 import { CoreValue } from "@shared/models/CoreValueTypes";
 import { getIntegerFromStringBetween } from "@shared/util/StringUtil";
 import { isNull, isNumber } from "@shared/util/ObjectUtil";
-import Logger from "@shared/Logger"
-
-const logger = new Logger("CoreValuesUtil");
-
 
 export interface CoreValuesBlob {
     imageUrl: string,
@@ -55,6 +51,5 @@ export function getCoreValuesBlob(values?: (string | CoreValue)[], forceIndex?: 
     if (!isNull(forceIndex) && isNumber(Number(forceIndex))) {
         index = Number(forceIndex);
     }
-    logger.info("getting blob with index", index);
     return blobs[index];
 }

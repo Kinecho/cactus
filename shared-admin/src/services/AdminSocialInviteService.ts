@@ -7,7 +7,7 @@ import {InvitationSendResult} from "@shared/types/SocialInviteTypes";
 import {generateReferralLink} from "@shared/util/SocialInviteUtil";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
 import {EmailContact} from "@shared/types/EmailContactTypes";
-import {CactusConfig} from "@shared/CactusConfig";
+import {CactusConfig} from "@admin/CactusConfig";
 import * as Sentry from "@sentry/node";
 import {AppType} from "@shared/models/ReflectionResponse";
 

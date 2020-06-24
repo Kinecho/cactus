@@ -2,7 +2,7 @@ import {Command} from "@scripts/CommandTypes";
 import {chooseEnvironment} from "@scripts/questionUtil";
 import {getCactusConfig, Project} from "@scripts/config";
 import MailchimpService from "@admin/services/MailchimpService";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import {writeToFile} from "@scripts/util/FileUtil";
 import helpers from "@scripts/helpers";
 const prompts = require("prompts");

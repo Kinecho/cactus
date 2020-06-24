@@ -6,6 +6,7 @@ export enum EmailCategory {
     Invitation = "Invitation",
     ConfirmEmail = "Confirm Email",
     Authentication = "Authentication",
+    PROMPT_NOTIFICATION = "Prompt Notification",
 }
 
 export enum SendgridTemplate {
@@ -14,7 +15,8 @@ export enum SendgridTemplate {
     invitation = "invitation",
     friend_request = "friend_request",
     trial_ending = "trial_ending",
-    data_export = "data_export"
+    data_export = "data_export",
+    new_prompt_notification = "new_prompt_notification",
 }
 
 /**
@@ -34,7 +36,9 @@ enum Fields {
     sendgridMessageId = "sendgridMessageId",
 }
 
-
+/**
+ * @Deprecated - use NotificationLog instead
+ */
 export default class EmailLog extends BaseModel {
     static Fields = Fields;
     collection = Collection.emailLogs;
@@ -56,7 +60,6 @@ export default class EmailLog extends BaseModel {
     memberId?: string;
     email!: string;
     templateData?: TemplateData;
-
 
     constructor(email?: string) {
         super();

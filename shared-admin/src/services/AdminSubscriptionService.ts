@@ -22,7 +22,7 @@ import { isNull, optionalStringToNumber, stringifyJSON } from "@shared/util/Obje
 import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 import { getHostname } from "@admin/config/configService";
 import { PageRoute } from "@shared/PageRoutes";
-import { CactusConfig } from "@shared/CactusConfig";
+import { CactusConfig } from "@admin/CactusConfig";
 import { SubscriptionInvoice, SubscriptionStatus } from "@shared/models/SubscriptionTypes";
 import { ApiResponse } from "@shared/api/ApiTypes";
 

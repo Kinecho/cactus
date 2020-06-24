@@ -1,7 +1,7 @@
 import {google, sheets_v4} from "googleapis";
 import Schema$Spreadsheet = sheets_v4.Schema$Spreadsheet;
 import Sheets = sheets_v4.Sheets;
-import {CactusConfig} from "@shared/CactusConfig";
+import {CactusConfig} from "@admin/CactusConfig";
 import Schema$ValueRange = sheets_v4.Schema$ValueRange;
 import Schema$UpdateValuesResponse = sheets_v4.Schema$UpdateValuesResponse;
 import {toCamelCamse} from "@shared/util/StringUtil";

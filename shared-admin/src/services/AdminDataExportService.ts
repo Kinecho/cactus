@@ -1,6 +1,6 @@
 import AdminFirestoreService, { FieldValue } from "@admin/services/AdminFirestoreService";
 import DataExport from "@shared/models/DataExport";
-import { CactusConfig } from "@shared/CactusConfig";
+import { CactusConfig } from "@admin/CactusConfig";
 import { Collection } from "@shared/FirestoreBaseModels";
 
 let firestoreService: AdminFirestoreService;

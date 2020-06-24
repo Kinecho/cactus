@@ -1,6 +1,60 @@
 {
   "indexes": [
     {
+      "collectionGroup": "coreValuesAssessmentResponses",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "completed",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "deleted",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "memberId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "coreValuesAssessmentResponses",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "deleted",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "memberId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "deletedUsers",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "deleted",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "memberDeletedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "fl_content",
       "queryScope": "COLLECTION",
       "fields": [
@@ -18,6 +72,136 @@
         },
         {
           "fieldPath": "scheduledSendAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "fl_content",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "contentStatus",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "scheduledSendAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "fl_content",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "subscriptionTiers",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "_fl_meta_.env",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "_fl_meta_.locale",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "_fl_meta_.schema",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "cactusElement",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "contentStatus",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "scheduledSendAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "fl_content",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "subscriptionTiers",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "_fl_meta_.env",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "_fl_meta_.locale",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "_fl_meta_.schema",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "contentStatus",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "deleted",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "scheduledSendAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "fl_content",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "subscriptionTiers",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "_fl_meta_.env",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "_fl_meta_.locale",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "_fl_meta_.schema",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "scheduledSendAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "gapAnalysisAssessmentResults",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "completed",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "deleted",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "memberId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "updatedAt",
           "order": "DESCENDING"
         }
       ]
@@ -59,7 +243,125 @@
           "order": "ASCENDING"
         },
         {
+          "fieldPath": "subscription.activated",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "subscription.tier",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "subscription.trial.endsAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "members",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "deleted",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "subscription.cancellation.userInitiatedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "members",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "deleted",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "subscription.optOutTrial.startedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "members",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "deleted",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "subscription.tier",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "subscription.cancellation.accessEndsAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "members",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "deleted",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "subscription.tier",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "subscription.trial.endsAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "members",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "deleted",
+          "order": "ASCENDING"
+        },
+        {
           "fieldPath": "unsubscribedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "members",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "promptSendTimeUTC.hour",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "promptSendTimeUTC.minute",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "payments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "deleted",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "apple.originalTransactionId",
           "order": "ASCENDING"
         }
       ]
@@ -169,6 +471,24 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
+          "fieldPath": "cactusMemberId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "deleted",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "updatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "reflectionResponses",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
           "fieldPath": "deleted",
           "order": "ASCENDING"
         },
@@ -219,12 +539,62 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
+          "fieldPath": "cactusMemberId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "deleted",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "promptId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "lastSentAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "sentPrompts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "completed",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "firstSentAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "sentPrompts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
           "fieldPath": "deleted",
           "order": "ASCENDING"
         },
         {
           "fieldPath": "createdAt",
           "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "sentPrompts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "promptId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "firstSentAt",
+          "order": "DESCENDING"
         }
       ]
     },

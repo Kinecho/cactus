@@ -1,9 +1,9 @@
 import { getAdmin, getCactusConfig, Project } from "@scripts/config";
 import * as admin from "firebase-admin";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import { resetConsole } from "@scripts/util/ConsoleUtil";
-import { CactusConfig } from "@shared/CactusConfig";
+import { CactusConfig } from "@admin/CactusConfig";
 import { initializeServices } from "@admin/services/AdminServiceConfig";
 import { setTimestamp } from "@shared/util/FirestoreUtil";
 import { setConfig } from "@admin/config/configService";
@@ -11,8 +11,6 @@ import { stringifyJSON } from "@shared/util/ObjectUtil";
 import Logger from "@shared/Logger"
 
 const logger = new Logger("CommandTypes");
-
-
 const prompts = require("prompts");
 
 export interface Command {
@@ -139,8 +137,6 @@ export abstract class FirebaseCommand implements Command {
         const separator = "====================================================";
         const message = `${ separator }\n Starting ${ this.name }\n Using firebase project ${ chalk.blue(projectId || "unknown") }\n${ separator }`;
         console.log(chalk.bold.green(message));
-
-        // setAdmin(this.app);
 
         return this.app;
     }

@@ -15,7 +15,7 @@ import {
     formatDateTime,
     getDateAtMidnightDenver,
     getISODate,
-    mailchimpTimeZone,
+    AmericaDenverTimezone,
     millisecondsToMinutes
 } from "@shared/util/DateUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
@@ -210,7 +210,7 @@ async function processToday(job: JobRequest): Promise<SlashCommandResponse> {
 
     const attachments = [{
         title: `Today's Stats`,
-        text: `Events since ${ formatDateTime(todayDate, { timezone: mailchimpTimeZone }) }`,
+        text: `Events since ${ formatDateTime(todayDate, { timezone: AmericaDenverTimezone }) }`,
         fields: todayFields,
         color: AttachmentColor.info,
     }, {

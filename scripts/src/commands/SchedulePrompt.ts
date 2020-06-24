@@ -1,16 +1,16 @@
-import {FirebaseCommand} from "@scripts/CommandTypes";
+import { FirebaseCommand } from "@scripts/CommandTypes";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import * as admin from "firebase-admin";
-import {CactusConfig} from "@shared/CactusConfig";
-import {Project} from "@scripts/config";
+import { CactusConfig } from "@admin/CactusConfig";
+import { Project } from "@scripts/config";
 import * as prompts from "prompts";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import PromptContentScheduler from "@admin/PromptContentScheduler";
-import {stringifyJSON} from "@shared/util/ObjectUtil";
-import chalk from "chalk"
-import {ContentStatus} from "@shared/models/PromptContent";
+import { stringifyJSON } from "@shared/util/ObjectUtil";
+import * as chalk from "chalk"
+import { ContentStatus } from "@shared/models/PromptContent";
 import AdminSlackService from "@admin/services/AdminSlackService";
-import {buildPromptContentURL} from "@admin/util/StringUtil";
+import { buildPromptContentURL } from "@admin/util/StringUtil";
 
 interface UserInput {
     entryId: string
@@ -24,7 +24,7 @@ export default class SchedulePrompt extends FirebaseCommand {
 
     protected async run(app: admin.app.App, firestoreService: AdminFirestoreService, config: CactusConfig): Promise<void> {
         const project = this.project || Project.STAGE;
-        console.log("Using project", project);
+        console.log(chalk.blue("Using project", project));
 
         await this.processUserInput();
         return;
@@ -49,15 +49,15 @@ export default class SchedulePrompt extends FirebaseCommand {
         // console.log("Scheduled date is of type date?", promptContent.scheduledSendAt instanceof Date);
         // console.log("Scheduled dated locale string", promptContent.scheduledSendAt?.toLocaleDateString());
 
-        console.log(chalk.cyan(`Warning: Forcing the content status to be submitted. It was originally ${promptContent.contentStatus}`));
+        console.log(chalk.cyan(`Warning: Forcing the content status to be submitted. It was originally ${ promptContent.contentStatus }`));
         promptContent.contentStatus = ContentStatus.submitted;
 
-        const scheduler = new PromptContentScheduler({promptContent, config: this.config});
+        const scheduler = new PromptContentScheduler({ promptContent, config: this.config });
         const result = await scheduler.run();
 
         if (result.didPublish && result.promptContent.contentStatus === ContentStatus.published) {
             const link = buildPromptContentURL(promptContent, this.config);
-            await AdminSlackService.getSharedInstance().sendDataLogMessage(`Prompt content has been scheduled ${promptContent.entryId} - ${promptContent.scheduledSendAt?.toLocaleDateString()}. <${link}|See it here>`)
+            await AdminSlackService.getSharedInstance().sendDataLogMessage(`Prompt content has been scheduled ${ promptContent.entryId } - ${ promptContent.scheduledSendAt?.toLocaleDateString() }. <${ link }|See it here>`)
         }
 
         console.log("======== SCHEDULE RESULT ========");
@@ -66,10 +66,10 @@ export default class SchedulePrompt extends FirebaseCommand {
         } else {
             console.log(chalk.red(stringifyJSON(result, 2)));
         }
-        console.log(chalk.yellow(`scheduled send date: ${scheduler.promptContent.scheduledSendAt}`));
+        console.log(chalk.yellow(`scheduled send date: ${ scheduler.promptContent.scheduledSendAt }`));
         console.log("=================================");
 
-        const againInput = await prompts({type: "confirm", message: "Schedule another prompt?", name: "again"});
+        const againInput = await prompts({ type: "confirm", message: "Schedule another prompt?", name: "again" });
         if (againInput.again) {
             await this.processUserInput();
             return;
@@ -78,3 +78,4 @@ export default class SchedulePrompt extends FirebaseCommand {
     }
 
 }
+

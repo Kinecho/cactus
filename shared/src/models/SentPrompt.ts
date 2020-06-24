@@ -3,6 +3,7 @@ import {CampaignMemberSendStatus} from "@shared/mailchimp/models/MailchimpTypes"
 
 export enum PromptSendMedium {
     EMAIL_MAILCHIMP = "EMAIL_MAILCHIMP",
+    EMAIL_SENDGRID = "EMAIL_SENDGRID",
     PROMPT_CONTENT = "PROMPT_CONTENT",
     CRON_JOB = "CRON_JOB",
     CUSTOM_SENT_PROMPT_TIME = "CUSTOM_SENT_PROMPT_TIME",

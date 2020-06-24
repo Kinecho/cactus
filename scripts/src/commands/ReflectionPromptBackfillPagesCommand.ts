@@ -2,7 +2,7 @@ import {FirebaseCommand} from "@scripts/CommandTypes";
 import * as admin from "firebase-admin";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import helpers from "@scripts/helpers";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import {getCactusConfig, Project} from "@scripts/config";
 import MailchimpService from "@admin/services/MailchimpService";
 import {CampaignContent} from "@shared/mailchimp/models/CreateCampaignRequest";

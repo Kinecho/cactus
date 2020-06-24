@@ -1,7 +1,6 @@
 import * as express from "express";
 import * as cors from "cors";
 import * as functions from "firebase-functions";
-import chalk from "chalk";
 import * as crypto from "crypto";
 import { getConfig } from "@admin/config/configService";
 import AdminSlackService, { SlackAttachment, SlackResponseType } from "@admin/services/AdminSlackService";
@@ -88,7 +87,7 @@ app.post("/commands/stats", async (req: functions.https.Request | any, resp: fun
 });
 
 app.post("/commands", async (req: functions.https.Request | any, resp: functions.Response) => {
-    logger.log("req", chalk.cyan(JSON.stringify(req.body, null, 2)));
+    logger.log("req", JSON.stringify(req.body, null, 2));
 
     const payload: CommandPayload = req.body;
 
@@ -213,7 +212,7 @@ app.post("/actions", async (req: functions.https.Request | any, resp: functions.
     } = JSON.parse(req.body.payload);
 
     const callbackId: string | undefined = payload.callback_id;
-    logger.log('body: ', chalk.blue(JSON.stringify(payload, null, 2)));
+    logger.log('body: ', JSON.stringify(payload, null, 2));
     if (callbackId === 'get_mailchimp_member') {
         await AdminSlackService.getSharedInstance().sendToResponseUrl(payload.response_url, { text: "This doesnt do anything useful... yet" });
 

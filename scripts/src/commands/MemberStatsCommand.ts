@@ -1,13 +1,13 @@
 import {FirebaseCommand} from "@scripts/CommandTypes";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import * as admin from "firebase-admin";
-import {CactusConfig} from "@shared/CactusConfig";
+import {CactusConfig} from "@admin/CactusConfig";
 import * as prompts from "prompts"
 import {Project} from "@scripts/config";
 import {isValidEmail} from "@shared/util/StringUtil";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
-import chalk from "chalk";
+import * as chalk from "chalk";
 
 interface UserInput {
     email: string

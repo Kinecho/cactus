@@ -31,8 +31,8 @@ import { getValidTimezoneName } from "@shared/timezones";
 import * as admin from "firebase-admin";
 import { QueryWhereClauses, removeDuplicates } from "@shared/util/FirestoreUtil";
 import { isBlank } from "@shared/util/StringUtil";
-import DocumentReference = admin.firestore.DocumentReference;
 import { CoreValue } from "@shared/models/CoreValueTypes";
+import DocumentReference = admin.firestore.DocumentReference;
 
 const logger = new Logger("AdminCactusMemberService");
 let firestoreService: AdminFirestoreService;
@@ -88,7 +88,10 @@ export default class AdminCactusMemberService {
         return firestoreService.save(model, options);
     }
 
-    async getById(id: string, options?: GetOptions): Promise<CactusMember | undefined> {
+    async getById(id?: string, options?: GetOptions): Promise<CactusMember | undefined> {
+        if (!id) {
+            return undefined;
+        }
         return await firestoreService.getById(id, CactusMember, options);
     }
 
@@ -677,5 +680,23 @@ export default class AdminCactusMemberService {
             logger.error(`Failed to update member's core values: memberId = ${ memberId }`)
         }
         return
+    }
+
+    /**
+     * Set the Email notification prefernece for a member by email address
+     * @param {string} email
+     * @param {boolean} subscribed
+     * @return {Promise<void>}
+     */
+    async setEmailNotificationPreference(email: string, subscribed: boolean): Promise<CactusMember | undefined> {
+        const member = await this.getMemberByEmail(email);
+        if (!member) {
+            return;
+        }
+
+        member.notificationSettings.email = subscribed ? NotificationStatus.ACTIVE : NotificationStatus.INACTIVE;
+        logger.info("Setting member's email preference to ", member.notificationSettings.email);
+        await this.save(member);
+        return member;
     }
 }

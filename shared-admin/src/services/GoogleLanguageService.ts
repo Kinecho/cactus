@@ -1,5 +1,5 @@
 import language from "@google-cloud/language";
-import {CactusConfig} from "@shared/CactusConfig";
+import {CactusConfig} from "@admin/CactusConfig";
 import {InsightWord, InsightWordsResult} from "@shared/models/ReflectionResponse";
 import Logger from "@shared/Logger";
 

@@ -8,10 +8,9 @@ import GoogleLanguageService from "@admin/services/GoogleLanguageService";
 import { getConfig } from "@admin/config/configService";
 import * as uuid from "uuid/v4"
 import * as admin from "firebase-admin"
-import { DateObject, DateTime } from "luxon";
+import { DateTime } from "luxon";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import * as DateUtil from "@shared/util/DateUtil";
-import { runJob as startSentPromptJob } from "@api/pubsub/subscribers/DailySentPromptJob";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
@@ -22,9 +21,7 @@ import { runMemberStatsJob } from "@api/pubsub/subscribers/MemberStatsJob";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
 
 const logger = new Logger("testApp");
-// const Config = getConfig();
 const app = express();
-// app.use(cors({origin: Config.allowedOrigins}));
 app.use(cors({ origin: true }));
 app.get('/', (req, res) => {
     res.status(200).json({ status: 'ok', queryParams: req.query });
@@ -35,11 +32,9 @@ app.get("/fcm", async (req, res) => {
         logger.log("Staring the message send process");
         const title = (req.query.title as string | undefined) || "Cactus Test Push Message";
         const body = (req.query.body as string | undefined) || "This is the body of the request";
-
         // const token = (req.query.token as string | undefined) || "f2SB0VUqdaA:APA91bGV1o6f4UzsXOlwX_LYqCIKsH-STA4HCIIbMoUwzUd7zobmaICShlUchVvB2qPYjoZAmnjLl5fI6ntvrxSNfyWvWmkMkCGIGcqps0B-zl0dDci1aP9mEFmX0GvH7GmIflGgHCY6";
-
         const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail("neil@neilpoulin.com");
-        let tokens = member?.fcmTokens ?? []
+        const tokens = member?.fcmTokens ?? []
 
         const tasks = tokens.map(token => {
             const payload: admin.messaging.MessagingPayload = {
@@ -57,8 +52,6 @@ app.get("/fcm", async (req, res) => {
         const allResults = await Promise.all(tasks);
 
         logger.info(stringifyJSON(allResults));
-        // logger.log("Send Message Result", result);
-
         return res.send(stringifyJSON(allResults));
     } catch (error) {
         logger.error("failed to send message", error);
@@ -130,62 +123,6 @@ app.get("/send-time", async (req, res) => {
     logger.log("result", result);
 
     res.send(result)
-});
-
-app.get("/next-prompt", async (req, res) => {
-    let memberId = req.query.memberId as string | undefined;
-    const email = req.query.email as string | undefined;
-    const runJob: boolean = !!req.query.run;
-    let member: CactusMember | undefined;
-    if (!memberId && email) {
-        member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
-    } else if (memberId) {
-        member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
-    }
-
-    if (!member) {
-        res.status(404);
-        res.send("No member found");
-        return;
-    }
-
-    memberId = member.id;
-
-    logger.log("Got member", memberId, member.email);
-    logger.log("getting next prompt for member Id", memberId);
-
-    const userTZ = member.timeZone;
-    // let systemDate = new Date();
-    const systemDate = new Date();
-    const systemDateObject = DateTime.local().toObject();
-    let userDateObject: DateObject = systemDateObject;
-    if (userTZ) {
-        logger.log("timezone =", userTZ);
-        userDateObject = DateUtil.getDateObjectForTimezone(systemDate, userTZ);
-        logger.log("user date obj", userDateObject);
-        logger.log("user date (locale)", userDateObject.toLocaleString())
-    }
-
-
-    let memberResult: CustomSentPromptNotificationsJob.MemberResult | undefined;
-    if (runJob) {
-        const job = { dryRun: false };
-        memberResult = await CustomSentPromptNotificationsJob.processMember({ job, member });
-    }
-
-    res.send({
-        memberTimeZone: userTZ,
-        userDate: DateTime.fromObject(userDateObject).toJSDate().toLocaleString(),
-        systemDate: systemDate.toLocaleString(),
-        userDateObject: userDateObject,
-        systemDateObject: systemDateObject,
-        promptSentTimePreference: member.promptSendTime,
-        memberJobResult: memberResult ? {
-            ...memberResult,
-            promptContent: memberResult?.promptContent?.toJSON(["_fl_meta_"]) || null,
-            sentPrompt: memberResult?.sentPrompt?.toJSON() || undefined,
-        } : "NOT PROCESSED",
-    });
 });
 
 app.get("/member-send-time", async (req, resp) => {
@@ -291,18 +228,6 @@ app.get("/content", async (req, resp) => {
     logger.log("local date ", d);
     const content = await AdminPromptContentService.getSharedInstance().getPromptContentForDate({ systemDate: d });
     return resp.send((content && content.toJSON()) || "none")
-});
-
-app.get("/contentJob", async (req, resp) => {
-    logger.log("Trying to fetch content");
-    const qDate = req.query.d as string | undefined;
-    let d = DateUtil.getDateAtMidnightDenver();
-    if (qDate) {
-        d = DateUtil.localDateFromISOString(qDate) || d;
-    }
-    logger.log("testApi: content Date", DateUtil.getISODate(d));
-    const result = await startSentPromptJob(d, undefined, true);
-    return resp.send(result);
 });
 
 app.get("/error", async (req, resp) => {

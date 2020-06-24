@@ -1,0 +1,19 @@
+queue:
+  - name: daily-prompt-setup
+    bucket_size: 100
+    rate: 500/s
+    retry_parameters:
+      task_retry_limit: 5
+      task_age_limit: 1d
+  - name: daily-prompt-push
+    bucket_size: 100
+    rate: 100/s
+    retry_parameters:
+      task_retry_limit: 5
+      task_age_limit: 1d
+  - name: daily-prompt-email
+    bucket_size: 100
+    rate: 100/s
+    retry_parameters:
+      task_retry_limit: 5
+      task_age_limit: 1d

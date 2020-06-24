@@ -2,7 +2,7 @@ import AdminFirestoreService, { GetOptions, SaveOptions } from "@admin/services/
 import User, { Field } from "@shared/models/User";
 import * as admin from "firebase-admin";
 import { BaseModel, Collection } from "@shared/FirestoreBaseModels";
-import { CactusConfig } from "@shared/CactusConfig";
+import { CactusConfig } from "@admin/CactusConfig";
 import CactusMember from "@shared/models/CactusMember";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";

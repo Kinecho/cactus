@@ -4,9 +4,8 @@ import inboundApp from "@api/endpoints/inboundApp";
 import checkoutApp from "@api/endpoints/checkoutApp";
 import manageNotificationApp from "@api/endpoints/manageNotificationsEndpoints";
 import testApp from "@api/endpoints/testApp";
-import * as EmailRecipientsJob from "@api/pubsub/subscribers/ProcessMailchimpCampaignRecipientsJob";
+import taskEndpoints from "@api/endpoints/taskEndpoints";
 import { backupFirestore, exportFirestoreToBigQuery } from "@api/endpoints/DataExportJob";
-import * as BridgeToMondayJob from "@api/pubsub/subscribers/BridgeToMondayJob";
 import * as UnsubscriberReportSyncJob from "@api/pubsub/subscribers/UnsubscriberReportSyncJob";
 import {
     onReflectionResponseCreated,
@@ -15,7 +14,6 @@ import {
     updateInsightWordsOnReflectionWrite
 } from "@api/triggers/ReflectionResponseTriggers";
 import * as SlackCommandJob from "@api/pubsub/subscribers/SlackCommandJob";
-import * as DailySentPromptJob from "@api/pubsub/subscribers/DailySentPromptJob";
 import * as MemberStatsJob from "@api/pubsub/subscribers/MemberStatsJob";
 import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
 import * as SentPromptTriggers from "@api/triggers/SentPromptTriggers";
@@ -55,14 +53,12 @@ export const cloudFunctions = {
     test: functions.https.onRequest(testApp),
     notificationPreferences: functions.https.onRequest(manageNotificationApp),
     apple: functions.https.onRequest(appleEndpoints),
+    tasks: functions.https.onRequest(taskEndpoints),
 
     //PubSub topics
     pubsub1: {
-        bridgeToMondayJob: functions.pubsub.topic(PubSubTopic.bridge_to_monday_prune).onPublish(BridgeToMondayJob.onPublish),
-        dailySentPromptJob: functions.pubsub.topic(PubSubTopic.create_daily_sent_prompts).onPublish(DailySentPromptJob.onPublish),
         backupFirestore: functions.pubsub.topic(PubSubTopic.firestore_backup).onPublish(backupFirestore),
         exportToBigQuery: functions.pubsub.topic(PubSubTopic.firestore_export_bigquery).onPublish(exportFirestoreToBigQuery),
-        processMailchimpEmailRecipients: functions.pubsub.topic(PubSubTopic.process_mailchimp_email_recipients).onPublish(EmailRecipientsJob.onPublish),
     },
     pubsub2: {
         slackCommandJob: functions.pubsub.topic(PubSubTopic.slack_command).onPublish(SlackCommandJob.onPublish),

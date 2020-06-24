@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import * as chalk from "chalk";
 const prompts = require('prompts');
 const helpers = require("@web/../helpers");
 const fs = require("fs");

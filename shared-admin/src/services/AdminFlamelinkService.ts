@@ -1,4 +1,4 @@
-import {CactusConfig} from "@shared/CactusConfig";
+import {CactusConfig} from "@admin/CactusConfig";
 import * as admin from "firebase-admin";
 import * as flamelink from "flamelink/app";
 import 'flamelink/content'

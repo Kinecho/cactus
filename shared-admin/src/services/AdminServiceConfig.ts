@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin'
-import { CactusConfig } from "@shared/CactusConfig";
+import { CactusConfig } from "@admin/CactusConfig";
 import MailchimpService from "@admin/services/MailchimpService";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
@@ -37,6 +37,10 @@ import StripeService from "@admin/services/StripeService";
 import AdminDataExportService from "@admin/services/AdminDataExportService";
 import AdminDeletedUserService from "@admin/services/AdminDeletedUserService";
 import AdminRevenueCatService from "@admin/services/AdminRevenueCatService";
+import CloudTaskService from "@admin/services/CloudTaskService";
+import PromptNotificationManager from "@admin/managers/PromptNotificationManager";
+import AdminNotificationService from "@admin/services/AdminNotificationService";
+import PushNotificationService from "@admin/services/PushNotificationService";
 
 const logger = new Logger("AdminServiceConfig");
 
@@ -66,6 +70,7 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminSentCampaignService.initialize();
     GoogleSheetsService.initialize(config);
     GoogleLanguageService.initialize(config);
+    CloudTaskService.initialize(config);
     AdminEmailReplyService.initialize();
     AdminSocialInviteService.initialize(config);
     AdminMemberProfileService.initialize();
@@ -79,6 +84,9 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminEmailLogService.initialize(config);
     AdminDataExportService.initialize(config);
     AdminDeletedUserService.initialize();
+    AdminNotificationService.initialize();
+
+    PushNotificationService.initialize(app);
 
     //Flamelink
     AdminFlamelinkService.initialize(config, app);
@@ -93,6 +101,8 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
 
     //RevenueCat
     AdminRevenueCatService.initialize(config);
+
+    PromptNotificationManager.initialize(config);
 
     logger.log("Initializing Sentry");
     const sentryOptions: Sentry.NodeOptions = {

@@ -2,14 +2,14 @@ import {FirebaseCommand} from "@scripts/CommandTypes";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import * as admin from "firebase-admin";
 import {Project} from "@scripts/config";
-import {CactusConfig} from "@shared/CactusConfig";
+import {CactusConfig} from "@admin/CactusConfig";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 import {DocumentSnapshot} from "firebase-functions/lib/providers/firestore";
 import {fromDocumentSnapshot} from "@shared/util/FirestoreUtil";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import CactusMember from "@shared/models/CactusMember";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
-import chalk from "chalk";
+import * as chalk from "chalk";
 
 const prompts = require("prompts");
 

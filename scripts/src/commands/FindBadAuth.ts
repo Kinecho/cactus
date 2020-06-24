@@ -1,7 +1,7 @@
 import {FirebaseCommand} from "@scripts/CommandTypes";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import * as admin from "firebase-admin";
-import {CactusConfig} from "@shared/CactusConfig";
+import {CactusConfig} from "@admin/CactusConfig";
 import {Project} from "@scripts/config";
 import UserRecord = admin.auth.UserRecord;
 import {isBlank} from "@shared/util/StringUtil";
@@ -9,7 +9,7 @@ import {writeToFile} from "@scripts/util/FileUtil";
 import {isDate, stringifyJSON} from "@shared/util/ObjectUtil";
 import helpers from "@scripts/helpers";
 import * as path from "path";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import {exec} from "child_process";
 import * as prompts from "prompts"
 import {transactionalOnCreate} from "@admin/AuthUserCreateJob";

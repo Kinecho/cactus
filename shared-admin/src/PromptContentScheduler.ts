@@ -1,7 +1,6 @@
 import PromptContent, { ContentStatus, ContentType } from "@shared/models/PromptContent";
-import { appendDomain, isBlank } from "@shared/util/StringUtil";
-import { CactusConfig } from "@shared/CactusConfig";
-import chalk from "chalk";
+import { isBlank } from "@shared/util/StringUtil";
+import { CactusConfig } from "@admin/CactusConfig";
 import AdminFlamelinkService from "@admin/services/AdminFlamelinkService";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import AdminSlackService, {
@@ -11,47 +10,15 @@ import AdminSlackService, {
     SlackAttachmentField
 } from "@admin/services/AdminSlackService";
 import { buildPromptContentURL } from "@admin/util/StringUtil";
-import { formatDateTime, mailchimpTimeZone } from "@shared/util/DateUtil";
+import { AmericaDenverTimezone, formatDateTime } from "@shared/util/DateUtil";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
-import {
-    Campaign,
-    CampaignType,
-    SendChecklistItem,
-    SendChecklistItemType
-} from "@shared/mailchimp/models/MailchimpTypes";
-import {
-    CampaignContent,
-    CampaignContentRequest,
-    CampaignContentSectionMap,
-    CreateCampaignRequest,
-    CreateCampaignSettings,
-    TemplateSection,
-    UpdateCampaignRequest
-} from "@shared/mailchimp/models/CreateCampaignRequest";
-import MailchimpService from "@admin/services/MailchimpService";
 import { DateTime } from "luxon";
-import { AxiosError } from "axios";
 import { PageRoute } from "@shared/PageRoutes";
 import Logger from "@shared/Logger";
-import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
 
 const logger = new Logger("PromptContentScheduler");
-
-export interface ScheduleCampaignResult {
-    success: boolean,
-    error?: string,
-    warnings?: SendChecklistItem[]
-}
-
-export interface EmailResult {
-    success: boolean,
-    alreadyScheduled?: boolean,
-    campaign?: Campaign,
-    error?: string | undefined,
-    scheduled: boolean,
-}
 
 export class ScheduleResult {
     success: boolean = false;
@@ -63,8 +30,6 @@ export class ScheduleResult {
     existingPromptContent?: PromptContent;
     reflectionPrompt?: ReflectionPrompt;
     existingReflectionPrompt = false;
-    mailchimpCampaign?: Campaign | undefined;
-    scheduledEmails = false;
 
     constructor(promptContent: PromptContent) {
         this.promptContent = promptContent;
@@ -175,7 +140,7 @@ export default class PromptContentScheduler {
         // const dateString = getISODate(this.promptContent.scheduledSendAt);
         const dateString = formatDateTime(this.promptContent.scheduledSendAt, {
             format: "cccc, LLLL d, yyyy",
-            timezone: mailchimpTimeZone
+            timezone: AmericaDenverTimezone
         });
         const fields: SlackAttachmentField[] = [
             { title: "Question", value: this.promptContent.getQuestion() || "not set" },
@@ -191,13 +156,6 @@ export default class PromptContentScheduler {
             fields.push({ title: "Prompt Question", value: result.promptContent.getQuestion()! });
         }
 
-        if (result.mailchimpCampaign?.web_id) {
-            fields.push({
-                title: "Mailchimp",
-                value: `<https://us20.admin.mailchimp.com/campaigns/edit?id=${ result.mailchimpCampaign.web_id }|Edit Campaign>`
-            })
-        }
-
         if (result.errors.length > 0) {
             fields.push({
                 title: "Issues",
@@ -206,7 +164,6 @@ export default class PromptContentScheduler {
         }
 
         const attachments: SlackAttachment[] = [{
-            // title: "Issues",
             text: " ",
             color: "warning",
             fields
@@ -220,10 +177,9 @@ export default class PromptContentScheduler {
 
     buildSuccessMessage(result: ScheduleResult): ChatMessage {
         const link = buildPromptContentURL(this.promptContent, this.config);
-        // const dateString = getISODate(this.promptContent.scheduledSendAt);
         const dateString = formatDateTime(this.promptContent.scheduledSendAt, {
             format: "cccc, LLLL d, yyyy",
-            timezone: mailchimpTimeZone
+            timezone: AmericaDenverTimezone
         });
         const fields: SlackAttachmentField[] = [
             {
@@ -252,13 +208,6 @@ export default class PromptContentScheduler {
                 short: true,
             }
         ];
-        if (this.result.mailchimpCampaign?.archive_url) {
-            fields.push({
-                title: "Mailchimp Email",
-                value: `<${ this.result.mailchimpCampaign.archive_url }|View Email>`,
-                short: true,
-            })
-        }
 
         if (this.result.errors.length > 0) {
             fields.push({
@@ -280,7 +229,7 @@ export default class PromptContentScheduler {
     /**
      * Schedule the prompt content.
      * This will validate the fields on the PromptContent,
-     * create/update the associated ReflectionPrompt, and schedule/update mailchimp emails
+     * create/update the associated ReflectionPrompt
      *
      * This method does not save the final ContentStatus on the PromptContent - that is up to the calling code.
      *
@@ -324,16 +273,7 @@ export default class PromptContentScheduler {
             return result;
         }
 
-        logger.log("setting up emails...");
-        const emailResult = await this.setupEmails();
-        logger.log("Set up email response", JSON.stringify(emailResult));
-        if (!emailResult.success) {
-            logger.error("Failed to setup emails", emailResult.error);
-            result.success = false;
-            return result;
-        } else {
-            result.success = true;
-        }
+        result.success = true;
 
         return result;
     }
@@ -367,7 +307,7 @@ export default class PromptContentScheduler {
             this.savePromptContent()
         ]);
 
-        logger.log(chalk.green(`Saved ReflectionPrompt to firestore and saved PromptContent to flamelink. PromptID = ${ prompt.id }`));
+        logger.log(`Saved ReflectionPrompt to firestore and saved PromptContent to flamelink. PromptID = ${ prompt.id }`);
         return true;
     }
 
@@ -398,254 +338,10 @@ export default class PromptContentScheduler {
         return undefined; //only return the existing if it wasn't the current prompt;
     }
 
-    async setupEmails(): Promise<EmailResult> {
-        const { success, error, campaign } = await this.createMailchimpCampaign();
-
-        if (!success || !campaign) {
-            this.result.success = false;
-            logger.error(chalk.red("Failed to create/get campaign"), error);
-            if (error) {
-                this.result.errors.push(error);
-            }
-            return {
-                success,
-                campaign,
-                error,
-                scheduled: false,
-                alreadyScheduled: false,
-            }
-        }
-
-        this.result.mailchimpCampaign = campaign;
-        this.promptContent.mailchimpCampaignId = campaign.id;
-        this.promptContent.mailchimpCampaignWebId = campaign.web_id;
-
-        logger.log("Got campaign, updating the campaign content");
-        const contentResponse = await this.updateCampaignContent(campaign);
-
-        logger.log("updated campaign content, now scheduling the campaign");
-        const scheduleResult = await this.scheduleCampaign(campaign);
-        logger.log("schedlue campaign result", JSON.stringify(scheduleResult));
-        return {
-            success: success && scheduleResult.success && contentResponse.success,
-            campaign,
-            error,
-            scheduled: scheduleResult.success,
-            alreadyScheduled: false,
-        }
-    }
-
-    async scheduleCampaign(campaign: Campaign): Promise<ScheduleCampaignResult> {
-        const campaignChecklist = await MailchimpService.getSharedInstance().getCampaignSendChecklist(campaign.id);
-        const result: ScheduleCampaignResult = { success: false };
-        const isReady = campaignChecklist.is_ready;
-        // let didForceRetry = false;
-
-        if (!isReady) {
-            logger.error("The campaign is not ready to be scheduled.");
-            const issues = campaignChecklist.items.filter(item => item.type !== SendChecklistItemType.success && item.heading !== "MonkeyRewards");
-            return {
-                success: false,
-                error: "The campaign is not ready to be sent. In the old days, this would happen for reminder emails and we'd use a \"trick\" to force them to be scheduled. If we start to schedule reminder emails again, we'll need to revisit this code.",
-                warnings: issues
-            }
-        }
-
-        const warnings = campaignChecklist.items.filter(item => item.type === SendChecklistItemType.warning && item.heading !== "MonkeyRewards");
-        logger.log(chalk.green(`Campaign is ready to be scheduled`));
-        if (warnings.length > 0) {
-            logger.warn(chalk.yellow(`The mailchimp campaign is ready to send, however, there are ${ warnings.length } warnings. \n${ JSON.stringify(warnings, null, 2) }`));
-            result.warnings = warnings;
-        }
-
-        const scheduledDate = new Date(this.promptContent.scheduledSendAt!);
-
-        const send_time = DateTime.fromJSDate(scheduledDate).setZone(mailchimpTimeZone)
-        .set({
-            hour: 2,
-            minute: 45
-        }).toISO();
-        logger.log("Scheduling Mailchimp campaign for promptContent scheduled Date", scheduledDate);
-        logger.log("The scheduled date is converted into ISO string for mailchimp at 2:45am: ", send_time);
-
-        let scheduleResponse = await MailchimpService.getSharedInstance().scheduleCampaign(campaign.id, { schedule_time: send_time }, campaign.web_id);
-        logger.log("schedule campaign success:", scheduleResponse);
-
-        if (scheduleResponse.alreadyScheduled) {
-            logger.log("Attempting to unschedule the campaign so we can reschedule it.");
-            const unscheduleResponse = await MailchimpService.getSharedInstance().unscheduleCampaign(campaign);
-            if (unscheduleResponse.success) {
-                logger.log("Un-scheduling campaign was successful. attempting to re-schedule campaign");
-                scheduleResponse = await MailchimpService.getSharedInstance().scheduleCampaign(campaign.id, { schedule_time: send_time }, campaign.web_id);
-                logger.log("re-schedule campaign response: ", JSON.stringify(scheduleResponse))
-            } else {
-                logger.error("Unschedule campaign failed", unscheduleResponse.errorMessage);
-                result.error = unscheduleResponse.errorMessage;
-                result.success = false;
-                this.result.errors.push(`The campaign was already scheduled and failed to re-schedule: ${ unscheduleResponse.errorMessage }`);
-                return result;
-            }
-        }
-
-        if (!scheduleResponse.success && !scheduleResponse.alreadyScheduled) {
-            result.error = scheduleResponse.error || "Unable to schedule the campaign. An API error occurred but it's not clear what it was."
-            logger.error("Failed to schedule the campaign", scheduleResponse.error);
-            result.success = false;
-            this.result.errors.push(result.error!);
-        }
-        result.success = scheduleResponse.success;
-        return result;
-    }
-
-    createReflectButtonHtml(): string {
-        const path = `${ PageRoute.PROMPTS_ROOT }/${ this.promptContent.entryId! }`;
-        const domain = this.config.web.domain;
-        const linkText = "Reflect";
-        return `<a class="button" href="${ appendDomain(path, domain) }?e=*|URL:EMAIL|*">${ linkText }</a>`
-    }
-
-    async updateCampaignContent(campaign: Campaign): Promise<{ success: boolean, content?: CampaignContent, error?: string }> {
-        logger.log(chalk.bold("creating template content..."));
-        const sections: CampaignContentSectionMap = {
-            [TemplateSection.question]: this.promptContent.getQuestion()!,
-            [TemplateSection.inspiration]: this.promptContent.getPreviewText() || "",
-            [TemplateSection.content_link]: this.createReflectButtonHtml(),
-        };
-
-        logger.info(`Setting email template sections to\n: ${ chalk.blue(stringifyJSON(sections)) }`);
-
-        if (this.promptContent.topic) {
-            sections[TemplateSection.prompt_topic] = this.promptContent.topic || "";
-        }
-
-        const contentRequest: CampaignContentRequest = {
-            template: {
-                id: Number(this.config.mailchimp.templates.prompt_module_morning),
-                sections
-            }
-        };
-        try {
-            const campaignContent = await MailchimpService.getSharedInstance().updateCampaignContent(campaign.id, contentRequest);
-            logger.log("Successfully updated the template content for campaign\n");
-
-            return { success: !!campaignContent, content: campaignContent }
-        } catch (error) {
-            const message = error.isAxiosError && (error as AxiosError).response?.data || "Unable to create campaign content";
-            this.result.errors.push(message);
-            return {
-                success: false,
-                error: message
-            }
-        }
-    }
-
-    async createMailchimpCampaign(): Promise<{ success: boolean, campaign?: Campaign, error?: string }> {
-        logger.log("Setting up the mailchimp campaign");
-
-        const config = this.config.mailchimp;
-        const promptContent = this.promptContent;
-        const sendDate = formatDateTime(promptContent.scheduledSendAt, {
-            format: "yyyy-LL-dd",
-            timezone: mailchimpTimeZone
-        });
-        logger.log(chalk.red(`Mailchimp Send Date is formatted as: ${ sendDate }`));
-        const campaignTitle = `${ sendDate } - Daily - ${ promptContent.getQuestion() }`;
-
-        const prompt = this.result.reflectionPrompt;
-        const campaignSettings: CreateCampaignSettings = {
-            title: campaignTitle,
-            reply_to: "hello@cactus.app",
-            subject_line: promptContent.subjectLine,
-            from_name: "Cactus",
-            preview_text: promptContent.getPreviewText(),
-            to_name: '*|FNAME|* *|LNAME|*'
-        };
-
-        const segmentId = this.mailchimpSegmentId();
-
-        if (promptContent?.mailchimpCampaignId) {
-            logger.log("The campaign already exists on the ReflectionPrompt so we will update it");
-
-            const campaign = await MailchimpService.getSharedInstance().getCampaign(promptContent.mailchimpCampaignId);
-            const updateRequest: UpdateCampaignRequest = {
-                settings: campaignSettings,
-                recipients: {
-                    list_id: config.audience_id,
-                    segment_opts: {
-                        saved_segment_id: Number(segmentId),
-                    }
-                },
-            };
-
-            try {
-                const updatedCampaign = await MailchimpService.getSharedInstance().updateCampaign(promptContent.mailchimpCampaignId, updateRequest);
-                return { success: true, campaign: updatedCampaign };
-            } catch (updateError) {
-                logger.error("Update campaign failed.", updateError);
-                return {
-                    success: false,
-                    campaign: campaign,
-                    error: `${ JSON.stringify(updateError.response?.data || updateError) }`
-                };
-            }
-        }
-
-        // the campaign does not already exist so we will create it
-        const campaignRequest: CreateCampaignRequest = {
-            type: CampaignType.regular,
-            recipients: {
-                list_id: config.audience_id,
-                segment_opts: {
-                    saved_segment_id: Number(segmentId),
-                }
-            },
-            settings: campaignSettings,
-            tracking: {
-                html_clicks: false,
-                text_clicks: false
-            }
-        };
-
-        try {
-            const campaign = await MailchimpService.getSharedInstance().createCampaign(campaignRequest);
-
-            if (prompt) {
-                prompt.campaign = campaign;
-                await AdminReflectionPromptService.getSharedInstance().save(prompt)
-            }
-
-            return { campaign, success: true };
-        } catch (error) {
-            if (error.isAxiosError) {
-                const axiosError = error as AxiosError;
-                logger.error("API Error creating mailchimp campaign", axiosError.response?.data);
-                return {
-                    success: false,
-                    error: JSON.stringify(axiosError.response?.data) || "API call failed to create mailchimp campaign "
-                }
-            } else {
-                logger.error("Failed to create mailchimp campaign", error);
-                return {
-                    success: false,
-                    error: `API Call to mailchimp to create the campaign failed: ${ error.message ? error.message : error }`
-                };
-            }
-
-        }
-    }
-
     async savePromptContent(): Promise<void> {
         const promptContent = this.promptContent;
         await AdminFlamelinkService.getSharedInstance().updateRaw(promptContent, { updatedBy: this.robotUserId });
-        logger.log(chalk.blue(`Saved PromptContent with status ${ promptContent.contentStatus }`));
+        logger.log(`Saved PromptContent with status ${ promptContent.contentStatus }`);
         return;
-    }
-
-    mailchimpSegmentId(): string {
-        if (this.promptContent?.subscriptionTiers?.includes(SubscriptionTier.BASIC)) {
-            return this.config.mailchimp.segment_id_all_tiers;
-        } else {
-            return this.config.mailchimp.segment_id_plus_tier;
-        }
     }
 }

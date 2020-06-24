@@ -7,7 +7,7 @@ import {DateObject} from "luxon";
 import AdminSlackService from "@admin/services/AdminSlackService";
 import Logger from "@shared/Logger";
 import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
-import {CactusConfig} from "@shared/CactusConfig";
+import {CactusConfig} from "@admin/CactusConfig";
 
 const logger = new Logger("AdminPromptContentService");
 

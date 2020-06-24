@@ -1,14 +1,14 @@
 import { FirebaseCommand } from "@scripts/CommandTypes";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import * as admin from "firebase-admin";
-import { CactusConfig } from "@shared/CactusConfig";
+import { CactusConfig } from "@admin/CactusConfig";
 import { Project } from "@scripts/config";
 import * as prompts from "prompts";
 import Logger from "@shared/Logger"
 import { Store } from "@shared/api/RevenueCatApi";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CactusMember from "@shared/models/CactusMember";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
 import { AndroidFulfillRestoredPurchasesParams, AndroidPurchaseHistoryRecord } from "@shared/api/CheckoutTypes";
 import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";

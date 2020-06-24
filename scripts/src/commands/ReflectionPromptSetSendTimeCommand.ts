@@ -7,7 +7,7 @@ import {fromDocumentSnapshot} from "@shared/util/FirestoreUtil";
 import SentCampaign from "@shared/models/SentCampaign";
 import {getDateFromISOString} from "@shared/util/DateUtil";
 import MailchimpService from "@admin/services/MailchimpService";
-import {CactusConfig} from "@shared/CactusConfig";
+import {CactusConfig} from "@admin/CactusConfig";
 
 export default class ReflectionPromptSetSendTimeCommand extends FirebaseCommand {
     description = "Refresh the send time on all reflection prompts";

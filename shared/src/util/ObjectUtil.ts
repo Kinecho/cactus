@@ -55,7 +55,7 @@ export function isString(input: any): input is string {
 export function isNumber(input: any): input is number {
     try {
         const number = Number(input);
-        return isNotNull(number) && typeof (input) === "number";
+        return isNotNull(number) && typeof (input) === "number" && !isNaN(input);
     } catch (error) {
         return false;
     }
@@ -162,8 +162,8 @@ export function transformObjectSync(input: any, transform: (value: any) => any, 
 
 export function toPlainObject(input: any): any {
     return transformObjectSync(input, (value => {
-        if (isNonEmptyObject(value)){
-          return Object.assign({}, value)
+        if (isNonEmptyObject(value)) {
+            return Object.assign({}, value)
         }
         return value
     }))

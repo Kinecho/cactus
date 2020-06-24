@@ -1,4 +1,5 @@
 import {SendgridTemplate} from "@shared/models/EmailLog";
+import { TaskQueueConfigName } from "@admin/services/CloudTaskService";
 
 export interface ServiceAccountCredentials {
     project_id: string,
@@ -15,6 +16,22 @@ export interface ServiceAccountCredentials {
 
 export type EnvironmentType = "test" | "dev" | "prod" | "stage"
 export type SendgridTemplateConfig = { [name in SendgridTemplate]: string };
+export type SendgridTemplateUnsubscribeGroupConfig = { [name in SendgridTemplate]?: string };
+
+export type SendgridTemplateGroupConfig = { [name in SendgridTemplate]: {
+    template_id: string,
+    unsubscribe_group_id?: string,
+}}
+
+export interface TaskQueueConfig {
+    name: string,
+    handler_path: string,
+    http_method: "GET"|"POST"|"PUT"
+}
+
+export type TaskQueueConfigMap = {
+    [name in TaskQueueConfigName]: TaskQueueConfig
+}
 
 export interface CactusConfig {
     isEmulator: boolean,
@@ -27,7 +44,7 @@ export interface CactusConfig {
     mailchimp: {
         api_key: string,
         audience_id: string,
-        bridge_to_monday_segment_id: string,
+        bridge_to_monday_segment_id: string, //no longer used - can be removed in a future release
         non_prompt_campaign_ids: string //this is a comma separated string
         segment_id_all_tiers: string,
         segment_id_plus_tier: string,
@@ -97,7 +114,12 @@ export interface CactusConfig {
     },
     sendgrid: {
         api_key: string,
+        webhook_verification_key: string,
+        /**
+         * @Deprecated - please use the sendgrid.templates.template_id config instead
+         */
         template_ids: SendgridTemplateConfig,
+        templates: SendgridTemplateGroupConfig,
     },
     language: {
         client_id: string,
@@ -123,5 +145,11 @@ export interface CactusConfig {
         public_key: string,
         secret_key: string,
         webhook_bearer_token: string,
+    },
+    tasks: {
+        project_id: string,
+        location: string,
+        handler_url_base: string,
+        queues: TaskQueueConfigMap,
     }
 }

@@ -1,7 +1,7 @@
 import {FirebaseCommand} from "@scripts/CommandTypes";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import * as admin from "firebase-admin";
-import {CactusConfig} from "@shared/CactusConfig";
+import {CactusConfig} from "@admin/CactusConfig";
 import {Project} from "@scripts/config";
 import {CactusElement} from "@shared/models/CactusElement";
 import * as csv from "csvtojson"
@@ -9,7 +9,7 @@ import * as path from "path";
 import helpers from "@scripts/helpers";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import PromptContent from "@shared/models/PromptContent";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import * as prompts from "prompts"
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";

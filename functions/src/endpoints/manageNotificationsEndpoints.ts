@@ -1,26 +1,30 @@
 import * as express from "express";
 import * as cors from "cors";
-import {getHostname} from "@admin/config/configService";
-import {PageRoute} from "@shared/PageRoutes";
-import {QueryParam} from "@shared/util/queryParams";
+import { getConfig, getHostname } from "@admin/config/configService";
+import { PageRoute } from "@shared/PageRoutes";
+import { QueryParam } from "@shared/util/queryParams";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import MailchimpService from "@admin/services/MailchimpService";
-import {ListMember, ListMemberStatus} from "@shared/mailchimp/models/MailchimpTypes";
+import { ListMember, ListMemberStatus } from "@shared/mailchimp/models/MailchimpTypes";
 import Logger from "@shared/Logger";
-import { isString } from "@shared/util/ObjectUtil";
+import { isString, stringifyJSON } from "@shared/util/ObjectUtil";
+import CryptoService from "@api/CryptoService";
+import * as functions from "firebase-functions";
+import AdminSendgridService from "@admin/services/AdminSendgridService";
+import { SendgridWebhookEvent } from "@admin/services/SendgridServiceTypes";
 
 const logger = new Logger("manageNotificationsEndpoints");
 const app = express();
-// const config = getConfig();
-// Automatically allow cross-origin requests
 
+
+// app.use(bodyParser.text({ type: 'application/json' }))
 // TODO: This didn't setup the CORS with allowedOrigins because we
 // expect this to get hit from HTML links in emails and stuff. Maybe we should still do it. Not sure
 // Neil Poulin, 2020-01-08
-app.use(cors({origin: true}));
+app.use(cors({ origin: true }));
 
 app.get("/manage-notifications/email/unsubscribe", async (req: express.Request, res: express.Response) => {
-    const mailchimpUniqueId = req.query.mcuid as string|undefined;
+    const mailchimpUniqueId = req.query.mcuid as string | undefined;
     let email: string | undefined;
     let mailchimpFullId: string | undefined;
     let listMember: ListMember | undefined;
@@ -32,7 +36,7 @@ app.get("/manage-notifications/email/unsubscribe", async (req: express.Request, 
 
     if (!mailchimpUniqueId) {
         const errorMessage = "The link you clicked was invalid or may have expired. Please try again.";
-        res.redirect(`${getHostname()}${PageRoute.UNSUBSCRIBE_SUCCESS}?${QueryParam.MESSAGE}=${encodeURIComponent(errorMessage)}&${QueryParam.UNSUBSCRIBE_SUCCESS}=false`)
+        res.redirect(`${ getHostname() }${ PageRoute.UNSUBSCRIBE_SUCCESS }?${ QueryParam.MESSAGE }=${ encodeURIComponent(errorMessage) }&${ QueryParam.UNSUBSCRIBE_SUCCESS }=false`)
         return
     }
 
@@ -57,7 +61,7 @@ app.get("/manage-notifications/email/unsubscribe", async (req: express.Request, 
 
     if (!email) {
         const errorMessage = "We were unable to find a member associated with the link you clicked.";
-        res.redirect(`${getHostname()}${PageRoute.UNSUBSCRIBE_SUCCESS}?${QueryParam.MESSAGE}=${encodeURIComponent(errorMessage)}&${QueryParam.UNSUBSCRIBE_SUCCESS}=false`)
+        res.redirect(`${ getHostname() }${ PageRoute.UNSUBSCRIBE_SUCCESS }?${ QueryParam.MESSAGE }=${ encodeURIComponent(errorMessage) }&${ QueryParam.UNSUBSCRIBE_SUCCESS }=false`)
         return
     }
 
@@ -69,8 +73,37 @@ app.get("/manage-notifications/email/unsubscribe", async (req: express.Request, 
 
     const isUnsubscribed = listMember?.status === ListMemberStatus.unsubscribed;
 
-    res.redirect(`${getHostname()}${PageRoute.UNSUBSCRIBE_SUCCESS}?${QueryParam.ALREADY_UNSUBSCRIBED}=${isUnsubscribed}&${QueryParam.EMAIL}=${encodeURIComponent(email)}&${QueryParam.MAILCHIMP_EMAIL_ID}=${encodeURIComponent(mailchimpUniqueId)}`)
+    res.redirect(`${ getHostname() }${ PageRoute.UNSUBSCRIBE_SUCCESS }?${ QueryParam.ALREADY_UNSUBSCRIBED }=${ isUnsubscribed }&${ QueryParam.EMAIL }=${ encodeURIComponent(email) }&${ QueryParam.MAILCHIMP_EMAIL_ID }=${ encodeURIComponent(mailchimpUniqueId) }`)
     return;
 });
+
+
+app.post("/sendgrid/webhook", async (req, resp) => {
+    try {
+        const signature = req.header("x-twilio-email-event-webhook-signature")!;
+        const timestamp = req.header("X-Twilio-Email-Event-Webhook-Timestamp")!;
+        logger.info("signature", signature);
+        logger.info("timestamp", timestamp);
+        const key = getConfig().sendgrid.webhook_verification_key
+        const bodyPayload = (req as functions.https.Request).rawBody.toString();
+        const verified = await CryptoService.shared.verifySendgrid(bodyPayload, timestamp, signature, key)
+        logger.info("Sendgrid key verified", verified);
+        if (!verified) {
+            resp.sendStatus(403);
+            return
+        }
+
+        const events = req.body as SendgridWebhookEvent[];
+        const allTasks = events.map(event => AdminSendgridService.getSharedInstance().handleWebhookEvent(event))
+        const results = await Promise.all(allTasks);
+        logger.info("Processed all events", stringifyJSON(results, 2));
+
+        resp.send(204);
+    } catch (error) {
+        logger.error("Failed to process webhook", error);
+        resp.status(500).send(error);
+        return;
+    }
+})
 
 export default app

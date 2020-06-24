@@ -98,7 +98,7 @@ export interface MemberStripeDetails {
     customerId?: string,
 }
 
-export default class  CactusMember extends BaseModel {
+export default class CactusMember extends BaseModel {
     readonly collection = Collection.members;
     static Field = Field;
     firstName?: string;
@@ -151,6 +151,49 @@ export default class  CactusMember extends BaseModel {
     coreValues?: CoreValue[];
 
     focusElement?: CactusElement | null;
+
+    toMemberData(): any {
+        return this.toJSON()
+    }
+
+    decodeJSON(json: any) {
+        super.decodeJSON(json);
+        const optOutTrial = this.subscription?.optOutTrial
+        if (optOutTrial) {
+            optOutTrial.endsAt = this.decodeDate(optOutTrial.endsAt)
+            optOutTrial.startedAt = this.decodeDate(optOutTrial.startedAt);
+        }
+
+        const trial = this.subscription?.trial;
+        if (trial) {
+            trial.activatedAt = this.decodeDate(trial.activatedAt);
+            trial.endsAt = this.decodeDate(trial.endsAt)!;
+        }
+
+        const cancellation = this.subscription?.cancellation;
+        if (cancellation) {
+            cancellation.accessEndsAt = this.decodeDate(cancellation.accessEndsAt);
+            cancellation.processedAt = this.decodeDate(cancellation.processedAt);
+            cancellation.initiatedAt = this.decodeDate(cancellation.initiatedAt);
+        }
+
+        if (this.activityStatus) {
+            this.activityStatus.lastSeenOccurredAt = this.decodeDate(this.activityStatus.lastSeenOccurredAt)
+        }
+
+        this.unsubscribedAt = this.decodeDate(this.unsubscribedAt);
+        this.signupAt = this.decodeDate(this.signupAt);
+        this.signupConfirmedAt = this.decodeDate(this.signupConfirmedAt);
+        this.lastSyncedAt = this.decodeDate(this.lastSyncedAt);
+        this.lastReplyAt = this.decodeDate(this.lastReplyAt);
+        this.lastJournalEntryAt = this.decodeDate(this.lastJournalEntryAt);
+    }
+
+    static fromMemberData(data: any): CactusMember {
+        const model = new CactusMember();
+        model.decodeJSON(data);
+        return model;
+    }
 
     prepareForFirestore(): any {
         super.prepareForFirestore();
