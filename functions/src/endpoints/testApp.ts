@@ -8,7 +8,7 @@ import GoogleLanguageService from "@admin/services/GoogleLanguageService";
 import { getConfig } from "@admin/config/configService";
 import * as uuid from "uuid/v4"
 import * as admin from "firebase-admin"
-import { DateObject, DateTime } from "luxon";
+import { DateTime } from "luxon";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import * as DateUtil from "@shared/util/DateUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";

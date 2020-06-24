@@ -85,7 +85,6 @@ export async function runCustomNotificationJob(job: CustomNotificationJob): Prom
 
     logger.info("Finished processing custom sent time jobs", stringifyJSON(result, 2));
     const { memberResults, ...trimmedResult } = result;
-    delete trimmedResult.memberResults;
     const endJobTime = (new Date()).getTime();
     await AdminSlackService.getSharedInstance().uploadTextSnippet({
         message: `:calling: Custom Sent Prompt Notification Job finished in ${ endJobTime - jobStartTime }ms.`,
