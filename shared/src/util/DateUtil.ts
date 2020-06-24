@@ -134,6 +134,10 @@ export function makeUTCDateIntoMailchimpDate(date: Date, keepTime: boolean = fal
     return dateWithZone.toISO();
 }
 
+export function currentDatePlusSeconds(seconds: number): Date {
+    return new Date(Date.now() + 1000 * seconds);
+}
+
 export function isoDateStringToFlamelinkDateString(input?: string | undefined): string | undefined {
     const date = getDateFromISOString(input);
     if (!date) {

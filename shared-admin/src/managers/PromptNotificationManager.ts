@@ -14,7 +14,7 @@ import { stringifyJSON } from "@shared/util/ObjectUtil";
 import Logger from "@shared/Logger"
 import AdminSlackService, { ChannelName } from "@admin/services/AdminSlackService";
 import { DateObject, DateTime } from "luxon";
-import { getSendTimeUTC } from "@shared/util/DateUtil";
+import { currentDatePlusSeconds, getSendTimeUTC } from "@shared/util/DateUtil";
 import { isSendTimeWindow } from "@shared/util/NotificationUtil";
 import HoboCache from "@admin/HoboCache";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
@@ -194,7 +194,7 @@ export default class PromptNotificationManager {
      * @param {MemberPromptNotificationTaskParams} params
      * @return {Promise<MemberPromptNotificationTaskResult>}
      */
-    async processMemberPromptNotification(params: MemberPromptNotificationTaskParams): Promise<MemberPromptNotificationTaskResult> {
+    async createMemberDailyPromptNotifications(params: MemberPromptNotificationTaskParams): Promise<MemberPromptNotificationTaskResult> {
         const setupInfo = await this.getMemberPromptNotificationSetupInfo(params);
         const success = !!setupInfo.promptContent;
         const errorMessage = setupInfo.errorMessage;
@@ -221,9 +221,8 @@ export default class PromptNotificationManager {
         }
 
         const [emailResult, pushResult] = await Promise.all([
-            this.createDailyPromptEmailTask(setupInfo),
-            this.createDailyPromptPushTask(setupInfo),
-
+            this.createDailyPromptEmailTask(setupInfo, currentDatePlusSeconds(0)),
+            this.createDailyPromptPushTask(setupInfo, currentDatePlusSeconds(2)),
         ])
         const sentPrompt = await this.createSentPromptFromSetupInfo({ setupInfo, pushResult, emailResult });
         result.emailTaskResponse = emailResult;

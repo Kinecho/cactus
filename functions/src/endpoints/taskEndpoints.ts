@@ -27,7 +27,7 @@ app.post("/daily-prompt-email", async (req: express.Request, resp: express.Respo
         resp.sendStatus(204);
     } catch (error) {
         logger.error("Unexpected error", error);
-        resp.status(500).send({ message: "Unexected error while processing email task", error });
+        resp.status(500).send({ message: "Unexpected error while processing email task", error });
         return
     }
 })
@@ -44,7 +44,7 @@ app.post("/daily-prompt-push", async (req: express.Request, resp: express.Respon
         resp.sendStatus(204);
     } catch (error) {
         logger.error("Unexpected error", error);
-        resp.status(500).send({ message: "Unexected error while processing push task", error });
+        resp.status(500).send({ message: "Unexpected error while processing push task", error });
         return
     }
 })
@@ -64,7 +64,7 @@ app.post("/daily-prompt-setup", async (req: express.Request, resp: express.Respo
         });
     }
     try {
-        const result = await PromptNotificationManager.shared.processMemberPromptNotification(params);
+        const result = await PromptNotificationManager.shared.createMemberDailyPromptNotifications(params);
         logger.info(stringifyJSON({
             params, result,
             taskInfo: {
