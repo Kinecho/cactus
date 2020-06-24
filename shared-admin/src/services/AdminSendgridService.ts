@@ -365,7 +365,7 @@ export default class AdminSendgridService {
             to: email,
             from: sender,
             templateId,
-            categories: [EmailCategory.TrialEnding],
+            categories: options.categories,
             dynamicTemplateData: data,
             asm,
         };
@@ -404,7 +404,6 @@ export default class AdminSendgridService {
             return { error: e, didSend: false };
         }
     }
-
 
     async updateNewPromptNotificationPreference(email: string, isSubscribed: boolean): Promise<{ success: boolean }> {
         try {

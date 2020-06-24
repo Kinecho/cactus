@@ -17,7 +17,7 @@ import DataExport from "@shared/models/DataExport";
 import AdminDataExportService from "@admin/services/AdminDataExportService";
 import { EmailDataParams, EmailDataResult } from "@shared/api/DataExportTypes";
 import AdminSendgridService, { CactusSender, SendEmailResult } from "@admin/services/AdminSendgridService";
-import { SendgridTemplate } from "@shared/models/EmailLog";
+import { EmailCategory, SendgridTemplate } from "@shared/models/EmailLog";
 import { UpdateStatusRequest } from "@shared/mailchimp/models/UpdateStatusTypes";
 import { ListMemberStatus } from "@shared/mailchimp/models/MailchimpTypes";
 import MailchimpService from "@admin/services/MailchimpService";
@@ -66,6 +66,7 @@ app.post("/export-data", async (req: express.Request, resp: express.Response) =>
             sender: CactusSender.SUPPORT,
             oneTime: false,
             template: SendgridTemplate.data_export,
+            categories: [EmailCategory.ExportData],
             data: {
                 link: downloadUrl
             },

@@ -7,6 +7,7 @@ export enum EmailCategory {
     ConfirmEmail = "Confirm Email",
     Authentication = "Authentication",
     PROMPT_NOTIFICATION = "Prompt Notification",
+    ExportData = "Export Data",
 }
 
 export enum SendgridTemplate {
