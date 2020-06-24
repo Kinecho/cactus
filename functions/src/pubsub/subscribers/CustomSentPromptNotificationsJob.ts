@@ -71,20 +71,16 @@ export async function onPublish(message: Message, context: functions.EventContex
 
 export async function runCustomNotificationJob(job: CustomNotificationJob): Promise<CustomNotificationJobResult> {
     const sendTimeUTC = job.sendTimeUTC || convertDateToSendTimeUTC(new Date());
-    const taskResults = await PromptNotificationManager.shared.createNotificationTasksForUTCSendTime(sendTimeUTC);
-    const emailsProcessed: string[] = [];
-    taskResults.forEach(r => {
-        if (r.memberEmail) {
-            emailsProcessed.push(r.memberEmail);
-        }
-    })
+    const jobStartTime = Date.now();
+    const { tasks: taskResults, emails } = await PromptNotificationManager.shared.createNotificationTasksForUTCSendTime(sendTimeUTC);
+
     const result: CustomNotificationJobResult = {
         sendTimeUTC,
         success: true,
         numSuccess: taskResults.length,
         systemDateObject: job.systemDateObject,
         numMembersFound: taskResults.length,
-        emailsProcessed,
+        emailsProcessed: emails,
     };
 
     logger.info("Finished processing custom sent time jobs", stringifyJSON(result, 2));

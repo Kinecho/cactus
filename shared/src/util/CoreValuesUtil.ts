@@ -1,10 +1,6 @@
 import { CoreValue } from "@shared/models/CoreValueTypes";
 import { getIntegerFromStringBetween } from "@shared/util/StringUtil";
 import { isNull, isNumber } from "@shared/util/ObjectUtil";
-import Logger from "@shared/Logger"
-
-const logger = new Logger("CoreValuesUtil");
-
 
 export interface CoreValuesBlob {
     imageUrl: string,

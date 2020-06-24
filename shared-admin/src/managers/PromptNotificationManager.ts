@@ -69,14 +69,18 @@ export default class PromptNotificationManager {
      *
      * @return {Promise<SubmitTaskResponse[]>}
      */
-    async createNotificationTasksForUTCSendTime(sendTimeUTC: PromptSendTime): Promise<SubmitTaskResponse[]> {
-        const memberResults: SubmitTaskResponse[] = []
+    async createNotificationTasksForUTCSendTime(sendTimeUTC: PromptSendTime): Promise<{ tasks: SubmitTaskResponse[], emails: string[] }> {
+        const taskResults: SubmitTaskResponse[] = []
+        const memberEmails: string[] = []
         await AdminCactusMemberService.getSharedInstance().getMembersForUTCSendPromptTimeBatch(sendTimeUTC, {
             onData: async (members, batchNumber) => {
                 const startTime = (new Date()).getTime();
                 console.log(`Fetched ${ members.length } in batch ${ batchNumber }`);
                 const memberBatchResult = await Promise.all(members.map(member => {
                     const memberId = member.id;
+                    if (member.email) {
+                        memberEmails.push(member.email);
+                    }
                     const payload: MemberPromptNotificationTaskParams = {
                         memberId: memberId,
                         promptSendTimeUTC: sendTimeUTC,
@@ -84,12 +88,12 @@ export default class PromptNotificationManager {
                     }
                     return this.createDailyPromptSetupTask(payload)
                 }));
-                memberResults.push(...memberBatchResult);
+                taskResults.push(...memberBatchResult);
                 const endTime = (new Date()).getTime();
                 logger.log(`batch finished. Processed ${ memberBatchResult.length } members in batch ${ batchNumber } in ${ endTime - startTime }ms`);
             }
         });
-        return memberResults;
+        return { tasks: taskResults, emails: memberEmails };
     }
 
     /**
