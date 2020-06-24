@@ -11,8 +11,6 @@ import { stringifyJSON } from "@shared/util/ObjectUtil";
 import Logger from "@shared/Logger"
 
 const logger = new Logger("CommandTypes");
-
-
 const prompts = require("prompts");
 
 export interface Command {
@@ -139,8 +137,6 @@ export abstract class FirebaseCommand implements Command {
         const separator = "====================================================";
         const message = `${ separator }\n Starting ${ this.name }\n Using firebase project ${ chalk.blue(projectId || "unknown") }\n${ separator }`;
         console.log(chalk.bold.green(message));
-
-        // setAdmin(this.app);
 
         return this.app;
     }
