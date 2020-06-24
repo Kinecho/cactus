@@ -55,6 +55,5 @@ export function getCoreValuesBlob(values?: (string | CoreValue)[], forceIndex?: 
     if (!isNull(forceIndex) && isNumber(Number(forceIndex))) {
         index = Number(forceIndex);
     }
-    logger.info("getting blob with index", index);
     return blobs[index];
 }
