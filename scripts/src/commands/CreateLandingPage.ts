@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import * as chalk from "chalk";
 import {getFilenameFromInput, getUrlFromInput} from "@shared/util/StringUtil";
 const prompts = require('prompts');
 import helpers from "@scripts/helpers";

@@ -8,7 +8,7 @@ import Logger from "@shared/Logger"
 import { Store } from "@shared/api/RevenueCatApi";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CactusMember from "@shared/models/CactusMember";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
 import { AndroidFulfillRestoredPurchasesParams, AndroidPurchaseHistoryRecord } from "@shared/api/CheckoutTypes";
 import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";

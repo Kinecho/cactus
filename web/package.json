@@ -51,7 +51,6 @@
     "branch-sdk": "^2.52.4",
     "camelcase": "^5.3.1",
     "canvas-confetti": "^1.2.0",
-    "chalk": "^4.1.0",
     "d3": "^5.7.2",
     "d3-hierarchy": "^1.1.9",
     "debounce": "^1.2.0",

@@ -9,7 +9,7 @@ import {fromDocumentSnapshot} from "@shared/util/FirestoreUtil";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import CactusMember from "@shared/models/CactusMember";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
-import chalk from "chalk";
+import * as chalk from "chalk";
 
 const prompts = require("prompts");
 

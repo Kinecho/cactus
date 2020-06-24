@@ -8,7 +8,7 @@ import {isValidEmail} from "@shared/util/StringUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CactusMember from "@shared/models/CactusMember";
 import {getValidTimezoneName} from "@shared/timezones";
-import chalk from "chalk";
+import * as chalk from "chalk";
 interface UserInput {
     email: string
 }

@@ -6,7 +6,7 @@ import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import {stringFromISODate} from "@shared/util/DateUtil";
 import {writeToFile} from "@scripts/util/FileUtil";
 import helpers from "@scripts/helpers";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import {exec} from "child_process";
 const prompts = require("prompts");
 

@@ -12,7 +12,7 @@ import {
     MemberActivity,
     MemberUnsubscribeReport
 } from "@shared/mailchimp/models/MailchimpTypes";
-import chalk from "chalk";
+import * as chalk from "chalk";
 
 export default class MailchimpSyncMembersCommand extends FirebaseCommand {
     name = "Mailchimp: Sync Members";

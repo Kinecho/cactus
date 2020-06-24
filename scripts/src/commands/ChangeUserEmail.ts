@@ -6,7 +6,7 @@ import { Project } from "@scripts/config";
 import * as prompts from "prompts";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
 import Logger from "@shared/Logger"
-import chalk from "chalk";
+import * as chalk from "chalk";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import UserRecord = admin.auth.UserRecord;
 

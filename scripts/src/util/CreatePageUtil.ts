@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import * as chalk from "chalk";
 import {promisify} from "util";
 import {getFilenameFromInput} from "@shared/util/StringUtil";
 import {InputResponse} from "@scripts/commands/CreateLandingPage";

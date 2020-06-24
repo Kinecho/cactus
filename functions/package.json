@@ -59,7 +59,6 @@
         "body-parser": "^1.19.0",
         "busboy": "^0.3.1",
         "camelcase": "^5.3.1",
-        "chalk": "^4.1.0",
         "cors": "^2.8.5",
         "email-addresses": "^3.0.3",
         "express": "^4.17.1",

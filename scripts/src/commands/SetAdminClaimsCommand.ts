@@ -5,7 +5,7 @@ import { CactusConfig } from "@admin/CactusConfig";
 import { Project } from "@scripts/config";
 import * as prompts from "prompts";
 import { isValidEmail } from "@shared/util/StringUtil";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import { Collection } from "@shared/FirestoreBaseModels";
 import UserRecord = admin.auth.UserRecord;
 

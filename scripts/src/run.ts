@@ -3,7 +3,7 @@ import {promisify} from "util";
 import helpers from "@scripts/helpers";
 import {resetConsole} from "@scripts/util/ConsoleUtil";
 import {Command} from "@scripts/CommandTypes";
-import chalk from "chalk";
+import * as chalk from "chalk";
 
 const prompts = require("prompts");
 const path = require("path");

@@ -9,7 +9,7 @@ import * as path from "path";
 import helpers from "@scripts/helpers";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import PromptContent from "@shared/models/PromptContent";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import * as prompts from "prompts"
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";

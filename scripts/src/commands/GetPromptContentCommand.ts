@@ -5,7 +5,7 @@ import {CactusConfig} from "@admin/CactusConfig";
 import {Project} from "@scripts/config";
 import * as prompts from "prompts";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
-import chalk from "chalk";
+import * as chalk from "chalk";
 
 interface UserInput {
     promptId: string

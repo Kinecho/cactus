@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import * as chalk from "chalk";
 import MailchimpQuestionCampaign, {QuestionType} from "@scripts/commands/MailchimpQuestionCampaign";
 import {PageConfig} from "@scripts/util/CreatePageUtil";
 import {resetConsole} from "@scripts/util/ConsoleUtil";

@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import * as chalk from "chalk";
 import {getCactusConfig, Project} from "@scripts/config";
 import MailchimpService from "@admin/services/MailchimpService";
 import {

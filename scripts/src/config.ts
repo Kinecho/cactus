@@ -1,6 +1,6 @@
 import { buildConfig } from "@admin/config/configService";
 import * as admin from "firebase-admin";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import helpers from "@scripts/helpers";
 import { CactusConfig } from "@admin/CactusConfig";
 

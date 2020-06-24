@@ -4,7 +4,7 @@ import * as admin from "firebase-admin";
 import {Project} from "@scripts/config";
 import {CactusConfig} from "@admin/CactusConfig";
 import {isValidEmail} from "@shared/util/StringUtil";
-import chalk from "chalk";
+import * as chalk from "chalk";
 
 const prompts = require("prompts");
 

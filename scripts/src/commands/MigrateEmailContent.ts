@@ -2,7 +2,7 @@ import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import * as admin from "firebase-admin";
 import {Collection} from "@shared/FirestoreBaseModels";
 import FieldValue = admin.firestore.FieldValue;
-import chalk from "chalk";
+import * as chalk from "chalk";
 import {FirebaseCommand} from "@scripts/CommandTypes";
 // import FieldValue = admin.firestore.FieldValue;
 

@@ -7,7 +7,7 @@ import {Project} from "@scripts/config";
 import {isValidEmail} from "@shared/util/StringUtil";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
-import chalk from "chalk";
+import * as chalk from "chalk";
 
 interface UserInput {
     email: string

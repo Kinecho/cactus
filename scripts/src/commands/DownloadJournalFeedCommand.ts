@@ -13,7 +13,7 @@ import PromptContent from "@shared/models/PromptContent";
 import {writeToFile} from "@scripts/util/FileUtil";
 import * as path from "path";
 import helpers from "@scripts/helpers";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import {exec} from "child_process";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 

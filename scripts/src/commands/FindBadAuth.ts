@@ -9,7 +9,7 @@ import {writeToFile} from "@scripts/util/FileUtil";
 import {isDate, stringifyJSON} from "@shared/util/ObjectUtil";
 import helpers from "@scripts/helpers";
 import * as path from "path";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import {exec} from "child_process";
 import * as prompts from "prompts"
 import {transactionalOnCreate} from "@admin/AuthUserCreateJob";

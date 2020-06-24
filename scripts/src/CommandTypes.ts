@@ -1,7 +1,7 @@
 import { getAdmin, getCactusConfig, Project } from "@scripts/config";
 import * as admin from "firebase-admin";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import { resetConsole } from "@scripts/util/ConsoleUtil";
 import { CactusConfig } from "@admin/CactusConfig";
 import { initializeServices } from "@admin/services/AdminServiceConfig";

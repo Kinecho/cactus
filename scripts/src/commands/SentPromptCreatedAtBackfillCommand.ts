@@ -4,7 +4,7 @@ import * as admin from "firebase-admin";
 import {Project} from "@scripts/config";
 import {CactusConfig} from "@admin/CactusConfig";
 import {DocumentSnapshot} from "firebase-functions/lib/providers/firestore";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 
 const prompts = require("prompts");

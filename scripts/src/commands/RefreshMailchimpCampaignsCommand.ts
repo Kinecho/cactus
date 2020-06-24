@@ -10,7 +10,7 @@ import SentCampaign from "@shared/models/SentCampaign";
 import {Campaign, CampaignStatus} from "@shared/mailchimp/models/MailchimpTypes";
 
 const prompts = require("prompts");
-import chalk from "chalk";
+import * as chalk from "chalk";
 import FieldValue = admin.firestore.FieldValue;
 
 interface Page {

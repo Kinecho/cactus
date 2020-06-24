@@ -4,7 +4,6 @@ import PromptContent from "@shared/models/PromptContent";
 import * as Sentry from "@sentry/node";
 import AdminUserService from "@admin/services/AdminUserService";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
-import chalk from "chalk";
 import Logger from "@shared/Logger";
 
 const logger = new Logger("WebhookHandler");
@@ -67,7 +66,7 @@ async function handlePromptContentEvent(event: FlamelinkWebhookEvent, action: Ev
 
 
         const promptFromDb = await AdminPromptContentService.getSharedInstance().getByEntryId(promptContent.entryId);
-        logger.log(chalk.green("fetched prompt from db using service class:", JSON.stringify(promptFromDb, null, 2)));
+        logger.log("fetched prompt from db using service class:", JSON.stringify(promptFromDb, null, 2));
 
         return {success: true, message: "Not yet implemented"}
     } catch (error) {
