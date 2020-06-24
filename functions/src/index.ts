@@ -5,6 +5,7 @@ import checkoutApp from "@api/endpoints/checkoutApp";
 import manageNotificationApp from "@api/endpoints/manageNotificationsEndpoints";
 import testApp from "@api/endpoints/testApp";
 import taskEndpoints from "@api/endpoints/taskEndpoints";
+import * as DailySentPromptJob from "@api/pubsub/subscribers/DailySentPromptJob";
 import { backupFirestore, exportFirestoreToBigQuery } from "@api/endpoints/DataExportJob";
 import * as UnsubscriberReportSyncJob from "@api/pubsub/subscribers/UnsubscriberReportSyncJob";
 import {
@@ -58,6 +59,7 @@ export const cloudFunctions = {
     //PubSub topics
     pubsub1: {
         backupFirestore: functions.pubsub.topic(PubSubTopic.firestore_backup).onPublish(backupFirestore),
+        dailySentPromptJob: functions.pubsub.topic(PubSubTopic.create_daily_sent_prompts).onPublish(DailySentPromptJob.onPublish),
         exportToBigQuery: functions.pubsub.topic(PubSubTopic.firestore_export_bigquery).onPublish(exportFirestoreToBigQuery),
     },
     pubsub2: {
