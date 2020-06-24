@@ -506,7 +506,7 @@ export default class PromptNotificationManager {
                 contentId: promptContent.entryId,
                 channel: NotificationChannel.PUSH,
                 memberId: member.id!,
-            }, { transaction })
+            }, { transaction, queryName: `Get existing Notification log for PUSH channel for ${ member.email }` })
 
             if (!notification) {
                 notification = Notification.createPush({
@@ -557,7 +557,7 @@ export default class PromptNotificationManager {
                 contentId: promptContent.entryId,
                 channel: NotificationChannel.EMAIL,
                 memberId: member.id!,
-            }, { transaction })
+            }, { transaction, queryName: `Get existing Notification log for EMAIL channel for ${ member.email }` })
 
             if (!notification) {
                 notification = Notification.createEmail({

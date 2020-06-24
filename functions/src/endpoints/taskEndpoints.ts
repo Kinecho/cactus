@@ -20,12 +20,16 @@ app.post("/daily-prompt-email", async (req: express.Request, resp: express.Respo
     const params = req.body as SendEmailNotificationParams;
     logger.info("Send Emails task called", stringifyJSON(params, 2));
 
-    const result = await PromptNotificationManager.shared.sendPromptNotificationEmail(params);
-
-    const logData = { taskInfo: { taskId, retryCount, executionCount }, params, result };
-    logger.info(stringifyJSON(logData, 2));
-    resp.sendStatus(204);
-    return;
+    try {
+        const result = await PromptNotificationManager.shared.sendPromptNotificationEmail(params);
+        const logData = { taskInfo: { taskId, retryCount, executionCount }, params, result };
+        logger.info(stringifyJSON(logData, 2));
+        resp.sendStatus(204);
+    } catch (error) {
+        logger.error("Unexpected error", error);
+        resp.status(500).send({ message: "Unexected error while processing email task", error });
+        return
+    }
 })
 
 app.post("/daily-prompt-push", async (req: express.Request, resp: express.Response) => {
@@ -33,13 +37,16 @@ app.post("/daily-prompt-push", async (req: express.Request, resp: express.Respon
     const retryCount = req.header("x-cloudtasks-taskretrycount");
     const executionCount = req.header("x-cloudtasks-taskexecutioncount");
     const params = req.body as SendPushNotificationParams;
-
-    const pushResult = await PromptNotificationManager.shared.sendPromptNotificationPush(params);
-
-    const logData = { taskInfo: { taskId, retryCount, executionCount }, pushResult, params, };
-    logger.info(stringifyJSON(logData, 2));
-    resp.sendStatus(204);
-    return;
+    try {
+        const pushResult = await PromptNotificationManager.shared.sendPromptNotificationPush(params);
+        const logData = { taskInfo: { taskId, retryCount, executionCount }, pushResult, params, };
+        logger.info(stringifyJSON(logData, 2));
+        resp.sendStatus(204);
+    } catch (error) {
+        logger.error("Unexpected error", error);
+        resp.status(500).send({ message: "Unexected error while processing push task", error });
+        return
+    }
 })
 
 app.post("/daily-prompt-setup", async (req: express.Request, resp: express.Response) => {
@@ -56,23 +63,26 @@ app.post("/daily-prompt-setup", async (req: express.Request, resp: express.Respo
             retryable: false
         });
     }
+    try {
+        const result = await PromptNotificationManager.shared.processMemberPromptNotification(params);
+        logger.info(stringifyJSON({
+            params, result,
+            taskInfo: {
+                taskId, retryCount, executionCount
+            }
+        }, 2))
 
-    const result = await PromptNotificationManager.shared.processMemberPromptNotification(params);
-
-    logger.info(stringifyJSON({
-        params, result,
-        taskInfo: {
-            taskId, retryCount, executionCount
+        if (result.success) {
+            resp.status(200).send(result);
+        } else if (result.retryable) {
+            resp.status(500).send(result);
+        } else {
+            logger.error("Unable to process result and it is not retryable", JSON.stringify(result, null, 2));
+            resp.status(200).send(result);
         }
-    }, 2))
-
-    if (result.success) {
-        resp.status(200).send(result);
-    } else if (result.retryable) {
-        resp.status(500).send(result);
-    } else {
-        logger.error("Unable to process result and it is not retryable", JSON.stringify(result, null, 2));
-        resp.status(200).send(result);
+    } catch (error) {
+        logger.error("Unexpected error", error);
+        resp.status(500).send({ message: "Unexected error while processing setup task", error });
     }
     return;
 })

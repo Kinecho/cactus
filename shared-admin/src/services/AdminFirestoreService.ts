@@ -56,6 +56,7 @@ export const DefaultGetOptions: GetOptions = {
 export interface SaveOptions {
     setUpdatedAt?: boolean,
     transaction?: Transaction,
+    queryName?: string,
     batch?: Batch,
 }
 
@@ -190,7 +191,7 @@ export default class AdminFirestoreService {
 
             return model;
         } catch (e) {
-            logger.error(`[${ this.config.app.serverName || "unknown_server" }] failed to save firestore document`, e);
+            logger.error(`[${ this.config.app.serverName || "unknown_server" }] failed to save firestore document ${ model.id } to collection ${ model.collection }. ${ opts.transaction ? "Using transaction." : "" }`, e);
             throw e;
         }
     }
