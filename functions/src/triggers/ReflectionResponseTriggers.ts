@@ -182,6 +182,8 @@ export const updateSentPromptOnReflectionWrite = functions.firestore
         const promptId = reflectionResponse.promptId;
         const memberId = reflectionResponse.cactusMemberId;
 
+        await AdminCactusMemberService.getSharedInstance().updateLastReplyByMemberId(memberId, new Date());
+
         if (!promptId || !memberId) {
             logger.error("Failed to get a member id and/or a prompt ID off of ReflectionPrompt", snapshot.id);
             return;
@@ -376,10 +378,7 @@ export const onReflectionResponseCreated = functions.firestore
     });
     const slackMessage: SlackMessage = { attachments: attachments, text: messageText };
     await slackService.sendActivityNotification(slackMessage);
-
-
-}
-);
+});
 
 
 async function createSentPromptIfNeeded(options: { member?: CactusMember, prompt?: ReflectionPrompt, reflectionResponse?: ReflectionResponse }): Promise<{ created: boolean, sentPrompt?: SentPrompt }> {

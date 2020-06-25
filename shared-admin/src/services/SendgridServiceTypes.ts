@@ -43,6 +43,7 @@ export interface PromptNotificationEmail {
     showTrialBanner?: boolean,
     trialEndsToday?: boolean,
     footerText?: string,
+    isLastEmail?: boolean,
 }
 
 export enum SendgridEventType {

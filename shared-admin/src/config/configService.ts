@@ -180,15 +180,6 @@ const defaultTestConfig: CactusConfig = {
     sendgrid: {
         api_key: "test-api-key",
         webhook_verification_key: "testkey",
-        template_ids: {
-            magic_link: "1234",
-            magic_link_new_user: '1234ra',
-            invitation: '1234invite',
-            friend_request: '1234fr',
-            trial_ending: '1234te',
-            data_export: "1234lj",
-            new_prompt_notification: "test_id",
-        },
         templates: {
             new_prompt_notification: {
                 template_id: "test_template_id",
@@ -292,6 +283,6 @@ const defaultTestConfig: CactusConfig = {
     }
 };
 
-function buildMockConfig(): CactusConfig {
+export function buildMockConfig(): CactusConfig {
     return { ...defaultTestConfig, ..._testConfigOverrides };
 }

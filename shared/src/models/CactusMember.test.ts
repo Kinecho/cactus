@@ -86,6 +86,7 @@ describe("encode/decode JSON", () => {
             lastSyncedAt: date.getTime(),
             lastReplyAt: date.getTime(),
             lastJournalEntryAt: date.getTime(),
+            adminEmailUnsubscribedAt: date.getTime(),
             activityStatus: {
                 lastSeenOccurredAt: date.getTime(),
             },
@@ -130,6 +131,7 @@ describe("encode/decode JSON", () => {
         expect(model.lastSyncedAt).toEqual(date);
         expect(model.lastReplyAt).toEqual(date);
         expect(model.lastJournalEntryAt).toEqual(date);
+        expect(model.adminEmailUnsubscribedAt).toEqual(date);
         expect(model.id).toEqual("one");
     })
 })

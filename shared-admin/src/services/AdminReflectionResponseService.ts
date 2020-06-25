@@ -178,6 +178,8 @@ export default class AdminReflectionResponseService {
                 }
             };
 
+            await memberService.updateLastReplyByEmail(email, lastReplyDate);
+
             const mergeResponse = await mailchimpService.updateMergeFields(mergeRequest);
 
             const tagRequest: UpdateTagsRequest = {
@@ -189,8 +191,6 @@ export default class AdminReflectionResponseService {
                     },
                 ]
             };
-
-            await memberService.updateLastReplyByEmail(email, lastReplyDate);
 
             const tagResponse = await mailchimpService.updateTags(tagRequest);
 

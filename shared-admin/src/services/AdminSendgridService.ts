@@ -24,11 +24,11 @@ import { isBlank } from "@shared/util/StringUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminSlackService from "@admin/services/AdminSlackService";
 import { getAxiosError } from "@shared/api/ApiTypes";
+import MailchimpService from "@admin/services/MailchimpService";
+import { ListMemberStatus } from "@shared/mailchimp/models/MailchimpTypes";
 export import EmailData = EmailAddressTypes.EmailData;
 export import ASMOptions = MailTypes.ASMOptions;
 export import MailDataRequired = MailTypes.MailDataRequired;
-import MailchimpService from "@admin/services/MailchimpService";
-import { ListMemberStatus } from "@shared/mailchimp/models/MailchimpTypes";
 
 export const SendgridHeaders = {
     MessageID: "x-message-id"
@@ -252,10 +252,11 @@ export default class AdminSendgridService {
     async sendFriendRequest(options: FriendRequestEmail): Promise<boolean> {
 
         try {
+            const templateId = this.getSendgridTemplateId(SendgridTemplate.friend_request);
             const mailParams = {
                 to: options.toEmail,
                 from: { name: "Cactus", email: "help@cactus.app" },
-                templateId: this.config.sendgrid.template_ids.friend_request,
+                templateId: templateId,
                 categories: [EmailCategory.FriendRequest],
                 dynamicTemplateData: {
                     name: options.fromName,

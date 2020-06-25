@@ -40,10 +40,18 @@ import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import SentPrompt, { PromptSendMedium, SentPromptHistoryItem } from "@shared/models/SentPrompt";
+import MailchimpService from "@admin/services/MailchimpService";
+import { ListMemberStatus } from "@shared/mailchimp/models/MailchimpTypes";
 
 const removeMarkdown = require("remove-markdown");
 const logger = new Logger("PromptNotificationManager");
 const MAX_TRANSACTION_ATTEMPTS = 10;
+const LAPSED_INACTIVE_DAYS = 30;
+
+export interface UnsubscribeLapsedMemberResult {
+    isLastEmail: boolean,
+    unsubscribed: boolean,
+}
 
 export default class PromptNotificationManager {
 
@@ -459,7 +467,6 @@ export default class PromptNotificationManager {
                 sent: false,
                 message: "User has opted out of emails, not sending",
             }
-
         }
 
         const emailData = this.buildEmailNotificationTemplateData({ member, promptContent });
@@ -496,7 +503,86 @@ export default class PromptNotificationManager {
         notification.status = SendStatus.SENT;
         await AdminNotificationService.getSharedInstance().save(notification);
 
+        if (emailData.isLastEmail) {
+            logger.info("Unsubscribing user from future emails");
+            await this.updateMemberEmailPreference(emailData.email, NotificationStatus.INACTIVE, true);
+            await AdminSlackService.getSharedInstance().sendDbAlertsMessage(`Unsubscribing ${ emailData.email } from future notification emails as they have not been active for ${ LAPSED_INACTIVE_DAYS } days or more`);
+        }
+
         return { sent: true, sendResult };
+    }
+
+    /**
+     * Update the cactus member's notificationPreferences object, and update all email providers.
+     * @param {string} email - the email of the user to update email preferences for
+     * @param {NotificationStatus} status - the status to update the user to
+     * @param {boolean} [isAdminUnsubscribe=false] - if this is an admin unsubscribe action.
+     * @return {Promise<void>}
+     */
+    async updateMemberEmailPreference(email: string, status: NotificationStatus, isAdminUnsubscribe: boolean = false): Promise<void> {
+        try {
+            if (!email) {
+                return;
+            }
+            const isUnsubscribe = status === NotificationStatus.INACTIVE;
+            await AdminCactusMemberService.getSharedInstance().setEmailNotificationPreference(email, !isUnsubscribe, isAdminUnsubscribe);
+            logger.info("Updated member status in the DB");
+
+            const mailchimpStatusRequest = {
+                status: isUnsubscribe ? ListMemberStatus.unsubscribed : ListMemberStatus.subscribed,
+                email,
+            }
+            const [mailchimpResponse, sendgridResult] = await Promise.all([
+                MailchimpService.getSharedInstance().updateMemberStatus(mailchimpStatusRequest),
+                AdminSendgridService.getSharedInstance().updateNewPromptNotificationPreference(email, !isUnsubscribe)
+            ]);
+            logger.info("Mailchimp update user status response", mailchimpResponse);
+            logger.info("unsubscribe user from email notifications result", stringifyJSON(sendgridResult, 2));
+
+        } catch (error) {
+            logger.error("Failed to update member status",)
+        }
+    }
+
+    getLapsedDate(from: Date = new Date()): Date {
+        return DateTime.fromJSDate(from).minus({ days: LAPSED_INACTIVE_DAYS }).toJSDate();
+    }
+
+    isLapsedDate(input: Date): boolean {
+        const lapsedCutoffDate = this.getLapsedDate();
+        return input < lapsedCutoffDate;
+    }
+
+    /**
+     * Returns if member has not been active for some {LAPSED_INACTIVE_DAYS} and is still subscribed to emails.
+     * If true, then the member should get the current day's email, but no more.
+     * @param {CactusMember} member
+     * @return {boolean}
+     */
+    isLastEmail(member: CactusMember): boolean {
+        if (member.notificationSettings.email === NotificationStatus.INACTIVE) {
+            return false
+        }
+
+        const adminDate = member.adminEmailUnsubscribedAt;
+        let adminLapsed = true;
+        if (adminDate) {
+            adminLapsed = this.isLapsedDate(adminDate);
+        }
+
+        const lastReply = member.lastReplyAt;
+        if (!lastReply) {
+            return false;
+        }
+
+        const replyLapsed = this.isLapsedDate(lastReply);
+        return replyLapsed && adminLapsed;
+    }
+
+    async unsubscribeMemberIfLapsed(member: CactusMember): Promise<UnsubscribeLapsedMemberResult> {
+        const result = { isLastEmail: false, unsubscribed: false }
+
+        return result;
     }
 
     async getOrCreatePushNotification(params: {
@@ -566,37 +652,48 @@ export default class PromptNotificationManager {
     }): Promise<{ notification: Notification, existing: boolean } | { errorMessage: string }> {
         const { member, promptContent, emailData, memberSendDate } = params;
         try {
-            return await AdminFirestoreService.getSharedInstance().firestore.runTransaction<{ notification: Notification, existing: boolean }>(async transaction => {
-                const uniqueBy = memberSendDate ? Notification.uniqueByDateObject(memberSendDate) : undefined;
-                let existing = false;
-                let notification: Notification | undefined = await AdminNotificationService.getSharedInstance().findFirst({
-                    uniqueBy,
-                    type: NotificationType.NEW_PROMPT,
-                    contentType: NotificationContentType.promptContent,
-                    contentId: promptContent.entryId,
-                    channel: NotificationChannel.EMAIL,
-                    memberId: member.id!,
-                }, { transaction, queryName: `Get existing Notification log for EMAIL channel for ${ member.email }` })
+            return await AdminFirestoreService.getSharedInstance().firestore.runTransaction<{ notification: Notification, existing: boolean }>(transaction => {
+                return new Promise<{ notification: Notification, existing: boolean }>(async (resolve, reject) => {
+                    try {
+                        const uniqueBy = memberSendDate ? Notification.uniqueByDateObject(memberSendDate) : undefined;
+                        let existing = false;
+                        let notification: Notification | undefined = await AdminNotificationService.getSharedInstance().findFirst({
+                            uniqueBy,
+                            type: NotificationType.NEW_PROMPT,
+                            contentType: NotificationContentType.promptContent,
+                            contentId: promptContent.entryId,
+                            channel: NotificationChannel.EMAIL,
+                            memberId: member.id!,
+                        }, {
+                            transaction,
+                            queryName: `Get existing Notification log for EMAIL channel for ${ member.email }`
+                        })
 
-                if (!notification) {
-                    notification = Notification.createEmail({
-                        memberId: member.id!,
-                        email: member.email!,
-                        type: NotificationType.NEW_PROMPT,
-                        contentType: NotificationContentType.promptContent,
-                        contentId: promptContent.entryId,
-                        uniqueBy,
-                        data: emailData,
-                        sendgridTemplateId: SendgridTemplate.new_prompt_notification,
-                    })
-                    notification.status = SendStatus.SENDING; //set to sending because we'll be sending this notification shortly
-                    notification = await AdminNotificationService.getSharedInstance().save(notification, { transaction });
-                } else {
-                    existing = true;
-                    logger.info("Found existing EMAIL notification:", stringifyJSON(notification, 2));
-
-                }
-                return { notification, existing };
+                        if (!notification) {
+                            notification = Notification.createEmail({
+                                memberId: member.id!,
+                                email: member.email!,
+                                type: NotificationType.NEW_PROMPT,
+                                contentType: NotificationContentType.promptContent,
+                                contentId: promptContent.entryId,
+                                uniqueBy,
+                                data: emailData,
+                                sendgridTemplateId: SendgridTemplate.new_prompt_notification,
+                            })
+                            notification.status = SendStatus.SENDING; //set to sending because we'll be sending this notification shortly
+                            notification = await AdminNotificationService.getSharedInstance().save(notification, { transaction });
+                        } else {
+                            existing = true;
+                            logger.info("Found existing EMAIL notification:", stringifyJSON(notification, 2));
+                        }
+                        resolve({ notification, existing });
+                    } catch (error) {
+                        logger.error("Error executing transaction", error);
+                        await AdminSlackService.getSharedInstance().sendDbAlertsMessage(`\`[PromptNotificationManager]\` Error getting/creating Notification for EMAIL\n\`\`\`${ error }\`\`\``);
+                        reject(error);
+                    }
+                    return;
+                })
             }, { maxAttempts: MAX_TRANSACTION_ATTEMPTS });
         } catch (error) {
             logger.error("Failed to execute transaction for getting/creating PUSH Notification", error);
@@ -627,7 +724,8 @@ export default class PromptNotificationManager {
             inOptInTrial: member.isOptInTrialing,
             trialDaysLeft: member.daysLeftInTrial,
             previewText: introText,
-            subjectLine: promptContent.subjectLine ?? "Cactus: Daily Prompt"
+            subjectLine: promptContent.subjectLine ?? "Cactus: Daily Prompt",
+            isLastEmail: this.isLastEmail(member),
         }
         logger.info("Created Prompt Notification Template Data", data);
         return data;

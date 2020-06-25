@@ -58,5 +58,4 @@ export default class SetEmailPreferences extends FirebaseCommand {
 
         return;
     }
-
 }
