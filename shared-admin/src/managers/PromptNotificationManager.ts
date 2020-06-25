@@ -584,12 +584,6 @@ export default class PromptNotificationManager {
         return replyLapsed && adminLapsed;
     }
 
-    async unsubscribeMemberIfLapsed(member: CactusMember): Promise<UnsubscribeLapsedMemberResult> {
-        const result = { isLastEmail: false, unsubscribed: false }
-
-        return result;
-    }
-
     async getOrCreatePushNotification(params: {
         member: CactusMember,
         promptContent: PromptContent,
