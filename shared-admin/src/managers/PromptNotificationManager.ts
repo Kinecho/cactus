@@ -464,16 +464,26 @@ export default class PromptNotificationManager {
 
         const emailData = this.buildEmailNotificationTemplateData({ member, promptContent });
         if (!emailData) {
-            return { sent: false, errorMessage: "Unable to build email data for the notification." };
+            return { sent: false, errorMessage: "Unable to build email data for the notification.", retryable: false };
         }
 
-        const { notification, existing: notificationExisted } = await this.getOrCreateEmailNotification({
+        const notificationResult = await this.getOrCreateEmailNotification({
             member,
             promptContent,
             emailData,
             memberSendDate
         });
 
+        const errorMessage = (notificationResult as { errorMessage: string }).errorMessage
+        if (errorMessage) {
+            return {
+                sent: false,
+                errorMessage: errorMessage,
+                retryable: true,
+            }
+        }
+
+        const { notification, existing: notificationExisted } = notificationResult as { notification: Notification, existing: boolean };
         const status = notification?.status;
         const restrictedStatuses: SendStatus[] = [SendStatus.SENDING, SendStatus.SENT];
         if (notificationExisted && status && restrictedStatuses.includes(status)) {
@@ -494,7 +504,7 @@ export default class PromptNotificationManager {
         promptContent: PromptContent,
         data: PushNotificationData,
         memberSendDate?: DateObject,
-    }): Promise<{ notification: Notification, existing: boolean } | { errorMessage: string }> {
+    }): Promise<{ notification: Notification, existing: boolean } | { errorMessage?: string }> {
         const { member, promptContent, data, memberSendDate } = params;
         try {
             return await AdminFirestoreService.getSharedInstance().firestore.runTransaction<{ notification: Notification, existing: boolean }>(async transaction => {
@@ -669,13 +679,14 @@ export default class PromptNotificationManager {
 
         const data: PushNotificationData = this.buildPushData({ member, promptContent });
 
-        const { notification, existing: notificationExisted, errorMessage } = await this.getOrCreatePushNotification({
+        const notificationResult = await this.getOrCreatePushNotification({
             member,
             memberSendDate,
             data,
             promptContent
         })
 
+        const errorMessage = (notificationResult as { errorMessage: string }).errorMessage;
         if (errorMessage) {
             return {
                 attempted: false,
@@ -683,6 +694,7 @@ export default class PromptNotificationManager {
                 retryable: true,
             }
         }
+        const { notification, existing: notificationExisted } = (notificationResult as { notification: Notification, existing: boolean });
 
         const restrictedStatuses: SendStatus[] = [SendStatus.SENDING, SendStatus.SENT]
         const status = notification?.status;

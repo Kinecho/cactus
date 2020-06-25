@@ -43,7 +43,7 @@ app.post("/daily-prompt-push", async (req: express.Request, resp: express.Respon
         logger.info(stringifyJSON(logData));
         if (pushResult.retryable) {
             logger.info("The push task was not successful - will retry", pushResult.error);
-            resp.status(500).send(result.error);
+            resp.status(500).send(pushResult.error);
         } else {
             resp.sendStatus(204);
         }
