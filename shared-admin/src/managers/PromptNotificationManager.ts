@@ -506,7 +506,7 @@ export default class PromptNotificationManager {
         if (emailData.isLastEmail) {
             logger.info("Unsubscribing user from future emails");
             await this.updateMemberEmailPreference(emailData.email, NotificationStatus.INACTIVE, true);
-            await AdminSlackService.getSharedInstance().sendDbAlertsMessage(`Unsubscribing ${ emailData.email } from future notification emails as they have not been active for ${ LAPSED_INACTIVE_DAYS } days or more`);
+            await AdminSlackService.getSharedInstance().sendActivityMessage(`Unsubscribing ${ emailData.email } from future notification emails as they have not been active for ${ LAPSED_INACTIVE_DAYS } days or more`);
         }
 
         return { sent: true, sendResult };
