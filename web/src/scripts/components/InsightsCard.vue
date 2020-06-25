@@ -6,7 +6,7 @@
             <span class="label">Positivity Rating</span>
             <strong class="rating">{{positivityRating}}</strong>
             <div class="progress">
-                <div class="meter" :style="`width: ${positivityRating}`"></div>
+                <div class="meter" :style="`width: ${positivityRating}`"><span class="gradient"></span></div>
             </div>
         </div>
         <div class="sentimentAnalysis">
@@ -95,9 +95,29 @@
         }
 
         .meter {
-            background-image: linear-gradient(to right, $royal, $green);
             border-radius: $multiple;
             height: $multiple;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .gradient {
+            background-image: linear-gradient(to right, $royal, $green);
+            height: $multiple;
+            left: 0;
+            position: absolute;
+            top: 0;
+            width: 25.6rem;
+
+            @include r(374) {
+                width: 53.5rem;
+            }
+            @include r(600) {
+                width: 40rem;
+            }
+            @include r(768) {
+                width: 46.8rem;
+            }
         }
     }
 
