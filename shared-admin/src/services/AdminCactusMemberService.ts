@@ -408,13 +408,16 @@ export default class AdminCactusMemberService {
         }
     }
 
-    async updateLastReplyByMemberId(memberId: string, lastReply: Date = new Date()): Promise<void> {
+    async updateLastReplyByMemberId(memberId?: string, lastReply: Date = new Date()): Promise<void> {
+        if (!memberId) {
+            return;
+        }
         try {
             const doc = this.getCollectionRef().doc(memberId);
             await doc.set({ [CactusMember.Field.lastReplyAt]: Timestamp.fromDate(lastReply) }, { merge: true });
             return;
         } catch (error) {
-            logger.error("Failed to update last reply for user email ", email);
+            logger.error("Failed to update last reply for memberId ", memberId);
             return;
         }
     }

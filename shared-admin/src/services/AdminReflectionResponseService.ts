@@ -1,8 +1,8 @@
 import AdminFirestoreService, { DeleteOptions, QueryOptions, SaveOptions } from "@admin/services/AdminFirestoreService";
 import ReflectionResponse, {
-    ReflectionResponseField,
     InsightWord,
-    InsightWordsResult
+    InsightWordsResult,
+    ReflectionResponseField
 } from "@shared/models/ReflectionResponse";
 import { BaseModelField, Collection } from "@shared/FirestoreBaseModels";
 import MailchimpService from "@admin/services/MailchimpService";
@@ -27,9 +27,9 @@ import {
 } from "@shared/util/ReflectionResponseUtil";
 import { QuerySortDirection } from "@shared/types/FirestoreConstants";
 import * as admin from "firebase-admin";
-import DocumentReference = admin.firestore.DocumentReference;
 import { AxiosError } from "axios";
 import Logger from "@shared/Logger";
+import DocumentReference = admin.firestore.DocumentReference;
 
 const logger = new Logger("AdminReflectionResponseService");
 
@@ -251,6 +251,15 @@ export default class AdminReflectionResponseService {
 
         const result = await this.firestoreService.executeQuery(query, ReflectionResponse, queryOptions);
         return result.results
+    }
+
+    async getLatestResponseForMember(memberId?: string): Promise<ReflectionResponse | undefined> {
+        if (!memberId) {
+            return undefined;
+        }
+        const query = this.getCollectionRef().where(ReflectionResponse.Field.cactusMemberId, "==", memberId)
+        .orderBy(BaseModelField.createdAt, "desc");
+        return this.firestoreService.getFirst(query, ReflectionResponse);
     }
 
     async calculateStatsForMember(options: { memberId: string, timeZone?: string }, queryOptions?: QueryOptions): Promise<ReflectionStats | undefined> {

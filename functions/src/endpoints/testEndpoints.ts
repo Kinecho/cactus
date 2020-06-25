@@ -14,7 +14,7 @@ import * as DateUtil from "@shared/util/DateUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
-import CactusMember, { PromptSendTime } from "@shared/models/CactusMember";
+import CactusMember, { DEFAULT_PROMPT_SEND_TIME, PromptSendTime } from "@shared/models/CactusMember";
 import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
 import Logger from "@shared/Logger";
 import { runMemberStatsJob } from "@api/pubsub/subscribers/MemberStatsJob";
@@ -129,9 +129,9 @@ app.get("/send-time", async (req, res) => {
 });
 
 app.get("/start-notif-task", async (req, resp) => {
-    const email = req.query.email ?? "neil@cactus.app";
+    const email = req.query.email as string | undefined ?? "neil@cactus.app";
     const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
-    const memberId = member.id;
+    const memberId = member?.id;
     if (!memberId) {
         resp.send({ error: `No member found for email ${ email }` });
         return;
@@ -139,7 +139,7 @@ app.get("/start-notif-task", async (req, resp) => {
     const payload: MemberPromptNotificationTaskParams = {
         memberId,
         systemDateObject: DateTime.local().toObject(),
-        promptSendTimeUTC: member?.promptSendTime,
+        promptSendTimeUTC: member?.promptSendTime ?? DEFAULT_PROMPT_SEND_TIME,
     }
     const result = await PromptNotificationManager.shared.createDailyPromptSetupTask(payload);
     resp.send({ result });

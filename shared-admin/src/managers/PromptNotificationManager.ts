@@ -118,7 +118,6 @@ export default class PromptNotificationManager {
         });
     }
 
-
     async createDailyPromptEmailTask(setupInfo: MemberPromptNotificationSetupInfo, processAt?: Date): Promise<SubmitTaskResponse> {
         const { member, promptContent, memberDateObject, sentPrompt } = setupInfo;
 
@@ -469,7 +468,8 @@ export default class PromptNotificationManager {
             }
         }
 
-        const emailData = this.buildEmailNotificationTemplateData({ member, promptContent });
+        const latestResponse = await AdminReflectionResponseService.getSharedInstance().getLatestResponseForMember(memberId);
+        const emailData = this.buildEmailNotificationTemplateData({ member, promptContent, latestResponse });
         if (!emailData) {
             return { sent: false, errorMessage: "Unable to build email data for the notification.", retryable: false };
         }
@@ -557,9 +557,10 @@ export default class PromptNotificationManager {
      * Returns if member has not been active for some {LAPSED_INACTIVE_DAYS} and is still subscribed to emails.
      * If true, then the member should get the current day's email, but no more.
      * @param {CactusMember} member
+     * @param {ReflectionResponse} [latestResponse - the last reflection response from this person
      * @return {boolean}
      */
-    isLastEmail(member: CactusMember): boolean {
+    isLastEmail(member: CactusMember, latestResponse?: ReflectionResponse): boolean {
         if (member.notificationSettings.email === NotificationStatus.INACTIVE) {
             return false
         }
@@ -570,12 +571,16 @@ export default class PromptNotificationManager {
             adminLapsed = this.isLapsedDate(adminDate);
         }
 
-        const lastReply = member.lastReplyAt;
-        if (!lastReply) {
-            return false;
+        const lastReplyDate = latestResponse?.createdAt ?? member.lastReplyAt;
+
+        //No last reply - user has no reflections
+        if (!lastReplyDate) {
+            const memberCreatedAt = member.createdAt;
+            return (memberCreatedAt && this.isLapsedDate(memberCreatedAt)) ?? false;
         }
 
-        const replyLapsed = this.isLapsedDate(lastReply);
+        const replyLapsed = this.isLapsedDate(lastReplyDate);
+
         return replyLapsed && adminLapsed;
     }
 
@@ -702,8 +707,8 @@ export default class PromptNotificationManager {
 
     }
 
-    buildEmailNotificationTemplateData(params: { member: CactusMember, promptContent: PromptContent }): PromptNotificationEmail | null {
-        const { member, promptContent } = params;
+    buildEmailNotificationTemplateData(params: { member: CactusMember, promptContent: PromptContent, latestResponse?: ReflectionResponse }): PromptNotificationEmail | null {
+        const { member, promptContent, latestResponse } = params;
         const introText = removeMarkdown(promptContent.getDynamicPreviewText({ member }) ?? "") as string;
         const promptUrl = buildPromptContentURL(promptContent, this.config);
 
@@ -725,7 +730,7 @@ export default class PromptNotificationManager {
             trialDaysLeft: member.daysLeftInTrial,
             previewText: introText,
             subjectLine: promptContent.subjectLine ?? "Cactus: Daily Prompt",
-            isLastEmail: this.isLastEmail(member),
+            isLastEmail: this.isLastEmail(member, latestResponse),
         }
         logger.info("Created Prompt Notification Template Data", data);
         return data;

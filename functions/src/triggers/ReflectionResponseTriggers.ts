@@ -182,8 +182,6 @@ export const updateSentPromptOnReflectionWrite = functions.firestore
         const promptId = reflectionResponse.promptId;
         const memberId = reflectionResponse.cactusMemberId;
 
-        await AdminCactusMemberService.getSharedInstance().updateLastReplyByMemberId(memberId, new Date());
-
         if (!promptId || !memberId) {
             logger.error("Failed to get a member id and/or a prompt ID off of ReflectionPrompt", snapshot.id);
             return;
@@ -252,6 +250,7 @@ export const onReflectionResponseCreated = functions.firestore
 
     let memberEmail = reflectionResponse.memberEmail;
     let member: CactusMember | undefined;
+    const memberId = reflectionResponse.cactusMemberId;
     if (reflectionResponse.cactusMemberId) {
         member = await AdminCactusMemberService.getSharedInstance().getById(reflectionResponse.cactusMemberId);
         if (member) {
@@ -286,6 +285,7 @@ export const onReflectionResponseCreated = functions.firestore
             await slackService.sendActivityNotification(`:warning: Failed to reset user reminder for ${ member.mailchimpListMember.email_address }\n\`\`\`${ JSON.stringify(resetUserResponse) }\`\`\``)
         }
     } else {
+        await AdminCactusMemberService.getSharedInstance().updateLastReplyByMemberId(memberId, new Date());
         logger.log("not resetting user reminder for email " + memberEmail)
     }
 
