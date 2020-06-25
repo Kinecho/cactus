@@ -3,6 +3,7 @@ export interface NewPromptNotificationPushResult {
         numSuccess: number,
         numError: number,
     },
+    retryable?: boolean,
     atLeastOneSuccess?: boolean,
     attempted: boolean,
     error?: string,

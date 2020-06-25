@@ -59,9 +59,6 @@
 
     const logger = new Logger("SocialHome");
 
-    Vue.use(VueClipboard);
-
-
     export default Vue.extend({
         components: {
             NavBar,

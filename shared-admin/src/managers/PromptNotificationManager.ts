@@ -43,7 +43,7 @@ import SentPrompt, { PromptSendMedium, SentPromptHistoryItem } from "@shared/mod
 
 const removeMarkdown = require("remove-markdown");
 const logger = new Logger("PromptNotificationManager");
-
+const MAX_TRANSACTION_ATTEMPTS = 10;
 
 export default class PromptNotificationManager {
 
@@ -446,6 +446,7 @@ export default class PromptNotificationManager {
         if (!member || !promptContent || !promptContentEntryId || !memberId || !email || isBlank(email)) {
             return {
                 sent: false,
+                retryable: false,
                 errorMessage: `unable to get both a member and prompt content from data: ${ stringifyJSON(params) }`
             };
         }
@@ -493,40 +494,48 @@ export default class PromptNotificationManager {
         promptContent: PromptContent,
         data: PushNotificationData,
         memberSendDate?: DateObject,
-    }): Promise<{ notification: Notification, existing: boolean }> {
+    }): Promise<{ notification: Notification, existing: boolean } | { errorMessage: string }> {
         const { member, promptContent, data, memberSendDate } = params;
-        return await AdminFirestoreService.getSharedInstance().firestore.runTransaction<{ notification: Notification, existing: boolean }>(async transaction => {
-            const uniqueBy = memberSendDate ? Notification.uniqueByDateObject(memberSendDate) : undefined;
-            let existing = false;
-            let notification: Notification | undefined = await AdminNotificationService.getSharedInstance().findFirst({
-                uniqueBy,
-                type: NotificationType.NEW_PROMPT,
-                contentType: NotificationContentType.promptContent,
-                contentId: promptContent.entryId,
-                channel: NotificationChannel.PUSH,
-                memberId: member.id!,
-            }, { transaction, queryName: `Get existing Notification log for PUSH channel for ${ member.email }` })
-
-            if (!notification) {
-                notification = Notification.createPush({
-                    memberId: member.id!,
-                    email: member.email!,
+        try {
+            return await AdminFirestoreService.getSharedInstance().firestore.runTransaction<{ notification: Notification, existing: boolean }>(async transaction => {
+                const uniqueBy = memberSendDate ? Notification.uniqueByDateObject(memberSendDate) : undefined;
+                let existing = false;
+                let notification: Notification | undefined = await AdminNotificationService.getSharedInstance().findFirst({
+                    uniqueBy,
                     type: NotificationType.NEW_PROMPT,
                     contentType: NotificationContentType.promptContent,
                     contentId: promptContent.entryId,
-                    fcmTokens: member.fcmTokens,
-                    uniqueBy,
-                    data,
-                })
-                notification.status = SendStatus.SENDING; //set to sending because we'll be sending this notification shortly
-                notification = await AdminNotificationService.getSharedInstance().save(notification, { transaction });
-            } else {
-                existing = true;
-                logger.info("Found existing PUSH notification:", stringifyJSON(notification, 2));
+                    channel: NotificationChannel.PUSH,
+                    memberId: member.id!,
+                }, { transaction, queryName: `Get existing Notification log for PUSH channel for ${ member.email } ` })
 
-            }
-            return { notification, existing };
-        });
+                if (!notification) {
+                    notification = Notification.createPush({
+                        memberId: member.id!,
+                        email: member.email!,
+                        type: NotificationType.NEW_PROMPT,
+                        contentType: NotificationContentType.promptContent,
+                        contentId: promptContent.entryId,
+                        fcmTokens: member.fcmTokens,
+                        uniqueBy,
+                        data,
+                    })
+                    notification.status = SendStatus.SENDING; //set to sending because we'll be sending this notification shortly
+                    notification = await AdminNotificationService.getSharedInstance().save(notification, {
+                        transaction,
+
+                        queryName: `Save new PUSH Notification for ${ member.email } `
+                    });
+                } else {
+                    existing = true;
+                    logger.info("Found existing PUSH notification:", stringifyJSON(notification, 2));
+
+                }
+                return { notification, existing };
+            }, { maxAttempts: MAX_TRANSACTION_ATTEMPTS });
+        } catch (error) {
+            return { errorMessage: error.message ?? "Unable to execute transaction to find or create PUSH notification. Max transaction attempts exceeded." };
+        }
     }
 
 
@@ -544,40 +553,46 @@ export default class PromptNotificationManager {
         promptContent: PromptContent,
         emailData: PromptNotificationEmail,
         memberSendDate?: DateObject
-    }): Promise<{ notification: Notification, existing: boolean }> {
+    }): Promise<{ notification: Notification, existing: boolean } | { errorMessage: string }> {
         const { member, promptContent, emailData, memberSendDate } = params;
-        return await AdminFirestoreService.getSharedInstance().firestore.runTransaction<{ notification: Notification, existing: boolean }>(async transaction => {
-            const uniqueBy = memberSendDate ? Notification.uniqueByDateObject(memberSendDate) : undefined;
-            let existing = false;
-            let notification: Notification | undefined = await AdminNotificationService.getSharedInstance().findFirst({
-                uniqueBy,
-                type: NotificationType.NEW_PROMPT,
-                contentType: NotificationContentType.promptContent,
-                contentId: promptContent.entryId,
-                channel: NotificationChannel.EMAIL,
-                memberId: member.id!,
-            }, { transaction, queryName: `Get existing Notification log for EMAIL channel for ${ member.email }` })
-
-            if (!notification) {
-                notification = Notification.createEmail({
-                    memberId: member.id!,
-                    email: member.email!,
+        try {
+            return await AdminFirestoreService.getSharedInstance().firestore.runTransaction<{ notification: Notification, existing: boolean }>(async transaction => {
+                const uniqueBy = memberSendDate ? Notification.uniqueByDateObject(memberSendDate) : undefined;
+                let existing = false;
+                let notification: Notification | undefined = await AdminNotificationService.getSharedInstance().findFirst({
+                    uniqueBy,
                     type: NotificationType.NEW_PROMPT,
                     contentType: NotificationContentType.promptContent,
                     contentId: promptContent.entryId,
-                    uniqueBy,
-                    data: emailData,
-                    sendgridTemplateId: SendgridTemplate.new_prompt_notification,
-                })
-                notification.status = SendStatus.SENDING; //set to sending because we'll be sending this notification shortly
-                notification = await AdminNotificationService.getSharedInstance().save(notification, { transaction });
-            } else {
-                existing = true;
-                logger.info("Found existing EMAIL notification:", stringifyJSON(notification, 2));
+                    channel: NotificationChannel.EMAIL,
+                    memberId: member.id!,
+                }, { transaction, queryName: `Get existing Notification log for EMAIL channel for ${ member.email }` })
 
-            }
-            return { notification, existing };
-        });
+                if (!notification) {
+                    notification = Notification.createEmail({
+                        memberId: member.id!,
+                        email: member.email!,
+                        type: NotificationType.NEW_PROMPT,
+                        contentType: NotificationContentType.promptContent,
+                        contentId: promptContent.entryId,
+                        uniqueBy,
+                        data: emailData,
+                        sendgridTemplateId: SendgridTemplate.new_prompt_notification,
+                    })
+                    notification.status = SendStatus.SENDING; //set to sending because we'll be sending this notification shortly
+                    notification = await AdminNotificationService.getSharedInstance().save(notification, { transaction });
+                } else {
+                    existing = true;
+                    logger.info("Found existing EMAIL notification:", stringifyJSON(notification, 2));
+
+                }
+                return { notification, existing };
+            }, { maxAttempts: MAX_TRANSACTION_ATTEMPTS });
+        } catch (error) {
+            logger.error("Failed to execute transaction for getting/creating PUSH Notification", error);
+            return { errorMessage: error.message ?? "Failed to execute transaction for getting/creating push notification. Max transaction retries exceeded." }
+        }
+
     }
 
     buildEmailNotificationTemplateData(params: { member: CactusMember, promptContent: PromptContent }): PromptNotificationEmail | null {
@@ -648,17 +663,26 @@ export default class PromptNotificationManager {
             return {
                 attempted: false,
                 error: "required data not present",
+                retryable: false,
             }
         }
 
         const data: PushNotificationData = this.buildPushData({ member, promptContent });
 
-        const { notification, existing: notificationExisted } = await this.getOrCreatePushNotification({
+        const { notification, existing: notificationExisted, errorMessage } = await this.getOrCreatePushNotification({
             member,
             memberSendDate,
             data,
             promptContent
         })
+
+        if (errorMessage) {
+            return {
+                attempted: false,
+                error: errorMessage,
+                retryable: true,
+            }
+        }
 
         const restrictedStatuses: SendStatus[] = [SendStatus.SENDING, SendStatus.SENT]
         const status = notification?.status;

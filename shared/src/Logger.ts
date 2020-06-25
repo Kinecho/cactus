@@ -7,7 +7,7 @@ export default class Logger {
     constructor(options: string | { fileName: string, serverName?: string }) {
         if (typeof options === "string") {
             this.fileName = options;
-            this.serverName = process.env.FUNCTION_NAME || undefined;
+            this.serverName = process.env.FUNCTION_NAME || process.env.K_SERVICE || undefined;
         } else {
             this.fileName = options.fileName;
             this.serverName = options.serverName;
@@ -15,7 +15,7 @@ export default class Logger {
     }
 
     protected get prefix(): string {
-        return `${this.getDateString()} [${this.serverName ? `${this.serverName}.` : ""}${this.fileName}]`
+        return `${ this.getDateString() } [${ this.serverName ? `${ this.serverName }.` : "" }${ this.fileName }]`
     }
 
     debug(...args: [any?, ...any[]]) {

@@ -13,13 +13,11 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import VueClipboard from 'vue-clipboard2';
     import {appendQueryParams} from '@shared/util/StringUtil'
     import Logger from "@shared/Logger";
 
     const logger = new Logger("CopyTextInput.vue");
 
-    Vue.use(VueClipboard);
 
     export default Vue.extend({
         created() {

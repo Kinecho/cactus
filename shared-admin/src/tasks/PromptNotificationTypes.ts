@@ -96,6 +96,7 @@ export interface SendEmailNotificationParams {
 
 export interface SendEmailNotificationResult {
     sent: boolean,
+    retryable?: boolean,
     errorMessage?: string,
     message?: string,
     sendResult?: SendEmailResult,

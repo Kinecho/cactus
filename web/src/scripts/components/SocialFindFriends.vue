@@ -68,7 +68,6 @@
     import SocialImportedContact from "@components/SocialImportedContact.vue"
     import {EmailService, CloudspongeContact} from "@shared/types/EmailContactTypes";
     import {ImportedContact} from "@shared/types/ImportedContactTypes";
-    import VueClipboard from 'vue-clipboard2';
     import CactusMember from "@shared/models/CactusMember";
     import {Config} from "@web/config";
     import {generateReferralLink} from '@shared/util/SocialInviteUtil';
@@ -79,8 +78,6 @@
     import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
     import ImportedContactService from '@web/services/ImportedContactService';
     import SocialConnectionRequest from "@shared/models/SocialConnectionRequest";
-
-    Vue.use(VueClipboard);
 
     export default Vue.extend({
         components: {

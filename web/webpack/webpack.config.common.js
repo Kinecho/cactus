@@ -111,8 +111,8 @@ module.exports = (config) => {
                 optimization: {
                     runtimeChunk: 'single',
                     splitChunks: {
-                        // minSize: 0,
-                        maxSize: 500000,
+                        minSize: 10000,
+                        maxSize: 750000,
                         chunks: 'all',
                         cacheGroups: {
                             ...cssCacheGroups,
@@ -122,13 +122,28 @@ module.exports = (config) => {
                                 priority: 10,
                                 reuseExistingChunk: true,
                             },
+                            vueVendors: {
+                                test: /[\\/]node_modules[\\/].*vue.*[\\/]/,
+                                name: 'vue',
+                                priority: 21,
+                                maxSize: 0,
+                                reuseExistingChunk: true,
+                            },
                             shared: {
                                 test: /[\\/]shared[\\/]/,
                                 // minChunks: 2,
                                 name: 'shared',
                                 chunks: 'all',
                                 reuseExistingChunk: true,
-                                // priority: -20,
+                                priority: 10,
+                            },
+                            services: {
+                                test: /[\\/]services[\\/]/,
+                                // minChunks: 2,
+                                name: 'services',
+                                chunks: 'all',
+                                reuseExistingChunk: true,
+                                priority: 10,
                             },
                             default: {
                                 minChunks: 2,

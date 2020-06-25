@@ -40,13 +40,10 @@
     import NavBar from "@components/NavBar.vue";
     import Spinner from "@components/Spinner.vue";
     import Footer from "@components/StandardFooter.vue";
-    import VueClipboard from 'vue-clipboard2';
     import SocialFriendList from "@components/SocialFriendList.vue";
     import SocialFriendNotifications from "@components/SocialFriendNotifications.vue";
     import SkeletonEvent from "@components/SocialActivityEventSkeleton.vue";
     import SocialActivityEvent from "@components/SocialActivityEvent.vue"
-
-    Vue.use(VueClipboard);
 
     export default Vue.extend({
         components: {

@@ -40,8 +40,13 @@ app.post("/daily-prompt-push", async (req: express.Request, resp: express.Respon
     try {
         const pushResult = await PromptNotificationManager.shared.sendPromptNotificationPush(params);
         const logData = { taskInfo: { taskId, retryCount, executionCount }, pushResult, params, };
-        logger.info(stringifyJSON(logData, 2));
-        resp.sendStatus(204);
+        logger.info(stringifyJSON(logData));
+        if (pushResult.retryable) {
+            logger.info("The push task was not successful - will retry", pushResult.error);
+            resp.status(500).send(result.error);
+        } else {
+            resp.sendStatus(204);
+        }
     } catch (error) {
         logger.error("Unexpected error", error);
         resp.status(500).send({ message: "Unexpected error while processing push task", error });

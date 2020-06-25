@@ -36,10 +36,8 @@
     import PromptContent from "@shared/models/PromptContent"
     import {PageRoute} from '@shared/PageRoutes'
     import {Config} from '@web/config';
-    import VueClipboard from 'vue-clipboard2';
     import SharingService from '@web/services/SharingService'
 
-    Vue.use(VueClipboard);
 
     export default Vue.extend({
         created() {
