@@ -48,6 +48,9 @@
                                     @navigationEnabled="navigationDisabled = false"
                             />
                         </transition>
+                        <transition name="insights" appear mode="out-in" v-if="reflectionResponse">
+                            <InsightsCard/>
+                        </transition>
                         <transition name="celebrate" appear mode="out-in" v-if="completed">
                             <celebrate v-on:back="completed = false"
                                     v-on:restart="restart"
@@ -93,6 +96,7 @@
     import { PageRoute } from '@shared/PageRoutes'
     import ContentCard from "@components/PromptContentCard.vue"
     import Celebrate from "@components/ReflectionCelebrateCard.vue";
+    import InsightsCard from "@components/InsightsCard.vue";
     import PromptContent, { Content, ContentType } from '@shared/models/PromptContent'
     import { CactusElement } from '@shared/models/CactusElement';
     import Spinner from "@components/Spinner.vue";
@@ -129,6 +133,7 @@
             ContentCard,
             Spinner,
             Celebrate,
+            InsightsCard,
             PromptContentSharing,
             FourOhFour,
             PricingModal
