@@ -11,16 +11,15 @@
         </div>
         <div class="sentimentAnalysis">
             <nav class="tabs">
-                <a>Anger</a>
-                <a>Fear</a>
-                <a>Joy</a>
-                <a>Sadness</a>
-                <a>Analytical</a>
-                <a>Confident</a>
-                <a>Tentative</a>
+                <a v-for="(emotion, i) in emotions" :key="`emotion_${i}`" class="emotion">{{emotion}}</a>
             </nav>
             <div class="noteText">
-                {{noteText}}
+                <p>Released 50 years ago this week, Black Sabbath’s self-titled debut almost single-handedly launched the heavy metal genre.</p>
+                <p>But in 1970, it wasn’t seen as much of a harbinger of things to come.</p>
+                <p>“The whole album is a shuck,” wrote Lester Bangs.</p>
+                <p class="highlight">“The worst of the counterculture on a plastic platter—bullshit necromancy, drug-impaired reaction time, long solos, everything,” complained Robert Christgau.</p>
+                <p>The rock critic cognoscenti was soon proven wrong: Black Sabbath and the band’s subsequent albums served as the foundational texts for countless acts who fell hard for Sabbath’s singular mix of bone-crunching riffs, adolescent alienation and vintage Hammer horror flicks.</p>
+                <p>In celebration of half a century of Sabbath, let’s dig into essential rarities from the band’s first decade (aka the Ozzy era).</p>
             </div>
         </div>
         <button class="contButton">Continue</button>
@@ -39,15 +38,7 @@
                 type: String,
                 default: "40%"
             },
-            noteText: {
-                type: String,
-                default: `Released 50 years ago this week, Black Sabbath’s self-titled debut almost single-handedly launched the heavy metal genre.
-                But in 1970, it wasn’t seen as much of a harbinger of things to come.
-                “The whole album is a shuck,” wrote Lester Bangs.
-                “The worst of the counterculture on a plastic platter—bullshit necromancy, drug-impaired reaction time, long solos, everything,” complained Robert Christgau.
-                The rock critic cognoscenti was soon proven wrong: Black Sabbath and the band’s subsequent albums served as the foundational texts for countless acts who fell hard for Sabbath’s singular mix of bone-crunching riffs, adolescent alienation and vintage Hammer horror flicks.
-                In celebration of half a century of Sabbath, let’s dig into essential rarities from the band’s first decade (aka the Ozzy era).`
-            },
+            emotions: {type: Array, default: ['Anger', 'Fear', 'Joy', 'Sadness', 'Analytical', 'Confident', 'Tentative']},
         },
         data(): {} {
             return {}
@@ -125,26 +116,55 @@
         overflow-y: hidden;
         position: sticky;
         top: 0;
+    }
 
-        a {
-            padding: .8rem 1.6rem;
+    .emotion {
+        padding: .8rem 1.6rem;
+
+        @include r(600) {
+            padding: 2.4rem 2rem;
+        }
+
+        &:first-child {
+            color: $darkestGreen;
+            padding-left: 2rem;
 
             @include r(600) {
-                padding: 2.4rem 2rem;
+                padding-left: 2.4rem;
             }
         }
+
+        // &.current {
+        //
+        // }
     }
 
     .noteText {
         padding: 1.6rem;
-        white-space: pre-line;
 
         @include r(600) {
             padding: 0 2.4rem 3.2rem;
         }
+
+        p {
+            margin-bottom: 1.6rem;
+        }
+    }
+
+    .highlight {
+        background-color: lighten($royal, 20%);
+        margin: 0 -.4rem 1.6rem;
+        padding: .4rem;
     }
 
     .contButton {
+        bottom: 3.2rem;
+        left: 3.2rem;
+        position: fixed;
+        right: 3.2rem;
+        width: calc(100% - 6.4rem);
+        z-index: 1;
+
         @include r(600) {
             display: none;
         }
