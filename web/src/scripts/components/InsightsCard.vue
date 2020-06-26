@@ -10,7 +10,7 @@
         </button>
         <tone-analyzer-modal
                 :showModal="modalVisible"
-                @close="modalVisible = false"/>
+                @close="hideModal()"/>
     </div>
 </template>
 
@@ -21,7 +21,6 @@
     import Component from "vue-class-component";
     import { Prop } from "vue-property-decorator";
     import ReflectionResponse from "@shared/models/ReflectionResponse";
-    import { ToneID, ToneScore } from "@shared/api/ToneAnalyzerTypes";
     import PositivityRating from "@components/PositivityRating.vue";
     import ToneAnalysis from "@components/ToneAnalysis.vue";
 
@@ -39,10 +38,6 @@
         reflectionResponse!: ReflectionResponse;
 
         modalVisible: boolean = false;
-
-        get positivityRating(): number | undefined {
-            return this.reflectionResponse.sentiment?.documentSentiment?.score ?? undefined
-        };
 
         showModal() {
             this.modalVisible = true;
