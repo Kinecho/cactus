@@ -1,16 +1,18 @@
 <template>
-    <div>
+    <div class="insights-card">
         <spinner v-if="loading"/>
-        <h1>This is onboarding insights</h1>
-        <h2 v-if="!reflectionResponse">
-            No Response Found
-        </h2>
-        <h2 v-else>
+        <div class="textBox">
+            <p v-if="!reflectionResponse">
+                No Response Found
+            </p>
+            <p v-else>This is what your note reveals about your emotions.</p>
+        </div>
+        <div class="insightsContainer">
             <positivity-rating :sentiment-score="reflectionResponse.sentiment.documentSentiment"/>
             <tone-analysis :tone-result="reflectionResponse.toneAnalysis"
                     :original-text="reflectionResponse.content.text"
                     :sentences-on-new-line="false"/>
-        </h2>
+        </div>
     </div>
 </template>
 
@@ -73,5 +75,45 @@
 </script>
 
 <style scoped lang="scss">
+    @import "variables";
+    @import "mixins";
+
+    .insights-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 80vh;
+        padding: 0 .8rem;
+
+        @include r(374) {
+            padding: 0 2.4rem;
+        }
+
+        @include r(600) {
+            align-items: center;
+            flex-direction: row;
+            justify-content: flex-start;
+            padding: 0 6.4rem;
+        }
+    }
+
+    .textBox {
+        @include r(600) {
+            padding-right: 6.4rem;
+            width: 50%;
+        }
+    }
+
+    .insightsContainer {
+        margin: 0 -2.4rem;
+        width: calc(100% + 4.8rem);
+
+        @include r(600) {
+            align-self: center;
+            margin: 0 auto;
+            max-width: 50%;
+            width: 100%;
+        }
+    }
 
 </style>
