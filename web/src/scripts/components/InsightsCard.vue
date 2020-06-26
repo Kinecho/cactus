@@ -87,7 +87,7 @@
 
     .insightsCard {
         background-color: $bgDolphin;
-        padding: 3.2rem;
+        padding: 5.6rem 3.2rem 3.2rem;
         position: relative;
         text-align: left;
 
@@ -245,7 +245,7 @@
 
     .infoButton {
         position: absolute;
-        right: 8rem - 1.2rem;
+        right: 5.6rem;
         top: 2rem - 1.2rem;
 
         @include r(600) {
