@@ -23,13 +23,25 @@
             </div>
         </div>
         <button class="contButton">Continue</button>
+        <button class="infoButton tertiary icon" @click="showModal">
+            <svg-icon icon="info" class="infoIcon" />
+        </button>
+        <tone-analyzer-modal
+            :showModal="modalVisible"
+            @close="modalVisible = false" />
     </div>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
+    import ToneAnalyzerModal from "@components/ToneAnalyzerModal.vue"
+    import SvgIcon from "@components/SvgIcon.vue";
 
     export default Vue.extend({
+        components: {
+            ToneAnalyzerModal,
+            SvgIcon,
+        },
         created() {
 
         },
@@ -38,10 +50,32 @@
                 type: String,
                 default: "40%"
             },
-            emotions: {type: Array, default: ['Anger', 'Fear', 'Joy', 'Sadness', 'Analytical', 'Confident', 'Tentative']},
+            emotions: {
+                type: Array,
+                default: () => ([
+                    "Anger",
+                    "Fear",
+                    "Sadness",
+                    "Analytical",
+                    "Confident",
+                    "Tentative"
+                ])
+            },
         },
-        data(): {} {
-            return {}
+        data(): {
+            modalVisible: boolean,
+        } {
+            return {
+                modalVisible: false,
+            }
+        },
+        methods: {
+            showModal() {
+                this.modalVisible = true;
+            },
+            hideModal() {
+                this.modalVisible = false;
+            }
         }
     })
 </script>
@@ -54,6 +88,7 @@
     .insightsCard {
         background-color: $bgDolphin;
         padding: 3.2rem;
+        position: relative;
         text-align: left;
 
         @include r(600) {
@@ -123,7 +158,26 @@
 
     .sentimentAnalysis {
         @include shadowbox;
-        margin: 0 -2.4rem;
+        margin: 0 -3.2rem;
+        position: relative;
+
+        @include r(374) {
+            margin: 0 -2rem;
+        }
+        @include r(600) {
+            margin: 0 -2.4rem;
+        }
+
+        &:after {
+            background-image: linear-gradient(to right, rgba(255,255,255,0), $white);
+            content: "";
+            height: 4rem;
+            position: absolute;
+            right: 0;
+            top: 1.2rem;
+            width: 4rem;
+            z-index: 1;
+        }
     }
 
     .tabs {
@@ -139,17 +193,13 @@
     }
 
     .emotion {
-        padding: .8rem 1.6rem;
-
-        @include r(600) {
-            padding: 2.4rem 2rem;
-        }
+        padding: 2rem 1.6rem;
 
         &:first-child {
             color: $darkestGreen;
-            padding-left: 2rem;
+            padding-left: 3.2rem;
 
-            @include r(600) {
+            @include r(374) {
                 padding-left: 2.4rem;
             }
         }
@@ -160,8 +210,11 @@
     }
 
     .noteText {
-        padding: 1.6rem;
+        padding: 0 3.2rem 1.6rem;
 
+        @include r(374) {
+            padding: 0 2.4rem 3.2rem;
+        }
         @include r(600) {
             padding: 0 2.4rem 3.2rem;
         }
@@ -187,6 +240,16 @@
 
         @include r(600) {
             display: none;
+        }
+    }
+
+    .infoButton {
+        position: absolute;
+        right: 8rem - 1.2rem;
+        top: 2rem - 1.2rem;
+
+        @include r(600) {
+            right: .8rem;
         }
     }
 
