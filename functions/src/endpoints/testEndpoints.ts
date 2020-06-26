@@ -14,11 +14,14 @@ import * as DateUtil from "@shared/util/DateUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
-import CactusMember, { PromptSendTime } from "@shared/models/CactusMember";
+import CactusMember, { DEFAULT_PROMPT_SEND_TIME, PromptSendTime } from "@shared/models/CactusMember";
 import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
 import Logger from "@shared/Logger";
 import { runMemberStatsJob } from "@api/pubsub/subscribers/MemberStatsJob";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
+import AdminSendgridService from "@admin/services/AdminSendgridService";
+import PromptNotificationManager from "@admin/managers/PromptNotificationManager";
+import { MemberPromptNotificationTaskParams } from "@admin/tasks/PromptNotificationTypes";
 
 const logger = new Logger("testApp");
 const app = express();
@@ -124,6 +127,47 @@ app.get("/send-time", async (req, res) => {
 
     res.send(result)
 });
+
+app.get("/start-notif-task", async (req, resp) => {
+    const email = req.query.email as string | undefined ?? "neil@cactus.app";
+    const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
+    const memberId = member?.id;
+    if (!memberId) {
+        resp.send({ error: `No member found for email ${ email }` });
+        return;
+    }
+    const payload: MemberPromptNotificationTaskParams = {
+        memberId,
+        systemDateObject: DateTime.local().toObject(),
+        promptSendTimeUTC: member?.promptSendTime ?? DEFAULT_PROMPT_SEND_TIME,
+    }
+    const result = await PromptNotificationManager.shared.createDailyPromptSetupTask(payload);
+    resp.send({ result });
+    return;
+})
+
+app.get("/send-notification-email", async (req, resp) => {
+    const email = req.query.email as string | undefined ?? "neil@cactus.app";
+    const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
+    if (!member) {
+        resp.status(400).send({ success: false, message: `No member found for email: "${ email }"` });
+        return
+    }
+
+    const sendResult = await AdminSendgridService.getSharedInstance().sendPromptNotification({
+        reflectUrl: "http://localhost:8080/home",
+        email,
+        isPlus: true,
+        mainText: "This is test text from the test endpoint",
+        memberId: member.id!,
+        subjectLine: "[STAGE] Test endpoint",
+        promptContentEntryId: "xxxx",
+        isLastEmail: true,
+    })
+
+    const result = { success: true, message: "", sendResult };
+    resp.send(result);
+})
 
 app.get("/member-send-time", async (req, resp) => {
     const memberId = req.query.memberId as string | undefined;

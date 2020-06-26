@@ -6,7 +6,7 @@ import AdminFirestoreService, {
     GetBatchOptions,
     GetOptions,
     QueryOptions,
-    SaveOptions
+    SaveOptions, Timestamp
 } from "@admin/services/AdminFirestoreService";
 import CactusMember, {
     DEFAULT_PROMPT_SEND_TIME,
@@ -408,6 +408,20 @@ export default class AdminCactusMemberService {
         }
     }
 
+    async updateLastReplyByMemberId(memberId?: string, lastReply: Date = new Date()): Promise<void> {
+        if (!memberId) {
+            return;
+        }
+        try {
+            const doc = this.getCollectionRef().doc(memberId);
+            await doc.set({ [CactusMember.Field.lastReplyAt]: Timestamp.fromDate(lastReply) }, { merge: true });
+            return;
+        } catch (error) {
+            logger.error("Failed to update last reply for memberId ", memberId);
+            return;
+        }
+    }
+
 
     async updateLastJournalByEmail(email: string, lastJournal: Date = new Date()): Promise<CactusMember | undefined> {
         const member = await this.getMemberByEmail(email);
@@ -683,18 +697,22 @@ export default class AdminCactusMemberService {
     }
 
     /**
-     * Set the Email notification prefernece for a member by email address
+     * Set the Email notification prefernece for a member by email address. Only updates the member record
      * @param {string} email
      * @param {boolean} subscribed
+     * @param {boolean} isAdminUnsubscribe - set to TRUE if the member's adminEmailUnsubscribe should get updated
      * @return {Promise<void>}
      */
-    async setEmailNotificationPreference(email: string, subscribed: boolean): Promise<CactusMember | undefined> {
+    async setEmailNotificationPreference(email: string, subscribed: boolean, isAdminUnsubscribe: boolean = false): Promise<CactusMember | undefined> {
         const member = await this.getMemberByEmail(email);
         if (!member) {
             return;
         }
 
         member.notificationSettings.email = subscribed ? NotificationStatus.ACTIVE : NotificationStatus.INACTIVE;
+        if (!subscribed && isAdminUnsubscribe) {
+            member.adminEmailUnsubscribedAt = new Date();
+        }
         logger.info("Setting member's email preference to ", member.notificationSettings.email);
         await this.save(member);
         return member;

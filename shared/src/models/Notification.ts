@@ -223,7 +223,7 @@ export default class Notification extends BaseModel {
 
     /**
      * Creates a new EMAIL channel notification.
-     * @param {EmailCreateParams}} params
+     * @param {EmailCreateParams} params
      * @return {Notification}
      */
     static createEmail(params: EmailCreateParams): Notification {

@@ -3,7 +3,7 @@ import mailchimpApp from "@api/endpoints/mailchimpEndpoints";
 import inboundApp from "@api/endpoints/inboundApp";
 import checkoutApp from "@api/endpoints/checkoutApp";
 import manageNotificationApp from "@api/endpoints/manageNotificationsEndpoints";
-import testApp from "@api/endpoints/testApp";
+import testApp from "@api/endpoints/testEndpoints";
 import taskEndpoints from "@api/endpoints/taskEndpoints";
 import * as DailySentPromptJob from "@api/pubsub/subscribers/DailySentPromptJob";
 import { backupFirestore, exportFirestoreToBigQuery } from "@api/endpoints/DataExportJob";

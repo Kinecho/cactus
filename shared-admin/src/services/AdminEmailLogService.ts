@@ -1,9 +1,9 @@
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
-import EmailLog, {SendgridTemplate, TemplateName} from "@shared/models/EmailLog";
-import {CactusConfig} from "@admin/CactusConfig";
-import {flattenUnique} from "@shared/util/FirestoreUtil";
+import EmailLog, { TemplateName } from "@shared/models/EmailLog";
+import { CactusConfig } from "@admin/CactusConfig";
+import { flattenUnique } from "@shared/util/FirestoreUtil";
 import Logger from "@shared/Logger";
-import {Collection} from "@shared/FirestoreBaseModels";
+import { Collection } from "@shared/FirestoreBaseModels";
 
 /**
  * Options you can pass to search for an email log.
@@ -31,10 +31,6 @@ export default class AdminEmailLogService {
     constructor(config: CactusConfig) {
         this.firestoreService = AdminFirestoreService.getSharedInstance();
         this.config = config;
-    }
-
-    getSendgridTemplateId(templateName: SendgridTemplate): string | undefined {
-        return this.config.sendgrid.template_ids[templateName] as string | undefined;
     }
 
     static getSharedInstance(): AdminEmailLogService {
