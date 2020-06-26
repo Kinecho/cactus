@@ -99,10 +99,4 @@
             right: .8rem;
         }
     }
-
-    .debug {
-        color: red;
-        font-family: monospace;
-    }
-
 </style>
