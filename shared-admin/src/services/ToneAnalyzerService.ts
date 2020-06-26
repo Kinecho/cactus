@@ -69,7 +69,10 @@ export default class ToneAnalyzerService {
         }
     }
 
-    async watsonBasicSdk(text: string): Promise<ToneResult | undefined> {
+    async watsonBasicSdk(text?: string): Promise<ToneResult | undefined> {
+        if (!text) {
+            return undefined;
+        }
         try {
             const watsonRequest = await this.watson.tone({ toneInput: { text }, sentences: true })
             const result = watsonRequest.result;

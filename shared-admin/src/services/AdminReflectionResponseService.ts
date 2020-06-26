@@ -1,9 +1,5 @@
 import AdminFirestoreService, { DeleteOptions, QueryOptions, SaveOptions } from "@admin/services/AdminFirestoreService";
-import ReflectionResponse, {
-    ReflectionResponseField,
-    InsightWord,
-    InsightWordsResult
-} from "@shared/models/ReflectionResponse";
+import ReflectionResponse, { ReflectionResponseField } from "@shared/models/ReflectionResponse";
 import { BaseModelField, Collection } from "@shared/FirestoreBaseModels";
 import MailchimpService from "@admin/services/MailchimpService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
@@ -26,12 +22,11 @@ import {
     getElementAccumulationCounts
 } from "@shared/util/ReflectionResponseUtil";
 import { QuerySortDirection } from "@shared/types/FirestoreConstants";
-import * as admin from "firebase-admin";
-import DocumentReference = admin.firestore.DocumentReference;
 import { AxiosError } from "axios";
 import Logger from "@shared/Logger";
 import GoogleLanguageService from "@admin/services/GoogleLanguageService";
 import ToneAnalyzerService from "@admin/services/ToneAnalyzerService";
+import { InsightWord } from "@shared/api/InsightLanguageTypes";
 
 const logger = new Logger("AdminReflectionResponseService");
 
@@ -113,28 +108,6 @@ export default class AdminReflectionResponseService {
         const results = await this.firestoreService.executeQuery(query, ReflectionResponse);
 
         return results.results
-    }
-
-    async setInsightsWordCloud(options: { reflectionResponseId: string, insightsResult?: InsightWordsResult }): Promise<void> {
-        const { reflectionResponseId, insightsResult } = options;
-        const doc: DocumentReference = this.getCollectionRef().doc(reflectionResponseId);
-        const data: Partial<ReflectionResponse> = {};
-
-        if (!insightsResult) {
-            return;
-        }
-        // for now, don't store all this raw data (it's huge)
-        // later we will store this in a separate collection
-        delete insightsResult.syntaxRaw;
-        delete insightsResult.entitiesRaw;
-        data.insights = insightsResult;
-        try {
-            await doc.set(data, { merge: true });
-        } catch (error) {
-            logger.error(`Unable to update reflection response insights for reflectionResponseId = ${ reflectionResponseId }.`, error)
-        }
-
-        return;
     }
 
     static async setLastJournalDate(email?: string, date?: Date): Promise<ApiResponse> {
@@ -400,16 +373,18 @@ export default class AdminReflectionResponseService {
         }
 
         const doc = this.getCollectionRef().doc(responseId);
-        const [wordCloud, toneAnalysis] = await Promise.all([
-            GoogleLanguageService.getSharedInstance().insightWords(response.content.text),
-            ToneAnalyzerService.shared.watsonBasicSdk(response.content.text),
+        const text = response.content.text;
+        const [wordCloud, sentiment, toneAnalysis] = await Promise.all([
+            GoogleLanguageService.getSharedInstance().insightWords(text),
+            GoogleLanguageService.getSharedInstance().getSentiment(text),
+            ToneAnalyzerService.shared.watsonBasicSdk(text),
         ]);
-
 
         await doc.set({
             [ReflectionResponse.Field.insights]: wordCloud ?? null,
             [ReflectionResponse.Field.toneAnalysis]: toneAnalysis ?? null,
-        }, { merge: true, ignoreUndefinedProperties: true });
+            [ReflectionResponse.Field.sentiment]: sentiment ?? null,
+        }, { merge: true });
 
         return undefined;
     }

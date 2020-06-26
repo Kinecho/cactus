@@ -24,12 +24,12 @@
     import ReflectCard from "@components/onboarding/OnboardingReflectCard.vue";
     import ElementsCard from "@components/onboarding/OnboardingElementsCard.vue";
     import WordCloudCard from "@components/onboarding/OnboardingWordCloudCard.vue";
-    import { InsightWord } from "@shared/models/ReflectionResponse";
     import SubscriptionProduct from "@shared/models/SubscriptionProduct";
     import UpsellCard from "@components/onboarding/OnboardingUpsellCard.vue";
     import CelebrateCard from "@components/onboarding/OnboardingCelebrateCard.vue";
     import { CheckoutInfo } from "@components/onboarding/OnboardingTypes";
     import CactusMember from "@shared/models/CactusMember";
+    import { InsightWord } from "@shared/api/InsightLanguageTypes";
 
     interface CardProps {
         type: string,

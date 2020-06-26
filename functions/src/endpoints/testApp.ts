@@ -451,9 +451,15 @@ app.get("/sheets/add", async (req, resp) => {
 
 app.get("/watson", async (req, resp) => {
     const text = req.query.text as string;
-
     const data = await ToneAnalyzerService.shared.watsonBasicSdk(text)
     resp.send({ watson: data });
+})
+
+app.get("/sentiment", async (req, resp) => {
+    const text = req.query.text as string;
+
+    const data = await GoogleLanguageService.getSharedInstance().getSentiment(text)
+    resp.send({ google: data });
 
 })
 

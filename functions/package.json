@@ -43,7 +43,7 @@
     "dependencies": {
         "@firebase/app": "^0.5.4",
         "@google-cloud/bigquery": "^4.1.4",
-        "@google-cloud/language": "^3.8.0",
+        "@google-cloud/language": "^4.1.0",
         "@google-cloud/pubsub": "^2.0.0",
         "@google-cloud/storage": "^3.0.2",
         "@google-cloud/tasks": "^2.0.0",

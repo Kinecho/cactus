@@ -1,8 +1,10 @@
-import language from "@google-cloud/language";
+import { v1beta2 } from "@google-cloud/language";
 import { CactusConfig } from "@admin/CactusConfig";
-import { InsightWord, InsightWordsResult } from "@shared/models/ReflectionResponse";
 import Logger from "@shared/Logger";
 import { isBlank } from "@shared/util/StringUtil";
+import { google } from "@google-cloud/language/build/protos/protos";
+import Document = google.cloud.language.v1.Document;
+import { InsightWord, InsightWordsResult } from "@shared/api/InsightLanguageTypes";
 
 const logger = new Logger("GoogleLanguageService");
 
@@ -15,7 +17,7 @@ export enum WordTypes {
 export default class GoogleLanguageService {
     protected static sharedInstance: GoogleLanguageService;
 
-    client: any;
+    client: v1beta2.LanguageServiceClient;
     config: CactusConfig;
     tagsToKeep: string[]
 
@@ -38,7 +40,7 @@ export default class GoogleLanguageService {
                 private_key: credentials.private_key
             }
         };
-        this.client = new language.LanguageServiceClient(authCredentials);
+        this.client = new v1beta2.LanguageServiceClient(authCredentials);
         this.config = config;
         this.tagsToKeep = ['NOUN', 'VERB', 'ADJ'];
     }
@@ -46,11 +48,11 @@ export default class GoogleLanguageService {
     async getEntities(text: string): Promise<any[] | undefined> {
         const document = {
             content: text,
-            type: 'PLAIN_TEXT'
+            type: Document.Type.PLAIN_TEXT
         };
         try {
-            const entityResponse = await this.client.analyzeEntities({ document: document });
-            return entityResponse[0]?.entities;
+            const [entityResponse] = await this.client.analyzeEntities({ document: document });
+            return entityResponse?.entities ?? undefined;
         } catch (error) {
             logger.log('There was an error analyzing entities with Google Language API', error);
             return;
@@ -60,7 +62,7 @@ export default class GoogleLanguageService {
     async getSyntaxTokens(text: string): Promise<any> {
         const document = {
             content: text,
-            type: 'PLAIN_TEXT'
+            type: Document.Type.PLAIN_TEXT,
         };
         try {
             const [result] = await this.client.analyzeSyntax({ document: document });
@@ -69,6 +71,16 @@ export default class GoogleLanguageService {
             logger.log('There was an error analyzing syntax with Google Language API', error);
             return;
         }
+    }
+
+    async getSentiment(text?: string): Promise<any> {
+        // this.client.sen
+        const document = {
+            content: text,
+            type: Document.Type.PLAIN_TEXT,
+        }
+        const [sentiment] = await this.client.analyzeSentiment({ document })
+        return sentiment;
     }
 
     async insightWords(text?: string): Promise<InsightWordsResult> {

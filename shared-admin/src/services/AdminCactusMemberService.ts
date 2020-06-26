@@ -16,7 +16,6 @@ import CactusMember, {
     PromptSendTime,
     ReflectionStats
 } from "@shared/models/CactusMember";
-import { InsightWord } from "@shared/models/ReflectionResponse";
 import { BaseModelField, Collection } from "@shared/FirestoreBaseModels";
 import { getDateAtMidnightDenver, getDateFromISOString, getSendTimeUTC } from "@shared/util/DateUtil";
 import {
@@ -35,6 +34,7 @@ import { CoreValue } from "@shared/models/CoreValueTypes";
 import DocumentReference = admin.firestore.DocumentReference;
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 import HoboCache from "@admin/HoboCache";
+import { InsightWord } from "@shared/api/InsightLanguageTypes";
 
 const logger = new Logger("AdminCactusMemberService");
 let firestoreService: AdminFirestoreService;

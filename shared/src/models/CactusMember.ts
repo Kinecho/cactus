@@ -1,6 +1,5 @@
 import { BaseModel, Collection } from "@shared/FirestoreBaseModels";
 import { ListMember } from "@shared/mailchimp/models/MailchimpTypes";
-import { InsightWord } from "@shared/models/ReflectionResponse";
 import { ElementAccumulation } from "@shared/models/ElementAccumulation";
 import { DateObject, DateTime } from "luxon";
 import * as DateUtil from "@shared/util/DateUtil";
@@ -15,6 +14,7 @@ import {
 import { DEFAULT_SUBSCRIPTION_TIER, SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 import { CoreValue } from "@shared/models/CoreValueTypes";
 import { CactusElement } from "@shared/models/CactusElement";
+import { InsightWord } from "@shared/api/InsightLanguageTypes";
 
 export enum JournalStatus {
     PREMIUM = "PREMIUM",
