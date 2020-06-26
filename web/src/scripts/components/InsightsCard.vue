@@ -3,7 +3,7 @@
         <h2>Insights</h2>
         <p class="subtext">This is what your note reveals about your emotions.</p>
         <positivity-rating :sentiment-score="reflectionResponse.sentiment.documentSentiment"/>
-        <tone-analysis :tone-result="reflectionResponse.toneAnalysis"/>
+        <tone-analysis :tone-result="reflectionResponse.toneAnalysis" :original-text="reflectionResponse.content.text" :sentences-on-new-line="false"/>
         <button class="contButton">Continue</button>
         <button class="infoButton tertiary icon" @click="showModal">
             <svg-icon icon="info" class="infoIcon"/>

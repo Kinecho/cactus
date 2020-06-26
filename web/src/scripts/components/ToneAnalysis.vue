@@ -9,14 +9,14 @@
             </a>
         </nav>
         <div class="noteText">
-            <p v-for="(sentence, i) in toneResult.sentencesTones"
-                    :key="`sentence_${i}`"
-                    :class="{highlight: sentence.tones && sentence.tones.some(t => t.toneId === currentToneId)}"
-            >
-                <span class="debug">({{sentence.tones.map(t => t.toneName).join(', ')}})</span>
-                <br/>
-                {{sentence.text}}
-
+            <p v-for="(paragraph, i) in paragraphs" :key="`paragraph_${i}`">
+                <span v-for="(sentence, i) in paragraph"
+                        :key="`sentence_${i}`"
+                        :class="{highlight: sentence.tones && sentence.tones.some(t => t.toneId === currentToneId)}"
+                >
+<!--                    <span class="debug">({{sentence.tones.map(t => t.toneName).join(', ')}})</span>-->
+                    {{sentence.text.trim()}}
+                </span>
             </p>
         </div>
     </div>
@@ -25,16 +25,25 @@
 <script lang="ts">
     import Vue from "vue";
     import Component from "vue-class-component"
-    import { ToneID, ToneResult, ToneScore } from "@shared/api/ToneAnalyzerTypes";
+    import { SentenceTone, ToneID, ToneResult, ToneScore } from "@shared/api/ToneAnalyzerTypes";
     import { Prop } from "vue-property-decorator";
+    import { isBlank } from "@shared/util/StringUtil";
+    import Logger from "@shared/Logger"
+
+    const logger = new Logger("ToneAnalysis");
 
     @Component
     export default class ToneAnalysis extends Vue {
         name = "ToneAnalysis";
 
+        @Prop({ type: String, default: null, required: false })
+        originalText!: string | null
+
         @Prop({ type: Object as () => ToneResult, required: false, default: null })
         toneResult!: ToneResult | null;
 
+        @Prop({type: Boolean, default: false})
+        sentencesOnNewLine!: boolean;
 
         get tones(): ToneScore[] {
             return this.toneResult?.documentTone?.tones ?? [];
@@ -48,6 +57,31 @@
             }
             return this.tones[Math.min(this.currentToneIndex, this.tones.length - 1)]?.toneId ?? null;
         };
+
+        get paragraphs(): SentenceTone[][] {
+            const sentences = this.toneResult?.sentencesTones
+            if (!this.originalText || isBlank(this.originalText) || !sentences || this.sentencesOnNewLine) {
+                return sentences?.map(sentence => ([sentence])) ?? []
+            }
+
+            const results: SentenceTone[][] = [];
+            let textParagraphs: string[] = this.originalText.toLowerCase().split("\n").filter(s => !isBlank(s));
+            debugger;
+            let remainingSentences = [...sentences];
+            let s = remainingSentences.shift();
+            for (let paragraph of textParagraphs) {
+                const pResult: SentenceTone = [];
+                while (s && s.text && !isBlank(s.text) && paragraph.includes(s.text.toLowerCase().trim())) {
+                    pResult.push(s);
+                    s = remainingSentences.shift();
+                }
+                if (pResult.length > 0) {
+                    results.push(pResult);
+                }
+            }
+            logger.info("Paragraph Results", results);
+            return results;
+        }
 
     }
 </script>
@@ -123,6 +157,7 @@
 
         p {
             margin-bottom: 1.6rem;
+            white-space: pre-line;
         }
     }
 
