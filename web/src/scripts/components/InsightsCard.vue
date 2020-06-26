@@ -24,7 +24,7 @@
         </div>
         <button class="contButton">Continue</button>
         <button class="infoButton tertiary icon" @click="showModal">
-            <svg-icon icon="heartOutline" class="infoIcon" />
+            <svg-icon icon="info" class="infoIcon" />
         </button>
         <tone-analyzer-modal
             :showModal="modalVisible"
@@ -158,7 +158,14 @@
 
     .sentimentAnalysis {
         @include shadowbox;
-        margin: 0 -2.4rem;
+        margin: 0 -3.2rem;
+
+        @include r(374) {
+            margin: 0 -2rem;
+        }
+        @include r(600) {
+            margin: 0 -2.4rem;
+        }
     }
 
     .tabs {
@@ -174,17 +181,13 @@
     }
 
     .emotion {
-        padding: .8rem 1.6rem;
-
-        @include r(600) {
-            padding: 2.4rem 2rem;
-        }
+        padding: 2rem 1.6rem;
 
         &:first-child {
             color: $darkestGreen;
-            padding-left: 2rem;
+            padding-left: 3.2rem;
 
-            @include r(600) {
+            @include r(374) {
                 padding-left: 2.4rem;
             }
         }
@@ -195,8 +198,11 @@
     }
 
     .noteText {
-        padding: 1.6rem;
+        padding: 0 3.2rem 1.6rem;
 
+        @include r(374) {
+            padding: 0 2.4rem 3.2rem;
+        }
         @include r(600) {
             padding: 0 2.4rem 3.2rem;
         }
@@ -227,8 +233,12 @@
 
     .infoButton {
         position: absolute;
-        right: 0;
-        top: 0;
+        right: 8rem - 1.2rem;
+        top: 2rem - 1.2rem;
+
+        @include r(600) {
+            right: .8rem;
+        }
     }
 
 </style>
