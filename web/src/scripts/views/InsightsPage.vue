@@ -60,7 +60,6 @@
     import CactusMember, { ReflectionStats } from "@shared/models/CactusMember";
     import { ListenerUnsubscriber } from "@web/services/FirestoreService";
     import CactusMemberService from "@web/services/CactusMemberService";
-    import { InsightWord } from "@shared/models/ReflectionResponse";
     import { CoreValueMeta, CoreValuesService } from "@shared/models/CoreValueTypes";
     import { PageRoute } from "@shared/PageRoutes";
     import { QueryParam } from "@shared/util/queryParams";
@@ -83,6 +82,7 @@
     import { StatWidgetData } from "@components/insights/MemberStatsTypes";
     import ReflectionStatsWidget from "@components/insights/ReflectionStatsWidget.vue";
     import { logFocusElementSelected } from "@web/analytics";
+    import { InsightWord } from "@shared/api/InsightLanguageTypes";
 
     const logger = new Logger("InsightsPage");
     const copy = CopyService.getSharedInstance().copy;

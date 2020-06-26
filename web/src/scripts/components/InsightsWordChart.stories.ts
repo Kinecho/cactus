@@ -1,5 +1,5 @@
-import { InsightWord } from "@shared/models/ReflectionResponse";
 import WordChart from "@components/InsightWordChart.vue";
+import { InsightWord } from "@shared/api/InsightLanguageTypes";
 
 export default {
     title: "Charts/Word Bubbles",

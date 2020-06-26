@@ -66,9 +66,9 @@
     import CactusMember from "@shared/models/CactusMember";
     import { startCheckout } from "@web/checkoutService";
     import { stringifyJSON } from "@shared/util/ObjectUtil";
-    import { InsightWord } from "@shared/models/ReflectionResponse";
     import Modal from "@components/Modal.vue";
     import { pushRoute } from "@web/NavigationUtil";
+    import { InsightWord } from "@shared/api/InsightLanguageTypes";
 
     const logger = new Logger("Onboarding");
 

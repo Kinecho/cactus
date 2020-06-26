@@ -13,7 +13,8 @@
         "target": "es5",
         "downlevelIteration": true,
         "lib": [
-            "es2019"
+            "es2019",
+            "dom"
         ],
         "baseUrl": ".",
         "rootDirs": [

@@ -16,7 +16,6 @@ import CactusMember, {
     PromptSendTime,
     ReflectionStats
 } from "@shared/models/CactusMember";
-import { InsightWord } from "@shared/models/ReflectionResponse";
 import { BaseModelField, Collection } from "@shared/FirestoreBaseModels";
 import { getDateAtMidnightDenver, getDateFromISOString, getSendTimeUTC } from "@shared/util/DateUtil";
 import {
@@ -33,6 +32,9 @@ import { QueryWhereClauses, removeDuplicates } from "@shared/util/FirestoreUtil"
 import { isBlank } from "@shared/util/StringUtil";
 import { CoreValue } from "@shared/models/CoreValueTypes";
 import DocumentReference = admin.firestore.DocumentReference;
+import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
+import HoboCache from "@admin/HoboCache";
+import { InsightWord } from "@shared/api/InsightLanguageTypes";
 
 const logger = new Logger("AdminCactusMemberService");
 let firestoreService: AdminFirestoreService;
@@ -698,5 +700,32 @@ export default class AdminCactusMemberService {
         logger.info("Setting member's email preference to ", member.notificationSettings.email);
         await this.save(member);
         return member;
+    }
+
+    async updateStatsOnReflectionResponse(memberId?: string): Promise<void> {
+        if (!memberId) {
+            return;
+        }
+        const { member } = await HoboCache.shared.getMemberById(memberId);
+        if (!member) {
+            return;
+        }
+        const timeZone = member.timeZone || undefined;
+        const [reflectionStats, aggregatedWordCloud] = await Promise.all([
+            AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({
+                memberId,
+                timeZone
+            }), AdminReflectionResponseService.getSharedInstance().aggregateWordInsightsForMember({
+                memberId
+            })
+        ]);
+
+        if (reflectionStats || aggregatedWordCloud) {
+            await this.setStats({
+                memberId,
+                stats: reflectionStats,
+                wordCloud: aggregatedWordCloud
+            })
+        }
     }
 }

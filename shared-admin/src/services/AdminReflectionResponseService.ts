@@ -1,9 +1,5 @@
 import AdminFirestoreService, { DeleteOptions, QueryOptions, SaveOptions } from "@admin/services/AdminFirestoreService";
-import ReflectionResponse, {
-    ReflectionResponseField,
-    InsightWord,
-    InsightWordsResult
-} from "@shared/models/ReflectionResponse";
+import ReflectionResponse, { ReflectionResponseField } from "@shared/models/ReflectionResponse";
 import { BaseModelField, Collection } from "@shared/FirestoreBaseModels";
 import MailchimpService from "@admin/services/MailchimpService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
@@ -26,10 +22,11 @@ import {
     getElementAccumulationCounts
 } from "@shared/util/ReflectionResponseUtil";
 import { QuerySortDirection } from "@shared/types/FirestoreConstants";
-import * as admin from "firebase-admin";
-import DocumentReference = admin.firestore.DocumentReference;
 import { AxiosError } from "axios";
 import Logger from "@shared/Logger";
+import GoogleLanguageService from "@admin/services/GoogleLanguageService";
+import ToneAnalyzerService from "@admin/services/ToneAnalyzerService";
+import { InsightWord } from "@shared/api/InsightLanguageTypes";
 
 const logger = new Logger("AdminReflectionResponseService");
 
@@ -111,25 +108,6 @@ export default class AdminReflectionResponseService {
         const results = await this.firestoreService.executeQuery(query, ReflectionResponse);
 
         return results.results
-    }
-
-    async setInsights(options: { reflectionResponseId: string, insightsResult?: InsightWordsResult }): Promise<void> {
-        const { reflectionResponseId, insightsResult } = options;
-        const doc: DocumentReference = this.getCollectionRef().doc(reflectionResponseId);
-        const data: Partial<ReflectionResponse> = {};
-
-        if (insightsResult) {
-            data.insights = insightsResult;
-        }
-
-        if (data.insights) {
-            try {
-                await doc.set(data, { merge: true });
-            } catch (error) {
-                logger.error(`Unable to update reflection response insights for reflectionResponseId = ${ reflectionResponseId }.`, error)
-            }
-        }
-        return;
     }
 
     static async setLastJournalDate(email?: string, date?: Date): Promise<ApiResponse> {
@@ -282,15 +260,15 @@ export default class AdminReflectionResponseService {
 
     }
 
-    async aggregateWordInsightsForMember(options: { memberId: string }, queryOptions?: QueryOptions): Promise<InsightWord[] | undefined> {
+    async aggregateWordInsightsForMember(options: { memberId: string, reflectionLimit?: number }, queryOptions?: QueryOptions): Promise<InsightWord[] | undefined> {
         try {
-            const { memberId } = options;
+            const { memberId, reflectionLimit = 7 } = options;
             if (!memberId) {
                 logger.error("No memberId provided to calculate stats.");
                 return
             }
 
-            const reflections = await this.getResponsesForMember({ memberId, limit: 7 }, queryOptions);
+            const reflections = await this.getResponsesForMember({ memberId, limit: reflectionLimit }, queryOptions);
             const wordStats: { [key: string]: InsightWord } = {};
             const wordCloud: InsightWord[] = [];
 
@@ -378,14 +356,6 @@ export default class AdminReflectionResponseService {
         logger.log("Getting batched result 1 for all members");
         const query: FirebaseFirestore.Query = this.getCollectionRef();
 
-        // if (options.excludeCompleted === true) {
-        //     query = query.where(SentPromptField.completed, "==", false);
-        // }
-
-        // if (options.beforeDate) {
-        //     query = query.where(BaseModelField.createdAt, "<", toTimestamp(options.beforeDate))
-        // }
-
         await AdminFirestoreService.getSharedInstance().executeBatchedQuery({
             query,
             type: ReflectionResponse,
@@ -394,5 +364,36 @@ export default class AdminReflectionResponseService {
             sortDirection: QuerySortDirection.asc,
             orderBy: BaseModelField.createdAt
         })
+    }
+
+    async updateTextAnalysis(response?: ReflectionResponse): Promise<ReflectionResponse | undefined> {
+        const responseId = response?.id;
+        if (!response || !responseId) {
+            return undefined;
+        }
+
+        const doc = this.getCollectionRef().doc(responseId);
+        const text = response.content.text;
+        const [wordCloud, sentiment, toneAnalysis] = await Promise.all([
+            GoogleLanguageService.getSharedInstance().insightWords(text),
+            GoogleLanguageService.getSharedInstance().getSentiment(text),
+            ToneAnalyzerService.shared.watsonBasicSdk(text),
+        ]);
+
+        await doc.set({
+            [ReflectionResponse.Field.insights]: wordCloud ?? null,
+            [ReflectionResponse.Field.toneAnalysis]: toneAnalysis ?? null,
+            [ReflectionResponse.Field.sentiment]: sentiment ?? null,
+        }, { merge: true });
+
+        return undefined;
+    }
+
+    async updateToneAnalysis(response?: ReflectionResponse): Promise<void> {
+        if (!response) {
+            return;
+        }
+
+
     }
 }

@@ -1,7 +1,10 @@
-import language from "@google-cloud/language";
-import {CactusConfig} from "@admin/CactusConfig";
-import {InsightWord, InsightWordsResult} from "@shared/models/ReflectionResponse";
+import { v1beta2 } from "@google-cloud/language";
+import { CactusConfig } from "@admin/CactusConfig";
 import Logger from "@shared/Logger";
+import { isBlank } from "@shared/util/StringUtil";
+import { google } from "@google-cloud/language/build/protos/protos";
+import Document = google.cloud.language.v1.Document;
+import { InsightWord, InsightWordsResult, SentimentResult } from "@shared/api/InsightLanguageTypes";
 
 const logger = new Logger("GoogleLanguageService");
 
@@ -14,7 +17,7 @@ export enum WordTypes {
 export default class GoogleLanguageService {
     protected static sharedInstance: GoogleLanguageService;
 
-    client: any;
+    client: v1beta2.LanguageServiceClient;
     config: CactusConfig;
     tagsToKeep: string[]
 
@@ -33,24 +36,24 @@ export default class GoogleLanguageService {
         const credentials = config.language.service_account;
         const authCredentials = {
             credentials: {
-                client_email: credentials.client_email, 
+                client_email: credentials.client_email,
                 private_key: credentials.private_key
             }
         };
-        this.client = new language.LanguageServiceClient(authCredentials);
+        this.client = new v1beta2.LanguageServiceClient(authCredentials);
         this.config = config;
-        this.tagsToKeep = ['NOUN','VERB','ADJ'];
+        this.tagsToKeep = ['NOUN', 'VERB', 'ADJ'];
     }
 
     async getEntities(text: string): Promise<any[] | undefined> {
         const document = {
             content: text,
-            type: 'PLAIN_TEXT'
+            type: Document.Type.PLAIN_TEXT
         };
         try {
-            const entityResponse = await this.client.analyzeEntities({document: document});
-            return entityResponse[0]?.entities;
-        } catch(error) {
+            const [entityResponse] = await this.client.analyzeEntities({ document: document });
+            return entityResponse?.entities ?? undefined;
+        } catch (error) {
             logger.log('There was an error analyzing entities with Google Language API', error);
             return;
         }
@@ -59,44 +62,66 @@ export default class GoogleLanguageService {
     async getSyntaxTokens(text: string): Promise<any> {
         const document = {
             content: text,
-            type: 'PLAIN_TEXT'
+            type: Document.Type.PLAIN_TEXT,
         };
         try {
-            const [result] = await this.client.analyzeSyntax({document: document});
+            const [result] = await this.client.analyzeSyntax({ document: document });
             return result.tokens;
-        } catch(error) {
+        } catch (error) {
             logger.log('There was an error analyzing syntax with Google Language API', error);
             return;
         }
     }
 
-    async insightWords(text: string): Promise<InsightWordsResult> {
-        const syntaxTokens = await this.getSyntaxTokens(text);
-        const entities = await this.getEntities(text);
+    /**
+     * Get the sentiment of the text. Note, we return a Cactus interface here, so if the google API changes,
+     * we'll have to map it to a Cactus object.
+     * @param {string} text
+     * @return {Promise<SentimentResult | undefined>}
+     */
+    async getSentiment(text?: string): Promise<SentimentResult | undefined> {
+        const document = {
+            content: text,
+            type: Document.Type.PLAIN_TEXT,
+        }
+        const [sentiment] = await this.client.analyzeSentiment({ document })
+        return sentiment;
+    }
+
+    async insightWords(text?: string): Promise<InsightWordsResult> {
+        if (!text || isBlank(text)) {
+            return {
+                insightWords: [],
+            };
+        }
+
+        const [syntaxTokens, entities] = await Promise.all([
+            this.getSyntaxTokens(text),
+            this.getEntities(text)
+        ]);
 
         const insightWords: InsightWord[] = [];
 
-        if (syntaxTokens) {
-            syntaxTokens.forEach((token: any) => {
-                if (this.tagsToKeep.includes(token.partOfSpeech?.tag)) {
-                    if (token.text?.content) {
-                        const wordObj: InsightWord = {
-                            word: token.text.content,
-                            partOfSpeech: WordTypes[token.partOfSpeech.tag as keyof typeof WordTypes]
-                        };
+        syntaxTokens?.forEach((token: any) => {
+            if (this.tagsToKeep.includes(token.partOfSpeech?.tag)) {
+                if (token.text?.content) {
+                    const wordObj: InsightWord = {
+                        word: token.text.content,
+                        partOfSpeech: WordTypes[token.partOfSpeech.tag as keyof typeof WordTypes]
+                    };
 
-                        if (entities) {
-                            const salience = this.getSalience(wordObj.word, entities);
-                            if (salience) {
-                                wordObj.salience = salience; 
-                            }
+                    if (entities) {
+                        const salience = this.getSalience(wordObj.word, entities);
+                        if (salience) {
+                            wordObj.salience = salience;
                         }
-
-                        insightWords.push(wordObj);
                     }
+
+                    insightWords.push(wordObj);
                 }
-            });
-        }
+            }
+        });
+
 
         // sort words by salience
         if (insightWords.length > 1) {
@@ -104,9 +129,9 @@ export default class GoogleLanguageService {
         }
 
         return {
-            insightWords: insightWords, 
-            syntaxRaw: syntaxTokens, 
-            entitiesRaw: entities
+            insightWords: insightWords,
+            // syntaxRaw: syntaxTokens,
+            // entitiesRaw: entities
         };
     }
 

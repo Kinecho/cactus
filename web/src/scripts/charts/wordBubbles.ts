@@ -6,9 +6,9 @@ import {
     select as d3Select,
 } from "d3";
 import { HierarchyCircularNode } from "d3-hierarchy";
-import { InsightWord } from "@shared/models/ReflectionResponse";
 import Logger from "@shared/Logger"
 import { getRandomNumberBetween, isBlank } from "@shared/util/StringUtil";
+import { InsightWord } from "@shared/api/InsightLanguageTypes";
 
 const logger = new Logger("wordBubbles");
 

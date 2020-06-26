@@ -41,6 +41,7 @@ import CloudTaskService from "@admin/services/CloudTaskService";
 import PromptNotificationManager from "@admin/managers/PromptNotificationManager";
 import AdminNotificationService from "@admin/services/AdminNotificationService";
 import PushNotificationService from "@admin/services/PushNotificationService";
+import ToneAnalyzerService from "@admin/services/ToneAnalyzerService";
 
 const logger = new Logger("AdminServiceConfig");
 
@@ -103,6 +104,9 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminRevenueCatService.initialize(config);
 
     PromptNotificationManager.initialize(config);
+
+    //IBM Watson
+    ToneAnalyzerService.initialize(config);
 
     logger.log("Initializing Sentry");
     const sentryOptions: Sentry.NodeOptions = {
