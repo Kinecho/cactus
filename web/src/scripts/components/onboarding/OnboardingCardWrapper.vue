@@ -27,10 +27,11 @@
     import SubscriptionProduct from "@shared/models/SubscriptionProduct";
     import UpsellCard from "@components/onboarding/OnboardingUpsellCard.vue";
     import CelebrateCard from "@components/onboarding/OnboardingCelebrateCard.vue";
-    import InsightsCard from "@components/InsightsCard.vue";
+    import InsightsCard from "@components/onboarding/OnboardingInsightsCard.vue";
     import { CheckoutInfo } from "@components/onboarding/OnboardingTypes";
     import CactusMember from "@shared/models/CactusMember";
     import { InsightWord } from "@shared/api/InsightLanguageTypes";
+    import ReflectionResponse from "@shared/models/ReflectionResponse";
 
     interface CardProps {
         type: string,
@@ -100,6 +101,7 @@
                     break;
                 case CardType.insights:
                     info.type = "insights-card";
+                    // info.props.promptContentEntryId = this.prompC
                     break;
                 case CardType.upsell:
                     info.type = "upsell-card";

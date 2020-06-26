@@ -10,6 +10,7 @@ export enum CardType {
     word_cloud = "word_cloud",
     upsell = "upsell",
     celebrate = "celebrate",
+    insights = "insights",
 }
 
 export enum TextReplacementType {
@@ -136,6 +137,7 @@ export default class OnboardingCardViewModel {
                 slug: "insights",
                 type: CardType.insights,
                 text: "Insights",
+                promptContentEntryId: settings?.onboarding.promptEntryId2,
             }),
             OnboardingCardViewModel.create({
                 slug: "take-a-moment",
