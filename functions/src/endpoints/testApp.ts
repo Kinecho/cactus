@@ -19,6 +19,7 @@ import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/Custo
 import Logger from "@shared/Logger";
 import { runMemberStatsJob } from "@api/pubsub/subscribers/MemberStatsJob";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
+import ToneAnalyzerService from "@admin/services/ToneAnalyzerService";
 
 const logger = new Logger("testApp");
 const app = express();
@@ -447,5 +448,13 @@ app.get("/sheets/add", async (req, resp) => {
         resp.send({ error: e });
     }
 });
+
+app.get("/watson", async (req, resp) => {
+    const text = req.query.text as string;
+
+    const data = await ToneAnalyzerService.shared.basicTextAnalysis(text)
+    resp.send({ watson: data });
+
+})
 
 export default app;
