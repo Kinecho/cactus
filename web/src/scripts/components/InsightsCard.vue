@@ -23,13 +23,25 @@
             </div>
         </div>
         <button class="contButton">Continue</button>
+        <button class="infoButton tertiary icon" @click="showModal">
+            <svg-icon icon="heartOutline" class="infoIcon" />
+        </button>
+        <tone-analyzer-modal
+            :showModal="modalVisible"
+            @close="modalVisible = false" />
     </div>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
+    import ToneAnalyzerModal from "@components/ToneAnalyzerModal.vue"
+    import SvgIcon from "@components/SvgIcon.vue";
 
     export default Vue.extend({
+        components: {
+            ToneAnalyzerModal,
+            SvgIcon,
+        },
         created() {
 
         },
@@ -38,10 +50,32 @@
                 type: String,
                 default: "40%"
             },
-            emotions: {type: Array, default: ['Anger', 'Fear', 'Joy', 'Sadness', 'Analytical', 'Confident', 'Tentative']},
+            emotions: {
+                type: Array,
+                default: () => ([
+                    "Anger",
+                    "Fear",
+                    "Sadness",
+                    "Analytical",
+                    "Confident",
+                    "Tentative"
+                ])
+            },
         },
-        data(): {} {
-            return {}
+        data(): {
+            modalVisible: boolean,
+        } {
+            return {
+                modalVisible: false,
+            }
+        },
+        methods: {
+            showModal() {
+                this.modalVisible = true;
+            },
+            hideModal() {
+                this.modalVisible = false;
+            }
         }
     })
 </script>
@@ -54,6 +88,7 @@
     .insightsCard {
         background-color: $bgDolphin;
         padding: 3.2rem;
+        position: relative;
         text-align: left;
 
         @include r(600) {
@@ -188,6 +223,12 @@
         @include r(600) {
             display: none;
         }
+    }
+
+    .infoButton {
+        position: absolute;
+        right: 0;
+        top: 0;
     }
 
 </style>
