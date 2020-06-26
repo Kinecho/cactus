@@ -52,7 +52,7 @@
             SvgIcon,
         }, filters: {
             percentage(input: number | string | undefined | null): string {
-                formatPercentage(input, 0);
+                return formatPercentage(input, 0);
             }
         }
     })
@@ -206,19 +206,20 @@
     .tone {
         padding: 2rem 1.6rem;
 
-        /*&:first-child {*/
-        &.selected {
-            color: $darkestGreen;
+        &:first-child {
             padding-left: 3.2rem;
-
             @include r(374) {
                 padding-left: 2.4rem;
             }
         }
 
-        // &.current {
-        //
-        // }
+        &:hover {
+            cursor: pointer;
+        }
+
+        &.selected {
+            color: $darkestGreen;
+        }
     }
 
     .noteText {
