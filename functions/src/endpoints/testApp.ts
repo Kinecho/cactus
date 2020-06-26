@@ -452,7 +452,7 @@ app.get("/sheets/add", async (req, resp) => {
 app.get("/watson", async (req, resp) => {
     const text = req.query.text as string;
 
-    const data = await ToneAnalyzerService.shared.basicTextAnalysis(text)
+    const data = await ToneAnalyzerService.shared.watsonBasicSdk(text)
     resp.send({ watson: data });
 
 })

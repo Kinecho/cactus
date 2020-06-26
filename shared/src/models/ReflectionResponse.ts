@@ -1,6 +1,7 @@
 import { BaseModel, Collection } from "@shared/FirestoreBaseModels";
 import { CactusElement } from "@shared/models/CactusElement";
 import { CoreValue } from "@shared/models/CoreValueTypes";
+import { ToneResult } from "@shared/api/ToneAnalyzerTypes";
 
 export enum ResponseMediumType {
     PROMPT = "PROMPT",
@@ -31,10 +32,13 @@ export interface InsightWord {
     frequency?: number
 }
 
+/**
+ * Not using syntaxRaw or entitiesRaw for now, although the data is available. The payloads are large.
+ */
 export interface InsightWordsResult {
     insightWords: InsightWord[],
-    syntaxRaw?: any,
-    entitiesRaw?: any
+    // syntaxRaw?: any,
+    // entitiesRaw?: any
 }
 
 export function getAppTypeFromResponseMedium(medium?: ResponseMedium | null): AppType | undefined {
@@ -176,10 +180,11 @@ export enum ReflectionResponseField {
     shared = "shared",
     cactusElement = "cactusElement",
     insights = "insights",
-    updatedAt = "updatedAt"
+    updatedAt = "updatedAt",
+    toneAnalysis = "toneAnalysis",
 }
 
-export type DynamicResponseValues = Record<string, string|null|undefined>;
+export type DynamicResponseValues = Record<string, string | null | undefined>;
 
 export default class ReflectionResponse extends BaseModel {
     readonly collection = Collection.reflectionResponses;
@@ -213,6 +218,8 @@ export default class ReflectionResponse extends BaseModel {
      * See {{DynamicContent}}
      */
     dynamicValues?: DynamicResponseValues;
+
+    toneAnalysis?: ToneResult;
 
     /**
      * Only Add a date log if the new date is not within 10 minutes of an existing date

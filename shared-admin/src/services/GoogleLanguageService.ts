@@ -1,7 +1,8 @@
 import language from "@google-cloud/language";
-import {CactusConfig} from "@admin/CactusConfig";
-import {InsightWord, InsightWordsResult} from "@shared/models/ReflectionResponse";
+import { CactusConfig } from "@admin/CactusConfig";
+import { InsightWord, InsightWordsResult } from "@shared/models/ReflectionResponse";
 import Logger from "@shared/Logger";
+import { isBlank } from "@shared/util/StringUtil";
 
 const logger = new Logger("GoogleLanguageService");
 
@@ -33,13 +34,13 @@ export default class GoogleLanguageService {
         const credentials = config.language.service_account;
         const authCredentials = {
             credentials: {
-                client_email: credentials.client_email, 
+                client_email: credentials.client_email,
                 private_key: credentials.private_key
             }
         };
         this.client = new language.LanguageServiceClient(authCredentials);
         this.config = config;
-        this.tagsToKeep = ['NOUN','VERB','ADJ'];
+        this.tagsToKeep = ['NOUN', 'VERB', 'ADJ'];
     }
 
     async getEntities(text: string): Promise<any[] | undefined> {
@@ -48,9 +49,9 @@ export default class GoogleLanguageService {
             type: 'PLAIN_TEXT'
         };
         try {
-            const entityResponse = await this.client.analyzeEntities({document: document});
+            const entityResponse = await this.client.analyzeEntities({ document: document });
             return entityResponse[0]?.entities;
-        } catch(error) {
+        } catch (error) {
             logger.log('There was an error analyzing entities with Google Language API', error);
             return;
         }
@@ -62,41 +63,48 @@ export default class GoogleLanguageService {
             type: 'PLAIN_TEXT'
         };
         try {
-            const [result] = await this.client.analyzeSyntax({document: document});
+            const [result] = await this.client.analyzeSyntax({ document: document });
             return result.tokens;
-        } catch(error) {
+        } catch (error) {
             logger.log('There was an error analyzing syntax with Google Language API', error);
             return;
         }
     }
 
-    async insightWords(text: string): Promise<InsightWordsResult> {
-        const syntaxTokens = await this.getSyntaxTokens(text);
-        const entities = await this.getEntities(text);
+    async insightWords(text?: string): Promise<InsightWordsResult> {
+        if (!text || isBlank(text)) {
+            return {
+                insightWords: [],
+            };
+        }
+
+        const [syntaxTokens, entities] = await Promise.all([
+            this.getSyntaxTokens(text),
+            this.getEntities(text)
+        ]);
 
         const insightWords: InsightWord[] = [];
 
-        if (syntaxTokens) {
-            syntaxTokens.forEach((token: any) => {
-                if (this.tagsToKeep.includes(token.partOfSpeech?.tag)) {
-                    if (token.text?.content) {
-                        const wordObj: InsightWord = {
-                            word: token.text.content,
-                            partOfSpeech: WordTypes[token.partOfSpeech.tag as keyof typeof WordTypes]
-                        };
+        syntaxTokens?.forEach((token: any) => {
+            if (this.tagsToKeep.includes(token.partOfSpeech?.tag)) {
+                if (token.text?.content) {
+                    const wordObj: InsightWord = {
+                        word: token.text.content,
+                        partOfSpeech: WordTypes[token.partOfSpeech.tag as keyof typeof WordTypes]
+                    };
 
-                        if (entities) {
-                            const salience = this.getSalience(wordObj.word, entities);
-                            if (salience) {
-                                wordObj.salience = salience; 
-                            }
+                    if (entities) {
+                        const salience = this.getSalience(wordObj.word, entities);
+                        if (salience) {
+                            wordObj.salience = salience;
                         }
-
-                        insightWords.push(wordObj);
                     }
+
+                    insightWords.push(wordObj);
                 }
-            });
-        }
+            }
+        });
+
 
         // sort words by salience
         if (insightWords.length > 1) {
@@ -104,9 +112,9 @@ export default class GoogleLanguageService {
         }
 
         return {
-            insightWords: insightWords, 
-            syntaxRaw: syntaxTokens, 
-            entitiesRaw: entities
+            insightWords: insightWords,
+            // syntaxRaw: syntaxTokens,
+            // entitiesRaw: entities
         };
     }
 

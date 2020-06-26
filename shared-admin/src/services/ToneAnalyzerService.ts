@@ -1,11 +1,16 @@
 import { CactusConfig } from "@admin/CactusConfig";
-import axios, { AxiosInstance, AxiosError } from "axios";
+import axios, { AxiosError, AxiosInstance } from "axios";
 import { isAxiosError } from "@shared/api/ApiTypes";
 import Logger from "@shared/Logger"
 import { stringifyJSON } from "@shared/util/ObjectUtil";
+import * as ToneAnalyzerV3 from "ibm-watson/tone-analyzer/v3";
+import { IamAuthenticator } from "ibm-watson/auth";
+import { SentenceTone, ToneID, ToneResult, ToneScore } from "@shared/api/ToneAnalyzerTypes";
+import WatsonToneAnalysis = ToneAnalyzerV3.ToneAnalysis;
+import SentenceAnalysis = ToneAnalyzerV3.SentenceAnalysis;
+import WatsonToneScore = ToneAnalyzerV3.ToneScore;
 
 const logger = new Logger("ToneAnalyzerService");
-
 
 export default class ToneAnalyzerService {
     protected static _shared: ToneAnalyzerService;
@@ -22,29 +27,37 @@ export default class ToneAnalyzerService {
     }
 
     config: CactusConfig
-    api: AxiosInstance;
-    tonePath = "/v3/tone";
-    apiVersion = "2017-09-21";
+    watsonApi: AxiosInstance;
+    watsonTonePath = "/v3/tone";
+    watsonApiVersion = "2017-09-21";
+
+    watson: ToneAnalyzerV3;
 
     constructor(config: CactusConfig) {
         this.config = config;
-        this.api = axios.create({
-            baseURL: `${ this.apiUrl }${ this.tonePath }`,
+
+        this.watson = new ToneAnalyzerV3({
+            authenticator: new IamAuthenticator({ apikey: this.watsonApiKey }),
+            version: this.watsonApiVersion,
+        })
+
+        this.watsonApi = axios.create({
+            baseURL: `${ this.watsonApiUrl }${ this.watsonTonePath }`,
             headers: {
                 "Content-Type": "application/json",
             },
             auth: {
                 username: "apikey",
-                password: this.apiKey,
+                password: this.watsonApiKey,
             }
         })
     }
 
-    get apiKey(): string {
+    get watsonApiKey(): string {
         return this.config.watson.tone_analyzer.api_key;
     }
 
-    get apiUrl(): string {
+    get watsonApiUrl(): string {
         return this.config.watson.tone_analyzer.api_url;
     }
 
@@ -56,20 +69,51 @@ export default class ToneAnalyzerService {
         }
     }
 
-    async basicTextAnalysis(text: string): Promise<any | undefined> {
+    async watsonBasicSdk(text: string): Promise<ToneResult | undefined> {
         try {
-            const response = await this.api.get("", {
-                params: {
-                    version: this.apiVersion,
-                    text
-                }
-            })
-            const data = response?.data
-            logger.info(data);
-            return data;
+            const watsonRequest = await this.watson.tone({ toneInput: { text }, sentences: true })
+            const result = watsonRequest.result;
+
+
+            return ToneAnalyzerService.fromWatsonAnalysis(result);
         } catch (error) {
-            this.logApiError("Failed to get basic text analysis", error);
+            logger.error("failed to get watson tone analysis", error);
             return undefined;
         }
+    }
+
+    static toneIdFromWatsonToneId(id: string): ToneID {
+        if (Object.keys(ToneID).includes(id)) {
+            return id as ToneID;
+        }
+        return ToneID.unknown;
+    }
+
+    static fromWatsonToneScore(watson: WatsonToneScore): ToneScore {
+        return {
+            score: watson.score,
+            toneId: ToneAnalyzerService.toneIdFromWatsonToneId(watson.tone_id),
+            toneName: watson.tone_name,
+        }
+    }
+
+    static fromWatsonSentence(watson: SentenceAnalysis): SentenceTone {
+        return {
+            sentenceId: watson.sentence_id,
+            text: watson.text,
+            tones: watson.tones?.map(ToneAnalyzerService.fromWatsonToneScore),
+        }
+    }
+
+    static fromWatsonAnalysis(watson: WatsonToneAnalysis): ToneResult {
+
+
+        return {
+            documentTone: {
+                tones: watson.document_tone.tones?.map(ToneAnalyzerService.fromWatsonToneScore)
+            },
+            sentencesTones: watson.sentences_tone?.map(ToneAnalyzerService.fromWatsonSentence),
+        };
+
     }
 }

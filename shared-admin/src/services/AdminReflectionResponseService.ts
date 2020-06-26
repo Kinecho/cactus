@@ -30,6 +30,8 @@ import * as admin from "firebase-admin";
 import DocumentReference = admin.firestore.DocumentReference;
 import { AxiosError } from "axios";
 import Logger from "@shared/Logger";
+import GoogleLanguageService from "@admin/services/GoogleLanguageService";
+import ToneAnalyzerService from "@admin/services/ToneAnalyzerService";
 
 const logger = new Logger("AdminReflectionResponseService");
 
@@ -113,22 +115,25 @@ export default class AdminReflectionResponseService {
         return results.results
     }
 
-    async setInsights(options: { reflectionResponseId: string, insightsResult?: InsightWordsResult }): Promise<void> {
+    async setInsightsWordCloud(options: { reflectionResponseId: string, insightsResult?: InsightWordsResult }): Promise<void> {
         const { reflectionResponseId, insightsResult } = options;
         const doc: DocumentReference = this.getCollectionRef().doc(reflectionResponseId);
         const data: Partial<ReflectionResponse> = {};
 
-        if (insightsResult) {
-            data.insights = insightsResult;
+        if (!insightsResult) {
+            return;
+        }
+        // for now, don't store all this raw data (it's huge)
+        // later we will store this in a separate collection
+        delete insightsResult.syntaxRaw;
+        delete insightsResult.entitiesRaw;
+        data.insights = insightsResult;
+        try {
+            await doc.set(data, { merge: true });
+        } catch (error) {
+            logger.error(`Unable to update reflection response insights for reflectionResponseId = ${ reflectionResponseId }.`, error)
         }
 
-        if (data.insights) {
-            try {
-                await doc.set(data, { merge: true });
-            } catch (error) {
-                logger.error(`Unable to update reflection response insights for reflectionResponseId = ${ reflectionResponseId }.`, error)
-            }
-        }
         return;
     }
 
@@ -282,15 +287,15 @@ export default class AdminReflectionResponseService {
 
     }
 
-    async aggregateWordInsightsForMember(options: { memberId: string }, queryOptions?: QueryOptions): Promise<InsightWord[] | undefined> {
+    async aggregateWordInsightsForMember(options: { memberId: string, reflectionLimit?: number }, queryOptions?: QueryOptions): Promise<InsightWord[] | undefined> {
         try {
-            const { memberId } = options;
+            const { memberId, reflectionLimit = 7 } = options;
             if (!memberId) {
                 logger.error("No memberId provided to calculate stats.");
                 return
             }
 
-            const reflections = await this.getResponsesForMember({ memberId, limit: 7 }, queryOptions);
+            const reflections = await this.getResponsesForMember({ memberId, limit: reflectionLimit }, queryOptions);
             const wordStats: { [key: string]: InsightWord } = {};
             const wordCloud: InsightWord[] = [];
 
@@ -378,14 +383,6 @@ export default class AdminReflectionResponseService {
         logger.log("Getting batched result 1 for all members");
         const query: FirebaseFirestore.Query = this.getCollectionRef();
 
-        // if (options.excludeCompleted === true) {
-        //     query = query.where(SentPromptField.completed, "==", false);
-        // }
-
-        // if (options.beforeDate) {
-        //     query = query.where(BaseModelField.createdAt, "<", toTimestamp(options.beforeDate))
-        // }
-
         await AdminFirestoreService.getSharedInstance().executeBatchedQuery({
             query,
             type: ReflectionResponse,
@@ -394,5 +391,34 @@ export default class AdminReflectionResponseService {
             sortDirection: QuerySortDirection.asc,
             orderBy: BaseModelField.createdAt
         })
+    }
+
+    async updateTextAnalysis(response?: ReflectionResponse): Promise<ReflectionResponse | undefined> {
+        const responseId = response?.id;
+        if (!response || !responseId) {
+            return undefined;
+        }
+
+        const doc = this.getCollectionRef().doc(responseId);
+        const [wordCloud, toneAnalysis] = await Promise.all([
+            GoogleLanguageService.getSharedInstance().insightWords(response.content.text),
+            ToneAnalyzerService.shared.watsonBasicSdk(response.content.text),
+        ]);
+
+
+        await doc.set({
+            [ReflectionResponse.Field.insights]: wordCloud ?? null,
+            [ReflectionResponse.Field.toneAnalysis]: toneAnalysis ?? null,
+        }, { merge: true, ignoreUndefinedProperties: true });
+
+        return undefined;
+    }
+
+    async updateToneAnalysis(response?: ReflectionResponse): Promise<void> {
+        if (!response) {
+            return;
+        }
+
+
     }
 }

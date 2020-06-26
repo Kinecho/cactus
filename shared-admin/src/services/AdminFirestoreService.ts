@@ -96,7 +96,9 @@ export default class AdminFirestoreService {
 
     constructor(admin: firebaseAdmin.app.App, config: CactusConfig) {
         this.admin = admin;
+
         this.firestore = admin.firestore();
+        this.firestore.settings({ ignoreUndefinedProperties: true });
         this.config = config;
     }
 
