@@ -133,6 +133,11 @@ export default class OnboardingCardViewModel {
                 textReplacementType: TextReplacementType.selected_insight_word,
             }),
             OnboardingCardViewModel.create({
+                slug: "insights",
+                type: CardType.insights,
+                text: "Insights",
+            }),
+            OnboardingCardViewModel.create({
                 slug: "take-a-moment",
                 type: CardType.text,
                 text: "Nice work. Take a moment to appreciate the role that **{{ONBOARDING_SELECTION}}** plays in your life.",
