@@ -99,7 +99,7 @@
             margin: 0 -2rem;
         }
         @include r(600) {
-            margin: 0 -2.4rem;
+            margin: 0;
         }
 
         &:after {
@@ -131,6 +131,7 @@
 
         &:first-child {
             padding-left: 3.2rem;
+
             @include r(374) {
                 padding-left: 2.4rem;
             }
@@ -146,6 +147,7 @@
     }
 
     .noteText {
+        line-height: 1.6;
         padding: 0 3.2rem 1.6rem;
 
         @include r(374) {
@@ -154,17 +156,12 @@
         @include r(600) {
             padding: 0 2.4rem 3.2rem;
         }
-
-        p {
-            margin-bottom: 1.6rem;
-            white-space: pre-line;
-        }
     }
 
     .highlight {
-        background-color: lighten($royal, 20%);
-        margin: 0 -.4rem 1.6rem;
-        padding: .4rem;
+        background-color: lighten($royal, 25%);
+        border-radius: .4rem;
+        margin-right: .4rem;
     }
 
     .debug {

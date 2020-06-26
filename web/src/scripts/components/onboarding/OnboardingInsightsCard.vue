@@ -105,11 +105,13 @@
     }
 
     .insightsContainer {
+        font-size: 1.8rem;
         margin: 0 -2.4rem;
         width: calc(100% + 4.8rem);
 
         @include r(600) {
             align-self: center;
+            font-size: 2rem;
             margin: 0 auto;
             max-width: 50%;
             width: 100%;
