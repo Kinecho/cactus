@@ -8,6 +8,7 @@ export enum CardType {
     reflect = "reflect",
     elements = "elements",
     word_cloud = "word_cloud",
+    insights = "insights",
     upsell = "upsell",
     celebrate = "celebrate",
 }
@@ -135,6 +136,8 @@ export default class OnboardingCardViewModel {
             OnboardingCardViewModel.create({
                 slug: "insights",
                 type: CardType.insights,
+                text: "This is what your note reveals about your emotions.",
+                defaultNextActionsEnabled: false,
                 text: "Insights",
             }),
             OnboardingCardViewModel.create({

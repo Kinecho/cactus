@@ -100,6 +100,7 @@
                     break;
                 case CardType.insights:
                     info.type = "insights-card";
+                    info.props.reflectionResponse = this.reflectionResponse;
                     break;
                 case CardType.upsell:
                     info.type = "upsell-card";
