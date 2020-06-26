@@ -6,11 +6,11 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import { InsightWord } from '@shared/models/ReflectionResponse'
     import Logger from "@shared/Logger";
     import Component from "vue-class-component";
     import { Prop, Watch } from "vue-property-decorator";
     import { drawWordBubbleChart, WordBubbleConfig } from "@web/charts/wordBubbles";
+    import { InsightWord } from "@shared/api/InsightLanguageTypes";
 
     const logger = new Logger("InsightWordChart");
 

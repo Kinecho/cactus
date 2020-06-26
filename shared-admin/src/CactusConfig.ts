@@ -151,5 +151,11 @@ export interface CactusConfig {
         location: string,
         handler_url_base: string,
         queues: TaskQueueConfigMap,
+    },
+    watson: {
+        tone_analyzer: {
+            api_key: string,
+            api_url: string,
+        }
     }
 }

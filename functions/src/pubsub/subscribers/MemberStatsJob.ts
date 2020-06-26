@@ -3,12 +3,12 @@ import * as functions from "firebase-functions";
 import * as Sentry from "@sentry/node"
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
-import {InsightWord} from "@shared/models/ReflectionResponse";
 import CactusMember, {ReflectionStats} from "@shared/models/CactusMember";
 import AdminSlackService from "@admin/services/AdminSlackService";
 import Logger from "@shared/Logger";
 import AdminFirestoreService, {Batch} from "@admin/services/AdminFirestoreService";
 import {chunkArray} from "@shared/util/ObjectUtil";
+import { InsightWord } from "@shared/api/InsightLanguageTypes";
 
 const logger = new Logger("MemberStatsJob");
 

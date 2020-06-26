@@ -247,6 +247,9 @@ export default class AdminRevenueCatService {
     }
 
     async updateSubscriberAttributes(member?: CactusMember) {
+        if (!member) {
+            return;
+        }
         const attributes = getSubscriberAttributes(member);
         await this.updateAttributes(attributes);
     }

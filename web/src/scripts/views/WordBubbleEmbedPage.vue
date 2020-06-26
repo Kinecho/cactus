@@ -11,9 +11,9 @@
     import Logger from "@shared/Logger";
     import InsightWordChart from "@components/InsightWordChart.vue";
     import { getQueryParam } from "@web/util";
-    import { InsightWord } from "@shared/models/ReflectionResponse";
     import { QueryParam } from "@shared/util/queryParams";
     import { fireRevealInsightEvent } from "@web/analytics";
+    import { InsightWord } from "@shared/api/InsightLanguageTypes";
 
     const logger = new Logger("WordBubbleEmbedPage");
 

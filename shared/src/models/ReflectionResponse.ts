@@ -1,6 +1,8 @@
 import { BaseModel, Collection } from "@shared/FirestoreBaseModels";
 import { CactusElement } from "@shared/models/CactusElement";
 import { CoreValue } from "@shared/models/CoreValueTypes";
+import { ToneResult } from "@shared/api/ToneAnalyzerTypes";
+import { InsightWordsResult, SentimentResult } from "@shared/api/InsightLanguageTypes";
 
 export enum ResponseMediumType {
     PROMPT = "PROMPT",
@@ -22,19 +24,6 @@ export enum ResponseMedium {
     JOURNAL_WEB = "JOURNAL_WEB",
     JOURNAL_IOS = "JOURNAL_IOS",
     JOURNAL_ANDROID = "JOURNAL_ANDROID"
-}
-
-export interface InsightWord {
-    word: string,
-    partOfSpeech?: string
-    salience?: number
-    frequency?: number
-}
-
-export interface InsightWordsResult {
-    insightWords: InsightWord[],
-    syntaxRaw?: any,
-    entitiesRaw?: any
 }
 
 export function getAppTypeFromResponseMedium(medium?: ResponseMedium | null): AppType | undefined {
@@ -176,10 +165,12 @@ export enum ReflectionResponseField {
     shared = "shared",
     cactusElement = "cactusElement",
     insights = "insights",
-    updatedAt = "updatedAt"
+    updatedAt = "updatedAt",
+    toneAnalysis = "toneAnalysis",
+    sentiment = "sentiment",
 }
 
-export type DynamicResponseValues = Record<string, string|null|undefined>;
+export type DynamicResponseValues = Record<string, string | null | undefined>;
 
 export default class ReflectionResponse extends BaseModel {
     readonly collection = Collection.reflectionResponses;
@@ -204,7 +195,7 @@ export default class ReflectionResponse extends BaseModel {
     unsharedAt?: Date;
     cactusElement?: CactusElement | null;
     reflectionDates: Date[] = [];
-    insights?: InsightWordsResult;
+
     coreValue?: CoreValue | undefined | null;
 
     /**
@@ -213,6 +204,10 @@ export default class ReflectionResponse extends BaseModel {
      * See {{DynamicContent}}
      */
     dynamicValues?: DynamicResponseValues;
+
+    insights?: InsightWordsResult;
+    toneAnalysis?: ToneResult;
+    sentiment?: SentimentResult|null;
 
     /**
      * Only Add a date log if the new date is not within 10 minutes of an existing date

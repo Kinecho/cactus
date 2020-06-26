@@ -18,13 +18,13 @@ import AdminReflectionResponseService from "@admin/services/AdminReflectionRespo
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CactusMember from "@shared/models/CactusMember";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
-import GoogleLanguageService from "@admin/services/GoogleLanguageService";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import { buildPromptURL } from "@admin/util/StringUtil";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import SentPrompt, { PromptSendMedium } from "@shared/models/SentPrompt";
 import Logger from "@shared/Logger";
 import AdminRevenueCatService from "@admin/services/AdminRevenueCatService";
+import HoboCache from "@admin/HoboCache";
 
 const logger = new Logger("ReflectionResponseTriggers");
 
@@ -38,128 +38,56 @@ export const updateReflectionStatsTrigger = functions.firestore
         return
     }
 
+    const textBefore = change.before?.get("content.text");
+    const textAfter = change.after?.get("content.text");
+
+    if (textBefore?.toLowerCase().trim() === textAfter?.toLowerCase().trim()) {
+        logger.info("[update reflection stats trigger] Text hasn't changed, not processing");
+        return;
+    }
+
     const data = snapshot.data();
     if (!data) {
         logger.error("No data could be retrieved from the snapshot", snapshot);
         return;
     }
-    const memberId = data[ReflectionResponse.Field.cactusMemberId];
+    const memberId = snapshot.get(ReflectionResponse.Field.cactusMemberId) as string | undefined;
     if (!memberId) {
         logger.warn("No member ID was found in the document data", data);
         return;
     }
-    const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
 
-    if (!member || !memberId) {
-        logger.warn("Member details were not able to be loaded", data);
+    const reflectionResponse = fromDocumentSnapshot(change.after, ReflectionResponse);
+
+    await AdminReflectionResponseService.getSharedInstance().updateTextAnalysis(reflectionResponse);
+
+    await AdminCactusMemberService.getSharedInstance().updateStatsOnReflectionResponse(memberId);
+    const { member } = await HoboCache.shared.getMemberById(memberId);
+    const responseMedium: ResponseMedium | undefined | null = change.after.get(ReflectionResponse.Field.responseMedium);
+
+    const appType = getAppTypeFromResponseMedium(responseMedium);
+    await AdminRevenueCatService.shared.updateLastSeen({ memberId, appType: appType, updateLastSeen: true });
+    await AdminRevenueCatService.shared.updateSubscriberAttributes(member ?? undefined);
+});
+
+export const updateToneAnalysisOnWrite = functions.runWith({ memory: "512MB", timeoutSeconds: 120 }).firestore
+.document(`${ Collection.reflectionResponses }/{responseId}`)
+.onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
+    logger.log("starting updateToneAnalysisOnWrite");
+
+    const textBefore = change.before?.get("content.text");
+    const textAfter = change.after?.get("content.text");
+
+    if (textBefore?.toLowerCase().trim() === textAfter?.toLowerCase().trim()) {
+        logger.info("Text hasn't changed, not processing");
         return;
     }
 
-    const timeZone = member.timeZone || undefined;
-
-    const reflectionStats = await AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({
-        memberId,
-        timeZone
-    });
-    if (reflectionStats) {
-        await AdminCactusMemberService.getSharedInstance().setStats({ memberId, stats: reflectionStats })
-    }
-
-    member.stats.reflections = reflectionStats;
-
-    const wordCloud = await AdminReflectionResponseService.getSharedInstance().aggregateWordInsightsForMember({
-        memberId
-    });
-    if (wordCloud) {
-        await AdminCactusMemberService.getSharedInstance().setWordInsights({
-            memberId,
-            wordCloud: wordCloud
-        });
-    }
-    member.wordCloud = wordCloud;
-    const responseMedium: ResponseMedium | undefined | null = change.after.get(ReflectionResponse.Field.responseMedium);
-    const appType = getAppTypeFromResponseMedium(responseMedium);
-    await AdminRevenueCatService.shared.updateLastSeen({ memberId, appType: appType, updateLastSeen: true });
-    await AdminRevenueCatService.shared.updateSubscriberAttributes(member);
+    const reflectionResponse = fromDocumentSnapshot(change.after, ReflectionResponse);
+    await AdminReflectionResponseService.getSharedInstance().updateToneAnalysis(reflectionResponse);
+    logger.info("finished updating tone analysis");
 });
 
-export const updateInsightWordsOnReflectionWrite = functions.runWith({ memory: "512MB", timeoutSeconds: 120 }).firestore
-.document(`${ Collection.reflectionResponses }/{responseId}`)
-.onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
-    logger.log("starting updateInsightWordsOnReflectionWrite");
-    try {
-        const beforeSnapshot = change.before;
-        const afterSnapshot = change.after;
-        if (!afterSnapshot) {
-            logger.warn("No snapshot was found in the change event");
-            return;
-        }
-
-        const reflectionResponseBefore = fromDocumentSnapshot(beforeSnapshot, ReflectionResponse);
-        const reflectionResponseAfter = fromDocumentSnapshot(afterSnapshot, ReflectionResponse);
-
-        if (!reflectionResponseAfter) {
-            logger.error(`Unable to de-serialize the reflection response for snapshot.id = ${ afterSnapshot.id }`);
-            return;
-        }
-
-        // only run insights if there is content to run it for
-        if (reflectionResponseAfter.content?.text &&
-        reflectionResponseAfter.content.text.trim().toLowerCase() !== reflectionResponseBefore?.content?.text?.trim().toLowerCase()) {
-
-            const insightsResult = await GoogleLanguageService.getSharedInstance().insightWords(reflectionResponseAfter.content.text);
-            if (insightsResult) {
-                // for now, don't store all this raw data (it's huge)
-                // later we will store this in a separate collection
-                delete insightsResult.syntaxRaw;
-                delete insightsResult.entitiesRaw;
-
-                // save words to the reflection response
-                await afterSnapshot.ref.update({ [ReflectionResponse.Field.insights]: insightsResult });
-            }
-
-            // attempt to process the last 14 reflections as well
-            const memberId = reflectionResponseAfter.cactusMemberId;
-            if (memberId) {
-                const insightTasks: Promise<void>[] = [];
-                const reflectionResponses = await AdminReflectionResponseService.getSharedInstance().getResponsesForMember({
-                    memberId: memberId,
-                    limit: 14
-                });
-                for (const response of reflectionResponses) {
-                    insightTasks.push(new Promise<void>(async resolve => {
-                        if (!response.insights && response.content?.text && response.id) {
-                            try {
-                                const pastInsightsResult = await GoogleLanguageService.getSharedInstance().insightWords(response.content.text);
-                                if (pastInsightsResult) {
-                                    // for now, don't store all this raw data (it's huge)
-                                    // later we will store this in a separate collection
-                                    delete pastInsightsResult.syntaxRaw;
-                                    delete pastInsightsResult.entitiesRaw;
-
-                                    // save words to the reflection response
-                                    await AdminReflectionResponseService.getSharedInstance().setInsights({
-                                        reflectionResponseId: response.id,
-                                        insightsResult: pastInsightsResult
-                                    });
-                                }
-                            } catch (error) {
-                                logger.log('There was a problem processing insights for reflection response', error)
-                            }
-                        }
-
-                        resolve();
-                    }));
-                }
-                await Promise.all(insightTasks);
-            }
-        }
-    } catch (error) {
-        logger.error("Failed to process the ReflectionResponse for insights.", error);
-    }
-
-    return;
-});
 
 export const updateSentPromptOnReflectionWrite = functions.firestore
 .document(`${ Collection.reflectionResponses }/{responseId}`)
@@ -287,14 +215,12 @@ export const onReflectionResponseCreated = functions.firestore
         logger.log("not resetting user reminder for email " + memberEmail)
     }
 
-
     if (member && memberEmail && isJournal(reflectionResponse.responseMedium)) {
         const setLastJournalDateResult = await AdminReflectionResponseService.setLastJournalDate(memberEmail);
         if (setLastJournalDateResult.error) {
             logger.error("Failed to set the last journal date", setLastJournalDateResult.error);
         }
     }
-
 
     const { sentPrompt, created: sentPromptCreated } = await createSentPromptIfNeeded({
         member,
