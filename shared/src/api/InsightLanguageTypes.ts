@@ -13,3 +13,24 @@ export interface InsightWordsResult {
     // syntaxRaw?: any,
     // entitiesRaw?: any
 }
+
+export interface SentimentText {
+    content?: string | null,
+    beginOffset?: number | null,
+}
+
+export interface SentimentSentence {
+    text?: SentimentText | null,
+    sentiment?: SentimentScore | null,
+}
+
+export interface SentimentScore {
+    magnitude?: number | null,
+    score?: number | null,
+}
+
+export interface SentimentResult {
+    sentences?: SentimentSentence[] | null,
+    documentSentiment?: SentimentScore | null,
+    language?: string | null,
+}

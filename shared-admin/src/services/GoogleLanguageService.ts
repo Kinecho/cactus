@@ -4,7 +4,7 @@ import Logger from "@shared/Logger";
 import { isBlank } from "@shared/util/StringUtil";
 import { google } from "@google-cloud/language/build/protos/protos";
 import Document = google.cloud.language.v1.Document;
-import { InsightWord, InsightWordsResult } from "@shared/api/InsightLanguageTypes";
+import { InsightWord, InsightWordsResult, SentimentResult } from "@shared/api/InsightLanguageTypes";
 
 const logger = new Logger("GoogleLanguageService");
 
@@ -73,8 +73,13 @@ export default class GoogleLanguageService {
         }
     }
 
-    async getSentiment(text?: string): Promise<any> {
-        // this.client.sen
+    /**
+     * Get the sentiment of the text. Note, we return a Cactus interface here, so if the google API changes,
+     * we'll have to map it to a Cactus object.
+     * @param {string} text
+     * @return {Promise<SentimentResult | undefined>}
+     */
+    async getSentiment(text?: string): Promise<SentimentResult | undefined> {
         const document = {
             content: text,
             type: Document.Type.PLAIN_TEXT,

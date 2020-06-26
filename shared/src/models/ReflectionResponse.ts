@@ -2,7 +2,7 @@ import { BaseModel, Collection } from "@shared/FirestoreBaseModels";
 import { CactusElement } from "@shared/models/CactusElement";
 import { CoreValue } from "@shared/models/CoreValueTypes";
 import { ToneResult } from "@shared/api/ToneAnalyzerTypes";
-import { InsightWordsResult } from "@shared/api/InsightLanguageTypes";
+import { InsightWordsResult, SentimentResult } from "@shared/api/InsightLanguageTypes";
 
 export enum ResponseMediumType {
     PROMPT = "PROMPT",
@@ -207,7 +207,7 @@ export default class ReflectionResponse extends BaseModel {
 
     insights?: InsightWordsResult;
     toneAnalysis?: ToneResult;
-    sentiment?: any;
+    sentiment?: SentimentResult|null;
 
     /**
      * Only Add a date log if the new date is not within 10 minutes of an existing date
