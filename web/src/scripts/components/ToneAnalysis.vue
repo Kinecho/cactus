@@ -132,7 +132,6 @@
         padding: .4rem;
     }
 
-
     .debug {
         color: red;
         font-family: monospace;
