@@ -2,13 +2,7 @@
     <div class="insightsCard">
         <h2>Insights</h2>
         <p class="subtext">This is what your note reveals about your emotions.</p>
-        <div class="posRating" v-if="positivityRating">
-            <span class="label">Positivity Rating</span>
-            <strong class="rating">{{positivityRating | percentage}}</strong>
-            <div class="progress">
-                <div class="meter" :style="`width: ${positivityRating * 100}%`"><span class="gradient"></span></div>
-            </div>
-        </div>
+        <positivity-rating :sentiment-score="reflectionResponse.sentiment.documentSentiment"/>
         <div class="sentimentAnalysis">
             <nav class="tabs">
                 <a v-for="(tone, i) in tones" :key="`tone_${i}`" class="tone" :class="{selected: currentToneId === tone.toneId}" @click="currentToneIndex = i">{{tone.toneName}}</a>
@@ -42,18 +36,14 @@
     import Component from "vue-class-component";
     import { Prop } from "vue-property-decorator";
     import ReflectionResponse from "@shared/models/ReflectionResponse";
-    import { formatPercentage } from "@shared/util/StringUtil";
     import { ToneID, ToneScore } from "@shared/api/ToneAnalyzerTypes";
-
+    import PositivityRating from "@components/PositivityRating.vue";
 
     @Component({
         components: {
             ToneAnalyzerModal,
             SvgIcon,
-        }, filters: {
-            percentage(input: number | string | undefined | null): string {
-                return formatPercentage(input, 0);
-            }
+            PositivityRating,
         }
     })
     export default class InsightsCard extends Vue {
@@ -115,55 +105,6 @@
         @include r(600) {
             font-size: 1.8rem;
             margin-bottom: 4rem;
-        }
-    }
-
-    .label {
-        font-size: 1.6rem;
-        opacity: .8;
-
-        &:after {
-            content: ":";
-            display: inline-block;
-            margin-right: .8rem;
-        }
-    }
-
-    .progress {
-        $multiple: 1.6rem;
-        background-color: lighten($lightDolphin, 20%);
-        border-radius: $multiple;
-        height: $multiple;
-        margin: .8rem 0 3.2rem;
-
-        @include r(600) {
-            margin-bottom: 4rem;
-        }
-
-        .meter {
-            border-radius: $multiple;
-            height: $multiple;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .gradient {
-            background-image: linear-gradient(to right, $royal, $green);
-            height: $multiple;
-            left: 0;
-            position: absolute;
-            top: 0;
-            width: 25.6rem;
-
-            @include r(374) {
-                width: 53.5rem;
-            }
-            @include r(600) {
-                width: 40rem;
-            }
-            @include r(768) {
-                width: 46.8rem;
-            }
         }
     }
 
