@@ -2,33 +2,36 @@
     <div class="insightsCard">
         <h2>Insights</h2>
         <p class="subtext">This is what your note reveals about your emotions.</p>
-        <div class="posRating">
+        <div class="posRating" v-if="positivityRating">
             <span class="label">Positivity Rating</span>
-            <strong class="rating">{{positivityRating}}</strong>
+            <strong class="rating">{{positivityRating | percentage}}</strong>
             <div class="progress">
-                <div class="meter" :style="`width: ${positivityRating}`"><span class="gradient"></span></div>
+                <div class="meter" :style="`width: ${positivityRating * 100}%`"><span class="gradient"></span></div>
             </div>
         </div>
         <div class="sentimentAnalysis">
             <nav class="tabs">
-                <a v-for="(emotion, i) in emotions" :key="`emotion_${i}`" class="emotion">{{emotion}}</a>
+                <a v-for="(tone, i) in tones" :key="`tone_${i}`" class="tone" :class="{selected: currentToneId === tone.toneId}" @click="currentToneIndex = i">{{tone.toneName}}</a>
             </nav>
             <div class="noteText">
-                <p>Released 50 years ago this week, Black Sabbath’s self-titled debut almost single-handedly launched the heavy metal genre.</p>
-                <p>But in 1970, it wasn’t seen as much of a harbinger of things to come.</p>
-                <p>“The whole album is a shuck,” wrote Lester Bangs.</p>
-                <p class="highlight">“The worst of the counterculture on a plastic platter—bullshit necromancy, drug-impaired reaction time, long solos, everything,” complained Robert Christgau.</p>
-                <p>The rock critic cognoscenti was soon proven wrong: Black Sabbath and the band’s subsequent albums served as the foundational texts for countless acts who fell hard for Sabbath’s singular mix of bone-crunching riffs, adolescent alienation and vintage Hammer horror flicks.</p>
-                <p>In celebration of half a century of Sabbath, let’s dig into essential rarities from the band’s first decade (aka the Ozzy era).</p>
+                <p v-for="(sentence, i) in reflectionResponse.toneAnalysis.sentencesTones"
+                        :key="`sentence_${i}`"
+                        :class="{highlight: sentence.tones && sentence.tones.some(t => t.toneId === currentToneId)}"
+                >
+                    <span class="debug">({{sentence.tones.map(t => t.toneName).join(', ')}})</span>
+                    <br/>
+                    {{sentence.text}}
+
+                </p>
             </div>
         </div>
         <button class="contButton">Continue</button>
         <button class="infoButton tertiary icon" @click="showModal">
-            <svg-icon icon="info" class="infoIcon" />
+            <svg-icon icon="info" class="infoIcon"/>
         </button>
         <tone-analyzer-modal
-            :showModal="modalVisible"
-            @close="modalVisible = false" />
+                :showModal="modalVisible"
+                @close="modalVisible = false"/>
     </div>
 </template>
 
@@ -36,48 +39,56 @@
     import Vue from "vue";
     import ToneAnalyzerModal from "@components/ToneAnalyzerModal.vue"
     import SvgIcon from "@components/SvgIcon.vue";
+    import Component from "vue-class-component";
+    import { Prop } from "vue-property-decorator";
+    import ReflectionResponse from "@shared/models/ReflectionResponse";
+    import { formatPercentage } from "@shared/util/StringUtil";
+    import { ToneID, ToneScore } from "@shared/api/ToneAnalyzerTypes";
 
-    export default Vue.extend({
+
+    @Component({
         components: {
             ToneAnalyzerModal,
             SvgIcon,
-        },
-        created() {
-
-        },
-        props: {
-            positivityRating: {
-                type: String,
-                default: "40%"
-            },
-            emotions: {
-                type: Array,
-                default: () => ([
-                    "Anger",
-                    "Fear",
-                    "Sadness",
-                    "Analytical",
-                    "Confident",
-                    "Tentative"
-                ])
-            },
-        },
-        data(): {
-            modalVisible: boolean,
-        } {
-            return {
-                modalVisible: false,
-            }
-        },
-        methods: {
-            showModal() {
-                this.modalVisible = true;
-            },
-            hideModal() {
-                this.modalVisible = false;
+        }, filters: {
+            percentage(input: number | string | undefined | null): string {
+                formatPercentage(input, 0);
             }
         }
     })
+    export default class InsightsCard extends Vue {
+
+        @Prop({ type: Object as () => ReflectionResponse, required: true })
+        reflectionResponse!: ReflectionResponse;
+
+        get tones(): ToneScore[] {
+            return this.reflectionResponse.toneAnalysis?.documentTone?.tones ?? [];
+        }
+
+        currentToneIndex = 0;
+
+        get currentToneId(): ToneID | null {
+            if (!this.tones || this.tones.length === 0) {
+                return null;
+            }
+            return this.tones[Math.min(this.currentToneIndex, this.tones.length - 1)]?.toneId ?? null;
+        };
+
+        modalVisible: boolean = false;
+
+        get positivityRating(): number | undefined {
+            return this.reflectionResponse.sentiment?.documentSentiment?.score ?? undefined
+        };
+
+        showModal() {
+            this.modalVisible = true;
+        }
+
+        hideModal() {
+            this.modalVisible = false;
+        }
+
+    }
 </script>
 
 <style lang="scss" scoped>
@@ -169,7 +180,7 @@
         }
 
         &:after {
-            background-image: linear-gradient(to right, rgba(255,255,255,0), $white);
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0), $white);
             content: "";
             height: 4rem;
             position: absolute;
@@ -192,10 +203,11 @@
         top: 0;
     }
 
-    .emotion {
+    .tone {
         padding: 2rem 1.6rem;
 
-        &:first-child {
+        /*&:first-child {*/
+        &.selected {
             color: $darkestGreen;
             padding-left: 3.2rem;
 
@@ -251,6 +263,11 @@
         @include r(600) {
             right: .8rem;
         }
+    }
+
+    .debug {
+        color: red;
+        font-family: monospace;
     }
 
 </style>

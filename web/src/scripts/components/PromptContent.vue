@@ -49,7 +49,7 @@
                             />
                         </transition>
                         <transition name="insights" appear mode="out-in" v-if="reflectionResponse">
-                            <InsightsCard/>
+                            <InsightsCard :reflection-response="reflectionResponse"/>
                         </transition>
                         <transition name="celebrate" appear mode="out-in" v-if="completed">
                             <celebrate v-on:back="completed = false"
