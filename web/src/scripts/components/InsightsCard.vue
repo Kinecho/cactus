@@ -159,12 +159,24 @@
     .sentimentAnalysis {
         @include shadowbox;
         margin: 0 -3.2rem;
+        position: relative;
 
         @include r(374) {
             margin: 0 -2rem;
         }
         @include r(600) {
             margin: 0 -2.4rem;
+        }
+
+        &:after {
+            background-image: linear-gradient(to right, rgba(255,255,255,0), $white);
+            content: "";
+            height: 4rem;
+            position: absolute;
+            right: 0;
+            top: 1.2rem;
+            width: 4rem;
+            z-index: 1;
         }
     }
 
