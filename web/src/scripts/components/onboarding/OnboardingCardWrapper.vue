@@ -27,6 +27,7 @@
     import SubscriptionProduct from "@shared/models/SubscriptionProduct";
     import UpsellCard from "@components/onboarding/OnboardingUpsellCard.vue";
     import CelebrateCard from "@components/onboarding/OnboardingCelebrateCard.vue";
+    import InsightsCard from "@components/InsightsCard.vue";
     import { CheckoutInfo } from "@components/onboarding/OnboardingTypes";
     import CactusMember from "@shared/models/CactusMember";
     import { InsightWord } from "@shared/api/InsightLanguageTypes";
@@ -45,6 +46,7 @@
             WordCloudCard,
             UpsellCard,
             CelebrateCard,
+            InsightsCard
         }
     })
     export default class OnboardingCardWrapper extends Vue {
@@ -95,6 +97,9 @@
                 case CardType.word_cloud:
                     info.type = "word-cloud-card";
                     info.props.words = this.member?.wordCloud ?? [];
+                    break;
+                case CardType.insights:
+                    info.type = "insights-card";
                     break;
                 case CardType.upsell:
                     info.type = "upsell-card";
