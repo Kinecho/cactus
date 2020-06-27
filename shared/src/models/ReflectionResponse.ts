@@ -168,6 +168,8 @@ export enum ReflectionResponseField {
     updatedAt = "updatedAt",
     toneAnalysis = "toneAnalysis",
     sentiment = "sentiment",
+    mightNeedInsightsUpdate = "mightNeedInsightsUpdate",
+    insightsUpdatedAt = "insightsUpdatedAt",
 }
 
 export type DynamicResponseValues = Record<string, string | null | undefined>;
@@ -208,6 +210,9 @@ export default class ReflectionResponse extends BaseModel {
     insights?: InsightWordsResult;
     toneAnalysis?: ToneResult;
     sentiment?: SentimentResult|null;
+
+    mightNeedInsightsUpdate?: boolean = false;
+    insightsUpdatedAt?: Date;
 
     /**
      * Only Add a date log if the new date is not within 10 minutes of an existing date

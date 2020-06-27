@@ -25,13 +25,14 @@ import SentPrompt, { PromptSendMedium } from "@shared/models/SentPrompt";
 import Logger from "@shared/Logger";
 import AdminRevenueCatService from "@admin/services/AdminRevenueCatService";
 import HoboCache from "@admin/HoboCache";
+import { isNull } from "@shared/util/ObjectUtil";
 
 const logger = new Logger("ReflectionResponseTriggers");
 
 export const updateReflectionStatsTrigger = functions.firestore
 .document(`${ Collection.reflectionResponses }/{responseId}`)
 .onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
-    logger.log("updating member stats");
+    logger.log("updating member stats job started");
     const snapshot = change.after || change.before;
     if (!snapshot) {
         logger.warn("No snapshot was found in the change event");
@@ -41,7 +42,28 @@ export const updateReflectionStatsTrigger = functions.firestore
     const textBefore = change.before?.get("content.text");
     const textAfter = change.after?.get("content.text");
 
-    if (textBefore?.toLowerCase().trim() === textAfter?.toLowerCase().trim()) {
+    logger.info("textBefore", textBefore);
+    logger.info("textAfter", textAfter);
+    const mightNeedInsights = change.after?.get(ReflectionResponse.Field.mightNeedInsightsUpdate) as boolean | undefined ?? false;
+
+    logger.info("Might need insights", mightNeedInsights);
+
+    const hasTextChanges = textBefore?.toLowerCase().trim() !== textAfter?.toLowerCase().trim()
+
+    logger.info("Has text changes", hasTextChanges);
+    const reflectionResponse = fromDocumentSnapshot(change.after, ReflectionResponse);
+    const hasAllInsights = !isNull(reflectionResponse?.sentiment) && !isNull(reflectionResponse?.toneAnalysis) && !isNull(reflectionResponse?.insights?.insightWords);
+
+
+    // If the reflection hasn't changed text and already has all of the insight values, set that the doc doesn't need changes.
+    if (change.after.exists && !hasTextChanges && mightNeedInsights && hasAllInsights) {
+        logger.info("Change after exists, no text changes, but it might need changes, but all insights are presnt. Setting to doesn't need changes")
+        await change.after.ref.update({ [ReflectionResponse.Field.mightNeedInsightsUpdate]: false });
+        return;
+    }
+
+    // In any case, if there are no text changes and we don't think there may need to be insight updates, exit.
+    if (!hasTextChanges && !mightNeedInsights) {
         logger.info("[update reflection stats trigger] Text hasn't changed, not processing");
         return;
     }
@@ -57,11 +79,12 @@ export const updateReflectionStatsTrigger = functions.firestore
         return;
     }
 
-    const reflectionResponse = fromDocumentSnapshot(change.after, ReflectionResponse);
 
     await AdminReflectionResponseService.getSharedInstance().updateTextAnalysis(reflectionResponse);
 
     await AdminCactusMemberService.getSharedInstance().updateStatsOnReflectionResponse(memberId);
+
+    // Update member last seen and log some other analytics stuff
     const { member } = await HoboCache.shared.getMemberById(memberId);
     const responseMedium: ResponseMedium | undefined | null = change.after.get(ReflectionResponse.Field.responseMedium);
 
@@ -69,25 +92,6 @@ export const updateReflectionStatsTrigger = functions.firestore
     await AdminRevenueCatService.shared.updateLastSeen({ memberId, appType: appType, updateLastSeen: true });
     await AdminRevenueCatService.shared.updateSubscriberAttributes(member ?? undefined);
 });
-
-export const updateToneAnalysisOnWrite = functions.runWith({ memory: "512MB", timeoutSeconds: 120 }).firestore
-.document(`${ Collection.reflectionResponses }/{responseId}`)
-.onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
-    logger.log("starting updateToneAnalysisOnWrite");
-
-    const textBefore = change.before?.get("content.text");
-    const textAfter = change.after?.get("content.text");
-
-    if (textBefore?.toLowerCase().trim() === textAfter?.toLowerCase().trim()) {
-        logger.info("Text hasn't changed, not processing");
-        return;
-    }
-
-    const reflectionResponse = fromDocumentSnapshot(change.after, ReflectionResponse);
-    await AdminReflectionResponseService.getSharedInstance().updateToneAnalysis(reflectionResponse);
-    logger.info("finished updating tone analysis");
-});
-
 
 export const updateSentPromptOnReflectionWrite = functions.firestore
 .document(`${ Collection.reflectionResponses }/{responseId}`)

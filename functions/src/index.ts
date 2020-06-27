@@ -12,7 +12,6 @@ import {
     onReflectionResponseCreated,
     updateReflectionStatsTrigger,
     updateSentPromptOnReflectionWrite,
-    updateToneAnalysisOnWrite,
 } from "@api/triggers/ReflectionResponseTriggers";
 import * as SlackCommandJob from "@api/pubsub/subscribers/SlackCommandJob";
 import * as MemberStatsJob from "@api/pubsub/subscribers/MemberStatsJob";
@@ -113,7 +112,6 @@ export const cloudFunctions = {
         publishPromptContentTrigger: PromptContentTriggers.onContentPublished,
         updateSubscriptionDetailsTrigger,
         updateMemberCoreValueFromAssessment: updateMemberCoreValueFromAssessment,
-        updateToneAnalysisOnWrite,
     },
     db3: {
         gapAssessmentCompleted,

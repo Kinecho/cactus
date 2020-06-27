@@ -1,4 +1,9 @@
-import AdminFirestoreService, { DeleteOptions, QueryOptions, SaveOptions } from "@admin/services/AdminFirestoreService";
+import AdminFirestoreService, {
+    DeleteOptions,
+    FieldValue,
+    QueryOptions,
+    SaveOptions
+} from "@admin/services/AdminFirestoreService";
 import ReflectionResponse, { ReflectionResponseField } from "@shared/models/ReflectionResponse";
 import { BaseModelField, Collection } from "@shared/FirestoreBaseModels";
 import MailchimpService from "@admin/services/MailchimpService";
@@ -384,6 +389,8 @@ export default class AdminReflectionResponseService {
             [ReflectionResponse.Field.insights]: wordCloud ?? null,
             [ReflectionResponse.Field.toneAnalysis]: toneAnalysis ?? null,
             [ReflectionResponse.Field.sentiment]: sentiment ?? null,
+            [ReflectionResponse.Field.mightNeedInsightsUpdate]: false,
+            [ReflectionResponse.Field.insightsUpdatedAt]: FieldValue.serverTimestamp(),
         }, { merge: true });
 
         return undefined;

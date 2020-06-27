@@ -52,7 +52,7 @@
         modalVisible: boolean = false;
 
         get loading(): boolean {
-            return !this.reflectionResponse || isNull(this.reflectionResponse.toneAnalysis) || isNull(this.reflectionResponse.sentiment);
+            return !this.reflectionResponse || this.reflectionResponse?.mightNeedInsightsUpdate === true;
         };
 
         showModal() {
