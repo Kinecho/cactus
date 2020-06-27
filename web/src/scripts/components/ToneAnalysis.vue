@@ -1,6 +1,6 @@
 <template>
-    <div class="toneAnalysis" v-if="toneResult">
-        <nav class="tabs" v-if="tones && tones.length > 0">
+    <div class="toneAnalysis" v-if="toneResult && tones && tones.length > 0">
+        <nav class="tabs">
             <span v-for="(tone, i) in tones"
                     :key="`tone_${i}`"
                     class="tone"
@@ -9,10 +9,6 @@
                 {{tone.toneName}}
             </span>
         </nav>
-        <nav class="tabs" v-else>
-            <span class="tone none">No Emotions Detected</span>
-        </nav>
-
         <div class="noteText">
             <p v-for="(paragraph, i) in paragraphs" :key="`paragraph_${i}`">
                 <span v-for="(sentence, i) in paragraph"

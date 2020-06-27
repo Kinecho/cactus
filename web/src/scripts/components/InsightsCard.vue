@@ -1,6 +1,7 @@
 <template>
     <div class="insightsCard">
         <h2>Insights</h2>
+        <!-- <p class="subtext" v-if="reflectionResponse.toneAnalysis">This is the positivity rating of your note. Write more to reveal different emotions.</p> -->
         <p class="subtext">This is what your note reveals about your emotions.</p>
         <transition name="component-fade" mode="out-in">
             <spinner v-if="loading" message="Processing insights" key="loader"/>
