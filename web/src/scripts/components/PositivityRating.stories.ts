@@ -16,8 +16,8 @@ export const Default = () => Vue.extend({
         PositivityRating,
     },
     props: {
-        rating: {
-            default: number("Score (-1 to 1)", 0, { min: -1, max: 1 })
+        percent: {
+            default: number("Score (0 to 100)", 0, { min: 0, max: 100 })
         },
         magnitude: {
             default: number("Magnitude (non-negative)", 1),
@@ -32,7 +32,7 @@ export const Default = () => Vue.extend({
         sentimentScore(): SentimentScore {
             return {
                 magnitude: this.magnitude,
-                score: this.rating,
+                score: 2* this.percent / 100 - 1,
             }
         }
     }
