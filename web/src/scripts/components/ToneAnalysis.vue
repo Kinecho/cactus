@@ -165,7 +165,7 @@
     .highlight {
         background-color: lighten($royal, 25%);
         border-radius: .4rem;
-        margin-right: .4rem;
+        //margin-right: .4rem; //disabling because the paragraphs jump around when switching Emotion selections
     }
 
     .debug {
