@@ -1,6 +1,6 @@
 <template>
-    <div class="toneAnalysis" v-if="toneResult && tones && tones.length > 0">
-        <nav class="tabs">
+    <div class="toneAnalysis" v-if="toneResult">
+        <nav class="tabs" v-if="tones && tones.length > 0">
             <span v-for="(tone, i) in tones"
                     :key="`tone_${i}`"
                     class="tone"
@@ -9,6 +9,10 @@
                 {{tone.toneName}}
             </span>
         </nav>
+        <nav class="tabs" v-else>
+            <span class="tone none">No emotions detected</span>
+        </nav>
+
         <div class="noteText">
             <p v-for="(paragraph, i) in paragraphs" :key="`paragraph_${i}`">
                 <span v-for="(sentence, i) in paragraph"
@@ -80,15 +84,7 @@
 
     .toneAnalysis {
         @include shadowbox;
-        margin: 0 -3.2rem;
         position: relative;
-
-        @include r(374) {
-            margin: 0 -2rem;
-        }
-        @include r(600) {
-            margin: 0;
-        }
 
         &:after {
             background-image: linear-gradient(to right, rgba(255, 255, 255, 0), $white);
