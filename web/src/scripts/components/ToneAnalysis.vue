@@ -153,12 +153,16 @@
         @include r(600) {
             padding: 0 2.4rem 3.2rem;
         }
+
+        p {
+            margin-bottom: 1.6rem;
+        }
     }
 
     .highlight {
         background-color: lighten($royal, 25%);
         border-radius: .4rem;
-        //margin-right: .4rem;
+        margin-right: .4rem;
     }
 
     .debug {
