@@ -342,3 +342,29 @@ export function formatPercentage(input: number | string | null | undefined, deci
 
     return `${ (num * 100).toFixed(decimalPlaces) }%`;
 }
+
+const HTMLEntityMap = [
+    ['amp', '&'],
+    ['apos', '\''],
+    ['#x27', '\''],
+    ['#x2F', '/'],
+    ['#39', '\''],
+    ['#47', '/'],
+    ['lt', '<'],
+    ['gt', '>'],
+    ['nbsp', ' '],
+    ['quot', '"']
+];
+
+export function decodeHTMLEntities(text?: string): string | undefined {
+    if (!text) {
+        return undefined;
+    }
+    let output = text;
+
+    for (let i = 0, max = HTMLEntityMap.length; i < max; ++i) {
+        output = output.replace(new RegExp('&' + HTMLEntityMap[i][0] + ';', 'g'), HTMLEntityMap[i][1]);
+    }
+
+    return output;
+}

@@ -13,10 +13,7 @@
                 <span v-for="(sentence, i) in paragraph"
                         :key="`sentence_${i}`"
                         :class="{highlight: sentence.tones && sentence.tones.some(t => t.toneId === currentToneId)}"
-                >
-<!--                    <span class="debug">({{sentence.tones.map(t => t.toneName).join(', ')}})</span>-->
-                    {{sentence.text.trim()}}
-                </span>
+                >{{sentence.text + " "}}</span>
             </p>
         </div>
     </div>
@@ -29,6 +26,7 @@
     import { Prop } from "vue-property-decorator";
     import { isBlank } from "@shared/util/StringUtil";
     import Logger from "@shared/Logger"
+    import { createParagraphs } from "@shared/util/ToneAnalyzerUtil";
 
     const logger = new Logger("ToneAnalysis");
 
@@ -42,7 +40,7 @@
         @Prop({ type: Object as () => ToneResult, required: false, default: null })
         toneResult!: ToneResult | null;
 
-        @Prop({type: Boolean, default: false})
+        @Prop({ type: Boolean, default: false })
         sentencesOnNewLine!: boolean;
 
         get tones(): ToneScore[] {
@@ -59,28 +57,19 @@
         };
 
         get paragraphs(): SentenceTone[][] {
-            const sentences = this.toneResult?.sentencesTones
-            if (!this.originalText || isBlank(this.originalText) || !sentences || this.sentencesOnNewLine) {
-                return sentences?.map(sentence => ([sentence])) ?? []
+            const analysisSentences = this.toneResult?.sentencesTones
+            logger.info("Original text", this.originalText);
+            if (!this.originalText || isBlank(this.originalText) || !analysisSentences || analysisSentences.length === 0 || this.sentencesOnNewLine) {
+
+                const r = analysisSentences?.map(sentence => ([sentence])) ?? []
+                logger.info("Using original sentence map", r);
+                return r;
             }
 
-            const results: SentenceTone[][] = [];
-            let textParagraphs: string[] = this.originalText.toLowerCase().split("\n").filter(s => !isBlank(s));
-            debugger;
-            let remainingSentences = [...sentences];
-            let s = remainingSentences.shift();
-            for (let paragraph of textParagraphs) {
-                const pResult: SentenceTone = [];
-                while (s && s.text && !isBlank(s.text) && paragraph.includes(s.text.toLowerCase().trim())) {
-                    pResult.push(s);
-                    s = remainingSentences.shift();
-                }
-                if (pResult.length > 0) {
-                    results.push(pResult);
-                }
-            }
-            logger.info("Paragraph Results", results);
-            return results;
+
+            const p = createParagraphs({ text: this.originalText, sentenceTones: analysisSentences })
+            logger.info("create paragraph result", p);
+            return p;
         }
 
     }
