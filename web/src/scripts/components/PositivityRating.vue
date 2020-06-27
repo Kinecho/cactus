@@ -1,5 +1,5 @@
 <template>
-    <div class="posRating" v-if="positivityPercentage">
+    <div class="posRating" v-if="positivityPercentage !== null && positivityPercentage !== undefined">
         <span class="label">Positivity Rating</span>
         <strong class="rating">{{positivityPercentage | percentage}}</strong>
         <div class="progress">
@@ -18,7 +18,7 @@
 
     @Component({
         filters: {
-            percentage(input: number | string | undefined | null): string {
+            percentage(input: number | string | undefined | null): string | null {
                 return formatPercentage(input, 0);
             }
         }
@@ -83,16 +83,17 @@
             left: 0;
             position: absolute;
             top: 0;
-            width: 25.6rem;
+            //width: 25.6rem;
+            width: 100%;
 
             @include r(374) {
-                width: 53.5rem;
+                //width: 53.5rem;
             }
             @include r(600) {
-                width: 40rem;
+                //width: 40rem;
             }
             @include r(768) {
-                width: 46.8rem;
+                //width: 46.8rem;
             }
         }
     }
