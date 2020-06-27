@@ -13,7 +13,7 @@
                 <span v-for="(sentence, i) in paragraph"
                         :key="`sentence_${i}`"
                         :class="{highlight: sentence.tones && sentence.tones.some(t => t.toneId === currentToneId)}"
-                >{{sentence.text + " "}}</span>
+                >{{sentence.text + ' '}}</span>
             </p>
         </div>
     </div>
@@ -57,15 +57,13 @@
         };
 
         get paragraphs(): SentenceTone[][] {
-            const analysisSentences = this.toneResult?.sentencesTones
+            const analysisSentences = this.toneResult?.sentencesTones ?? []
             logger.info("Original text", this.originalText);
-            if (!this.originalText || isBlank(this.originalText) || !analysisSentences || analysisSentences.length === 0 || this.sentencesOnNewLine) {
-
+            if (!this.originalText || isBlank(this.originalText) || this.sentencesOnNewLine) {
                 const r = analysisSentences?.map(sentence => ([sentence])) ?? []
                 logger.info("Using original sentence map", r);
                 return r;
             }
-
 
             const p = createParagraphs({ text: this.originalText, sentenceTones: analysisSentences })
             logger.info("create paragraph result", p);
