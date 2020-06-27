@@ -6,7 +6,6 @@
         <tone-analysis :tone-result="reflectionResponse.toneAnalysis"
                 :original-text="reflectionResponse.content.text"
                 :sentences-on-new-line="false"/>
-        <button class="contButton">Continue</button>
         <button class="infoButton tertiary icon" @click="showModal">
             <svg-icon icon="info" class="infoIcon"/>
             <span>About</span>
@@ -60,6 +59,7 @@
 
     .insightsCard {
         background-color: $bgDolphin;
+        min-height: 100vh;
         padding: 5.6rem 3.2rem 3.2rem;
         position: relative;
         text-align: left;
@@ -67,6 +67,7 @@
         @include r(600) {
             border-radius: 12px;
             box-shadow: 0 30px 160px -6px rgba(0, 0, 0, 0.3);
+            margin-bottom: 6.4rem;
             min-height: 100%;
             padding: 5.6rem 4rem 4rem;
         }
@@ -83,29 +84,30 @@
         }
     }
 
-    .contButton {
-        bottom: 3.2rem;
-        left: 3.2rem;
-        position: fixed;
-        right: 3.2rem;
-        width: calc(100% - 6.4rem);
-        z-index: 1;
-
-        @include r(600) {
-            display: none;
-        }
-    }
+    // .contButton {
+    //     bottom: 3.2rem;
+    //     left: 3.2rem;
+    //     position: fixed;
+    //     right: 3.2rem;
+    //     width: calc(100% - 6.4rem);
+    //     z-index: 1;
+    //
+    //     @include r(600) {
+    //         display: none;
+    //     }
+    // }
 
     .toneAnalysis {
         margin-bottom: 3.2rem;
     }
 
-    .infoButton {
+    button.infoButton {
         position: absolute;
         right: 5.6rem;
         top: 2rem - 1.2rem;
 
         @include r(600) {
+            margin-left: -1.2rem;
             position: static;
 
             &:hover {
