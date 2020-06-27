@@ -1,13 +1,18 @@
 <template>
     <div class="toneAnalysis" v-if="toneResult">
-        <nav class="tabs">
-            <a v-for="(tone, i) in tones"
-                    :key="`tone_${i}`" class="tone"
+        <nav class="tabs" v-if="tones && tones.length > 0">
+            <span v-for="(tone, i) in tones"
+                    :key="`tone_${i}`"
+                    class="tone"
                     :class="{selected: currentToneId === tone.toneId}"
                     @click="currentToneIndex = i">
                 {{tone.toneName}}
-            </a>
+            </span>
         </nav>
+        <nav class="tabs" v-else>
+            <span class="tone none">No Emotions Detected</span>
+        </nav>
+
         <div class="noteText">
             <p v-for="(paragraph, i) in paragraphs" :key="`paragraph_${i}`">
                 <span v-for="(sentence, i) in paragraph"
@@ -115,6 +120,7 @@
 
     .tone {
         padding: 2rem 1.6rem;
+        color: $darkGreen;
 
         &:first-child {
             padding-left: 3.2rem;
@@ -128,8 +134,12 @@
             cursor: pointer;
         }
 
-        &.selected {
+        &.selected, &.none {
             color: $darkestGreen;
+        }
+
+        &.none {
+            cursor: default;
         }
     }
 
