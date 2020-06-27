@@ -1,9 +1,13 @@
 <template>
-    <div class="posRating" v-if="positivityPercentage">
+    <div class="posRating" v-if="positivityPercentage !== null && positivityPercentage !== undefined">
         <span class="label">Positivity Rating</span>
         <strong class="rating">{{positivityPercentage | percentage}}</strong>
         <div class="progress">
-            <div class="meter" :style="`width: ${positivityPercentage * 100}%`"><span class="gradient"></span></div>
+            <div class="meter" >
+<!--                <span class="gradient"></span>-->
+<!--                <span class="mask" :style="`clip-path: inset(0 0 0 calc(100% - ${positivityPercentage * 100}%) )`"></span>-->
+                <span class="mask" :style="`width: ${(1 - positivityPercentage) * 100}%`"></span>
+            </div>
         </div>
     </div>
 </template>
@@ -18,7 +22,7 @@
 
     @Component({
         filters: {
-            percentage(input: number | string | undefined | null): string {
+            percentage(input: number | string | undefined | null): string | null {
                 return formatPercentage(input, 0);
             }
         }
@@ -34,7 +38,7 @@
          * @return {number}
          */
         get positivityPercentage(): number | null {
-            const score = this.sentimentScore.score;
+            const score = this.sentimentScore?.score;
             if (isNull(score)) {
                 return null;
             }
@@ -61,7 +65,7 @@
 
     .progress {
         $multiple: 1.6rem;
-        background-color: lighten($lightDolphin, 20%);
+        background-image: linear-gradient(to right, $royal, $green);
         border-radius: $multiple;
         height: $multiple;
         margin: .8rem 0 3.2rem;
@@ -77,22 +81,34 @@
             position: relative;
         }
 
+        .mask {
+            background-color: lighten($lightDolphin, 20%);
+            height: $multiple;
+            right: 0;
+            position: absolute;
+            top: 0;
+            //width: 25.6rem;
+            width: 100%;
+        }
+
         .gradient {
-            background-image: linear-gradient(to right, $royal, $green);
+            //background-image: linear-gradient(to right, $royal, $green);
+            background-color: red;
             height: $multiple;
             left: 0;
             position: absolute;
             top: 0;
-            width: 25.6rem;
+            //width: 25.6rem;
+            width: 100%;
 
             @include r(374) {
-                width: 53.5rem;
+                //width: 53.5rem;
             }
             @include r(600) {
-                width: 40rem;
+                //width: 40rem;
             }
             @include r(768) {
-                width: 46.8rem;
+                //width: 46.8rem;
             }
         }
     }
