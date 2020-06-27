@@ -150,7 +150,7 @@
     .highlight {
         background-color: lighten($royal, 25%);
         border-radius: .4rem;
-        margin-right: .4rem;
+        //margin-right: .4rem;
     }
 
     .debug {
