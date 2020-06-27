@@ -9,6 +9,7 @@
         <button class="contButton">Continue</button>
         <button class="infoButton tertiary icon" @click="showModal">
             <svg-icon icon="info" class="infoIcon"/>
+            <span>About</span>
         </button>
         <tone-analyzer-modal
                 :showModal="modalVisible"
@@ -64,7 +65,10 @@
         text-align: left;
 
         @include r(600) {
-            padding: 4rem;
+            border-radius: 12px;
+            box-shadow: 0 30px 160px -6px rgba(0, 0, 0, 0.3);
+            min-height: 100%;
+            padding: 5.6rem 4rem 4rem;
         }
     }
 
@@ -92,13 +96,30 @@
         }
     }
 
+    .toneAnalysis {
+        margin-bottom: 3.2rem;
+    }
+
     .infoButton {
         position: absolute;
         right: 5.6rem;
         top: 2rem - 1.2rem;
 
         @include r(600) {
-            right: .8rem;
+            position: static;
+
+            &:hover {
+                background-color: transparent;
+            }
+        }
+
+        span {
+            display: none;
+
+            @include r(600) {
+                display: block;
+                padding-left: .4rem;
+            }
         }
     }
 </style>

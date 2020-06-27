@@ -136,7 +136,6 @@ export default class OnboardingCardViewModel {
             OnboardingCardViewModel.create({
                 slug: "insights",
                 type: CardType.insights,
-                defaultNextActionsEnabled: false,
                 promptContentEntryId: settings?.onboarding.promptEntryId2,
             }),
             OnboardingCardViewModel.create({
