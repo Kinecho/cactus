@@ -19,7 +19,7 @@ export function createParagraphs(params: { text: string, sentenceTones: Sentence
     const remainingSentences = [...sentenceTones];
 
     let sentence = remainingSentences.shift();
-    let sentenceId = 0
+    let sentenceId = 1
     for (let i = 0; i < textParagraphs.length; i++) {
         let textParagraph = textParagraphs[i];
         const sentenceGroup: SentenceTone[] = [];
@@ -63,6 +63,10 @@ export function createParagraphs(params: { text: string, sentenceTones: Sentence
                     textParagraph = textParagraph.substring(sentence.text.length).trim();
                     logger.info(`Added sentence ${ sentenceId } to paragraph ${ i }`);
                     sentence = remainingSentences.shift();
+                    sentenceId++;
+                } else if (!isBlank(textParagraph)) {
+                    sentenceGroup.push({ sentenceId, text: textParagraph.trim() });
+                    textParagraph = "";
                     sentenceId++;
                 }
 

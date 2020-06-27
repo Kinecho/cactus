@@ -3,6 +3,18 @@ import { PattonToneResult, PattonSpeech } from "@shared/util/ToneAnalyzerFixture
 
 
 describe("createParagraphs", () => {
+    test("simple paragraph with all no results", () => {
+
+        const text = "Sentence one. Sentence two.";
+        const result = createParagraphs({ text, sentenceTones: [] })
+
+        expect(result.length).toEqual(1);
+        expect(result).toEqual([[{
+            sentenceId: 1,
+            text: "Sentence one. Sentence two."
+        }]]);
+    })
+
     test("simple paragraph with all sentences present", () => {
         const sentenceTones = [
             {
@@ -107,14 +119,16 @@ describe("createParagraphs", () => {
     })
 
     test("With long speech", () => {
-        const result = createParagraphs({ text: PattonSpeech, sentenceTones: PattonToneResult.sentencesTones! })
+        const result = createParagraphs({
+            text: "First Text.\n\n" + PattonSpeech,
+            sentenceTones: PattonToneResult.sentencesTones!
+        })
 
-
-
-        expect(result.length).toEqual(3);
-        expect(result[0].length).toEqual(10);
-        expect(result[1].length).toEqual(7);
-        expect(result[2].length).toEqual(9);
+        expect(result.length).toEqual(4);
+        expect(result[0].length).toEqual(1);
+        expect(result[1].length).toEqual(10);
+        expect(result[2].length).toEqual(7);
+        expect(result[3].length).toEqual(9);
 
     })
 
