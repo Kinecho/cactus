@@ -151,6 +151,9 @@
             padding: 0 2.4rem 3.2rem;
         }
         @include r(600) {
+            max-height: 47rem;
+            overflow-x: hidden;
+            overflow-y: auto;
             padding: 0 2.4rem 3.2rem;
         }
 

@@ -83,22 +83,29 @@
         flex-direction: column;
         justify-content: center;
         min-height: 80vh;
-        padding: 0 .8rem;
+        padding: 0 1.6rem;
 
         @include r(374) {
             padding: 0 2.4rem;
         }
 
-        @include r(600) {
+        @include r(960) {
             align-items: center;
             flex-direction: row;
             justify-content: flex-start;
-            padding: 0 6.4rem;
         }
     }
 
     .textBox {
+        margin-bottom: 3.2rem;
+
         @include r(600) {
+            margin: 0 auto 3.2rem;
+            max-width: 60rem;
+            width: 100%;
+        }
+        @include r(960) {
+            margin-bottom: 0;
             padding-right: 6.4rem;
             width: 50%;
         }
@@ -106,13 +113,14 @@
 
     .insightsContainer {
         font-size: 1.8rem;
-        margin: 0 -2.4rem;
-        width: calc(100% + 4.8rem);
 
         @include r(600) {
+            margin: 0 auto;
+            max-width: 60rem;
+        }
+        @include r(960) {
             align-self: center;
             font-size: 2rem;
-            margin: 0 auto;
             max-width: 50%;
             width: 100%;
         }
