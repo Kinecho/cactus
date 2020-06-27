@@ -17,7 +17,7 @@ export const Default = () => Vue.extend({
     },
     props: {
         percent: {
-            default: number("Score (0 to 100)", 0, { min: 0, max: 100 })
+            default: number("Score (0 to 100)", 65, { min: 0, max: 100 })
         },
         magnitude: {
             default: number("Magnitude (non-negative)", 1),
