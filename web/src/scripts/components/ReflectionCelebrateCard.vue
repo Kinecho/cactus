@@ -302,7 +302,7 @@
                         return this.cactusElement
                 }
             },
-            hasInsights(): boolean {
+            hasTone(): boolean {
                 return this.member?.wordCloud ? true : false;
             },
             wordData(): InsightWord[] | undefined {

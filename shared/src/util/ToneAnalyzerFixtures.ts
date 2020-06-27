@@ -1,4 +1,5 @@
 import { ToneID, ToneResult } from "@shared/api/ToneAnalyzerTypes";
+import { SentimentResult } from "@shared/api/InsightLanguageTypes";
 
 export const PattonSpeech = "Men, all this stuff you hear about America not wanting to fight, wanting to stay out of the war, is a lot of bullshit. Americans love to fight. All real Americans love the sting and clash of battle. When you were kids, you all admired the champion marble shooter, the fastest runner, the big-league ball players and the toughest boxers. Americans love a winner and will not tolerate a loser. Americans play to win all the time. That's why Americans have never lost and will never lose a war. The very thought of losing is hateful to Americans. Battle is the most significant competition in which a man can indulge. It brings out all that is best and it removes all that is base.\n" +
 "\n" +
@@ -355,4 +356,275 @@ export const PattonToneResult: ToneResult = {
             "tones": []
         }
     ]
+}
+
+
+export const PattonSentiment: SentimentResult = {
+    "sentences": [
+        {
+            "text": {
+                "content": "Men, all this stuff you hear about America not wanting to fight, wanting to stay out of the war, is a lot of bullshit.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.800000011920929,
+                "score": -0.800000011920929
+            }
+        },
+        {
+            "text": {
+                "content": "Americans love to fight.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.8999999761581421,
+                "score": 0.8999999761581421
+            }
+        },
+        {
+            "text": {
+                "content": "All real Americans love the sting and clash of battle.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.8999999761581421,
+                "score": 0.8999999761581421
+            }
+        },
+        {
+            "text": {
+                "content": "When you were kids, you all admired the champion marble shooter, the fastest runner, the big-league ball players and the toughest boxers.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.800000011920929,
+                "score": 0.800000011920929
+            }
+        },
+        {
+            "text": {
+                "content": "Americans love a winner and will not tolerate a loser.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.800000011920929,
+                "score": 0.800000011920929
+            }
+        },
+        {
+            "text": {
+                "content": "Americans play to win all the time.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.6000000238418579,
+                "score": 0.6000000238418579
+            }
+        },
+        {
+            "text": {
+                "content": "That's why Americans have never lost and will never lose a war.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.10000000149011612,
+                "score": 0.10000000149011612
+            }
+        },
+        {
+            "text": {
+                "content": "The very thought of losing is hateful to Americans.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.699999988079071,
+                "score": -0.699999988079071
+            }
+        },
+        {
+            "text": {
+                "content": "Battle is the most significant competition in which a man can indulge.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.6000000238418579,
+                "score": 0.6000000238418579
+            }
+        },
+        {
+            "text": {
+                "content": "It brings out all that is best and it removes all that is base.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.6000000238418579,
+                "score": 0.6000000238418579
+            }
+        },
+        {
+            "text": {
+                "content": "You are not all going to die.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.699999988079071,
+                "score": -0.699999988079071
+            }
+        },
+        {
+            "text": {
+                "content": "Only two percent of you right here today would be killed in a major battle.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.6000000238418579,
+                "score": -0.6000000238418579
+            }
+        },
+        {
+            "text": {
+                "content": "Every man is scared in his first action.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.5,
+                "score": -0.5
+            }
+        },
+        {
+            "text": {
+                "content": "If he says he's not, he's a goddamn liar.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.800000011920929,
+                "score": -0.800000011920929
+            }
+        },
+        {
+            "text": {
+                "content": "But the real hero is the man who fights even though he's scared.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0,
+                "score": 0
+            }
+        },
+        {
+            "text": {
+                "content": "Some men will get over their fright in a minute under fire, some take an hour, and for some it takes days.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.6000000238418579,
+                "score": -0.6000000238418579
+            }
+        },
+        {
+            "text": {
+                "content": "But the real man never lets his fear of death overpower his honor, his sense of duty to his country, and his innate manhood.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.10000000149011612,
+                "score": -0.10000000149011612
+            }
+        },
+        {
+            "text": {
+                "content": "All through your army career you men have bitched about what you call 'this chicken-shit drilling.'",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.800000011920929,
+                "score": -0.800000011920929
+            }
+        },
+        {
+            "text": {
+                "content": "That is all for a purpose—to ensure instant obedience to orders and to create constant alertness.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0,
+                "score": 0
+            }
+        },
+        {
+            "text": {
+                "content": "This must be bred into every soldier.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.30000001192092896,
+                "score": 0.30000001192092896
+            }
+        },
+        {
+            "text": {
+                "content": "I don't give a fuck for a man who is not always on his toes.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.800000011920929,
+                "score": -0.800000011920929
+            }
+        },
+        {
+            "text": {
+                "content": "But the drilling has made veterans of all you men.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0,
+                "score": 0
+            }
+        },
+        {
+            "text": {
+                "content": "You are ready!",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.8999999761581421,
+                "score": 0.8999999761581421
+            }
+        },
+        {
+            "text": {
+                "content": "A man has to be alert all the time if he expects to keep on breathing.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.5,
+                "score": -0.5
+            }
+        },
+        {
+            "text": {
+                "content": "If not, some German son-of-a-bitch will sneak up behind him and beat him to death with a sock full of shit.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.8999999761581421,
+                "score": -0.8999999761581421
+            }
+        },
+        {
+            "text": {
+                "content": "There are four hundred neatly marked graves in Sicily, all because one man went to sleep on the job—but they are German graves, because we caught the bastard asleep before his officer did.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.5,
+                "score": -0.5
+            }
+        }
+    ],
+    "documentSentiment": {
+        "magnitude": 16.200000762939453,
+        "score": 0
+    },
+    "language": "en"
 }

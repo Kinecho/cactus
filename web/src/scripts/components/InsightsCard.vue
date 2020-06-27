@@ -2,14 +2,21 @@
     <div class="insightsCard">
         <h2>Insights</h2>
         <p class="subtext">This is what your note reveals about your emotions.</p>
-        <positivity-rating :sentiment-score="reflectionResponse.sentiment.documentSentiment"/>
-        <tone-analysis :tone-result="reflectionResponse.toneAnalysis"
-                :original-text="reflectionResponse.content.text"
-                :sentences-on-new-line="false"/>
-        <button class="infoButton tertiary icon" @click="showModal">
-            <svg-icon icon="info" class="infoIcon"/>
-            <span>About</span>
-        </button>
+        <transition name="component-fade" mode="out-in">
+            <spinner v-if="loading" message="Processing insights" key="loader"/>
+            <!--  Note: using a div on this wrapper so that transition works correctly -->
+            <div v-else-if="reflectionResponse" :key="'insights'">
+                <positivity-rating :sentiment-score="reflectionResponse.sentiment.documentSentiment"/>
+                <tone-analysis :tone-result="reflectionResponse.toneAnalysis"
+                        :original-text="reflectionResponse.content.text"
+                        :sentences-on-new-line="false"/>
+                <button class="infoButton tertiary icon" @click="showModal">
+                    <svg-icon icon="info" class="infoIcon"/>
+                    <span>About</span>
+                </button>
+            </div>
+        </transition>
+
         <tone-analyzer-modal
                 :showModal="modalVisible"
                 @close="hideModal()"/>
@@ -25,6 +32,8 @@
     import ReflectionResponse from "@shared/models/ReflectionResponse";
     import PositivityRating from "@components/PositivityRating.vue";
     import ToneAnalysis from "@components/ToneAnalysis.vue";
+    import Spinner from "@components/Spinner.vue";
+    import { isNull } from "@shared/util/ObjectUtil";
 
     @Component({
         components: {
@@ -32,14 +41,19 @@
             ToneAnalyzerModal,
             SvgIcon,
             PositivityRating,
+            Spinner,
         }
     })
     export default class InsightsCard extends Vue {
 
-        @Prop({ type: Object as () => ReflectionResponse, required: true })
-        reflectionResponse!: ReflectionResponse;
+        @Prop({ type: Object as () => ReflectionResponse, required: false, default: undefined })
+        reflectionResponse!: ReflectionResponse | null | undefined;
 
         modalVisible: boolean = false;
+
+        get loading(): boolean {
+            return !this.reflectionResponse || isNull(this.reflectionResponse.toneAnalysis) || isNull(this.reflectionResponse.sentiment);
+        };
 
         showModal() {
             this.modalVisible = true;
@@ -56,6 +70,7 @@
     @import "common";
     @import "mixins";
     @import "variables";
+    @import "transitions";
 
     .insightsCard {
         background-color: $bgDolphin;
