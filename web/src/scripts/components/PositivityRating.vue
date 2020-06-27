@@ -3,9 +3,7 @@
         <span class="label">Positivity Rating</span>
         <strong class="rating">{{positivityPercentage | percentage}}</strong>
         <div class="progress">
-            <div class="meter" >
-<!--                <span class="gradient"></span>-->
-<!--                <span class="mask" :style="`clip-path: inset(0 0 0 calc(100% - ${positivityPercentage * 100}%) )`"></span>-->
+            <div class="meter">
                 <span class="mask" :style="`width: ${(1 - positivityPercentage) * 100}%`"></span>
             </div>
         </div>
@@ -82,34 +80,23 @@
         }
 
         .mask {
-            background-color: lighten($lightDolphin, 20%);
+            $mask-color: lighten($lightDolphin, 20%);
+            background-color: $mask-color;
             height: $multiple;
             right: 0;
             position: absolute;
             top: 0;
-            //width: 25.6rem;
             width: 100%;
+            mask-image: radial-gradient(circle 10px at left, transparent 0, transparent 8px, $mask-color 8px)
         }
 
         .gradient {
-            //background-image: linear-gradient(to right, $royal, $green);
             background-color: red;
             height: $multiple;
             left: 0;
             position: absolute;
             top: 0;
-            //width: 25.6rem;
             width: 100%;
-
-            @include r(374) {
-                //width: 53.5rem;
-            }
-            @include r(600) {
-                //width: 40rem;
-            }
-            @include r(768) {
-                //width: 46.8rem;
-            }
         }
     }
 
