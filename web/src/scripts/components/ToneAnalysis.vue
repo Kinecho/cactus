@@ -20,6 +20,18 @@
                         :class="{highlight: sentence.tones && sentence.tones.some(t => t.toneId === currentToneId)}"
                 >{{sentence.text + ' '}}</span>
             </p>
+            <!-- <p>
+                <span :class="{highlight: currentToneId === tones.toneId}">We’re using a service called the Tone Analyzer. With it, we're able to show you how positive your note is and what emotions are revealed. Next time, try writing a few more words.</span>
+            </p>
+            <p>
+                <span :class="{highlight: currentToneId === tones.toneId}">Here’s an example:</span>
+            </p>
+            <p>
+                <span :class="{highlight: currentToneId === tones.toneId}">I wasn’t sure if I was able to get everything done. I felt great after enjoying a warm cup of coffee on the front porch.</span>
+            </p>
+            <p>
+                <span :class="{highlight: currentToneId === tones.toneId}">Your notes remain private, secure, and forever yours.</span>
+            </p> -->
         </div>
     </div>
 </template>
