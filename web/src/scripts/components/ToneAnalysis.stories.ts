@@ -81,7 +81,13 @@ export const FallbackOption = () => Vue.extend({
 
 export const NoSentenceToneResults = () => Vue.extend({
     template: `
-        <tone-analysis :original-text="originalText" :tone-result="toneResult" :sentences-on-new-line="sentencesOnNewLine"/>
+    <div>
+        <tone-analysis :original-text="originalText" :tone-result="toneResult" :use-no-results-fallback="false" :sentences-on-new-line="sentencesOnNewLine"/>
+        <div>
+            <pre>{{JSON.stringify({originalText}, null, 2)}}</pre>
+            <pre>{{JSON.stringify(toneResult, null, 2)}}</pre>
+        </div>
+    </div>
     `,
     components: { ToneAnalysis },
     props: {

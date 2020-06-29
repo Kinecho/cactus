@@ -634,25 +634,27 @@ export const ONBOARDING_DEFAULT_TEXT = `We use a service called Tone Analyzer. I
 You can also see which tones are sensed in your writing, and where. These include Anger, Fear, Joy, Sadness, Analytical, Confident, and Tentative.
 
 Your notes remain private, secure, and forever yours.
+
+You're going to love it!
 `;
 
 export const ONBOARDING_TONE_RESULTS: ToneResult = {
     "documentTone": {
         "tones": [
             {
-                "score": 0.709924,
+                "score": 0.667684,
                 "toneId": "joy",
                 "toneName": "Joy"
             },
             {
-                "score": 0.952663,
-                "toneId": "confident",
-                "toneName": "Confident"
+                "score": 0.688301,
+                "toneId": "fear",
+                "toneName": "Fear"
             },
             {
-                "score": 0.714458,
-                "toneId": "analytical",
-                "toneName": "Analytical"
+                "score": 0.944427,
+                "toneId": "confident",
+                "toneName": "Confident"
             }
         ]
     },
@@ -678,14 +680,14 @@ export const ONBOARDING_TONE_RESULTS: ToneResult = {
                     "toneName": "Joy"
                 },
                 {
-                    "score": 0.849827,
-                    "toneId": "confident",
-                    "toneName": "Confident"
-                },
-                {
                     "score": 0.687768,
                     "toneId": "analytical",
                     "toneName": "Analytical"
+                },
+                {
+                    "score": 0.849827,
+                    "toneId": "confident",
+                    "toneName": "Confident"
                 }
             ]
         },
@@ -713,6 +715,17 @@ export const ONBOARDING_TONE_RESULTS: ToneResult = {
                     "score": 0.97759,
                     "toneId": "confident",
                     "toneName": "Confident"
+                }
+            ]
+        },
+        {
+            "sentenceId": 5,
+            "text": "You're going to love it!",
+            "tones": [
+                {
+                    "score": 0.795093,
+                    "toneId": "joy",
+                    "toneName": "Joy"
                 }
             ]
         }

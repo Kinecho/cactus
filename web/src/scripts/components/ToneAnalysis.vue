@@ -22,7 +22,7 @@
             <p v-for="(paragraph, i) in paragraphs" :key="`paragraph_${i}`" :class="{fallback: useDefaultValues}">
                 <span v-for="(sentence, i) in paragraph"
                         :key="`sentence_${i}`"
-                        :class="{highlight: sentence.tones && sentence.tones.some(t => t.toneId === currentToneId)}"
+                        :class="{highlight: sentence.tones && sentence.tones.some(t => t.toneId === currentToneId) && showHighlights}"
                 >{{sentence.text + ' '}}</span>
             </p>
         </div>
@@ -34,7 +34,7 @@
     import Component from "vue-class-component"
     import { SentenceTone, ToneID, ToneResult, ToneScore } from "@shared/api/ToneAnalyzerTypes";
     import { Prop } from "vue-property-decorator";
-    import { formatPercentage, isBlank } from "@shared/util/StringUtil";
+    import { isBlank } from "@shared/util/StringUtil";
     import Logger from "@shared/Logger"
     import { createParagraphs } from "@shared/util/ToneAnalyzerUtil";
     import { ONBOARDING_DEFAULT_TEXT, ONBOARDING_TONE_RESULTS } from "@shared/util/ToneAnalyzerFixtures";
@@ -58,22 +58,47 @@
         useNoResultsFallback!: boolean;
 
         get useDefaultValues(): boolean {
-            const sentenceList: ToneScore = [];
-            this.toneResult?.sentencesTones?.forEach(s => {
-                if (s.tones) {
-                    sentenceList.push(...s.tones);
-                }
+            return this.useNoResultsFallback && Object.keys(this.originalToneMap).length === 0;
+        }
+
+        get showHighlights(): boolean {
+            return this.useDefaultValues || (this.toneResult?.sentencesTones ?? []).length > 0;
+        }
+
+        get fallbackToneMap(): { [id: ToneID]: ToneScore } {
+            const toneMap: { [key: ToneID]: ToneScore } = {}
+
+            ONBOARDING_TONE_RESULTS.sentencesTones.forEach(s => {
+                s.tones?.forEach(t => {
+                    toneMap[t.toneId] = t;
+                })
             })
-            const tones = this.toneResult?.documentTone?.tones ?? [];
-            return this.useNoResultsFallback && (tones.length === 0 || sentenceList.length === 0);
+
+            ONBOARDING_TONE_RESULTS.documentTone?.tones?.forEach(t => {
+                toneMap[t.toneId] = t;
+            })
+            return Object.values(toneMap);
+        }
+
+        get originalToneMap(): { [id: ToneID]: ToneScore } {
+            const toneMap: { [key: ToneID]: ToneScore } = {}
+            this.toneResult?.sentencesTones?.forEach(s => {
+                s.tones?.forEach(t => {
+                    toneMap[t.toneId] = t;
+                })
+            })
+
+            this.toneResult?.documentTone?.tones?.forEach(t => {
+                toneMap[t.toneId] = t;
+            })
+            return toneMap;
         }
 
         get tones(): ToneScore[] {
-            const tones = this.toneResult?.documentTone?.tones ?? [];
             if (this.useDefaultValues) {
-                return ONBOARDING_TONE_RESULTS.documentTone?.tones ?? [];
+                return Object.values(this.fallbackToneMap);
             } else {
-                return tones;
+                return Object.values(this.originalToneMap);
             }
         }
 
@@ -122,6 +147,8 @@
         get paragraphs(): SentenceTone[][] {
             const analysisSentences = this.useDefaultValues ? ONBOARDING_TONE_RESULTS.sentencesTones : this.toneResult?.sentencesTones ?? [];
             const displayText = this.useDefaultValues ? `${ ONBOARDING_DEFAULT_TEXT }`.trim() : this.originalText;
+            const documentTones = this.useDefaultValues ? ONBOARDING_TONE_RESULTS.documentTone?.tones : this.toneResult?.documentTone?.tones ?? []
+
             logger.info("Original text", this.originalText);
             logger.info("display text", displayText);
             if (!displayText || isBlank(displayText) || this.sentencesOnNewLine) {
@@ -130,7 +157,11 @@
                 return r;
             }
 
-            const p = createParagraphs({ text: displayText, sentenceTones: analysisSentences })
+            const p = createParagraphs({
+                text: displayText,
+                sentenceTones: analysisSentences,
+                documentTones: documentTones
+            })
             logger.info("create paragraph result", p);
             return p;
         }
