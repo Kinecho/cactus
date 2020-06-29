@@ -1,7 +1,7 @@
 <template>
     <div class="toneAnalysis">
         <nav class="tabs" v-if="!hasTones">
-            <span class="tone none">No Emotions Detected</span>
+            <span class="tone none">No emotions detected</span>
         </nav>
         <nav class="tabs" v-else-if="hasSentenceBreakdown">
             <span v-for="(tone, i) in tones"
@@ -135,15 +135,7 @@
 
     .toneAnalysis {
         @include shadowbox;
-        margin: 0 -3.2rem;
         position: relative;
-
-        @include r(374) {
-            margin: 0 -2rem;
-        }
-        @include r(600) {
-            margin: 0;
-        }
 
         &:after {
             background-image: linear-gradient(to right, rgba(255, 255, 255, 0), $white);
@@ -211,12 +203,15 @@
         p {
             margin-bottom: 1.6rem;
         }
+
+        span {
+            margin-right: .4rem;
+        }
     }
 
     .highlight {
         background-color: lighten($royal, 25%);
         border-radius: .4rem;
-        //margin-right: .4rem; //disabling because the paragraphs jump around when switching Emotion selections
     }
 
     .debug {
