@@ -10,6 +10,7 @@
                 <positivity-rating :sentiment-score="reflectionResponse.sentiment.documentSentiment"/>
                 <tone-analysis :tone-result="reflectionResponse.toneAnalysis"
                         :original-text="reflectionResponse.content.text"
+                        :use-no-results-fallback="true"
                         :sentences-on-new-line="false"/>
                 <button class="infoButton tertiary icon" @click="showModal">
                     <svg-icon icon="info" class="infoIcon"/>

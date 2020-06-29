@@ -18,6 +18,7 @@
 
 
         <div class="noteText">
+            <p v-if="useDefaultValues && originalText" class="original-text">{{originalText}}</p>
             <p v-for="(paragraph, i) in paragraphs" :key="`paragraph_${i}`">
                 <span v-for="(sentence, i) in paragraph"
                         :key="`sentence_${i}`"
@@ -57,12 +58,18 @@
         useNoResultsFallback!: boolean;
 
         get useDefaultValues(): boolean {
+            const sentenceList: ToneScore = [];
+            this.toneResult?.sentencesTones?.forEach(s => {
+                if (s.tones) {
+                    sentenceList.push(...s.tones);
+                }
+            })
             const tones = this.toneResult?.documentTone?.tones ?? [];
-            return this.useNoResultsFallback && tones.length === 0;
+            return this.useNoResultsFallback && (tones.length === 0 || sentenceList.length === 0);
         }
 
         get tones(): ToneScore[] {
-            const tones = this.toneResult?.documentTone?.tones;
+            const tones = this.toneResult?.documentTone?.tones ?? [];
             if (this.useDefaultValues) {
                 return ONBOARDING_TONE_RESULTS.documentTone?.tones ?? [];
             } else {
@@ -95,9 +102,12 @@
             return null;
         }
 
+        get sentenceTones(): SentenceTone[] {
+            return this.useDefaultValues ? ONBOARDING_TONE_RESULTS.sentencesTones! : this.toneResult?.sentencesTones ?? [];
+        }
+
         get hasSentenceBreakdown(): boolean {
-            const tones = this.toneResult?.sentencesTones ?? [];
-            return tones.length > 0;
+            return this.sentenceTones.length > 0;
         }
 
         currentToneIndex = 0;
@@ -109,10 +119,9 @@
             return this.tones[Math.min(this.currentToneIndex, this.tones.length - 1)]?.toneId ?? null;
         };
 
-
         get paragraphs(): SentenceTone[][] {
             const analysisSentences = this.useDefaultValues ? ONBOARDING_TONE_RESULTS.sentencesTones : this.toneResult?.sentencesTones ?? [];
-            const displayText = this.useDefaultValues ? ONBOARDING_DEFAULT_TEXT : this.originalText;
+            const displayText = this.useDefaultValues ? `${ ONBOARDING_DEFAULT_TEXT }`.trim() : this.originalText;
             logger.info("Original text", this.originalText);
             logger.info("display text", displayText);
             if (!displayText || isBlank(displayText) || this.sentencesOnNewLine) {
@@ -132,6 +141,11 @@
 <style scoped lang="scss">
     @import "variables";
     @import "mixins";
+
+    .original-text {
+        font-weight: bold;
+        color: red;
+    }
 
     .toneAnalysis {
         @include shadowbox;
