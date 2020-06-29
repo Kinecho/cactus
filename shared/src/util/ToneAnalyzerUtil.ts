@@ -1,12 +1,12 @@
-import { SentenceTone } from "@shared/api/ToneAnalyzerTypes";
+import { SentenceTone, ToneScore } from "@shared/api/ToneAnalyzerTypes";
 import Logger from "@shared/Logger"
 import { decodeHTMLEntities, isBlank } from "@shared/util/StringUtil";
 
 const logger = new Logger("ToneAnalyzerUtil");
 
 
-export function createParagraphs(params: { text?: string, sentenceTones?: SentenceTone[] }): SentenceTone[][] {
-    const { text, sentenceTones=[] } = params;
+export function createParagraphs(params: { text?: string, sentenceTones?: SentenceTone[], documentTones?: ToneScore[] }): SentenceTone[][] {
+    const { text, sentenceTones = [], documentTones = [] } = params;
 
     const results: SentenceTone[][] = [];
 
@@ -22,6 +22,10 @@ export function createParagraphs(params: { text?: string, sentenceTones?: Senten
     logger.info(`Found ${ textParagraphs.length } paragraphs in the original text. Processing them now`);
     logger.info(`There are ${ sentenceTones.length } sentences in the processed data`);
     const remainingSentences = [...sentenceTones.filter(s => !isBlank(s.text))];
+
+    if (textParagraphs.length === 1 && (sentenceTones ?? []).length === 0) {
+        return [[{ sentenceId: 1, tones: documentTones, text: decodedText }]]
+    }
 
     let sentence = remainingSentences.shift();
     let sentenceId = 1
