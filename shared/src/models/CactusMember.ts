@@ -83,6 +83,7 @@ export enum Field {
     stripeCustomerId = "stripe.customerId",
     coreValues = "coreValues",
     focusElement = "focusElement",
+    lastReplyAt = "lastReplyAt",
 }
 
 export interface PromptSendTime {
@@ -125,6 +126,7 @@ export default class CactusMember extends BaseModel {
         [NotificationChannel.email]: NotificationStatus.ACTIVE,
         [NotificationChannel.push]: NotificationStatus.NOT_SET,
     };
+    adminEmailUnsubscribedAt?: Date;
     timeZone?: string | null;
     locale?: string | null | undefined;
     promptSendTime?: PromptSendTime;
@@ -187,6 +189,7 @@ export default class CactusMember extends BaseModel {
         this.lastSyncedAt = this.decodeDate(this.lastSyncedAt);
         this.lastReplyAt = this.decodeDate(this.lastReplyAt);
         this.lastJournalEntryAt = this.decodeDate(this.lastJournalEntryAt);
+        this.adminEmailUnsubscribedAt = this.decodeDate(this.adminEmailUnsubscribedAt);
     }
 
     static fromMemberData(data: any): CactusMember {

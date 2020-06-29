@@ -1,4 +1,4 @@
-import {SendgridTemplate} from "@shared/models/EmailLog";
+import { SendgridTemplate } from "@shared/models/EmailLog";
 import { TaskQueueConfigName } from "@admin/services/CloudTaskService";
 
 export interface ServiceAccountCredentials {
@@ -18,15 +18,17 @@ export type EnvironmentType = "test" | "dev" | "prod" | "stage"
 export type SendgridTemplateConfig = { [name in SendgridTemplate]: string };
 export type SendgridTemplateUnsubscribeGroupConfig = { [name in SendgridTemplate]?: string };
 
-export type SendgridTemplateGroupConfig = { [name in SendgridTemplate]: {
-    template_id: string,
-    unsubscribe_group_id?: string,
-}}
+export type SendgridTemplateGroupConfig = {
+    [name in SendgridTemplate]: {
+        template_id: string,
+        unsubscribe_group_id?: string,
+    }
+}
 
 export interface TaskQueueConfig {
     name: string,
     handler_path: string,
-    http_method: "GET"|"POST"|"PUT"
+    http_method: "GET" | "POST" | "PUT"
 }
 
 export type TaskQueueConfigMap = {
@@ -115,10 +117,6 @@ export interface CactusConfig {
     sendgrid: {
         api_key: string,
         webhook_verification_key: string,
-        /**
-         * @Deprecated - please use the sendgrid.templates.template_id config instead
-         */
-        template_ids: SendgridTemplateConfig,
         templates: SendgridTemplateGroupConfig,
     },
     language: {
