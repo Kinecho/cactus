@@ -5,9 +5,14 @@ import { decodeHTMLEntities, isBlank } from "@shared/util/StringUtil";
 const logger = new Logger("ToneAnalyzerUtil");
 
 
-export function createParagraphs(params: { text: string, sentenceTones: SentenceTone[] }): SentenceTone[][] {
-    const { text, sentenceTones } = params;
+export function createParagraphs(params: { text?: string, sentenceTones?: SentenceTone[] }): SentenceTone[][] {
+    const { text, sentenceTones=[] } = params;
+
     const results: SentenceTone[][] = [];
+
+    if (!text) {
+        return results;
+    }
 
     logger.info("sentence tones", sentenceTones);
 
