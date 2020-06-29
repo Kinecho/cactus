@@ -4,12 +4,8 @@ import AdminFirestoreService, {
     QueryOptions,
     SaveOptions
 } from "@admin/services/AdminFirestoreService";
-import AdminFirestoreService, { DeleteOptions, QueryOptions, SaveOptions } from "@admin/services/AdminFirestoreService";
-import ReflectionResponse, {
-    InsightWord,
-    InsightWordsResult,
-    ReflectionResponseField
-} from "@shared/models/ReflectionResponse";
+import ReflectionResponse, { ReflectionResponseField } from "@shared/models/ReflectionResponse";
+
 import { BaseModelField, Collection } from "@shared/FirestoreBaseModels";
 import MailchimpService from "@admin/services/MailchimpService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
@@ -32,10 +28,8 @@ import {
     getElementAccumulationCounts
 } from "@shared/util/ReflectionResponseUtil";
 import { QuerySortDirection } from "@shared/types/FirestoreConstants";
-import * as admin from "firebase-admin";
 import { AxiosError } from "axios";
 import Logger from "@shared/Logger";
-import DocumentReference = admin.firestore.DocumentReference;
 import GoogleLanguageService from "@admin/services/GoogleLanguageService";
 import ToneAnalyzerService from "@admin/services/ToneAnalyzerService";
 import { InsightWord } from "@shared/api/InsightLanguageTypes";
