@@ -19,7 +19,7 @@
 
         <div class="noteText">
             <p v-if="useDefaultValues && originalText" class="original-text">{{originalText}}</p>
-            <p v-for="(paragraph, i) in paragraphs" :key="`paragraph_${i}`">
+            <p v-for="(paragraph, i) in paragraphs" :key="`paragraph_${i}`" :class="{fallback: useDefaultValues}">
                 <span v-for="(sentence, i) in paragraph"
                         :key="`sentence_${i}`"
                         :class="{highlight: sentence.tones && sentence.tones.some(t => t.toneId === currentToneId)}"
