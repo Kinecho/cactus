@@ -26,7 +26,7 @@
             </p>
         </div>
     </div>
-    <button class="infoButton tertiary icon" @click="showModal">
+    <button v-if="!useDefaultValues" class="infoButton tertiary icon" @click="showModal">
         <svg-icon icon="info" class="infoIcon"/>
         <span>About</span>
     </button>
@@ -199,6 +199,7 @@
 
     .toneAnalysis {
         @include shadowbox;
+        margin-bottom: 3.2rem;
         position: relative;
 
         &:after {
@@ -255,7 +256,7 @@
         padding-bottom: 1.6rem;
 
         @include r(600) {
-            max-height: 47rem;
+            max-height: 36rem;
             overflow-x: hidden;
             overflow-y: auto;
         }
