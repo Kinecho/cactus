@@ -1,7 +1,6 @@
 <template>
     <div class="insightsCard">
         <h2>Insights</h2>
-        <!-- <p class="subtext" v-if="reflectionResponse.toneAnalysis">This is the positivity rating of your note. Write more to reveal different emotions.</p> -->
         <p class="subtext">This is what your note reveals about your emotions.</p>
         <transition name="component-fade" mode="out-in">
             <spinner v-if="loading" message="Processing insights" key="loader"/>
@@ -12,23 +11,13 @@
                         :original-text="reflectionResponse.content.text"
                         :use-no-results-fallback="true"
                         :sentences-on-new-line="false"/>
-                <button class="infoButton tertiary icon" @click="showModal">
-                    <svg-icon icon="info" class="infoIcon"/>
-                    <span>About</span>
-                </button>
             </div>
         </transition>
-
-        <tone-analyzer-modal
-                :showModal="modalVisible"
-                @close="hideModal()"/>
     </div>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
-    import ToneAnalyzerModal from "@components/ToneAnalyzerModal.vue"
-    import SvgIcon from "@components/SvgIcon.vue";
     import Component from "vue-class-component";
     import { Prop } from "vue-property-decorator";
     import ReflectionResponse from "@shared/models/ReflectionResponse";
@@ -40,8 +29,6 @@
     @Component({
         components: {
             ToneAnalysis,
-            ToneAnalyzerModal,
-            SvgIcon,
             PositivityRating,
             Spinner,
         }
@@ -51,20 +38,9 @@
         @Prop({ type: Object as () => ReflectionResponse, required: false, default: undefined })
         reflectionResponse!: ReflectionResponse | null | undefined;
 
-        modalVisible: boolean = false;
-
         get loading(): boolean {
             return !this.reflectionResponse || this.reflectionResponse?.mightNeedInsightsUpdate === true;
         };
-
-        showModal() {
-            this.modalVisible = true;
-        }
-
-        hideModal() {
-            this.modalVisible = false;
-        }
-
     }
 </script>
 
@@ -116,29 +92,5 @@
 
     .toneAnalysis {
         margin-bottom: 3.2rem;
-    }
-
-    button.infoButton {
-        position: absolute;
-        right: 5.6rem;
-        top: 2rem - 1.2rem;
-
-        @include r(600) {
-            margin-left: -1.2rem;
-            position: static;
-
-            &:hover {
-                background-color: transparent;
-            }
-        }
-
-        span {
-            display: none;
-
-            @include r(600) {
-                display: block;
-                padding-left: .4rem;
-            }
-        }
     }
 </style>
