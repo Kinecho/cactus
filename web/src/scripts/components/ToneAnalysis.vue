@@ -1,4 +1,5 @@
 <template>
+    <div>
     <div class="toneAnalysis">
         <nav class="tabs" v-if="!hasTones">
             <span class="tone none">No emotions detected</span>
@@ -15,11 +16,9 @@
         <nav class="tabs" v-else-if="!hasSentenceBreakdown">
             <span class="tone none">Overall tone is <span class="">{{toneListText}}</span></span>
         </nav>
-
-
         <div class="noteText">
             <p v-if="useDefaultValues && originalText" class="original-text">{{originalText}}</p>
-            <p v-for="(paragraph, i) in paragraphs" :key="`paragraph_${i}`" :class="{fallback: useDefaultValues}">
+            <p v-for="(paragraph, i) in paragraphs" :key="`paragraph_${i}`" class="analyzed-text" :class="{fallback: useDefaultValues}">
                 <span v-for="(sentence, i) in paragraph"
                         :key="`sentence_${i}`"
                         :class="{highlight: sentence.tones && sentence.tones.some(t => t.toneId === currentToneId) && showHighlights}"
@@ -27,6 +26,14 @@
             </p>
         </div>
     </div>
+    <button class="infoButton tertiary icon" @click="showModal">
+        <svg-icon icon="info" class="infoIcon"/>
+        <span>About</span>
+    </button>
+    <tone-analyzer-modal
+            :showModal="modalVisible"
+            @close="hideModal()"/>
+</div>
 </template>
 
 <script lang="ts">
@@ -38,10 +45,18 @@
     import Logger from "@shared/Logger"
     import { createParagraphs } from "@shared/util/ToneAnalyzerUtil";
     import { ONBOARDING_DEFAULT_TEXT, ONBOARDING_TONE_RESULTS } from "@shared/util/ToneAnalyzerFixtures";
+    import ToneAnalyzerModal from "@components/ToneAnalyzerModal.vue"
+    import SvgIcon from "@components/SvgIcon.vue";
 
     const logger = new Logger("ToneAnalysis");
 
-    @Component
+    @Component({
+        components: {
+            ToneAnalyzerModal,
+            SvgIcon,
+        }
+    })
+
     export default class ToneAnalysis extends Vue {
         name = "ToneAnalysis";
 
@@ -56,6 +71,8 @@
 
         @Prop({ type: Boolean, default: true })
         useNoResultsFallback!: boolean;
+
+        modalVisible: boolean = false;
 
         get useDefaultValues(): boolean {
             return this.useNoResultsFallback && Object.keys(this.originalToneMap).length === 0;
@@ -166,17 +183,19 @@
             return p;
         }
 
+        showModal() {
+            this.modalVisible = true;
+        }
+
+        hideModal() {
+            this.modalVisible = false;
+        }
     }
 </script>
 
 <style scoped lang="scss">
     @import "variables";
     @import "mixins";
-
-    .original-text {
-        font-weight: bold;
-        color: red;
-    }
 
     .toneAnalysis {
         @include shadowbox;
@@ -233,25 +252,39 @@
 
     .noteText {
         line-height: 1.6;
-        padding: 0 3.2rem 1.6rem;
+        padding-bottom: 1.6rem;
 
-        @include r(374) {
-            padding: 0 2.4rem 3.2rem;
-        }
         @include r(600) {
             max-height: 47rem;
             overflow-x: hidden;
             overflow-y: auto;
-            padding: 0 2.4rem 3.2rem;
-        }
-
-        p {
-            margin-bottom: 1.6rem;
         }
 
         span {
             margin-right: .4rem;
         }
+    }
+
+    .analyzed-text,
+    .fallback,
+    .original-text {
+        margin-bottom: 1.6rem;
+        padding: 0 3.2rem;
+
+        @include r(374) {
+            padding: 0 2.4rem;
+        }
+    }
+
+    .original-text + .fallback {
+        border-top: 1px solid lighten($lightDolphin, 25%);
+        margin-top: 2.4rem;
+        padding-top: 2.4rem;
+    }
+
+    .fallback {
+        font-size: 1.6rem;
+        opacity: .8;
     }
 
     .highlight {
@@ -262,6 +295,30 @@
     .debug {
         color: red;
         font-family: monospace;
+    }
+
+    button.infoButton {
+        position: absolute;
+        right: 5.6rem;
+        top: 2rem - 1.2rem;
+
+        @include r(600) {
+            margin-left: -1.2rem;
+            position: static;
+
+            &:hover {
+                background-color: transparent;
+            }
+        }
+
+        span {
+            display: none;
+
+            @include r(600) {
+                display: block;
+                padding-left: .4rem;
+            }
+        }
     }
 
 </style>
