@@ -90,7 +90,4 @@
     //     }
     // }
 
-    .toneAnalysis {
-        margin-bottom: 3.2rem;
-    }
 </style>

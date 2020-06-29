@@ -372,7 +372,7 @@
     .close {
         position: absolute;
         right: 0;
-        top: 1.2rem;
+        top: 1rem;
         z-index: 20;
     }
 
