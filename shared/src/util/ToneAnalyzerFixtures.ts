@@ -640,106 +640,78 @@ export const ONBOARDING_TONE_RESULTS: ToneResult = {
     "documentTone": {
         "tones": [
             {
-                "score": 0.670733,
-                "toneId": ToneID.joy,
+                "score": 0.709924,
+                "toneId": "joy",
                 "toneName": "Joy"
             },
             {
-                "score": 0.771318,
-                "toneId": ToneID.confident,
+                "score": 0.952663,
+                "toneId": "confident",
                 "toneName": "Confident"
+            },
+            {
+                "score": 0.714458,
+                "toneId": "analytical",
+                "toneName": "Analytical"
             }
         ]
     },
     "sentencesTones": [
         {
             "sentenceId": 0,
-            "text": "We’re using a service called the Tone Analyzer.",
+            "text": "We use a service called Tone Analyzer.",
             "tones": [
                 {
-                    "score": 0.803567,
-                    "toneId": ToneID.analytical,
+                    "score": 0.94715,
+                    "toneId": "analytical",
                     "toneName": "Analytical"
                 }
             ]
         },
         {
             "sentenceId": 1,
-            "text": "With it, we're able to show you how positive your note is and what emotions are revealed.",
+            "text": "It gives you a positivity rating on your written notes.",
             "tones": [
                 {
-                    "score": 0.671181,
-                    "toneId": ToneID.joy,
+                    "score": 0.830814,
+                    "toneId": "joy",
                     "toneName": "Joy"
                 },
                 {
-                    "score": 0.6821,
-                    "toneId": ToneID.confident,
+                    "score": 0.849827,
+                    "toneId": "confident",
                     "toneName": "Confident"
+                },
+                {
+                    "score": 0.687768,
+                    "toneId": "analytical",
+                    "toneName": "Analytical"
                 }
             ]
         },
         {
             "sentenceId": 2,
-            "text": "Next time, try writing a few more words.",
-            "tones": [
-                {
-                    "score": 0.615352,
-                    "toneId": ToneID.tentative,
-                    "toneName": "Tentative"
-                }
-            ]
+            "text": "You can also see which tones are sensed in your writing, and where.",
+            "tones": []
         },
         {
             "sentenceId": 3,
-            "text": "Here's an example:",
+            "text": "These include Anger, Fear, Joy, Sadness, Analytical, Confident, and Tentative.",
             "tones": [
                 {
-                    "score": 0.991736,
-                    "toneId": ToneID.analytical,
-                    "toneName": "Analytical"
+                    "score": 0.958009,
+                    "toneId": "fear",
+                    "toneName": "Fear"
                 }
             ]
         },
         {
             "sentenceId": 4,
-            "text": "",
-            "tones": []
-        },
-        {
-            "sentenceId": 5,
-            "text": "I wasn’t sure if I was able to get everything done.",
-            "tones": [
-                {
-                    "score": 0.653099,
-                    "toneId": ToneID.analytical,
-                    "toneName": "Analytical"
-                },
-                {
-                    "score": 0.602068,
-                    "toneId": ToneID.tentative,
-                    "toneName": "Tentative"
-                }
-            ]
-        },
-        {
-            "sentenceId": 6,
-            "text": "I felt great after enjoying a warm cup of coffee on the front porch.",
-            "tones": [
-                {
-                    "score": 0.938492,
-                    "toneId": ToneID.joy,
-                    "toneName": "Joy"
-                }
-            ]
-        },
-        {
-            "sentenceId": 7,
             "text": "Your notes remain private, secure, and forever yours.",
             "tones": [
                 {
                     "score": 0.97759,
-                    "toneId": ToneID.confident,
+                    "toneId": "confident",
                     "toneName": "Confident"
                 }
             ]
