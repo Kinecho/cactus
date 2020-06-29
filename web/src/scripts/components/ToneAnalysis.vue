@@ -168,17 +168,17 @@
 
             logger.info("Original text", this.originalText);
             logger.info("display text", displayText);
-            if (!displayText || isBlank(displayText) || this.sentencesOnNewLine) {
-                const r = analysisSentences?.map(sentence => ([sentence])) ?? []
-                logger.info("Using original sentence map", r);
-                return r;
-            }
 
             const p = createParagraphs({
                 text: displayText,
                 sentenceTones: analysisSentences,
                 documentTones: documentTones
             })
+
+            if (!displayText || isBlank(displayText) || this.sentencesOnNewLine) {
+                return p.flat().map(i => [i]);
+            }
+
             logger.info("create paragraph result", p);
             return p;
         }
