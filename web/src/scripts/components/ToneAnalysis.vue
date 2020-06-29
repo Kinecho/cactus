@@ -13,7 +13,7 @@
             </span>
         </nav>
         <nav class="tabs" v-else-if="!hasSentenceBreakdown">
-            <span class="tone none">Overall tone is: <span class="">{{toneListText}}</span></span>
+            <span class="tone none">Overall tone is <span class="">{{toneListText}}</span></span>
         </nav>
 
 
@@ -97,7 +97,7 @@
                     return txt;
                 }
                 let last = tones.pop();
-                return [tones.map(t => this.formatToneScore(t)).join(", "), this.formatToneScore(last)].join(" and ");
+                return [tones.map(t => this.formatToneScore(t)).join(", "), this.formatToneScore(last)].join(" & ");
             }
             return null;
         }

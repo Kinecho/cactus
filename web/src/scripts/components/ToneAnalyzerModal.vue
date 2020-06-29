@@ -5,8 +5,8 @@
     >
         <div slot="body" class="modalContainer">
             <h3>About Insights</h3>
-            <p>We’re using a service called Tone Analyzer. When you write a note, the analyzer gives you a sense of how positive your note is.</p>
-            <p>Dive deeper with the sentence-level analysis, which shows the tones that are strongest. Tones include: Anger, Fear, Joy, Sadness, Analytical, Confident, and Tentative.</p>
+            <p>We use a service called Tone Analyzer. It gives you a positivity rating on your written notes.</p>
+            <p>You can also see which tones are sensed in your writing, and where. These include Anger, Fear, Joy, Sadness, Analytical, Confident, and Tentative.</p>
             <p>Your notes remain private, secure, and forever yours.</p>
         </div>
     </modal>

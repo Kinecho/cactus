@@ -629,11 +629,9 @@ export const PattonSentiment: SentimentResult = {
     "language": "en"
 }
 
-export const ONBOARDING_DEFAULT_TEXT = `We’re using a service called the Tone Analyzer. With it, we're able to show you how positive your note is and what emotions are revealed. Next time, try writing a few more words.
+export const ONBOARDING_DEFAULT_TEXT = `We use a service called Tone Analyzer. It gives you a positivity rating on your written notes.
 
-Here's an example:
-
-I wasn’t sure if I was able to get everything done. I felt great after enjoying a warm cup of coffee on the front porch.
+You can also see which tones are sensed in your writing, and where. These include Anger, Fear, Joy, Sadness, Analytical, Confident, and Tentative.
 
 Your notes remain private, secure, and forever yours.
 `;
