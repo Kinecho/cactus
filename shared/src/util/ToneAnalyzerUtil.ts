@@ -16,7 +16,7 @@ export function createParagraphs(params: { text: string, sentenceTones: Sentence
     const textParagraphs: string[] = decodedText.split("\n").filter(s => !isBlank(s));
     logger.info(`Found ${ textParagraphs.length } paragraphs in the original text. Processing them now`);
     logger.info(`There are ${ sentenceTones.length } sentences in the processed data`);
-    const remainingSentences = [...sentenceTones];
+    const remainingSentences = [...sentenceTones.filter(s => !isBlank(s.text))];
 
     let sentence = remainingSentences.shift();
     let sentenceId = 1

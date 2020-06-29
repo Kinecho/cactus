@@ -628,3 +628,203 @@ export const PattonSentiment: SentimentResult = {
     },
     "language": "en"
 }
+
+export const ONBOARDING_DEFAULT_TEXT = `We’re using a service called the Tone Analyzer. With it, we're able to show you how positive your note is and what emotions are revealed. Next time, try writing a few more words.
+
+Here's an example:
+
+I wasn’t sure if I was able to get everything done. I felt great after enjoying a warm cup of coffee on the front porch.
+
+Your notes remain private, secure, and forever yours.
+`;
+
+export const ONBOARDING_TONE_RESULTS: ToneResult = {
+    "documentTone": {
+        "tones": [
+            {
+                "score": 0.670733,
+                "toneId": ToneID.joy,
+                "toneName": "Joy"
+            },
+            {
+                "score": 0.771318,
+                "toneId": ToneID.confident,
+                "toneName": "Confident"
+            }
+        ]
+    },
+    "sentencesTones": [
+        {
+            "sentenceId": 0,
+            "text": "We’re using a service called the Tone Analyzer.",
+            "tones": [
+                {
+                    "score": 0.803567,
+                    "toneId": ToneID.analytical,
+                    "toneName": "Analytical"
+                }
+            ]
+        },
+        {
+            "sentenceId": 1,
+            "text": "With it, we're able to show you how positive your note is and what emotions are revealed.",
+            "tones": [
+                {
+                    "score": 0.671181,
+                    "toneId": ToneID.joy,
+                    "toneName": "Joy"
+                },
+                {
+                    "score": 0.6821,
+                    "toneId": ToneID.confident,
+                    "toneName": "Confident"
+                }
+            ]
+        },
+        {
+            "sentenceId": 2,
+            "text": "Next time, try writing a few more words.",
+            "tones": [
+                {
+                    "score": 0.615352,
+                    "toneId": ToneID.tentative,
+                    "toneName": "Tentative"
+                }
+            ]
+        },
+        {
+            "sentenceId": 3,
+            "text": "Here's an example:",
+            "tones": [
+                {
+                    "score": 0.991736,
+                    "toneId": ToneID.analytical,
+                    "toneName": "Analytical"
+                }
+            ]
+        },
+        {
+            "sentenceId": 4,
+            "text": "",
+            "tones": []
+        },
+        {
+            "sentenceId": 5,
+            "text": "I wasn’t sure if I was able to get everything done.",
+            "tones": [
+                {
+                    "score": 0.653099,
+                    "toneId": ToneID.analytical,
+                    "toneName": "Analytical"
+                },
+                {
+                    "score": 0.602068,
+                    "toneId": ToneID.tentative,
+                    "toneName": "Tentative"
+                }
+            ]
+        },
+        {
+            "sentenceId": 6,
+            "text": "I felt great after enjoying a warm cup of coffee on the front porch.",
+            "tones": [
+                {
+                    "score": 0.938492,
+                    "toneId": ToneID.joy,
+                    "toneName": "Joy"
+                }
+            ]
+        },
+        {
+            "sentenceId": 7,
+            "text": "Your notes remain private, secure, and forever yours.",
+            "tones": [
+                {
+                    "score": 0.97759,
+                    "toneId": ToneID.confident,
+                    "toneName": "Confident"
+                }
+            ]
+        }
+    ]
+}
+
+export const ONBOARDING_SENTIMENT_RESULT: SentimentResult = {
+    "sentences": [
+        {
+            "text": {
+                "content": "We’re using a service called the Tone Analyzer.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.10000000149011612,
+                "score": -0.10000000149011612
+            }
+        },
+        {
+            "text": {
+                "content": "With it, we're able to show you how positive your note is and what emotions are revealed.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.8999999761581421,
+                "score": 0.8999999761581421
+            }
+        },
+        {
+            "text": {
+                "content": "Next time, try writing a few more words.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.10000000149011612,
+                "score": -0.10000000149011612
+            }
+        },
+        {
+            "text": {
+                "content": "Here's an example:",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.20000000298023224,
+                "score": -0.20000000298023224
+            }
+        },
+        {
+            "text": {
+                "content": "I wasn’t sure if I was able to get everything done.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.4000000059604645,
+                "score": 0.4000000059604645
+            }
+        },
+        {
+            "text": {
+                "content": "I felt great after enjoying a warm cup of coffee on the front porch.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.8999999761581421,
+                "score": 0.8999999761581421
+            }
+        },
+        {
+            "text": {
+                "content": "Your notes remain private, secure, and forever yours.",
+                "beginOffset": -1
+            },
+            "sentiment": {
+                "magnitude": 0.8999999761581421,
+                "score": 0.8999999761581421
+            }
+        }
+    ],
+    "documentSentiment": {
+        "magnitude": 3.700000047683716,
+        "score": 0.30000001192092896
+    },
+    "language": "en"
+}

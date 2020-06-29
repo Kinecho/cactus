@@ -1,6 +1,9 @@
 <template>
-    <div class="toneAnalysis" v-if="toneResult">
-        <nav class="tabs" v-if="tones && tones.length > 0">
+    <div class="toneAnalysis">
+        <nav class="tabs" v-if="!hasTones">
+            <span class="tone none">No Emotions Detected</span>
+        </nav>
+        <nav class="tabs" v-else-if="hasSentenceBreakdown">
             <span v-for="(tone, i) in tones"
                     :key="`tone_${i}`"
                     class="tone"
@@ -9,9 +12,10 @@
                 {{tone.toneName}}
             </span>
         </nav>
-        <nav class="tabs" v-else>
-            <span class="tone none">No Emotions Detected</span>
+        <nav class="tabs" v-else-if="!hasSentenceBreakdown">
+            <span class="tone none">Overall tone is: <span class="">{{toneListText}}</span></span>
         </nav>
+
 
         <div class="noteText">
             <p v-for="(paragraph, i) in paragraphs" :key="`paragraph_${i}`">
@@ -29,9 +33,10 @@
     import Component from "vue-class-component"
     import { SentenceTone, ToneID, ToneResult, ToneScore } from "@shared/api/ToneAnalyzerTypes";
     import { Prop } from "vue-property-decorator";
-    import { isBlank } from "@shared/util/StringUtil";
+    import { formatPercentage, isBlank } from "@shared/util/StringUtil";
     import Logger from "@shared/Logger"
     import { createParagraphs } from "@shared/util/ToneAnalyzerUtil";
+    import { ONBOARDING_DEFAULT_TEXT, ONBOARDING_TONE_RESULTS } from "@shared/util/ToneAnalyzerFixtures";
 
     const logger = new Logger("ToneAnalysis");
 
@@ -48,8 +53,51 @@
         @Prop({ type: Boolean, default: false })
         sentencesOnNewLine!: boolean;
 
+        @Prop({ type: Boolean, default: true })
+        useNoResultsFallback!: boolean;
+
+        get useDefaultValues(): boolean {
+            const tones = this.toneResult?.documentTone?.tones ?? [];
+            return this.useNoResultsFallback && tones.length === 0;
+        }
+
         get tones(): ToneScore[] {
-            return this.toneResult?.documentTone?.tones ?? [];
+            const tones = this.toneResult?.documentTone?.tones;
+            if (this.useDefaultValues) {
+                return ONBOARDING_TONE_RESULTS.documentTone?.tones ?? [];
+            } else {
+                return tones;
+            }
+        }
+
+        get hasTones(): boolean {
+            return this.tones && this.tones.length > 0;
+        }
+
+        formatToneScore(t?: ToneScore): string | undefined {
+            if (!t) {
+                return undefined;
+            }
+            return `${ t.toneName }`
+        }
+
+        get toneListText(): string | null {
+            if (this.tones && this.tones.length > 0) {
+                let tones = [...this.tones];
+                if (tones.length === 1) {
+                    const txt = this.formatToneScore(tones[0]) ?? null;
+                    logger.info("Tone Text", txt);
+                    return txt;
+                }
+                let last = tones.pop();
+                return [tones.map(t => this.formatToneScore(t)).join(", "), this.formatToneScore(last)].join(" and ");
+            }
+            return null;
+        }
+
+        get hasSentenceBreakdown(): boolean {
+            const tones = this.toneResult?.sentencesTones ?? [];
+            return tones.length > 0;
         }
 
         currentToneIndex = 0;
@@ -61,16 +109,19 @@
             return this.tones[Math.min(this.currentToneIndex, this.tones.length - 1)]?.toneId ?? null;
         };
 
+
         get paragraphs(): SentenceTone[][] {
-            const analysisSentences = this.toneResult?.sentencesTones ?? []
+            const analysisSentences = this.useDefaultValues ? ONBOARDING_TONE_RESULTS.sentencesTones : this.toneResult?.sentencesTones ?? [];
+            const displayText = this.useDefaultValues ? ONBOARDING_DEFAULT_TEXT : this.originalText;
             logger.info("Original text", this.originalText);
-            if (!this.originalText || isBlank(this.originalText) || this.sentencesOnNewLine) {
+            logger.info("display text", displayText);
+            if (!displayText || isBlank(displayText) || this.sentencesOnNewLine) {
                 const r = analysisSentences?.map(sentence => ([sentence])) ?? []
                 logger.info("Using original sentence map", r);
                 return r;
             }
 
-            const p = createParagraphs({ text: this.originalText, sentenceTones: analysisSentences })
+            const p = createParagraphs({ text: displayText, sentenceTones: analysisSentences })
             logger.info("create paragraph result", p);
             return p;
         }

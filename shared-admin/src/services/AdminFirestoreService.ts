@@ -79,6 +79,7 @@ export default class AdminFirestoreService {
     firestore: FirebaseFirestore.Firestore;
     config: CactusConfig;
     static Timestamp = Timestamp;
+    static _dbInitialized: boolean = false
 
     protected static sharedInstance: AdminFirestoreService;
 
@@ -98,7 +99,11 @@ export default class AdminFirestoreService {
         this.admin = admin;
 
         this.firestore = admin.firestore();
-        this.firestore.settings({ ignoreUndefinedProperties: true });
+        if (!AdminFirestoreService._dbInitialized) {
+            this.firestore.settings({ ignoreUndefinedProperties: true });
+            AdminFirestoreService._dbInitialized = true
+        }
+
         this.config = config;
     }
 
