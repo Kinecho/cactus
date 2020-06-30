@@ -318,29 +318,27 @@ async function createSentPromptIfNeeded(options: { member?: CactusMember, prompt
         return { created: false, sentPrompt };
     }
 
-    if (member && member.id && prompt && prompt.id) {
-        sentPrompt = new SentPrompt();
-        sentPrompt.userId = member.userId;
-        sentPrompt.memberEmail = member.email;
-        sentPrompt.firstSentAt = new Date();
-        sentPrompt.lastSentAt = new Date();
-        sentPrompt.promptId = prompt.id;
-        sentPrompt.cactusMemberId = member.id;
-        sentPrompt.promptContentEntryId = prompt.promptContentEntryId;
-        if (reflectionResponse && reflectionResponse.responseMedium && [ResponseMedium.PROMPT_WEB, ResponseMedium.PROMPT_ANDROID, ResponseMedium.PROMPT_IOS].includes(reflectionResponse.responseMedium)) {
-            sentPrompt.sendHistory.push({
-                sendDate: new Date(),
-                medium: PromptSendMedium.PROMPT_CONTENT,
-            })
-        }
-        sentPrompt.completed = true;
-        sentPrompt.completedAt = new Date();
-
-        const saved = await AdminSentPromptService.getSharedInstance().save(sentPrompt);
-        return { sentPrompt: saved, created: true };
+    if (!member) {
+        return { created: false };
     }
 
-    return { created: false };
+    const createPromptResult = dminSentPromptService.createSentPrompt({
+        member,
+        createHistoryItem: true,
+        medium: PromptSendMedium.PROMPT_CONTENT,
+        promptId: prompt?.id,
+        prompt: prompt,
+    })
+
+    if (!createPromptResult.sentPrompt) {
+        return { created: false };
+    }
+
+    sentPrompt = createPromptResult.sentPrompt;
+    const saved = await AdminSentPromptService.getSharedInstance().save(sentPrompt);
+
+    return { sentPrompt: saved, created: true };
+
 }
 
 async function getSentPrompt(options: { member?: CactusMember, prompt?: ReflectionPrompt, reflectionResponse?: ReflectionResponse }): Promise<SentPrompt | undefined> {
