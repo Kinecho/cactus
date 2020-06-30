@@ -540,7 +540,9 @@
                     const path = event.composedPath();
                     const foundExcludedTarget = path.find((t) => {
                         const el = t as HTMLElement;
-                        return !!excludedTags.includes((el.tagName || "").toUpperCase());
+                        const excludedTag = excludedTags.includes((el.tagName || "").toUpperCase());
+                        const dataDisabled = el.dataset && el.dataset.disableCardNav === "true"
+                        return !!excludedTag || dataDisabled
 
                     });
 

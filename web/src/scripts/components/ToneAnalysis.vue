@@ -1,39 +1,47 @@
 <template>
     <div>
-    <div class="toneAnalysis">
-        <nav class="tabs" v-if="!hasTones">
-            <span class="tone none">No emotions detected</span>
-        </nav>
-        <nav class="tabs" v-else-if="hasSentenceBreakdown">
+        <div class="toneAnalysis">
+            <nav class="tabs" v-if="!hasTones">
+                <span class="tone none">No emotions detected</span>
+            </nav>
+            <nav class="tabs" v-else-if="hasSentenceBreakdown">
             <span v-for="(tone, i) in tones"
                     :key="`tone_${i}`"
                     class="tone"
+                    :data-disable-card-nav="true"
                     :class="{selected: currentToneId === tone.toneId}"
                     @click="currentToneIndex = i">
                 {{tone.toneName}}
             </span>
-        </nav>
-        <nav class="tabs" v-else-if="!hasSentenceBreakdown">
-            <span class="tone none">Overall tone is <span class="">{{toneListText}}</span></span>
-        </nav>
-        <div class="noteText">
-            <p v-if="useDefaultValues && originalText" class="original-text">{{originalText}}</p>
-            <p v-for="(paragraph, i) in paragraphs" :key="`paragraph_${i}`" class="analyzed-text" :class="{fallback: useDefaultValues}">
+            </nav>
+            <nav class="tabs" v-else-if="!hasSentenceBreakdown">
+                <span class="tone none">Overall tone is <span class="">{{toneListText}}</span></span>
+            </nav>
+            <div class="noteText">
+                <p v-if="useDefaultValues && originalText" v-for="(paragraph, i) in originalParagraphs"
+                        :key="`original_paragraph_${i}`"
+                        class="original-text">
+                <span v-for="(sentence, i) in paragraph"
+                        :key="`original_sentence_${i}`"
+                        :class="{highlight: sentence.tones && sentence.tones.some(t => t.toneId === currentToneId) && showHighlights}"
+                >{{sentence.text + ' '}}</span>
+                </p>
+                <p v-for="(paragraph, i) in paragraphs" :key="`paragraph_${i}`" class="analyzed-text" :class="{fallback: useDefaultValues}">
                 <span v-for="(sentence, i) in paragraph"
                         :key="`sentence_${i}`"
                         :class="{highlight: sentence.tones && sentence.tones.some(t => t.toneId === currentToneId) && showHighlights}"
                 >{{sentence.text + ' '}}</span>
-            </p>
+                </p>
+            </div>
         </div>
+        <button v-if="!useDefaultValues" class="infoButton tertiary icon" @click="showModal">
+            <svg-icon icon="info" class="infoIcon"/>
+            <span>About</span>
+        </button>
+        <tone-analyzer-modal
+                :showModal="modalVisible"
+                @close="hideModal()"/>
     </div>
-    <button v-if="!useDefaultValues" class="infoButton tertiary icon" @click="showModal">
-        <svg-icon icon="info" class="infoIcon"/>
-        <span>About</span>
-    </button>
-    <tone-analyzer-modal
-            :showModal="modalVisible"
-            @close="hideModal()"/>
-</div>
 </template>
 
 <script lang="ts">
@@ -50,13 +58,16 @@
 
     const logger = new Logger("ToneAnalysis");
 
+    interface ToneScoreMap {
+        [key: string]: ToneScore
+    }
+
     @Component({
         components: {
             ToneAnalyzerModal,
             SvgIcon,
         }
     })
-
     export default class ToneAnalysis extends Vue {
         name = "ToneAnalysis";
 
@@ -75,17 +86,17 @@
         modalVisible: boolean = false;
 
         get useDefaultValues(): boolean {
-            return this.useNoResultsFallback && Object.keys(this.originalToneMap).length === 0;
+            return this.useNoResultsFallback && Object.keys(this.toneResult?.sentencesTones ?? []).length === 0;
         }
 
         get showHighlights(): boolean {
             return this.useDefaultValues || (this.toneResult?.sentencesTones ?? []).length > 0;
         }
 
-        get fallbackToneMap(): { [id: ToneID]: ToneScore } {
-            const toneMap: { [key: ToneID]: ToneScore } = {}
+        get fallbackToneMap(): ToneScoreMap {
+            const toneMap: ToneScoreMap = {}
 
-            ONBOARDING_TONE_RESULTS.sentencesTones.forEach(s => {
+            ONBOARDING_TONE_RESULTS.sentencesTones?.forEach(s => {
                 s.tones?.forEach(t => {
                     toneMap[t.toneId] = t;
                 })
@@ -94,11 +105,11 @@
             ONBOARDING_TONE_RESULTS.documentTone?.tones?.forEach(t => {
                 toneMap[t.toneId] = t;
             })
-            return Object.values(toneMap);
+            return toneMap;
         }
 
-        get originalToneMap(): { [id: ToneID]: ToneScore } {
-            const toneMap: { [key: ToneID]: ToneScore } = {}
+        get originalToneMap(): ToneScoreMap {
+            const toneMap: ToneScoreMap = {}
             this.toneResult?.sentencesTones?.forEach(s => {
                 s.tones?.forEach(t => {
                     toneMap[t.toneId] = t;
@@ -161,10 +172,10 @@
             return this.tones[Math.min(this.currentToneIndex, this.tones.length - 1)]?.toneId ?? null;
         };
 
-        get paragraphs(): SentenceTone[][] {
-            const analysisSentences = this.useDefaultValues ? ONBOARDING_TONE_RESULTS.sentencesTones : this.toneResult?.sentencesTones ?? [];
-            const displayText = this.useDefaultValues ? `${ ONBOARDING_DEFAULT_TEXT }`.trim() : this.originalText;
-            const documentTones = this.useDefaultValues ? ONBOARDING_TONE_RESULTS.documentTone?.tones : this.toneResult?.documentTone?.tones ?? []
+        get originalParagraphs(): SentenceTone[][] {
+            const analysisSentences = this.toneResult?.sentencesTones ?? [];
+            const displayText = this.originalText;
+            const documentTones = this.toneResult?.documentTone?.tones ?? []
 
             logger.info("Original text", this.originalText);
             logger.info("display text", displayText);
@@ -181,6 +192,29 @@
 
             logger.info("create paragraph result", p);
             return p;
+        }
+
+        get fallbackParagraphs() {
+            const analysisSentences = ONBOARDING_TONE_RESULTS.sentencesTones;
+            const displayText = `${ ONBOARDING_DEFAULT_TEXT }`.trim();
+            const documentTones = ONBOARDING_TONE_RESULTS.documentTone?.tones;
+
+            const p = createParagraphs({
+                text: displayText,
+                sentenceTones: analysisSentences,
+                documentTones: documentTones
+            })
+
+            if (!displayText || isBlank(displayText) || this.sentencesOnNewLine) {
+                return p.flat().map(i => [i]);
+            }
+
+            logger.info("create paragraph result", p);
+            return p;
+        }
+
+        get paragraphs(): SentenceTone[][] {
+            return this.useDefaultValues ? this.fallbackParagraphs : this.originalParagraphs;
         }
 
         showModal() {

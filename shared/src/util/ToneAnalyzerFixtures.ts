@@ -629,31 +629,29 @@ export const PattonSentiment: SentimentResult = {
     "language": "en"
 }
 
-export const ONBOARDING_DEFAULT_TEXT = `We use a service called Tone Analyzer. It gives you a positivity rating on your written notes.
+export const ONBOARDING_DEFAULT_TEXT = `We use a service called Tone Analyzer. It gives you a positivity rating on your written notes. You're going to love it!
 
 You can also see which tones are sensed in your writing, and where. These include Anger, Fear, Joy, Sadness, Analytical, Confident, and Tentative.
 
 Your notes remain private, secure, and forever yours.
-
-You're going to love it!
 `;
 
 export const ONBOARDING_TONE_RESULTS: ToneResult = {
     "documentTone": {
         "tones": [
             {
-                "score": 0.667684,
-                "toneId": "joy",
-                "toneName": "Joy"
-            },
-            {
                 "score": 0.688301,
-                "toneId": "fear",
+                toneId: ToneID.fear,
                 "toneName": "Fear"
             },
             {
+                "score": 0.667684,
+                toneId: ToneID.joy,
+                "toneName": "Joy"
+            },
+            {
                 "score": 0.944427,
-                "toneId": "confident",
+                toneId: ToneID.confident,
                 "toneName": "Confident"
             }
         ]
@@ -665,7 +663,7 @@ export const ONBOARDING_TONE_RESULTS: ToneResult = {
             "tones": [
                 {
                     "score": 0.94715,
-                    "toneId": "analytical",
+                    toneId: ToneID.analytical,
                     "toneName": "Analytical"
                 }
             ]
@@ -676,56 +674,56 @@ export const ONBOARDING_TONE_RESULTS: ToneResult = {
             "tones": [
                 {
                     "score": 0.830814,
-                    "toneId": "joy",
+                    toneId: ToneID.joy,
                     "toneName": "Joy"
                 },
                 {
-                    "score": 0.687768,
-                    "toneId": "analytical",
-                    "toneName": "Analytical"
+                    "score": 0.849827,
+                    toneId: ToneID.confident,
+                    "toneName": "Confident"
                 },
                 {
-                    "score": 0.849827,
-                    "toneId": "confident",
-                    "toneName": "Confident"
+                    "score": 0.687768,
+                    toneId: ToneID.analytical,
+                    "toneName": "Analytical"
                 }
             ]
         },
         {
             "sentenceId": 2,
+            "text": "You're going to love it!",
+            "tones": [
+                {
+                    "score": 0.795093,
+                    toneId: ToneID.joy,
+                    "toneName": "Joy"
+                }
+            ]
+        },
+        {
+            "sentenceId": 3,
             "text": "You can also see which tones are sensed in your writing, and where.",
             "tones": []
         },
         {
-            "sentenceId": 3,
+            "sentenceId": 4,
             "text": "These include Anger, Fear, Joy, Sadness, Analytical, Confident, and Tentative.",
             "tones": [
                 {
                     "score": 0.958009,
-                    "toneId": "fear",
+                    toneId: ToneID.fear,
                     "toneName": "Fear"
                 }
             ]
         },
         {
-            "sentenceId": 4,
+            "sentenceId": 5,
             "text": "Your notes remain private, secure, and forever yours.",
             "tones": [
                 {
                     "score": 0.97759,
-                    "toneId": "confident",
+                    toneId: ToneID.confident,
                     "toneName": "Confident"
-                }
-            ]
-        },
-        {
-            "sentenceId": 5,
-            "text": "You're going to love it!",
-            "tones": [
-                {
-                    "score": 0.795093,
-                    "toneId": "joy",
-                    "toneName": "Joy"
                 }
             ]
         }
