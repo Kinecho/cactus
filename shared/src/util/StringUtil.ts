@@ -335,7 +335,7 @@ export function formatPercentage(input: number | string | null | undefined, deci
         return null;
     }
 
-    let num = Number(input);
+    const num = Number(input);
     if (!isNumber(num)) {
         return null;
     }

@@ -183,10 +183,10 @@ describe("createParagraphs", () => {
         expect(result).toEqual([[
             {
                 sentenceId: 1,
-                text: "We’re using a service called the Tone Analyzer.",
+                text: "We use a service called the Tone Analyzer.",
                 tones: [
                     {
-                        score: 0.803567,
+                        score: 0.94715,
                         toneId: "analytical",
                         toneName: "Analytical"
                     }
@@ -194,74 +194,48 @@ describe("createParagraphs", () => {
             },
             {
                 sentenceId: 2,
-                text: "With it, we're able to show you how positive your note is and what emotions are revealed.",
+                text: "It gives you a positivity rating on your written notes.",
                 tones: [
                     {
-                        score: 0.671181,
+                        score: 0.830814,
                         toneId: "joy",
                         toneName: "Joy"
                     },
                     {
-                        score: 0.6821,
+                        score: 0.849827,
                         toneId: "confident",
                         toneName: "Confident"
+                    },
+                    {
+                        score: 0.991736,
+                        toneId: "analytical",
+                        toneName: "Analytical"
                     }
                 ]
             },
             {
                 sentenceId: 3,
-                text: "Next time, try writing a few more words.",
-                tones: [
-                    {
-                        score: 0.615352,
-                        toneId: "tentative",
-                        toneName: "Tentative"
-                    }
-                ]
-            }
-        ],
-            [
-                {
-                    sentenceId: 4,
-                    text: "Here's an example:",
-                    tones: [
-                        {
-                            score: 0.991736,
-                            toneId: "analytical",
-                            toneName: "Analytical"
-                        }
-                    ]
-                }
-            ],
-            [{
-                sentenceId: 5,
-                text: "I wasn’t sure if I was able to get everything done.",
-                tones: [
-                    {
-                        "score": 0.653099,
-                        "toneId": "analytical",
-                        "toneName": "Analytical"
-                    },
-                    {
-                        "score": 0.602068,
-                        "toneId": "tentative",
-                        "toneName": "Tentative"
-                    }
-                ],
+                text: "You can also see which tones are sensed in your writing.",
+                tones: []
             }, {
-                sentenceId: 6,
-                text: "I felt great after enjoying a warm cup of coffee on the front porch.",
+                sentenceId: 4,
+                text: "These include Joy, Anger, Confident, and more.",
                 tones: [
                     {
-                        "score": 0.938492,
+                        "score": 0.830814,
                         "toneId": "joy",
                         "toneName": "Joy"
+                    },
+                    {
+                        "score": 0.849827,
+                        "toneId": "confident",
+                        "toneName": "Confident"
                     }
                 ]
             }],
             [
                 {
-                    sentenceId: 7,
+                    sentenceId: 5,
                     text: "Your notes remain private, secure, and forever yours.",
                     tones: [
                         {
