@@ -76,6 +76,12 @@
         }
     }
 
+    h2 {
+        @include r(600) {
+            font-size: 3.2rem;
+        }
+    }
+
     .subtext {
         font-size: 1.6rem;
         margin-bottom: 3.2rem;
