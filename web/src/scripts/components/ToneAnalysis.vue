@@ -18,14 +18,6 @@
                 <span class="tone none">Overall tone is <span class="">{{toneListText}}</span></span>
             </nav>
             <div class="noteText">
-                <!-- <p v-if="useDefaultValues && originalText" v-for="(paragraph, i) in originalParagraphs"
-                        :key="`original_paragraph_${i}`"
-                        class="original-text">
-                <span v-for="(sentence, i) in paragraph"
-                        :key="`original_sentence_${i}`"
-                        :class="{highlight: sentence.tones && sentence.tones.some(t => t.toneId === currentToneId) && showHighlights}"
-                >{{sentence.text + ' '}}</span>
-                </p> -->
                 <p class="analyzed-text" v-if="useDefaultValues && originalText">Your note didn’t reveal specific emotions today.</p>
                 <p v-for="(paragraph, i) in paragraphs" :key="`paragraph_${i}`" class="analyzed-text" :class="{fallback: useDefaultValues}">
                 <span v-for="(sentence, i) in paragraph"
