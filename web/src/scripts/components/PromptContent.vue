@@ -20,7 +20,7 @@
             <section class="content-container centered" v-else-if="!loading && promptContent && responsesLoaded">
                 <div class="progress-wrapper" v-if="!completed && !showSharing && !isShareNote">
                     <div class="progress">
-                        <span v-for="(content, index) in promptContent.content" :class="['segment', {complete: index <= activeIndex}]"></span>
+                        <span v-for="(content, index) in contentItems" :class="['segment', {complete: index <= activeIndex}]"></span>
                     </div>
                 </div>
 
@@ -93,6 +93,7 @@
     import { PageRoute } from '@shared/PageRoutes'
     import ContentCard from "@components/PromptContentCard.vue"
     import Celebrate from "@components/ReflectionCelebrateCard.vue";
+    import InsightsCard from "@components/InsightsCard.vue";
     import PromptContent, { Content, ContentType } from '@shared/models/PromptContent'
     import { CactusElement } from '@shared/models/CactusElement';
     import Spinner from "@components/Spinner.vue";
@@ -129,6 +130,7 @@
             ContentCard,
             Spinner,
             Celebrate,
+            InsightsCard,
             PromptContentSharing,
             FourOhFour,
             PricingModal
@@ -364,21 +366,22 @@
                     return;
                 }
 
-                const items = [...this.promptContent.content];
+                const items: Content[] = [...this.promptContent.content];
 
-                logger.log("this.promptContent.shareReflectionCopy_md", this.promptContent.shareReflectionCopy_md);
 
-                // if (this.reflectionResponse && !isBlank(this.reflectionResponse.content.text)) {
-                //     let shareReflectionCopy = isBlank(this.promptContent.shareReflectionCopy_md) ? copy.prompts.SHARE_PROMPT_COPY_MD : this.promptContent.shareReflectionCopy_md;
-                //     const sharingCard: Content = {
-                //         contentType: ContentType.share_reflection,
-                //         text_md: shareReflectionCopy,
-                //         title: copy.prompts.SHARE_YOUR_NOTE,
-                //     };
-                //     logger.log("adding share card to content items");
-                //     items.push(sharingCard);
-                // }
+                const hasInsightsCard = items.some(c => c.contentType === ContentType.insights);
+                if (!hasInsightsCard) {
+                    const reflectIndex = items.findIndex(c => c.contentType === ContentType.reflect)
+                    const insightsCard: Content = {
+                        contentType: ContentType.insights,
+                    }
+                    if (reflectIndex >= 0 && reflectIndex !== items.length) {
+                        items.splice(reflectIndex + 1, 0, insightsCard)
+                    } else if (reflectIndex === items.length) {
+                        items.push(insightsCard);
+                    }
 
+                }
 
                 return items;
 
@@ -537,7 +540,9 @@
                     const path = event.composedPath();
                     const foundExcludedTarget = path.find((t) => {
                         const el = t as HTMLElement;
-                        return !!excludedTags.includes((el.tagName || "").toUpperCase());
+                        const excludedTag = excludedTags.includes((el.tagName || "").toUpperCase());
+                        const dataDisabled = el.dataset && el.dataset.disableCardNav === "true"
+                        return !!excludedTag || dataDisabled
 
                     });
 

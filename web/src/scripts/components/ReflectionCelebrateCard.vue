@@ -125,7 +125,7 @@
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import { millisecondsToMinutes } from '@shared/util/DateUtil'
     import { ElementAccumulation } from '@shared/models/ElementAccumulation'
-    import ReflectionResponse, { InsightWord } from '@shared/models/ReflectionResponse'
+    import ReflectionResponse from '@shared/models/ReflectionResponse'
     import CactusMemberService from '@web/services/CactusMemberService'
     import { ListenerUnsubscriber } from '@web/services/FirestoreService'
     import CactusMember from '@shared/models/CactusMember'
@@ -150,6 +150,7 @@
     import { gtag } from "@web/analytics"
     import { pushRoute } from "@web/NavigationUtil";
     import SvgIcon from "@components/SvgIcon.vue";
+    import { InsightWord } from "@shared/api/InsightLanguageTypes";
 
     const logger = new Logger("ReflectionCelebrateCard.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -301,7 +302,7 @@
                         return this.cactusElement
                 }
             },
-            hasInsights(): boolean {
+            hasTone(): boolean {
                 return this.member?.wordCloud ? true : false;
             },
             wordData(): InsightWord[] | undefined {

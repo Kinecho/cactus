@@ -1,6 +1,6 @@
 import * as firebase from "firebase/app"
-import {Config} from "@web/config";
-import {setTimestamp} from "@shared/util/FirestoreUtil";
+import { Config } from "@web/config";
+import { setTimestamp } from "@shared/util/FirestoreUtil";
 import "firebase/functions"
 import "firebase/firestore";
 import "firebase/auth";
@@ -10,9 +10,9 @@ import "firebase/analytics";
 import flamelink from "flamelink/app";
 import 'flamelink/content'
 import 'flamelink/storage'
-import StorageService, {LocalStorageKey} from "@web/services/StorageService";
+import StorageService, { LocalStorageKey } from "@web/services/StorageService";
 import FirebaseApp = firebase.app.App;
-import CopyService, {LocaleCode} from "@shared/copy/CopyService";
+import CopyService, { LocaleCode } from "@shared/copy/CopyService";
 
 let isInitialized = false;
 let firebaseApp: FirebaseApp;
@@ -58,8 +58,8 @@ export function initializeFirebase(): FirebaseObject {
             precache: true // optional, default shown. Currently it only precaches "schemas" for better performance
         });
         firebaseApp.analytics();
-        CopyService.initialize({locale: localeCode});
-
+        CopyService.initialize({ locale: localeCode });
+        firebase.firestore().settings({ ignoreUndefinedProperties: true });
         isInitialized = true;
     }
 

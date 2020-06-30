@@ -18,9 +18,9 @@
     import OnboardingCardViewModel from "@components/onboarding/OnboardingCardViewModel";
     import { Prop } from "vue-property-decorator";
     import MarkdownText from "@components/MarkdownText.vue";
-    import { InsightWord } from "@shared/models/ReflectionResponse";
     import WordChart from "@components/InsightWordChart.vue";
     import { WordBubbleConfig } from "@web/charts/wordBubbles";
+    import { InsightWord } from "@shared/api/InsightLanguageTypes";
 
     @Component({
         components: {

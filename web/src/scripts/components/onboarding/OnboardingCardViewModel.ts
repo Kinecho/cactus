@@ -10,6 +10,7 @@ export enum CardType {
     word_cloud = "word_cloud",
     upsell = "upsell",
     celebrate = "celebrate",
+    insights = "insights",
 }
 
 export enum TextReplacementType {
@@ -131,6 +132,11 @@ export default class OnboardingCardViewModel {
                 element: CactusElement.energy,
                 defaultReplacementValue: "this physical activity",
                 textReplacementType: TextReplacementType.selected_insight_word,
+            }),
+            OnboardingCardViewModel.create({
+                slug: "insights",
+                type: CardType.insights,
+                promptContentEntryId: settings?.onboarding.promptEntryId2,
             }),
             OnboardingCardViewModel.create({
                 slug: "take-a-moment",

@@ -3,7 +3,7 @@ import camelcase from "camelcase";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import PromptContent from "@shared/models/PromptContent";
-import { isNumber, isString } from "@shared/util/ObjectUtil";
+import { isNull, isNumber, isString } from "@shared/util/ObjectUtil";
 
 const MICRO_TO_CENT = 10000;
 
@@ -323,4 +323,48 @@ export function getRandomNumberBetween(min: number, max: number, fractionDigits 
     const num = Math.floor(Math.random() * (scaledMax - scaledMin + offset)) + scaledMin;
 
     return num / precision;
+}
+
+/**
+ * Expects input to be a number where 0.1 = 10%
+ * @param {number | string | null | undefined} input
+ * @return {string | null}
+ */
+export function formatPercentage(input: number | string | null | undefined, decimalPlaces: number = 0): string | null {
+    if (isNull(input)) {
+        return null;
+    }
+
+    const num = Number(input);
+    if (!isNumber(num)) {
+        return null;
+    }
+
+    return `${ (num * 100).toFixed(decimalPlaces) }%`;
+}
+
+const HTMLEntityMap = [
+    ['amp', '&'],
+    ['apos', '\''],
+    ['#x27', '\''],
+    ['#x2F', '/'],
+    ['#39', '\''],
+    ['#47', '/'],
+    ['lt', '<'],
+    ['gt', '>'],
+    ['nbsp', ' '],
+    ['quot', '"']
+];
+
+export function decodeHTMLEntities(text?: string): string | undefined {
+    if (!text) {
+        return undefined;
+    }
+    let output = text;
+
+    for (let i = 0, max = HTMLEntityMap.length; i < max; ++i) {
+        output = output.replace(new RegExp('&' + HTMLEntityMap[i][0] + ';', 'g'), HTMLEntityMap[i][1]);
+    }
+
+    return output;
 }

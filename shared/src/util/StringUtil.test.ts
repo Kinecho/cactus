@@ -11,7 +11,10 @@ import {
     isBlank, preventOrphanedWords,
     stripQueryParams,
     titleCase,
-    isFeatureAuthUrl, isExternalUrl, getRandomNumberBetween
+    isFeatureAuthUrl,
+    isExternalUrl,
+    getRandomNumberBetween,
+    decodeHTMLEntities,
 } from "@shared/util/StringUtil";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
@@ -434,5 +437,19 @@ describe("random number generator", () => {
             expect(random1).toBeGreaterThanOrEqual(0.2)
             expect(random1).toBeLessThanOrEqual(0.5);
         }
+    })
+})
+
+describe("Decode HTML entities", () => {
+    test("string with &nbsp; entity in it", () => {
+        const input = "this is&nbsp;a string";
+        const output = decodeHTMLEntities(input);
+        expect(output).toEqual("this is a string");
+    })
+
+    test("string with apostrophe entity in it", () => {
+        const input = "It&#39;s got an apostrophe";
+        const output = decodeHTMLEntities(input);
+        expect(output).toEqual("It's got an apostrophe");
     })
 })

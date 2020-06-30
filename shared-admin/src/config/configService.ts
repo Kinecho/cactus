@@ -279,6 +279,12 @@ const defaultTestConfig: CactusConfig = {
                 handler_path: "/daily-prompt-email",
                 http_method: "POST"
             }
+        },
+    },
+    watson: {
+        tone_analyzer: {
+            api_key: "test_key",
+            api_url: "https://api.us-south.tone-analyzer.cloud"
         }
     }
 };

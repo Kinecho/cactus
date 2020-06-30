@@ -120,6 +120,8 @@ export default class ReflectionResponseService {
             model.addReflectionLog(new Date())
         }
 
+        //Anytime we save from the frontend, set to True. The db trigger will update this as appropriate.
+        model.mightNeedInsightsUpdate = true;
         if (model.cactusMemberId) {
             const saved = this.firestoreService.save(model);
             //TODO: using cactusMemberId on this may be a weak way to go - we might want to check the current logged in status of the member instead. (shrug)

@@ -36,10 +36,10 @@
     import Vue from "vue";
     import InsightWordChart from "@components/InsightWordChart.vue"
     import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
-    import {InsightWord} from "@shared/models/ReflectionResponse";
     import {PageRoute} from "@shared/PageRoutes";
     import {fireRevealInsightEvent, gtag} from "@web/analytics";
     import {PremiumSubscriptionTiers} from "@shared/models/MemberSubscription";
+    import { InsightWord } from "@shared/api/InsightLanguageTypes";
 
     export default Vue.extend({
         components: {
