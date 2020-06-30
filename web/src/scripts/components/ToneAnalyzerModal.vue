@@ -4,9 +4,8 @@
             :showCloseButton="true"
     >
         <div slot="body" class="modalContainer">
-            <h3>About Insights</h3>
-            <p>We use a service called Tone Analyzer. It gives you a positivity rating on your written notes.</p>
-            <p>You can also see which tones are sensed in your writing, and where. These include Anger, Fear, Joy, Sadness, Analytical, Confident, and Tentative.</p>
+            <h3>About</h3>
+            <p>We use a service called the Tone Analyzer. It gives you a positivity rating on your written notes. You can also see which tones are sensed in your writing. These include Joy, Anger, Confident, and more.</p>
             <p>Your notes remain private, secure, and forever yours.</p>
         </div>
     </modal>

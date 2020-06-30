@@ -1,6 +1,6 @@
 <template>
     <div class="insightsCard" :data-disable-card-nav="true">
-        <h2>Insights</h2>
+        <h2>Analysis</h2>
         <p class="subtext">This is what your note reveals about your emotions.</p>
         <transition name="component-fade" mode="out-in">
             <spinner v-if="loading" message="Processing insights" key="loader"/>

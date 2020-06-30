@@ -629,9 +629,7 @@ export const PattonSentiment: SentimentResult = {
     "language": "en"
 }
 
-export const ONBOARDING_DEFAULT_TEXT = `We use a service called Tone Analyzer. It gives you a positivity rating on your written notes. You're going to love it!
-
-You can also see which tones are sensed in your writing, and where. These include Anger, Fear, Joy, Sadness, Analytical, Confident, and Tentative.
+export const ONBOARDING_DEFAULT_TEXT = `We use a service called the Tone Analyzer. It gives you a positivity rating on your written notes. You can also see which tones are sensed in your writing. These include Joy, Anger, Confident, and more.
 
 Your notes remain private, secure, and forever yours.
 `;
@@ -639,11 +637,6 @@ Your notes remain private, secure, and forever yours.
 export const ONBOARDING_TONE_RESULTS: ToneResult = {
     "documentTone": {
         "tones": [
-            {
-                "score": 0.688301,
-                toneId: ToneID.fear,
-                "toneName": "Fear"
-            },
             {
                 "score": 0.667684,
                 toneId: ToneID.joy,
@@ -659,7 +652,7 @@ export const ONBOARDING_TONE_RESULTS: ToneResult = {
     "sentencesTones": [
         {
             "sentenceId": 0,
-            "text": "We use a service called Tone Analyzer.",
+            "text": "We use a service called the Tone Analyzer.",
             "tones": [
                 {
                     "score": 0.94715,
@@ -690,29 +683,23 @@ export const ONBOARDING_TONE_RESULTS: ToneResult = {
             ]
         },
         {
-            "sentenceId": 2,
-            "text": "You're going to love it!",
-            "tones": [
-                {
-                    "score": 0.795093,
-                    toneId: ToneID.joy,
-                    "toneName": "Joy"
-                }
-            ]
-        },
-        {
             "sentenceId": 3,
-            "text": "You can also see which tones are sensed in your writing, and where.",
+            "text": "You can also see which tones are sensed in your writing.",
             "tones": []
         },
         {
             "sentenceId": 4,
-            "text": "These include Anger, Fear, Joy, Sadness, Analytical, Confident, and Tentative.",
+            "text": "These include Joy, Anger, Confident, and more.",
             "tones": [
                 {
-                    "score": 0.958009,
-                    toneId: ToneID.fear,
-                    "toneName": "Fear"
+                    "score": 0.830814,
+                    toneId: ToneID.joy,
+                    "toneName": "Joy"
+                },
+                {
+                    "score": 0.849827,
+                    toneId: ToneID.confident,
+                    "toneName": "Confident"
                 }
             ]
         },
