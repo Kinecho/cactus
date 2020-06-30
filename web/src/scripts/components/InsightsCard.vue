@@ -13,7 +13,7 @@
                         :sentences-on-new-line="false"/>
             </div>
         </transition>
-        <button v-if="!loading" class="contButton" @click="next">Continue</button>
+        <!-- <button v-if="!loading" class="contButton" @click="next">Continue</button> -->
     </div>
 </template>
 
