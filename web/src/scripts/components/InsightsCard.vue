@@ -13,6 +13,7 @@
                         :sentences-on-new-line="false"/>
             </div>
         </transition>
+        <button v-if="!loading" class="contButton">Continue</button>
     </div>
 </template>
 
@@ -77,17 +78,17 @@
         }
     }
 
-    // .contButton {
-    //     bottom: 3.2rem;
-    //     left: 3.2rem;
-    //     position: fixed;
-    //     right: 3.2rem;
-    //     width: calc(100% - 6.4rem);
-    //     z-index: 1;
-    //
-    //     @include r(600) {
-    //         display: none;
-    //     }
-    // }
+    .contButton {
+        bottom: 3.2rem;
+        left: 3.2rem;
+        position: sticky;
+        right: 3.2rem;
+        width: 100%;
+        z-index: 1;
+
+        @include r(600) {
+            display: none;
+        }
+    }
 
 </style>
