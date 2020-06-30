@@ -1,5 +1,5 @@
 <template>
-    <div class="insightsCard">
+    <div class="insightsCard" :data-disable-card-nav="true">
         <h2>Insights</h2>
         <p class="subtext">This is what your note reveals about your emotions.</p>
         <transition name="component-fade" mode="out-in">
@@ -13,7 +13,7 @@
                         :sentences-on-new-line="false"/>
             </div>
         </transition>
-        <button v-if="!loading" class="contButton">Continue</button>
+        <button v-if="!loading" class="contButton" @click="next">Continue</button>
     </div>
 </template>
 
@@ -42,6 +42,10 @@
         get loading(): boolean {
             return !this.reflectionResponse || this.reflectionResponse?.mightNeedInsightsUpdate === true;
         };
+
+        next() {
+            this.$emit("next");
+        }
     }
 </script>
 
