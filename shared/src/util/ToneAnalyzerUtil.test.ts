@@ -20,7 +20,8 @@ describe("createParagraphs", () => {
         expect(result.length).toEqual(1);
         expect(result).toEqual([[{
             sentenceId: 1,
-            text: "Sentence one. Sentence two."
+            text: "Sentence one. Sentence two.",
+            tones: []
         }]]);
     })
 
@@ -207,7 +208,7 @@ describe("createParagraphs", () => {
                         toneName: "Confident"
                     },
                     {
-                        score: 0.991736,
+                        score: 0.687768,
                         toneId: "analytical",
                         toneName: "Analytical"
                     }
