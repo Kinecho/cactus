@@ -19,6 +19,7 @@
             </nav>
             <div class="noteText">
                 <p class="analyzed-text" v-if="useDefaultValues && originalText">Your note didn't have enough text to reveal emotions.</p>
+                <p class="analyzed-text" v-if="!originalText && useNoResultsFallback"><a href="#" @click="addNoteAction">Add a note</a> to your reflection to reveal specific emotions.</p>
                 <p v-for="(paragraph, i) in paragraphs" :key="`paragraph_${i}`" class="analyzed-text" :class="{fallback: useDefaultValues}">
                 <span v-for="(sentence, i) in paragraph"
                         :key="`sentence_${i}`"
@@ -75,6 +76,9 @@
 
         @Prop({ type: Boolean, default: true })
         useNoResultsFallback!: boolean;
+
+        @Prop({ type: String as () => addNoteAction, default: null, required: false })
+        addNoteAction!: string | undefined;
 
         modalVisible: boolean = false;
 

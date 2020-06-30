@@ -10,6 +10,7 @@
                 <tone-analysis :tone-result="reflectionResponse.toneAnalysis"
                         :original-text="reflectionResponse.content.text"
                         :use-no-results-fallback="true"
+                        :add-note-action="reflect"
                         :sentences-on-new-line="false"/>
             </div>
         </transition>
@@ -45,6 +46,10 @@
 
         next() {
             this.$emit("next");
+        }
+
+        reflect() {
+            this.$emit("previous");
         }
     }
 </script>
