@@ -60,7 +60,7 @@
     })
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
     @import "common";
     @import "mixins";
     @import "simplyCentered";
