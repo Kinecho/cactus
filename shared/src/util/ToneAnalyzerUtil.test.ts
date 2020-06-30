@@ -248,7 +248,7 @@ describe("createParagraphs", () => {
                 }
             ]]);
 
-        expect(result.length).toEqual(4);
+        expect(result.length).toEqual(2);
 
     })
 
