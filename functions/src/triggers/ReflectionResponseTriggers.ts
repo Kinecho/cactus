@@ -322,7 +322,7 @@ async function createSentPromptIfNeeded(options: { member?: CactusMember, prompt
         return { created: false };
     }
 
-    const createPromptResult = dminSentPromptService.createSentPrompt({
+    const createPromptResult = AdminSentPromptService.createSentPrompt({
         member,
         createHistoryItem: true,
         medium: PromptSendMedium.PROMPT_CONTENT,
