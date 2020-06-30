@@ -1,5 +1,5 @@
 <template>
-    <InsightsCard :reflection-response="response" v-if="isInsightsCard" @next="next"/>
+    <InsightsCard :reflection-response="response" v-if="isInsightsCard" @next="next" @previous="previous"/>
     <div v-else-if="processedContent" :class="['content-card', `type-${processedContent.contentType}`, processedContent.backgroundImage ? processedContent.backgroundImage.position : '', {reflectScreen: isReflectScreen}]">
         <section class="content">
             <div v-if="processedContent.text" class="text">
