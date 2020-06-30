@@ -11,7 +11,9 @@
             <positivity-rating :sentiment-score="reflectionResponse.sentiment.documentSentiment"/>
             <tone-analysis :tone-result="reflectionResponse.toneAnalysis"
                     :original-text="reflectionResponse.content.text"
-                    :sentences-on-new-line="false"/>
+                    :sentences-on-new-line="false"
+                    @previous="previous"
+            />
         </div>
     </div>
 </template>
@@ -46,6 +48,10 @@
         reflectionResponse: ReflectionResponse | null = null;
         responseObserver: ListenerUnsubscriber | null | undefined = null;
 
+
+        previous() {
+            this.$emit("previous");
+        }
 
         beforeMount() {
             const promptEntryId = this.card.promptContentEntryId;
