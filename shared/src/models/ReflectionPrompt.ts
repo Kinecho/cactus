@@ -1,5 +1,6 @@
-import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
-import {Campaign} from "@shared/mailchimp/models/MailchimpTypes";
+import { BaseModel, Collection } from "@shared/FirestoreBaseModels";
+import { Campaign } from "@shared/mailchimp/models/MailchimpTypes";
+import { AppType } from "@shared/types/DeviceTypes";
 
 export enum Field {
     question = "question",
@@ -14,6 +15,10 @@ export enum Field {
     promptContentEntryId = "promptContentEntryId",
 }
 
+export enum PromptType {
+    FREE_FORM = "FREE_FORM",
+    CACTUS = "CACTUS"
+}
 
 export default class ReflectionPrompt extends BaseModel {
     static Field = Field;
@@ -29,6 +34,13 @@ export default class ReflectionPrompt extends BaseModel {
     topic?: string;
     promptContentEntryId?: string;
 
+    /**
+     * The Member ID if the prompt was created by a user as a free-form prompt
+     */
+    memberId?: string;
+    promptType?: PromptType = PromptType.CACTUS;
+    sourceApp?: AppType;
+
     prepareForFirestore(): any {
         this.campaignIds = [];
         this.campaignWebIds = [];
@@ -42,4 +54,17 @@ export default class ReflectionPrompt extends BaseModel {
         }
         return this;
     }
+
+    static createFreeForm(params: { memberId: string, question?: string | null | undefined, topic?: string | undefined, app?: AppType }): ReflectionPrompt {
+        const { memberId, question, topic, app } = params;
+        const prompt = new ReflectionPrompt();
+        prompt.promptType = PromptType.FREE_FORM;
+        prompt.memberId = memberId;
+        prompt.question = question ?? undefined;
+        prompt.sendDate = new Date();
+        prompt.topic = topic;
+        prompt.sourceApp = app;
+        return prompt;
+    }
+
 }

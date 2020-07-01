@@ -9,7 +9,6 @@ import CactusMember from "@shared/models/CactusMember";
 import SubscriptionProduct from "@shared/models/SubscriptionProduct";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
 import { getStripeId } from "@admin/util/AdminStripeUtils";
-import { AppType } from "@shared/models/ReflectionResponse";
 import {
     apiDomain,
     AttributesInput,
@@ -18,6 +17,7 @@ import {
     processAttributeInputForUpdate,
     RevenueCatEndpoints
 } from "@shared/api/RevenueCatApi";
+import { AppType } from "@shared/types/DeviceTypes";
 
 const logger = new Logger("RevenueCatService");
 

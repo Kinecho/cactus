@@ -4,7 +4,7 @@ import { fromDocumentSnapshot } from "@shared/util/FirestoreUtil";
 import SentPrompt, { PromptSendMedium } from "@shared/models/SentPrompt";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CactusMember, { DEFAULT_PROMPT_SEND_TIME } from "@shared/models/CactusMember";
-import ReflectionPrompt from "@shared/models/ReflectionPrompt";
+import ReflectionPrompt, { PromptType } from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import PushNotificationService from "@admin/services/PushNotificationService";
 import { NewPromptNotificationPushResult } from "@admin/PushNotificationTypes";
@@ -29,6 +29,12 @@ export const sentPromptPushNotificationTrigger = functions.runWith({ timeoutSeco
 
         const memberId = sentPrompt.cactusMemberId;
         const promptId = sentPrompt.promptId;
+        const isFreeForm = sentPrompt.containsMedium(PromptSendMedium.FREE_FORM)
+        if (isFreeForm) {
+            logger.info("The prompt was created by the user - no need to send notifications");
+            return;
+        }
+
         if (!memberId || !promptId) {
             logger.warn("No cactus member Id  or promptId was found on the sentPrompt. Id = " + sentPrompt.id);
             return
@@ -53,6 +59,11 @@ async function sendPush(options: { member: CactusMember, prompt: ReflectionPromp
     const userPromptSendTime = member.promptSendTime || DEFAULT_PROMPT_SEND_TIME;
     const isSendTime = isSendTimeWindow({ currentDate: userDateObject, sendTime: userPromptSendTime });
 
+    const isFreeForm = prompt.promptType === PromptType.FREE_FORM;
+    if (isFreeForm) {
+        logger.info("The prompt is of type FREE_FORM, no need to send notifications");
+        return undefined;
+    }
     if (isSendTime) {
         // return await PushNotificationService.sharedInstance.sendPromptNotification({member, prompt})
 

@@ -1,5 +1,5 @@
 import {ApiResponse} from "@shared/api/ApiTypes";
-import {AppType} from "@shared/models/ReflectionResponse";
+import { AppType } from "@shared/types/DeviceTypes";
 
 export interface EmailStatusRequest {
     email: string,
