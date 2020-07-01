@@ -8,6 +8,7 @@
     "build:deploy": "npm run clean && npm run logo && NODE_ENV=production NODE_OPTIONS=--max_old_space_size=6000 webpack --config webpack/webpack.deploy.config.js",
     "build:firebase": "npm run build:deploy && npm run copy",
     "build:prod": "npm run logo && GCLOUD_PROJECT=cactus-app-prod NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack/webpack.deploy.config.js --progress",
+    "build:embeds": "npm run logo && npm run clean && GCLOUD_PROJECT=cactus-app-prod NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack/webpack.embeds.js --progress",
     "build:analyze": "npm run logo && GCLOUD_PROJECT=cactus-app-prod NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack/webpack.config.test-prod.js --progress",
     "build:stage": "npm run logo && GCLOUD_PROJECT=cactus-app-stage NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack/webpack.deploy.config.js --progress",
     "build:local": "npm run logo && GCLOUD_PROJECT=cactus-app-stage NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack/webpack.config.dev.js --progress",

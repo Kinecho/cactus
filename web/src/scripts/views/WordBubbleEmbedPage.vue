@@ -17,7 +17,7 @@
 
     const logger = new Logger("WordBubbleEmbedPage");
 
-    /**
+    /*
      * Set up window functions for app interface
      */
     const dataParam = getQueryParam(QueryParam.CHART_DATA);
@@ -97,8 +97,7 @@
         }
     };
 
-
-    /**
+    /*
      * END window app functions
      */
 
@@ -114,12 +113,16 @@
             }
         },
         beforeMount() {
+            document.body.classList.add("transparent")
             dataSource.delegate = {
                 onData: (words) => {
                     logger.info("Fetched words from data source", words);
                 }
             }
         },
+        destroyed() {
+            document.body.classList.remove("transparent")
+        }
     })
 </script>
 

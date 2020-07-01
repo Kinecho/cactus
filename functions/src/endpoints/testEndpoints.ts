@@ -23,6 +23,9 @@ import ToneAnalyzerService from "@admin/services/ToneAnalyzerService";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
 import PromptNotificationManager from "@admin/managers/PromptNotificationManager";
 import { MemberPromptNotificationTaskParams } from "@admin/tasks/PromptNotificationTypes";
+import { isBlank } from "@shared/util/StringUtil";
+import AdminSentPromptService from "@admin/services/AdminSentPromptService";
+import { PromptSendMedium } from "@shared/models/SentPrompt";
 
 const logger = new Logger("testApp");
 const app = express();
@@ -145,6 +148,44 @@ app.get("/start-notif-task", async (req, resp) => {
     const result = await PromptNotificationManager.shared.createDailyPromptSetupTask(payload);
     resp.send({ result });
     return;
+})
+
+/**
+ * Create new sent prompt (if required) for a given user and prompt entry id
+ */
+app.post("/sent-prompt", async (req, resp) => {
+    const { promptId, email, memberId } = req.body as { promptId?: string, email?: string, memberId?: string };
+    if (!promptId || (isBlank(email) && isBlank(memberId))) {
+        resp.send({ error: "You must provide a promptId and either email or memberId" });
+        return
+    }
+    const member = memberId ? await AdminCactusMemberService.getSharedInstance().getById(memberId) : await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email)
+    if (!member) {
+        resp.send({ error: `No member found for id=${ memberId ?? "none" } or email ${ email ?? "none" }` });
+        return;
+    }
+
+    const promptContent = await AdminPromptContentService.getSharedInstance().getByEntryId(promptId);
+    if (!promptContent) {
+        resp.send({ error: `No prompt content found for prompt content entry id = ${ promptId }` });
+        return;
+    }
+
+    const { sentPrompt, error } = AdminSentPromptService.createSentPrompt({
+        member,
+        promptContent,
+        medium: PromptSendMedium.PROMPT_CONTENT,
+        createHistoryItem: true
+    });
+    if (!sentPrompt) {
+        resp.send({ message: "Unable to create a sent prompt", error })
+        return;
+    }
+
+    await AdminSentPromptService.getSharedInstance().save(sentPrompt);
+    resp.send({ sentPrompt, success: true });
+    return;
+
 })
 
 app.get("/send-notification-email", async (req, resp) => {
