@@ -28,9 +28,10 @@
     import { getRandomAvatar } from '@web/AvatarUtil'
     import MemberProfile from "@shared/models/MemberProfile";
     import MemberProfileService from '@web/services/MemberProfileService';
-    import { preventOrphanedWords } from "@shared/util/StringUtil"
+    import { isBlank, preventOrphanedWords } from "@shared/util/StringUtil"
     import MarkdownText from "@components/MarkdownText.vue";
     import PromptContent from "@shared/models/PromptContent";
+    import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -47,6 +48,7 @@
             response: Object as () => ReflectionResponse,
             memberProfile: Object as () => MemberProfile,
             question: String,
+            prompt: Object as () => ReflectionPrompt,
             promptContent: Object as () => PromptContent,
         },
         data(): {
@@ -81,6 +83,8 @@
                 if (this.promptContent && this.response) {
                     const coreValue = this.response.coreValue ?? undefined;
                     return this.promptContent?.getDynamicQuestionText({ coreValue }) ?? this.response.promptQuestion;
+                } else if (this.prompt && !isBlank(this.prompt.question)) {
+                    return this.prompt.question;
                 }
                 return this.response.promptQuestion;
             },

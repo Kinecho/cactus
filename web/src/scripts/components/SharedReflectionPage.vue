@@ -6,6 +6,7 @@
             <div class="reflection-container" v-if="reflectionResponse">
                 <card v-if="reflectionResponse"
                         class="full"
+                        :prompt="prompt"
                         :response="reflectionResponse"
                         :prompt-content="promptContent"
                         :question="questionText"
