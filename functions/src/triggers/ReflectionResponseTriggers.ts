@@ -104,6 +104,8 @@ export const updateSentPromptOnReflectionWrite = functions.firestore
             return
         }
 
+        const sharingChanged = change.before.get(ReflectionResponse.Field.shared) !== change.after.get(ReflectionResponse.Field.shared)
+
         const reflectionResponse = fromDocumentSnapshot(snapshot, ReflectionResponse);
         if (!reflectionResponse) {
             logger.error(`Unable to de-serialize the reflection response for snapshot.id = ${ snapshot.id }`);
@@ -117,6 +119,14 @@ export const updateSentPromptOnReflectionWrite = functions.firestore
         if (!promptId || !memberId) {
             logger.error("Failed to get a member id and/or a prompt ID off of ReflectionPrompt", snapshot.id);
             return;
+        }
+
+        if (sharingChanged) {
+            const prompt = await AdminReflectionPromptService.getSharedInstance().get(promptId);
+            if (prompt && prompt.memberId === memberId) {
+                prompt.shared = reflectionResponse.shared;
+                await AdminReflectionPromptService.getSharedInstance().setShared(promptId, reflectionResponse.shared);
+            }
         }
 
         const sentPrompt = await AdminSentPromptService.getSharedInstance().getSentPromptForCactusMemberId({

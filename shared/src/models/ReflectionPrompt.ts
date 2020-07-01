@@ -13,6 +13,10 @@ export enum Field {
     baseFileName = "baseFileName",
     sendDate = "sendDate",
     promptContentEntryId = "promptContentEntryId",
+    memberId = "memberId",
+    promptType = "promptType",
+    sourceApp = "sourceApp",
+    shared = "shared",
 }
 
 export enum PromptType {
@@ -40,6 +44,7 @@ export default class ReflectionPrompt extends BaseModel {
     memberId?: string;
     promptType?: PromptType = PromptType.CACTUS;
     sourceApp?: AppType;
+    shared?: boolean = false;
 
     prepareForFirestore(): any {
         this.campaignIds = [];

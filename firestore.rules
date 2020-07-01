@@ -108,7 +108,9 @@ service cloud.firestore {
 
     //CUSTOM AUTH
     match /reflectionPrompt/{document=**} {
-    	allow read: if true;
+    	allow read: if resource.data.promptType != "FREE_FORM" || resource.data.memberId == getMemberId() || resource.data.shared == true;
+    	allow update: if resource.data.memberId == getMemberId() && resource.data.promptType == "FREE_FORM";
+    	allow create: if request.resource.data.memberId == getMemberId() && request.resource.data.promptType == "FREE_FORM";
     }
     match /members/{document=**} {
       allow read,write: if resourceBelongsToUser()

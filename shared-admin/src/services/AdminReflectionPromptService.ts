@@ -1,8 +1,8 @@
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
-import {Collection} from "@shared/FirestoreBaseModels";
-import ReflectionPrompt, {Field} from "@shared/models/ReflectionPrompt";
-import {Campaign} from "@shared/mailchimp/models/MailchimpTypes";
-import {getDateFromISOString} from "@shared/util/DateUtil";
+import { Collection } from "@shared/FirestoreBaseModels";
+import ReflectionPrompt, { Field } from "@shared/models/ReflectionPrompt";
+import { Campaign } from "@shared/mailchimp/models/MailchimpTypes";
+import { getDateFromISOString } from "@shared/util/DateUtil";
 import Logger from "@shared/Logger";
 
 const logger = new Logger("AdminReflectionPromptService");
@@ -36,6 +36,17 @@ export default class AdminReflectionPromptService {
         return firestoreService.save(model);
     }
 
+    async setShared(promptId: string, shared: boolean): Promise<void> {
+        try {
+            const doc = this.getCollectionRef().doc(promptId);
+            await doc.update({ [ReflectionPrompt.Field.shared]: shared })
+            return;
+        } catch (error) {
+            logger.error("Failed to update doc, it may not exist", error)
+            return;
+        }
+    }
+
     async getPromptForCampaignId(campaignId?: string): Promise<ReflectionPrompt | undefined> {
         if (!campaignId) {
             return undefined;
@@ -45,7 +56,7 @@ export default class AdminReflectionPromptService {
         const query = collection.where(Field.campaignIds, "array-contains", campaignId);
 
 
-        const {results, size} = await firestoreService.executeQuery(query, ReflectionPrompt);
+        const { results, size } = await firestoreService.executeQuery(query, ReflectionPrompt);
         if (size > 1) {
             logger.warn("Found more than one question prompt for given campaign id");
         }
@@ -62,7 +73,7 @@ export default class AdminReflectionPromptService {
         const collection = firestoreService.getCollectionRef(Collection.reflectionPrompt);
         const query = collection.where(Field.promptContentEntryId, "==", entryId);
 
-        const {results, size} = await firestoreService.executeQuery(query, ReflectionPrompt);
+        const { results, size } = await firestoreService.executeQuery(query, ReflectionPrompt);
         if (size > 1) {
             logger.warn("Found more than one question prompt for given campaign id");
         }

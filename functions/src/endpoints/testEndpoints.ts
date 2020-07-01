@@ -212,7 +212,7 @@ app.post("/free-form-prompt", async (req, resp) => {
     }
 
 
-    const prompt = ReflectionPrompt.createFreeForm({ memberId, question: title, app: AppType.WEB });
+    const prompt = ReflectionPrompt.createFreeForm({ memberId: member.id!, question: title, app: AppType.WEB });
     await AdminReflectionPromptService.getSharedInstance().save(prompt);
 
     const { sentPrompt, error } = AdminSentPromptService.createSentPrompt({
