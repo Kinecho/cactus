@@ -91,7 +91,7 @@
     import Vue from "vue";
     import { Config } from "@web/config";
     import { PageRoute } from '@shared/PageRoutes'
-    import ContentCard from "@components/PromptContentCard.vue"
+    import ContentCard from "@components/LegacyPromptContentCard.vue"
     import Celebrate from "@components/ReflectionCelebrateCard.vue";
     import InsightsCard from "@components/InsightsCard.vue";
     import PromptContent, { Content, ContentType } from '@shared/models/PromptContent'

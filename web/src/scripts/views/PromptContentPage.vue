@@ -5,7 +5,7 @@
 <script lang="ts">
     import Vue from "vue";
     import { PageRoute } from "@shared/PageRoutes";
-    import Prompt from "@components/PromptContent.vue"
+    import Prompt from "@components/LegacyPromptContent.vue"
     import Component from "vue-class-component";
     import Logger from "@shared/Logger"
     import { pushRoute } from "@web/NavigationUtil";
