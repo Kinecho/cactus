@@ -107,12 +107,33 @@ const routes: MetaRouteConfig[] = [
             description: "See yourself and the world more positively. Questions to help you become more mindful and reflect on what makes you happy.",
         }
     },
+    /**
+     * Legacy prompt page. New prompts should go to new page
+     */
     {
         component: () => lazyLoadView(import(
         /* webpackPrefetch: true, webpackPreload: true, webpackChunkName: "pages" */
         "@web/views/LegacyPromptContentPage.vue")),
-        path: `${ PageRoute.PROMPTS_ROOT }/:entryId`,
+        path: `${ PageRoute.PROMPTS_ROOT }-legacy/:entryId`,
+        name: "LegacyPrompt",
+        meta: {
+            title: "Reflection Prompt",
+            description: "Take a moment for mindful reflection",
+        }
+    },
+    {
+        component: () => lazyLoadView(import(
+        /* webpackPrefetch: true, webpackPreload: true, webpackChunkName: "pages" */
+        "@web/views/PromptPage.vue")),
+        path: `${ PageRoute.PROMPTS_ROOT }/:id`,
         name: "Prompt",
+        props: (route) => {
+            const usePrompt = route.query[QueryParam.USE_PROMPT_ID] === "true";
+            return {
+                promptId: usePrompt ? route.params.id : null,
+                entryId: usePrompt ? null : route.params.id
+            }
+        },
         meta: {
             title: "Reflection Prompt",
             description: "Take a moment for mindful reflection",
