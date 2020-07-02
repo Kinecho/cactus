@@ -12,6 +12,14 @@ export interface GapAnalysisOnboardingSettings {
     }
 }
 
+export interface JournalSettings {
+    enableAllSentPromptsForTiers: SubscriptionTier[]
+}
+
+const defaultJournalSettings = (): JournalSettings => ({
+    enableAllSentPromptsForTiers: []
+})
+
 export default class AppSettings extends FlamelinkModel {
     static getSchema(): SchemaName {
         return SchemaName.appSettings;
@@ -25,11 +33,17 @@ export default class AppSettings extends FlamelinkModel {
         promptEntryId2: string,
     }
 
+    journal: JournalSettings = defaultJournalSettings();
+
     constructor(data?: Partial<AppSettings>) {
         super(data);
         if (data) {
             Object.assign(this, data);
         }
+    }
+
+    onlyShowCompletedSentPromptsForTier(tier?: SubscriptionTier): boolean {
+        return !this.journal.enableAllSentPromptsForTiers.includes(tier ?? SubscriptionTier.BASIC)
     }
 
     getElementOnboardingPromptEntryId(element: CactusElement): string | undefined {

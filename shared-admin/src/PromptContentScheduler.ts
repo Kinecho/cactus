@@ -11,7 +11,7 @@ import AdminSlackService, {
 } from "@admin/services/AdminSlackService";
 import { buildPromptContentURL } from "@admin/util/StringUtil";
 import { AmericaDenverTimezone, formatDateTime } from "@shared/util/DateUtil";
-import ReflectionPrompt from "@shared/models/ReflectionPrompt";
+import ReflectionPrompt, { PromptType } from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import { DateTime } from "luxon";
 import { PageRoute } from "@shared/PageRoutes";
@@ -299,6 +299,9 @@ export default class PromptContentScheduler {
             prompt.question = this.promptContent.getQuestion();
             prompt.topic = this.promptContent.topic;
             prompt.promptContentEntryId = this.promptContent.entryId;
+            prompt.promptType = PromptType.CACTUS;
+            prompt.shared = true;
+            prompt.promptContentEntryId = this.promptContent.entryId
         }
 
         this.promptContent.promptId = prompt?.id;

@@ -1,9 +1,9 @@
 import * as admin from "firebase-admin";
 import * as express from "express";
 import Logger from "@shared/Logger";
-import { AppType } from "@shared/models/ReflectionResponse";
 import { AxiosError } from "axios";
 import { QueryParam } from "@shared/util/queryParams";
+import { AppType } from "@shared/types/DeviceTypes";
 
 const logger = new Logger("RequestUtil")
 

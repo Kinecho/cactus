@@ -1,7 +1,7 @@
 import AdminFirestoreService, { DeleteOptions } from "@admin/services/AdminFirestoreService";
 import SentPrompt, { PromptSendMedium, SentPromptField } from "@shared/models/SentPrompt";
 import { BaseModelField, Collection } from "@shared/FirestoreBaseModels";
-import ReflectionPrompt from "@shared/models/ReflectionPrompt";
+import ReflectionPrompt, { PromptType } from "@shared/models/ReflectionPrompt";
 import PendingUser from "@shared/models/PendingUser";
 import CactusMember from "@shared/models/CactusMember";
 import User from "@shared/models/User";
@@ -89,11 +89,19 @@ export default class AdminSentPromptService {
         promptId?: string,
         promptContent?: PromptContent,
         medium?: PromptSendMedium,
-        prompt?: ReflectionPrompt
+        prompt?: ReflectionPrompt,
+        promptType?: PromptType,
         createHistoryItem?: boolean,
     }): CreateSentPromptResult {
         const result: CreateSentPromptResult = {};
-        const { member, promptContent, prompt, medium = PromptSendMedium.CRON_JOB, createHistoryItem = false } = options;
+        const {
+            member,
+            promptContent,
+            prompt,
+            medium = PromptSendMedium.CRON_JOB,
+            createHistoryItem = false,
+            promptType
+        } = options;
         let { promptId } = options;
         promptId = promptId || promptContent?.promptId || prompt?.id;
         if (!promptId) {
@@ -111,6 +119,7 @@ export default class AdminSentPromptService {
         const currentDate = new Date();
 
         const sentPrompt = new SentPrompt();
+        sentPrompt.promptType = promptType ?? prompt?.promptType ?? PromptType.CACTUS
         sentPrompt.createdAt = currentDate;
         sentPrompt.id = `${ memberId }_${ promptId }`; //should be deterministic in the case we have a race condition
         sentPrompt.firstSentAt = currentDate;

@@ -1,10 +1,12 @@
-import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
-import {CampaignMemberSendStatus} from "@shared/mailchimp/models/MailchimpTypes";
+import { BaseModel, Collection } from "@shared/FirestoreBaseModels";
+import { CampaignMemberSendStatus } from "@shared/mailchimp/models/MailchimpTypes";
+import { PromptType } from "@shared/models/ReflectionPrompt";
 
 export enum PromptSendMedium {
     EMAIL_MAILCHIMP = "EMAIL_MAILCHIMP",
     EMAIL_SENDGRID = "EMAIL_SENDGRID",
     PROMPT_CONTENT = "PROMPT_CONTENT",
+    FREE_FORM = "FREE_FORM",
     CRON_JOB = "CRON_JOB",
     CUSTOM_SENT_PROMPT_TIME = "CUSTOM_SENT_PROMPT_TIME",
     PUSH = "PUSH",
@@ -46,6 +48,7 @@ export default class SentPrompt extends BaseModel {
     promptContentEntryId?: string;
     completed: boolean = false;
     completedAt?: Date;
+    promptType?: PromptType=PromptType.CACTUS;
 
     containsMedium(medium: PromptSendMedium): boolean {
         return !!this.sendHistory.find(history => history.medium === medium);

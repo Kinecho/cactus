@@ -3,17 +3,12 @@ import { CactusElement } from "@shared/models/CactusElement";
 import { CoreValue } from "@shared/models/CoreValueTypes";
 import { ToneResult } from "@shared/api/ToneAnalyzerTypes";
 import { InsightWordsResult, SentimentResult } from "@shared/api/InsightLanguageTypes";
+import { AppType } from "@shared/types/DeviceTypes";
 
 export enum ResponseMediumType {
     PROMPT = "PROMPT",
     JOURNAL = "JOURNAL",
     EMAIL = "EMAIL"
-}
-
-export enum AppType {
-    WEB = "WEB",
-    ANDROID = "ANDROID",
-    IOS = "IOS"
 }
 
 export enum ResponseMedium {
