@@ -45,7 +45,7 @@
                     <span class="navLabel">{{copy.navigation.INSIGHTS}}</span>
                 </router-link>
                  <router-link class="composeBtn" :to="journalHref" v-if="loggedIn">
-                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><title>Compose</title><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                     <svg class="pen wiggle" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><title>Compose</title><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
                     <span>{{copy.navigation.COMPOSE}}</span>
                 </router-link>
                <dropdown-menu :items="links" v-if="loggedIn" :displayName="displayName" :email="email">
@@ -448,7 +448,7 @@
         transition: background-color .3s;
         width: 5.6rem;
         
-        svg {
+        .pen {
             height: 2rem;
             width: 2rem;
         }
@@ -460,26 +460,29 @@
         &:hover,
         &:active {
             background-color: $darkGreen;
+
+            .pen {
+                animation: wiggle .5s forwards;
+            }
         }
 
         @include r(600) {
+            @include smallButton;
             border-radius: 3rem;
-            box-shadow: none;
             bottom: auto;
             color: white;
-            font: 1.6rem $font-stack;
             height: auto;
-            padding: .7rem 1.6rem .9rem;
             position: static;
             right: auto;
             text-decoration: none;
             transition: background-color .3s;
             width: auto;
 
-            svg {
-                height: 1.6rem;
+            .pen {
+                height: 1.5rem;
                 margin-right: .4rem;
-                width: 1.6rem;
+                margin-top: .1rem;
+                width: 1.5rem;
             }
 
             span {
