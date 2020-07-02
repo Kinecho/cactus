@@ -107,6 +107,7 @@ export default class EnglishCopy extends LocalizedCopy {
         JOURNAL: "Journal",
         ACTIVITY: "Activity",
         INSIGHTS: "Insights",
+        COMPOSE: "Compose",
         HOME: "Home"
     };
     prompts: PromptCopy = {

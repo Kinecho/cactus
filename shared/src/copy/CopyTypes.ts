@@ -100,6 +100,7 @@ export interface NavigationCopy {
     JOURNAL: string,
     ACTIVITY: string,
     INSIGHTS: string,
+    COMPOSE: string,
     HOME: string
 }
 
