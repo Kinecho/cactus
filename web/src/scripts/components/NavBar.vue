@@ -447,6 +447,7 @@
         right: 1.6rem;
         transition: background-color .3s;
         width: 5.6rem;
+        z-index: 1;
         
         .pen {
             height: 2rem;
