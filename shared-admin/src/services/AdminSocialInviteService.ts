@@ -9,7 +9,7 @@ import AdminSendgridService from "@admin/services/AdminSendgridService";
 import {EmailContact} from "@shared/types/EmailContactTypes";
 import {CactusConfig} from "@admin/CactusConfig";
 import * as Sentry from "@sentry/node";
-import {AppType} from "@shared/models/ReflectionResponse";
+import { AppType } from "@shared/types/DeviceTypes";
 
 const logger = new Logger("AdminSocialInviteService");
 let firestoreService: AdminFirestoreService;

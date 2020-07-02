@@ -1,7 +1,7 @@
 import Logger from "@shared/Logger";
 import { Config } from "@web/config";
-import { AppType } from "@shared/models/ReflectionResponse";
 import { getValidTimezoneName } from "@shared/timezones";
+import { AppType } from "@shared/types/DeviceTypes";
 
 export const MOBILE_BREAKPOINT_PX = 600;
 const logger = new Logger("DeviceUtil");

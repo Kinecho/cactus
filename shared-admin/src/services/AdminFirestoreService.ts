@@ -281,7 +281,6 @@ export default class AdminFirestoreService {
             if (!isBlank(this.config.app.serverName)) {
                 messageParts.push(`\`[${ this.config.app.serverName }]\``);
             }
-
             messageParts.push(`An error occurred while executing a query${ options.transaction ? " while using a transaction." : "." }`);
             if (options.queryName) {
                 messageParts.push(`\nQueryName: \`${ options.queryName }\``);

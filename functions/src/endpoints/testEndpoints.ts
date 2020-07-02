@@ -26,6 +26,9 @@ import { MemberPromptNotificationTaskParams } from "@admin/tasks/PromptNotificat
 import { isBlank } from "@shared/util/StringUtil";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import { PromptSendMedium } from "@shared/models/SentPrompt";
+import ReflectionPrompt from "@shared/models/ReflectionPrompt";
+import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
+import { AppType } from "@shared/types/DeviceTypes";
 
 const logger = new Logger("testApp");
 const app = express();
@@ -184,6 +187,51 @@ app.post("/sent-prompt", async (req, resp) => {
 
     await AdminSentPromptService.getSharedInstance().save(sentPrompt);
     resp.send({ sentPrompt, success: true });
+    return;
+
+});
+
+/**
+ * Create new free-form prompt
+ */
+app.post("/free-form-prompt", async (req, resp) => {
+    const { title, email, memberId } = req.body as { title?: string, email?: string, memberId?: string };
+    const completed = req.body.completed === "true" || Boolean(req.body.completed);
+
+    if (isBlank(email) && isBlank(memberId)) {
+        resp.send({ error: "You must provide a promptId and either email or memberId" });
+        return
+    }
+    const member = await AdminCactusMemberService.getSharedInstance().findCactusMember({
+        cactusMemberId: memberId,
+        email,
+    });
+    if (!member) {
+        resp.send({ error: `No member found for id=${ memberId ?? "none" } or email ${ email ?? "none" }` });
+        return;
+    }
+
+
+    const prompt = ReflectionPrompt.createFreeForm({ memberId: member.id!, question: title, app: AppType.WEB });
+    await AdminReflectionPromptService.getSharedInstance().save(prompt);
+
+    const { sentPrompt, error } = AdminSentPromptService.createSentPrompt({
+        member,
+        prompt,
+        medium: PromptSendMedium.FREE_FORM,
+        createHistoryItem: true
+    });
+
+    if (!sentPrompt) {
+        resp.send({ message: "Unable to create a sent prompt", error })
+        return;
+    }
+
+    if (completed) {
+        sentPrompt.completed = completed;
+    }
+    await AdminSentPromptService.getSharedInstance().save(sentPrompt);
+    resp.send({ prompt, sentPrompt, success: true });
     return;
 
 })

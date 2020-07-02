@@ -12,7 +12,9 @@
                 color="successAlt">
             <div slot="text" class="centered">
                 <h3>Welcome to Cactus Plus!</h3>
-                <p>Now you have full access to personalized activities, insights, and tools to help you better know yourself. If you have questions or feedback, please reach out to us at <a href="mailto:help@cactus.app">help@cactus.app</a>.</p>
+                <p>Now you have full access to personalized activities, insights, and tools to help you better know
+                    yourself. If you have questions or feedback, please reach out to us at
+                    <a href="mailto:help@cactus.app">help@cactus.app</a>.</p>
             </div>
         </snackbar-content>
         <div class="container centered">
@@ -207,7 +209,7 @@
                                 onData: async (todaySentPrompt: SentPrompt | undefined) => {
                                     let todayEntry = undefined;
 
-                                    if (todaySentPrompt?.promptId && todaySentPrompt.completed === false) {
+                                    if (todaySentPrompt?.promptId && !todaySentPrompt.completed) {
                                         todayEntry = new JournalEntry(todaySentPrompt.promptId, todaySentPrompt);
                                     } else if (!todaySentPrompt && todaysPromptContent?.promptId) {
                                         // they don't have a SentPrompt for today's prompt
@@ -331,7 +333,7 @@
             }
         },
         computed: {
-            tier(): SubscriptionTier|null {
+            tier(): SubscriptionTier | null {
                 return this.cactusMember?.tier ?? null;
             },
             email(): string | undefined | null {

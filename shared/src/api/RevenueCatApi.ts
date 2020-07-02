@@ -1,8 +1,8 @@
 import { isNull } from "@shared/util/ObjectUtil";
-import { AppType } from "@shared/models/ReflectionResponse";
 import CactusMember from "@shared/models/CactusMember";
 import { millisecondsToMinutes } from "@shared/util/DateUtil";
 import { isBlank } from "@shared/util/StringUtil";
+import { AppType } from "@shared/types/DeviceTypes";
 
 export const apiDomain = "https://api.revenuecat.com/v1";
 
