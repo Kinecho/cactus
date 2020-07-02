@@ -7,6 +7,7 @@
             <p>EntryId: {{entryId || 'not set'}}</p>
             <p>PromptId: {{promptId || 'not set'}}</p>
             <p>Found: {{promptContent && promptContent.subjectLine}}</p>
+            <p>memberEmail: {{member.email}}</p>
         </div>
     </div>
 </template>
@@ -14,13 +15,14 @@
 <script lang="ts">
     import Vue from "vue";
     import Component from "vue-class-component"
-    import { Prop } from "vue-property-decorator";
+    import { Prop, Watch } from "vue-property-decorator";
     import Logger from "@shared/Logger"
     import FourOhFour from "@components/404.vue";
     import PromptContent from "@shared/models/PromptContent";
     import PromptContentService from "@web/services/PromptContentService";
     import { ListenerUnsubscriber } from "@web/services/FirestoreService";
     import Spinner from "@components/Spinner.vue";
+    import CactusMember from "@shared/models/CactusMember";
 
     const logger = new Logger("PromptPage");
 
@@ -40,17 +42,32 @@
         @Prop({ type: String, required: false, default: null })
         promptId!: string | null
 
+        @Prop({ type: Object as () => CactusMember, required: true })
+        member!: CactusMember;
+
         loading: boolean = false;
         notFound: boolean = false;
         promptContent: PromptContent | null = null;
         promptContentUnsubscriber: ListenerUnsubscriber | null = null;
 
+        @Watch("promptId")
+        onPromptId(currentId: string | null, oldId: string | null) {
+            if (currentId !== oldId) {
+                this.setupPromptObserver();
+            }
+        }
+
+        @Watch("entryId")
+        onEntryId(currentId: string | null, oldId: string | null) {
+            if (currentId !== oldId) {
+                this.setupPromptObserver();
+            }
+        }
+
         beforeMount() {
-            logger.info("Loading page with entryId = ", this.entryId);
             if (!this.promptId && !this.entryId) {
                 this.notFound = true;
             }
-
             this.setupPromptObserver();
         }
 
@@ -59,9 +76,11 @@
         }
 
         setupPromptObserver() {
+            logger.info("Setting up prompt observer for id", this.promptId ?? this.entryId);
             this.loading = true;
+            this.promptContentUnsubscriber?.();
 
-            PromptContentService.sharedInstance.observeByPromptOrEntryId({
+            this.promptContentUnsubscriber = PromptContentService.sharedInstance.observeByPromptOrEntryId({
                 entryId: this.entryId,
                 promptId: this.promptId
             }, {

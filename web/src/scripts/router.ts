@@ -137,6 +137,9 @@ const routes: MetaRouteConfig[] = [
         meta: {
             title: "Reflection Prompt",
             description: "Take a moment for mindful reflection",
+            passMember: true,
+            authRequired: true,
+            authContinueMessage: "You must be signed in to view this content"
         }
     },
     {
