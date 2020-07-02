@@ -29,7 +29,7 @@ export const sentPromptPushNotificationTrigger = functions.runWith({ timeoutSeco
 
         const memberId = sentPrompt.cactusMemberId;
         const promptId = sentPrompt.promptId;
-        const isFreeForm = sentPrompt.containsMedium(PromptSendMedium.FREE_FORM)
+        const isFreeForm = sentPrompt.containsMedium(PromptSendMedium.FREE_FORM) || sentPrompt.promptType === PromptType.FREE_FORM
         if (isFreeForm) {
             logger.info("The prompt was created by the user - no need to send notifications");
             return;
