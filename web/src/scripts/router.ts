@@ -110,7 +110,7 @@ const routes: MetaRouteConfig[] = [
     {
         component: () => lazyLoadView(import(
         /* webpackPrefetch: true, webpackPreload: true, webpackChunkName: "pages" */
-        "@web/views/PromptContentPage.vue")),
+        "@web/views/LegacyPromptContentPage.vue")),
         path: `${ PageRoute.PROMPTS_ROOT }/:entryId`,
         name: "Prompt",
         meta: {
