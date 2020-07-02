@@ -1,9 +1,10 @@
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
-import { Collection } from "@shared/FirestoreBaseModels";
+import { BaseModelField, Collection } from "@shared/FirestoreBaseModels";
 import ReflectionPrompt, { Field } from "@shared/models/ReflectionPrompt";
 import { Campaign } from "@shared/mailchimp/models/MailchimpTypes";
 import { getDateFromISOString } from "@shared/util/DateUtil";
 import Logger from "@shared/Logger";
+import { QuerySortDirection } from "@shared/types/FirestoreConstants";
 
 const logger = new Logger("AdminReflectionPromptService");
 let firestoreService: AdminFirestoreService;
@@ -102,6 +103,25 @@ export default class AdminReflectionPromptService {
         }
 
         return reflectionPrompt;
+    }
+
+    async getAllBatch(options: {
+        onData: (models: ReflectionPrompt[], batchNumber: number) => Promise<void>,
+        batchSize?: number,
+        includeDeleted?: boolean,
+    }): Promise<void> {
+        const query = this.getCollectionRef();
+
+        await firestoreService.executeBatchedQuery({
+            query,
+            type: ReflectionPrompt,
+            onData: options.onData,
+            batchSize: options?.batchSize,
+            orderBy: BaseModelField.createdAt,
+            sortDirection: QuerySortDirection.asc,
+            includeDeleted: options.includeDeleted,
+        });
+        return;
     }
 
     async get(id: string): Promise<ReflectionPrompt | undefined> {
