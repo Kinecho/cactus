@@ -369,11 +369,11 @@
                 const items: Content[] = [...this.promptContent.content];
 
 
-                const hasInsightsCard = items.some(c => c.contentType === ContentType.insights);
+                const hasInsightsCard = items.some(c => c.contentType === ContentType.reflection_analysis);
                 if (!hasInsightsCard) {
                     const reflectIndex = items.findIndex(c => c.contentType === ContentType.reflect)
                     const insightsCard: Content = {
-                        contentType: ContentType.insights,
+                        contentType: ContentType.reflection_analysis,
                     }
                     if (reflectIndex >= 0 && reflectIndex !== items.length) {
                         items.splice(reflectIndex + 1, 0, insightsCard)

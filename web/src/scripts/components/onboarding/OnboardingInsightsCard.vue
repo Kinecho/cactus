@@ -27,13 +27,11 @@
     import { ListenerUnsubscriber } from "@web/services/FirestoreService";
     import ReflectionResponseService from "@web/services/ReflectionResponseService";
     import Spinner from "@components/Spinner.vue";
-    import InsightsCard from "@components/InsightsCard.vue";
     import PositivityRating from "@components/PositivityRating.vue";
     import ToneAnalysis from "@components/ToneAnalysis.vue";
 
     @Component({
         components: {
-            InsightsCard,
             Spinner,
             PositivityRating,
             ToneAnalysis,

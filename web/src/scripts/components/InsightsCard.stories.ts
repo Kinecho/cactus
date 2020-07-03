@@ -11,7 +11,7 @@ export default {
 }
 
 const insightsContent: Content = {
-    contentType: ContentType.insights,
+    contentType: ContentType.reflection_analysis,
 }
 
 export const Loading = () => Vue.extend({

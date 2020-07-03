@@ -9,6 +9,8 @@
                     :card="card"
                     :index="i"
                     :key="`card_${i}`"
+                    @next="next"
+                    @previous="previous"
             />
         </transition-group>
 
@@ -42,6 +44,7 @@
     import ReflectCard from "@components/promptcontent/ReflectCard.vue";
     import QuoteCard from "@components/promptcontent/QuoteCard.vue";
     import VideoCard from "@components/promptcontent/VideoCard.vue";
+    import ReflectionAnalysisCard from "@components/promptcontent/ReflectionAnalysisCard.vue";
 
     const logger = new Logger("PromptContent");
 
@@ -56,6 +59,7 @@
         quote = "quote-card",
         reflect = "reflect-card",
         video = "video-card",
+        reflection_analysis = "reflection-analysis-card",
     }
 
     @Component({
@@ -65,6 +69,7 @@
             [CardType.reflect]: ReflectCard,
             [CardType.quote]: QuoteCard,
             [CardType.video]: VideoCard,
+            [CardType.reflection_analysis]: ReflectionAnalysisCard,
             ProgressStepper,
         }
     })
@@ -88,6 +93,9 @@
          */
         @Prop({ type: Number, required: false, default: 0 })
         index!: number;
+
+        @Prop({type: Array as () => PromptContentCardViewModel[], required: true, default: []})
+        cards!: PromptContentCardViewModel[]
 
         cardTransitionName = transitionName.next;
         keyListener: any = null;
@@ -113,11 +121,12 @@
                     return CardType.quote;
                 case ContentType.video:
                     return CardType.video;
+                case ContentType.reflection_analysis:
+                    return CardType.reflection_analysis;
                 case ContentType.audio:
                 case ContentType.elements:
                 case ContentType.share_reflection:
                 case ContentType.invite:
-                case ContentType.insights:
                 default:
                     return CardType.text;
             }
@@ -133,15 +142,6 @@
 
         get totalPages(): number {
             return this.promptContent.content.length;
-        }
-
-        get cards(): PromptContentCardViewModel[] {
-            const prompt = this.prompt;
-            const promptContent = this.promptContent;
-            const responses = this.responses;
-            const member = this.member;
-
-            return PromptContentCardViewModel.createAll({ responses, promptContent, prompt, member });
         }
 
         get showNextButton(): boolean {

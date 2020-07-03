@@ -100,7 +100,7 @@ export enum ContentType {
     elements = "elements",
     share_reflection = "share_reflection",
     invite = "invite",
-    insights = "insights",
+    reflection_analysis = "reflection_analysis",
 }
 
 export enum ContentStatus {

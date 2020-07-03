@@ -1,6 +1,6 @@
 import ReflectionResponse, { DynamicResponseValues } from "@shared/models/ReflectionResponse";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
-import PromptContent, { Content, ContentType, Image, Quote, Video } from "@shared/models/PromptContent";
+import PromptContent, { Content, ContentType, Image, Video } from "@shared/models/PromptContent";
 import Logger from "@shared/Logger"
 import CactusMember from "@shared/models/CactusMember";
 import { isBlank } from "@shared/util/StringUtil";
@@ -79,11 +79,50 @@ export default class PromptContentCardViewModel {
         return !isBlank(model.text) ? model : null;
     }
 
-    static createAll(params: { prompt: ReflectionPrompt, promptContent: PromptContent, responses: ReflectionResponse[] | null, member: CactusMember }): PromptContentCardViewModel[] {
+    get responseText(): string | null {
+        const responses = this.responses ?? []
+        if (responses.length > 0) {
+            return responses.map(r => r.content.text).join("\n\n").trim();
+        }
+        return null;
+    }
+
+    static createReflectionAnalysis(params: {
+        prompt: ReflectionPrompt,
+        promptContent: PromptContent,
+        responses: ReflectionResponse[] | null,
+        member: CactusMember,
+    }): PromptContentCardViewModel {
         const { prompt, promptContent, responses, member } = params;
-        const models: PromptContentCardViewModel[] = promptContent.content.map(content => {
+        const content: Content = {
+            contentType: ContentType.reflection_analysis,
+        }
+        return new PromptContentCardViewModel({ prompt, promptContent, responses, content, member });
+    }
+
+    static createAll(params: {
+        prompt: ReflectionPrompt,
+        promptContent: PromptContent,
+        responses: ReflectionResponse[] | null,
+        member: CactusMember
+    }): PromptContentCardViewModel[] {
+        const { prompt, promptContent, responses, member } = params;
+        let lastReflectIndex: number | null = null;
+        let hasInsightsAnalysis = false;
+        const models: PromptContentCardViewModel[] = promptContent.content.map((content, i) => {
+            if (content.contentType === ContentType.reflect) {
+                lastReflectIndex = i;
+            } else if (content.contentType === ContentType.reflection_analysis) {
+                hasInsightsAnalysis = true;
+            }
             return new PromptContentCardViewModel({ prompt, promptContent, responses, content, member });
         });
+
+        if (lastReflectIndex !== null && !hasInsightsAnalysis) {
+            const insightsCard = PromptContentCardViewModel.createReflectionAnalysis(params);
+            models.splice(lastReflectIndex + 1, 0, insightsCard)
+        }
+
         logger.info(`Created ${ models.length } view models`);
         return models;
     }

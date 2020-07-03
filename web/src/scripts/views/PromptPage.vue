@@ -4,6 +4,7 @@
         <transition mode="out-in" name="component-fade" appear>
             <spinner v-if="loading" :delay="1200" message="Loading"/>
             <prompt-content v-else
+                    :cards="cards"
                     :prompt-content="promptContent"
                     :prompt="prompt"
                     :responses="responses"
@@ -36,6 +37,7 @@
     import { PageRoute } from "@shared/PageRoutes";
     import { QueryParam } from "@shared/util/queryParams";
     import { removeQueryParam } from "@web/util";
+    import PromptContentCardViewModel from "@components/promptcontent/PromptContentCardViewModel";
 
     const logger = new Logger("PromptPage");
 
@@ -70,8 +72,8 @@
         notFound: boolean = false;
 
         promptContent: PromptContent | null = null;
-        prompt: ReflectionPrompt | null;
-        responses: ReflectionResponse[] | null;
+        prompt: ReflectionPrompt | null = null;
+        responses: ReflectionResponse[] | null = null;
 
         promptContentUnsubscriber: ListenerUnsubscriber | null = null;
         promptUnsubscriber: ListenerUnsubscriber | null = null;
@@ -84,6 +86,15 @@
 
         promptHasLoaded = false;
         responsesHasLoaded = false;
+
+        get cards(): PromptContentCardViewModel[] {
+            const prompt = this.prompt;
+            const promptContent = this.promptContent;
+            const responses = this.responses;
+            const member = this.member;
+
+            return PromptContentCardViewModel.createAll({ responses, promptContent, prompt, member });
+        }
 
         get loading(): boolean {
             return this.promptContentLoading || this.promptLoading || this.responsesLoading || !this.responsesHasLoaded || !this.promptHasLoaded;
@@ -141,7 +152,7 @@
         }
 
         async setPageIndex(index: number) {
-            const boundedIndex = Math.min(Math.max(index, 1), this.promptContent?.content.length ?? 1);
+            const boundedIndex = Math.min(Math.max(index, 1), this.cards.length ?? 1);
             const id = this.promptContent?.entryId ?? this._entryId;
             if (boundedIndex === this.page && this.$route.params.id === id) {
                 logger.info("Not navigating anywhere, page index is the same and so is the ID");

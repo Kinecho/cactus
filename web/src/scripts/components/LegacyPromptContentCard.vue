@@ -332,7 +332,7 @@
         },
         computed: {
             isInsightsCard(): boolean {
-                return this.response && this.processedContent?.contentType === ContentType.insights;
+                return this.response && this.processedContent?.contentType === ContentType.reflection_analysis;
             },
             shareableLinkParams(): {} | undefined {
                 if (this.shareableLinkUrl && this.member?.email) {
