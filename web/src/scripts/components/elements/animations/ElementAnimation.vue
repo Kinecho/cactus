@@ -35,29 +35,15 @@
 <script lang="ts">
     import Vue from "vue";
     import Component from "vue-class-component"
-    import { element } from "@shared/models/element";
     import { Prop } from "vue-property-decorator";
-    import emotions from "@components/elements/animations/emotions.vue"
-    import energy from "@components/elements/animations/energy.vue"
-    import experience from "@components/elements/animations/experience.vue"
-    import meaning from "@components/elements/animations/meaning.vue"
-    import relationships from "@components/elements/animations/relationships.vue"
+    import { CactusElement } from "@shared/models/CactusElement";
 
-
-    @Component({
-        components: {
-            emotions,
-            energy,
-            experience,
-            meaning,
-            relationships,
-        }
-    })
+    @Component
     export default class ElementAnimation extends Vue {
         name = "ElementAnimation.vue";
 
-        @Prop({ type: String as () => element, required: false, default: null })
-        element!: element | null;
+        @Prop({ type: String as () => CactusElement, required: false, default: null })
+        element!: CactusElement | null;
     }
 </script>
 
