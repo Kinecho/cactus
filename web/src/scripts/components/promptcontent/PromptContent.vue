@@ -1,6 +1,11 @@
 <template>
-    <div v-touch:swipe="handleSwipeEvent" class="prompt-content-main" :class="`index-${index}`">
+    <div v-touch:swipe="handleSwipeEvent" class="prompt-content-main" :class="[`index-${index}`, {isLastCard: isLastCard}]">
         <progress-stepper :total="totalPages" :current="contentIndex" class="progress"/>
+        <button aria-label="Close" @click="closePrompt()" title="Close" class="close tertiary icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
+                <path d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
+            </svg>
+        </button>
         <transition-group :name="cardTransitionName" mode="in-out" tag="div" class="card-container">
             <component
                     v-for="(card, i) in cards"
@@ -9,6 +14,8 @@
                     :card="card"
                     :index="i"
                     :key="`card_${i}`"
+                    @enableKeyboardNavigation="enableKeyboardNavigation"
+                    @close="closePrompt"
                     @next="next"
                     @previous="previous"
             />
@@ -25,6 +32,25 @@
             </svg>
         </button>
 
+
+        <div class="last-card-actions" v-if="isLastCard">
+            <button class="button actions secondary" @click="showShareNote = true" v-if="hasNote">Share Note</button>
+            <button class="button actions" @click="closePrompt">Done</button>
+        </div>
+
+        <modal :show="showShareNote && !!shareReflectionCard" v-on:close="showShareNote = false" :showCloseButton="true">
+            <div class="sharing-card note" slot="body">
+                <ShareNoteCard :card="shareReflectionCard"/>
+            </div>
+        </modal>
+
+        <Modal :show="showCloseConfirm" :show-close-button="false">
+            <div slot="body" class="confirm-body">
+                <h2>Are you sure you want to exit? Any unsaved progress will be lost.</h2>
+                <button @click="showCloseConfirm = false">No, continue</button>
+                <button @click="closePrompt()">Yes, exit.</button>
+            </div>
+        </Modal>
     </div>
 </template>
 
@@ -45,6 +71,11 @@
     import QuoteCard from "@components/promptcontent/QuoteCard.vue";
     import VideoCard from "@components/promptcontent/VideoCard.vue";
     import ReflectionAnalysisCard from "@components/promptcontent/ReflectionAnalysisCard.vue";
+    import Modal from "@components/Modal.vue";
+    import { pushRoute } from "@web/NavigationUtil";
+    import { PageRoute } from "@shared/PageRoutes";
+    import { isBlank } from "@shared/util/StringUtil";
+    import ShareNoteCard from "@components/promptcontent/ShareNoteCard.vue";
 
     const logger = new Logger("PromptContent");
 
@@ -64,6 +95,7 @@
 
     @Component({
         components: {
+            ShareNoteCard,
             [CardType.text]: TextCard,
             [CardType.photo]: PhotoCard,
             [CardType.reflect]: ReflectCard,
@@ -71,6 +103,7 @@
             [CardType.video]: VideoCard,
             [CardType.reflection_analysis]: ReflectionAnalysisCard,
             ProgressStepper,
+            Modal
         }
     })
     export default class PromptView extends Vue {
@@ -94,12 +127,14 @@
         @Prop({ type: Number, required: false, default: 0 })
         index!: number;
 
-        @Prop({type: Array as () => PromptContentCardViewModel[], required: true, default: []})
+        @Prop({ type: Array as () => PromptContentCardViewModel[], required: true, default: [] })
         cards!: PromptContentCardViewModel[]
 
         cardTransitionName = transitionName.next;
         keyListener: any = null;
         keyboardNavigationEnabled = true;
+        showCloseConfirm = false;
+        showShareNote: boolean = false;
 
         mounted() {
             this.keyListener = document.addEventListener("keyup", this.handleDocumentKeyUp)
@@ -107,6 +142,10 @@
 
         destroyed() {
             document.removeEventListener("keyup", this.handleDocumentKeyUp);
+        }
+
+        enableKeyboardNavigation(enabled: boolean) {
+            this.keyboardNavigationEnabled = enabled;
         }
 
         getCardType(card: PromptContentCardViewModel): CardType {
@@ -130,6 +169,18 @@
                 default:
                     return CardType.text;
             }
+        }
+
+        get card(): PromptContentCardViewModel {
+            return this.cards[this.index];
+        }
+
+        get shareReflectionCard(): PromptContentCardViewModel | null {
+            return this.cards.find(card => card.type === ContentType.reflect) ?? null
+        }
+
+        get hasNote(): boolean {
+            return this.responses?.some(r => !isBlank(r.content.text)) ?? false;
         }
 
         /**
@@ -156,6 +207,18 @@
 
         get previousEnabled(): boolean {
             return this.index > 0;
+        }
+
+        get isLastCard(): boolean {
+            return this.index >= this.cards.length - 1;
+        }
+
+        async closePrompt(force: boolean = false) {
+            if (this.showCloseConfirm || force || this.isLastCard) {
+                await pushRoute(PageRoute.JOURNAL_HOME);
+                return;
+            }
+            this.showCloseConfirm = true;
         }
 
         next() {
@@ -204,6 +267,25 @@
     @import "transitions";
     @import "variables";
     @import "mixins";
+
+    .isLastCard {
+        padding-bottom: 15rem;
+    }
+
+    .last-card-actions {
+        position: fixed;
+        bottom: 4rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: row;
+        flex: 1;
+        width: 100%;
+        > * {
+            margin-right: 2rem;
+        }
+
+    }
 
     .prompt-content-main {
         background: $beige no-repeat;

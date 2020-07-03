@@ -2,14 +2,15 @@
     <div class="prompt-content-card">
         <span>analysis card</span>
 
-        <spinner v-if="isLoading"/>
+
         <div class="textBox">
             <!-- <p v-if="reflectionResponse.toneAnalysis">
                 This is the positivity rating of your note. Write more to reveal different emotions.
             </p> -->
             <p>This is what your note reveals about your emotions.</p>
         </div>
-        <div class="insightsContainer" v-if="response">
+        <spinner v-if="isLoading"/>
+        <div class="insightsContainer" v-if="!isLoading && response">
             <positivity-rating :sentiment-score="response.sentiment.documentSentiment"/>
             <tone-analysis :tone-result="response.toneAnalysis"
                     :original-text="response.content.text"
@@ -29,12 +30,14 @@
     import ReflectionResponse from "@shared/models/ReflectionResponse";
     import PositivityRating from "@components/PositivityRating.vue";
     import ToneAnalysis from "@components/ToneAnalysis.vue";
+    import Spinner from "@components/Spinner.vue";
 
     @Component({
         components: {
             MarkdownText,
             PositivityRating,
             ToneAnalysis,
+            Spinner
         }
     })
     export default class ReflectionAnalysisCard extends Vue {
@@ -47,7 +50,7 @@
         card!: PromptContentCardViewModel;
 
         get isLoading(): boolean {
-            return this.response?.mightNeedInsightsUpdate ?? false;
+            return !this.response || (this.card?.responses?.some(r => r.mightNeedInsightsUpdate) ?? false);
         }
 
         get response(): ReflectionResponse | null {
