@@ -11,7 +11,7 @@
     import { Prop } from "vue-property-decorator";
 
     @Component
-    export default class PromptContentCard extends Vue {
+    export default class ReflectCard extends Vue {
         name = "ReflectCard.vue";
 
         @Prop({ type: Number, required: true, default: 0 })

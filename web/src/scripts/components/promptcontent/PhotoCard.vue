@@ -21,7 +21,7 @@
         }
     })
     export default class PhotoCard extends Vue {
-        name = "TextCard.vue";
+        name = "PhotoCard.vue";
 
         @Prop({ type: Number, required: true, default: 0 })
         index!: number;

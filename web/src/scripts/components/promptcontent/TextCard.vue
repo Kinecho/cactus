@@ -17,7 +17,7 @@
             MarkdownText
         }
     })
-    export default class PromptContentCard extends Vue {
+    export default class TextCard extends Vue {
         name = "TextCard.vue";
 
         @Prop({ type: Number, required: true, default: 0 })
