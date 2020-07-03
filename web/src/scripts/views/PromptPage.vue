@@ -1,16 +1,14 @@
 <template>
     <four-oh-four v-if="notFound"/>
     <div v-else class="prompt-page">
-        <h1>prompt page</h1>
-        <p>memberEmail: {{member.email}}</p>
         <transition mode="out-in" name="component-fade" appear>
             <spinner v-if="loading" :delay="1200" message="Loading"/>
             <prompt-content v-else
                     :prompt-content="promptContent"
                     :prompt="prompt"
                     :responses="responses"
+                    :member="member"
                     :index="page - 1"
-
                     @next="nextPage"
                     @previous="previousPage"
             />
@@ -66,7 +64,7 @@
         /**
          * Current page starting at one. Content index should be page - 1.
          */
-        @Prop({ type: Number, required: false, default:10 })
+        @Prop({ type: Number, required: false, default: 10 })
         page!: number;
 
         notFound: boolean = false;
