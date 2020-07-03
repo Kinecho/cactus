@@ -129,9 +129,11 @@ const routes: MetaRouteConfig[] = [
         name: "Prompt",
         props: (route) => {
             const usePrompt = route.query[QueryParam.USE_PROMPT_ID] === "true";
+            const pageParam = route.query[QueryParam.CONTENT_INDEX]
             return {
-                promptId: usePrompt ? route.params.id : null,
-                entryId: usePrompt ? null : route.params.id
+                _promptId: usePrompt ? route.params.id : null,
+                _entryId: usePrompt ? null : route.params.id,
+                page: Number(route.params.page ?? pageParam ?? 0)
             }
         },
         meta: {
@@ -140,7 +142,13 @@ const routes: MetaRouteConfig[] = [
             passMember: true,
             authRequired: true,
             authContinueMessage: "You must be signed in to view this content"
-        }
+        },
+        children: [
+            {
+                path: ":page",
+                props: true,
+            }
+        ]
     },
     {
         component: () => lazyLoadView(import(
