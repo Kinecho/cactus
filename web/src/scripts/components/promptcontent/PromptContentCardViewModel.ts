@@ -4,6 +4,7 @@ import PromptContent, { Content, ContentType, Image, Quote, Video } from "@share
 import Logger from "@shared/Logger"
 import CactusMember from "@shared/models/CactusMember";
 import { isBlank } from "@shared/util/StringUtil";
+import { CactusElement } from "@shared/models/CactusElement";
 
 const logger = new Logger("PromptContentCardViewModel");
 
@@ -31,6 +32,10 @@ export default class PromptContentCardViewModel {
 
     get type(): ContentType {
         return this.content.contentType;
+    }
+
+    get element(): CactusElement | null {
+        return this.promptContent.cactusElement ?? null;
     }
 
     get text(): string | null | undefined {

@@ -1,6 +1,10 @@
 <template>
     <div class="prompt-content-card">
         <p>Reflect {{index}} - {{card.type}}</p>
+
+        <div class="animation">
+            <ElementAnimation :element="card.element"/>
+        </div>
     </div>
 </template>
 
@@ -9,8 +13,11 @@
     import Component from "vue-class-component"
     import PromptContentCardViewModel from "@components/promptcontent/PromptContentCardViewModel";
     import { Prop } from "vue-property-decorator";
+    import ElementAnimation from "@components/elements/animations/ElementAnimation.vue";
 
-    @Component
+    @Component({
+        components: { ElementAnimation }
+    })
     export default class ReflectCard extends Vue {
         name = "ReflectCard.vue";
 
