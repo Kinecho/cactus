@@ -133,7 +133,7 @@ const routes: MetaRouteConfig[] = [
             return {
                 _promptId: usePrompt ? route.params.id : null,
                 _entryId: usePrompt ? null : route.params.id,
-                page: Number(route.params.page ?? pageParam ?? 0)
+                page: Number(route.params.page ?? pageParam ?? 1)
             }
         },
         meta: {

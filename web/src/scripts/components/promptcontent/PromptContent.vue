@@ -1,6 +1,6 @@
 <template>
     <div>
-        <progress-stepper :total="totalPages" :current="contentIndex"/>
+        <progress-stepper :total="totalPages" :current="contentIndex" />
         <p>EntryId: {{promptContent.entryId || 'not set'}}</p>
         <p>PromptId: {{prompt.id || 'not set'}}</p>
         <p>Prompt Content Subject Line: {{promptContent.subjectLine}}</p>
@@ -9,6 +9,7 @@
         <p>PromptType: {{prompt.promptType}}</p>
 
         <p>Current Content Index: {{contentIndex}}</p>
+        <p>Total Pages {{totalPages}}</p>
 
         <button class="button" @click="$emit('previous')">Previous</button>
         <button class="button" @click="$emit('next')">Next</button>
@@ -41,6 +42,9 @@
         @Prop({ type: Array as () => ReflectionResponse[], required: false, default: null })
         responses!: ReflectionResponse[] | null;
 
+        /**
+         * Zero-based index of the current card to show
+         */
         @Prop({ type: Number, required: false, default: 0 })
         index!: number;
 

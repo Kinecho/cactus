@@ -1,6 +1,11 @@
 <template>
     <div class="progress" :class="[type]">
-        <span v-for="(step, i) in steps" :key="`step_${i}`" class="step" :class="{completed: step.completed, current: step.current}"></span>
+        <span v-if="type === 'rectangle'" class="step completed" :style="rectangleStyle"></span>
+        <span v-else v-for="(step, i) in steps"
+                :key="`step_${i}`"
+                class="step"
+                :class="{completed: step.completed, current: step.current}"></span>
+
     </div>
 </template>
 
@@ -12,14 +17,32 @@
         current: boolean
     }
 
+    export enum StepperStyle {
+        dots = "dots",
+        rectangle = "rectangle",
+    }
+
     export default Vue.extend({
         name: "ProgressStepper",
         props: {
             total: Number,
             current: { type: Number, default: 0 },
-            type: { type: String, default: "rectangle", required: false },
+            type: {
+                type: String as () => StepperStyle,
+                default: StepperStyle.rectangle,
+                required: false,
+                validator(value: string): boolean {
+                    return Object.values(StepperStyle).includes(value);
+                }
+            },
         },
         computed: {
+            rectangleStyle(): Record<string, any> {
+                const widthPercent = ((this.current + 1) / this.total ?? 1) * 100;
+                return {
+                    width: `${ widthPercent }%`
+                };
+            },
             steps(): Step[] {
                 const steps: Step[] = [];
                 for (let i = 0; i < this.total; i++) {
@@ -51,7 +74,8 @@
             background-color: $darkestGreen;
 
             .step {
-                flex: 1;
+                /*flex: 1;*/
+                transition: width .2s;
                 height: .4rem;
             }
         }

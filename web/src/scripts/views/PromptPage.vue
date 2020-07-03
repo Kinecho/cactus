@@ -9,7 +9,7 @@
                     :prompt-content="promptContent"
                     :prompt="prompt"
                     :responses="responses"
-                    :index="page"
+                    :index="page - 1"
 
                     @next="nextPage"
                     @previous="previousPage"
@@ -37,6 +37,7 @@
     import { pushRoute } from "@web/NavigationUtil";
     import { PageRoute } from "@shared/PageRoutes";
     import { QueryParam } from "@shared/util/queryParams";
+    import { removeQueryParam } from "@web/util";
 
     const logger = new Logger("PromptPage");
 
@@ -62,8 +63,11 @@
         @Prop({ type: Object as () => CactusMember, required: true })
         member!: CactusMember;
 
-        @Prop({ type: Number, required: false, default: 0 })
-        page: 0;
+        /**
+         * Current page starting at one. Content index should be page - 1.
+         */
+        @Prop({ type: Number, required: false, default:10 })
+        page!: number;
 
         notFound: boolean = false;
 
@@ -102,7 +106,14 @@
         }
 
         @Watch("promptContent")
-        onPromptContent(current: PromptContent | null, previous: PromptContent | null) {
+        async onPromptContent(current: PromptContent | null, previous: PromptContent | null) {
+            if (current?.entryId && current.entryId !== this._entryId) {
+                logger.info("Navigating to the current.entryId")
+                // pushRoute(`${ PageRoute.PROMPTS_ROOT }/${ current.entryId }`);
+                removeQueryParam(QueryParam.USE_PROMPT_ID);
+                await this.setPageIndex(this.page);
+            }
+
             if (current?.promptId !== previous?.promptId) {
                 logger.info("promptContent.promptId changed, updating response + prompt observers");
                 this.setupResponseObserver();
@@ -131,23 +142,20 @@
             this.setPageIndex(this.page - 1);
         }
 
-        setPageIndex(index: number) {
-            const boundedIndex = Math.min(Math.max(index, 0), (this.promptContent?.content.length ?? 1) - 1);
-            if (boundedIndex === this.page) {
+        async setPageIndex(index: number) {
+            const boundedIndex = Math.min(Math.max(index, 1), this.promptContent?.content.length ?? 1);
+            const id = this.promptContent?.entryId ?? this._entryId;
+            if (boundedIndex === this.page && this.$route.params.id === id) {
+                logger.info("Not navigating anywhere, page index is the same and so is the ID");
                 return;
-            }
-            const id = this._entryId ?? this._promptId;
-            const params: Record<string, string | number | boolean> = {};
-            if (this._promptId) {
-                params[QueryParam.USE_PROMPT_ID] = true;
             }
 
             const basePath = `${ PageRoute.PROMPTS_ROOT }/${ id }`
-
-            if (boundedIndex > 0) {
-                pushRoute(`${ basePath }/${ boundedIndex }`);
+            logger.info("navigating to route ", basePath)
+            if (boundedIndex > 1) {
+                await pushRoute(`${ basePath }/${ boundedIndex }`);
             } else {
-                pushRoute(`${ basePath }`);
+                await pushRoute(`${ basePath }`);
             }
 
         }
