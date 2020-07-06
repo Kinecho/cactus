@@ -20,6 +20,10 @@
                     @previous="previous"
             />
         </transition-group>
+        <div class="last-card-actions" v-if="isLastCard">
+                <button class="button actions" @click="closePrompt">Done</button>
+                <button class="button actions tertiary" @click="showShareNote = true" v-if="hasNote"><svg-icon icon="share"/>Share Note</button>
+        </div>
 
         <button aria-label="Previous slide" @click="previous" :disabled="!previousEnabled" class="arrow previous tertiary no-loading">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
@@ -31,12 +35,6 @@
                 <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
             </svg>
         </button>
-
-
-        <div class="last-card-actions" v-if="isLastCard">
-            <button class="button actions" @click="closePrompt">Done</button>
-            <button class="button actions tertiary" @click="showShareNote = true" v-if="hasNote"><svg-icon icon="share"/>Share Note</button>
-        </div>
 
         <modal :show="showShareNote && !!shareReflectionCard" v-on:close="showShareNote = false" :showCloseButton="true">
             <div class="sharing-card note" slot="body">
@@ -277,8 +275,8 @@
     .last-card-actions {
         bottom: 0;
         left: 0;
-        position: fixed;
         padding: 2.4rem;
+        position: fixed;
         width: 100%;
 
         @include r(600) {
