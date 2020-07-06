@@ -1,7 +1,6 @@
 <template>
     <div class="prompt-content-card">
         <div class="quote-card">
-            <span>quote card</span>
             <div class="quote">
                 <markdown-text :source="card.quote.text" v-if="card.quote.text" treatment="quote"/>
             </div>
@@ -9,8 +8,12 @@
                 <div class="avatar-container" v-if="card.quote.avatar">
                     <flamelink-image v-bind:image="card.quote.avatar" :width="60"/>
                 </div>
-                <strong><markdown-text :source="card.quote.authorName" v-if="card.quote.authorName"/></strong>
-                <p class="byline"><markdown-text :source="card.quote.authorTitle" v-if="card.quote.authorTitle"/></p>
+                <strong>
+                    <markdown-text :source="card.quote.authorName" v-if="card.quote.authorName"/>
+                </strong>
+                <p class="byline">
+                    <markdown-text :source="card.quote.authorTitle" v-if="card.quote.authorTitle"/>
+                </p>
             </div>
         </div>
     </div>
@@ -22,10 +25,12 @@
     import PromptContentCardViewModel from "@components/promptcontent/PromptContentCardViewModel";
     import MarkdownText from "@components/MarkdownText.vue";
     import { Prop } from "vue-property-decorator";
+    import FlamelinkImage from "@components/FlamelinkImage.vue";
 
     @Component({
         components: {
-            MarkdownText
+            MarkdownText,
+            FlamelinkImage,
         }
     })
     export default class QuoteCard extends Vue {

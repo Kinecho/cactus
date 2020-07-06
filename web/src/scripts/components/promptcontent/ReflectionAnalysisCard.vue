@@ -4,7 +4,6 @@
             <div class="textBox">
                 <p>This is what your note reveals about your emotions.</p>
             </div>
-            <spinner v-if="isLoading"/>
             <div class="analysisContainer" v-if="!isLoading && response">
                 <positivity-rating :sentiment-score="response.sentiment.documentSentiment"/>
                 <tone-analysis :tone-result="response.toneAnalysis"
@@ -14,6 +13,7 @@
                 />
             </div>
         </div>
+        <spinner v-if="isLoading" class="loading" message="Gathering insights..."/>
     </div>
 </template>
 
@@ -117,5 +117,9 @@
             font-size: 2rem;
             max-width: 50%;
         }
+    }
+
+    .loading {
+        font-size: 1.8rem;
     }
 </style>

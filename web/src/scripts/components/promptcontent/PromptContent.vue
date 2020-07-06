@@ -35,7 +35,10 @@
 
         <div class="last-card-actions" v-if="isLastCard">
             <button class="button actions" @click="closePrompt">Done</button>
-            <button class="button actions tertiary" @click="showShareNote = true" v-if="hasNote"><svg-icon icon="share"/>Share Note</button>
+            <button class="button actions tertiary" @click="showShareNote = true" v-if="hasNote">
+                <svg-icon icon="share"/>
+                Share Note
+            </button>
         </div>
 
         <modal :show="showShareNote && !!shareReflectionCard" v-on:close="showShareNote = false" :showCloseButton="true">
@@ -59,10 +62,8 @@
     import Component from "vue-class-component"
     import PromptContent, { ContentType } from "@shared/models/PromptContent";
     import { Prop } from "vue-property-decorator";
-    import ReflectionPrompt from "@shared/models/ReflectionPrompt";
     import ReflectionResponse from "@shared/models/ReflectionResponse";
     import ProgressStepper from "@components/ProgressStepper.vue";
-    import CactusMember from "@shared/models/CactusMember";
     import Logger from "@shared/Logger"
     import PromptContentCardViewModel from "@components/promptcontent/PromptContentCardViewModel";
     import TextCard from "@components/promptcontent/TextCard.vue";
@@ -111,17 +112,8 @@
     export default class PromptView extends Vue {
         name = "PromptContent.vue";
 
-        @Prop({ type: Object as () => PromptContent, required: true })
-        promptContent!: PromptContent
-
-        @Prop({ type: Object as () => ReflectionPrompt, required: true })
-        prompt!: ReflectionPrompt;
-
         @Prop({ type: Array as () => ReflectionResponse[], required: false, default: null })
         responses!: ReflectionResponse[] | null;
-
-        @Prop({ type: Object as () => CactusMember, required: true })
-        member!: CactusMember;
 
         /**
          * Zero-based index of the current card to show
@@ -194,7 +186,7 @@
         }
 
         get totalPages(): number {
-            return this.promptContent.content.length;
+            return this.cards.length;
         }
 
         get showNextButton(): boolean {
@@ -217,7 +209,8 @@
 
         async closePrompt(force: boolean = false) {
             if (this.showCloseConfirm || force || this.isLastCard) {
-                await pushRoute(PageRoute.JOURNAL_HOME);
+                // await pushRoute(PageRoute.JOURNAL_HOME);
+                this.$emit("close");
                 return;
             }
             this.showCloseConfirm = true;
@@ -312,7 +305,7 @@
         position: relative;
         transition: background-position 1s, background-color 1s;
         width: 100%;
-
+        flex-direction: column;
         @include r(374) {
             font-size: 2.4rem;
         }

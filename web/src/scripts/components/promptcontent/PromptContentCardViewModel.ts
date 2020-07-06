@@ -128,4 +128,29 @@ export default class PromptContentCardViewModel {
         logger.info(`Created ${ models.length } view models`);
         return models;
     }
+
+    static createMocks(contentItems?: Content[]): PromptContentCardViewModel[] {
+        const promptId = "p123";
+        const memberId = "m123";
+        const promptContentId = "c123";
+        const prompt: ReflectionPrompt = new ReflectionPrompt();
+        prompt.id = promptId;
+
+        const promptContent = new PromptContent();
+        promptContent.entryId = promptContentId;
+        promptContent.promptId = promptId;
+        promptContent.content = contentItems ?? [];
+        const member = new CactusMember();
+        member.id = memberId;
+        member.email = "test@cactus.app";
+
+        const responses: ReflectionResponse[] = [];
+
+        return PromptContentCardViewModel.createAll({
+            prompt,
+            promptContent,
+            member,
+            responses
+        });
+    }
 }

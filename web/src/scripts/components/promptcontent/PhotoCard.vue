@@ -13,10 +13,12 @@
     import PromptContentCardViewModel from "@components/promptcontent/PromptContentCardViewModel";
     import { Prop } from "vue-property-decorator";
     import FlamelinkImage from "@components/FlamelinkImage.vue";
+    import MarkdownText from "@components/MarkdownText.vue";
 
     @Component({
         components: {
             FlamelinkImage,
+            MarkdownText,
         }
     })
     export default class PhotoCard extends Vue {
