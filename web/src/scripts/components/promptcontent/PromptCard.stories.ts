@@ -68,7 +68,21 @@ export const FullStack = () => Vue.extend({
                     contentType: ContentType.photo,
                     text_md: "This is the second page",
                     photo: { url: "/assets/images/art.svg" }
-                }, {
+                },
+                {
+                    contentType: ContentType.audio,
+                    text_md: "This is an audio clip",
+                    audio: { url: "http://soundbible.com/grab.php?id=2177&type=mp3" }
+                },
+                {
+                    contentType: ContentType.video,
+                    text_md: "This is a youtube video",
+                    video: { youtubeVideoId: "dQw4w9WgXcQ" }
+                },
+                {
+                    contentType: ContentType.invite,
+                },
+                {
                     contentType: ContentType.quote,
                     quote: {
                         text: "Nothing can beat a **nice day**, not even sunshine.",

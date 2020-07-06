@@ -1,5 +1,5 @@
 <template>
-    <div class="invite-friends">
+    <div class="prompt-content-card">
         <div class="cta" v-if="!showInviteForm">
             <SocialActivityCard
                     avatarUrl="/assets/images/avatars/blobatar1.png"
@@ -48,105 +48,83 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import CopyService from "@shared/copy/CopyService"
-    import { getDeviceDimensions } from "@web/DeviceUtil"
-    import { isValidEmail } from "@shared/util/StringUtil"
-    import SocialActivityCard from "@components/SocialActivityCard.vue"
-    import { sendInvite } from '@web/social';
+    import Component from "vue-class-component"
     import { EmailContact } from "@shared/types/EmailContactTypes";
+    import { sendInvite } from "@web/social";
+    import { isValidEmail } from "@shared/util/StringUtil";
+    import SocialActivityCard from "@components/SocialActivityCard.vue";
 
-    const copy = CopyService.getSharedInstance().copy;
-
-    export default Vue.extend({
+    @Component({
         components: {
             SocialActivityCard
-        },
-        data(): {
-            resizeListener: any | undefined,
-            deviceWidth: number,
-            showInviteForm: boolean,
-            emailAddress: string,
-            message: string,
-            validEmail: boolean | undefined,
-            sendingInvite: boolean,
-            wasInvited: boolean
-            error: string | undefined
-        } {
-            return {
-                resizeListener: undefined,
-                deviceWidth: 0,
-                showInviteForm: false,
-                emailAddress: '',
-                message: '',
-                validEmail: undefined,
-                sendingInvite: false,
-                wasInvited: false,
-                error: undefined
-            }
-        },
-        destroyed() {
-            if (this.resizeListener) {
-                window.removeEventListener("resize", this.resizeListener);
-            }
-        },
-        mounted() {
-            this.deviceWidth = getDeviceDimensions().width;
-            this.resizeListener = window.addEventListener("resize", () => {
-                this.deviceWidth = getDeviceDimensions().width;
-            })
-        },
-        methods: {
-            async sendInvite(): Promise<void> {
-                this.validateEmail();
-
-                if (this.validEmail) {
-                    this.sendingInvite = true;
-
-                    const contact: EmailContact = {
-                        first_name: '',
-                        last_name: '',
-                        email: this.emailAddress
-                    };
-
-                    const sendInviteResult = await sendInvite(contact, this.message);
-
-                    if (sendInviteResult.success) {
-                        this.sendingInvite = false;
-                        this.wasInvited = true;
-                        this.error = undefined;
-                        setTimeout(() => this.skip(), 1500);
-                        return;
-                    } else {
-                        this.sendingInvite = false;
-                        this.wasInvited = false;
-                        this.error = sendInviteResult.message;
-                        return;
-                    }
-                }
-            },
-            validateEmail() {
-                if (isValidEmail(this.emailAddress)) {
-                    this.validEmail = true;
-                } else {
-                    this.validEmail = false;
-                }
-            },
-            skip() {
-                this.$emit("skip");
-            },
-            reset() {
-                this.showInviteForm = false;
-            },
-            switchToInvite() {
-                this.showInviteForm = true;
-                this.$emit("disableNavigation");
-            }
         }
     })
+    export default class InviteFriendsCard extends Vue {
+        name = "InviteFriendsCard";
+
+
+        showInviteForm: boolean = false;
+        emailAddress: string = "";
+        message: string = "";
+        validEmail: boolean = true;
+        sendingInvite: boolean = false;
+        wasInvited: boolean = false;
+        error: string | null = null;
+
+        async sendInvite(): Promise<void> {
+            this.validateEmail();
+
+            if (this.validEmail) {
+                this.sendingInvite = true;
+
+                const contact: EmailContact = {
+                    first_name: '',
+                    last_name: '',
+                    email: this.emailAddress
+                };
+
+                const sendInviteResult = await sendInvite(contact, this.message);
+
+                if (sendInviteResult.success) {
+                    this.sendingInvite = false;
+                    this.wasInvited = true;
+                    this.error = null;
+                    setTimeout(() => this.skip(), 1500);
+                    return;
+                } else {
+                    this.sendingInvite = false;
+                    this.wasInvited = false;
+                    this.error = sendInviteResult.message ?? null;
+                    return;
+                }
+            }
+        }
+
+        validateEmail() {
+            if (isValidEmail(this.emailAddress)) {
+                this.validEmail = true;
+            } else {
+                this.validEmail = false;
+            }
+        }
+
+        skip() {
+            this.$emit("next");
+        }
+
+        reset() {
+            this.showInviteForm = false;
+        }
+
+        switchToInvite() {
+            this.showInviteForm = true;
+            this.$emit("disableNavigation");
+        }
+    }
 </script>
 
-
-<style lang="scss" scoped>
+<style scoped lang="scss">
+    @import "prompts";
     @import "variables";
     @import "mixins";
     @import "forms";
@@ -170,8 +148,7 @@
     }
 
     .subtext {
-        margin: 0 auto 2.4rem;
-        max-width: 40rem;
+        margin: 0 0 2.4rem;
     }
 
     .button {
@@ -210,12 +187,14 @@
 
     textarea {
         @include textAreaAlt;
+        max-width: none;
         width: 100%;
     }
 
     .error {
         margin: .8rem 0 2.4rem;
         padding: 1.6rem;
+        font-size: 1.8rem;
     }
 
     .buttonContainer {

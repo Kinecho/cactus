@@ -65,7 +65,7 @@
     import ReflectionResponse from "@shared/models/ReflectionResponse";
     import ProgressStepper from "@components/ProgressStepper.vue";
     import Logger from "@shared/Logger"
-    import PromptContentCardViewModel, { CardType } from "@components/promptcontent/PromptContentCardViewModel";
+    import PromptContentCardViewModel from "@components/promptcontent/PromptContentCardViewModel";
     import TextCard from "@components/promptcontent/TextCard.vue";
     import PhotoCard from "@components/promptcontent/PhotoCard.vue";
     import ReflectCard from "@components/promptcontent/ReflectCard.vue";
@@ -77,6 +77,22 @@
     import ShareNoteCard from "@components/promptcontent/ShareNoteCard.vue";
     import SvgIcon from "@components/SvgIcon.vue";
     import ElementsCard from "@components/promptcontent/ElementsCard.vue";
+    import AudioCard from "@components/promptcontent/AudioCard.vue";
+    import InviteFriendsCard from "@components/promptcontent/InviteFriendsCard.vue";
+
+
+    export enum CardType {
+        text = "text-card",
+        photo = "photo-card",
+        quote = "quote-card",
+        reflect = "reflect-card",
+        video = "video-card",
+        reflection_analysis = "reflection-analysis-card",
+        elements = "elements-card",
+        share_note = "share-note-card",
+        audio = "audio-card",
+        invite_friends = "invite-friend-card",
+    }
 
     const logger = new Logger("PromptContent");
 
@@ -95,6 +111,8 @@
             [CardType.video]: VideoCard,
             [CardType.elements]: ElementsCard,
             [CardType.share_note]: ShareNoteCard,
+            [CardType.audio]: AudioCard,
+            [CardType.invite_friends]: InviteFriendsCard,
             [CardType.reflection_analysis]: ReflectionAnalysisCard,
             ProgressStepper,
             SvgIcon,
@@ -135,11 +153,34 @@
         }
 
         get supportedCards(): PromptContentCardViewModel[] {
-            return this.cards.filter(card => card.isSupportedCardType);
+            return this.cards.filter(card => !!this.getCardType(card));
         }
 
         getCardType(card: PromptContentCardViewModel): CardType | null {
-            return card.cardType;
+            switch (card.type) {
+                case ContentType.text:
+                    return CardType.text;
+                case ContentType.photo:
+                    return CardType.photo;
+                case ContentType.reflect:
+                    return CardType.reflect;
+                case ContentType.quote:
+                    return CardType.quote;
+                case ContentType.video:
+                    return CardType.video;
+                case ContentType.reflection_analysis:
+                    return CardType.reflection_analysis;
+                case ContentType.elements:
+                    return CardType.elements;
+                case ContentType.share_reflection:
+                    return CardType.share_note;
+                case ContentType.audio:
+                    return CardType.audio;
+                case ContentType.invite:
+                    return CardType.invite_friends;
+                default:
+                    return null
+            }
         }
 
         get card(): PromptContentCardViewModel {

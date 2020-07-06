@@ -1,6 +1,5 @@
 <template>
     <div class="prompt-content-card">
-        <span>Video</span>
         <markdown-text :source="card.text" v-if="card.text"/>
         <div class="video-container" v-if="card.video">
             <div v-if="card.video.youtubeVideoId" class="iframe-wrapper">

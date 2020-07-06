@@ -1,23 +1,12 @@
 import ReflectionResponse, { DynamicResponseValues } from "@shared/models/ReflectionResponse";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
-import PromptContent, { Content, ContentType, Image, isImage, Video } from "@shared/models/PromptContent";
+import PromptContent, { Audio, Content, ContentType, Image, isImage, Video } from "@shared/models/PromptContent";
 import Logger from "@shared/Logger"
 import CactusMember from "@shared/models/CactusMember";
 import { getResponseText, isBlank } from "@shared/util/StringUtil";
 import { CactusElement } from "@shared/models/CactusElement";
 
 const logger = new Logger("PromptContentCardViewModel");
-
-export enum CardType {
-    text = "text-card",
-    photo = "photo-card",
-    quote = "quote-card",
-    reflect = "reflect-card",
-    video = "video-card",
-    reflection_analysis = "reflection-analysis-card",
-    elements = "elements-card",
-    share_note = "share-note-card",
-}
 
 export interface QuoteModel {
     text: string,
@@ -68,6 +57,10 @@ export default class PromptContentCardViewModel {
         return this.content.photo;
     }
 
+    get audio(): Audio | null {
+        return this.content.audio ?? null;
+    }
+
     get video(): Video | null {
         const video = this.content.video
         if (isBlank(video?.youtubeVideoId) && isBlank(video?.url)) {
@@ -98,35 +91,6 @@ export default class PromptContentCardViewModel {
             return responses.map(r => r.content.text).join("\n\n").trim();
         }
         return null;
-    }
-
-    get cardType(): CardType | null {
-        switch (this.type) {
-            case ContentType.text:
-                return CardType.text;
-            case ContentType.photo:
-                return CardType.photo;
-            case ContentType.reflect:
-                return CardType.reflect;
-            case ContentType.quote:
-                return CardType.quote;
-            case ContentType.video:
-                return CardType.video;
-            case ContentType.reflection_analysis:
-                return CardType.reflection_analysis;
-            case ContentType.elements:
-                return CardType.elements;
-            case ContentType.share_reflection:
-                return CardType.share_note;
-            case ContentType.audio:
-            case ContentType.invite:
-            default:
-                return null
-        }
-    }
-
-    get isSupportedCardType(): boolean {
-        return !!this.cardType;
     }
 
     static createReflectionAnalysis(params: {
