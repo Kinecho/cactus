@@ -84,6 +84,8 @@ export const FullStack = () => Vue.extend({
                     text_md: "This is the most _important_ question you'll ever see.",
                 }, {
                     contentType: ContentType.elements,
+                }, {
+                    contentType: ContentType.share_reflection,
                 }
             ])
         }

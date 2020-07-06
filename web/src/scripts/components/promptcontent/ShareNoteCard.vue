@@ -27,8 +27,6 @@
                     @click="createSharableLink">
                 {{creatingLink ? 'Creating' : 'Get Shareable Link'}}
             </button>
-
-
         </transition>
     </div>
 </template>

@@ -8,7 +8,7 @@
         </button>
         <transition-group :name="cardTransitionName" mode="in-out" tag="div" class="card-container">
             <component
-                    v-for="(card, i) in cards"
+                    v-for="(card, i) in supportedCards"
                     v-if="i === index"
                     :is="getCardType(card)"
                     :card="card"
@@ -65,7 +65,7 @@
     import ReflectionResponse from "@shared/models/ReflectionResponse";
     import ProgressStepper from "@components/ProgressStepper.vue";
     import Logger from "@shared/Logger"
-    import PromptContentCardViewModel from "@components/promptcontent/PromptContentCardViewModel";
+    import PromptContentCardViewModel, { CardType } from "@components/promptcontent/PromptContentCardViewModel";
     import TextCard from "@components/promptcontent/TextCard.vue";
     import PhotoCard from "@components/promptcontent/PhotoCard.vue";
     import ReflectCard from "@components/promptcontent/ReflectCard.vue";
@@ -85,16 +85,6 @@
         previous: "slide-right-absolute"
     }
 
-    enum CardType {
-        text = "text-card",
-        photo = "photo-card",
-        quote = "quote-card",
-        reflect = "reflect-card",
-        video = "video-card",
-        reflection_analysis = "reflection-analysis-card",
-        elements = "elements-card",
-    }
-
     @Component({
         components: {
             ShareNoteCard,
@@ -104,6 +94,7 @@
             [CardType.quote]: QuoteCard,
             [CardType.video]: VideoCard,
             [CardType.elements]: ElementsCard,
+            [CardType.share_note]: ShareNoteCard,
             [CardType.reflection_analysis]: ReflectionAnalysisCard,
             ProgressStepper,
             SvgIcon,
@@ -143,36 +134,20 @@
             this.keyboardNavigationEnabled = enabled;
         }
 
-        getCardType(card: PromptContentCardViewModel): CardType {
-            switch (card.type) {
-                case ContentType.text:
-                    return CardType.text;
-                case ContentType.photo:
-                    return CardType.photo;
-                case ContentType.reflect:
-                    return CardType.reflect;
-                case ContentType.quote:
-                    return CardType.quote;
-                case ContentType.video:
-                    return CardType.video;
-                case ContentType.reflection_analysis:
-                    return CardType.reflection_analysis;
-                case ContentType.elements:
-                    return CardType.elements;
-                case ContentType.audio:
-                case ContentType.share_reflection:
-                case ContentType.invite:
-                default:
-                    return CardType.text;
-            }
+        get supportedCards(): PromptContentCardViewModel[] {
+            return this.cards.filter(card => card.isSupportedCardType);
+        }
+
+        getCardType(card: PromptContentCardViewModel): CardType | null {
+            return card.cardType;
         }
 
         get card(): PromptContentCardViewModel {
-            return this.cards[this.index];
+            return this.supportedCards[this.index];
         }
 
         get shareReflectionCard(): PromptContentCardViewModel | null {
-            return this.cards.find(card => card.type === ContentType.reflect) ?? null
+            return this.supportedCards.find(card => card.type === ContentType.reflect) ?? null
         }
 
         get hasNote(): boolean {
@@ -184,11 +159,11 @@
          * @return {number}
          */
         get contentIndex(): number {
-            return Math.min(Math.max(this.index, 0), this.cards.length - 1);
+            return Math.min(Math.max(this.index, 0), this.totalPages - 1);
         }
 
         get totalPages(): number {
-            return this.cards.length;
+            return this.supportedCards.length;
         }
 
         get showNextButton(): boolean {
@@ -196,7 +171,7 @@
         }
 
         get nextEnabled(): boolean {
-            const hasNextCard = this.index < this.cards.length - 1;
+            const hasNextCard = this.index < this.totalPages - 1;
             logger.info("Has next card: ", true);
             return hasNextCard;
         }
@@ -206,7 +181,7 @@
         }
 
         get isLastCard(): boolean {
-            return this.index >= this.cards.length - 1;
+            return this.index >= this.totalPages - 1;
         }
 
         async closePrompt(force: boolean = false) {

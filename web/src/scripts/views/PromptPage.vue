@@ -5,6 +5,7 @@
             <spinner v-if="loading" :delay="1200" message="Loading"/>
             <prompt-content v-else
                     :cards="cards"
+                    :responses="responses"
                     :index="page - 1"
                     @close="close"
                     @next="nextPage"
@@ -76,7 +77,6 @@
         promptUnsubscriber: ListenerUnsubscriber | null = null;
         reflectionResponsesUnsubscriber: ListenerUnsubscriber | null = null;
 
-
         promptContentLoading: boolean = false;
         promptLoading = false;
         responsesLoading = false;
@@ -89,6 +89,10 @@
             const promptContent = this.promptContent;
             const responses = this.responses;
             const member = this.member;
+
+            if (!prompt || !promptContent) {
+                return [];
+            }
 
             return PromptContentCardViewModel.createAll({ responses, promptContent, prompt, member });
         }
