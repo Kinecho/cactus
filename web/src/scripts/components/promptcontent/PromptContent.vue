@@ -8,7 +8,7 @@
         </button>
         <transition-group :name="cardTransitionName" mode="in-out" tag="div" class="card-container">
             <component
-                    v-for="(card, i) in cards"
+                    v-for="(card, i) in supportedCards"
                     v-if="i === index"
                     :is="getCardType(card)"
                     :card="card"
@@ -21,8 +21,11 @@
             />
         </transition-group>
         <div class="last-card-actions" v-if="isLastCard">
-                <button class="button actions" @click="closePrompt">Done</button>
-                <button class="button actions tertiary" @click="showShareNote = true" v-if="hasNote"><svg-icon icon="share"/>Share Note</button>
+            <button class="button actions" @click="closePrompt">Done</button>
+            <button class="button actions tertiary" @click="showShareNote = true" v-if="hasNote">
+                <svg-icon icon="share"/>
+                Share Note
+            </button>
         </div>
 
         <button aria-label="Previous slide" @click="previous" :disabled="!previousEnabled" class="arrow icon previous tertiary no-loading">
@@ -35,7 +38,6 @@
                 <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
             </svg>
         </button>
-
         <modal :show="showShareNote && !!shareReflectionCard" v-on:close="showShareNote = false" :showCloseButton="true">
             <div class="sharing-card note" slot="body">
                 <ShareNoteCard :card="shareReflectionCard"/>
@@ -57,12 +59,10 @@
     import Component from "vue-class-component"
     import PromptContent, { ContentType } from "@shared/models/PromptContent";
     import { Prop } from "vue-property-decorator";
-    import ReflectionPrompt from "@shared/models/ReflectionPrompt";
     import ReflectionResponse from "@shared/models/ReflectionResponse";
     import ProgressStepper from "@components/ProgressStepper.vue";
-    import CactusMember from "@shared/models/CactusMember";
     import Logger from "@shared/Logger"
-    import PromptContentCardViewModel from "@components/promptcontent/PromptContentCardViewModel";
+    import PromptContentCardViewModel, { CardType } from "@components/promptcontent/PromptContentCardViewModel";
     import TextCard from "@components/promptcontent/TextCard.vue";
     import PhotoCard from "@components/promptcontent/PhotoCard.vue";
     import ReflectCard from "@components/promptcontent/ReflectCard.vue";
@@ -70,26 +70,16 @@
     import VideoCard from "@components/promptcontent/VideoCard.vue";
     import ReflectionAnalysisCard from "@components/promptcontent/ReflectionAnalysisCard.vue";
     import Modal from "@components/Modal.vue";
-    import { pushRoute } from "@web/NavigationUtil";
-    import { PageRoute } from "@shared/PageRoutes";
     import { isBlank } from "@shared/util/StringUtil";
     import ShareNoteCard from "@components/promptcontent/ShareNoteCard.vue";
     import SvgIcon from "@components/SvgIcon.vue";
+    import ElementsCard from "@components/promptcontent/ElementsCard.vue";
 
     const logger = new Logger("PromptContent");
 
     const transitionName = {
         next: "slide-left-absolute",
         previous: "slide-right-absolute"
-    }
-
-    enum CardType {
-        text = "text-card",
-        photo = "photo-card",
-        quote = "quote-card",
-        reflect = "reflect-card",
-        video = "video-card",
-        reflection_analysis = "reflection-analysis-card",
     }
 
     @Component({
@@ -100,6 +90,8 @@
             [CardType.reflect]: ReflectCard,
             [CardType.quote]: QuoteCard,
             [CardType.video]: VideoCard,
+            [CardType.elements]: ElementsCard,
+            [CardType.share_note]: ShareNoteCard,
             [CardType.reflection_analysis]: ReflectionAnalysisCard,
             ProgressStepper,
             SvgIcon,
@@ -109,17 +101,8 @@
     export default class PromptView extends Vue {
         name = "PromptContent.vue";
 
-        @Prop({ type: Object as () => PromptContent, required: true })
-        promptContent!: PromptContent
-
-        @Prop({ type: Object as () => ReflectionPrompt, required: true })
-        prompt!: ReflectionPrompt;
-
         @Prop({ type: Array as () => ReflectionResponse[], required: false, default: null })
         responses!: ReflectionResponse[] | null;
-
-        @Prop({ type: Object as () => CactusMember, required: true })
-        member!: CactusMember;
 
         /**
          * Zero-based index of the current card to show
@@ -148,35 +131,20 @@
             this.keyboardNavigationEnabled = enabled;
         }
 
-        getCardType(card: PromptContentCardViewModel): CardType {
-            switch (card.type) {
-                case ContentType.text:
-                    return CardType.text;
-                case ContentType.photo:
-                    return CardType.photo;
-                case ContentType.reflect:
-                    return CardType.reflect;
-                case ContentType.quote:
-                    return CardType.quote;
-                case ContentType.video:
-                    return CardType.video;
-                case ContentType.reflection_analysis:
-                    return CardType.reflection_analysis;
-                case ContentType.audio:
-                case ContentType.elements:
-                case ContentType.share_reflection:
-                case ContentType.invite:
-                default:
-                    return CardType.text;
-            }
+        get supportedCards(): PromptContentCardViewModel[] {
+            return this.cards.filter(card => card.isSupportedCardType);
+        }
+
+        getCardType(card: PromptContentCardViewModel): CardType | null {
+            return card.cardType;
         }
 
         get card(): PromptContentCardViewModel {
-            return this.cards[this.index];
+            return this.supportedCards[this.index];
         }
 
         get shareReflectionCard(): PromptContentCardViewModel | null {
-            return this.cards.find(card => card.type === ContentType.reflect) ?? null
+            return this.supportedCards.find(card => card.type === ContentType.reflect) ?? null
         }
 
         get hasNote(): boolean {
@@ -188,11 +156,11 @@
          * @return {number}
          */
         get contentIndex(): number {
-            return Math.min(Math.max(this.index, 0), this.cards.length - 1);
+            return Math.min(Math.max(this.index, 0), this.totalPages - 1);
         }
 
         get totalPages(): number {
-            return this.promptContent.content.length;
+            return this.supportedCards.length;
         }
 
         get showNextButton(): boolean {
@@ -200,7 +168,7 @@
         }
 
         get nextEnabled(): boolean {
-            const hasNextCard = this.index < this.cards.length - 1;
+            const hasNextCard = this.index < this.totalPages - 1;
             logger.info("Has next card: ", true);
             return hasNextCard;
         }
@@ -210,12 +178,13 @@
         }
 
         get isLastCard(): boolean {
-            return this.index >= this.cards.length - 1;
+            return this.index >= this.totalPages - 1;
         }
 
         async closePrompt(force: boolean = false) {
             if (this.showCloseConfirm || force || this.isLastCard) {
-                await pushRoute(PageRoute.JOURNAL_HOME);
+                // await pushRoute(PageRoute.JOURNAL_HOME);
+                this.$emit("close");
                 return;
             }
             this.showCloseConfirm = true;
@@ -310,7 +279,7 @@
         position: relative;
         transition: background-position 1s, background-color 1s;
         width: 100%;
-
+        flex-direction: column;
         @include r(374) {
             font-size: 2.4rem;
         }
@@ -396,5 +365,11 @@
         &.next {
             right: 0;
         }
+    }
+
+    .confirm-body {
+        @include shadowbox;
+        background-color: $lightDolphin;
+        padding: 2rem;
     }
 </style>

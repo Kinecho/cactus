@@ -1,18 +1,23 @@
 <template>
     <div class="prompt-content-card">
         <div class="analysis-card">
-            <div class="textBox">
-                <p>This is what your note reveals about your emotions.</p>
+            <div class="timeout-error" v-if="timedOut && !isLoading">
+                <p>Oops, it looks like we were unable to load your insights. Please try again later</p>
             </div>
-            <spinner v-if="isLoading"/>
-            <div class="analysisContainer" v-if="!isLoading && response">
-                <positivity-rating :sentiment-score="response.sentiment.documentSentiment"/>
-                <tone-analysis :tone-result="response.toneAnalysis"
-                        :original-text="response.content.text"
-                        :sentences-on-new-line="false"
-                        @previous="previous"
-                />
-            </div>
+            <spinner v-if="isLoading" class="loading" message="Gathering insights..."/>
+            <template v-if="!isLoading && response">
+                <div class="textBox">
+                    <p>This is what your note reveals about your emotions.</p>
+                </div>
+                <div class="analysisContainer">
+                    <positivity-rating :sentiment-score="response.sentiment.documentSentiment"/>
+                    <tone-analysis :tone-result="response.toneAnalysis"
+                            :original-text="response.content.text"
+                            :sentences-on-new-line="false"
+                            @previous="previous"
+                    />
+                </div>
+            </template>
         </div>
     </div>
 </template>
@@ -27,6 +32,9 @@
     import PositivityRating from "@components/PositivityRating.vue";
     import ToneAnalysis from "@components/ToneAnalysis.vue";
     import Spinner from "@components/Spinner.vue";
+    import Timeout = NodeJS.Timeout;
+
+    const timeout_ms = 20000; // 20 seconds;
 
     @Component({
         components: {
@@ -45,12 +53,33 @@
         @Prop({ type: Object as () => PromptContentCardViewModel, required: true, })
         card!: PromptContentCardViewModel;
 
+        timedOut = false;
+        timerTimeout: Timeout | null = null;
+
         get isLoading(): boolean {
-            return !this.response || (this.card?.responses?.some(r => r.mightNeedInsightsUpdate) ?? false);
+            return !this.timedOut && this.analysisLoading;
+        }
+
+        get analysisLoading(): boolean {
+            return !this.response || (this.card?.responses?.some(r => r.mightNeedInsightsUpdate) ?? false)
         }
 
         get response(): ReflectionResponse | null {
             return this.card.responses?.[0] ?? null;
+        }
+
+        mounted() {
+            this.timerTimeout = setTimeout(() => {
+                if (this.analysisLoading) {
+                    this.timedOut = true;
+                }
+            }, timeout_ms);
+        }
+
+        destroyed() {
+            if (this.timerTimeout) {
+                clearTimeout(this.timerTimeout);
+            }
         }
 
         next() {
@@ -117,5 +146,9 @@
             font-size: 2rem;
             max-width: 50%;
         }
+    }
+
+    .loading {
+        font-size: 1.8rem;
     }
 </style>

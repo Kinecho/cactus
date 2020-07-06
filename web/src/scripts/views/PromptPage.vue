@@ -5,11 +5,9 @@
             <spinner v-if="loading" :delay="1200" message="Loading"/>
             <prompt-content v-else
                     :cards="cards"
-                    :prompt-content="promptContent"
-                    :prompt="prompt"
                     :responses="responses"
-                    :member="member"
                     :index="page - 1"
+                    @close="close"
                     @next="nextPage"
                     @previous="previousPage"
             />
@@ -79,7 +77,6 @@
         promptUnsubscriber: ListenerUnsubscriber | null = null;
         reflectionResponsesUnsubscriber: ListenerUnsubscriber | null = null;
 
-
         promptContentLoading: boolean = false;
         promptLoading = false;
         responsesLoading = false;
@@ -92,6 +89,10 @@
             const promptContent = this.promptContent;
             const responses = this.responses;
             const member = this.member;
+
+            if (!prompt || !promptContent) {
+                return [];
+            }
 
             return PromptContentCardViewModel.createAll({ responses, promptContent, prompt, member });
         }
@@ -149,6 +150,10 @@
 
         previousPage() {
             this.setPageIndex(this.page - 1);
+        }
+
+        async close() {
+            await pushRoute(PageRoute.JOURNAL_HOME);
         }
 
         async setPageIndex(index: number) {

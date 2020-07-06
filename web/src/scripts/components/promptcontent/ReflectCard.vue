@@ -19,13 +19,13 @@
                     />
                 </resizable-textarea>
             </transition>
-            <button v-if="responseText"  class="doneBtn icon no-loading" @click="saveAndContinue" :disabled="saving">
+            <button v-if="responseText" class="doneBtn icon no-loading" @click="saveAndContinue" :disabled="saving">
                 <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">
                     <path fill="#fff" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/>
                 </svg>
                 <span class="doneText">{{saving ? 'Saving....' : 'Done'}}</span>
             </button>
-            <button v-else  class="no-loading doneBtn" @click="saveAndContinue" :disabled="saving">
+            <button v-else class="no-loading doneBtn" @click="skip" :disabled="saving">
                 <span class="doneText">{{saving ? 'Saving....' : 'Skip'}}</span>
             </button>
         </div>
@@ -147,6 +147,10 @@
             await ReflectionResponseService.sharedInstance.save(response);
             this.saving = false;
             logger.info("Saved successfully.");
+            this.$emit('next');
+        }
+
+        skip() {
             this.$emit('next');
         }
 

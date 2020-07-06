@@ -3,10 +3,21 @@ import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import PromptContent, { Content, ContentType, Image, isImage, Video } from "@shared/models/PromptContent";
 import Logger from "@shared/Logger"
 import CactusMember from "@shared/models/CactusMember";
-import { isBlank } from "@shared/util/StringUtil";
+import { getResponseText, isBlank } from "@shared/util/StringUtil";
 import { CactusElement } from "@shared/models/CactusElement";
 
 const logger = new Logger("PromptContentCardViewModel");
+
+export enum CardType {
+    text = "text-card",
+    photo = "photo-card",
+    quote = "quote-card",
+    reflect = "reflect-card",
+    video = "video-card",
+    reflection_analysis = "reflection-analysis-card",
+    elements = "elements-card",
+    share_note = "share-note-card",
+}
 
 export interface QuoteModel {
     text: string,
@@ -89,6 +100,35 @@ export default class PromptContentCardViewModel {
         return null;
     }
 
+    get cardType(): CardType | null {
+        switch (this.type) {
+            case ContentType.text:
+                return CardType.text;
+            case ContentType.photo:
+                return CardType.photo;
+            case ContentType.reflect:
+                return CardType.reflect;
+            case ContentType.quote:
+                return CardType.quote;
+            case ContentType.video:
+                return CardType.video;
+            case ContentType.reflection_analysis:
+                return CardType.reflection_analysis;
+            case ContentType.elements:
+                return CardType.elements;
+            case ContentType.share_reflection:
+                return CardType.share_note;
+            case ContentType.audio:
+            case ContentType.invite:
+            default:
+                return null
+        }
+    }
+
+    get isSupportedCardType(): boolean {
+        return !!this.cardType;
+    }
+
     static createReflectionAnalysis(params: {
         prompt: ReflectionPrompt,
         promptContent: PromptContent,
@@ -108,10 +148,16 @@ export default class PromptContentCardViewModel {
         responses: ReflectionResponse[] | null,
         member: CactusMember
     }): PromptContentCardViewModel[] {
+        logger.info("Creating cards....");
         const { prompt, promptContent, responses, member } = params;
         let lastReflectIndex: number | null = null;
         let hasInsightsAnalysis = false;
-        const models: PromptContentCardViewModel[] = promptContent.content.map((content, i) => {
+        const models: PromptContentCardViewModel[] = promptContent.content.filter(c => {
+            if (c.contentType === ContentType.share_reflection && isBlank(getResponseText(responses))) {
+                return false;
+            }
+            return true;
+        }).map((content, i) => {
             if (content.contentType === ContentType.reflect) {
                 lastReflectIndex = i;
             } else if (content.contentType === ContentType.reflection_analysis) {
@@ -127,5 +173,30 @@ export default class PromptContentCardViewModel {
 
         logger.info(`Created ${ models.length } view models`);
         return models;
+    }
+
+    static createMocks(contentItems?: Content[]): PromptContentCardViewModel[] {
+        const promptId = "p123";
+        const memberId = "m123";
+        const promptContentId = "c123";
+        const prompt: ReflectionPrompt = new ReflectionPrompt();
+        prompt.id = promptId;
+
+        const promptContent = new PromptContent();
+        promptContent.entryId = promptContentId;
+        promptContent.promptId = promptId;
+        promptContent.content = contentItems ?? [];
+        const member = new CactusMember();
+        member.id = memberId;
+        member.email = "test@cactus.app";
+
+        const responses: ReflectionResponse[] = [];
+
+        return PromptContentCardViewModel.createAll({
+            prompt,
+            promptContent,
+            member,
+            responses
+        });
     }
 }
