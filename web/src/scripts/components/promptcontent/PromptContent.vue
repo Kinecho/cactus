@@ -73,8 +73,6 @@
     import VideoCard from "@components/promptcontent/VideoCard.vue";
     import ReflectionAnalysisCard from "@components/promptcontent/ReflectionAnalysisCard.vue";
     import Modal from "@components/Modal.vue";
-    import { pushRoute } from "@web/NavigationUtil";
-    import { PageRoute } from "@shared/PageRoutes";
     import { isBlank } from "@shared/util/StringUtil";
     import ShareNoteCard from "@components/promptcontent/ShareNoteCard.vue";
     import SvgIcon from "@components/SvgIcon.vue";
@@ -391,5 +389,11 @@
         &.next {
             right: 0;
         }
+    }
+
+    .confirm-body {
+        @include shadowbox;
+        background-color: $lightDolphin;
+        padding: 2rem;
     }
 </style>

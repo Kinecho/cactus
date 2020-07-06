@@ -82,7 +82,6 @@ export const FullStack = () => Vue.extend({
                 }, {
                     contentType: ContentType.reflect,
                     text_md: "This is the most _important_ question you'll ever see.",
-
                 }
             ])
         }
