@@ -1,9 +1,13 @@
 <template>
     <div class="prompt-content-card">
         <span>quote card</span>
-        <markdown-text :source="card.quote.text" v-if="card.quote.text" treatment="quote"/>
-        <markdown-text :source="card.quote.authorName" v-if="card.quote.authorName"/>
-        <markdown-text :source="card.quote.authorTitle" v-if="card.quote.authorTitle"/>
+        <div class="quote">
+            <markdown-text :source="card.quote.text" v-if="card.quote.text" treatment="quote"/>
+        </div>
+        <div class="author">
+            <strong><markdown-text :source="card.quote.authorName" v-if="card.quote.authorName"/></strong>
+            <p class="byline"><markdown-text :source="card.quote.authorTitle" v-if="card.quote.authorTitle"/></p>
+        </div>
     </div>
 </template>
 
@@ -44,4 +48,21 @@
             width: 100%;
         }
     }
+
+    .quote {
+        margin-bottom: 2.4rem;
+    }
+
+    .author {
+        font-size: 1.6rem;
+
+        @include r(768) {
+            font-size: 1.8rem;
+        }
+    }
+
+    .byline {
+        opacity: .8;
+    }
+
 </style>
