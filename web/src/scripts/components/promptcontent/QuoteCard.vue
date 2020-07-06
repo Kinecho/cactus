@@ -1,12 +1,18 @@
 <template>
     <div class="prompt-content-card">
-
-        <markdown-text :source="card.quote.text" v-if="card.quote.text" treatment="quote"/>
-        <div class="avatar-container" v-if="card.quote.avatar">
-            <flamelink-image v-bind:image="card.quote.avatar" :width="60"/>
+        <div class="quote-card">
+            <span>quote card</span>
+            <div class="quote">
+                <markdown-text :source="card.quote.text" v-if="card.quote.text" treatment="quote"/>
+            </div>
+            <div class="author">
+                <div class="avatar-container" v-if="card.quote.avatar">
+                    <flamelink-image v-bind:image="card.quote.avatar" :width="60"/>
+                </div>
+                <strong><markdown-text :source="card.quote.authorName" v-if="card.quote.authorName"/></strong>
+                <p class="byline"><markdown-text :source="card.quote.authorTitle" v-if="card.quote.authorTitle"/></p>
+            </div>
         </div>
-        <markdown-text :source="card.quote.authorName" v-if="card.quote.authorName"/>
-        <markdown-text :source="card.quote.authorTitle" v-if="card.quote.authorTitle"/>
     </div>
 </template>
 
@@ -36,5 +42,36 @@
 
 <style scoped lang="scss">
     @import "prompts";
+    @import "mixins";
+
+    .quote-card {
+        padding: 0 .8rem;
+
+        @include r(374) {
+            margin: 0 auto;
+            max-width: 48rem;
+            padding: 0 2.4rem;
+        }
+        @include r(768) {
+            max-width: none;
+            padding: 0 6.4rem;
+        }
+    }
+
+    .quote {
+        margin-bottom: 2.4rem;
+    }
+
+    .author {
+        font-size: 1.6rem;
+
+        @include r(768) {
+            font-size: 1.8rem;
+        }
+    }
+
+    .byline {
+        opacity: .8;
+    }
 
 </style>

@@ -17,7 +17,7 @@
                 <copy-text-input v-if="shareableLinkUrl" :text="shareableLinkUrl" :queryParams="shareableLinkParams" :editable="false" buttonStyle="primary"/>
                 <div v-if="nativeShareEnabled" class="sharing">
                     <button class="btn secondary" @click="shareNatively()">
-                        <img class="shareIcon" src="/assets/images/share.svg" alt="Share Icon"/>Share
+                        <img class="shareIcon" src="/assets/icons/share.svg" alt="Share Icon"/>Share
                     </button>
                 </div>
             </div>

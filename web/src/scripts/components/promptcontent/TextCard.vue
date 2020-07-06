@@ -1,6 +1,10 @@
 <template>
     <div class="prompt-content-card">
-        <markdown-text :source="text" v-if="text"/>
+        <div class="text-card">
+            <div class="textBox">
+                <markdown-text :source="text" v-if="text"/>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -34,4 +38,47 @@
 
 <style scoped lang="scss">
     @import "prompts";
+    @import "mixins";
+
+    .text-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 80vh;
+        padding: 0 .8rem;
+
+        @include r(374) {
+            justify-content: center;
+            margin: 0 auto;
+            max-width: 48rem;
+            padding: 0 2.4rem;
+        }
+        @include r(768) {
+            align-items: center;
+            flex-direction: row;
+            justify-content: flex-start;
+            max-width: none;
+            padding: 0 6.4rem;
+        }
+    }
+
+    .textBox {
+        margin-bottom: 5.6rem;
+
+        @include r(768) {
+            margin-bottom: 0;
+            padding-right: 6.4rem;
+            width: 66%;
+        }
+    }
+
+    .image {
+        height: auto;
+        width: 100%;
+
+        @include r(768) {
+            align-self: center;
+            max-width: 33%;
+        }
+    }
 </style>

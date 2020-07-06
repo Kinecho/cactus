@@ -34,8 +34,8 @@
 
 
         <div class="last-card-actions" v-if="isLastCard">
-            <button class="button actions secondary" @click="showShareNote = true" v-if="hasNote">Share Note</button>
             <button class="button actions" @click="closePrompt">Done</button>
+            <button class="button actions tertiary" @click="showShareNote = true" v-if="hasNote"><svg-icon icon="share"/>Share Note</button>
         </div>
 
         <modal :show="showShareNote && !!shareReflectionCard" v-on:close="showShareNote = false" :showCloseButton="true">
@@ -76,6 +76,7 @@
     import { PageRoute } from "@shared/PageRoutes";
     import { isBlank } from "@shared/util/StringUtil";
     import ShareNoteCard from "@components/promptcontent/ShareNoteCard.vue";
+    import SvgIcon from "@components/SvgIcon.vue";
 
     const logger = new Logger("PromptContent");
 
@@ -103,6 +104,7 @@
             [CardType.video]: VideoCard,
             [CardType.reflection_analysis]: ReflectionAnalysisCard,
             ProgressStepper,
+            SvgIcon,
             Modal
         }
     })
@@ -273,18 +275,32 @@
     }
 
     .last-card-actions {
+        bottom: 0;
+        left: 0;
         position: fixed;
-        bottom: 4rem;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: row;
-        flex: 1;
+        padding: 2.4rem;
         width: 100%;
-        > * {
-            margin-right: 2rem;
+
+        @include r(600) {
+            display: flex;
+            padding: 0;
+            position: static;
+            width: auto;
         }
 
+        button {
+            align-items: center;
+            display: flex;
+            justify-content: center;
+            max-width: none;
+            width: 100%;
+
+            .icon {
+                height: 1.8rem;
+                margin-right: .8rem;
+                width: 1.8rem;
+            }
+        }
     }
 
     .prompt-content-main {

@@ -2,9 +2,6 @@
     <div class="insights-card">
         <spinner v-if="loading"/>
         <div class="textBox">
-            <!-- <p v-if="reflectionResponse.toneAnalysis">
-                This is the positivity rating of your note. Write more to reveal different emotions.
-            </p> -->
             <p>This is what your note reveals about your emotions.</p>
         </div>
         <div class="insightsContainer">

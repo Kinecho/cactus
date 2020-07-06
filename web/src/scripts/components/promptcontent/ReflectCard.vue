@@ -1,33 +1,34 @@
 <template>
     <div class="prompt-content-card">
-        <p>Reflect {{index}} - {{card.type}}</p>
-        <strong>
-            <markdown-text :source="card.text"/>
-        </strong>
-        <div class="animation">
-            <ElementAnimation :element="card.element"/>
+        <div class="elementReflectContainer">
+            <div class="animation">
+                <ElementAnimation :element="card.element"/>
+            </div>
+            <strong>
+                <markdown-text :source="card.text"/>
+            </strong>
+            <transition name="component-fade" appear>
+                <resizable-textarea :max-height-px="maxTextareaHeight" ref="resizableTextArea">
+                    <textarea placeholder="Write something..."
+                            v-model="responseText"
+                            ref="textInput"
+                            type="text"
+                            :disabled="saving"
+                            @focus="$emit('enableKeyboardNavigation', false)"
+                            @blur="$emit('enableKeyboardNavigation', true)"
+                    />
+                </resizable-textarea>
+            </transition>
+            <button v-if="responseText"  class="doneBtn icon no-loading" @click="saveAndContinue" :disabled="saving">
+                <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">
+                    <path fill="#fff" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/>
+                </svg>
+                <span class="doneText">{{saving ? 'Saving....' : 'Done'}}</span>
+            </button>
+            <button v-else  class="no-loading doneBtn" @click="saveAndContinue" :disabled="saving">
+                <span class="doneText">{{saving ? 'Saving....' : 'Skip'}}</span>
+            </button>
         </div>
-        <transition name="component-fade" appear>
-            <resizable-textarea :max-height-px="maxTextareaHeight" ref="resizableTextArea">
-                <textarea placeholder="Write something..."
-                        v-model="responseText"
-                        ref="textInput"
-                        type="text"
-                        :disabled="saving"
-                        @focus="$emit('enableKeyboardNavigation', false)"
-                        @blur="$emit('enableKeyboardNavigation', true)"
-                />
-            </resizable-textarea>
-        </transition>
-        <button v-if="responseText" class="doneBtn icon no-loading" @click="saveAndContinue" :disabled="saving">
-            <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">
-                <path fill="#fff" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/>
-            </svg>
-            <span class="doneText">{{saving ? 'Saving....' : 'Done'}}</span>
-        </button>
-        <button v-else class="no-loading doneBtn" @click="saveAndContinue" :disabled="saving">
-            <span class="doneText">{{saving ? 'Saving....' : 'Skip'}}</span>
-        </button>
     </div>
 </template>
 
@@ -155,6 +156,29 @@
 <style scoped lang="scss">
     @import "prompts";
     @import "transitions";
+    @import "mixins";
+
+    .elementReflectContainer {
+        padding: 0 1.6rem;
+        width: 100%;
+
+        @include r(600) {
+            padding: 0 6.4rem;
+        }
+        @include r(1140) {
+            min-width: 60vw;
+        }
+    }
+
+    strong {
+        display: block;
+        margin-bottom: 1.2rem;
+
+        @include r(768) {
+            margin-bottom: 1.6rem;
+        }
+    }
+
 
     textarea {
         font-family: $font-stack;
@@ -188,14 +212,14 @@
     .doneBtn {
         bottom: 2.4rem;
         padding: 1.6rem;
-        /*position: fixed;*/
+        position: fixed;
         right: 2.4rem;
         transition: opacity .3s;
 
         @include r(768) {
             min-width: 20rem;
             padding: 1.2rem 1.6rem 1.6rem;
-            //position: static;
+            position: static;
             width: auto;
         }
 
