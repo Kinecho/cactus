@@ -1,13 +1,12 @@
 import Vue from "vue";
-import InsightsCard from "@components/InsightsCard.vue";
+import LegacyInsightsCard from "@components/LegacyInsightsCard.vue";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import { Content, ContentType } from "@shared/models/PromptContent";
 import { boolean } from "@storybook/addon-knobs";
-import { ToneResult } from "@shared/api/ToneAnalyzerTypes";
 import { PattonSentiment, PattonToneResult } from "@shared/util/ToneAnalyzerFixtures";
 
 export default {
-    title: "Prompt Content/Insights Card"
+    title: "Legacy Prompt Content/Legacy Insights Card"
 }
 
 const insightsContent: Content = {
@@ -18,7 +17,7 @@ export const Loading = () => Vue.extend({
     template: `
         <insights-card :reflection-response="reflectionResponse"/>`,
     components: {
-        InsightsCard,
+        InsightsCard: LegacyInsightsCard,
     },
     computed: {
         reflectionResponse(): ReflectionResponse | null {
@@ -32,7 +31,7 @@ export const ConditionalLoading = () => Vue.extend({
     template: `
         <insights-card :reflection-response="reflectionResponse"/>`,
     components: {
-        InsightsCard,
+        InsightsCard: LegacyInsightsCard,
     },
     props: {
         hasTone: { default: boolean("Has Tone", false) },

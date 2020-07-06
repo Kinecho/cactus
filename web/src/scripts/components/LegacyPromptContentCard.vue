@@ -243,7 +243,7 @@
     import { appendQueryParams, isBlank } from "@shared/util/StringUtil";
     import PricingModal from "@components/PricingModal.vue";
     import { PageRoute } from "@shared/PageRoutes";
-    import InsightsCard from "@components/InsightsCard.vue";
+    import LegacyInsightsCard from "@components/LegacyInsightsCard.vue";
 
     const logger = new Logger("PromptContentCard.vue");
     const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
@@ -262,7 +262,7 @@
             ElementDescriptionModal,
             MarkdownText,
             PricingModal,
-            InsightsCard,
+            InsightsCard: LegacyInsightsCard,
         },
         props: {
             content: {

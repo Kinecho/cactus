@@ -93,7 +93,7 @@
     import { PageRoute } from '@shared/PageRoutes'
     import ContentCard from "@components/LegacyPromptContentCard.vue"
     import Celebrate from "@components/ReflectionCelebrateCard.vue";
-    import InsightsCard from "@components/InsightsCard.vue";
+    import LegacyInsightsCard from "@components/LegacyInsightsCard.vue";
     import PromptContent, { Content, ContentType } from '@shared/models/PromptContent'
     import { CactusElement } from '@shared/models/CactusElement';
     import Spinner from "@components/Spinner.vue";
@@ -130,7 +130,7 @@
             ContentCard,
             Spinner,
             Celebrate,
-            InsightsCard,
+            InsightsCard: LegacyInsightsCard,
             PromptContentSharing,
             FourOhFour,
             PricingModal
