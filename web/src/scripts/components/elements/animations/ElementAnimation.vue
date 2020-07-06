@@ -55,10 +55,7 @@
     @import "transitions";
 
     .element-animation {
-        align-items: center;
-        display: flex;
         height: 156px;
-        justify-content: center;
 
         .element {
             height: 18rem;
