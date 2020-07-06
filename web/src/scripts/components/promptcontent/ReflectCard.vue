@@ -1,12 +1,12 @@
 <template>
     <div class="prompt-content-card">
+        <div class="animation">
+            <ElementAnimation :element="card.element"/>
+        </div>
         <p>Reflect {{index}} - {{card.type}}</p>
         <strong>
             <markdown-text :source="card.text"/>
         </strong>
-        <div class="animation">
-            <ElementAnimation :element="card.element"/>
-        </div>
         <transition name="component-fade" appear>
             <resizable-textarea :max-height-px="maxTextareaHeight" ref="resizableTextArea">
                 <textarea placeholder="Write something..."
