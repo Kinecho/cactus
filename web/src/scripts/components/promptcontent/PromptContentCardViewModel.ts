@@ -1,6 +1,6 @@
 import ReflectionResponse, { DynamicResponseValues } from "@shared/models/ReflectionResponse";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
-import PromptContent, { Content, ContentType, Image, Video } from "@shared/models/PromptContent";
+import PromptContent, { Content, ContentType, Image, isImage, Video } from "@shared/models/PromptContent";
 import Logger from "@shared/Logger"
 import CactusMember from "@shared/models/CactusMember";
 import { isBlank } from "@shared/util/StringUtil";
@@ -12,6 +12,7 @@ export interface QuoteModel {
     text: string,
     authorName?: string,
     authorTitle?: string,
+    avatar?: Image,
 }
 
 export default class PromptContentCardViewModel {
@@ -74,6 +75,7 @@ export default class PromptContentCardViewModel {
             text: quote.text_md ?? quote.text,
             authorName: quote.authorName,
             authorTitle: quote.authorTitle,
+            avatar: isImage(quote.authorAvatar) ? quote.authorAvatar : undefined,
         }
 
         return !isBlank(model.text) ? model : null;

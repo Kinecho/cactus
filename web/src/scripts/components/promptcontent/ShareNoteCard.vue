@@ -119,17 +119,13 @@
 </script>
 
 <style scoped lang="scss">
+    @import "prompts";
     @import "mixins";
-@import "variables";
+    @import "variables";
+
     .prompt-content-card {
-        padding: 4rem 2.4rem;
         background: $darkerGreen url(/assets/images/darkGreenNeedles.svg);
         color: $white;
         border-radius: 4rem;
-        @include r(374) {
-            //do not add margin: auto here as it makes the cards jumpy
-            padding: 5.6rem 3.2rem;
-            width: 100%;
-        }
     }
 </style>

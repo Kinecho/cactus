@@ -322,7 +322,7 @@
 
     .card-container {
         position: relative;
-
+        width: 100vw;
         @include r(600) {
             align-items: center;
             display: flex;

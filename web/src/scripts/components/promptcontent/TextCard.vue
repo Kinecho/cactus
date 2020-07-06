@@ -1,6 +1,5 @@
 <template>
     <div class="prompt-content-card">
-        <span>text card</span>
         <markdown-text :source="text" v-if="text"/>
     </div>
 </template>
@@ -34,15 +33,5 @@
 </script>
 
 <style scoped lang="scss">
-    @import "mixins";
-
-    .prompt-content-card {
-        padding: 4rem 2.4rem;
-
-        @include r(374) {
-            //do not add margin: auto here as it makes the cards jumpy
-            padding: 5.6rem 3.2rem;
-            width: 100%;
-        }
-    }
+    @import "prompts";
 </style>

@@ -1,7 +1,10 @@
 <template>
     <div class="prompt-content-card">
-        <span>quote card</span>
+
         <markdown-text :source="card.quote.text" v-if="card.quote.text" treatment="quote"/>
+        <div class="avatar-container" v-if="card.quote.avatar">
+            <flamelink-image v-bind:image="card.quote.avatar" :width="60"/>
+        </div>
         <markdown-text :source="card.quote.authorName" v-if="card.quote.authorName"/>
         <markdown-text :source="card.quote.authorTitle" v-if="card.quote.authorTitle"/>
     </div>
@@ -28,20 +31,10 @@
         @Prop({ type: Object as () => PromptContentCardViewModel, required: true, })
         card!: PromptContentCardViewModel;
 
-
     }
 </script>
 
 <style scoped lang="scss">
-    @import "mixins";
+    @import "prompts";
 
-    .prompt-content-card {
-        padding: 4rem 2.4rem;
-
-        @include r(374) {
-            //do not add margin: auto here as it makes the cards jumpy
-            padding: 5.6rem 3.2rem;
-            width: 100%;
-        }
-    }
 </style>

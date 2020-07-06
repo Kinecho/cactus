@@ -8,7 +8,7 @@ import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 import CactusMember from "@shared/models/CactusMember";
 import { CoreValue } from "@shared/models/CoreValueTypes";
 import ReflectionResponse, { DynamicResponseValues } from "@shared/models/ReflectionResponse";
-import { isString } from "@shared/util/ObjectUtil";
+import { isNotNull, isString } from "@shared/util/ObjectUtil";
 
 const logger = new Logger("PromptContent.ts");
 
@@ -22,6 +22,10 @@ export interface Image extends FlamelinkFile {
     storageUrl?: string,
     fileIds?: string[],
     altText?: string
+}
+
+export function isImage(input?: Image | undefined | null): input is Image {
+    return isNotNull(input) && (!isBlank(input?.url) || !isBlank(input?.storageUrl));
 }
 
 export interface Video extends FlamelinkFile {

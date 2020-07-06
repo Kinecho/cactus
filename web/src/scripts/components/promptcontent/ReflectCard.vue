@@ -19,13 +19,13 @@
                 />
             </resizable-textarea>
         </transition>
-        <button v-if="responseText"  class="doneBtn icon no-loading" @click="saveAndContinue" :disabled="saving">
+        <button v-if="responseText" class="doneBtn icon no-loading" @click="saveAndContinue" :disabled="saving">
             <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">
                 <path fill="#fff" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/>
             </svg>
             <span class="doneText">{{saving ? 'Saving....' : 'Done'}}</span>
         </button>
-        <button v-else  class="no-loading doneBtn" @click="saveAndContinue" :disabled="saving">
+        <button v-else class="no-loading doneBtn" @click="saveAndContinue" :disabled="saving">
             <span class="doneText">{{saving ? 'Saving....' : 'Skip'}}</span>
         </button>
     </div>
@@ -153,18 +153,8 @@
 </script>
 
 <style scoped lang="scss">
-    @import "mixins";
-
-    .prompt-content-card {
-        padding: 4rem 2.4rem;
-
-        @include r(374) {
-            //do not add margin: auto here as it makes the cards jumpy
-            padding: 5.6rem 3.2rem;
-            width: 100%;
-        }
-    }
-
+    @import "prompts";
+    @import "transitions";
 
     textarea {
         font-family: $font-stack;
@@ -198,14 +188,14 @@
     .doneBtn {
         bottom: 2.4rem;
         padding: 1.6rem;
-        position: fixed;
+        /*position: fixed;*/
         right: 2.4rem;
         transition: opacity .3s;
 
         @include r(768) {
             min-width: 20rem;
             padding: 1.2rem 1.6rem 1.6rem;
-            position: static;
+            //position: static;
             width: auto;
         }
 

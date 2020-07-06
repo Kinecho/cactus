@@ -1,8 +1,5 @@
 <template>
     <div class="prompt-content-card">
-        <span>analysis card</span>
-
-
         <div class="textBox">
             <!-- <p v-if="reflectionResponse.toneAnalysis">
                 This is the positivity rating of your note. Write more to reveal different emotions.
@@ -72,15 +69,6 @@
 </script>
 
 <style scoped lang="scss">
-    @import "mixins";
+    @import "prompts";
 
-    .prompt-content-card {
-        padding: 4rem 2.4rem;
-
-        @include r(374) {
-            //do not add margin: auto here as it makes the cards jumpy
-            padding: 5.6rem 3.2rem;
-            width: 100%;
-        }
-    }
 </style>

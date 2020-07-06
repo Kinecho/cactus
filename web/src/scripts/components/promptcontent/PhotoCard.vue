@@ -1,6 +1,5 @@
 <template>
     <div class="prompt-content-card">
-        <span>Photo</span>
         <markdown-text :source="card.text" v-if="card.text"/>
         <div class="photo-container" v-if="card.photo">
             <flamelink-image :image="card.photo"/>
@@ -33,17 +32,7 @@
 </script>
 
 <style scoped lang="scss">
-    @import "mixins";
-
-    .prompt-content-card {
-        padding: 4rem 2.4rem;
-
-        @include r(374) {
-            //do not add margin: auto here as it makes the cards jumpy
-            padding: 5.6rem 3.2rem;
-            width: 100%;
-        }
-    }
+    @import "prompts";
 
     .photo-container {
         margin-top: 4rem;
