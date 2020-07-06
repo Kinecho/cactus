@@ -76,6 +76,7 @@
     import { isBlank } from "@shared/util/StringUtil";
     import ShareNoteCard from "@components/promptcontent/ShareNoteCard.vue";
     import SvgIcon from "@components/SvgIcon.vue";
+    import ElementsCard from "@components/promptcontent/ElementsCard.vue";
 
     const logger = new Logger("PromptContent");
 
@@ -91,6 +92,7 @@
         reflect = "reflect-card",
         video = "video-card",
         reflection_analysis = "reflection-analysis-card",
+        elements = "elements-card",
     }
 
     @Component({
@@ -101,6 +103,7 @@
             [CardType.reflect]: ReflectCard,
             [CardType.quote]: QuoteCard,
             [CardType.video]: VideoCard,
+            [CardType.elements]: ElementsCard,
             [CardType.reflection_analysis]: ReflectionAnalysisCard,
             ProgressStepper,
             SvgIcon,
@@ -154,8 +157,9 @@
                     return CardType.video;
                 case ContentType.reflection_analysis:
                     return CardType.reflection_analysis;
-                case ContentType.audio:
                 case ContentType.elements:
+                    return CardType.elements;
+                case ContentType.audio:
                 case ContentType.share_reflection:
                 case ContentType.invite:
                 default:
