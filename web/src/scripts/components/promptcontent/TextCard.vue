@@ -3,18 +3,15 @@
         <div class="text-card">
             <div class="textBox">
                 <slot name="element"/>
-                <h4 class="label" v-if="card.content.label">{{card.content.label}}</h4>
                 <h2 class="title" v-if="card.content.title">{{card.content.title}}</h2>
                 <markdown-text :source="text" v-if="text"/>
                 <div class="actions">
                     <slot name="actions"/>
                 </div>
-
             </div>
             <div class="backgroundImage" v-if="card.backgroundImage" :class="[card.backgroundImage.position]">
                 <flamelink-image :image="card.backgroundImage"/>
             </div>
-
         </div>
     </div>
 </template>
@@ -67,7 +64,7 @@
             max-width: 48rem;
             padding: 0 2.4rem;
         }
-        @include r(768) {
+        @include r(960) {
             align-items: center;
             flex-direction: row;
             justify-content: flex-start;
@@ -79,7 +76,7 @@
     .textBox {
         margin-bottom: 5.6rem;
 
-        @include r(768) {
+        @include r(960) {
             margin-bottom: 0;
             padding-right: 6.4rem;
             width: 66%;
@@ -91,7 +88,7 @@
         height: auto;
         width: 100%;
 
-        @include r(768) {
+        @include r(960) {
             align-self: center;
             max-width: 33%;
         }
