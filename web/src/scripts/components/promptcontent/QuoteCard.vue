@@ -79,16 +79,6 @@
         }
     }
 
-    .avatar-container {
-        margin-bottom: 2.4rem;
-
-        img {
-            $avatarSize: 5.6rem;
-            height: $avatarSize;
-            width: $avatarSize;
-        }
-    }
-
     .byline {
         opacity: .8;
     }
