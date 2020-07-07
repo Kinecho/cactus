@@ -26,9 +26,6 @@
                 </svg>
                 <span class="doneText">{{saving ? 'Saving....' : 'Done'}}</span>
             </button>
-            <button v-else class="no-loading doneBtn" @click="skip" :disabled="saving">
-                <span class="doneText">{{saving ? 'Saving....' : 'Skip'}}</span>
-            </button>
         </div>
     </div>
 </template>
