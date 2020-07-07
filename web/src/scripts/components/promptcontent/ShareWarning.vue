@@ -19,7 +19,6 @@
     .share-warning {
         align-items: center;
         display: flex;
-        justify-content: center;
         padding: .8rem 1.6rem;
 
         .shareText {

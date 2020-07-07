@@ -1,6 +1,7 @@
 <template>
     <div class="prompt-content-card">
         <h2>{{copy.prompts.SHARE_YOUR_NOTE}}</h2>
+        <p class="subtext">Feel more positive emotions when you share your note.</p>
         <shared-reflection-card :response="response" :prompt-content="this.card.promptContent" :question="this.card.text"/>
 
         <transition name="fade-in" mode="out-in">
