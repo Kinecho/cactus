@@ -46,12 +46,14 @@
     import SharedReflectionCard from "@components/SharedReflectionCard.vue";
     import CopyTextInput from "@components/CopyTextInput.vue";
     import CopyService from "@shared/copy/CopyService";
+    import SnackbarContent from "@components/SnackbarContent.vue"
 
     @Component({
         components: {
             MarkdownText,
             SharedReflectionCard,
             CopyTextInput,
+            SnackbarContent,
         }
     })
     export default class TextCard extends Vue {
@@ -121,10 +123,91 @@
     @import "prompts";
     @import "mixins";
     @import "variables";
+    @import "transitions";
 
     .prompt-content-card {
-        background: $darkerGreen url(/assets/images/darkGreenNeedles.svg);
+        background: $mediumDolphin url(/assets/images/grainy.png);
         color: $white;
-        border-radius: 4rem;
+        min-height: 100vh;
+        padding: 3.2rem 2.4rem;
+
+        @include r(374) {
+            padding: 3.2rem;
+        }
+        @include r(600) {
+            @include shadowbox;
+            background: $mediumDolphin url(/assets/images/grainy.png);
+            min-height: 0;
+            height: auto;
+            padding: 5.6rem 4rem;
+        }
+    }
+
+    h2 {
+        @include r(600) {
+            margin-top: -2.4rem;
+        }
+    }
+
+    .subtext {
+        margin-bottom: 3.2rem;
+        opacity: .8;
+    }
+
+    .directLink {
+        margin-bottom: 1.6rem;
+        opacity: .8;
+    }
+
+    .sharing {
+        display: flex;
+        justify-content: center;
+
+        button {
+            align-items: center;
+            display: flex;
+            flex-grow: 0;
+            justify-content: center;
+            margin-top: 1.6rem;
+            width: auto;
+
+            @include r(600) {
+                width: 50%;
+            }
+        }
+
+        .shareIcon {
+            height: 1.6rem;
+            margin-right: .8rem;
+            width: 1.6rem;
+        }
+    }
+
+    .getLink {
+        width: 100%;
+
+        @include r(600) {
+            width: auto;
+        }
+    }
+
+    .snack {
+        &-enter-active {
+            transition: all .2s cubic-bezier(.42, .97, .52, 1.49)
+        }
+
+        &-leave-active {
+            transition: all .2s ease;
+        }
+
+        &-enter {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        &-leave-to {
+            opacity: 0;
+            transform: translateX(-150px);
+        }
     }
 </style>
