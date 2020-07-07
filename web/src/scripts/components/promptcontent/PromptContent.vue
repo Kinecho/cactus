@@ -19,6 +19,9 @@
                     @next="next"
                     @previous="previous"
             >
+                <template v-slot:element>
+                    <card-element :card="card"/>
+                </template>
                 <template v-slot:actions>
                     <prompt-button :button="card.content.actionButton" @next="next" @previous="previous" @complete="closePrompt"/>
                     <prompt-button :link="card.content.link"/>
@@ -63,12 +66,7 @@
                 :showModal="showPricingModal"
                 @close="showPricingModal = false"
         />
-        <element-description-modal
-                :cactusElement="cactusModalElement"
-                :showModal="cactusModalVisible"
-                :navigationEnabled="true"
-                :showIntroCard="false"
-                @close="cactusModalVisible = false"/>
+
     </div>
 </template>
 
@@ -100,6 +98,7 @@
     import PricingModal from "@components/PricingModal.vue";
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
     import PromptButton from "@components/promptcontent/PromptButton.vue";
+    import CardElement from "@components/promptcontent/CardElement.vue";
 
     export enum CardType {
         text = "text-card",
@@ -123,6 +122,7 @@
 
     @Component({
         components: {
+            CardElement,
             PromptButton,
             ActionButton: OnboardingActionButton,
             ShareNoteCard,
@@ -164,7 +164,7 @@
         showCloseConfirm = false;
         showShareNote: boolean = false;
         showPricingModal = false;
-        cactusModalVisible = false;
+        elementModalVisible = false;
 
         mounted() {
             this.keyListener = document.addEventListener("keyup", this.handleDocumentKeyUp)
@@ -180,10 +180,6 @@
 
         get supportedCards(): PromptContentCardViewModel[] {
             return this.cards.filter(card => !!this.getCardType(card));
-        }
-
-        get cactusModalElement(): CactusElement | null {
-            return this.cards.find(card => card.element)?.element ?? null;
         }
 
         getCardType(card: PromptContentCardViewModel): CardType | null {
@@ -287,6 +283,16 @@
             } else if (event.key === "ArrowRight" || event.code === "ArrowRight" || event.which === 39) {
                 this.next()
             }
+        }
+
+        showElementModal() {
+            this.elementModalVisible = true;
+            this.keyboardNavigationEnabled = false;
+        }
+
+        hideElementModal() {
+            this.elementModalVisible = false;
+            this.keyboardNavigationEnabled = true;
         }
 
         handleSwipeEvent(direction: string) {
@@ -414,6 +420,10 @@
         }
     }
 
+    .element-container {
+        cursor: pointer;
+        text-align: center;
+    }
 
     .tertiary.icon {
         cursor: pointer;

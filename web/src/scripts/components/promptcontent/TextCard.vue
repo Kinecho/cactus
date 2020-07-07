@@ -2,9 +2,10 @@
     <div class="prompt-content-card">
         <div class="text-card">
             <div class="textBox">
+                <slot name="element"/>
                 <markdown-text :source="text" v-if="text"/>
+                <slot name="actions"/>
             </div>
-            <slot name="actions"/>
         </div>
     </div>
 </template>
