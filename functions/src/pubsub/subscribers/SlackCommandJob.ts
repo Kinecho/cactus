@@ -6,16 +6,17 @@ import { getConfig } from "@admin/config/configService";
 import AdminSlackService, {
     AttachmentColor,
     ChatMessage,
+    SlackAttachment,
     SlackAttachmentField,
     SlackResponseType,
     SlashCommandResponse
 } from "@admin/services/AdminSlackService";
 import { getActiveUserCountForTrailingDays } from "@api/analytics/BigQueryUtil";
 import {
+    AmericaDenverTimezone,
     formatDateTime,
     getDateAtMidnightDenver,
     getISODate,
-    AmericaDenverTimezone,
     millisecondsToMinutes
 } from "@shared/util/DateUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
@@ -26,10 +27,13 @@ import AdminReflectionResponseService from "@admin/services/AdminReflectionRespo
 import ReflectionResponse, { getResponseMediumDisplayName } from "@shared/models/ReflectionResponse";
 import Logger from "@shared/Logger";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
-import { isValidEmail } from "@shared/util/StringUtil";
+import { formatPriceCentsUsd, isValidEmail } from "@shared/util/StringUtil";
 import { CactusElement } from "@shared/models/CactusElement";
 import DeletedUser from "@shared/models/DeletedUser";
 import AdminDeletedUserService from "@admin/services/AdminDeletedUserService";
+import AdminUserService from "@admin/services/AdminUserService";
+import SubscriptionProduct from "@shared/models/SubscriptionProduct";
+import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
 
 const logger = new Logger("SlackCommandJob");
 const config = getConfig();
@@ -39,7 +43,8 @@ export enum JobType {
     bigquery = "bigquery",
     durumuru = "durumuru",
     activeUsers = "activeUsers",
-    memberStats = "stats"
+    memberStats = "stats",
+    user = "user",
 }
 
 export interface JobRequest {
@@ -78,6 +83,9 @@ export async function processJob(job: JobRequest) {
         case JobType.memberStats:
             task = processMemberStats(job);
             break;
+        case JobType.user:
+            task = processUser(job);
+            break;
     }
     if (task) {
         const message = await task;
@@ -112,11 +120,92 @@ export async function processJob(job: JobRequest) {
             await AdminSlackService.getSharedInstance().sendArbitraryMessage(job.channelName, message as ChatMessage);
         }
 
+        if (message.fileData && job.channelName) {
+            await AdminSlackService.getSharedInstance().uploadTextSnippet({
+                data: message.fileData,
+                channel: job.channelName,
+                useChannelId: true,
+                fileType: "json",
+                filename: `${ job.type ?? "job" }-results.json`,
+            })
+        }
 
         logger.log(`Finished processing SlackCommand ${ job.type }`);
     } else {
         logger.warn("No task was created for job", JSON.stringify(job, null, 2));
     }
+}
+
+/**
+ * Get information about a user and return it to slack.
+ * @param {JobRequest} job
+ * @return {Promise<SlashCommandResponse>}
+ */
+async function processUser(job: JobRequest): Promise<SlashCommandResponse> {
+    logger.log("Getting user info ");
+    const email = job.payload as string;
+
+    const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
+    const userRecord = await AdminUserService.getSharedInstance().getAuthUserByEmail(email)
+
+    const subscriptionProductId = member?.subscription?.subscriptionProductId;
+    let subscriptionProduct: SubscriptionProduct | null = null;
+    if (subscriptionProductId) {
+        subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByEntryId(subscriptionProductId) ?? null;
+    }
+
+    let text = `No user found for email ${ email }`;
+    const attachments: SlackAttachment[] = [];
+    if (member || userRecord) {
+        const envSuffix = config.app.environment === "prod" ? "prod" : "stage"
+        const revenueCatAppId = config.revenuecat.app_id;
+        const firebaseLink = `https://console.firebase.google.com/u/0/project/cactus-app-${ envSuffix }/database/firestore/data~2Fmembers~2F${ member!.id }`;
+        text = `User info for ${ email }`;
+
+        const accessEndsAt = member?.subscription?.cancellation?.accessEndsAt;
+        const trialStartedAt = member?.subscription?.optOutTrial?.startedAt;
+        attachments.push({
+            fields: [
+                {
+                    title: "Member ID / User ID",
+                    value: (member?.id ? `<${ firebaseLink }|${ member?.id }>` : "--") + ` / ${ userRecord?.uid ?? "--" }`,
+                },
+                { title: "Email", value: member?.email ?? email },
+                {
+                    title: "Created At",
+                    value: formatDateTime(member?.createdAt, { timezone: AmericaDenverTimezone }) ?? "--"
+                },
+                {
+                    title: "Source / Medium / Campaign: ",
+                    value: `${ member?.getSignupSource() ?? "--" } / ${ member?.getSignupMedium() ?? "--" } / ${ member?.getSignupCampaign() ?? "--" }`
+                },
+                {
+                    title: "Subscription",
+                    value: `*Tier*: ${ member?.tier ?? "--" }
+*In Trial*: ${ member?.isOptOutTrialing === true ? "Yes" : "No" }
+*Plan Duration* ${ subscriptionProduct?.billingPeriod ?? "--" }
+*Price* ${ subscriptionProduct?.priceCentsUsd ? formatPriceCentsUsd(subscriptionProduct!.priceCentsUsd) : "--" }
+*Trial Started At*: ${ formatDateTime(trialStartedAt, { timezone: AmericaDenverTimezone }) ?? "--" }
+*Cancels At*: ${ formatDateTime(accessEndsAt, { timezone: AmericaDenverTimezone }) ?? "--" }
+                    `.trim(),
+                },
+                {
+                    title: "Stats",
+                    value: `*Streak (Days)*: ${ member?.stats.reflections?.currentStreakDays ?? 0 }
+*Total Reflections*: ${ member?.stats?.reflections?.totalCount ?? 0 }`,
+                },
+                {
+                    title: "Links",
+                    value: `<https://app.revenuecat.com/customers/${ revenueCatAppId }/${ member?.id }|RevenueCat>
+<${ firebaseLink }|Firebase Member Record>
+`
+                },
+
+            ]
+        })
+    }
+    const fileData = stringifyJSON({ member: member?.toJSON(), userRecord: userRecord?.toJSON() }, 2);
+    return { text, attachments, fileData, response_type: SlackResponseType.ephemeral };
 }
 
 async function processMemberStats(job: JobRequest): Promise<SlashCommandResponse> {

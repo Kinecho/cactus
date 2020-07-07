@@ -73,7 +73,8 @@ export enum SlackResponseType {
 }
 
 export interface SlashCommandResponse extends Partial<ChatMessage> {
-    response_type?: SlackResponseType
+    response_type?: SlackResponseType,
+    fileData?: string,
 }
 
 
@@ -376,15 +377,16 @@ export default class AdminSlackService {
 
     async uploadTextSnippet(options: {
         data: string,
-        channel: ChannelName,
+        channel: ChannelName | string,
         filename: string,
         fileType?: string | undefined
         title?: string
         message?: string,
+        useChannelId?: boolean
     }) {
-        const { data, channel, filename, fileType, title, message } = options;
+        const { data, channel, useChannelId, filename, fileType, title, message } = options;
         return this.web.files.upload({
-            channels: this.getChannel(channel),
+            channels: useChannelId ? channel : this.getChannel(channel as ChannelName),
             content: data,
             filetype: fileType,
             title,

@@ -219,6 +219,10 @@ export default class CactusMember extends BaseModel {
         return;
     }
 
+    getSignupCampaign(): string | undefined {
+        return this.signupQueryParams?.utm_campaign;
+    }
+
     getReferredBy(): string | undefined {
         if (this.referredByEmail) {
             return this.referredByEmail;
