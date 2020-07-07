@@ -1,7 +1,7 @@
 <template>
     <div v-touch:swipe="handleSwipeEvent" class="prompt-content-main" :class="[`index-${index}`, {isLastCard: isLastCard}]">
         <progress-stepper :total="totalPages" :current="contentIndex" class="progress"/>
-        <button aria-label="Close" @click="closePrompt()" title="Close" class="close tertiary icon">
+        <button aria-label="Close" @click="closePrompt" title="Close" class="close tertiary icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
                 <path d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
             </svg>
@@ -52,13 +52,13 @@
             </div>
         </modal>
 
-        <Modal :show="showCloseConfirm" :show-close-button="false">
+        <!-- <Modal :show="showCloseConfirm" :show-close-button="false">
             <div slot="body" class="confirm-body">
                 <h2>Are you sure you want to exit? Any unsaved progress will be lost.</h2>
                 <button @click="showCloseConfirm = false">No, continue</button>
                 <button @click="closePrompt()">Yes, exit.</button>
             </div>
-        </Modal>
+        </Modal> -->
 
         <pricing-modal
                 :showModal="showPricingModal"
