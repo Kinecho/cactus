@@ -14,7 +14,7 @@ export interface JournalEntryDelegate {
     entryUpdated: (entry: JournalEntry) => void
 }
 
-class JournalEntry {
+class   JournalEntry {
     promptId: string;
 
     delegate?: JournalEntryDelegate = undefined;

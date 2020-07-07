@@ -5,7 +5,7 @@
             <h1>Insights</h1>
 
             <reflection-stats-widget :reflection-stats="reflectionStats" v-if="reflectionStats"/>
-
+            <prompt-widget :entry="todayEntry" v-if="todayEntry" :member="member"/>
             <section class="valuesContainer" v-if="hasCoreValues">
                 <h2>Core Values</h2>
                 <p class="subtext">The values important in your&nbsp;life</p>
@@ -24,7 +24,8 @@
             </section>
             <section class="novaluesContainer" v-else>
                 <h2>Core Values</h2>
-                <p class="subtext">Discover what is most important for you so that you better understand past decisions and make better decisions in the future.</p>
+                <p class="subtext">Discover what is most important for you so that you better understand past decisions
+                    and make better decisions in the future.</p>
                 <router-link tag="button" class="esButton" :to="coreValuesHref">Get My Core Values</router-link>
             </section>
 
@@ -63,7 +64,6 @@
     import { CoreValueMeta, CoreValuesService } from "@shared/models/CoreValueTypes";
     import { PageRoute } from "@shared/PageRoutes";
     import { QueryParam } from "@shared/util/queryParams";
-    import { millisecondsToMinutes } from "@shared/util/DateUtil";
     import CopyService from "@shared/copy/CopyService";
     import { DropdownMenuLink } from "@components/DropdownMenuTypes";
     import DropdownMenu from "@components/DropdownMenu.vue";
@@ -79,16 +79,21 @@
     import Spinner from "@components/Spinner.vue";
     import { CactusElement } from "@shared/models/CactusElement";
     import GapAnalysisWidget from "@components/insights/GapAnalysisWidget.vue";
-    import { StatWidgetData } from "@components/insights/MemberStatsTypes";
     import ReflectionStatsWidget from "@components/insights/ReflectionStatsWidget.vue";
     import { logFocusElementSelected } from "@web/analytics";
     import { InsightWord } from "@shared/api/InsightLanguageTypes";
+    import PromptWidget from "@components/insights/PromptWidget.vue";
+    import PromptContent from "@shared/models/PromptContent";
+    import PromptContentService from "@web/services/PromptContentService";
+    import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
+    import JournalEntry from "@web/datasource/models/JournalEntry";
 
     const logger = new Logger("InsightsPage");
     const copy = CopyService.getSharedInstance().copy;
 
     @Component({
         components: {
+            PromptWidget,
             ReflectionStatsWidget,
             GapAnalysisWidget,
             Results,
@@ -109,6 +114,10 @@
         selectFocusEnabled = false;
         currentElementSelection: CactusElement | null = null
 
+        todayPromptLoading = false;
+        todayPromptContent: PromptContent | null = null;
+        todayEntry: JournalEntry | null = null;
+
         beforeMount() {
             this.memberObserver = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({ member }) => {
@@ -124,12 +133,28 @@
 
                     if (memberChanged) {
                         logger.info("fetching gap results because member id is different / not set")
-                        await this.fetchGapResults();
+                        await Promise.all([
+                            this.fetchGapResults(),
+                            this.fetchTodayPrompt()
+                        ]);
                     } else {
                         logger.info("member changed but not fetching results because it's the same member");
                     }
                 }
             })
+        }
+
+        async fetchTodayPrompt() {
+            this.todayPromptLoading = true;
+            const promptContent = await PromptContentService.sharedInstance.getPromptContentForDate({
+                subscriptionTier: this.member?.tier ?? SubscriptionTier.BASIC,
+                systemDate: new Date(),
+            })
+            if (promptContent?.promptId) {
+                this.todayEntry = new JournalEntry(promptContent.promptId);
+                this.todayEntry.start();
+            }
+            this.todayPromptLoading = false;
         }
 
         async fetchGapResults() {
