@@ -18,10 +18,9 @@
     import { ActionButton, ContentAction, ContentLink, LinkStyle, LinkTarget } from "@shared/models/PromptContent";
     import { Prop } from "vue-property-decorator";
     import { PageRoute } from "@shared/PageRoutes";
-    import { appendQueryParams, isBlank } from "@shared/util/StringUtil";
+    import { appendQueryParams, isBlank, isExternalUrl } from "@shared/util/StringUtil";
     import PricingModal from "@components/PricingModal.vue";
     import { QueryParam } from "@shared/util/queryParams";
-    import CactusMember from "@shared/models/CactusMember";
     import CactusMemberService from "@web/services/CactusMemberService";
 
     const logger = new Logger("PromptButton");
@@ -84,6 +83,7 @@
 
         get attributes(): Attributes {
             const info: Attributes = { type: "button", props: {}, label: this.link?.linkLabel ?? this.button?.label };
+
             if (!isBlank(this.link?.linkLabel)) {
                 info.type = "router-link";
             }
@@ -97,7 +97,12 @@
                 if (this.link?.appendMemberId && memberId) {
                     url = appendQueryParams(url, { [QueryParam.CACTUS_MEMBER_ID]: memberId })
                 }
-                info.props.to = url;
+                if (isExternalUrl(url)) {
+                    info.type = "a";
+                    info.props.href = url;
+                } else {
+                    info.props.to = url;
+                }
             }
 
             switch (this.button?.action) {
@@ -149,4 +154,10 @@
 <style scoped lang="scss">
     @import "mixins";
     @import "common";
+
+    .action-button {
+        margin-bottom: 1rem;
+
+        font-size: 2rem;
+    }
 </style>

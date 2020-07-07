@@ -6,7 +6,10 @@
                 <h4 class="label" v-if="card.content.label">{{card.content.label}}</h4>
                 <h2 class="title" v-if="card.content.title">{{card.content.title}}</h2>
                 <markdown-text :source="text" v-if="text"/>
-                <slot name="actions"/>
+                <div class="actions">
+                    <slot name="actions"/>
+                </div>
+
             </div>
             <div class="backgroundImage" v-if="card.backgroundImage" :class="[card.backgroundImage.position]">
                 <flamelink-image :image="card.backgroundImage"/>
@@ -122,6 +125,10 @@
             max-height: 35rem;
             max-width: 100%;
         }
+    }
+
+    .actions {
+        margin: 2rem 0;
     }
 
 </style>

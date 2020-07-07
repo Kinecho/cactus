@@ -4,7 +4,10 @@
         <div class="photo-container" v-if="card.photo">
             <flamelink-image :image="card.photo"/>
         </div>
-        <slot name="actions"/>
+        <div class="actions">
+            <slot name="actions"/>
+        </div>
+
     </div>
 </template>
 
@@ -39,12 +42,16 @@
 
     .photo-container {
         margin-top: 4rem;
-
+        margin-bottom: 2rem;
         img {
             border-radius: 4px;
             display: block;
             max-width: 100%;
             margin: 0 auto; /* center smaller image in card */
         }
+    }
+
+    .actions {
+        text-align: center;
     }
 </style>

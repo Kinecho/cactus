@@ -15,8 +15,13 @@
                     <markdown-text :source="card.quote.authorTitle" v-if="card.quote.authorTitle"/>
                 </p>
             </div>
+
+            <div class="actions">
+                <slot name="actions"/>
+            </div>
         </div>
-        <slot name="actions"/>
+
+
     </div>
 </template>
 
@@ -52,7 +57,6 @@
 
     .quote-card {
         padding: 0 .8rem;
-
         @include r(374) {
             margin: 0 auto;
             max-width: 48rem;
@@ -70,7 +74,6 @@
 
     .author {
         font-size: 1.6rem;
-
         @include r(768) {
             font-size: 1.8rem;
         }
@@ -88,6 +91,18 @@
 
     .byline {
         opacity: .8;
+    }
+
+    .actions {
+        &:empty {
+            display: none;
+        }
+
+        font-size: 2rem;
+
+        > * {
+            margin-bottom: 1rem;
+        }
     }
 
 </style>
