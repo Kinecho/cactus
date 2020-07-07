@@ -163,10 +163,15 @@
             display: flex;
             margin: 0 1.6rem 0 0;
             text-align: left;
+
+            + .actionButtonContainer {
+                margin-left: 1.6rem;
+            }
         }
     }
 
-    button {
+    button,
+    .button {
         display: block;
         width: 100%;
 

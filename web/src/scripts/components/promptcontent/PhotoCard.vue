@@ -1,10 +1,15 @@
 <template>
     <div class="prompt-content-card">
-        <markdown-text :source="card.text" v-if="card.text"/>
         <div class="photo-container" v-if="card.photo">
             <flamelink-image :image="card.photo"/>
         </div>
-        <slot name="actions"/>
+        <div class="caption">
+            caption caption caption caption caption caption caption caption caption caption caption
+            <markdown-text :source="card.text" v-if="card.text"/>
+        </div>
+        <div class="actions">
+            <slot name="actions"/>
+        </div>
     </div>
 </template>
 
@@ -38,22 +43,40 @@
     @import "prompts";
 
     .photo-container {
-        margin: 4rem 1.6rem;
+        margin: 4rem 1.6rem 1.6rem;
 
-        @include r(600) {
-            margin: 0 0 4rem;
+        @include r(768) {
+            margin: 0 0 1.6rem;
         }
 
         img {
             border-radius: .4rem;
             display: block;
-            margin: 0 auto; /* center smaller image in card */
-            max-width: 56rem;
             width: 100%;
+
+            @include r(768) {
+                margin: 0 auto; /* center smaller image in card */
+                max-width: 56rem;
+            }
         }
     }
 
-    .actionButtonContainer {
+    .caption {
+        font-size: 1.6rem;
+        margin: 0 1.6rem 4rem;
+        max-width: 56rem;
+        opacity: .8;
+
+        @include r(768) {
+            margin: 0 auto 4rem;
+        }
+
+        &:empty {
+            display: none;
+        }
+    }
+
+    .actions {
         @include r(600) {
             justify-content: center;
         }
