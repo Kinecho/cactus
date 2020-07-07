@@ -64,6 +64,10 @@
             max-width: 48rem;
             padding: 0 2.4rem;
         }
+        @include r(768) {
+            max-width: 64rem;
+            min-height: 0;
+        }
         @include r(960) {
             align-items: center;
             flex-direction: row;
@@ -95,7 +99,11 @@
             order: 1;
             position: static;
         }
+        @include r(768) {
+            justify-content: flex-start;
+        }
         @include r(960) {
+            justify-content: center;
             max-width: 33%;
         }
 

@@ -355,6 +355,9 @@
             position: static;
         }
         @include r(768) {
+            max-width: 64rem;
+        }
+        @include r(960) {
             max-width: 110rem;
             padding: 0 9.6rem;
         }
