@@ -380,7 +380,7 @@
             }
 
             &.shareNote {
-                color: $darkestGreen;
+                color: $darkerGreen;
             }
         }
     }
