@@ -186,7 +186,7 @@ async function processUser(job: JobRequest): Promise<SlashCommandResponse> {
                     value: `*Tier*: ${ member?.tier ?? "--" }
 *In Trial*: ${ member?.isOptOutTrialing === true ? "Yes" : "No" }
 *Plan Duration* ${ subscriptionProduct?.billingPeriod ?? "--" }
-*Price* ${ subscriptionProduct?.priceCentsUsd ? formatPriceCentsUsd(subscriptionProduct!.priceCentsUsd) : "--" }
+*Price* ${ subscriptionProduct?.priceCentsUsd ? formatPriceCentsUsd(subscriptionProduct.priceCentsUsd) : "--" }
 *Trial Started At*: ${ formatDateTime(trialStartedAt, { timezone: AmericaDenverTimezone }) ?? "--" }
 *Cancels At*: ${ formatDateTime(accessEndsAt, { timezone: AmericaDenverTimezone }) ?? "--" }
                     `.trim(),
