@@ -5,7 +5,7 @@
             <h1>Insights</h1>
 
             <reflection-stats-widget :reflection-stats="reflectionStats" v-if="reflectionStats"/>
-            <prompt-widget :entry="todayEntry" v-if="todayEntry" :member="member"/>
+            <prompt-widget :entry="todayEntry" :member="member" :loading="todayPromptLoading"/>
             <section class="valuesContainer" v-if="hasCoreValues">
                 <h2>Core Values</h2>
                 <p class="subtext">The values important in your&nbsp;life</p>

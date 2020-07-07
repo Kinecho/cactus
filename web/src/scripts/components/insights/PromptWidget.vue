@@ -1,7 +1,7 @@
 <template>
     <div class="today-widget" :class="{reflected: hasReflected}">
         <h4>Today</h4>
-        <spinner v-if="!entry.allLoaded"/>
+        <spinner v-if="loading || !entry.allLoaded"/>
         <template v-else>
             <template>
                 <h3>
@@ -47,8 +47,11 @@
     export default class TodayPromptWidget extends Vue {
         name = "PromptWidget.vue";
 
-        @Prop({ type: Object as () => JournalEntry, required: true })
-        entry!: JournalEntry;
+        @Prop({type: Boolean, required: false, default: true})
+        loading!: boolean;
+
+        @Prop({ type: Object as () => JournalEntry, required: true, default: null })
+        entry!: JournalEntry|null;
 
 
         @Prop({ type: Object as () => CactusMember, required: true })
@@ -60,18 +63,18 @@
         }
 
         get hasReflected(): boolean {
-            return (this.entry.responses ?? []).length > 0;
+            return (this.entry?.responses ?? []).length > 0;
         }
 
         get reflectionText(): string | undefined {
-            return getResponseText(this.entry.responses);
+            return getResponseText(this.entry?.responses);
         }
 
         get questionText(): string | undefined {
-            let contentList = this.entry.promptContent?.content || [];
+            let contentList = this.entry?.promptContent?.content || [];
             const reflectCard = contentList?.find(c => c.contentType === ContentType.reflect);
             if (reflectCard) {
-                const text = this.entry.promptContent?.getDynamicDisplayText({
+                const text = this.entry?.promptContent?.getDynamicDisplayText({
                     content: reflectCard,
                     member: this.member,
                     coreValue: this.entry.responses?.find(r => r.coreValue)?.coreValue,
@@ -83,7 +86,7 @@
         }
 
         get previewText(): string | undefined {
-            return this.entry.promptContent?.getDynamicPreviewText({
+            return this.entry?.promptContent?.getDynamicPreviewText({
                 member: this.member,
                 coreValue: this.entry.responses?.find(r => r.coreValue)?.coreValue ?? undefined,
                 dynamicValues: this.entry.responses?.find(r => !!r.dynamicValues)?.dynamicValues,
@@ -91,7 +94,7 @@
         }
 
         get image(): ContentBackgroundImage | Image | undefined {
-            const image = this.entry.promptContent?.content[0]?.backgroundImage ?? this.entry.promptContent?.content[0]?.photo;
+            const image = this.entry?.promptContent?.content[0]?.backgroundImage ?? this.entry.promptContent?.content[0]?.photo;
             if (image?.url || image?.flamelinkFileName || image?.storageUrl) {
                 return image;
             }
