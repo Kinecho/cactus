@@ -3,10 +3,10 @@ const getCommonWebpackConfig = require('./webpack.config.common')
 const minimizersConfig = require('./minimizers.config')
 const config = require('./config.prod-alt')
 
-const simplegit = require('simple-git/promise')
+const simpleGit = require('simple-git')
 
 function getCommitHash() {
-    const git = simplegit()
+    const git = simpleGit()
     return git.revparse(['HEAD'])
 }
 

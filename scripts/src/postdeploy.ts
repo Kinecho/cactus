@@ -1,6 +1,8 @@
 import { getCactusConfig, Project } from "@scripts/config";
 import AdminSlackService, { ChannelName, ChatMessage } from "@admin/services/AdminSlackService";
+import simpleGit, { SimpleGit } from 'simple-git';
 
+const git: SimpleGit = simpleGit();
 (async () => {
     const projectId = process.env.GCLOUD_PROJECT;
     const isProd = projectId === 'cactus-app-prod';
@@ -26,10 +28,11 @@ import AdminSlackService, { ChannelName, ChatMessage } from "@admin/services/Adm
 
     AdminSlackService.initialize(config);
 
-    if (isProd && isHosting) {
-        const appName = isAlt ? "Prod-Backstage" : "Prod"
-        const url = isAlt ? "https://cactus-app-prod-alt.web.app" : "https://cactus.app";
+    const branch = (await git.branchLocal()).current;
 
+    if (isProd && isHosting) {
+        const appName = isAlt ? `Prod-Alt \`${ branch }\`` : "Prod"
+        const url = isAlt ? "https://cactus-app-prod-alt.web.app" : "https://cactus.app";
         const message: ChatMessage = {
             text: "",
             attachments: [{
@@ -40,7 +43,7 @@ import AdminSlackService, { ChannelName, ChatMessage } from "@admin/services/Adm
         };
         await AdminSlackService.getSharedInstance().sendGeneralMessage(message);
     } else if (isHosting) {
-        const appName = isAlt ? "Stage - Feature Branch" : "Stage"
+        const appName = isAlt ? `Stage - Alt \`${ branch }\`` : "Stage"
         const url = isAlt ? "https://cactus-app-stage-alt.web.app" : "https://cactus-app-stage.web.app";
         const emoji = isAlt ? ":fire:" : ""
         const message: ChatMessage = {

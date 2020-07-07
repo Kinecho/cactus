@@ -7,11 +7,11 @@ const helpers = require('./../helpers')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const WebpackNotifierPlugin = require('webpack-notifier')
 const chalk = require('chalk')
-const simplegit = require('simple-git/promise')
+const simpleGit = require('simple-git')
 const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
 
 function getCommitHash() {
-    const git = simplegit()
+    const git = simpleGit()
     return git.revparse(['HEAD'])
 }
 

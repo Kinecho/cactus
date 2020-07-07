@@ -738,7 +738,7 @@ workflows:
           requires:
             - *all_tests_finished
       - firebase-deploy-some:
-          name: &branch_deploy_only_hosting_name_stage_alt "Deploy FE to Stage-Alt"
+          name: "Deploy FE to Stage-Alt"
           project: "stage"
           modules: "hosting:webapp:alt"
           requires:
@@ -747,14 +747,14 @@ workflows:
           name: "Notify Stage-Alt Deploy Started"
           target: "Stage - Feature Branch"
           requires:
-            - *branch_deploy_only_hosting_name_stage_alt
+            - *stage_alt_fe_approval_name
       - branch_deploy_fe_approval_prod_alt:
           type: approval
           name: &prod_alt_fe_approval_name "Approve FE To Prod-Alt"
           requires:
             - *all_tests_finished
       - firebase-deploy-some:
-          name: &branch_deploy_only_hosting_name_prod_alt "Deploy FE to Prod-Alt"
+          name: "Deploy FE to Prod-Alt"
           project: "prod"
           modules: "hosting:webapp:alt"
           requires:
@@ -762,7 +762,7 @@ workflows:
       - branch-deploy-started-prod:
           name: "Notify Prod-Alt Deploy Started"
           requires:
-            - *branch_deploy_only_hosting_name_prod_alt
+            - *prod_alt_fe_approval_name
       - branch_deploy_fe_approval:
           type: approval
           name: &stage_fe_approval_name "Approve FE To Stage"
