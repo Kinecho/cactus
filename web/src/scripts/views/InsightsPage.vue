@@ -144,6 +144,11 @@
             })
         }
 
+        destroyed() {
+            this.memberObserver?.();
+            this.todayEntry?.stop();
+        }
+
         async fetchTodayPrompt() {
             this.todayPromptLoading = true;
             const promptContent = await PromptContentService.sharedInstance.getPromptContentForDate({

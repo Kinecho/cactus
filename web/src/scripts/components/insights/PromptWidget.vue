@@ -44,14 +44,14 @@
             FlamelinkImage
         }
     })
-    export default class TodayPromptWidget extends Vue {
+    export default class PromptWidget extends Vue {
         name = "PromptWidget.vue";
 
-        @Prop({type: Boolean, required: false, default: true})
+        @Prop({ type: Boolean, required: false, default: true })
         loading!: boolean;
 
-        @Prop({ type: Object as () => JournalEntry, required: true, default: null })
-        entry!: JournalEntry|null;
+        @Prop({ type: Object as () => JournalEntry | null, required: false, default: null })
+        entry!: JournalEntry | null;
 
 
         @Prop({ type: Object as () => CactusMember, required: true })
@@ -59,7 +59,7 @@
 
         get link(): string | null {
             const entryId = this.entry?.promptContent?.entryId;
-            return entryId ? `${ PageRoute.PROMPTS_ROOT }/${ this.entry.promptContent?.entryId }` : null
+            return entryId ? `${ PageRoute.PROMPTS_ROOT }/${ this.entry?.promptContent?.entryId }` : null
         }
 
         get hasReflected(): boolean {
@@ -94,7 +94,7 @@
         }
 
         get image(): ContentBackgroundImage | Image | undefined {
-            const image = this.entry?.promptContent?.content[0]?.backgroundImage ?? this.entry.promptContent?.content[0]?.photo;
+            const image = this.entry?.promptContent?.content[0]?.backgroundImage ?? this.entry?.promptContent?.content[0]?.photo;
             if (image?.url || image?.flamelinkFileName || image?.storageUrl) {
                 return image;
             }
