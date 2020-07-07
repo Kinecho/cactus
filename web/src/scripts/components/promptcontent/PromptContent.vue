@@ -353,17 +353,26 @@
 
         @include r(600) {
             display: flex;
-            padding: 0;
+            margin: 0 auto;
+            max-width: 48rem;
+            padding: 0 2.4rem;
             position: static;
-            width: auto;
+        }
+        @include r(768) {
+            max-width: 110rem;
+            padding: 0 9.6rem;
         }
 
         button {
-            align-items: center;
-            display: flex;
-            justify-content: center;
-            max-width: none;
             width: 100%;
+
+            @include r(600) {
+                align-items: center;
+                display: flex;
+                justify-content: center;
+                margin-right: .8rem;
+                max-width: 20rem;
+            }
 
             .icon {
                 height: 1.8rem;
