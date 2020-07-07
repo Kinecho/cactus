@@ -6,7 +6,7 @@
             </router-link>
             <div v-if="!loggedIn" class="anonLinks">
                 <router-link
-                        class="login"
+                        v-if="displayLoginButton"
                         :to="pricingHref"
                         type="link"
                 >
@@ -19,6 +19,13 @@
                         type="link"
                 >
                     <span>{{copy.common.LOG_IN}}</span>
+                </router-link>
+                <router-link v-if="displayLoginButton"
+                        class="login"
+                        :to="signupHref"
+                        type="link"
+                >
+                    <span>{{copy.common.SIGN_UP}}</span>
                 </router-link>
             </div>
             <div class="navContainer" v-if="loggedIn && showLinks">
@@ -297,21 +304,32 @@
         justify-content: flex-end;
         white-space: nowrap;
 
-        .login {
+        a {
             display: block;
             font-size: 1.6rem;
             margin: 0;
             padding-left: 3vw;
             text-decoration: none;
             transition: background-color .2s ease-in-out;
-
             @include r(600) {
                 font-size: 1.8rem;
 
+            }
+        }
+
+        .login {
+            &:last-child {
+                border: 1px solid $lightGreen;
+                border-radius: 3rem;
+                margin-left: 3.2vw;
+                padding: .4rem 1.0rem;
+
+                &:hover, &.router-link-active {
+                    background-color: $lightGreen;
+                }
+            }
+            @include r(600) {
                 &:last-child {
-                    border: 1px solid $lightGreen;
-                    border-radius: 3rem;
-                    margin-left: 3.2vw;
                     padding: .8rem 1.6rem;
 
                     &:hover, &.router-link-active {
