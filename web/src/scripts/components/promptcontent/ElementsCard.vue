@@ -4,6 +4,7 @@
             <markdown-text :source="card.text"/>
         </div>
         <elements/>
+        <slot name="actions"/>
     </div>
 </template>
 

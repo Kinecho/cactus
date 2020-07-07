@@ -4,6 +4,7 @@
             <div class="textBox">
                 <markdown-text :source="text" v-if="text"/>
             </div>
+            <slot name="actions"/>
         </div>
     </div>
 </template>

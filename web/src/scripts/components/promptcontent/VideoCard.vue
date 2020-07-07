@@ -14,6 +14,7 @@
             <div v-if="card.video.url">
                 <video :src="card.video.url" controls></video>
             </div>
+            <slot name="actions"/>
         </div>
     </div>
 </template>

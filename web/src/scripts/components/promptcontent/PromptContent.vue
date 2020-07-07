@@ -18,14 +18,21 @@
                     @close="closePrompt"
                     @next="next"
                     @previous="previous"
-            />
+            >
+                <template v-slot:actions>
+                    <prompt-button :button="card.content.actionButton" @next="next" @previous="previous" @complete="closePrompt"/>
+                    <prompt-button :link="card.content.link"/>
+                </template>
+            </component>
         </transition-group>
-        <div class="last-card-actions" v-if="isLastCard">
-            <button class="button actions" @click="closePrompt">Done</button>
-            <button class="button actions tertiary" @click="showShareNote = true" v-if="hasNote">
-                <svg-icon icon="share"/>
-                Share Note
-            </button>
+        <div class="card-actions">
+            <template v-if="isLastCard">
+                <button class="button actions" @click="closePrompt">Done</button>
+                <button class="button actions tertiary" @click="showShareNote = true" v-if="hasNote">
+                    <svg-icon icon="share"/>
+                    Share Note
+                </button>
+            </template>
         </div>
 
         <button aria-label="Previous slide" @click="previous" :disabled="!previousEnabled" class="arrow icon previous tertiary no-loading">
@@ -38,7 +45,7 @@
                 <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
             </svg>
         </button>
-        <modal :show="showShareNote && !!shareReflectionCard" v-on:close="showShareNote = false" :showCloseButton="true">
+        <modal :show="showShareNote && !!shareReflectionCard" @close="showShareNote = false" :showCloseButton="true">
             <div class="sharing-card note" slot="body">
                 <ShareNoteCard :card="shareReflectionCard"/>
             </div>
@@ -51,13 +58,24 @@
                 <button @click="closePrompt()">Yes, exit.</button>
             </div>
         </Modal>
+
+        <pricing-modal
+                :showModal="showPricingModal"
+                @close="showPricingModal = false"
+        />
+        <element-description-modal
+                :cactusElement="cactusModalElement"
+                :showModal="cactusModalVisible"
+                :navigationEnabled="true"
+                :showIntroCard="false"
+                @close="cactusModalVisible = false"/>
     </div>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
     import Component from "vue-class-component"
-    import PromptContent, { ContentType } from "@shared/models/PromptContent";
+    import PromptContent, { ContentAction, ContentType } from "@shared/models/PromptContent";
     import { Prop } from "vue-property-decorator";
     import ReflectionResponse from "@shared/models/ReflectionResponse";
     import ProgressStepper from "@components/ProgressStepper.vue";
@@ -76,7 +94,12 @@
     import ElementsCard from "@components/promptcontent/ElementsCard.vue";
     import AudioCard from "@components/promptcontent/AudioCard.vue";
     import InviteFriendsCard from "@components/promptcontent/InviteFriendsCard.vue";
-
+    import OnboardingActionButton from "@components/OnboardingActionButton.vue";
+    import { PageRoute } from "@shared/PageRoutes";
+    import { CactusElement } from "@shared/models/CactusElement";
+    import PricingModal from "@components/PricingModal.vue";
+    import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
+    import PromptButton from "@components/promptcontent/PromptButton.vue";
 
     export enum CardType {
         text = "text-card",
@@ -100,6 +123,8 @@
 
     @Component({
         components: {
+            PromptButton,
+            ActionButton: OnboardingActionButton,
             ShareNoteCard,
             [CardType.text]: TextCard,
             [CardType.photo]: PhotoCard,
@@ -112,6 +137,8 @@
             [CardType.invite_friends]: InviteFriendsCard,
             [CardType.reflection_analysis]: ReflectionAnalysisCard,
             ProgressStepper,
+            PricingModal,
+            ElementDescriptionModal,
             SvgIcon,
             Modal
         }
@@ -136,6 +163,8 @@
         keyboardNavigationEnabled = true;
         showCloseConfirm = false;
         showShareNote: boolean = false;
+        showPricingModal = false;
+        cactusModalVisible = false;
 
         mounted() {
             this.keyListener = document.addEventListener("keyup", this.handleDocumentKeyUp)
@@ -151,6 +180,10 @@
 
         get supportedCards(): PromptContentCardViewModel[] {
             return this.cards.filter(card => !!this.getCardType(card));
+        }
+
+        get cactusModalElement(): CactusElement | null {
+            return this.cards.find(card => card.element)?.element ?? null;
         }
 
         getCardType(card: PromptContentCardViewModel): CardType | null {
@@ -270,6 +303,31 @@
                 this.previous();
             }
         }
+
+        handleButtonClick(action?: ContentAction | undefined | null) {
+            logger.info("Handling button click", action);
+            if (!action) {
+                return;
+            }
+
+            switch (action) {
+                case ContentAction.showPricing:
+                    this.showPricingModal = true;
+                    break;
+                case ContentAction.next:
+                    this.next();
+                    break;
+                case ContentAction.previous:
+                    this.previous();
+                    break;
+                case ContentAction.complete:
+                    // this.complete();
+                    break;
+                case ContentAction.coreValues:
+                    window.open(`${ PageRoute.CORE_VALUES }`, "_blank");
+                    break;
+            }
+        }
     }
 </script>
 
@@ -282,7 +340,7 @@
         padding-bottom: 15rem;
     }
 
-    .last-card-actions {
+    .card-actions {
         bottom: 0;
         left: 0;
         padding: 2.4rem;

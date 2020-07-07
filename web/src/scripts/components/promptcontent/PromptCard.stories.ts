@@ -1,7 +1,7 @@
 import Vue from "vue";
 import PromptContentCardViewModel from "@components/promptcontent/PromptContentCardViewModel";
 import PromptContentView from "@components/promptcontent/PromptContent.vue";
-import PromptContent, { ContentType } from "@shared/models/PromptContent";
+import PromptContent, { ContentAction, ContentType, LinkStyle, LinkTarget } from "@shared/models/PromptContent";
 import CactusMember from "@shared/models/CactusMember";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
@@ -63,11 +63,31 @@ export const FullStack = () => Vue.extend({
         },
         cards(): PromptContentCardViewModel[] {
             return PromptContentCardViewModel.createMocks([
-                { contentType: ContentType.text, text_md: "Hello **storybook**, nice to see you!" },
+                {
+                    contentType: ContentType.text,
+                    text_md: "Hello **storybook**, nice to see you!",
+                    actionButton: {
+                        action: ContentAction.showPricing,
+                        label: "Show Pricing",
+                        linkStyle: LinkStyle.buttonSecondary
+                    },
+                    link: {
+                        linkLabel: "Get some Tamales",
+                        destinationHref: "https://texaslonestartamales.com/",
+                        linkTarget: LinkTarget.blank,
+                        linkStyle: LinkStyle.buttonPrimary,
+                        appendMemberId: true,
+                    }
+                },
                 {
                     contentType: ContentType.photo,
                     text_md: "This is the second page",
-                    photo: { url: "/assets/images/art.svg" }
+                    photo: { url: "/assets/images/art.svg" },
+                    actionButton: {
+                        action: ContentAction.next,
+                        label: "Action - Go To Next",
+                        linkStyle: LinkStyle.fancyLink
+                    }
                 },
                 {
                     contentType: ContentType.audio,

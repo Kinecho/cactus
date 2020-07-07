@@ -4,6 +4,7 @@
         <div class="audio-container" v-if="card.audio">
             <audio controls :src="card.audio.url"/>
         </div>
+        <slot name="actions"/>
     </div>
 </template>
 

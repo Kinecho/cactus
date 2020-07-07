@@ -48,7 +48,7 @@ export enum ContentAction {
     unknown = "unknown",
 }
 
-enum LinkTarget {
+export enum LinkTarget {
     blank = "_blank",
     self = "_self",
     parent = "_parent",
@@ -405,19 +405,16 @@ export default class PromptContent extends FlamelinkModel {
             content,
             dynamicValues = {}
         } = params;
-        logger.info("Building dynamic text");
         const dynamicContent = content.dynamicContent;
         const enabled = dynamicContent?.enabled === true;
         //if not enabled, return undefined
         if (!dynamicContent || !enabled) {
-            logger.info("Dynamic content was not enabled");
             return undefined;
         }
 
         //if the dynamic content does not have a template string or is blank, return undefined
         const templateTextMd = dynamicContent.templateTextMd
         if (!isString(templateTextMd) || isBlank(templateTextMd)) {
-            logger.info("template text was blank or did not exist");
             return undefined;
         }
 

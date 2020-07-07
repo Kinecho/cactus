@@ -16,6 +16,7 @@
                 </p>
             </div>
         </div>
+        <slot name="actions"/>
     </div>
 </template>
 
@@ -72,6 +73,16 @@
 
         @include r(768) {
             font-size: 1.8rem;
+        }
+    }
+
+    .avatar-container {
+        margin-bottom: 2.4rem;
+
+        img {
+            $avatarSize: 5.6rem;
+            height: $avatarSize;
+            width: $avatarSize;
         }
     }
 

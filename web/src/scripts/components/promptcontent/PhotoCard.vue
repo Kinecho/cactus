@@ -4,6 +4,7 @@
         <div class="photo-container" v-if="card.photo">
             <flamelink-image :image="card.photo"/>
         </div>
+        <slot name="actions"/>
     </div>
 </template>
 
