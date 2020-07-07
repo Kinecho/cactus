@@ -28,14 +28,12 @@
                 </template>
             </component>
         </transition-group>
-        <div class="card-actions">
-            <template v-if="isLastCard">
-                <button class="button actions" @click="closePrompt">Done</button>
-                <button class="button actions tertiary" @click="showShareNote = true" v-if="hasNote">
-                    <svg-icon icon="share"/>
-                    Share Note
-                </button>
-            </template>
+        <div class="last-card-actions" v-if="isLastCard">
+            <button class="button actions" @click="closePrompt">Done</button>
+            <button class="button actions tertiary" @click="showShareNote = true" v-if="hasNote">
+                <svg-icon icon="share"/>
+                Share Note
+            </button>
         </div>
 
         <button aria-label="Previous slide" @click="previous" :disabled="!previousEnabled" class="arrow icon previous tertiary no-loading">
@@ -346,7 +344,7 @@
         padding-bottom: 15rem;
     }
 
-    .card-actions {
+    .last-card-actions {
         bottom: 0;
         left: 0;
         padding: 2.4rem;
