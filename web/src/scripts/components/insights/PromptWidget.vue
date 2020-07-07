@@ -18,6 +18,7 @@
                     {{reflectionText}}
                 </p>
 
+                <router-link v-if="link" :to="link" tag="button">Reflect</router-link>
             </template>
         </template>
     </div>
@@ -34,6 +35,7 @@
     import MarkdownText from "@components/MarkdownText.vue";
     import { getResponseText, preventOrphanedWords } from "@shared/util/StringUtil";
     import FlamelinkImage from "@components/FlamelinkImage.vue";
+    import { PageRoute } from "@shared/PageRoutes";
 
     @Component({
         components: {
@@ -51,6 +53,11 @@
 
         @Prop({ type: Object as () => CactusMember, required: true })
         member!: CactusMember;
+
+        get link(): string | null {
+            const entryId = this.entry?.promptContent?.entryId;
+            return entryId ? `${ PageRoute.PROMPTS_ROOT }/${ this.entry.promptContent?.entryId }` : null
+        }
 
         get hasReflected(): boolean {
             return (this.entry.responses ?? []).length > 0;
