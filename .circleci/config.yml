@@ -387,6 +387,19 @@ jobs:
           include_project_field: false
           ts: "$(date +%s)"
           message: "$CIRCLE_USERNAME has started deploying \\`${CIRCLE_BRANCH}\\` to stage. <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|View Workflow>"
+  branch-deploy-started-prod:
+    executor: cactus-web
+    resource_class: small
+    steps:
+      - run: echo "Notify Feature Branch deploy to prod started"
+      - slack/notify:
+          <<: *webhook-engineering-ci
+          color: 'good'
+          include_job_number_field: false
+          include_visit_job_action: false
+          include_project_field: false
+          ts: "$(date +%s)"
+          message: "$CIRCLE_USERNAME has started deploying \\`${CIRCLE_BRANCH}\\` to prod-alt. <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|View Workflow>"
 
   branch-deploy-finished:
     executor: cactus-web
@@ -714,6 +727,36 @@ workflows:
           filters:
             branches:
               ignore: master
+      - branch_deploy_fe_approval_stage_alt:
+          type: approval
+          name: &stage_alt_fe_approval_name "Approve Hosting To Stage - Branch"
+          requires:
+            - *all_tests_finished
+      - firebase-deploy-some:
+          name: &branch_deploy_only_hosting_name_stage_alt "Deploy Hosting to Stage-Alt"
+          project: "stage"
+          modules: "hosting:webapp:alt"
+          requires:
+            - *stage_alt_fe_approval_name
+      - branch-deploy-started:
+          name: "Notify Prod Backstage Deploy Started"
+          requires:
+            - *branch_deploy_only_hosting_name_stage_alt
+      - branch_deploy_fe_approval_prod_alt:
+          type: approval
+          name: &prod_alt_fe_approval_name "Approve Hosting To Prod-Alt"
+          requires:
+            - *all_tests_finished
+      - firebase-deploy-some:
+          name: &branch_deploy_only_hosting_name_prod_alt "Deploy Hosting Only to Prod-Alt"
+          project: "prod"
+          modules: "hosting:webapp:alt"
+          requires:
+            - *prod_alt_fe_approval_name
+      - branch-deploy-started-prod:
+          name: "Notify Prod Backstage Deploy Started"
+          requires:
+            - *branch_deploy_only_hosting_name_prod_alt
       - branch_deploy_fe_approval:
           type: approval
           name: &stage_fe_approval_name "Approve Hosting Only To Stage"
