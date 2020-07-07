@@ -9,7 +9,7 @@
                     <slot name="actions"/>
                 </div>
             </div>
-            <div class="backgroundImage" v-if="card.backgroundImage" :class="[card.backgroundImage.position]">
+            <div class="backgroundImage" v-if="card.backgroundImage">
                 <flamelink-image :image="card.backgroundImage"/>
             </div>
         </div>
@@ -77,28 +77,16 @@
         margin-bottom: 5.6rem;
 
         @include r(960) {
+            flex-grow: 1;
             margin-bottom: 0;
             padding-right: 6.4rem;
             width: 66%;
         }
     }
 
-    // Not sure that this selector is used. Feel free to change.
-    .image {
+    .backgroundImage {
         height: auto;
         width: 100%;
-
-        @include r(960) {
-            align-self: center;
-            max-width: 33%;
-        }
-    }
-
-    // Copied from LegacyPromptContentCard.vue
-    .backgroundImage {
-        &:empty {
-            display: none;
-        }
 
         @include r(600) {
             display: flex;
@@ -107,14 +95,12 @@
             order: 1;
             position: static;
         }
-
-        &.top {
-            margin-top: -2.4rem;
+        @include r(960) {
+            max-width: 33%;
         }
 
-        &.bottom {
-            align-items: flex-end;
-            margin: 0 -2.4rem -4rem;
+        &:empty {
+            display: none;
         }
 
         img {
