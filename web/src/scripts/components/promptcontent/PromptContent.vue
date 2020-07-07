@@ -340,10 +340,6 @@
     @import "variables";
     @import "mixins";
 
-    .isLastCard {
-        padding-bottom: 15rem;
-    }
-
     .last-card-actions {
         bottom: 0;
         left: 0;
@@ -391,13 +387,14 @@
         position: relative;
         transition: background-position 1s, background-color 1s;
         width: 100%;
-        flex-direction: column;
+
         @include r(374) {
             font-size: 2.4rem;
         }
         @include r(600) {
             align-items: center;
             display: flex;
+            flex-direction: column;
         }
         @include r(768) {
             font-size: 3.2rem;
@@ -418,6 +415,7 @@
     .card-container {
         position: relative;
         width: 100vw;
+ 
         @include r(600) {
             align-items: center;
             display: flex;
@@ -488,4 +486,17 @@
         background-color: $lightDolphin;
         padding: 2rem;
     }
+
+    .isLastCard {
+        background-color: lighten($green, 20%);
+
+        @include r(600) {
+            justify-content: center;
+
+            .card-container {
+                flex-grow: 0;
+            }
+        }
+    }
+
 </style>
