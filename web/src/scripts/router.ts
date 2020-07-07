@@ -66,13 +66,25 @@ const routes: MetaRouteConfig[] = [
     {
         component: () => lazyLoadView(import(
         /* webpackPrefetch: true, webpackPreload: true, webpackChunkName: "pages" */
-        "@components/JournalHome.vue"
+        "@web/views/InsightsPage.vue"
         )),
-        path: PageRoute.JOURNAL_HOME,
+        path: PageRoute.MEMBER_HOME,
+        alias: PageRoute.INSIGHTS,
         name: "Home",
         meta: {
-            title: "Journal | Home",
+            title: "Home | Cactus",
             description: "See yourself and the world more positively. Questions to help you become more mindful and reflect on what makes you happy."
+        }
+    },
+    {
+        component: () => lazyLoadView(import(
+        /* webpackPrefetch: true, webpackPreload: true, webpackChunkName: "pages" */
+        "@components/JournalHome.vue"
+        )),
+        path: PageRoute.JOURNAL,
+        name: "Journal",
+        meta: {
+            title: "Journal | Cactus",
         }
     },
     {
@@ -274,12 +286,12 @@ const routes: MetaRouteConfig[] = [
         name: "Sign up",
         path: PageRoute.SIGNUP_CONFIRMED,
     },
-    {
-        component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
-        "@web/views/InsightsPage.vue")),
-        name: "Insights",
-        path: PageRoute.INSIGHTS,
-    },
+    // {
+    //     component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
+    //     "@web/views/InsightsPage.vue")),
+    //     name: "Insights",
+    //     path: PageRoute.INSIGHTS,
+    // },
     {
         component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
         "@web/views/OnboardingPage.vue")),

@@ -19,7 +19,7 @@
     })
     export default class PromptContentPage extends Vue {
         async redirectToJournal() {
-            await pushRoute({ path: PageRoute.JOURNAL_HOME });
+            await pushRoute({ path: PageRoute.MEMBER_HOME });
         }
     }
 </script>

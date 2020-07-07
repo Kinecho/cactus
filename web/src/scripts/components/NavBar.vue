@@ -22,27 +22,19 @@
                 </router-link>
             </div>
             <div class="navContainer" v-if="loggedIn && showLinks">
-                <router-link class="navbarLink home" :to="journalHref" v-if="loggedIn">
-                    <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Home to My
-                        Journal</title>
+                <router-link class="navbarLink home" :to="memberHomeHref" v-if="loggedIn">
+                    <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Home</title>
                         <path fill="#07454C" d="M5 23a3 3 0 01-3-3V9a1 1 0 01.386-.79l9-7a1 1 0 011.228 0l9 7A1 1 0 0122 9v11a3 3 0 01-3 3H5zm7-19.733L4 9.489V20a1 1 0 001 1h3v-9a1 1 0 01.883-.993L9 11h6a1 1 0 011 1v9h3a1 1 0 001-1V9.49l-8-6.223zM14 13h-4v8h4v-8z"/>
                     </svg>
                     <span class="navLabel">{{copy.navigation.HOME}}</span>
                 </router-link>
-                <!--        Activity        -->
-                <!-- <router-link class="navbarLink" :to="socialHref" v-if="loggedIn">
-                    <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Activity</title>
-                        <path fill="#07454C" d="M15 17.838L9.949 2.684c-.304-.912-1.594-.912-1.898 0L5.28 11H2a1 1 0 000 2h4a1 1 0 00.949-.684L9 6.162l5.051 15.154c.304.912 1.594.912 1.898 0L18.72 13H22a1 1 0 000-2h-4a1 1 0 00-.949.684L15 17.838z"/>
+                <router-link class="navbarLink" :to="journalHref" v-if="loggedIn">
+                    <svg class="navIcon journal" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 22">
+                        <title>Journal</title>
+                        <path fill="#07454C" d="M7.636 0c1.785 0 3.37.857 4.365 2.182A5.44 5.44 0 0116.364 0h6.545C23.512 0 24 .488 24 1.09v16.365a1.09 1.09 0 01-1.09 1.09h-7.637a2.182 2.182 0 00-2.177 2.026l-.005.156c0 1.455-2.182 1.455-2.182 0a2.182 2.182 0 00-2.182-2.182H1.091A1.09 1.09 0 010 17.455V1.09C0 .488.488 0 1.09 0h6.546zm0 2.182H2.182v14.182h6.545c.696 0 1.353.162 1.937.452l.245.131V5.455a3.273 3.273 0 00-3.273-3.273zm14.182 0h-5.454a3.273 3.273 0 00-3.273 3.273v11.492a4.344 4.344 0 012.182-.583h6.545V2.182zM7.636 12.545a1.09 1.09 0 010 2.182H4.364a1.09 1.09 0 110-2.182zm1.091-4.363a1.09 1.09 0 110 2.182H4.364a1.09 1.09 0 010-2.182zm-1.09-4.364a1.09 1.09 0 010 2.182H4.363a1.09 1.09 0 110-2.182z"/>
                     </svg>
-                    <span class="navLabel">{{copy.navigation.ACTIVITY}}</span>
-                    <span class="badge" v-if="activityBadgeCount > 0" data-test="badge">{{activityBadgeCount}}</span>
-                </router-link> -->
-                <!-- INSIGHTS      -->
-                <router-link class="navbarLink" :to="insightsHref" v-if="loggedIn">
-                    <svg class="navIcon pie" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><title>Insights</title>
-                        <path fill="#07454C" d="M6.601.913a1 1 0 01.8 1.834A9 9 0 1019.29 14.5a1 1 0 011.842.778A11 11 0 116.601.913zm4.4-.913a11 11 0 0111 11 1 1 0 01-1 1h-10a1 1 0 01-1-1V1a1 1 0 011-1zm1 2.056V10h7.944a9 9 0 00-7.944-7.944z"/>
-                    </svg>
-                    <span class="navLabel">{{copy.navigation.INSIGHTS}}</span>
+
+                    <span class="navLabel">{{copy.navigation.JOURNAL}}</span>
                 </router-link>
                 <dropdown-menu :items="links" v-if="loggedIn" :displayName="displayName" :email="email">
                     <div class="navbar-avatar-container" slot="custom-button">
@@ -78,6 +70,7 @@
     import Logger from "@shared/Logger";
     import { isPremiumTier, subscriptionTierDisplayName } from "@shared/models/MemberSubscription";
     import { pushRoute } from "@web/NavigationUtil";
+    import SvgIcon from "@components/SvgIcon.vue";
 
     const logger = new Logger("NavBar.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -100,6 +93,7 @@
             'click-outside': clickOutsideDirective(),
         },
         components: {
+            SvgIcon,
             DropdownMenu,
         },
         beforeMount() {
@@ -207,7 +201,7 @@
                 return `${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ this.loginRedirectUrl || window.location.href }`;
             },
             logoHref(): string {
-                return this.loggedIn ? PageRoute.JOURNAL_HOME : PageRoute.HOME;
+                return this.loggedIn ? PageRoute.MEMBER_HOME : PageRoute.HOME;
             },
             isPaidTier(): boolean {
                 return isPremiumTier(this.member?.tier);
@@ -221,8 +215,11 @@
             assessmentHref(): string {
                 return PageRoute.GAP_ANALYSIS;
             },
+            memberHomeHref(): string {
+                return PageRoute.MEMBER_HOME;
+            },
             journalHref(): string {
-                return PageRoute.JOURNAL_HOME;
+                return PageRoute.JOURNAL;
             },
             // socialHref(): string {
             //     return PageRoute.SOCIAL;
@@ -415,6 +412,10 @@
 
             @include r(600) {
                 display: none;
+            }
+
+            path {
+                fill: #07454C;
             }
         }
 

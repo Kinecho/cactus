@@ -218,7 +218,7 @@
 
         async closeOnboarding(force: boolean = false) {
             if (this.showCloseConfirm || force) {
-                await pushRoute(PageRoute.JOURNAL_HOME);
+                await pushRoute(PageRoute.MEMBER_HOME);
                 return;
             }
             this.showCloseConfirm = true;

@@ -38,7 +38,7 @@
                 if (user) {
                     logger.info("Welcome page, user is logged in, sending them home");
                     // await pushRoute(PageRoute.JOURNAL_HOME);
-                    window.location.href = PageRoute.JOURNAL_HOME;
+                    window.location.href = PageRoute.MEMBER_HOME;
                 }
                 this.authLoaded = true;
             })

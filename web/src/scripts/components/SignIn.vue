@@ -170,7 +170,7 @@
             setupAuthUi() {
                 this.firebaseUiLoading = true;
                 const ui = getAuthUI();
-                let emailLinkSignInPath = this.redirectUrl || redirectUrlParam || PageRoute.JOURNAL_HOME;
+                let emailLinkSignInPath = this.redirectUrl || redirectUrlParam || PageRoute.MEMBER_HOME;
                 logger.info("SignIn.vue emailLinkSignInPath = ", emailLinkSignInPath);
                 logger.info("SignIn.vue signInSuccessPath = ", emailLinkSignInPath);
                 let includeEmailLink = false;
@@ -184,7 +184,7 @@
                 const config = getAuthUIConfig({
                     includeEmailLink,
                     includeTwitter: this.twitterEnabled,
-                    signInSuccessPath: this.redirectUrl || redirectUrlParam || PageRoute.JOURNAL_HOME,
+                    signInSuccessPath: this.redirectUrl || redirectUrlParam || PageRoute.MEMBER_HOME,
                     emailLinkSignInPath, //Note: normal magic link is handled in signupEndpoints.ts. This is for the special case of federated login connecting to an existing magic link acct.
                     signInSuccess: (authResult, redirectUrl) => {
                         this.isSigningIn = true;
@@ -245,7 +245,7 @@
                         }
 
                         if (this.redirectOnSignIn) {
-                            await pushRoute(this.pendingRedirectUrl || PageRoute.JOURNAL_HOME)
+                            await pushRoute(this.pendingRedirectUrl || PageRoute.MEMBER_HOME)
                         }
                     }
                 }

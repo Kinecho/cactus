@@ -21,7 +21,7 @@
         name = "OnboardingCelebrateCard";
 
         get homeHref(): string {
-            return PageRoute.JOURNAL_HOME;
+            return PageRoute.MEMBER_HOME;
         }
     }
 </script>

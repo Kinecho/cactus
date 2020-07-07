@@ -28,7 +28,7 @@
         },
         data(): { signUpUrl: string } {
             return {
-                signUpUrl: PageRoute.JOURNAL_HOME,
+                signUpUrl: PageRoute.MEMBER_HOME,
             }
 
         }

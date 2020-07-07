@@ -91,7 +91,7 @@
                     redirectUrl = appendQueryParams(redirectUrl, { memberId: member.id });
                 }
 
-                await pushRoute(redirectUrl || PageRoute.JOURNAL_HOME);
+                await pushRoute(redirectUrl || PageRoute.MEMBER_HOME);
             },
             async handleResponse(response: EmailLinkSignupResult) {
                 if (response.credential) {
@@ -113,7 +113,7 @@
                             redirectUrl = appendQueryParams(redirectUrl, { memberId: member.id });
                         }
 
-                        await pushRoute(redirectUrl || PageRoute.JOURNAL_HOME);
+                        await pushRoute(redirectUrl || PageRoute.MEMBER_HOME);
                     }
 
                     return;
