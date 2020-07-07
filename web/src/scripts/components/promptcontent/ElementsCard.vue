@@ -46,7 +46,7 @@
             padding: 0 2.4rem;
         }
 
-        @include r(600) {
+        @include r(768) {
             align-items: center;
             flex-direction: row;
             justify-content: flex-start;
@@ -55,7 +55,7 @@
     }
 
     .textBox {
-        @include r(600) {
+        @include r(768) {
             padding-right: 6.4rem;
             width: 50%;
         }
@@ -65,7 +65,7 @@
         margin: 0 -2.4rem;
         width: calc(100% + 4.8rem);
 
-        @include r(600) {
+        @include r(768) {
             align-self: center;
             margin: 0 auto;
             max-width: 50%;
