@@ -483,17 +483,13 @@
                 this.pricingModalVisible = false;
             },
             async updatePendingActiveIndex(reflection?: ReflectionResponse) {
-                logger.log("Update pending active index");
                 if (reflection && !isBlank(reflection.content.text) && this.pendingActiveIndex !== undefined) {
                     if (this.promptContent && this.promptContent.content.length > 0) {
-                        logger.log("Setting active index in pending active index method");
                         this.activeIndex = Math.min(this.promptContent.content.length, this.pendingActiveIndex);
                     }
                 } else if (!this.completed) {
                     updateQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
                 }
-
-
             },
             updateDocumentMeta() {
                 logger.info("Prompt content updating meta");
