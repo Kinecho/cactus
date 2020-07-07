@@ -19,7 +19,7 @@
     .share-warning {
         align-items: center;
         display: flex;
-        padding: .8rem 1.6rem;
+        margin: -3.2rem 0 4rem;
 
         .shareText {
             font-size: 1.6rem;
