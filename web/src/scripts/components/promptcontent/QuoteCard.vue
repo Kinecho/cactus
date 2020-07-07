@@ -5,9 +5,9 @@
                 <markdown-text :source="card.quote.text" v-if="card.quote.text" treatment="quote"/>
             </div>
             <div class="author">
-                <div class="avatar-container" v-if="card.quote.avatar">
+                <!-- <div class="avatar-container" v-if="card.quote.avatar">
                     <flamelink-image v-bind:image="card.quote.avatar" :width="60"/>
-                </div>
+                </div> -->
                 <strong>
                     <markdown-text :source="card.quote.authorName" v-if="card.quote.authorName"/>
                 </strong>
@@ -15,13 +15,10 @@
                     <markdown-text :source="card.quote.authorTitle" v-if="card.quote.authorTitle"/>
                 </p>
             </div>
-
             <div class="actions">
                 <slot name="actions"/>
             </div>
         </div>
-
-
     </div>
 </template>
 
@@ -57,6 +54,7 @@
 
     .quote-card {
         padding: 0 .8rem;
+   
         @include r(374) {
             margin: 0 auto;
             max-width: 48rem;
@@ -74,6 +72,7 @@
 
     .author {
         font-size: 1.6rem;
+
         @include r(768) {
             font-size: 1.8rem;
         }
@@ -81,18 +80,6 @@
 
     .byline {
         opacity: .8;
-    }
-
-    .actions {
-        &:empty {
-            display: none;
-        }
-
-        font-size: 2rem;
-
-        > * {
-            margin-bottom: 1rem;
-        }
     }
 
 </style>
