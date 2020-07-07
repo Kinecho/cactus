@@ -40,17 +40,16 @@
         flex-direction: column;
         justify-content: center;
         min-height: 80vh;
-        padding: 0 .8rem;
+        padding: 0 3.2rem;
 
         @include r(374) {
-            padding: 0 2.4rem;
+            padding: 0 5.6rem;
         }
-
         @include r(768) {
             align-items: center;
             flex-direction: row;
             justify-content: flex-start;
-            padding: 0 6.4rem;
+            padding: 0 9.6rem;
         }
     }
 

@@ -53,16 +53,16 @@
     @import "mixins";
 
     .quote-card {
-        padding: 0 .8rem;
+        padding: 0 3.2rem;
    
         @include r(374) {
             margin: 0 auto;
             max-width: 48rem;
-            padding: 0 2.4rem;
+            padding: 0 5.6rem;
         }
         @include r(768) {
             max-width: none;
-            padding: 0 6.4rem;
+            padding: 0 9.6rem;
         }
     }
 

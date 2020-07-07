@@ -43,7 +43,11 @@
 
     .photo-container {
         margin: 4rem 1.6rem 1.6rem;
+        padding: 0 2.4rem;
 
+        @include r(374) {
+            padding: 0 3.2rem;
+        }
         @include r(768) {
             margin: 0 0 1.6rem;
         }
