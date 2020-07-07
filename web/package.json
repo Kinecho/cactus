@@ -6,7 +6,9 @@
   "repository": "https://github.com/Kinecho/cactus",
   "scripts": {
     "build:deploy": "npm run clean && npm run logo && NODE_ENV=production NODE_OPTIONS=--max_old_space_size=6000 webpack --config webpack/webpack.deploy.config.js",
+    "build:deploy:alt": "npm run clean && npm run logo && NODE_ENV=production NODE_OPTIONS=--max_old_space_size=6000 webpack --config webpack/webpack.deploy-alt.config.js",
     "build:firebase": "npm run build:deploy && npm run copy",
+    "build:firebase:alt": "npm run build:deploy:alt && npm run copy",
     "build:prod": "npm run logo && GCLOUD_PROJECT=cactus-app-prod NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack/webpack.deploy.config.js --progress",
     "build:embeds": "npm run logo && npm run clean && GCLOUD_PROJECT=cactus-app-prod NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack/webpack.embeds.js --progress",
     "embeds:watch": "npm run logo && npm run clean && GCLOUD_PROJECT=cactus-app-prod NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack/webpack.embeds.js --progress --watch",

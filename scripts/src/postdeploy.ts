@@ -20,25 +20,33 @@ import AdminSlackService, { ChannelName, ChatMessage } from "@admin/services/Adm
     if (resource.toLowerCase().trim().includes("hosting") && !resource.toLowerCase().includes("storybook")) {
         isHosting = true;
     }
+    const isAlt = isHosting && resource.includes("alt");
+
     console.log("is hosting deploy: ", isHosting);
 
     AdminSlackService.initialize(config);
 
     if (isProd && isHosting) {
+        const appName = isAlt ? "Prod-Backstage" : "Prod"
+        const url = isAlt ? "https://cactus-app-prod-alt.web.app" : "https://cactus.app";
+
         const message: ChatMessage = {
             text: "",
             attachments: [{
-                text: `:white_check_mark: *Prod* has been updated. <https://cactus.app|Check it out>.`,
+                text: `:white_check_mark: *${ appName }* has been updated. <${ url }|Check it out>.`,
                 color: "good",
                 ts: `${ (new Date()).getTime() / 1000 }`
             }],
         };
         await AdminSlackService.getSharedInstance().sendGeneralMessage(message);
     } else if (isHosting) {
+        const appName = isAlt ? "Stage - Feature Branch" : "Stage"
+        const url = isAlt ? "https://cactus-app-stage-alt.web.app" : "https://cactus-app-stage.web.app";
+        const emoji = isAlt ? ":fire:" : ""
         const message: ChatMessage = {
             text: "",
             attachments: [{
-                text: `*Stage* has been updated. <https://cactus-app-stage.web.app|Check it out>.`,
+                text: `${ emoji } *${ appName }* has been updated. <${ url }|Check it out>.`.trim(),
                 ts: `${ (new Date()).getTime() / 1000 }`
             }],
         };
