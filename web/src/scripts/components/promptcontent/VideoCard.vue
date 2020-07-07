@@ -3,6 +3,7 @@
         <markdown-text :source="card.text" v-if="card.text"/>
         <div class="video-container" v-if="card.video">
             <div v-if="card.video.youtubeVideoId" class="iframe-wrapper">
+                <spinner v-if="youtubeVideoLoading" message="Loading video..."/>
                 <iframe @load="youtubeVideoLoading = false"
                         width="320"
                         height="203"

@@ -3,9 +3,15 @@
         <div class="text-card">
             <div class="textBox">
                 <slot name="element"/>
+                <h4 class="label" v-if="card.content.label">{{card.content.label}}</h4>
+                <h2 class="title" v-if="card.content.title">{{card.content.title}}</h2>
                 <markdown-text :source="text" v-if="text"/>
                 <slot name="actions"/>
             </div>
+            <div class="backgroundImage" v-if="card.backgroundImage" :class="[card.backgroundImage.position]">
+                <flamelink-image :image="card.backgroundImage"/>
+            </div>
+
         </div>
     </div>
 </template>
@@ -16,10 +22,12 @@
     import PromptContentCardViewModel from "@components/promptcontent/PromptContentCardViewModel";
     import MarkdownText from "@components/MarkdownText.vue";
     import { Prop } from "vue-property-decorator";
+    import FlamelinkImage from "@components/FlamelinkImage.vue";
 
     @Component({
         components: {
-            MarkdownText
+            MarkdownText,
+            FlamelinkImage,
         }
     })
     export default class TextCard extends Vue {
@@ -74,6 +82,7 @@
         }
     }
 
+    // Not sure that this selector is used. Feel free to change.
     .image {
         height: auto;
         width: 100%;
@@ -83,4 +92,35 @@
             max-width: 33%;
         }
     }
+
+    // Copied from LegacyPromptContentCard.vue
+    .backgroundImage {
+        &:empty {
+            display: none;
+        }
+
+        @include r(600) {
+            display: flex;
+            justify-content: center;
+            max-height: none;
+            order: 1;
+            position: static;
+        }
+
+        &.top {
+            margin-top: -2.4rem;
+        }
+
+        &.bottom {
+            align-items: flex-end;
+            margin: 0 -2.4rem -4rem;
+        }
+
+        img {
+            height: auto;
+            max-height: 35rem;
+            max-width: 100%;
+        }
+    }
+
 </style>
