@@ -1,8 +1,8 @@
 <template>
-    <div v-if="isVisible">
+    <div v-if="isVisible" :class="stacked ? 'stacked' : 'inline'">
         <a class="element-container" @click.prevent="showModal">
             <ElementAnimation :element="card.element" v-if="animated"/>
-            <img :src="imageUrl" :alt="label" v-else/>
+            <img class="elementSvg" :src="imageUrl" :alt="label" v-else/>
             <h4 class="label" v-if="showLabel">{{label}}</h4>
         </a>
         <element-description-modal
@@ -39,6 +39,9 @@
         animated!: boolean;
 
         @Prop({ type: Boolean, default: true })
+        stacked!: boolean;
+
+        @Prop({ type: Boolean, default: true })
         showLabel!: boolean;
 
         modalVisible = false;
@@ -73,12 +76,31 @@
 
     .element-container {
         cursor: pointer;
-        text-align: center;
-        display: inline-block;
+
+        .stacked & {
+            text-align: center;
+            display: inline-block;
+        }
+
+        .inline & {
+            align-items: center;
+            display: flex;
+            margin-bottom: 1.6rem;
+        }
+    }
+
+    .elementSvg {
+        .inline & {
+            height: 4rem;
+            width: 4rem;
+        }
     }
 
     .label {
         color: $darkestGreen;
-        margin-bottom: 1.6rem;
+
+        .stacked & {
+            margin-bottom: 1.6rem;
+        }
     }
 </style>

@@ -20,7 +20,7 @@
                     @previous="previous"
             >
                 <template v-slot:element>
-                    <card-element :card="card" :animated="false"/>
+                    <card-element :card="card" :animated="false" :stacked="false"/>
                 </template>
                 <template v-slot:actions>
                     <prompt-button :button="card.content.actionButton" @next="next" @previous="previous" @complete="closePrompt"/>
