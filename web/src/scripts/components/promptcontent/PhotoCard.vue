@@ -3,9 +3,8 @@
         <div class="photo-container" v-if="card.photo">
             <flamelink-image :image="card.photo"/>
         </div>
-        <div class="caption">
-            caption caption caption caption caption caption caption caption caption caption caption
-            <markdown-text :source="card.text" v-if="card.text"/>
+        <div class="caption" v-if="card.text">
+            <markdown-text :source="card.text"/>
         </div>
         <div class="actions">
             <slot name="actions"/>
@@ -62,18 +61,7 @@
     }
 
     .caption {
-        font-size: 1.6rem;
-        margin: 0 1.6rem 4rem;
         max-width: 56rem;
-        opacity: .8;
-
-        @include r(768) {
-            margin: 0 auto 4rem;
-        }
-
-        &:empty {
-            display: none;
-        }
     }
 
     .actions {

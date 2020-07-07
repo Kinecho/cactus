@@ -30,3 +30,13 @@
         display: none;
     }
 }
+
+.caption {
+    font-size: 1.6rem;
+    margin: 0 1.6rem 4rem;
+    opacity: .8;
+
+    @include r(768) {
+        margin: 0 auto 4rem;
+    }
+}

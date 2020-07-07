@@ -1,6 +1,5 @@
 <template>
     <div class="prompt-content-card">
-        <markdown-text :source="card.text" v-if="card.text"/>
         <div class="video-container" v-if="card.video">
             <div v-if="card.video.youtubeVideoId" class="iframe-wrapper">
                 <spinner v-if="youtubeVideoLoading" message="Loading video..."/>
@@ -15,6 +14,11 @@
             <div v-if="card.video.url">
                 <video :src="card.video.url" controls></video>
             </div>
+        </div>
+        <div class="caption" v-if="card.text">
+            <markdown-text :source="card.text"/>
+        </div>
+        <div class="actions">
             <slot name="actions"/>
         </div>
     </div>
@@ -55,9 +59,13 @@
     @import "prompts";
 
     .video-container {
-        border-radius: 4px;
-        margin-top: 4rem;
+        border-radius: .4rem;
+        margin: 4rem 1.6rem 1.6rem;
         overflow: hidden;
+
+        @include r(768) {
+            margin: 0 0 1.6rem;
+        }
 
         .iframe-wrapper {
             position: relative;
@@ -84,6 +92,12 @@
                 height: 100%;
                 z-index: 2;
             }
+        }
+    }
+
+    .actions {
+        @include r(600) {
+            justify-content: center;
         }
     }
 
