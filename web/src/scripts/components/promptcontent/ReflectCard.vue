@@ -19,6 +19,7 @@
                     />
                 </resizable-textarea>
             </transition>
+            <share-warning v-if="card.noteShared"/>
             <button v-if="responseText" class="doneBtn icon no-loading" @click="saveAndContinue" :disabled="saving">
                 <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">
                     <path fill="#fff" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/>
@@ -45,11 +46,13 @@
     import Logger from "@shared/Logger"
     import { getDeviceDimensions } from "@web/DeviceUtil";
     import { debounce } from "debounce";
+    import ShareWarning from "@components/promptcontent/ShareWarning.vue";
 
     const logger = new Logger("ReflectCard");
 
     @Component({
         components: {
+            ShareWarning,
             ElementAnimation,
             MarkdownText,
             ResizableTextarea,

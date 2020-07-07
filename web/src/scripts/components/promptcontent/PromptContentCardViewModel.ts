@@ -61,6 +61,10 @@ export default class PromptContentCardViewModel {
         })
     }
 
+    get noteShared(): boolean {
+        return this.responses?.some(r => r.shared) ?? false;
+    }
+
     get photo(): Image | undefined | null {
         return isImage(this.content.photo) ? this.content.photo : null;
     }

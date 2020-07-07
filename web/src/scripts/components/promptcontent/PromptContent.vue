@@ -20,7 +20,7 @@
                     @previous="previous"
             >
                 <template v-slot:element>
-                    <card-element :card="card"/>
+                    <card-element :card="card" :animated="true"/>
                 </template>
                 <template v-slot:actions>
                     <prompt-button :button="card.content.actionButton" @next="next" @previous="previous" @complete="closePrompt"/>
@@ -94,7 +94,6 @@
     import InviteFriendsCard from "@components/promptcontent/InviteFriendsCard.vue";
     import OnboardingActionButton from "@components/OnboardingActionButton.vue";
     import { PageRoute } from "@shared/PageRoutes";
-    import { CactusElement } from "@shared/models/CactusElement";
     import PricingModal from "@components/PricingModal.vue";
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
     import PromptButton from "@components/promptcontent/PromptButton.vue";
@@ -140,7 +139,8 @@
             PricingModal,
             ElementDescriptionModal,
             SvgIcon,
-            Modal
+            Modal,
+
         }
     })
     export default class PromptView extends Vue {

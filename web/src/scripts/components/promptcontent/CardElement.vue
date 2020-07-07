@@ -1,8 +1,9 @@
 <template>
     <div v-if="isVisible">
         <a class="element-container" @click.prevent="showModal">
-            <img :src="imageUrl" :alt="label"/>
-            <h4 class="label">{{label}}</h4>
+            <ElementAnimation :element="card.element" v-if="animated"/>
+            <img :src="imageUrl" :alt="label" v-else/>
+            <h4 class="label" v-if="showLabel">{{label}}</h4>
         </a>
         <element-description-modal
                 :cactusElement="card.element"
@@ -19,10 +20,13 @@
     import PromptContentCardViewModel from "@components/promptcontent/PromptContentCardViewModel";
     import { Prop } from "vue-property-decorator";
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
+    import ElementAnimation from "@components/elements/animations/ElementAnimation.vue";
+
 
     @Component({
         components: {
-            ElementDescriptionModal
+            ElementDescriptionModal,
+            ElementAnimation,
         }
     })
     export default class CardElement extends Vue {
@@ -30,6 +34,12 @@
 
         @Prop({ type: Object as () => PromptContentCardViewModel, required: true })
         card!: PromptContentCardViewModel;
+
+        @Prop({ type: Boolean, default: false })
+        animated!: boolean;
+
+        @Prop({ type: Boolean, default: true })
+        showLabel!: boolean;
 
         modalVisible = false;
 

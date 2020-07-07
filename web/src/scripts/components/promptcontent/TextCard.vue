@@ -28,6 +28,7 @@
         components: {
             MarkdownText,
             FlamelinkImage,
+
         }
     })
     export default class TextCard extends Vue {
