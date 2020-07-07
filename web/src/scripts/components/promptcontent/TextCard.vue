@@ -104,6 +104,7 @@
         }
 
         img {
+            align-self: center;
             height: auto;
             max-height: 35rem;
             max-width: 100%;

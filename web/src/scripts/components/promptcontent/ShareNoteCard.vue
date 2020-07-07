@@ -160,19 +160,22 @@
     }
 
     .sharing {
-        display: flex;
-        justify-content: center;
 
         button {
             align-items: center;
             display: flex;
             flex-grow: 0;
             justify-content: center;
-            margin-top: 1.6rem;
-            width: auto;
+            margin-top: 3.2rem;
+            width: 100%;
 
             @include r(600) {
-                width: 50%;
+                margin-top: 1.6rem;
+                width: auto;
+            }
+
+            &:hover {
+                background-color: $white;
             }
         }
 
