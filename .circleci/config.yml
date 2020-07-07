@@ -744,7 +744,7 @@ workflows:
           requires:
             - *stage_alt_fe_approval_name
       - branch-deploy-started:
-          name: "Notify Stage Backstage Deploy Started"
+          name: "Notify Stage-Alt Deploy Started"
           target: "Stage - Feature Branch"
           requires:
             - *branch_deploy_only_hosting_name_stage_alt
@@ -760,7 +760,7 @@ workflows:
           requires:
             - *prod_alt_fe_approval_name
       - branch-deploy-started-prod:
-          name: "Notify Prod Backstage Deploy Started"
+          name: "Notify Prod-Alt Deploy Started"
           requires:
             - *branch_deploy_only_hosting_name_prod_alt
       - branch_deploy_fe_approval:
