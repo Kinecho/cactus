@@ -778,7 +778,6 @@ workflows:
           name: "Notify FE Finished"
           requires:
             - *branch_deploy_only_hosting_name
-            - *stage_fe_approval_name
       - branch_deploy_all_approval:
           type: approval
           name: &stage_all_approval_name "Approve All To Stage"
