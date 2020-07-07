@@ -4,10 +4,7 @@
         <div class="photo-container" v-if="card.photo">
             <flamelink-image :image="card.photo"/>
         </div>
-        <div class="actions">
-            <slot name="actions"/>
-        </div>
-
+        <slot name="actions"/>
     </div>
 </template>
 
@@ -41,17 +38,18 @@
     @import "prompts";
 
     .photo-container {
-        margin-top: 4rem;
-        margin-bottom: 2rem;
-        img {
-            border-radius: 4px;
-            display: block;
-            max-width: 54rem;
-            margin: 0 auto; /* center smaller image in card */
-        }
-    }
+        margin: 4rem 1.6rem;
 
-    .actions {
-        text-align: center;
+        @include r(600) {
+            margin: 0 0 4rem;
+        }
+
+        img {
+            border-radius: .4rem;
+            display: block;
+            margin: 0 auto; /* center smaller image in card */
+            max-width: 56rem;
+            width: 100%;
+        }
     }
 </style>
