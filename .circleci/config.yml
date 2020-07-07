@@ -376,6 +376,11 @@ jobs:
           message: "$CIRCLE_USERNAME has promoted a Stage Build. <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|View Workflow>"
   branch-deploy-started:
     executor: cactus-web
+    parameters:
+      target:
+        type: string
+        description: The name of the project being deployed
+        default: "stage"
     resource_class: small
     steps:
       - run: echo "Notify Feature Branch deploy started"
@@ -386,7 +391,7 @@ jobs:
           include_visit_job_action: false
           include_project_field: false
           ts: "$(date +%s)"
-          message: "$CIRCLE_USERNAME has started deploying \\`${CIRCLE_BRANCH}\\` to stage. <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|View Workflow>"
+          message: "$CIRCLE_USERNAME has started deploying \\`${CIRCLE_BRANCH}\\` to <<parameters.target>>. <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|View Workflow>"
   branch-deploy-started-prod:
     executor: cactus-web
     resource_class: small
@@ -729,7 +734,7 @@ workflows:
               ignore: master
       - branch_deploy_fe_approval_stage_alt:
           type: approval
-          name: &stage_alt_fe_approval_name "Approve Hosting To Stage - Branch"
+          name: &stage_alt_fe_approval_name "Approve FE To Stage - Branch"
           requires:
             - *all_tests_finished
       - firebase-deploy-some:
@@ -739,7 +744,8 @@ workflows:
           requires:
             - *stage_alt_fe_approval_name
       - branch-deploy-started:
-          name: "Notify Prod Backstage Deploy Started"
+          name: "Notify Stage Backstage Deploy Started"
+          target: "Stage - Feature Branch"
           requires:
             - *branch_deploy_only_hosting_name_stage_alt
       - branch_deploy_fe_approval_prod_alt:
@@ -748,7 +754,7 @@ workflows:
           requires:
             - *all_tests_finished
       - firebase-deploy-some:
-          name: &branch_deploy_only_hosting_name_prod_alt "Deploy Hosting Only to Prod-Alt"
+          name: &branch_deploy_only_hosting_name_prod_alt "Deploy FE to Prod-Alt"
           project: "prod"
           modules: "hosting:webapp:alt"
           requires:
@@ -763,7 +769,7 @@ workflows:
           requires:
             - *all_tests_finished
       - firebase-deploy-some:
-          name: &branch_deploy_only_hosting_name "Deploy Hosting Only to Stage"
+          name: &branch_deploy_only_hosting_name "Deploy FE to Stage"
           project: "stage"
           modules: "hosting,firestore:rules,firestore:indexes"
           requires:
