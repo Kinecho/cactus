@@ -1,5 +1,5 @@
 import { getCactusConfig, Project } from "@scripts/config";
-import AdminSlackService, { ChatMessage } from "@admin/services/AdminSlackService";
+import AdminSlackService, { ChannelName, ChatMessage } from "@admin/services/AdminSlackService";
 
 (async () => {
     const projectId = process.env.GCLOUD_PROJECT;
@@ -42,6 +42,6 @@ import AdminSlackService, { ChatMessage } from "@admin/services/AdminSlackServic
                 ts: `${ (new Date()).getTime() / 1000 }`
             }],
         };
-        await AdminSlackService.getSharedInstance().sendGeneralMessage(message);
+        await AdminSlackService.getSharedInstance().sendArbitraryMessage(ChannelName.general, message);
     }
 })().then(() => console.log("Done")).catch(e => console.error("Failed to execute slack command", e));

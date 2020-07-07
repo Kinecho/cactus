@@ -19,8 +19,7 @@ export function createParagraphs(params: { text?: string|null, sentenceTones?: S
 
     let sentence = remainingSentences.shift();
     let sentenceId = 1
-    for (let i = 0; i < textParagraphs.length; i++) {
-        let textParagraph = textParagraphs[i];
+    for (let textParagraph of textParagraphs) {
         const sentenceGroup: SentenceTone[] = [];
 
         if (!sentence) {

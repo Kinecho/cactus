@@ -103,7 +103,7 @@ export function drawWordBubbleChart(parentSelector: string, words: InsightWord[]
     .sum((d: BubbleNode) => {
         let t = 0;
         if (isBubbleData(d)) {
-            let min = !isBlank(d.word) ? 2 : 0
+            const min = !isBlank(d.word) ? 2 : 0
             // never take a value greater than six, to control colors
             const freq = d.frequency ?? 0;
             const salience = d.salience ?? 0;
@@ -162,7 +162,7 @@ export function drawWordBubbleChart(parentSelector: string, words: InsightWord[]
         if (isBubbleData(d.data) && selectable) {
             if (!isBlank(d.data.word) && !d.data.selected) {
                 const radius = d.r;
-                d3Select(this as any).style("fill", color(d.value ?? 0) as string)
+                d3Select(this as any).style("fill", color(d.value ?? 0))
                 .transition().duration(300).attr("r", function () {
                     return radius;
                 });
@@ -181,7 +181,6 @@ export function drawWordBubbleChart(parentSelector: string, words: InsightWord[]
         const radius = d.r;
         if (isBubbleData(data)) {
             const selected = !data.selected;
-            // parent.select("circle").each(c => c.style("fill", color(`${ c.data.value ?? 0 }`) as string))
             logger.info("Data is selected = ", selected);
             config.wordClicked?.(data, selected);
             const selection = d3Select(this)
@@ -189,13 +188,13 @@ export function drawWordBubbleChart(parentSelector: string, words: InsightWord[]
 
             parent.selectAll<SVGElement, HierarchyCircularNode<BubbleData>>("circle").style("fill", function (v) {
                 v.data.selected = false;
-                return color(v.value ?? 0) as string
+                return color(v.value ?? 0)
             }).each(function (e) {
                 const r = e.r;
                 d3Select(this).transition().attr("r", r);
             })
             data.selected = selected;
-            const newColor = selected && config.selectedFillColor ? config.selectedFillColor : color(d.value ?? 0) as string;
+            const newColor = selected && config.selectedFillColor ? config.selectedFillColor : color(d.value ?? 0);
 
             selection.style("fill", newColor)
             selection.transition().duration(200).attr("r", function () {
