@@ -1,10 +1,12 @@
 <template>
     <div class="prompt-content-card">
+        <div class="centered timeout-error" v-if="timedOut && !isLoading">
+            <p>Looks like we were unable to load your insights. Please try again later.</p>
+        </div>
+        <div class="centered" v-if="isLoading">
+            <spinner class="loading" message="Gathering insights..."/>
+        </div>
         <div class="analysis-card">
-            <div class="timeout-error" v-if="timedOut && !isLoading">
-                <p>Oops, it looks like we were unable to load your insights. Please try again later</p>
-            </div>
-            <spinner v-if="isLoading" class="loading" message="Gathering insights..."/>
             <template v-if="!isLoading && response">
                 <div class="textBox">
                     <p>This is what your note reveals about your emotions.</p>
@@ -100,6 +102,12 @@
     @import "prompts";
     @import "mixins";
 
+    .timeout-error {
+        font-size: 2.4rem;
+        max-width: 56rem;
+        padding: 6.4rem 0;
+    }
+
     .analysis-card {
         display: flex;
         flex-direction: column;
@@ -115,6 +123,10 @@
             align-items: center;
             flex-direction: row;
             justify-content: flex-start;
+        }
+
+        &:empty {
+            display: none;
         }
     }
 
