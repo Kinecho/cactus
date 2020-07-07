@@ -33,5 +33,6 @@
 </script>
 
 <style scoped lang="scss">
+    @import "prompts";
 
 </style>

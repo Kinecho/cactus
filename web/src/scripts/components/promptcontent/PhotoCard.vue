@@ -46,7 +46,7 @@
         img {
             border-radius: 4px;
             display: block;
-            max-width: 100%;
+            max-width: 54rem;
             margin: 0 auto; /* center smaller image in card */
         }
     }
