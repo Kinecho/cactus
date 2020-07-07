@@ -1,5 +1,5 @@
 <template>
-    <div v-if="isVisible">
+    <div class="actions" v-if="isVisible">
         <component
                 class="action-button"
                 :is="attributes.type"
@@ -155,9 +155,22 @@
     @import "mixins";
     @import "common";
 
-    .action-button {
-        margin-bottom: 1rem;
+    .actions {
+        bottom: 0;
+        left: 0;
+        padding: 2.4rem;
+        position: fixed;
+        width: 100%;
 
-        font-size: 2rem;
+        @include r(600) {
+            display: flex;
+            justify-content: center;
+            position: static;
+        }
+    }
+
+    .action-button {
+        display: block;
+        width: 100%;
     }
 </style>
