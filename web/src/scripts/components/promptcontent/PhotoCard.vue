@@ -52,4 +52,10 @@
             width: 100%;
         }
     }
+
+    .actionButtonContainer {
+        @include r(600) {
+            justify-content: center;
+        }
+    }
 </style>
