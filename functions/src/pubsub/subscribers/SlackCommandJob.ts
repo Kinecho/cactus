@@ -52,6 +52,8 @@ export interface JobRequest {
     payload?: any,
     slackResponseURL?: string,
     channelName?: string,
+    userId?: string,
+    userName?: string,
 }
 
 export async function onPublish(message: Message, context: functions.EventContext) {
@@ -120,10 +122,10 @@ export async function processJob(job: JobRequest) {
             await AdminSlackService.getSharedInstance().sendArbitraryMessage(job.channelName, message as ChatMessage);
         }
 
-        if (message.fileData && job.channelName) {
+        if (message.fileData && (job.channelName || job.userId)) {
             await AdminSlackService.getSharedInstance().uploadTextSnippet({
                 data: message.fileData,
-                channel: job.channelName,
+                channels: [job.channelName,].filter(Boolean) as string[],
                 useChannelId: true,
                 fileType: "json",
                 filename: `${ job.type ?? "job" }-results.json`,
@@ -205,7 +207,7 @@ async function processUser(job: JobRequest): Promise<SlashCommandResponse> {
         })
     }
     const fileData = stringifyJSON({ member: member?.toJSON(), userRecord: userRecord?.toJSON() }, 2);
-    return { text, attachments, fileData, response_type: SlackResponseType.ephemeral };
+    return { text, attachments, fileData, response_type: SlackResponseType.in_channel };
 }
 
 async function processMemberStats(job: JobRequest): Promise<SlashCommandResponse> {

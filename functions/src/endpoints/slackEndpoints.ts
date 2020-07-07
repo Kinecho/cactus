@@ -114,6 +114,8 @@ app.post("/commands/member", async (req: functions.https.Request | any, resp: fu
         payload: memberEmail,
         slackResponseURL: payload.response_url,
         channelName: payload.channel_id,
+        userId: payload.user_id,
+        userName: payload.user_name
     };
 
     await submitJobAndReturn({ job, args: rest, immediate, response: resp });

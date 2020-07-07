@@ -1,10 +1,10 @@
 import { CactusConfig } from "@admin/CactusConfig";
 import {
+    ChatPostMessageArguments,
     IncomingWebhook,
     IncomingWebhookSendArguments,
     MessageAttachment,
-    WebClient,
-    ChatPostMessageArguments
+    WebClient
 } from "@slack/client";
 import axios from "axios";
 import Logger from "@shared/Logger";
@@ -377,22 +377,44 @@ export default class AdminSlackService {
 
     async uploadTextSnippet(options: {
         data: string,
-        channel: ChannelName | string,
+        channel?: ChannelName | string,
+        channels?: string[],
         filename: string,
         fileType?: string | undefined
         title?: string
         message?: string,
         useChannelId?: boolean
-    }) {
-        const { data, channel, useChannelId, filename, fileType, title, message } = options;
-        return this.web.files.upload({
-            channels: useChannelId ? channel : this.getChannel(channel as ChannelName),
-            content: data,
-            filetype: fileType,
-            title,
-            filename: filename,
-            initial_comment: message,
-        })
+    } & ({ channels: string[] } | { channel: ChannelName | string })) {
+        const { data, channel, useChannelId, filename, fileType, title, message, channels } = options;
+        const channelParam: string[] = channels ?? [];
+
+        let channelId = undefined;
+        if (channel) {
+            channelId = useChannelId ? channel : this.getChannel(channel as ChannelName);
+        }
+
+        if (channelId) {
+            channelParam.push(channelId);
+        }
+        logger.info("channels to upload to", channelParam.filter(Boolean).join(","))
+        try {
+            const result = await this.web.files.upload({
+                channels: channelParam.filter(Boolean).join(","),
+                content: data,
+                filetype: fileType,
+                title,
+                filename: filename,
+                initial_comment: message,
+            })
+            logger.info("Upload file result", JSON.stringify(result, null, 2));
+
+            return result;
+        } catch (error) {
+            logger.error("failed to upload text snippet", error);
+            logger.error("error data", JSON.stringify(error.data, null, 2));
+            return;
+        }
+
     }
 }
 
