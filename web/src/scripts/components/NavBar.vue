@@ -5,6 +5,13 @@
                 <img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" :src="'/assets/images/' + logoSrc" alt="Cactus logo"/>
             </router-link>
             <div v-if="!loggedIn" class="anonLinks">
+                <router-link
+                        class="login"
+                        :to="pricingHref"
+                        type="link"
+                >
+                    <span>Pricing</span>
+                </router-link>
                 <router-link v-if="displayLoginButton"
                         class="login "
                         :to="loginHref"
@@ -23,7 +30,8 @@
                     <span class="navLabel">{{copy.navigation.HOME}}</span>
                 </router-link>
                 <router-link class="navbarLink" :to="insightsHref" v-if="loggedIn">
-                    <svg class="navIcon pie" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><title>Insights</title>
+                    <svg class="navIcon pie" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><title>
+                        Insights</title>
                         <path fill="#07454C" d="M6.601.913a1 1 0 01.8 1.834A9 9 0 1019.29 14.5a1 1 0 011.842.778A11 11 0 116.601.913zm4.4-.913a11 11 0 0111 11 1 1 0 01-1 1h-10a1 1 0 01-1-1V1a1 1 0 011-1zm1 2.056V10h7.944a9 9 0 00-7.944-7.944z"/>
                     </svg>
                     <span class="navLabel">{{copy.navigation.INSIGHTS}}</span>
@@ -31,7 +39,7 @@
                 <dropdown-menu :items="links" v-if="loggedIn" :displayName="displayName" :email="email">
                     <div class="navbar-avatar-container" slot="custom-button">
                         <div v-if="!profileImageUrl" class="initials">{{initials}}</div>
-                        <img v-if="profileImageUrl" :alt="(displayName || email) + `'s Profile Image`" :src="profileImageUrl"/>
+                        <img @error="avatarImageError = true" v-if="profileImageUrl" :alt="(displayName || email) + `'s Profile Image`" :src="profileImageUrl"/>
                     </div>
                 </dropdown-menu>
             </div>
@@ -77,6 +85,7 @@
         memberProfile: MemberProfile | undefined,
         memberProfileUnsubscriber: ListenerUnsubscriber | undefined,
         activityBadgeCount: number,
+        avatarImageError: boolean,
     }
 
     export default Vue.extend({
@@ -146,6 +155,7 @@
                 activityBadgeCount: StorageService.getNumber(LocalStorageKey.activityBadgeCount, 0)!,
                 memberProfileUnsubscriber: undefined,
                 memberProfile: undefined,
+                avatarImageError: false,
             }
         },
         computed: {
@@ -176,7 +186,8 @@
                 return this.user ? this.user.email : null;
             },
             profileImageUrl(): string | undefined | null {
-                return (this.memberProfile?.avatarUrl) ? this.memberProfile.avatarUrl : getRandomAvatar(this.member?.id);
+
+                return (!this.avatarImageError && this.memberProfile?.avatarUrl) ? this.memberProfile.avatarUrl : getRandomAvatar(this.member?.id);
             },
             displayLoginButton(): boolean {
                 return this.showLogin && this.authLoaded && !this.user;
@@ -216,6 +227,9 @@
             },
             insightsHref(): string {
                 return PageRoute.INSIGHTS
+            },
+            pricingHref(): string {
+                return PageRoute.PRICING;
             }
         },
         methods: {
