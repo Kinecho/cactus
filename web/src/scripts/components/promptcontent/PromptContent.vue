@@ -30,7 +30,7 @@
         </transition-group>
         <div class="last-card-actions" v-if="isLastCard">
             <button class="button actions" @click="closePrompt">Done</button>
-            <button class="button actions tertiary" @click="showShareNote = true" v-if="hasNote">
+            <button class="button actions tertiary shareNote" @click="showShareNote = true" v-if="hasNote">
                 <svg-icon icon="share"/>
                 Share Note
             </button>
@@ -374,6 +374,10 @@
                 height: 1.8rem;
                 margin-right: .8rem;
                 width: 1.8rem;
+            }
+
+            &.shareNote {
+                color: $darkestGreen;
             }
         }
     }
