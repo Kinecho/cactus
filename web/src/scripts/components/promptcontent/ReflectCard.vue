@@ -150,7 +150,6 @@
                 ...this.buttonStyles,
                 top: `${ top }px`,
             }
-
         }
 
         get response(): ReflectionResponse | undefined {

@@ -1,8 +1,10 @@
 <template>
-    <MountingPortal v-if="hasShown || show" :mountTo="target">
+    <MountingPortal v-if="portalReady && (hasShown || show) " :mountTo="target">
         <transition name="modal" v-if="show" appear>
             <div :class="['modal-mask', {show, opaque, light, dark, tall}]">
-                <div class="modal-container" :class="{relative: containerPositionRelative}" role="dialog">
+                <div class="modal-container" :class="{relative: containerPositionRelative}"
+                        role="dialog"
+                >
                     <div class="modal-header" v-if="!!$slots.header">
                         <slot name="header"></slot>
                     </div>
@@ -15,7 +17,6 @@
                         <div class="content-body" v-if="!!$slots.body">
                             <slot name="body"></slot>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -28,49 +29,71 @@
     import * as uuid from "uuid/v4"
     import { MountingPortal } from "portal-vue"
     import Logger from "@shared/Logger"
+    import Component from "vue-class-component";
+    import { Prop, Watch } from "vue-property-decorator";
+    import { debounce } from "debounce";
+    import { getDeviceDimensions } from "@web/DeviceUtil";
 
     const logger = new Logger("Modal");
-
-    export default Vue.extend({
+    @Component(
+    {
         components: {
             MountingPortal,
-        },
-        props: {
-            show: Boolean,
-            showCloseButton: { type: Boolean, default: true },
-            hideCloseButtonOnMobile: { type: Boolean, default: false },
-            opaque: Boolean,
-            light: { type: Boolean, default: true },
-            dark: Boolean,
-            closeStyles: {
-                type: Object as () => { [name: string]: any }
-            },
-            tall: {
-                type: Boolean,
-                default: false,
-            },
-            containerPositionRelative: {
-                type: Boolean,
-                default: false,
-            }
-        },
+        }
+    })
+    export default class Modal extends Vue {
+        @Prop({ type: Boolean, default: false })
+        show!: boolean
+
+        @Prop({ type: Boolean, default: true })
+        showCloseButton!: boolean;
+
+        @Prop({ type: Boolean, default: false })
+        hideCloseButtonOnMobile!: boolean;
+
+        @Prop({ type: Boolean, default: false })
+        opaque!: boolean;
+
+        @Prop({ type: Boolean, default: true })
+        light!: boolean;
+
+        @Prop({ type: Boolean, default: false })
+        dark!: boolean;
+
+        @Prop({ type: Object as () => Record<string, any>, default: null })
+        closeStyles!: Record<string, any> | null;
+
+        @Prop({ type: Boolean, default: false })
+        tall!: boolean;
+
+        @Prop({ type: Boolean, default: false })
+        containerPositionRelative!: boolean;
+
+
+        escapeListener: any = undefined;
+        cleanupInterval: any = undefined;
+        hasShown: boolean = this.show;
+        scrollPosition: number = 0;
+        id = uuid();
+        portalReady: boolean = false;
+
+        //END props
         beforeMount() {
             this.escapeListener = (evt: KeyboardEvent) => {
                 if (evt.code === "Escape" || evt.keyCode === 27) {
                     this.close()
                 }
             };
-
             document.addEventListener('keyup', this.escapeListener);
 
+            const wrapper = document.getElementById(this.key);
+            wrapper?.remove();
+        }
 
-            if (!this.id) {
-                this.id = uuid()
-            }
-
-        },
         destroyed() {
             window.removeEventListener("keyup", this.escapeListener);
+            window.removeEventListener("resize", this.resizeListener);
+            window.visualViewport?.removeEventListener("resize", this.resizeListener);
             if (this.key) {
                 let wrapper = document.getElementById(this.key);
                 if (wrapper) {
@@ -81,105 +104,92 @@
             window.clearInterval(this.cleanupInterval);
             this.removeModal();
             this.removeStyles();
+        }
 
-        },
-        data(): {
-            escapeListener: any,
-            id?: string,
-            cleanupInterval?: any,
-            hasShown: boolean,
-            scrollPosition: number
-        } {
-            return {
-                escapeListener: undefined,
-                cleanupInterval: undefined,
-                hasShown: this.show,
-                scrollPosition: 0,
-            }
-        },
-        methods: {
-            close() {
-                this.$emit("close");
-            },
-            addStyles() {
-                try {
-                    const scrollPosition = window.pageYOffset;
-                    const isNoScroll = document.body.classList.contains("no-scroll");
-                    document.body.classList.add("no-scroll");
-                    this.$root.$children[0]?.$el?.classList?.add("modal-mask-in")
-                    if (!isNoScroll) {
-                        this.scrollPosition = scrollPosition;
-                        logger.info("setting scroll position to", scrollPosition);
-                        document.body.style.top = `-${ scrollPosition }px`;
-                    }
+        close() {
+            this.$emit("close");
+        }
 
-                } catch (error) {
-                    logger.error("Failed to add modal-mask-in on app root", error)
+        addStyles() {
+            try {
+                const scrollPosition = window.pageYOffset;
+                const isNoScroll = document.body.classList.contains("no-scroll");
+                document.body.classList.add("no-scroll");
+                this.$root.$children[0]?.$el?.classList?.add("modal-mask-in")
+                if (!isNoScroll) {
+                    this.scrollPosition = scrollPosition;
+                    logger.info("setting scroll position to", scrollPosition);
+                    document.body.style.top = `-${ scrollPosition }px`;
                 }
-            },
-            removeStyles() {
-                try {
-                    const isNoScroll = document.body.classList.contains("no-scroll");
 
-                    document.body.classList.remove("no-scroll");
-                    this.$root.$children[0]?.$el?.classList?.remove("modal-mask-in");
-                    document.body.style.removeProperty('top');
-                    if (isNoScroll) {
-                        logger.info("Scrolling to", this.scrollPosition);
-                        window.scrollTo(0, this.scrollPosition);
-                    }
-                } catch (error) {
-                    logger.error("failed to remove modal-mask-in class from the app root", error);
-                }
-            },
-
-            removeModal() {
-                if (this.key) {
-                    const wrapper = document.getElementById(this.key);
-                    wrapper?.remove();
-                }
-            }
-        },
-        watch: {
-            show(newValue) {
-                window.clearInterval(this.cleanupInterval);
-                if (newValue) {
-                    if (this.key) {
-                        let modal = document.getElementById(this.key);
-                        if (!modal) {
-                            const wrapper = document.createElement("div");
-                            const portal = document.createElement("div");
-                            portal.classList.add("portal-target");
-                            wrapper.setAttribute("id", this.key);
-                            wrapper.appendChild(portal);
-                            document.body.appendChild(wrapper)
-                        }
-                    }
-
-                    this.hasShown = true;
-                    this.addStyles()
-
-                } else {
-                    this.removeStyles()
-
-                    //wait for a bit before removing the wrapper element so that any animations can finish.
-                    this.cleanupInterval = window.setTimeout(() => {
-                        this.removeModal();
-                        this.hasShown = false;
-                    }, 1000)
-
-                }
-            }
-        },
-        computed: {
-            key(): string | undefined {
-                return this.id ? `modal_${ this.id }` : undefined
-            },
-            target(): string | undefined {
-                return this.key ? `#${ this.key } > .portal-target` : undefined
+            } catch (error) {
+                logger.error("Failed to add modal-mask-in on app root", error)
             }
         }
-    })
+
+        removeStyles() {
+            try {
+                const isNoScroll = document.body.classList.contains("no-scroll");
+
+                document.body.classList.remove("no-scroll");
+                this.$root.$children[0]?.$el?.classList?.remove("modal-mask-in");
+                document.body.style.removeProperty('top');
+                if (isNoScroll) {
+                    logger.info("Scrolling to", this.scrollPosition);
+                    window.scrollTo(0, this.scrollPosition);
+                }
+            } catch (error) {
+                logger.error("failed to remove modal-mask-in class from the app root", error);
+            }
+        }
+
+        removeModal() {
+            const wrapper = document.getElementById(this.key);
+            wrapper?.remove();
+            this.portalReady = false;
+        }
+
+        @Watch("show")
+        onShow(newValue: boolean) {
+            window.clearInterval(this.cleanupInterval);
+            if (newValue) {
+                if (this.key) {
+                    let modal = document.getElementById(this.key);
+                    if (!modal) {
+                        const wrapper = document.createElement("div");
+                        const portal = document.createElement("div");
+                        portal.classList.add("portal-target");
+                        wrapper.setAttribute("id", this.key);
+                        wrapper.appendChild(portal);
+                        document.body.appendChild(wrapper)
+                        this.portalReady = true;
+                    }
+                }
+
+                this.hasShown = true;
+                this.addStyles()
+
+            } else {
+                this.removeStyles()
+
+                //wait for a bit before removing the wrapper element so that any animations can finish.
+                this.cleanupInterval = window.setTimeout(() => {
+                    this.removeModal();
+                    this.hasShown = false;
+                }, 1000)
+
+            }
+        }
+
+        get key(): string {
+            return `modal_${ this.id }`
+        }
+
+        get target(): string {
+            return `#${ this.key } > .portal-target`
+        }
+    }
+
 </script>
 
 <style lang="scss" scoped>
@@ -190,14 +200,14 @@
     .modal-mask {
         align-items: center;
         display: flex;
-        height: 100vh;
         justify-content: center;
-        left: 0;
-        overflow-y: auto;
         position: fixed;
+        left: 0;
         top: 0;
-        transition: opacity .3s ease;
+        height: 100%;
         width: 100%;
+        overflow-y: auto;
+        transition: opacity .3s ease;
         z-index: 9998;
 
         &.light {
