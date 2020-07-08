@@ -20,11 +20,14 @@
                 </resizable-textarea>
             </transition>
             <share-warning v-if="card.noteShared"/>
-            <button v-if="responseText" class="doneBtn icon no-loading" @click="saveAndContinue" :disabled="saving">
+            <button v-if="hasText" class="doneBtn icon no-loading" @click="saveAndContinue" :disabled="saving">
                 <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">
                     <path fill="#fff" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/>
                 </svg>
-                <span class="doneText">{{saving ? 'Saving....' : 'Done'}}</span>
+                <span class="doneText">{{doneButtonText}}</span>
+            </button>
+            <button v-else-if="!hasText" class="skipBtn icon no-loading" @click="skip" :disabled="saving">
+                <span class="">{{skipButtonText}}</span>
             </button>
         </div>
     </div>
@@ -38,12 +41,13 @@
     import ElementAnimation from "@components/elements/animations/ElementAnimation.vue";
     import MarkdownText from "@components/MarkdownText.vue";
     import ResizableTextarea from "@components/ResizableTextarea.vue";
-    import { ResponseMedium } from "@shared/models/ReflectionResponse";
+    import ReflectionResponse, { ResponseMedium } from "@shared/models/ReflectionResponse";
     import ReflectionResponseService from "@web/services/ReflectionResponseService";
     import Logger from "@shared/Logger"
     import { getDeviceDimensions } from "@web/DeviceUtil";
     import { debounce } from "debounce";
     import ShareWarning from "@components/promptcontent/ShareWarning.vue";
+    import { isBlank } from "@shared/util/StringUtil";
 
     const logger = new Logger("ReflectCard");
 
@@ -72,6 +76,7 @@
         errorMessage: string | null = null;
         saving = false;
         debounceWindowSizeHandler: any;
+        startTime: Date = new Date();
 
         @Watch("card")
         onCard(current?: PromptContentCardViewModel, previous?: PromptContentCardViewModel) {
@@ -86,7 +91,7 @@
                 (this.$refs.textInput as HTMLElement | undefined)?.focus();
             }
 
-            // this.observeResponses();
+            this.startTime = new Date();
             this.updateMaxTextareaHeight();
             this.debounceWindowSizeHandler = debounce(this.updateMaxTextareaHeight, 500)
             window.addEventListener("resize", this.debounceWindowSizeHandler);
@@ -97,6 +102,18 @@
         beforeDestroy() {
             // this.reflectionUnsubscriber?.();
             window.removeEventListener("resize", this.debounceWindowSizeHandler);
+        }
+
+        get doneButtonText(): string {
+            return this.saving ? 'Saving....' : "Done";
+        }
+
+        get skipButtonText(): string {
+            return this.saving ? 'Saving....' : "Skip";
+        }
+
+        get hasText(): boolean {
+            return !isBlank(this.responseText);
         }
 
         get reflectionResponsesText(): string | null {
@@ -112,14 +129,34 @@
             logger.info("set max text height to ", this.maxTextareaHeight);
         }
 
+        get response(): ReflectionResponse | undefined {
+            return this.card.responses?.[0];
+        }
+
+        /**
+         * The time spent on this card during this viewing.
+         * @return {number} - milliseconds spent reflecting
+         */
+        get currentReflectionDuration(): number {
+            return Date.now() - this.startTime.getTime();
+        }
+
+        /**
+         * The total time spent reflecting on this prompt.
+         * This is the time currently spent reflecting (currentReflectionDuration) PLUS
+         * the duration saved on the ReflectionResponse object
+         * @return {number} milliseconds spent reflecting
+         */
+        get totalReflectionDurationMs(): number {
+            return (this.response?.reflectionDurationMs ?? 0) + this.currentReflectionDuration;
+        }
+
         async saveAndContinue() {
             this.errorMessage = null;
             const entryId = this.card.promptContent.entryId;
             logger.info("Saving and continuing for entryId", entryId);
             this.saving = true;
-
-            let response = this.card.responses?.[0];
-
+            let response = this.response;
             if (!response && entryId) {
                 logger.info("no response found, but there was an entry id, so we can create a new response");
 
@@ -136,22 +173,19 @@
 
             logger.info("Setting the response content text to ", this.responseText);
             response.content.text = this.responseText;
-            // if (this.selectedInsightWord) {
-            //     response.dynamicValues = {
-            //         ...response.dynamicValues,
-            //         [this.card.textReplacerToken]: this.selectedInsightWord
-            //     }
-            // }
+            response.reflectionDurationMs = this.totalReflectionDurationMs;
+
+            logger.info(`set total duration to ${ (response.reflectionDurationMs / 1000).toFixed(1) } seconds`);
 
             logger.info("Saving reflection response");
             await ReflectionResponseService.sharedInstance.save(response);
             this.saving = false;
             logger.info("Saved successfully.");
-            this.$emit('next');
+            this.$emit('next', true);
         }
 
-        skip() {
-            this.$emit('next');
+        async skip() {
+            await this.saveAndContinue();
         }
 
     }
@@ -212,7 +246,7 @@
         }
     }
 
-    .doneBtn {
+    .doneBtn, .skipBtn {
         bottom: 2.4rem;
         padding: 1.6rem;
         position: fixed;

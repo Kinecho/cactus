@@ -228,6 +228,10 @@
             return this.supportedCards.length;
         }
 
+        get isReflectCard(): boolean {
+            return this.card.type === ContentType.reflect;
+        }
+
         get showNextButton(): boolean {
             return this.nextEnabled;
         }
@@ -235,7 +239,7 @@
         get nextEnabled(): boolean {
             const hasNextCard = this.index < this.totalPages - 1;
             logger.info("Has next card: ", true);
-            return hasNextCard;
+            return hasNextCard && !this.isReflectCard;
         }
 
         get previousEnabled(): boolean {
@@ -255,22 +259,22 @@
             this.showCloseConfirm = true;
         }
 
-        next() {
-            if (this.nextEnabled) {
+        next(force: boolean = false) {
+            if (this.nextEnabled || force) {
                 this.cardTransitionName = transitionName.next;
                 this.$emit('next');
             }
         }
 
-        previous() {
-            if (this.previousEnabled) {
+        previous(force: boolean = false) {
+            if (this.previousEnabled || force) {
                 this.cardTransitionName = transitionName.previous;
                 this.$emit("previous");
             }
         }
 
         handleDocumentKeyUp(event: KeyboardEvent) {
-            if (!this.keyboardNavigationEnabled) {
+            if (!this.keyboardNavigationEnabled || this.isReflectCard) {
                 return;
             }
             if (event.key === "ArrowLeft" || event.code === "ArrowLeft" || event.which === 37) {
@@ -280,53 +284,18 @@
             }
         }
 
-        showElementModal() {
-            this.elementModalVisible = true;
-            this.keyboardNavigationEnabled = false;
-        }
-
-        hideElementModal() {
-            this.elementModalVisible = false;
-            this.keyboardNavigationEnabled = true;
-        }
-
         handleSwipeEvent(direction: string) {
             logger.info("Handling swipe event", direction);
-            // if (!this.defaultNextActionEnabled) {
-            //     logger.info("swipe is not enabled")
-            //     return;
-            // }
+            if (this.isReflectCard) {
+                logger.info("swipe is not enabled")
+                return;
+            }
             if (direction === "left") {
                 this.next()
             }
 
             if (direction === "right") {
                 this.previous();
-            }
-        }
-
-        handleButtonClick(action?: ContentAction | undefined | null) {
-            logger.info("Handling button click", action);
-            if (!action) {
-                return;
-            }
-
-            switch (action) {
-                case ContentAction.showPricing:
-                    this.showPricingModal = true;
-                    break;
-                case ContentAction.next:
-                    this.next();
-                    break;
-                case ContentAction.previous:
-                    this.previous();
-                    break;
-                case ContentAction.complete:
-                    // this.complete();
-                    break;
-                case ContentAction.coreValues:
-                    window.open(`${ PageRoute.CORE_VALUES }`, "_blank");
-                    break;
             }
         }
     }
