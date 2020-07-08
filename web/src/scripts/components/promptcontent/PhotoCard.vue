@@ -1,13 +1,15 @@
 <template>
     <div class="prompt-content-card">
-        <div class="photo-container" v-if="card.photo">
-            <flamelink-image :image="card.photo"/>
-        </div>
-        <div class="caption" v-if="card.text">
-            <markdown-text :source="card.text"/>
-        </div>
-        <div class="actions">
-            <slot name="actions"/>
+        <div>
+            <div class="photo-container" v-if="card.photo">
+                <flamelink-image :image="card.photo"/>
+            </div>
+            <div class="caption" v-if="card.text">
+                <markdown-text :source="card.text"/>
+            </div>
+            <div class="actions">
+                <slot name="actions"/>
+            </div>
         </div>
     </div>
 </template>
@@ -43,11 +45,7 @@
 
     .photo-container {
         margin: 4rem 1.6rem 1.6rem;
-        padding: 0 2.4rem;
 
-        @include r(374) {
-            padding: 0 3.2rem;
-        }
         @include r(768) {
             margin: 0 0 1.6rem;
         }

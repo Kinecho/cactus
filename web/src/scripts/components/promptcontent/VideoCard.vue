@@ -97,9 +97,10 @@
         margin: 4rem 1.6rem 1.6rem;
         overflow: hidden;
 
-
+        @include r(600) {
+            margin: 0;
+        }
         @include r(768) {
-            margin: 0 0 1.6rem;
             width: 100%;
         }
 
