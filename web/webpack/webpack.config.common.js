@@ -15,7 +15,6 @@ function getCommitHash() {
     return git.revparse(['HEAD'])
 }
 
-
 function recursiveIssuer(m) {
     if (m.issuer) {
         return recursiveIssuer(m.issuer)
@@ -261,7 +260,7 @@ module.exports = (config) => {
                         console.log(chalk.green('Configuring HTML page ', filename, 'chunks: ', chunks.join(', ')))
                         return new HtmlWebpackPlugin({
                             chunks,
-                            title: page.title,
+                            analyticsId: config.__GOOGLE_ANALYTICS_ID__,
                             template: `${helpers.htmlDir}/${filename}.html`,
                             filename: `${filename}.html`,
                             favicon: `${helpers.srcDir}/favicon.ico`,

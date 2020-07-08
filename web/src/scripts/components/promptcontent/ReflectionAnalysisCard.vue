@@ -1,20 +1,20 @@
 <template>
     <div class="prompt-content-card">
-        <div class="centered timeout-error" v-if="timedOut && !isLoading">
+        <div class="centered timeout-error" v-if="hasText && timedOut && !isLoading">
             <p>Looks like we were unable to load your insights. Please try again later.</p>
         </div>
         <div class="centered" v-if="isLoading">
             <spinner class="loading" message="Gathering insights..."/>
         </div>
         <div class="analysis-card">
-            <template v-if="!isLoading && response">
+            <template v-if="!isLoading">
                 <div class="textBox">
-                    <p>This is what your note reveals about your emotions.</p>
+                    <p v-if="hasText">This is what your note reveals about your emotions.</p>
                 </div>
                 <div class="analysisContainer">
-                    <positivity-rating :sentiment-score="response.sentiment.documentSentiment"/>
-                    <tone-analysis :tone-result="response.toneAnalysis"
-                            :original-text="response.content.text"
+                    <positivity-rating :sentiment-score="documentSentiment"/>
+                    <tone-analysis :tone-result="toneAnalysis"
+                            :original-text="reflectionText"
                             :sentences-on-new-line="false"
                             @previous="previous"
                     />
@@ -35,6 +35,9 @@
     import ToneAnalysis from "@components/ToneAnalysis.vue";
     import Spinner from "@components/Spinner.vue";
     import Timeout = NodeJS.Timeout;
+    import { SentimentScore } from "@shared/api/InsightLanguageTypes";
+    import { ToneResult } from "@shared/api/ToneAnalyzerTypes";
+    import { isBlank } from "@shared/util/StringUtil";
 
     const timeout_ms = 20000; // 20 seconds;
 
@@ -59,7 +62,7 @@
         timerTimeout: Timeout | null = null;
 
         get isLoading(): boolean {
-            return !this.timedOut && this.analysisLoading;
+            return this.hasText && !this.timedOut && this.analysisLoading;
         }
 
         get analysisLoading(): boolean {
@@ -68,6 +71,22 @@
 
         get response(): ReflectionResponse | null {
             return this.card.responses?.[0] ?? null;
+        }
+
+        get documentSentiment(): SentimentScore | null {
+            return this.hasText ? this.response?.sentiment?.documentSentiment ?? null : null;
+        }
+
+        get toneAnalysis(): ToneResult | null {
+            return this.hasText ? this.response?.toneAnalysis ?? null : null;
+        }
+
+        get reflectionText(): string | null {
+            return this.response?.content.text ?? null;
+        }
+
+        get hasText(): boolean {
+            return !isBlank(this.reflectionText);
         }
 
         mounted() {
