@@ -21,23 +21,11 @@
 <style scoped lang="scss">
     @import "mixins";
     @import "variables";
+    @import "prompts";
 
     .actionButtonContainer {
-        margin-bottom: 1.6rem;
-        text-align: center;
-
-        > * {
-            margin-bottom: 1.6rem;
-        }
-
         @include r(600) {
             display: flex;
-            margin: 0 1.6rem 0 0;
-            text-align: left;
-
-            > * + * {
-                margin-left: 1.6rem;
-            }
         }
     }
 </style>
