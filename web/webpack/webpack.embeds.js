@@ -6,12 +6,12 @@ const helpers = require('./../helpers')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const WebpackNotifierPlugin = require('webpack-notifier')
 const chalk = require('chalk')
-const simplegit = require('simple-git/promise')
-const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
+const simpleGit = require('simple-git')
+// const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
 const config = require('./config.prod')
 
 function getCommitHash() {
-    const git = simplegit()
+    const git = simpleGit()
     return git.revparse(['HEAD'])
 }
 
@@ -264,14 +264,7 @@ module.exports = () => {
                 ],
             }
 
-            if (!isDev) {
-                const smp = new SpeedMeasurePlugin()
-                resolve(smp.wrap(finalConfig))
-            } else {
-                return resolve(finalConfig)
-            }
+            return resolve(finalConfig)
         })
     })
-
-
 }

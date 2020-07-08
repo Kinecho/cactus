@@ -5,12 +5,12 @@
                 <img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" :src="'/assets/images/' + logoSrc" alt="Cactus logo"/>
             </router-link>
             <div v-if="!loggedIn" class="anonLinks">
-                <router-link v-if="displayLoginButton"
-                        class="login"
-                        :to="sponsorHref"
+                <router-link
+                        v-if="displayLoginButton"
+                        :to="pricingHref"
                         type="link"
                 >
-                    <span>Sponsor</span>
+                    <span>Pricing</span>
                 </router-link>
                 <router-link v-if="displayLoginButton"
                         class="login "
@@ -19,6 +19,13 @@
                         type="link"
                 >
                     <span>{{copy.common.LOG_IN}}</span>
+                </router-link>
+                <router-link v-if="displayLoginButton"
+                        class="login"
+                        :to="signupHref"
+                        type="link"
+                >
+                    <span>{{copy.common.SIGN_UP}}</span>
                 </router-link>
             </div>
             <div class="navContainer" v-if="loggedIn && showLinks">
@@ -29,17 +36,9 @@
                     </svg>
                     <span class="navLabel">{{copy.navigation.HOME}}</span>
                 </router-link>
-                <!--        Activity        -->
-                <!-- <router-link class="navbarLink" :to="socialHref" v-if="loggedIn">
-                    <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Activity</title>
-                        <path fill="#07454C" d="M15 17.838L9.949 2.684c-.304-.912-1.594-.912-1.898 0L5.28 11H2a1 1 0 000 2h4a1 1 0 00.949-.684L9 6.162l5.051 15.154c.304.912 1.594.912 1.898 0L18.72 13H22a1 1 0 000-2h-4a1 1 0 00-.949.684L15 17.838z"/>
-                    </svg>
-                    <span class="navLabel">{{copy.navigation.ACTIVITY}}</span>
-                    <span class="badge" v-if="activityBadgeCount > 0" data-test="badge">{{activityBadgeCount}}</span>
-                </router-link> -->
-                <!-- INSIGHTS      -->
                 <router-link class="navbarLink" :to="insightsHref" v-if="loggedIn">
-                    <svg class="navIcon pie" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><title>Insights</title>
+                    <svg class="navIcon pie" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><title>
+                        Insights</title>
                         <path fill="#07454C" d="M6.601.913a1 1 0 01.8 1.834A9 9 0 1019.29 14.5a1 1 0 011.842.778A11 11 0 116.601.913zm4.4-.913a11 11 0 0111 11 1 1 0 01-1 1h-10a1 1 0 01-1-1V1a1 1 0 011-1zm1 2.056V10h7.944a9 9 0 00-7.944-7.944z"/>
                     </svg>
                     <span class="navLabel">{{copy.navigation.INSIGHTS}}</span>
@@ -47,7 +46,7 @@
                 <dropdown-menu :items="links" v-if="loggedIn" :displayName="displayName" :email="email">
                     <div class="navbar-avatar-container" slot="custom-button">
                         <div v-if="!profileImageUrl" class="initials">{{initials}}</div>
-                        <img v-if="profileImageUrl" :alt="(displayName || email) + `'s Profile Image`" :src="profileImageUrl"/>
+                        <img @error="avatarImageError = true" v-if="profileImageUrl" :alt="(displayName || email) + `'s Profile Image`" :src="profileImageUrl"/>
                     </div>
                 </dropdown-menu>
             </div>
@@ -93,6 +92,7 @@
         memberProfile: MemberProfile | undefined,
         memberProfileUnsubscriber: ListenerUnsubscriber | undefined,
         activityBadgeCount: number,
+        avatarImageError: boolean,
     }
 
     export default Vue.extend({
@@ -162,6 +162,7 @@
                 activityBadgeCount: StorageService.getNumber(LocalStorageKey.activityBadgeCount, 0)!,
                 memberProfileUnsubscriber: undefined,
                 memberProfile: undefined,
+                avatarImageError: false,
             }
         },
         computed: {
@@ -192,7 +193,8 @@
                 return this.user ? this.user.email : null;
             },
             profileImageUrl(): string | undefined | null {
-                return (this.memberProfile?.avatarUrl) ? this.memberProfile.avatarUrl : getRandomAvatar(this.member?.id);
+
+                return (!this.avatarImageError && this.memberProfile?.avatarUrl) ? this.memberProfile.avatarUrl : getRandomAvatar(this.member?.id);
             },
             displayLoginButton(): boolean {
                 return this.showLogin && this.authLoaded && !this.user;
@@ -232,6 +234,9 @@
             },
             insightsHref(): string {
                 return PageRoute.INSIGHTS
+            },
+            pricingHref(): string {
+                return PageRoute.PRICING;
             }
         },
         methods: {
@@ -299,21 +304,32 @@
         justify-content: flex-end;
         white-space: nowrap;
 
-        .login {
+        a {
             display: block;
             font-size: 1.6rem;
             margin: 0;
             padding-left: 3vw;
             text-decoration: none;
             transition: background-color .2s ease-in-out;
-
             @include r(600) {
                 font-size: 1.8rem;
 
+            }
+        }
+
+        .login {
+            &:last-child {
+                border: 1px solid $lightGreen;
+                border-radius: 3rem;
+                margin-left: 3.2vw;
+                padding: .4rem 1.0rem;
+
+                &:hover, &.router-link-active {
+                    background-color: $lightGreen;
+                }
+            }
+            @include r(600) {
                 &:last-child {
-                    border: 1px solid $lightGreen;
-                    border-radius: 3rem;
-                    margin-left: 3.2vw;
                     padding: .8rem 1.6rem;
 
                     &:hover, &.router-link-active {

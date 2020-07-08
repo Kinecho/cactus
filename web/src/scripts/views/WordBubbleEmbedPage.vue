@@ -1,7 +1,11 @@
 <template>
     <div class="container" :style="{ display: 'flex', flex: 1, justifyItems: 'stretch', alignItems: 'stretch' }">
         <transition name="fade-in">
-            <WordChart :words="dataSource.words" style="flex: 1" :blurry="dataSource.blurred" v-if="dataSource.loaded"/>
+            <WordChart :words="dataSource.words"
+                    style="flex: 1"
+                    :blurry="dataSource.blurred"
+                    :chart-config="chartConfig"
+                    v-if="dataSource.loaded"/>
         </transition>
     </div>
 </template>
@@ -14,6 +18,8 @@
     import { QueryParam } from "@shared/util/queryParams";
     import { fireRevealInsightEvent } from "@web/analytics";
     import { InsightWord } from "@shared/api/InsightLanguageTypes";
+    import Component from "vue-class-component";
+    import { WordBubbleConfig } from "@web/charts/wordBubbles";
 
     const logger = new Logger("WordBubbleEmbedPage");
 
@@ -56,6 +62,7 @@
 
 
     const dataSource = new InsightDataSource();
+    window.ChartDataSource = dataSource;
     if (initialWords && initialWords.length) {
         dataSource.words = initialWords
     }
@@ -102,31 +109,40 @@
      */
 
 
-    export default Vue.extend({
-        name: "InsightsEmbedPage",
+    @Component({
         components: {
             WordChart: InsightWordChart,
-        },
-        data(): { dataSource: InsightDataSource } {
+        }
+    })
+    export default class WordBubbleEmbedPage extends Vue {
+        name = "InsightsEmbedPage";
+
+        dataSource: InsightDataSource = window.ChartDataSource;
+
+        get chartConfig(): Partial<WordBubbleConfig> {
             return {
-                dataSource,
+                // numFillerBubbles: 3,
             }
-        },
+        }
+
         beforeMount() {
             document.body.classList.add("transparent")
-            dataSource.delegate = {
+            this.dataSource.delegate = {
                 onData: (words) => {
                     logger.info("Fetched words from data source", words);
                 }
             }
-        },
+        }
+
         destroyed() {
             document.body.classList.remove("transparent")
         }
-    })
+    }
 </script>
 
 <style lang="scss">
+    @import "common";
+
     body, html {
         background: transparent;
     }
