@@ -58,6 +58,11 @@
     @import "mixins";
     @import "prompts";
 
+    .prompt-content-card {
+        margin: 0 auto;
+        width: 90%;
+    }
+
     .video-container {
         border-radius: .4rem;
         margin: 4rem 1.6rem 1.6rem;
