@@ -131,10 +131,10 @@
         height: 100vh;
         overflow: hidden;
         overflow-y: auto;
-        padding: 3.2rem 2.4rem;
+        padding: 5.6rem 2.4rem;
 
         @include r(374) {
-            padding: 3.2rem;
+            padding: 5.6rem 3.2rem;
         }
         @include r(600) {
             @include shadowbox;
