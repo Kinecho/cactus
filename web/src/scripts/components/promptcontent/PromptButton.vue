@@ -1,7 +1,6 @@
 <template>
-    <div class="" v-if="isVisible">
+    <div class="actionButton" v-if="isVisible">
         <component
-                class="action-button"
                 :is="attributes.type"
                 :class="classNames"
                 v-bind="attributes.props"
@@ -152,26 +151,11 @@
 </script>
 
 <style scoped lang="scss">
-    @import "mixins";
-    @import "common";
+    @import "prompts";
 
-    button,
-    .button {
-        display: block;
-        width: 100%;
-
-        @include r(600) {
-            width: auto;
-        }
-    }
-
-    .link {
-        display: inline-block;
-        font-size: 1.8rem;
-        font-weight: bold;
-
-        @include r(600) {
-            width: auto;
-        }
+    .actionButton {
+        align-items: center;
+        display: flex;
+        justify-content: center;
     }
 </style>

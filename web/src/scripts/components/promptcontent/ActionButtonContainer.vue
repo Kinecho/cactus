@@ -17,28 +17,11 @@
 <style scoped lang="scss">
     @import "mixins";
     @import "variables";
+    @import "prompts";
 
     .actionButtonContainer {
         @include r(600) {
             display: flex;
-            min-width: 32rem;
-        }
-    }
-
-    .button {
-        margin-bottom: 1.6rem;
-        white-space: nowrap;
-        width: 100%;
-
-        @include r(600) {
-            margin-bottom: 0;
-            
-        }
-    }
-
-    .button + .button {
-        @include r(600) {
-            margin-left: 1.6rem;
         }
     }
 </style>
