@@ -113,12 +113,11 @@
         flex-direction: column;
         justify-content: center;
         min-height: 80vh;
-        padding: 2.4rem 3.2rem;
+        padding: 2.4rem 1.6rem;
 
         @include r(374) {
-            padding: 2.4rem 5.6rem;
+            padding: 2.4rem;
         }
-
         @include r(960) {
             align-items: center;
             flex-direction: row;

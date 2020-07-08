@@ -6,14 +6,15 @@
                 <path d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
             </svg>
         </button>
-        <transition-group :name="cardTransitionName" mode="in-out" tag="div" class="card-container">
+        <transition-group :name="cardTransitionName" mode="in-out" tag="div" class="slide-container">
             <component
+                    class="card-container"
+                    :key="`card_${i}`"
                     v-for="(card, i) in supportedCards"
                     v-if="i === index"
                     :is="getCardType(card)"
                     :card="card"
                     :index="i"
-                    :key="`card_${i}`"
                     @enableKeyboardNavigation="enableKeyboardNavigation"
                     @close="closePrompt"
                     @next="next"
@@ -53,14 +54,6 @@
                 <ShareNoteCard :card="shareReflectionCard"/>
             </div>
         </modal>
-
-        <!-- <Modal :show="showCloseConfirm" :show-close-button="false">
-            <div slot="body" class="confirm-body">
-                <h2>Are you sure you want to exit? Any unsaved progress will be lost.</h2>
-                <button @click="showCloseConfirm = false">No, continue</button>
-                <button @click="closePrompt()">Yes, exit.</button>
-            </div>
-        </Modal> -->
 
         <pricing-modal
                 :showModal="showPricingModal"
@@ -348,11 +341,13 @@
         background: $beige no-repeat;
         background-image: url(/assets/images/transparentBlob1.svg), url(/assets/images/transparentBlob2.svg);
         font-size: 2rem;
-        min-height: 100vh;
         overflow: hidden;
-        position: relative;
         transition: background-position 1s, background-color 1s;
-        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
 
         @include r(374) {
             font-size: 2.4rem;
@@ -405,9 +400,20 @@
         width: 100%;
     }
 
+    .slide-container {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        overflow: hidden;
+    }
+
     .card-container {
-        position: relative;
-        width: 100vw;
+        position: absolute;
+        width: 100%;
+        overflow: auto;
+        height: 100%;
 
         @include r(600) {
             align-items: center;
@@ -483,14 +489,6 @@
 
     .isLastCard {
         background-color: lighten($green, 20%);
-
-        @include r(600) {
-            justify-content: center;
-
-            .card-container {
-                flex-grow: 0;
-            }
-        }
     }
 
     .actions .shareNote {

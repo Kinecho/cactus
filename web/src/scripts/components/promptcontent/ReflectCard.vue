@@ -163,12 +163,9 @@
     @import "mixins";
 
     .elementReflectContainer {
-        padding: 0 4rem;
+        padding: 0 1.6rem;
         width: 100%;
 
-        @include r(374) {
-            padding: 0 4.8rem;
-        }
         @include r(600) {
             padding: 0 6.4rem;
         }
@@ -186,7 +183,6 @@
         }
     }
 
-
     textarea {
         font-family: $font-stack;
         background: transparent;
@@ -198,7 +194,7 @@
         opacity: .8;
         padding: .8rem;
         width: 100%;
-
+        resize: none;
         @include r(374) {
             font-size: 2rem;
         }
