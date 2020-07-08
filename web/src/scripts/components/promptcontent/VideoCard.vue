@@ -66,7 +66,6 @@
         justify-content: space-between;
         min-height: 80vh;
         padding: 0 .8rem;
-        flex: 1;
         @include r(374) {
             justify-content: center;
             margin: 0 auto;
@@ -90,8 +89,7 @@
         border-radius: .4rem;
         margin: 4rem 1.6rem 1.6rem;
         overflow: hidden;
-        width: 100%;
-        flex: 1;
+        /*width: 100%;*/
 
         @include r(768) {
             margin: 0 0 1.6rem;
@@ -101,7 +99,6 @@
             position: relative;
             padding-bottom: 56.25%; //makes a 16:9 aspect ratio
             padding-top: 2.4rem;
-
             /*.loading {*/
             /*    position: absolute;*/
             /*    top: 0;*/
