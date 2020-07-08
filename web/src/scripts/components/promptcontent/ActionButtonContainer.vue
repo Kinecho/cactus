@@ -7,11 +7,7 @@
 <script lang="ts">
     import Vue from "vue";
     import Component from "vue-class-component"
-    import Logger from "@shared/Logger"
-
-    const logger = new Logger("ActionButtonContainer");
-
-
+   
     @Component
     export default class ActionButtonContainer extends Vue {
         name = "ActionButtonContainer";
