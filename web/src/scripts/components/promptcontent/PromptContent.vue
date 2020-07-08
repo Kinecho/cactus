@@ -25,8 +25,8 @@
                 <template v-slot:actions>
                     <action-button-container>
                         <template v-if="isLastCard">
-                            <button class="button actions" @click="closePrompt">Done</button>
-                            <button v-if="hasNote" class="button actions tertiary shareNote" @click="showShareNote = true">
+                            <button class="button" @click="closePrompt">Done</button>
+                            <button v-if="hasNote" class="button tertiary shareNote" @click="showShareNote = true">
                                 <svg-icon icon="share"/>
                                 Share Note
                             </button>
@@ -490,6 +490,16 @@
             .card-container {
                 flex-grow: 0;
             }
+        }
+    }
+
+    .shareNote {
+        color: $darkerGreen;
+
+        .icon {
+            height: 1.8rem;
+            margin-right: .8rem;
+            width: 1.8rem;
         }
     }
 
