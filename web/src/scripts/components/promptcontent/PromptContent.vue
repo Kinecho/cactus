@@ -6,7 +6,7 @@
                 <path d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
             </svg>
         </button>
-        <transition-group :name="cardTransitionName" mode="in-out" tag="div" class="slide-container" >
+        <transition-group :name="cardTransitionName" mode="in-out" tag="div" class="slide-container">
             <component
                     class="card-container"
                     :key="`card_${i}`"
@@ -349,10 +349,15 @@
         background: $beige no-repeat;
         background-image: url(/assets/images/transparentBlob1.svg), url(/assets/images/transparentBlob2.svg);
         font-size: 2rem;
-        min-height: 100vh;
+        //min-height: 100vh;
+        //width: 100%;
         overflow: hidden;
         transition: background-position 1s, background-color 1s;
-        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
 
         @include r(374) {
             font-size: 2.4rem;
@@ -406,22 +411,25 @@
     }
 
     .slide-container {
-        /*width: 100%;*/
-        /*height: 100%;*/
+        width: 100%;
+        height: 100%;
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-        justify-content: center;
-
+        /*top: 0;*/
+        /*left: 0;*/
+        /*right: 0;*/
+        /*bottom: 0;*/
+        /*display: flex;*/
+        /*justify-content: center;*/
+        overflow: hidden;
     }
 
     .card-container {
         position: absolute;
         width: 100%;
-        flex: 1;
+        overflow: auto;
+        height: 100%;
+        /*overflow: auto;*/
+        /*flex: 1;*/
         @include r(600) {
             align-items: center;
             display: flex;
