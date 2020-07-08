@@ -1,10 +1,16 @@
 <template>
     <div class="prompt-content-card">
-        <markdown-text :source="card.text" v-if="card.text"/>
-        <div class="audio-container" v-if="card.audio">
-            <audio controls :src="card.audio.url"/>
+        <div class="audio-card">
+            <div class="textBox">
+                <markdown-text :source="card.text" v-if="card.text"/>
+                <div class="actions">
+                    <slot name="actions"/>
+                </div>
+            </div>
+            <div class="audio-container" v-if="card.audio">
+                <audio controls :src="card.audio.url"/>
+            </div>
         </div>
-        <slot name="actions"/>
     </div>
 </template>
 
@@ -34,5 +40,56 @@
 
 <style scoped lang="scss">
     @import "prompts";
+
+    .audio-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 80vh;
+        padding: 0 .8rem;
+
+        @include r(374) {
+            justify-content: center;
+            margin: 0 auto;
+            max-width: 48rem;
+            padding: 0 2.4rem;
+        }
+        @include r(768) {
+            max-width: 64rem;
+            min-height: 0;
+        }
+        @include r(960) {
+            align-items: center;
+            flex-direction: row;
+            justify-content: flex-start;
+            max-width: none;
+            padding: 0 6.4rem;
+        }
+    }
+
+    .textBox {
+        margin-bottom: 5.6rem;
+
+        @include r(960) {
+            flex-grow: 1;
+            margin-bottom: 0;
+            padding-right: 6.4rem;
+            width: 66%;
+        }
+    }
+
+    .audio-container {
+        width: 100% ;
+
+        @include r(960) {
+            align-self: center;
+            margin: 0 auto;
+            max-width: 50%;
+        }
+
+        audio {
+            width: 100%;
+        }
+    }
 
 </style>
