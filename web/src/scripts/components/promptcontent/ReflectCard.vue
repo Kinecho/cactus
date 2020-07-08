@@ -140,7 +140,7 @@
             logger.info("set max text height to ", this.maxTextareaHeight);
 
 
-            const offset = isIosDevice() && this.noteFocused ? 140 : 0;
+            const offset = isIosDevice() && this.noteFocused ? 80 : 0;
 
             logger.info("Offset is", offset);
             let buttonHeight = 60;

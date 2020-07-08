@@ -2,21 +2,20 @@
     <MountingPortal v-if="hasShown || show" :mountTo="target">
         <transition name="modal" v-if="show" appear>
             <div :class="['modal-mask', {show, opaque, light, dark, tall}]">
-                <div class="modal-wrapper">
-                    <div class="modal-container" :class="{relative: containerPositionRelative}" role="dialog">
-                        <div class="modal-header">
-                            <slot name="header"></slot>
+                <div class="modal-container" :class="{relative: containerPositionRelative}" role="dialog">
+                    <div class="modal-header" v-if="!!$slots.header">
+                        <slot name="header"></slot>
+                    </div>
+                    <div class="modal-body">
+                        <button v-if="showCloseButton" @click="close" title="Close" class="modal-close tertiary icon" :style="closeStyles" :class='{mobileHidden: hideCloseButtonOnMobile}'>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
+                                <path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
+                            </svg>
+                        </button>
+                        <div class="content-body" v-if="!!$slots.body">
+                            <slot name="body"></slot>
                         </div>
-                        <div class="modal-body">
-                            <button v-if="showCloseButton" @click="close" title="Close" class="modal-close tertiary icon" :style="closeStyles" :class='{mobileHidden: hideCloseButtonOnMobile}'>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
-                                    <path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
-                                </svg>
-                            </button>
-                            <slot name="body">
-                                default body
-                            </slot>
-                        </div>
+
                     </div>
                 </div>
             </div>
@@ -227,44 +226,50 @@
             }
         }
 
-        .modal-wrapper {
-            .modal-container {
-                margin: 0 auto;
-                border-radius: 2px;
-                transition: all .3s ease;
+        .modal-container {
+            margin: 0 auto;
+            border-radius: 2px;
+            transition: all .3s ease;
+            max-height: 100%;
+            overflow: auto;
 
-                &.relative {
-                    position: relative;
+            &.relative {
+                position: relative;
+            }
+
+            .modal-close {
+                position: absolute;
+                top: .8rem;
+                right: .8rem;
+                z-index: 100;
+                height: 4.8rem;
+                width: 4.8rem;
+
+                @include r(600) {
+                    position: absolute;
                 }
 
-                .modal-close {
-                    position: fixed;
-                    top: .8rem;
-                    right: .8rem;
-                    z-index: 100;
-                    height: 4.8rem;
-                    width: 4.8rem;
-
-                    @include r(600) {
-                        position: absolute;
-                    }
-
-                    &.mobileHidden {
-                        @include maxW(600) {
-                            display: none;
-                        }
-                    }
-
-                    svg {
-                        height: 1.8rem;
-                        width: 1.8rem;
+                &.mobileHidden {
+                    @include maxW(600) {
+                        display: none;
                     }
                 }
 
-                .modal-body {
-                    margin: 0 0;
-                    position: relative;
+                svg {
+                    height: 1.8rem;
+                    width: 1.8rem;
                 }
+            }
+
+            .modal-body {
+                margin: 0 0;
+                position: relative;
+                overflow: auto;
+                max-height: 100%;
+            }
+
+            .content-body {
+
             }
         }
     }
