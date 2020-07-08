@@ -134,9 +134,6 @@
         min-height: 80vh;
         padding: 2.4rem 1.6rem;
 
-        @include r(374) {
-            padding: 2.4rem;
-        }
         @include r(960) {
             align-items: center;
             flex-direction: row;
