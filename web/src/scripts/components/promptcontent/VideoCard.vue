@@ -1,25 +1,27 @@
 <template>
     <div class="prompt-content-card">
         <div class="video-card">
-            <div class="video-container" v-if="card.video">
-                <div v-if="card.video.youtubeVideoId" class="iframe-wrapper">
-                    <spinner v-if="youtubeVideoLoading" message="Loading video..."/>
-                    <iframe @load="youtubeVideoLoading = false"
-                            width="320"
-                            height="203"
-                            :src="`https://www.youtube.com/embed/${card.video.youtubeVideoId}`"
-                            frameborder="0"
-                            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-                            allowfullscreen></iframe>
+            <div class="video-container">
+                <div v-if="card.video">
+                    <div v-if="card.video.youtubeVideoId" class="iframe-wrapper">
+                        <spinner v-if="youtubeVideoLoading" message="Loading video..."/>
+                        <iframe @load="youtubeVideoLoading = false"
+                                width="320"
+                                height="203"
+                                :src="`https://www.youtube.com/embed/${card.video.youtubeVideoId}`"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen></iframe>
+                    </div>
+                    <div v-if="card.video.url">
+                        <video :src="card.video.url" controls></video>
+                    </div>
                 </div>
-                <div v-if="card.video.url">
-                    <video :src="card.video.url" controls></video>
+                <div class="caption" v-if="card.text">
+                    <markdown-text :source="card.text"/>
                 </div>
             </div>
-            <div class="caption" v-if="card.text">
-                <markdown-text :source="card.text"/>
-            </div>
-            <div class="actions">
+            <div class="actions" v-if="hasActions">
                 <slot name="actions"/>
             </div>
         </div>
@@ -52,6 +54,10 @@
         @Prop({ type: Object as () => PromptContentCardViewModel, required: true, })
         card!: PromptContentCardViewModel;
 
+        get hasActions(): boolean {
+            return !!this.$slots.actions;
+        }
+
         youtubeVideoLoading = true;
     }
 </script>
@@ -64,23 +70,24 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        min-height: 80vh;
+        flex: 1;
         padding: 0 .8rem;
         @include r(374) {
             justify-content: center;
             margin: 0 auto;
-            max-width: 48rem;
+            //max-width: 48rem;
             padding: 0 2.4rem;
         }
         @include r(768) {
-            max-width: 64rem;
-            min-height: 0;
+            //max-width: 64rem;
+            min-height: 80vh;
         }
         @include r(960) {
             align-items: center;
             flex-direction: row;
             justify-content: flex-start;
             max-width: none;
+            min-height: 80vh;
             padding: 0 6.4rem;
         }
     }
@@ -89,10 +96,11 @@
         border-radius: .4rem;
         margin: 4rem 1.6rem 1.6rem;
         overflow: hidden;
-        /*width: 100%;*/
+
 
         @include r(768) {
             margin: 0 0 1.6rem;
+            width: 100%;
         }
 
         .iframe-wrapper {

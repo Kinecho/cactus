@@ -198,7 +198,7 @@
         opacity: .8;
         padding: .8rem;
         width: 100%;
-
+        resize: none;
         @include r(374) {
             font-size: 2rem;
         }

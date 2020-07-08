@@ -1,5 +1,5 @@
 <template>
-    <div class="actionButtonContainer">
+    <div class="actionButtonContainer" v-if="hasButtons">
         <slot></slot>
     </div>
 </template>
@@ -7,10 +7,21 @@
 <script lang="ts">
     import Vue from "vue";
     import Component from "vue-class-component"
+    import Logger from "@shared/Logger"
+
+    const logger = new Logger("ActionButtonContainer");
+
 
     @Component
     export default class ActionButtonContainer extends Vue {
         name = "ActionButtonContainer";
+
+        get hasButtons(): boolean {
+            logger.info("Action button container slots", this.$slots.default);
+            const hasNonComments = this.$slots.default?.some(n => !n.isComment) ?? false;
+            logger.info("has non-comments", hasNonComments);
+            return hasNonComments
+        }
     }
 </script>
 

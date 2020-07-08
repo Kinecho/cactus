@@ -32,8 +32,8 @@
                                 Share Note
                             </button>
                         </template>
-                        <prompt-button :button="card.actionButton" @next="next" @previous="previous" @complete="closePrompt"/>
-                        <prompt-button :link="card.link"/>
+                        <prompt-button v-if="card.actionButton" :button="card.actionButton" @next="next" @previous="previous" @complete="closePrompt"/>
+                        <prompt-button v-if="card.link" :link="card.link"/>
                     </action-button-container>
                 </template>
             </component>
@@ -54,14 +54,6 @@
                 <ShareNoteCard :card="shareReflectionCard"/>
             </div>
         </modal>
-
-        <!-- <Modal :show="showCloseConfirm" :show-close-button="false">
-            <div slot="body" class="confirm-body">
-                <h2>Are you sure you want to exit? Any unsaved progress will be lost.</h2>
-                <button @click="showCloseConfirm = false">No, continue</button>
-                <button @click="closePrompt()">Yes, exit.</button>
-            </div>
-        </Modal> -->
 
         <pricing-modal
                 :showModal="showPricingModal"
