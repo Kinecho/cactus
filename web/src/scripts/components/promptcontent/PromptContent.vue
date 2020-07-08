@@ -1,5 +1,8 @@
 <template>
-    <div v-touch:swipe="handleSwipeEvent" class="prompt-content-main" :class="[`index-${index}`, {isLastCard: isLastCard}]">
+    <div v-touch:swipe="handleSwipeEvent"
+            class="prompt-content-main"
+            :class="[`index-${index}`, {isLastCard: isLastCard}]"
+    >
         <progress-stepper :total="totalPages" :current="contentIndex" class="progress"/>
         <button aria-label="Close" @click="closePrompt" title="Close" class="close tertiary icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
@@ -66,7 +69,7 @@
 <script lang="ts">
     import Vue from "vue";
     import Component from "vue-class-component"
-    import PromptContent, { ContentAction, ContentType } from "@shared/models/PromptContent";
+    import PromptContent, { ContentType } from "@shared/models/PromptContent";
     import { Prop } from "vue-property-decorator";
     import ReflectionResponse from "@shared/models/ReflectionResponse";
     import ProgressStepper from "@components/ProgressStepper.vue";
@@ -86,12 +89,13 @@
     import AudioCard from "@components/promptcontent/AudioCard.vue";
     import InviteFriendsCard from "@components/promptcontent/InviteFriendsCard.vue";
     import OnboardingActionButton from "@components/OnboardingActionButton.vue";
-    import { PageRoute } from "@shared/PageRoutes";
     import PricingModal from "@components/PricingModal.vue";
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
     import PromptButton from "@components/promptcontent/PromptButton.vue";
     import CardElement from "@components/promptcontent/CardElement.vue";
     import ActionButtonContainer from "@components/promptcontent/ActionButtonContainer.vue";
+    import { debounce } from "debounce";
+    import { getDeviceDimensions } from "@web/DeviceUtil";
 
     export enum CardType {
         text = "text-card",
@@ -159,10 +163,10 @@
         showCloseConfirm = false;
         showShareNote: boolean = false;
         showPricingModal = false;
-        elementModalVisible = false;
 
         mounted() {
             this.keyListener = document.addEventListener("keyup", this.handleDocumentKeyUp)
+            this.debounceResizeHandler();
         }
 
         destroyed() {
@@ -316,7 +320,7 @@
         top: 0;
         left: 0;
         right: 0;
-        bottom: 0;
+        height: 100%;
 
         @include r(374) {
             font-size: 2.4rem;
@@ -382,6 +386,7 @@
         position: absolute;
         width: 100%;
         overflow: auto;
+        overflow-scrolling: touch;
         height: 100%;
 
         @include r(600) {

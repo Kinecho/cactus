@@ -12,20 +12,21 @@
                     <textarea placeholder="Write something..."
                             v-model="responseText"
                             type="text"
+                            ref="noteInput"
                             :disabled="saving"
-                            @focus="$emit('enableKeyboardNavigation', false)"
-                            @blur="$emit('enableKeyboardNavigation', true)"
+                            @focus="onNoteFocus"
+                            @blur="onNoteBlur"
                     />
                 </resizable-textarea>
             </transition>
             <share-warning v-if="card.noteShared"/>
-            <button v-if="hasText" class="doneBtn icon no-loading" @click="saveAndContinue" :disabled="saving">
+            <button v-if="hasText" class="doneBtn icon no-loading" @click="saveAndContinue" :disabled="saving" :style="buttonStyles">
                 <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">
                     <path fill="#fff" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/>
                 </svg>
                 <span class="doneText">{{doneButtonText}}</span>
             </button>
-            <button v-else-if="!hasText" class="skipBtn secondary no-loading" @click="skip" :disabled="saving">
+            <button v-else-if="!hasText" class="skipBtn secondary no-loading" @click="skip" :disabled="saving" :style="buttonStyles">
                 <span class="">{{skipButtonText}}</span>
             </button>
         </div>
@@ -43,7 +44,7 @@
     import ReflectionResponse, { ResponseMedium } from "@shared/models/ReflectionResponse";
     import ReflectionResponseService from "@web/services/ReflectionResponseService";
     import Logger from "@shared/Logger"
-    import { getDeviceDimensions } from "@web/DeviceUtil";
+    import { getDeviceDimensions, isIosDevice } from "@web/DeviceUtil";
     import { debounce } from "debounce";
     import ShareWarning from "@components/promptcontent/ShareWarning.vue";
     import { isBlank } from "@shared/util/StringUtil";
@@ -73,6 +74,8 @@
         saving = false;
         debounceWindowSizeHandler: any;
         startTime: Date = new Date();
+        buttonStyles: Record<string, string> = {};
+        noteFocused = false;
 
         @Watch("card")
         onCard(current?: PromptContentCardViewModel, previous?: PromptContentCardViewModel) {
@@ -85,16 +88,31 @@
             logger.info("Reflect card mounted");
 
             this.startTime = new Date();
-            this.updateMaxTextareaHeight();
-            this.debounceWindowSizeHandler = debounce(this.updateMaxTextareaHeight, 500)
+            this.onWidowSize();
+            this.debounceWindowSizeHandler = debounce(this.onWidowSize, 500)
             window.addEventListener("resize", this.debounceWindowSizeHandler);
-
+            window.visualViewport?.addEventListener("resize", this.debounceWindowSizeHandler)
             this.responseText = this.reflectionResponsesText ?? "";
         }
 
         beforeDestroy() {
             // this.reflectionUnsubscriber?.();
             window.removeEventListener("resize", this.debounceWindowSizeHandler);
+            window.visualViewport?.removeEventListener("resize", this.debounceWindowSizeHandler);
+        }
+
+        get noteHeight(): number {
+            return 0;
+        }
+
+        onNoteFocus() {
+            this.$emit('enableKeyboardNavigation', false)
+            this.noteFocused = true;
+        }
+
+        onNoteBlur() {
+            this.$emit('enableKeyboardNavigation', true)
+            this.noteFocused = false;
         }
 
         get doneButtonText(): string {
@@ -117,9 +135,22 @@
             return ""
         }
 
-        updateMaxTextareaHeight() {
+        onWidowSize() {
             this.maxTextareaHeight = getDeviceDimensions().height / 2;
             logger.info("set max text height to ", this.maxTextareaHeight);
+
+
+            const offset = isIosDevice() && this.noteFocused ? 140 : 0;
+
+            logger.info("Offset is", offset);
+            let buttonHeight = 60;
+
+            const top = getDeviceDimensions().height - buttonHeight + offset
+            this.buttonStyles = {
+                ...this.buttonStyles,
+                top: `${ top }px`,
+            }
+
         }
 
         get response(): ReflectionResponse | undefined {
@@ -240,10 +271,11 @@
     }
 
     .doneBtn, .skipBtn {
-        bottom: 2.4rem;
-        position: fixed;
+        /*bottom: 2.4rem;*/
+        position: absolute;
         right: 2.4rem;
-        transition: opacity .3s;
+        transition: opacity .3s, top .2s;
+
 
         @include r(768) {
             min-width: 14rem;
