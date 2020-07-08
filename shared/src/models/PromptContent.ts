@@ -8,7 +8,7 @@ import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 import CactusMember from "@shared/models/CactusMember";
 import { CoreValue } from "@shared/models/CoreValueTypes";
 import ReflectionResponse, { DynamicResponseValues } from "@shared/models/ReflectionResponse";
-import { isNotNull, isString } from "@shared/util/ObjectUtil";
+import { isNonEmptyObject, isNotNull, isString } from "@shared/util/ObjectUtil";
 
 const logger = new Logger("PromptContent.ts");
 
@@ -70,11 +70,29 @@ export interface ContentLink {
     appendMemberId?: boolean
 }
 
+export function isContentLink(link: ContentLink | any): link is ContentLink {
+    if (!isNonEmptyObject(link)) {
+        return false;
+    }
+    const l = link as ContentLink;
+    return !isBlank(l.linkLabel) && !isBlank(l.destinationHref);
+}
+
 export interface ActionButton {
     action?: ContentAction,
     label?: string,
     linkStyle?: LinkStyle,
 }
+
+
+export function isActionButton(button: ActionButton | any): button is ActionButton {
+    if (!isNonEmptyObject(button)) {
+        return false;
+    }
+    const l = button as ActionButton;
+    return !isBlank(l.label) && !isBlank(l.action);
+}
+
 
 export interface Quote {
     text: string,

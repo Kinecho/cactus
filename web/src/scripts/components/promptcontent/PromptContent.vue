@@ -6,14 +6,15 @@
                 <path d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
             </svg>
         </button>
-        <transition-group :name="cardTransitionName" mode="in-out" tag="div" class="card-container">
+        <transition-group :name="cardTransitionName" mode="in-out" tag="div" class="slide-container">
             <component
+                    class="card-container"
+                    :key="`card_${i}`"
                     v-for="(card, i) in supportedCards"
                     v-if="i === index"
                     :is="getCardType(card)"
                     :card="card"
                     :index="i"
-                    :key="`card_${i}`"
                     @enableKeyboardNavigation="enableKeyboardNavigation"
                     @close="closePrompt"
                     @next="next"
@@ -31,8 +32,8 @@
                                 Share Note
                             </button>
                         </template>
-                        <prompt-button :button="card.content.actionButton" @next="next" @previous="previous" @complete="closePrompt"/>
-                        <prompt-button :link="card.content.link"/>
+                        <prompt-button :button="card.actionButton" @next="next" @previous="previous" @complete="closePrompt"/>
+                        <prompt-button :link="card.link"/>
                     </action-button-container>
                 </template>
             </component>
@@ -350,7 +351,6 @@
         font-size: 2rem;
         min-height: 100vh;
         overflow: hidden;
-        position: relative;
         transition: background-position 1s, background-color 1s;
         width: 100%;
 
@@ -405,10 +405,23 @@
         width: 100%;
     }
 
-    .card-container {
-        position: relative;
-        width: 100vw;
+    .slide-container {
+        /*width: 100%;*/
+        /*height: 100%;*/
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        justify-content: center;
 
+    }
+
+    .card-container {
+        position: absolute;
+        width: 100%;
+        flex: 1;
         @include r(600) {
             align-items: center;
             display: flex;
@@ -485,11 +498,11 @@
         background-color: lighten($green, 20%);
 
         @include r(600) {
-            justify-content: center;
+            /*justify-content: center;*/
 
-            .card-container {
-                flex-grow: 0;
-            }
+            /*.card-container {*/
+            /*    flex-grow: 0;*/
+            /*}*/
         }
     }
 
