@@ -23,18 +23,18 @@
                     <card-element :card="card" :animated="false" :stacked="false"/>
                 </template>
                 <template v-slot:actions>
+                    <template v-if="isLastCard">
+                        <button class="button actions" @click="closePrompt">Done</button>
+                        <button v-if="hasNote" class="button actions tertiary shareNote" @click="showShareNote = true">
+                            <svg-icon icon="share"/>
+                            Share Note
+                        </button>
+                    </template>
                     <prompt-button :button="card.content.actionButton" @next="next" @previous="previous" @complete="closePrompt"/>
                     <prompt-button :link="card.content.link"/>
                 </template>
             </component>
         </transition-group>
-        <div class="last-card-actions" v-if="isLastCard">
-            <button class="button actions" @click="closePrompt">Done</button>
-            <button class="button actions tertiary shareNote" @click="showShareNote = true" v-if="hasNote">
-                <svg-icon icon="share"/>
-                Share Note
-            </button>
-        </div>
 
         <button aria-label="Previous slide" @click="previous" :disabled="!previousEnabled" class="arrow icon previous tertiary no-loading">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
@@ -340,51 +340,6 @@
     @import "variables";
     @import "mixins";
 
-    .last-card-actions {
-        bottom: 0;
-        left: 0;
-        padding: 2.4rem;
-        position: fixed;
-        width: 100%;
-
-        @include r(600) {
-            display: flex;
-            margin: 0 auto;
-            max-width: 48rem;
-            padding: 0 2.4rem;
-            position: static;
-        }
-        @include r(768) {
-            max-width: 64rem;
-        }
-        @include r(960) {
-            max-width: 110rem;
-            padding: 0 9.6rem;
-        }
-
-        button {
-            width: 100%;
-
-            @include r(600) {
-                align-items: center;
-                display: flex;
-                justify-content: center;
-                margin-right: .8rem;
-                max-width: 20rem;
-            }
-
-            .icon {
-                height: 1.8rem;
-                margin-right: .8rem;
-                width: 1.8rem;
-            }
-
-            &.shareNote {
-                color: $darkerGreen;
-            }
-        }
-    }
-
     .prompt-content-main {
         background: $beige no-repeat;
         background-image: url(/assets/images/transparentBlob1.svg), url(/assets/images/transparentBlob2.svg);
@@ -449,7 +404,7 @@
     .card-container {
         position: relative;
         width: 100vw;
- 
+
         @include r(600) {
             align-items: center;
             display: flex;
