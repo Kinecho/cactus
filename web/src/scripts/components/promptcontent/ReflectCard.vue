@@ -8,10 +8,9 @@
                 <markdown-text :source="card.text"/>
             </strong>
             <transition name="component-fade" appear>
-                <resizable-textarea :max-height-px="maxTextareaHeight" ref="resizableTextArea">
+                <resizable-textarea :max-height-px="maxTextareaHeight">
                     <textarea placeholder="Write something..."
                             v-model="responseText"
-                            ref="textInput"
                             type="text"
                             :disabled="saving"
                             @focus="$emit('enableKeyboardNavigation', false)"
@@ -68,9 +67,6 @@
         @Prop({ type: Object as () => PromptContentCardViewModel, required: true, })
         card!: PromptContentCardViewModel;
 
-        @Prop({ type: Boolean, default: true })
-        autofocusInput!: boolean;
-
         maxTextareaHeight = 200;
         responseText: string = ""
         errorMessage: string | null = null;
@@ -87,9 +83,6 @@
 
         mounted() {
             logger.info("Reflect card mounted");
-            if (this.autofocusInput) {
-                (this.$refs.textInput as HTMLElement | undefined)?.focus();
-            }
 
             this.startTime = new Date();
             this.updateMaxTextareaHeight();
