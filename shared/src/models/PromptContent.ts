@@ -84,7 +84,6 @@ export interface ActionButton {
     linkStyle?: LinkStyle,
 }
 
-
 export function isActionButton(button: ActionButton | any): button is ActionButton {
     if (!isNonEmptyObject(button)) {
         return false;
@@ -92,7 +91,6 @@ export function isActionButton(button: ActionButton | any): button is ActionButt
     const l = button as ActionButton;
     return !isBlank(l.label) && !isBlank(l.action);
 }
-
 
 export interface Quote {
     text: string,

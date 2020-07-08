@@ -17,10 +17,7 @@
         name = "ActionButtonContainer";
 
         get hasButtons(): boolean {
-            logger.info("Action button container slots", this.$slots.default);
-            const hasNonComments = this.$slots.default?.some(n => !n.isComment) ?? false;
-            logger.info("has non-comments", hasNonComments);
-            return hasNonComments
+            return this.$slots.default?.some(n => !n.isComment) ?? false
         }
     }
 </script>
