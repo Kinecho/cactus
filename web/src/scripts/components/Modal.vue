@@ -92,8 +92,6 @@
 
         destroyed() {
             window.removeEventListener("keyup", this.escapeListener);
-            window.removeEventListener("resize", this.resizeListener);
-            window.visualViewport?.removeEventListener("resize", this.resizeListener);
             if (this.key) {
                 let wrapper = document.getElementById(this.key);
                 if (wrapper) {
