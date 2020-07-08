@@ -31,7 +31,6 @@
     import { CheckoutInfo } from "@components/onboarding/OnboardingTypes";
     import CactusMember from "@shared/models/CactusMember";
     import { InsightWord } from "@shared/api/InsightLanguageTypes";
-    import ReflectionResponse from "@shared/models/ReflectionResponse";
 
     interface CardProps {
         type: string,

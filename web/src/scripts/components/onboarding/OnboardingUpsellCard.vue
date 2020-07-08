@@ -12,20 +12,20 @@
                 <ul class="upsellInfo">
                     <li>
                         <svg-icon icon="heartOutline" class="icon"/>
-                        <span>Personalized journal app with daily questions to reflect&nbsp;on</span>
+                        <span><strong>Personalized</strong> journal app with daily questions to reflect&nbsp;on</span>
                     </li>
                     <li>
                         <svg-icon icon="pie" class="icon"/>
-                        <span>Insights dashboard, showing the things that make you&nbsp;happy</span>
+                        <span><strong>Insights</strong> dashboard, showing the things that make you&nbsp;happy</span>
                     </li>
                     <li>
                         <svg-icon icon="checkCircle" class="icon"/>
-                        <span>Personality tests to help you better know&nbsp;yourself</span>
+                        <span><strong>Personality</strong> tests to help you better know&nbsp;yourself</span>
                     </li>
                 </ul>
                 <div class="btnContainer">
                     <button class="tryIt" @click="checkout" :disabled="checkoutLoading">{{ctaText}}</button>
-                    <router-link :to="pricingHref" tag="a" class="button tertiary" target="_blank">More info & other plans</router-link>
+                    <router-link :to="pricingHref" tag="a" class="moreInfo button tertiary" target="_blank">More info & other plans</router-link>
                     <p class="finePrint" v-if="product.trialDays && product.trialDays > 0">
                         Cactus Plus is free for {{product.trialDays}} days, then {{pricePerMonth}} /
                         {{displayPeriod}}<span v-if="isAnnualBilling"> (billed annually)</span>. No commitment. Cancel
@@ -303,6 +303,10 @@
                 width: auto;
             }
         }
+    }
+
+    a.button.moreInfo {
+        color: $darkerGreen;
     }
 
     .finePrint {

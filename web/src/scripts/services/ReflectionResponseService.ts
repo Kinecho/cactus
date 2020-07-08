@@ -1,13 +1,13 @@
-import FirestoreService, {ListenerUnsubscriber, QueryObserverOptions} from "@web/services/FirestoreService";
-import ReflectionResponse, {ReflectionResponseField, ResponseMedium} from "@shared/models/ReflectionResponse";
-import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
-import {QuerySortDirection} from "@shared/types/FirestoreConstants";
+import FirestoreService, { ListenerUnsubscriber, QueryObserverOptions } from "@web/services/FirestoreService";
+import ReflectionResponse, { ReflectionResponseField, ResponseMedium } from "@shared/models/ReflectionResponse";
+import { BaseModelField, Collection } from "@shared/FirestoreBaseModels";
+import { QuerySortDirection } from "@shared/types/FirestoreConstants";
 import CactusMemberService from "@web/services/CactusMemberService";
 import CactusMember from "@shared/models/CactusMember";
-import {Config} from "@web/config";
-import {PageRoute} from "@shared/PageRoutes";
-import StorageService, {LocalStorageKey} from "@web/services/StorageService";
-import {calculateStreaks, StreakResult} from "@shared/util/ReflectionResponseUtil";
+import { Config } from "@web/config";
+import { PageRoute } from "@shared/PageRoutes";
+import StorageService, { LocalStorageKey } from "@web/services/StorageService";
+import { calculateStreaks, StreakResult } from "@shared/util/ReflectionResponseUtil";
 import Logger from "@shared/Logger";
 
 const logger = new Logger("ReflectionResponseService");
@@ -35,7 +35,7 @@ export default class ReflectionResponseService {
             return;
         }
 
-        return `${Config.domain}${PageRoute.SHARED_REFLECTION}/${response.id}`;
+        return `${ Config.domain }${ PageRoute.SHARED_REFLECTION }/${ response.id }`;
 
     }
 
@@ -49,7 +49,7 @@ export default class ReflectionResponseService {
 
         response.shared = true;
         response.sharedAt = new Date();
-        return await this.save(response, {saveIfAnonymous: true, updateReflectionLog: false});
+        return await this.save(response, { saveIfAnonymous: true, updateReflectionLog: false });
     }
 
     async unShareResponse(response?: ReflectionResponse): Promise<ReflectionResponse | undefined> {
@@ -62,7 +62,7 @@ export default class ReflectionResponseService {
 
         response.shared = false;
         response.unsharedAt = new Date();
-        return await this.save(response, {saveIfAnonymous: true, updateReflectionLog: false});
+        return await this.save(response, { saveIfAnonymous: true, updateReflectionLog: false });
     }
 
     async updateResponseMemberName(response: ReflectionResponse, member: CactusMember): Promise<ReflectionResponse | undefined> {
@@ -137,7 +137,7 @@ export default class ReflectionResponseService {
 
     async getForMailchimpMemberId(memberId: string): Promise<ReflectionResponse[]> {
         const query = this.getCollectionRef().where(ReflectionResponseField.mailchimpMemberId, "==", memberId)
-            .orderBy(BaseModelField.createdAt, QuerySortDirection.desc);
+        .orderBy(BaseModelField.createdAt, QuerySortDirection.desc);
         try {
             const results = await this.firestoreService.executeQuery(query, ReflectionResponse);
             return results.results;
@@ -165,7 +165,7 @@ export default class ReflectionResponseService {
         let queryUnsubscriber: ListenerUnsubscriber | undefined = undefined;
         let currentMember: CactusMember | undefined = undefined;
         const memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-            onData: ({member}) => {
+            onData: ({ member }) => {
                 const currentId = currentMember && currentMember.id;
                 const newId = member && member.id;
                 if (currentId !== newId) {
@@ -180,8 +180,8 @@ export default class ReflectionResponseService {
                 }
 
                 const query = this.getCollectionRef().where(ReflectionResponse.Field.cactusMemberId, "==", member.id)
-                    .where(ReflectionResponse.Field.promptId, "==", promptId)
-                    .orderBy(BaseModelField.createdAt, QuerySortDirection.desc);
+                .where(ReflectionResponse.Field.promptId, "==", promptId)
+                .orderBy(BaseModelField.createdAt, QuerySortDirection.desc);
 
                 options.queryName = "ReflectionResponseService:observeForPromptId";
                 queryUnsubscriber = this.firestoreService.observeQuery(query, ReflectionResponse, options);
@@ -201,7 +201,7 @@ export default class ReflectionResponseService {
 
     observeForMailchimpMemberId(memberId: string, options: QueryObserverOptions<ReflectionResponse>): ListenerUnsubscriber {
         const query = this.getCollectionRef().where(ReflectionResponseField.mailchimpMemberId, "==", memberId)
-            .orderBy(BaseModelField.createdAt, QuerySortDirection.desc);
+        .orderBy(BaseModelField.createdAt, QuerySortDirection.desc);
 
         options.queryName = "ReflectionResponseService:observeForMailchimpMemberId";
         return this.firestoreService.observeQuery(query, ReflectionResponse, options);
@@ -242,6 +242,6 @@ export default class ReflectionResponseService {
     }
 
     static getCurrentStreaks(reflections: ReflectionResponse[], member?: CactusMember): StreakResult {
-        return calculateStreaks(reflections, {timeZone: member?.timeZone || undefined});
+        return calculateStreaks(reflections, { timeZone: member?.timeZone || undefined });
     }
 }

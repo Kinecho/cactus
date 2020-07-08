@@ -107,16 +107,48 @@ const routes: MetaRouteConfig[] = [
             description: "See yourself and the world more positively. Questions to help you become more mindful and reflect on what makes you happy.",
         }
     },
+    /**
+     * Legacy prompt page. New prompts should go to new page
+     */
     {
         component: () => lazyLoadView(import(
         /* webpackPrefetch: true, webpackPreload: true, webpackChunkName: "pages" */
-        "@web/views/PromptContentPage.vue")),
-        path: `${ PageRoute.PROMPTS_ROOT }/:entryId`,
-        name: "Prompt",
+        "@web/views/LegacyPromptContentPage.vue")),
+        path: `${ PageRoute.PROMPTS_ROOT }-legacy/:entryId`,
+        name: "LegacyPrompt",
         meta: {
             title: "Reflection Prompt",
             description: "Take a moment for mindful reflection",
         }
+    },
+    {
+        component: () => lazyLoadView(import(
+        /* webpackPrefetch: true, webpackPreload: true, webpackChunkName: "pages" */
+        "@web/views/PromptPage.vue")),
+        path: `${ PageRoute.PROMPTS_ROOT }/:id`,
+        name: "Prompt",
+        props: (route) => {
+            const usePrompt = route.query[QueryParam.USE_PROMPT_ID] === "true";
+            const pageParam = route.query[QueryParam.CONTENT_INDEX]
+            return {
+                _promptId: usePrompt ? route.params.id : null,
+                _entryId: usePrompt ? null : route.params.id,
+                page: Number(route.params.page ?? pageParam ?? 1)
+            }
+        },
+        meta: {
+            title: "Reflection Prompt",
+            description: "Take a moment for mindful reflection",
+            passMember: true,
+            authRequired: true,
+            authContinueMessage: "You must be signed in to view this content"
+        },
+        children: [
+            {
+                path: ":page",
+                props: true,
+            }
+        ]
     },
     {
         component: () => lazyLoadView(import(
