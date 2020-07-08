@@ -128,7 +128,9 @@
     .prompt-content-card {
         background: $mediumDolphin url(/assets/images/grainy.png);
         color: $white;
-        min-height: 100vh;
+        height: 100vh;
+        overflow: hidden;
+        overflow-y: auto;
         padding: 3.2rem 2.4rem;
 
         @include r(374) {
