@@ -1,5 +1,5 @@
 <template>
-    <div class="actionButtonContainer" v-if="isVisible">
+    <div class="" v-if="isVisible">
         <component
                 class="action-button"
                 :is="attributes.type"
@@ -155,20 +155,20 @@
     @import "mixins";
     @import "common";
 
-    .actionButtonContainer {
-        margin-bottom: 1.6rem;
-        text-align: center;
-
-        @include r(600) {
-            display: flex;
-            margin: 0 1.6rem 0 0;
-            text-align: left;
-
-            + .actionButtonContainer {
-                margin-left: 1.6rem;
-            }
-        }
-    }
+    //.actionButtonContainer {
+    //    margin-bottom: 1.6rem;
+    //    text-align: center;
+    //
+    //    @include r(600) {
+    //        display: flex;
+    //        margin: 0 1.6rem 0 0;
+    //        text-align: left;
+    //
+    //        + .actionButtonContainer {
+    //            margin-left: 1.6rem;
+    //        }
+    //    }
+    //}
 
     button,
     .button {

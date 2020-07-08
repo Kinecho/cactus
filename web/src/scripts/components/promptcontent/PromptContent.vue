@@ -23,15 +23,17 @@
                     <card-element :card="card" :animated="false" :stacked="false"/>
                 </template>
                 <template v-slot:actions>
-                    <template v-if="isLastCard">
-                        <button class="button actions" @click="closePrompt">Done</button>
-                        <button v-if="hasNote" class="button actions tertiary shareNote" @click="showShareNote = true">
-                            <svg-icon icon="share"/>
-                            Share Note
-                        </button>
-                    </template>
-                    <prompt-button :button="card.content.actionButton" @next="next" @previous="previous" @complete="closePrompt"/>
-                    <prompt-button :link="card.content.link"/>
+                    <action-button-container>
+                        <template v-if="isLastCard">
+                            <button class="button actions" @click="closePrompt">Done</button>
+                            <button v-if="hasNote" class="button actions tertiary shareNote" @click="showShareNote = true">
+                                <svg-icon icon="share"/>
+                                Share Note
+                            </button>
+                        </template>
+                        <prompt-button :button="card.content.actionButton" @next="next" @previous="previous" @complete="closePrompt"/>
+                        <prompt-button :link="card.content.link"/>
+                    </action-button-container>
                 </template>
             </component>
         </transition-group>
@@ -96,6 +98,7 @@
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
     import PromptButton from "@components/promptcontent/PromptButton.vue";
     import CardElement from "@components/promptcontent/CardElement.vue";
+    import ActionButtonContainer from "@components/promptcontent/ActionButtonContainer.vue";
 
     export enum CardType {
         text = "text-card",
@@ -119,6 +122,7 @@
 
     @Component({
         components: {
+            ActionButtonContainer,
             CardElement,
             PromptButton,
             ActionButton: OnboardingActionButton,
