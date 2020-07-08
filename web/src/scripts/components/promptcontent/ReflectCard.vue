@@ -26,7 +26,7 @@
                 </svg>
                 <span class="doneText">{{doneButtonText}}</span>
             </button>
-            <button v-else-if="!hasText" class="skipBtn icon no-loading" @click="skip" :disabled="saving">
+            <button v-else-if="!hasText" class="skipBtn secondary no-loading" @click="skip" :disabled="saving">
                 <span class="">{{skipButtonText}}</span>
             </button>
         </div>
@@ -248,16 +248,22 @@
 
     .doneBtn, .skipBtn {
         bottom: 2.4rem;
-        padding: 1.6rem;
         position: fixed;
         right: 2.4rem;
         transition: opacity .3s;
 
         @include r(768) {
-            min-width: 20rem;
-            padding: 1.2rem 1.6rem 1.6rem;
+            min-width: 14rem;
             position: static;
             width: auto;
+        }
+    }
+
+    .doneBtn {
+        padding: 1.6rem;
+
+        @include r(768) {
+            padding: 1.2rem 1.6rem 1.6rem;
         }
 
         .check {
@@ -276,14 +282,6 @@
             @include r(768) {
                 display: inline;
             }
-        }
-
-        &.hide {
-            opacity: 0;
-        }
-
-        &.show {
-            opacity: 1;
         }
     }
 </style>
