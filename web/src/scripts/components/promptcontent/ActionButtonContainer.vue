@@ -1,5 +1,5 @@
 <template>
-    <div class="actionButtonContainer">
+    <div class="actionButtonContainer" v-if="hasButtons">
         <slot></slot>
     </div>
 </template>
@@ -11,6 +11,10 @@
     @Component
     export default class ActionButtonContainer extends Vue {
         name = "ActionButtonContainer";
+
+        get hasButtons(): boolean {
+            return this.$slots.default?.some(n => !n.isComment) ?? false
+        }
     }
 </script>
 

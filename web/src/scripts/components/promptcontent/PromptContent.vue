@@ -31,8 +31,8 @@
                                 Share Note
                             </button>
                         </template>
-                        <prompt-button :button="card.content.actionButton" @next="next" @previous="previous" @complete="closePrompt"/>
-                        <prompt-button :link="card.content.link"/>
+                        <prompt-button v-if="card.actionButton" :button="card.actionButton" @next="next" @previous="previous" @complete="closePrompt"/>
+                        <prompt-button v-if="card.link" :link="card.link"/>
                     </action-button-container>
                 </template>
             </component>
