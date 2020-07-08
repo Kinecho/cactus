@@ -1,11 +1,12 @@
 import ReflectionResponse, { DynamicResponseValues } from "@shared/models/ReflectionResponse";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import PromptContent, {
+    ActionButton,
     Audio,
     Content,
-    ContentBackgroundImage,
+    ContentBackgroundImage, ContentLink,
     ContentType,
-    Image,
+    Image, isActionButton, isContentLink,
     isImage,
     Video
 } from "@shared/models/PromptContent";
@@ -108,6 +109,20 @@ export default class PromptContentCardViewModel {
         const responses = this.responses ?? []
         if (responses.length > 0) {
             return responses.map(r => r.content.text).join("\n\n").trim();
+        }
+        return null;
+    }
+
+    get link(): ContentLink | null {
+        if (isContentLink(this.content.link)) {
+            return this.content.link;
+        }
+        return null;
+    }
+
+    get actionButton(): ActionButton | null {
+        if (isActionButton(this.content.actionButton)) {
+            return this.content.actionButton;
         }
         return null;
     }
