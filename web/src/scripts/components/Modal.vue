@@ -81,12 +81,7 @@
 
             window.clearInterval(this.cleanupInterval);
             this.removeModal();
-            try {
-                document.body.classList.remove("no-scroll");
-                this.$root.$children[0]?.$el?.classList?.remove("modal-mask-in");
-            } catch (error) {
-                //unable to remove classes from the body;
-            }
+            this.removeStyles();
 
         },
         data(): {
@@ -94,17 +89,51 @@
             id?: string,
             cleanupInterval?: any,
             hasShown: boolean,
+            scrollPosition: number
         } {
             return {
                 escapeListener: undefined,
                 cleanupInterval: undefined,
                 hasShown: this.show,
+                scrollPosition: 0,
             }
         },
         methods: {
             close() {
                 this.$emit("close");
             },
+            addStyles() {
+                try {
+                    const scrollPosition = window.pageYOffset;
+                    const isNoScroll = document.body.classList.contains("no-scroll");
+                    document.body.classList.add("no-scroll");
+                    this.$root.$children[0]?.$el?.classList?.add("modal-mask-in")
+                    if (!isNoScroll) {
+                        this.scrollPosition = scrollPosition;
+                        logger.info("setting scroll position to", scrollPosition);
+                        document.body.style.top = `-${ scrollPosition }px`;
+                    }
+
+                } catch (error) {
+                    logger.error("Failed to add modal-mask-in on app root", error)
+                }
+            },
+            removeStyles() {
+                try {
+                    const isNoScroll = document.body.classList.contains("no-scroll");
+
+                    document.body.classList.remove("no-scroll");
+                    this.$root.$children[0]?.$el?.classList?.remove("modal-mask-in");
+                    document.body.style.removeProperty('top');
+                    if (isNoScroll) {
+                        logger.info("Scrolling to", this.scrollPosition);
+                        window.scrollTo(0, this.scrollPosition);
+                    }
+                } catch (error) {
+                    logger.error("failed to remove modal-mask-in class from the app root", error);
+                }
+            },
+
             removeModal() {
                 if (this.key) {
                     const wrapper = document.getElementById(this.key);
@@ -129,20 +158,10 @@
                     }
 
                     this.hasShown = true;
-                    try {
-                        document.body.classList.add("no-scroll");
-                        this.$root.$children[0]?.$el?.classList?.add("modal-mask-in")
-                    } catch (error) {
-                        logger.error("Failed to add modal-mask-in on app root", error)
-                    }
+                    this.addStyles()
 
                 } else {
-                    try {
-                        document.body.classList.remove("no-scroll");
-                        this.$root.$children[0]?.$el?.classList?.remove("modal-mask-in");
-                    } catch (error) {
-                        logger.error("failed to remove modal-mask-in class from the app root", error);
-                    }
+                    this.removeStyles()
 
                     //wait for a bit before removing the wrapper element so that any animations can finish.
                     this.cleanupInterval = window.setTimeout(() => {
@@ -172,7 +191,7 @@
     .modal-mask {
         align-items: center;
         display: flex;
-        height: 100%;
+        height: 100vh;
         justify-content: center;
         left: 0;
         overflow-y: auto;
