@@ -19,9 +19,20 @@
     @include r(600) {
         align-items: center;
         display: flex;
-        margin-top: 4rem;
+        margin-top: 5.6rem;
         padding: 3.2rem;
         position: static;
+
+        .button {
+            flex-grow: 0;
+            min-width: 16rem;
+        }
+
+        .button + .button {
+            margin-left: 1.6rem;
+        }
+    }
+    @include r(768) {
         padding: 0;
     }
 
