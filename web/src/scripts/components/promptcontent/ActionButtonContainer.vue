@@ -19,21 +19,26 @@
     @import "variables";
 
     .actionButtonContainer {
-        margin-bottom: 1.6rem;
-        text-align: center;
-
-        > * {
-            margin-bottom: 1.6rem;
-        }
-
         @include r(600) {
             display: flex;
-            margin: 0 1.6rem 0 0;
-            text-align: left;
+            min-width: 32rem;
+        }
+    }
 
-            > * + * {
-                margin-left: 1.6rem;
-            }
+    .button {
+        margin-bottom: 1.6rem;
+        white-space: nowrap;
+        width: 100%;
+
+        @include r(600) {
+            margin-bottom: 0;
+            
+        }
+    }
+
+    .button + .button {
+        @include r(600) {
+            margin-left: 1.6rem;
         }
     }
 </style>

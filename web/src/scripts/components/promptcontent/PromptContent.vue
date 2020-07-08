@@ -494,7 +494,10 @@
     }
 
     .shareNote {
+        align-items: center;
         color: $darkerGreen;
+        display: flex;
+        justify-content: center;
 
         .icon {
             height: 1.8rem;

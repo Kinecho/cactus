@@ -155,21 +155,6 @@
     @import "mixins";
     @import "common";
 
-    //.actionButtonContainer {
-    //    margin-bottom: 1.6rem;
-    //    text-align: center;
-    //
-    //    @include r(600) {
-    //        display: flex;
-    //        margin: 0 1.6rem 0 0;
-    //        text-align: left;
-    //
-    //        + .actionButtonContainer {
-    //            margin-left: 1.6rem;
-    //        }
-    //    }
-    //}
-
     button,
     .button {
         display: block;
