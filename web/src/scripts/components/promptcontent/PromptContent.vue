@@ -166,7 +166,6 @@
 
         mounted() {
             this.keyListener = document.addEventListener("keyup", this.handleDocumentKeyUp)
-            this.debounceResizeHandler();
         }
 
         destroyed() {
