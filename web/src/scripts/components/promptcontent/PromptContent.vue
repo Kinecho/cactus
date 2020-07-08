@@ -341,8 +341,6 @@
         background: $beige no-repeat;
         background-image: url(/assets/images/transparentBlob1.svg), url(/assets/images/transparentBlob2.svg);
         font-size: 2rem;
-        //min-height: 100vh;
-        //width: 100%;
         overflow: hidden;
         transition: background-position 1s, background-color 1s;
         position: absolute;
@@ -408,12 +406,6 @@
         width: 100%;
         height: 100%;
         position: absolute;
-        /*top: 0;*/
-        /*left: 0;*/
-        /*right: 0;*/
-        /*bottom: 0;*/
-        /*display: flex;*/
-        /*justify-content: center;*/
         overflow: hidden;
     }
 
@@ -422,8 +414,7 @@
         width: 100%;
         overflow: auto;
         height: 100%;
-        /*overflow: auto;*/
-        /*flex: 1;*/
+
         @include r(600) {
             align-items: center;
             display: flex;
@@ -498,14 +489,6 @@
 
     .isLastCard {
         background-color: lighten($green, 20%);
-
-        @include r(600) {
-            /*justify-content: center;*/
-
-            /*.card-container {*/
-            /*    flex-grow: 0;*/
-            /*}*/
-        }
     }
 
     .actions .shareNote {

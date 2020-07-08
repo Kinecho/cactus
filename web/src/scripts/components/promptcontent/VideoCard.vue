@@ -75,11 +75,9 @@
         @include r(374) {
             justify-content: center;
             margin: 0 auto;
-            //max-width: 48rem;
             padding: 0 2.4rem;
         }
         @include r(768) {
-            //max-width: 64rem;
             min-height: 80vh;
         }
         @include r(960) {
@@ -108,6 +106,7 @@
             position: relative;
             padding-bottom: 56.25%; //makes a 16:9 aspect ratio
             padding-top: 2.4rem;
+            
             /*.loading {*/
             /*    position: absolute;*/
             /*    top: 0;*/
