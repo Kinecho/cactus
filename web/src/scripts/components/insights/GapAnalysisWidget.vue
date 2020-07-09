@@ -56,11 +56,11 @@
     </section>
     <!-- Show BASIC User Upgrade message -->
     <section v-else-if="!isPlusMember" class="basic nogapContainer borderContainer">
-        <h2>What makes you happy?</h2>
-        <p class="subtext">Get access to the quiz that helps you identify and focus on the people, places, and things
-            that make you happy.</p>
-        <router-link tag="button" class="esButton" :to="pricingHref">Try Cactus Plus
-        </router-link>
+        <h2><svg-icon icon="lock" class="lock"/>What Makes Me Happy?</h2>
+        <p class="subtext">Discover the people, places, & things that make you happy.</p>
+        <!-- <router-link tag="button" class="secondary esButton" :to="pricingHref">Take the
+            Mental Fitness quiz
+        </router-link> -->
     </section>
 </template>
 
@@ -76,12 +76,14 @@
     import Results from "@components/gapanalysis/Results.vue";
     import Spinner from "@components/Spinner.vue";
     import GapAnalysisLegend from "@components/gapanalysis/GapAnalysisLegend.vue";
+    import SvgIcon from "@components/SvgIcon.vue";
 
     @Component({
         components: {
             DropdownMenu,
             Results,
             GapAnalysisLegend,
+            SvgIcon,
             Spinner
         }
     })
@@ -168,10 +170,6 @@
             flex-basis: 66%;
             flex-direction: row;
         }
-
-        .subtext {
-            margin: 0 0 4rem;
-        }
     }
 
     .flexIt {
@@ -238,12 +236,16 @@
         }
 
         &.basic {
-            background: url(/assets/images/radarChartGraphic.svg) center top 14rem no-repeat;
-            padding-bottom: 7.2rem;
+            background-color: $royal;
+            background-image: url(/assets/images/grainy.png), url(/assets/images/radarChartGraphicGreen.svg);
+            background-position: 0 0, right -11rem center;
+            background-repeat: repeat, no-repeat;
+            background-size: auto, 19rem;
+            color: $white;
+            padding-left: 2.4rem;
 
             @include r(600) {
-                background-position: right -38rem center;
-                padding-bottom: 3.2rem;
+                background-position: 0 0, right -38rem center;
 
                 .subtext {
                     max-width: 66%;
@@ -265,11 +267,19 @@
         }
 
         .subtext {
-            margin-bottom: 2.4rem;
+            padding-left: 3.2rem;
 
             @include r(768) {
                 max-width: 48rem;
             }
+        }
+    }
+
+    .esButton {
+        width: 100%;
+
+        @include r(768) {
+            width: auto;
         }
     }
 

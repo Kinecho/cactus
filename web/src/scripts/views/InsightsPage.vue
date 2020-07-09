@@ -23,10 +23,9 @@
                 <dropdown-menu :items="coreValuesDropdownLinks" class="dotsBtn"/>
             </section>
             <section class="novaluesContainer" v-else>
-                <h2>Core Values</h2>
-                <p class="subtext">Discover what is most important for you so that you better understand past decisions
-                    and make better decisions in the future.</p>
-                <router-link tag="button" class="esButton" :to="coreValuesHref">Get My Core Values</router-link>
+                <h2><svg-icon icon="lock" class="lock"/>Get My Core Values</h2>
+                <p class="subtext">Discover what is most important & understand yourself better.</p>
+                <!-- <router-link tag="button" class="secondary esButton" :to="coreValuesHref">Get My Core Values</router-link> -->
             </section>
 
             <div class="flexSections">
@@ -87,6 +86,7 @@
     import PromptContentService from "@web/services/PromptContentService";
     import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
     import JournalEntry from "@web/datasource/models/JournalEntry";
+    import SvgIcon from "@components/SvgIcon.vue";
 
     const logger = new Logger("InsightsPage");
     const copy = CopyService.getSharedInstance().copy;
@@ -103,6 +103,7 @@
             WordCloud,
             DropdownMenu,
             Spinner,
+            SvgIcon,
         }
     })
     export default class InsightsPage extends Vue {
@@ -298,12 +299,12 @@
         @include shadowbox;
         background-color: $dolphin;
         background-image: url(/assets/images/grainy.png), url(/assets/images/cvBlob.png), url(/assets/images/pinkVs.svg);
-        background-position: 0 0, -14rem -15rem, -7rem 120%;
+        background-position: 0 0, -17rem -7rem, right -6rem top -4rem;
         background-repeat: repeat, no-repeat, no-repeat;
         background-size: auto, 28rem, auto;
         color: $white;
-        margin-bottom: 4rem;
-        padding: 3.2rem;
+        margin-bottom: 3.2rem;
+        padding: 2.4rem 3.2rem 3.2rem 2.4rem;
         position: relative;
 
         @include r(768) {
@@ -313,9 +314,17 @@
         }
 
         .subtext {
-            margin: 0 0 2.4rem;
             max-width: 56rem;
             opacity: .8;
+            padding-left: 3.2rem;
+        }
+
+        .esButton {
+            width: 100%;
+
+            @include r(768) {
+                width: auto;
+            }
         }
     }
 

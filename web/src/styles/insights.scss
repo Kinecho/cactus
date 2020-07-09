@@ -19,7 +19,6 @@ h3 {
 
 .subtext {
     font-size: 1.6rem;
-    margin-bottom: 4rem;
     opacity: .8;
 
     &.light {
@@ -43,8 +42,8 @@ h3 {
 .borderContainer {
   border: 1px solid $lightest;
   border-radius: 1.6rem;
-  margin-bottom: 4rem;
-  padding: 3.2rem;
+  margin-bottom: 3.2rem;
+  padding: 2.4rem 3.2rem 3.2rem;
   position: relative;
 
   @include r(768) {
@@ -62,6 +61,12 @@ h3 {
   position: absolute;
   right: 1rem;
   top: 1.6rem;
+}
+
+.lock {
+    height: 1.6rem;
+    margin-right: 1.6rem;
+    width: 1.6rem;
 }
 
 .esButton {
