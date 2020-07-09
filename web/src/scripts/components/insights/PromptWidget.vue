@@ -1,5 +1,7 @@
 <template>
     <div class="today-widget" :class="{reflected: hasReflected}">
+        <img class="blob" src="assets/images/transparentBlob1.svg"/>
+        <img class="blob" src="assets/images/transparentBlob2.svg"/>
         <p class="date">Today</p>
         <spinner v-if="loading || !entry.allLoaded"/>
         <template v-else>
@@ -117,15 +119,39 @@
         margin: 0 2.4rem 3.2rem;
         overflow: hidden;
         padding: 2.4rem;
+        position: relative;
 
         @include r(374) {
             margin: 0 0 3.2rem;
             padding: 2.4rem 3.2rem 3.2rem;
         }
+        @include r(600) {
+            min-height: 24rem;
+        }
         @include r(768) {
             margin-bottom: 4.8rem;
         }
+    }
 
+    .blob {
+        animation: rotateInfinite 48s infinite;
+        height: auto;
+        left: 0;
+        position: absolute;
+        top: 0;
+        transform-origin: left top;
+        width: 100vw;
+
+        @include r(768) {
+            width: 60rem;
+        }
+
+        &:nth-child(2) {
+            animation-direction: reverse;
+            bottom: 0;
+            right: 0;
+            transform-origin: right bottom;
+        }
     }
 
     .date {
@@ -138,6 +164,11 @@
         font-size: 2.1rem;
         line-height: 1.3;
         margin-bottom: 2.4rem;
+    }
+
+    .question,
+    .entry {
+        width: 66%;
     }
 
     .entry {
@@ -160,11 +191,6 @@
         }
     }
 
-    .reflected {
-        .backgroundImage {
-        }
-    }
-
     .backgroundImage {
         height: 28rem;
         margin: 0 0 -14rem;
@@ -172,6 +198,18 @@
         position: relative;
         right: 0;
         z-index: 0;
+
+        @include r(600) {
+            height: auto;
+            left: 66%;
+            position: absolute;
+            top: 3.2rem;
+            width: 24rem;
+            z-index: 0;
+        }
+        @include r(768) {
+            width: 36rem;
+        }
 
         img {
             display: block;
@@ -188,10 +226,11 @@
 
         button {
             width: 100%;
+
+            @include r(600) {
+                min-width: 16rem;
+                width: auto;
+            }
         }
     }
-
-    .reflection {
-    }
-
 </style>
