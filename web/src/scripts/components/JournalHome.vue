@@ -33,24 +33,6 @@
                 </div>
 
                 <div class="section-container" v-if="loggedIn && loginReady && journalEntries.length > 0">
-                    <!-- TODO: this key isn't right -->
-                    <snackbar-content
-                            v-if="showCoreValuesBanner"
-                            class="coreValuesBox"
-                            :closeable="true"
-                            key="core-values-banner"
-                            :autoHide="false"
-                            @close="coreValuesClosed = true"
-                            color="dolphin">
-                        <div slot="text" class="centered">
-                            <h3 class="cvTitle">What's important to&nbsp;you?</h3>
-                            <p class="cvSubtext" v-if="!plusUser">Discover your core values by taking our
-                                assessment.</p>
-                            <p class="cvSubtext" v-else>Discover your core values by taking our assessment, included
-                                with your Plus&nbsp;membership.</p>
-                        </div>
-                        <button class="cvButton" slot="action" @click="launchCoreValues">Find My Core Values</button>
-                    </snackbar-content>
                     <section class="journalList">
                         <transition-group
                                 tag="div"
