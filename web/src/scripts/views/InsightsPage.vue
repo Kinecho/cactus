@@ -2,7 +2,7 @@
     <div class="insightsDash">
         <NavBar/>
         <div class="centered" v-if="authLoaded">
-            <h1>Insights</h1>
+            <h1>Welcome back, {{displayName}}</h1>
 
             <reflection-stats-widget :reflection-stats="reflectionStats" v-if="reflectionStats"/>
             <prompt-widget :entry="todayEntry" :member="member" :loading="todayPromptLoading"/>
@@ -191,6 +191,10 @@
         cancelSetFocus() {
             this.selectFocusEnabled = false;
             this.currentElementSelection = null;
+        }
+
+        get displayName(): string | undefined {
+            return this.member?.firstName;
         }
 
         get coreValuesBlob(): CoreValuesBlob | undefined {
