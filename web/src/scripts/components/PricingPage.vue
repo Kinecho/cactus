@@ -32,7 +32,7 @@
                                     personalized mindfulness&nbsp;journey.</p>
                             </div>
                             <div class="benefit">
-                                <span class="benefitIcon"><img src="/assets/images/lock.svg" alt=""/></span>
+                                <span class="benefitIcon"><img src="/assets/icons/lock.svg" alt=""/></span>
                                 <h3>Private + secure</h3>
                                 <p class="text">Your journal entries are yours—encrypted and never read
                                     or&nbsp;sold.</p>
