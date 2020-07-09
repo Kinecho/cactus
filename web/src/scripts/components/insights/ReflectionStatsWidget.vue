@@ -36,13 +36,6 @@
 
             const stats: StatWidgetData[] = [];
 
-            stats.push({
-                value: `${ memberStats.totalCount }`,
-                label: "Reflections",
-                unit: "",
-                icon: "journal"
-            });
-
             if (memberStats.currentStreakDays > 1) {
                 stats.push({
                     value: `${ memberStats.currentStreakDays }`,
@@ -65,6 +58,13 @@
                     icon: "flame"
                 })
             }
+
+            stats.push({
+                value: `${ memberStats.totalCount }`,
+                label: "Reflections",
+                unit: "",
+                icon: "journal"
+            });
 
             let totalDuration = memberStats.totalDurationMs ?? 0;
             let durationValue = `${ totalDuration.toFixed(0) }`;
