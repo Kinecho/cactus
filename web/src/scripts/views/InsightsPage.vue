@@ -2,7 +2,7 @@
     <div class="insightsDash">
         <NavBar/>
         <div class="centered" v-if="authLoaded">
-            <h1>Welcome back, {{displayName}}</h1>
+            <h1>Welcome back{{displayName ? ', ' + displayName : ''}}</h1>
 
             <reflection-stats-widget :reflection-stats="reflectionStats" v-if="reflectionStats"/>
             <prompt-widget :entry="todayEntry" :member="member" :loading="todayPromptLoading"/>
