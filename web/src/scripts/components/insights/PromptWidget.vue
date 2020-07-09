@@ -8,18 +8,18 @@
             <h3 class="question">
                 <markdown-text :source="questionText"/>
             </h3>
-            <p class="entry" v-if="!hasReflected && !reflectionText">
+            <p class="previewText" v-if="!hasReflected && !reflectionText">
                 <markdown-text :source="previewText"/>
+            </p>
+            <p class="entry" v-if="hasReflected && reflectionText">
+                {{reflectionText}}
             </p>
 
             <div class="backgroundImage">
                 <flamelink-image :image="image"/>
             </div>
-            <p class="refection" v-if="hasReflected && reflectionText">
-                {{reflectionText}}
-            </p>
 
-            <div class="buttonContainer">
+            <div class="buttonContainer" v-if="!hasReflected">
                 <router-link v-if="link" :to="link" tag="button">Reflect</router-link>
             </div>
         </template>
@@ -134,22 +134,24 @@
     }
 
     .blob {
-        animation: rotateInfinite 48s infinite;
+        animation: rotateInfinite 60s infinite;
         height: auto;
-        left: 0;
+        left: -3.2rem;
         position: absolute;
-        top: 0;
+        top: -3.2rem;
         transform-origin: left top;
         width: 100vw;
 
         @include r(768) {
-            width: 60rem;
+            width: 80rem;
         }
 
         &:nth-child(2) {
             animation-direction: reverse;
-            bottom: 0;
-            right: 0;
+            bottom: -3.2rem;
+            left: auto;
+            right: -3.2rem;
+            top: auto;
             transform-origin: right bottom;
         }
     }
@@ -163,20 +165,26 @@
     .question {
         font-size: 2.1rem;
         line-height: 1.3;
-        margin-bottom: 2.4rem;
+        margin-bottom: .8rem;
     }
 
     .question,
     .entry {
-        width: 66%;
+        @include r(600) {
+            width: 66%;
+        }
     }
 
     .entry {
+        margin: 0 0 2.4rem -2rem;
         padding-left: 2rem;
         position: relative;
         white-space: pre-line;
-        margin: 1.6rem 0 1.6rem -2rem;
         word-break: break-word;
+
+        @include r(600) {
+            margin: 1.6rem 0;
+        }
 
         &:before {
             background-color: $royal;
@@ -184,10 +192,15 @@
             content: '';
             display: block;
             height: 100%;
-            left: .4rem;
+            left: -1.2rem;
             position: absolute;
             top: 0;
             width: .4rem;
+
+            @include r(600) {
+                border-radius: .4rem;
+                left: 0;
+            }
         }
     }
 
