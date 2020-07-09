@@ -39,7 +39,7 @@
                 <dropdown-menu :items="links" v-if="loggedIn" :displayName="displayName" :email="email">
                     <div class="navbar-avatar-container" slot="custom-button">
                         <div v-if="!profileImageUrl" class="initials">{{initials}}</div>
-                        <img v-if="profileImageUrl" :alt="(displayName || email) + `'s Profile Image`" :src="profileImageUrl"/>
+                        <img v-if="profileImageUrl" alt="Account" :src="profileImageUrl"/>
                     </div>
                 </dropdown-menu>
             </div>
