@@ -40,7 +40,7 @@
         display: flex;
         flex-basis: 33%;
         margin-right: .8rem;
-        padding: 1.6rem;
+        padding: 2.4rem;
 
         @include r(600) {
             margin-right: 1.6rem;
