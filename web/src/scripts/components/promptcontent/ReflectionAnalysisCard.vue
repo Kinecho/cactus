@@ -158,6 +158,10 @@
             padding-right: 6.4rem;
             width: 50%;
         }
+
+        &:empty {
+            display: none;
+        }
     }
 
     .analysisContainer {
