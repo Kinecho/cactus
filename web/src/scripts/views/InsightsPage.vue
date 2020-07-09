@@ -33,7 +33,8 @@
                     <dropdown-menu :items="coreValuesDropdownLinks" class="dotsBtn"/>
                 </section>
                 <section class="novaluesContainer" v-else>
-                    <h2><svg-icon icon="lock" class="lock"/>Get My Core Values</h2>
+                    <svg class="lock" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    <h2>Get My Core Values</h2>
                     <p class="subtext">Discover what is most important & understand yourself better.</p>
                     <!-- <router-link tag="button" class="secondary esButton" :to="coreValuesHref">Get My Core Values</router-link> -->
                 </section>
@@ -329,22 +330,19 @@
         background-size: auto, 28rem, auto;
         color: $white;
         margin: 0 2.4rem 3.2rem;
-        padding: 2.4rem 3.2rem 3.2rem 2.4rem;
+        padding: 2.4rem 3.2rem 3.2rem 5.6rem;
         position: relative;
 
         @include r(374) {
             margin: 0 0 3.2rem;
         }
         @include r(768) {
-            background-position: 0 0, 100% -15rem, 98% 133%;
-            background-size: auto, 40rem, auto;
             margin: 0 .8rem 4.8rem 0;
         }
 
         .subtext {
             max-width: 56rem;
             opacity: .8;
-            padding-left: 3.2rem;
         }
 
         .esButton {
@@ -488,9 +486,15 @@
     }
 
     .bubblesContainer {
+        padding: 2.4rem;
+ 
+        @include r(374) {
+            padding: 3.2rem 3.2rem 2.4rem;
+        }
         @include r(600) {
             display: flex;
             flex-direction: row;
+            
         }
         @include r(768) {
             display: block;
@@ -499,6 +503,10 @@
         }
         @include r(960) {
             flex-basis: 33%;
+        }
+
+        .subtext {
+            margin-bottom: 1.6rem;
         }
 
         .wordCloud {

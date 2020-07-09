@@ -56,7 +56,8 @@
     </section>
     <!-- Show BASIC User Upgrade message -->
     <section v-else-if="!isPlusMember" class="basic nogapContainer borderContainer">
-        <h2><svg-icon icon="lock" class="lock"/>What Makes Me Happy?</h2>
+        <svg class="lock" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        <h2>What Makes Me Happy?</h2>
         <p class="subtext">Discover the people, places, & things that make you happy.</p>
         <!-- <router-link tag="button" class="secondary esButton" :to="pricingHref">Take the
             Mental Fitness quiz
@@ -246,24 +247,15 @@
             background-repeat: repeat, no-repeat;
             background-size: auto, 19rem;
             color: $white;
-            padding-left: 2.4rem;
+            padding-left: 5.6rem;
 
-            @include r(600) {
-                background-position: 0 0, right -38rem center;
-            }
             @include r(768) {
-                background-size: 150%;
-                background-position: center top 22rem;
                 margin: 0 0 4.8rem .8rem;
             }
         }
 
         h2 {
             margin-bottom: .4rem;
-        }
-
-        .subtext {
-            padding-left: 3.2rem;
         }
     }
 
