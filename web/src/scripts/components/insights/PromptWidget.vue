@@ -1,25 +1,25 @@
 <template>
     <div class="today-widget" :class="{reflected: hasReflected}">
-        <h4>Today</h4>
+        <p class="date">Today</p>
         <spinner v-if="loading || !entry.allLoaded"/>
         <template v-else>
-            <template>
-                <h3>
-                    <markdown-text :source="questionText"/>
-                </h3>
-                <p v-if="!hasReflected && !reflectionText">
-                    <markdown-text :source="previewText"/>
-                </p>
+            <h3 class="question">
+                <markdown-text :source="questionText"/>
+            </h3>
+            <p class="entry" v-if="!hasReflected && !reflectionText">
+                <markdown-text :source="previewText"/>
+            </p>
 
-                <div class="backgroundImage">
-                    <flamelink-image :image="image"/>
-                </div>
-                <p class="refection" v-if="hasReflected && reflectionText">
-                    {{reflectionText}}
-                </p>
+            <div class="backgroundImage">
+                <flamelink-image :image="image"/>
+            </div>
+            <p class="refection" v-if="hasReflected && reflectionText">
+                {{reflectionText}}
+            </p>
 
+            <div class="buttonContainer">
                 <router-link v-if="link" :to="link" tag="button">Reflect</router-link>
-            </template>
+            </div>
         </template>
     </div>
 </template>
@@ -108,44 +108,69 @@
     @import "mixins";
 
     .today-widget {
-        @include shadowbox;
-        margin: 0 auto 3.2rem;
+        background-color: $bgGreen;
+        margin-bottom: 3.2rem;
         overflow: hidden;
-        padding: 1.6rem 1.6rem 2.4rem;
-        position: relative;
-        text-align: left;
+        padding: 2.4rem;
 
-        @include r(600) {
-            // max width is defined by the parent container, see JournalHome.vue
-            padding: 3.2rem 2.4rem;
+        @include r(374) {
+            border-radius: 12px;
+            box-shadow: 0 6.9px 21px -24px rgba(0, 0, 0, 0.032),
+                0 11.5px 32.3px -24px rgba(0, 0, 0, 0.056),
+                0 13.9px 37.7px -24px rgba(0, 0, 0, 0.094),
+                0 24px 63px -24px rgba(0, 0, 0, 0.35);
+            padding: 2.4rem 3.2rem 3.2rem;
         }
 
         @include r(768) {
-            margin-bottom: 4.8rem;
-            padding: 3.2rem;
         }
 
+    }
+
+    .date {
+        font-size: 1.6rem;
+        margin: .8rem 0 .4rem;
+        opacity: .8;
+    }
+
+    .question {
+        font-size: 2.1rem;
+        line-height: 1.3;
+        margin-bottom: 2.4rem;
+    }
+
+    .entry {
+        padding-left: 2rem;
+        position: relative;
+        white-space: pre-line;
+        margin: 1.6rem 0 1.6rem -2rem;
+        word-break: break-word;
+
+        &:before {
+            background-color: $royal;
+            border-radius: 0 .4rem .4rem 0;
+            content: '';
+            display: block;
+            height: 100%;
+            left: .4rem;
+            position: absolute;
+            top: 0;
+            width: .4rem;
+        }
     }
 
     .reflected {
         .backgroundImage {
-            height: 8rem;
-            overflow: hidden;
-            z-index: 0;
         }
     }
 
     .backgroundImage {
-        height: 23rem;
+        height: 28rem;
+        margin: 0 0 -14rem;
         overflow: hidden;
+        position: relative;
+        right: 0;
         z-index: 0;
-
-        @include r(600) {
-            height: 100%;
-            margin: 0;
-            max-width: 28rem;
-            top: 7.2rem;
-        }
 
         img {
             display: block;
@@ -155,8 +180,17 @@
         }
     }
 
+    .buttonContainer {
+        margin-top: 2.4rem;
+        position: relative;
+        z-index: 1;
+
+        button {
+            width: 100%;
+        }
+    }
+
     .reflection {
-        white-space: pre-wrap;
     }
 
 </style>
