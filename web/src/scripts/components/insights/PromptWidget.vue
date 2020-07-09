@@ -109,20 +109,21 @@
 
     .today-widget {
         background-color: $bgGreen;
-        margin-bottom: 3.2rem;
+        border-radius: 1.6rem;
+        box-shadow: 0 6.9px 21px -24px rgba(0, 0, 0, 0.032),
+                0 11.5px 32.3px -24px rgba(0, 0, 0, 0.056),
+                0 13.9px 37.7px -24px rgba(0, 0, 0, 0.094),
+                0 24px 63px -24px rgba(0, 0, 0, 0.35);
+        margin: 0 2.4rem 3.2rem;
         overflow: hidden;
         padding: 2.4rem;
 
         @include r(374) {
-            border-radius: 12px;
-            box-shadow: 0 6.9px 21px -24px rgba(0, 0, 0, 0.032),
-                0 11.5px 32.3px -24px rgba(0, 0, 0, 0.056),
-                0 13.9px 37.7px -24px rgba(0, 0, 0, 0.094),
-                0 24px 63px -24px rgba(0, 0, 0, 0.35);
+            margin: 0 0 3.2rem;
             padding: 2.4rem 3.2rem 3.2rem;
         }
-
         @include r(768) {
+            margin-bottom: 4.8rem;
         }
 
     }

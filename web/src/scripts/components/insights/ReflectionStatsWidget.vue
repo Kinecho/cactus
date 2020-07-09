@@ -108,7 +108,7 @@
         @include r(960) {
             margin: 0 0 2.4rem;
             overflow: visible;
-            padding-bottom: 2.4rem;
+            padding: 0 0 2.4rem;
         }
     }
 </style>

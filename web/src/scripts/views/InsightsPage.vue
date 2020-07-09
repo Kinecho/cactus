@@ -4,39 +4,10 @@
         <div class="centered" v-if="authLoaded">
             <h1>Welcome back{{displayName ? ', ' + displayName : ''}}</h1>
 
-            <reflection-stats-widget :reflection-stats="reflectionStats" v-if="reflectionStats"/>
-            <prompt-widget :entry="todayEntry" :member="member" :loading="todayPromptLoading"/>
-            <section class="valuesContainer" v-if="hasCoreValues">
-                <h2>Core Values</h2>
-                <p class="subtext">The values important in your&nbsp;life</p>
-                <div class="flexIt">
-                    <div class="imgContainer" v-if="coreValuesBlob">
-                        <img :src="coreValuesBlob.imageUrl" alt="Core Values Graphic"/>
-                    </div>
-                    <ul class="core-values-list">
-                        <li v-for="(coreValue, index) in coreValues" :key="`value_${index}`" class="core-value">
-                            <h3>{{coreValue.value}}</h3>
-                            <p class="description">{{coreValue.description}}</p>
-                        </li>
-                    </ul>
-                </div>
-                <dropdown-menu :items="coreValuesDropdownLinks" class="dotsBtn"/>
-            </section>
-            <section class="novaluesContainer" v-else>
-                <h2><svg-icon icon="lock" class="lock"/>Get My Core Values</h2>
-                <p class="subtext">Discover what is most important & understand yourself better.</p>
-                <!-- <router-link tag="button" class="secondary esButton" :to="coreValuesHref">Get My Core Values</router-link> -->
-            </section>
-
-            <div class="flexSections">
-                <gap-analysis-widget :loading="gapResultsLoading"
-                        :gap-assessment-results="gapAssessmentResults"
-                        :is-plus-member="isPlusMember"
-                        :member-focus-element="focusElement"
-                        @focusElement="saveFocus"
-                />
-
-                <section class="bubblesContainer borderContainer" v-if="hasWordCloud">
+            <div class="insightsGrid">
+                <reflection-stats-widget :reflection-stats="reflectionStats" v-if="reflectionStats"/>
+                <prompt-widget :entry="todayEntry" :member="member" :loading="todayPromptLoading"/>
+                <section class="bubblesContainer" v-if="hasWordCloud">
                     <div class="flexIt">
                         <h2>Word Bubbles</h2>
                         <p class="subtext">Common words in your reflections</p>
@@ -45,6 +16,33 @@
                         <WordCloud class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
                     </div>
                 </section>
+                <section class="valuesContainer" v-if="hasCoreValues">
+                    <h2>Core Values</h2>
+                    <p class="subtext">The values important in your&nbsp;life</p>
+                    <div class="flexIt">
+                        <div class="imgContainer" v-if="coreValuesBlob">
+                            <img :src="coreValuesBlob.imageUrl" alt="Core Values Graphic"/>
+                        </div>
+                        <ul class="core-values-list">
+                            <li v-for="(coreValue, index) in coreValues" :key="`value_${index}`" class="core-value">
+                                <h3>{{coreValue.value}}</h3>
+                                <p class="description">{{coreValue.description}}</p>
+                            </li>
+                        </ul>
+                    </div>
+                    <dropdown-menu :items="coreValuesDropdownLinks" class="dotsBtn"/>
+                </section>
+                <section class="novaluesContainer" v-else>
+                    <h2><svg-icon icon="lock" class="lock"/>Get My Core Values</h2>
+                    <p class="subtext">Discover what is most important & understand yourself better.</p>
+                    <!-- <router-link tag="button" class="secondary esButton" :to="coreValuesHref">Get My Core Values</router-link> -->
+                </section>
+                <gap-analysis-widget :loading="gapResultsLoading"
+                        :gap-assessment-results="gapAssessmentResults"
+                        :is-plus-member="isPlusMember"
+                        :member-focus-element="focusElement"
+                        @focusElement="saveFocus"
+                />
             </div>
         </div>
         <Footer/>
@@ -282,15 +280,42 @@
                 padding: 0 2.4rem 6.4rem;
             }
         }
+    }
 
-        h1 {
-            margin: 3.2rem 2.4rem;
+    h1 {
+        margin: 3.2rem 2.4rem;
 
-            @include r(374) {
-                margin: 3.2rem 0;
+        @include r(374) {
+            margin: 3.2rem 0;
+        }
+        @include r(768) {
+            margin: 6.4rem 0 4rem;
+        }
+    }
+
+    .insightsGrid {
+        @include r(768) {
+            display: grid;
+            grid-template-areas: "stats stats stats stats stats stats"
+                "today today today today bubbles bubbles"
+                "values values values gap gap gap";
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+            grid-template-rows: auto;
+
+            .statsContainer {
+                grid-area: stats;
             }
-            @include r(768) {
-                margin: 6.4rem 0 4rem;
+            .today-widget {
+                grid-area: today;
+            }
+            .bubblesContainer {
+                grid-area: bubbles;
+            }
+            .novaluesContainer {
+                grid-area: values;
+            }
+            .nogapContainer {
+                grid-area: gap;
             }
         }
     }
@@ -303,14 +328,17 @@
         background-repeat: repeat, no-repeat, no-repeat;
         background-size: auto, 28rem, auto;
         color: $white;
-        margin-bottom: 3.2rem;
+        margin: 0 2.4rem 3.2rem;
         padding: 2.4rem 3.2rem 3.2rem 2.4rem;
         position: relative;
 
+        @include r(374) {
+            margin: 0 0 3.2rem;
+        }
         @include r(768) {
             background-position: 0 0, 100% -15rem, 98% 133%;
             background-size: auto, 40rem, auto;
-            margin-bottom: 4.8rem;
+            margin: 0 .8rem 4.8rem 0;
         }
 
         .subtext {
@@ -467,6 +495,7 @@
         @include r(768) {
             display: block;
             flex-basis: 50%;
+            padding: 3.2rem 0 3.2rem 4rem;
         }
         @include r(960) {
             flex-basis: 33%;

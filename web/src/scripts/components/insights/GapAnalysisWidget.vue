@@ -212,9 +212,13 @@
 
     .nogapContainer {
         @include shadowbox;
+        margin: 0 2.4rem 3.2rem;
         order: 2;
         position: relative;
 
+        @include r(374) {
+            margin: 0 0 3.2rem;
+        }
         @include r(768) {
             flex-basis: 50%;
             flex-grow: 1;
@@ -246,19 +250,11 @@
 
             @include r(600) {
                 background-position: 0 0, right -38rem center;
-
-                .subtext {
-                    max-width: 66%;
-                }
             }
-
             @include r(768) {
                 background-size: 150%;
                 background-position: center top 22rem;
-
-                .subtext {
-                    max-width: none;
-                }
+                margin: 0 0 4.8rem .8rem;
             }
         }
 
@@ -268,10 +264,6 @@
 
         .subtext {
             padding-left: 3.2rem;
-
-            @include r(768) {
-                max-width: 48rem;
-            }
         }
     }
 
