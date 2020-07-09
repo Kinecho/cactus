@@ -322,12 +322,12 @@
     }
 
     .novaluesContainer {
-        @include shadowbox;
         background-color: $dolphin;
         background-image: url(/assets/images/grainy.png), url(/assets/images/cvBlob.png), url(/assets/images/pinkVs.svg);
         background-position: 0 0, -17rem -7rem, right -6rem top -4rem;
         background-repeat: repeat, no-repeat, no-repeat;
         background-size: auto, 28rem, auto;
+        border-radius: 1.6rem;
         color: $white;
         margin: 0 2.4rem 3.2rem;
         padding: 2.4rem 3.2rem 3.2rem 5.6rem;

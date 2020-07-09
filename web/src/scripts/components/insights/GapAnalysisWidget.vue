@@ -212,21 +212,15 @@
     }
 
     .nogapContainer {
-        @include shadowbox;
         margin: 0 2.4rem 3.2rem;
-        order: 2;
         position: relative;
 
         @include r(374) {
             margin: 0 0 3.2rem;
         }
-        @include r(768) {
-            flex-basis: 50%;
-            flex-grow: 1;
-            order: 2;
-        }
 
         &.plus {
+            @include shadowbox;
             background-image: url(/assets/images/crosses2.svg),
             url(/assets/images/outlineBlob.svg),
             url(/assets/images/royalBlob.svg),
@@ -246,6 +240,7 @@
             background-position: 0 0, right -11rem center;
             background-repeat: repeat, no-repeat;
             background-size: auto, 19rem;
+            border-radius: 1.6rem;
             color: $white;
             padding-left: 5.6rem;
 
