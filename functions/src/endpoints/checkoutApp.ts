@@ -317,8 +317,8 @@ async function buildStripeSubscriptionCheckoutSessionOptions(options: {
     }
 
     if (currentOffer) {
-        metadata.offerEntryId = currentOffer.entryId;
-        metadata.offerName = currentOffer.displayName;
+        metadata.offerEntryId = currentOffer.entryId ?? "";
+        metadata.offerName = currentOffer.displayName ?? "";
     }
 
     const stripeSubscriptionData: Stripe.Checkout.SessionCreateParams.SubscriptionData = {
