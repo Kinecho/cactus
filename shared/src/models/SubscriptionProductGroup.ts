@@ -33,7 +33,7 @@ export const DEFAULT_SUBSCRIPTION_TIER = SubscriptionTier.BASIC;
 
 export interface ProductGroupFooter {
     textMarkdown?: string
-    icon: IconType
+    icon?: IconType
 }
 
 export default class SubscriptionProductGroup extends FlamelinkModel {
