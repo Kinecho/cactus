@@ -1,22 +1,6 @@
 <template>
-    <div>
-        <spinner v-if="loading">Loading....</spinner>
-        <template v-if="!loading">
-            <p>
-                <strong>Slug:</strong> "{{slug}}"
-            </p>
-            <div v-if="offer">
-                <strong>Found Promotions:</strong>
-                <div v-if="offer">
-                    <p>Offer ID: {{offer.entryId}}</p>
-                    <p>Offer Name: {{offer.displayName}}</p>
-                    <p>Offer Slug: {{offer.urlSlug}}</p>
-                </div>
-            </div>
-            <p v-else>
-                No offer found
-            </p>
-        </template>
+    <div class="centered">
+        <spinner v-if="loading" message="Loading..." color="dark" :delay="1200"/>
     </div>
 </template>
 
@@ -82,5 +66,35 @@
 </script>
 
 <style scoped lang="scss">
+    @import "mixins";
+    @import "variables";
+
+    .centered {
+        overflow-x: hidden;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        height: 75vh;
+        justify-content: center;
+        align-items: center;
+    }
+
+    section {
+        padding: 2.4rem;
+    }
+
+    .graphic {
+        margin-bottom: 3.2rem;
+        max-width: 100%;
+        width: 50rem;
+    }
+
+    h1 {
+        margin: 0;
+    }
+
+    p {
+        margin: .8rem auto 4rem;
+    }
 
 </style>
