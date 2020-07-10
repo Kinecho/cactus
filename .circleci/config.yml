@@ -286,6 +286,8 @@ jobs:
     steps:
       - checkout
       - restore-module:
+          module: *root-module
+      - restore-module:
           module: *functions-module
       - restore-module:
           module: *shared-module
@@ -314,6 +316,8 @@ jobs:
     steps:
       - checkout
       - restore-module:
+          module: *root-module
+      - restore-module:
           module: shared
       - run:
           name: "TSLint"
@@ -334,9 +338,11 @@ jobs:
     steps:
       - checkout
       - restore-module:
-          module: shared
+          module: *root-module
       - restore-module:
-          module: scripts
+          module: *shared-module
+      - restore-module:
+          module: *scripts-module
       - restore-module:
           module: *admin-module
       - run:
