@@ -1,31 +1,32 @@
 <template>
-    <section v-if="isPlusMember && gapAssessmentResults" class="gapContainer borderContainer">
+    <section v-if="isPlusMember && gapAssessmentResults" class="gapContainer">
+        <h2>Happiness Quiz</h2>
         <div class="flexIt">
-            <h2>Happiness Quiz Results</h2>
-            <p class="subtext">Importance and satisfaction across Cactus's five core elements</p>
-            <div class="gapFocus" v-if="memberFocusElement">
-                <p class="statLabel">Focus</p>
-                <h3>{{memberFocusElement}}</h3>
+            <div class="textContainer">
+                <div class="gapFocus" v-if="memberFocusElement">
+                    <p class="statLabel">Focus</p>
+                    <h3>{{memberFocusElement}}</h3>
+                </div>
+                <div class="legend">
+                    <gap-analysis-legend :stacked="true"/>
+                </div>
             </div>
-            <div class="legend">
-                <gap-analysis-legend :stacked="true"/>
-            </div>
-        </div>
-        <div class="radarChartContainer">
-            <spinner v-if="loading" message="Loading Results..." :delay="1200"/>
-            <Results v-if="!loading && gapAssessmentResults"
-                    :results="gapAssessmentResults"
-                    :selectable-elements="selectFocusEnabled"
-                    :pulsing-enabled="selectFocusEnabled"
-                    :hideElements="false"
-                    :selected-element="radarChartSelectedElement"
-                    @elementSelected="setSelectedElement"
-                    :withLabel="showElementLabels"
-                    :showElementImages="true"
-                    :showLegend="false"
-            />
-            <div class="legend">
-                <gap-analysis-legend/>
+            <div class="radarChartContainer">
+                <spinner v-if="loading" message="Loading Results..." :delay="1200"/>
+                <Results v-if="!loading && gapAssessmentResults"
+                        :results="gapAssessmentResults"
+                        :selectable-elements="selectFocusEnabled"
+                        :pulsing-enabled="selectFocusEnabled"
+                        :hideElements="false"
+                        :selected-element="radarChartSelectedElement"
+                        @elementSelected="setSelectedElement"
+                        :withLabel="showElementLabels"
+                        :showElementImages="true"
+                        :showLegend="false"
+                />
+                <div class="legend">
+                    <gap-analysis-legend/>
+                </div>
             </div>
         </div>
         <div v-if="selectFocusEnabled" class="gapActions">
@@ -46,7 +47,7 @@
         <dropdown-menu :items="mentalFitnessDropdownLinks" class="dotsBtn"/>
     </section>
     <!-- Show PLUS User Empty State message -->
-    <section v-else-if="isPlusMember" class="plus nogapContainer borderContainer">
+    <section v-else-if="isPlusMember" class="plus nogapContainer">
         <h2>Happiness Quiz</h2>
         <p class="subtext">Find the gap between what is important to you and how satisfied you are regarding
             that area of your&nbsp;life.</p>
@@ -55,7 +56,7 @@
         </router-link>
     </section>
     <!-- Show BASIC User Upgrade message -->
-    <section v-else-if="!isPlusMember" class="basic nogapContainer borderContainer">
+    <section v-else-if="!isPlusMember" class="basic nogapContainer">
         <svg class="lock" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
         <h2>What Makes Me Happy?</h2>
         <p class="subtext">Discover the people, places, & things that make you happy.</p>
@@ -162,19 +163,32 @@
     @import "insights";
 
     .gapContainer {
-        @include r(768) {
-            flex-basis: 50%;
-            margin-right: 1.6rem;
+        border: 1px solid $lightest;
+        border-radius: 1.6rem;
+        margin: 0 2.4rem 3.2rem;
+        padding: 2.4rem 2.4rem 0;
+        position: relative;
+
+        @include r(374) {
+            margin: 0 0 3.2rem;
+            padding: 2.4rem 3.2rem 0;
         }
+
         @include r(960) {
-            display: flex;
-            flex-basis: 66%;
-            flex-direction: row;
+            flex-basis: 50%;
+            margin-bottom: 4.8rem;
+            margin-right: 1.6rem;
         }
     }
 
     .flexIt {
+        @include r(960) {
+            align-items: center;
+            display: flex;
+        }
+    }
 
+    .textContainer {
         .legend {
             display: none;
         }
@@ -188,8 +202,16 @@
         }
     }
 
+    h2 {
+        margin-bottom: 3.2rem;
+
+        @include r(960) {
+            margin-bottom: 0;
+        }
+    }
+
     .gapFocus {
-        margin-bottom: 4rem;
+        margin-bottom: 2.4rem;
 
         @include r(960) {
             margin-bottom: 0;
@@ -197,17 +219,23 @@
     }
 
     .radarChartContainer {
-        margin: 0 auto;
+        margin: 0 auto 3.2rem;
         max-width: 38rem;
         width: 100%;
 
         @include r(960) {
-            padding-left: 3.2rem;
-            width: 55%;
+            width: 66%;
 
             .legend {
                 display: none;
             }
+        }
+    }
+
+    .gapContainer,
+    .nogapContainer {
+        @include r(768) {
+            margin: 0 0 4.8rem 1.6rem;
         }
     }
 
@@ -222,9 +250,9 @@
         &.plus {
             @include shadowbox;
             background-image: url(/assets/images/crosses2.svg),
-            url(/assets/images/outlineBlob.svg),
-            url(/assets/images/royalBlob.svg),
-            url(/assets/images/pinkBlob5.svg);
+                url(/assets/images/outlineBlob.svg),
+                url(/assets/images/royalBlob.svg),
+                url(/assets/images/pinkBlob5.svg);
             background-position: -1rem 18rem, right -29rem top -32rem, -11rem 16rem, 61% -133px;
             background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
             background-size: 20rem, 48rem, 30rem, 23rem;
@@ -243,10 +271,6 @@
             border-radius: 1.6rem;
             color: $white;
             padding-left: 5.6rem;
-
-            @include r(768) {
-                margin: 0 0 4.8rem .8rem;
-            }
         }
 
         h2 {

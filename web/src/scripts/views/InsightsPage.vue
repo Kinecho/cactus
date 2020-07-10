@@ -10,7 +10,6 @@
                 <section class="bubblesContainer" v-if="hasWordCloud">
                     <div class="flexIt">
                         <h2>Word Bubbles</h2>
-                        <p class="subtext">Common words in your reflections</p>
                     </div>
                     <div class="wordCloud">
                         <WordCloud class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
@@ -18,17 +17,16 @@
                 </section>
                 <section class="valuesContainer" v-if="hasCoreValues">
                     <h2>Core Values</h2>
-                    <p class="subtext">The values important in your&nbsp;life</p>
                     <div class="flexIt">
-                        <div class="imgContainer" v-if="coreValuesBlob">
-                            <img :src="coreValuesBlob.imageUrl" alt="Core Values Graphic"/>
-                        </div>
                         <ul class="core-values-list">
                             <li v-for="(coreValue, index) in coreValues" :key="`value_${index}`" class="core-value">
                                 <h3>{{coreValue.value}}</h3>
-                                <p class="description">{{coreValue.description}}</p>
+                                <!-- <p class="description">{{coreValue.description}}</p> -->
                             </li>
                         </ul>
+                        <div class="imgContainer" v-if="coreValuesBlob">
+                            <img :src="coreValuesBlob.imageUrl" alt="Core Values Graphic"/>
+                        </div>
                     </div>
                     <dropdown-menu :items="coreValuesDropdownLinks" class="dotsBtn"/>
                 </section>
@@ -312,10 +310,12 @@
             .bubblesContainer {
                 grid-area: bubbles;
             }
-            .novaluesContainer {
+            .novaluesContainer,
+            .valuesContainer {
                 grid-area: values;
             }
-            .nogapContainer {
+            .nogapContainer,
+            .gapContainer {
                 grid-area: gap;
             }
         }
@@ -329,16 +329,8 @@
         background-size: auto, 28rem, auto;
         border-radius: 1.6rem;
         color: $white;
-        margin: 0 2.4rem 3.2rem;
         padding: 2.4rem 3.2rem 3.2rem 5.6rem;
         position: relative;
-
-        @include r(374) {
-            margin: 0 0 3.2rem;
-        }
-        @include r(768) {
-            margin: 0 .8rem 4.8rem 0;
-        }
 
         .subtext {
             max-width: 56rem;
@@ -354,82 +346,58 @@
         }
     }
 
+    .novaluesContainer,
     .valuesContainer {
-        background-color: $bgGreen;
+        margin: 0 2.4rem 3.2rem;
+
+        @include r(374) {
+            margin: 0 0 3.2rem;
+        }
+        @include r(768) {
+            margin: 0 1.6rem 4.8rem 0;
+        }
+    }
+
+    .valuesContainer {
+        border: 1px solid $lightest;
         border-radius: 1.6rem;
-        margin-bottom: 4rem;
-        padding: 3.2rem;
+        padding: 2.4rem;
         position: relative;
 
+        @include r(374) {
+            padding: 2.4rem 3.2rem;
+        }
         @include r(768) {
+            display: flex;
+            flex-direction: column;
             margin-bottom: 4.8rem;
         }
 
-        .subtext {
-            margin-bottom: 0;
-            max-width: 16rem;
-
-            @include r(374) {
-                margin-bottom: 4rem;
-            }
-            @include r(768) {
-                max-width: none;
-            }
-            @include r(1024) {
-                max-width: 15rem;
-            }
-            @include r(1140) {
-                max-width: 22rem;
-            }
-        }
-
         .flexIt {
+            align-items: center;
+            display: flex;
+            flex-grow: 1;
+
             @include r(600) {
-                align-items: center;
-                display: flex;
-                flex-direction: row-reverse;
-                justify-content: flex-end;
-            }
-            @include r(1024) {
-                align-items: flex-start;
-                flex-direction: row;
-                margin-top: -9.2rem;
+                justify-content: space-between;
             }
         }
     }
 
     .imgContainer {
-        margin-top: 2.4rem;
-        position: relative;
 
-        @include r(374) {
-            margin-bottom: 2.4rem;
-            margin-top: -16rem;
-            transform: translate(60%, 0);
-            position: absolute;
-        }
         @include r(600) {
-            margin-bottom: -4.8rem;
-            margin-top: -14rem;
-            max-width: 60%;
-            position: relative;
-            transform: none;
-            width: 100%;
-        }
-        @include r(1024) {
-            margin-top: -4.8rem;
-            max-width: 38rem;
-            text-align: center;
+            width: 40%;
         }
 
         img {
+            max-height: 16rem;
             position: relative;
-            width: 29rem;
 
             @include r(600) {
                 height: auto;
                 max-height: 32rem;
-                max-width: 32rem;
+                max-width: 100%;
                 width: auto;
             }
         }
@@ -437,18 +405,12 @@
 
     .core-values-list {
         list-style: none;
-        margin: 2.4rem 0;
-        width: 50%;
+        margin: 2.4rem 2.4rem .8rem 0;
         padding: 0;
 
         @include r(768) {
-            display: flex;
-            flex-flow: row wrap;
             margin: 0;
-            width: auto;
-        }
-        @include r(1024) {
-            max-width: 48.75%;
+            width: 50%;
         }
     }
 
@@ -457,46 +419,23 @@
         margin: 0 0 .8rem;
         padding: 0;
 
-        @include r(768) {
-            margin: 0 2.4rem 2.4rem 0;
-            width: calc(50% - 2.4rem);
-        }
-        @include r(1024) {
-            margin: 0 0 2.4rem;
-            padding-left: 3.2rem;
-            width: 50%;
-        }
-
-        .description {
-            display: none;
-
-            @include r(768) {
-                display: block;
-                font-size: 1.6rem;
-                opacity: .8;
-            }
-        }
-    }
-
-    .flexSections {
-        @include r(768) {
-            display: flex;
-            justify-content: space-between;
+        @include r(600) {
+            margin-bottom: 1.6rem;
         }
     }
 
     .bubblesContainer {
-        padding: 2.4rem;
+        border: 1px solid $lightest;
+        border-radius: 1.6rem;
+        margin: 0 2.4rem 3.2rem;
+        padding: 2.4rem 2.4rem 1.6rem;
  
         @include r(374) {
+            margin: 0 0 3.2rem;
             padding: 3.2rem 3.2rem 2.4rem;
         }
-        @include r(600) {
-            display: flex;
-            flex-direction: row;
-            
-        }
         @include r(768) {
+            border: 0;
             display: block;
             flex-basis: 50%;
             padding: 3.2rem 0 3.2rem 4rem;
@@ -505,18 +444,13 @@
             flex-basis: 33%;
         }
 
-        .subtext {
+        h2 {
             margin-bottom: 1.6rem;
         }
 
         .wordCloud {
-            margin: -1.6rem auto 0;
-            max-width: 40rem;
-            width: 100%;
+            margin: -1.6rem -1.2rem -1.2rem;
 
-            @include r(600) {
-                width: 50%;
-            }
             @include r(768) {
                 margin: -3.2rem -1.6rem -1.6rem;
                 width: calc(100% + 3.2rem);
@@ -524,13 +458,13 @@
         }
     }
 
-    .nogapContainer + .bubblesContainer {
-        @include r(768) {
-            flex-basis: 50%;
-            margin-right: 1.6rem;
-            order: 1;
-        }
-    }
+    // .nogapContainer + .bubblesContainer {
+    //     @include r(768) {
+    //         flex-basis: 50%;
+    //         margin-right: 1.6rem;
+    //         order: 1;
+    //     }
+    // }
 
     .focusElement {
         font-size: 2rem;

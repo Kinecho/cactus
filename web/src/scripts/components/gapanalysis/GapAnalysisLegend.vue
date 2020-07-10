@@ -31,7 +31,7 @@
     .legend {
         display: flex;
         justify-content: center;
-        padding-top: 4rem;
+        padding-top: 1.6rem;
 
         .item {
             align-items: center;
@@ -67,6 +67,14 @@
         }
         &.blue {
             background-color: $dolphin;
+        }
+    }
+
+    .statLabel {
+        font-size: 1.4rem;
+
+        @include r(374) {
+            font-size: 1.6rem;
         }
     }
 </style>

@@ -5,9 +5,9 @@
         <p class="date">Today</p>
         <spinner v-if="loading || !entry.allLoaded"/>
         <template v-else>
-            <h3 class="question">
+            <h2 class="question">
                 <markdown-text :source="questionText"/>
-            </h3>
+            </h2>
             <p class="previewText" v-if="!hasReflected && !reflectionText">
                 <markdown-text :source="previewText"/>
             </p>
@@ -110,12 +110,12 @@
     @import "mixins";
 
     .today-widget {
-        background-color: $bgGreen;
+        background-color: $beige;
         border-radius: 1.6rem;
         box-shadow: 0 6.9px 21px -24px rgba(0, 0, 0, 0.032),
-                0 11.5px 32.3px -24px rgba(0, 0, 0, 0.056),
-                0 13.9px 37.7px -24px rgba(0, 0, 0, 0.094),
-                0 24px 63px -24px rgba(0, 0, 0, 0.35);
+        0 11.5px 32.3px -24px rgba(0, 0, 0, 0.056),
+        0 13.9px 37.7px -24px rgba(0, 0, 0, 0.094),
+        0 24px 63px -24px rgba(0, 0, 0, 0.35);
         margin: 0 2.4rem 3.2rem;
         overflow: hidden;
         padding: 2.4rem;
@@ -166,12 +166,25 @@
         font-size: 2.1rem;
         line-height: 1.3;
         margin-bottom: .8rem;
+
+        @include r(600) {
+            font-size: 2.4rem;
+        }
     }
 
     .question,
-    .entry {
+    .entry,
+    .previewText {
         @include r(600) {
             width: 66%;
+        }
+    }
+
+    .previewText {
+        margin-bottom: 2.4rem;
+
+        @include r(600) {
+            margin: 1.6rem 0;
         }
     }
 
