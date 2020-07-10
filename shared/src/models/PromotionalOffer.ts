@@ -17,6 +17,7 @@ export class OfferDetails {
      */
     appliedAt?: Date;
     trialDays?: number | null;
+    redeemedAt?: Date|null;
 
     constructor(data: Partial<OfferDetails> & { entryId: string }) {
         Object.assign(this, data);
