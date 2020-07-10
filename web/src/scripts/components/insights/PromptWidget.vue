@@ -270,11 +270,14 @@
             content: '';
             display: block;
             height: 100%;
-            left: -1.2rem;
+            left: -.4rem;
             position: absolute;
             top: 0;
             width: .4rem;
 
+            @include r(374) {
+                left: -1.2rem;
+            }
             @include r(600) {
                 border-radius: .4rem;
                 left: 0;
