@@ -30,12 +30,12 @@
                     </div>
                     <dropdown-menu :items="coreValuesDropdownLinks" class="dotsBtn"/>
                 </section>
-                <section class="novaluesContainer" v-else>
+                <router-link v-else tag="section" class="novaluesContainer" :to="coreValuesHref">
                     <svg class="lock" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                     <h2>Get My Core Values</h2>
                     <p class="subtext">Discover what is most important & understand yourself better.</p>
                     <!-- <router-link tag="button" class="secondary esButton" :to="coreValuesHref">Get My Core Values</router-link> -->
-                </section>
+                </router-link>
                 <gap-analysis-widget :loading="gapResultsLoading"
                         :gap-assessment-results="gapAssessmentResults"
                         :is-plus-member="isPlusMember"
@@ -329,6 +329,7 @@
         background-size: auto, 28rem, auto;
         border-radius: 1.6rem;
         color: $white;
+        cursor: pointer;
         padding: 2.4rem 3.2rem 3.2rem 5.6rem;
         position: relative;
 
@@ -337,11 +338,15 @@
             opacity: .8;
         }
 
-        .esButton {
-            width: 100%;
+        @include r(600) {
+            transition: box-shadow .3s, transform .3s ease-in;
 
-            @include r(768) {
-                width: auto;
+            &:hover {
+                box-shadow: 0 6.9px 21px -24px rgba(0, 0, 0, 0.012),
+                    0 11.5px 32.3px -24px rgba(0, 0, 0, 0.036),
+                    0 13.9px 37.7px -24px rgba(0, 0, 0, 0.074),
+                    0 24px 63px -24px rgba(0, 0, 0, 0.15);
+                transform: translateY(-.2rem);
             }
         }
     }
