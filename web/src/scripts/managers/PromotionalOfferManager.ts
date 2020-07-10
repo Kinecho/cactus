@@ -78,7 +78,7 @@ export default class PromotionalOfferManager {
 
 
     getCurrentOffer(member?: CactusMember | undefined | null): OfferDetails | null {
-        const offer = member.currentOffer ?? this.getSessionOfferDetails();
+        const offer = member?.currentOffer ?? this.getSessionOfferDetails();
         if (isAndroidApp()) {
             return null;
         }

@@ -32,8 +32,6 @@ export import TwitterProvider = firebase.auth.TwitterAuthProvider;
 export import EmailProvider = firebase.auth.EmailAuthProvider;
 export import PhoneProvider = firebase.auth.PhoneAuthProvider;
 export import OAuthProvider = firebase.auth.OAuthProvider;
-// export import AppleProvider = firebase.auth.AppleAuthProvider;
-// export import AppleProvider = firebase.auth.Apple
 
 export enum FirebaseAppName {
     flamelink = "flamelink",
@@ -67,8 +65,6 @@ export function initializeFirebase(): FirebaseObject {
         CopyService.initialize({ locale: localeCode });
         firebase.firestore().settings({ ignoreUndefinedProperties: true });
         isInitialized = true;
-    } else {
-        logger.info("Firebase alreay initialized, skipped");
     }
 
     return firebase;
