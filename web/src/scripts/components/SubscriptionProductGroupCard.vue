@@ -80,6 +80,7 @@
     import Component from "vue-class-component";
     import { Prop } from "vue-property-decorator";
     import { isBlank } from "@shared/util/StringUtil";
+    import PromotionalOfferManager from "@web/managers/PromotionalOfferManager";
 
     const copy = CopyService.getSharedInstance().copy;
     const logger = new Logger("SubscriptionProductGroupCard");
@@ -154,7 +155,7 @@
         }
 
         get footer(): ProductGroupFooter | undefined {
-            const offerTrialDays = this.member?.currentOffer?.trialDays;
+            const offerTrialDays = PromotionalOfferManager.shared.getCurrentOffer(this.member)?.trialDays;
             const footer = this.productGroup.productGroup?.footer;
 
             if (isNull(offerTrialDays) || isBlank(footer?.textMarkdown)) {
