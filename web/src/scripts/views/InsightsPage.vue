@@ -373,6 +373,15 @@
             margin-bottom: 4.8rem;
         }
 
+        h2 {
+            @include r(768) {
+                margin-bottom: 3.2rem;
+            }
+            @include r(960) {
+                margin-bottom: 0;
+            }
+        }
+
         .flexIt {
             align-items: center;
             display: flex;
@@ -381,12 +390,24 @@
             @include r(600) {
                 justify-content: space-between;
             }
+            @include r(768) {
+                flex-direction: column;
+            }
+            @include r(960) {
+                flex-direction: row;
+            }
         }
     }
 
     .imgContainer {
 
         @include r(600) {
+            width: 40%;
+        }
+        @include r(768) {
+            width: 100%;
+        }
+        @include r(960) {
             width: 40%;
         }
 
@@ -409,6 +430,10 @@
         padding: 0;
 
         @include r(768) {
+            margin: 0;
+            width: 100%;
+        }
+        @include r(960) {
             margin: 0;
             width: 50%;
         }

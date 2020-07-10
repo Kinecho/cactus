@@ -173,7 +173,6 @@
             margin: 0 0 3.2rem;
             padding: 2.4rem 3.2rem 0;
         }
-
         @include r(960) {
             flex-basis: 50%;
             margin-bottom: 4.8rem;
