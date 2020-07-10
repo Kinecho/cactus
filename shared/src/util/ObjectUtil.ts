@@ -24,7 +24,7 @@ export function isBoolean(input: any): input is boolean {
     return input === true || input === false;
 }
 
-export function isNull(input: any): input is undefined|null {
+export function isNull(input: any): input is undefined | null {
     return input === null || input === undefined;
 }
 

@@ -244,12 +244,16 @@ export function getPromptQuestion(args: { prompt?: ReflectionPrompt, promptConte
     return;
 }
 
-export function isBlank(input: string | null | undefined): boolean {
-    if (!input || !input.trim()) {
+export function isBlank(input?: string|null|undefined): input is "" | null | undefined {
+    if (!input || input.trim() === "") {
         return true;
     }
 
     return false;
+}
+
+export function notBlank(input?: string | null | undefined): input is string {
+    return !isBlank(input);
 }
 
 export function getProviderDisplayName(provider?: string): string {

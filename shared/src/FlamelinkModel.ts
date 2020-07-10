@@ -9,6 +9,7 @@ export enum SchemaName {
     subscriptionProducts = "subscriptionProducts",
     subscriptionProductGroups = "subscriptionProductGroups",
     appSettings = "appSettings_web",
+    promotionalOffer = "promotionalOffer",
     // coreValuesAssessment = "coreValuesAssessment",
 }
 
@@ -38,7 +39,7 @@ export interface FlamelinkData {
 }
 
 export interface FlamelinkIdentifiable extends FlamelinkData {
-    schema: SchemaName,
+    readonly schema: SchemaName,
     _fl_meta_?: FlamelinkMeta
 }
 
