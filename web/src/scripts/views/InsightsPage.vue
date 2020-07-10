@@ -363,6 +363,10 @@
                     margin-top: 2.4rem;
                     width: auto;
                 }
+
+                button:hover {
+                    background-color: $white;
+                }
             }
 
             .lock,
