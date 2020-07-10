@@ -266,6 +266,15 @@ $widthDesktop: $widthXL;
   }
 }
 
+@keyframes rotate180 {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(180deg);
+    }
+  }
+
 @keyframes blink {
   50% {
     opacity: 0;
