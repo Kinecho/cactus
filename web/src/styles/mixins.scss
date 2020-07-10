@@ -251,6 +251,17 @@ $widthDesktop: $widthXL;
   }
 }
 
+@keyframes slideX {
+    0% {
+        opacity: 0;
+        transform: translateX(33vw);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
 @keyframes rotate {
   100% {
     transform: rotate(360deg);
