@@ -1,5 +1,7 @@
 import FlamelinkModel, { SchemaName } from "@shared/FlamelinkModel";
 import { isBlank } from "@shared/util/StringUtil";
+import CactusMember from "@shared/models/CactusMember";
+import { isPremiumTier } from "@shared/models/MemberSubscription";
 
 enum Field {
     urlSlug = "urlSlug",
@@ -15,10 +17,6 @@ export class OfferDetails {
      */
     appliedAt?: Date;
     trialDays?: number | null;
-    /**
-     * The date the user redeemed the offer
-     */
-    redeemedAt?: Date | null = null;
 
     constructor(data: Partial<OfferDetails> & { entryId: string }) {
         Object.assign(this, data);
@@ -31,6 +29,20 @@ export class OfferDetails {
             return null;
         }
         return new OfferDetails(json);
+    }
+
+    isMemberEligible(member?: CactusMember): boolean {
+        if (!member) {
+            return true;
+        }
+
+        if (member.hasTrialed) {
+            return false;
+        }
+        if (isPremiumTier(member.tier)) {
+            return false;
+        }
+        return true;
     }
 }
 

@@ -3,6 +3,7 @@ import StorageService, { LocalStorageKey } from "@web/services/StorageService";
 import CactusMember from "@shared/models/CactusMember";
 import CactusMemberService from "@web/services/CactusMemberService";
 import Logger from "@shared/Logger"
+import { isPremiumTier } from "@shared/models/MemberSubscription";
 
 const logger = new Logger("PromotionalOfferManager");
 
@@ -27,6 +28,13 @@ export default class PromotionalOfferManager {
 
     async applyOfferDetails(offerDetails: OfferDetails, member?: CactusMember | null) {
         const existingOffer = member?.currentOffer;
+
+        if (!offerDetails.isMemberEligible(member)) {
+            logger.info("Member is not eligible for promotions as they have already trialed.");
+            await this.clearSessionOffers();
+            return
+        }
+
         if (member && existingOffer?.entryId !== offerDetails.entryId) {
             member.currentOffer = offerDetails
             logger.info(`Going to apply offer ${ offerDetails.displayName } to member ${ member.email }`)
