@@ -31,8 +31,9 @@
                     <flamelink-image :image="image"/>
                 </div>
 
-                <div class="buttonContainer" v-if="!hasReflected">
-                    <router-link v-if="link" :to="link" tag="button">Reflect</router-link>
+                <div class="buttonContainer" v-if="!hasNote | !hasReflected">
+                    <router-link v-if="link & !hasReflected" :to="link" tag="button">Reflect</router-link>
+                    <button v-if="!hasNote && !isEditingNote" @click="isEditingNote = true" class="secondary"><img class="pen" src="/assets/images/pen.svg" alt=""/>Add a Note</button>
                 </div>
             </div>
         </transition>
@@ -324,6 +325,25 @@
             @include r(600) {
                 min-width: 16rem;
                 width: auto;
+            }
+        }
+
+        .pen {
+            height: 1.8rem;
+            margin-right: .8rem;
+            width: 1.8rem;
+        }
+
+        button.secondary {
+            align-items: center;
+            display: flex;
+
+            &:hover {
+                background-color: $white;
+
+                .pen {
+                    animation: wiggle .5s forwards;
+                }
             }
         }
     }
