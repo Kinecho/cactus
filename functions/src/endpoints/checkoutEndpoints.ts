@@ -310,10 +310,6 @@ async function buildStripeSubscriptionCheckoutSessionOptions(options: {
         [QueryParam.SUBSCRIPTION_PRODUCT_ID]: `${ subscriptionProductId }`,
     });
 
-    const stripeSubscriptionData: Stripe.Checkout.SessionCreateParams.SubscriptionData = { items: [{ plan: planId }] };
-    if (trialDays > 0) {
-        stripeSubscriptionData.trial_period_days = trialDays
-    }
 
     const metadata: Record<string, string> = {
         memberId: `${ memberId }`,
@@ -323,6 +319,14 @@ async function buildStripeSubscriptionCheckoutSessionOptions(options: {
     if (currentOffer) {
         metadata.offerEntryId = currentOffer.entryId;
         metadata.offerName = currentOffer.displayName;
+    }
+
+    const stripeSubscriptionData: Stripe.Checkout.SessionCreateParams.SubscriptionData = {
+        items: [{ plan: planId }],
+        metadata,
+    };
+    if (trialDays > 0) {
+        stripeSubscriptionData.trial_period_days = trialDays
     }
 
     const stripeOptions: Stripe.Checkout.SessionCreateParams = {

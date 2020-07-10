@@ -239,8 +239,8 @@ export default class StripeWebhookService {
 
         cactusMember.subscription = cactusSubscription;
 
-        if (member.currentOffer?.entryId === stripeOfferEntryId) {
-            member.currentOffer.redeemedAt = new Date();
+        if (cactusMember.currentOffer && cactusMember.currentOffer?.entryId === stripeOfferEntryId) {
+            cactusMember.currentOffer.redeemedAt = new Date();
         }
 
         cactusMember.stripeCustomerId = customerId;
