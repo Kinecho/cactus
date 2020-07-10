@@ -1,38 +1,41 @@
 <template>
     <div class="today-widget" :class="{reflected: hasReflected}">
-        <img class="blob" src="assets/images/transparentBlob1.svg"/>
-        <img class="blob" src="assets/images/transparentBlob2.svg"/>
+        <img class="blob" src="/assets/images/transparentBlob1.svg"/>
+        <img class="blob" src="/assets/images/transparentBlob2.svg"/>
         <p class="date">Today</p>
-        <spinner v-if="loading || !entry.allLoaded"/>
-        <template v-else>
-            <h2 class="question">
-                <markdown-text :source="questionText"/>
-            </h2>
-            <p class="previewText" v-if="!hasReflected && !reflectionText">
-                <markdown-text :source="previewText"/>
-            </p>
-            <p class="entry" v-if="!isEditingNote && hasReflected && reflectionText" @click="isEditingNote = true">
-                {{reflectionText}}
-            </p>
+        <transition name="component-fade" appear>
+            <spinner v-if="loading || !entry.allLoaded" :delay="1500"/>
+            <!-- Using a div here so that the fade transition works -->
+            <div v-else>
+                <h2 class="question">
+                    <markdown-text :source="questionText"/>
+                </h2>
+                <p class="previewText" v-if="!hasReflected && !reflectionText">
+                    <markdown-text :source="previewText"/>
+                </p>
+                <p class="entry" v-if="!isEditingNote && hasReflected && reflectionText" @click="isEditingNote = true">
+                    {{reflectionText}}
+                </p>
 
-            <edit-reflection
-                    :show="isEditingNote"
-                    :responses="entry.responses"
-                    :prompt-content="entry.promptContent"
-                    :prompt="entry.prompt"
-                    :member="member"
-                    :responseMedium="responseMedium"
-                    @close="isEditingNote = false"
-            />
+                <edit-reflection
+                        :show="isEditingNote"
+                        :responses="entry.responses"
+                        :prompt-content="entry.promptContent"
+                        :prompt="entry.prompt"
+                        :member="member"
+                        :responseMedium="responseMedium"
+                        @close="isEditingNote = false"
+                />
 
-            <div class="backgroundImage">
-                <flamelink-image :image="image"/>
+                <div class="backgroundImage">
+                    <flamelink-image :image="image"/>
+                </div>
+
+                <div class="buttonContainer" v-if="!hasReflected">
+                    <router-link v-if="link" :to="link" tag="button">Reflect</router-link>
+                </div>
             </div>
-
-            <div class="buttonContainer" v-if="!hasReflected">
-                <router-link v-if="link" :to="link" tag="button">Reflect</router-link>
-            </div>
-        </template>
+        </transition>
         <dropdown-menu :items="linkItems" class="dotsBtn"/>
         <!-- <modal :show="showSharing" v-on:close="showSharing = false" :showCloseButton="true">
             <div class="sharing-card" slot="body">
@@ -59,22 +62,13 @@
     import CactusMember from "@shared/models/CactusMember";
     import { ContentBackgroundImage, ContentType, Image } from "@shared/models/PromptContent";
     import MarkdownText from "@components/MarkdownText.vue";
-    import { getResponseText, preventOrphanedWords } from "@shared/util/StringUtil";
+    import { getResponseText, isBlank, preventOrphanedWords } from "@shared/util/StringUtil";
     import FlamelinkImage from "@components/FlamelinkImage.vue";
     import { PageRoute } from "@shared/PageRoutes";
-    import { DropdownMenuLink } from "@components/DropdownMenuTypes";
     import DropdownMenu from "@components/DropdownMenu.vue";
     import CopyService from "@shared/copy/CopyService";
-    //import Modal from "@components/Modal.vue"
-    //import LegacyPromptContentCard from "@components/LegacyPromptContentCard.vue"
-    //import PromptSharing from "@components/PromptContentSharing.vue";
     import EditReflection from "@components/ReflectionResponseTextEdit.vue"
-    import { isBlank } from "@shared/util/StringUtil"
-    import ReflectionResponse, {
-        getResponseMedium,
-        ResponseMedium,
-        ResponseMediumType
-    } from "@shared/models/ReflectionResponse"
+    import { ResponseMedium } from "@shared/models/ReflectionResponse"
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -82,11 +76,8 @@
         components: {
             Spinner,
             MarkdownText,
-            //Modal,
             EditReflection,
-            //PromptSharing,
             DropdownMenu,
-            //LegacyPromptContentCard,
             FlamelinkImage
         }
     })
@@ -95,12 +86,6 @@
 
         @Prop({ type: Boolean, required: false, default: true })
         loading!: boolean;
-
-        // @Prop({ type: Boolean, required: false, default: false })
-        // showSharing!: boolean;
-
-        // @Prop({ type: Boolean, required: false, default: false })
-        // showShareNote!: boolean;
 
         isEditingNote: boolean = false;
 
@@ -124,10 +109,10 @@
 
         get linkItems(): {
             title: string,
-            href?: string,
+            href?: string | null,
             onClick?: () => void,
         }[] {
-            const linkItems = [
+            return [
                 {
                     title: copy.prompts.REFLECT,
                     href: this.link,
@@ -138,22 +123,7 @@
                         this.isEditingNote = true;
                     }
                 },
-                // {
-                //     title: copy.prompts.SHARE_PROMPT,
-                //     onClick: () => {
-                //         this.showSharing = true;
-                //     }
-                // },
-            ];
-            // if (this.hasReflected && this.entry.promptContent && this.entry.promptContent.content) {
-            //     linkItems.push({
-            //         title: copy.prompts.SHARE_NOTE,
-            //         onClick: () => {
-            //             this.showShareNote = true
-            //         }
-            //     })
-            // }
-            return linkItems
+            ]
         }
 
         get hasReflected(): boolean {
@@ -201,6 +171,7 @@
     @import "variables";
     @import "mixins";
     @import "insights";
+    @import "transitions";
 
     .today-widget {
         background-color: $beige;
