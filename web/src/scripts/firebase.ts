@@ -13,6 +13,10 @@ import 'flamelink/storage'
 import StorageService, { LocalStorageKey } from "@web/services/StorageService";
 import FirebaseApp = firebase.app.App;
 import CopyService, { LocaleCode } from "@shared/copy/CopyService";
+import Logger from "@shared/Logger"
+
+const logger = new Logger("firebase");
+
 
 let isInitialized = false;
 let firebaseApp: FirebaseApp;
@@ -43,7 +47,9 @@ export enum EmailActionMode {
 }
 
 export function initializeFirebase(): FirebaseObject {
+
     if (!isInitialized) {
+        logger.info("initializing firebase");
         setTimestamp(firebase.firestore.Timestamp);
         firebaseApp = firebase.initializeApp(Config.firebase); //this is the default app, used in all the services
 
@@ -61,6 +67,8 @@ export function initializeFirebase(): FirebaseObject {
         CopyService.initialize({ locale: localeCode });
         firebase.firestore().settings({ ignoreUndefinedProperties: true });
         isInitialized = true;
+    } else {
+        logger.info("Firebase alreay initialized, skipped");
     }
 
     return firebase;
