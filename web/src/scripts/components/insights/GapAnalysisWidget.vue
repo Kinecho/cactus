@@ -233,18 +233,18 @@
 
     .gapContainer,
     .nogapContainer {
+        margin: 0 2.4rem 3.2rem;
+
+        @include r(374) {
+            margin: 0 0 3.2rem;
+        }
         @include r(768) {
             margin: 0 0 4.8rem 1.6rem;
         }
     }
 
     .nogapContainer {
-        margin: 0 2.4rem 3.2rem;
         position: relative;
-
-        @include r(374) {
-            margin: 0 0 3.2rem;
-        }
 
         &.plus {
             @include shadowbox;
@@ -269,7 +269,7 @@
             background-size: auto, 19rem;
             border-radius: 1.6rem;
             color: $white;
-            padding-left: 5.6rem;
+            padding: 2.4rem 3.2rem 3.2rem 5.6rem;
         }
 
         h2 {
