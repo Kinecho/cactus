@@ -20,7 +20,7 @@ export function isArray(input: any) {
     return Array.isArray(input);
 }
 
-export function isNull(input: any): input is undefined|null {
+export function isNull(input: any): input is undefined | null {
     return input === null || input === undefined;
 }
 

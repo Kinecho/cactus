@@ -21,6 +21,43 @@ export interface EntryObserverOptions<IModel extends FlamelinkModel> extends IGe
 
 export type FlamelinkValue = string | number | boolean;
 
+export abstract class FlamelinkModelService<T extends FlamelinkModel> {
+    flamelink = FlamelinkService.sharedInstance;
+    abstract Type: new () => T;
+
+    async save(model?: T): Promise<T | undefined> {
+        return this.flamelink.save(model);
+    }
+
+    async getByEntryId(entryId?: string): Promise<T | undefined> {
+        if (!entryId) {
+            return;
+        }
+
+        return this.flamelink.getById(entryId, this.Type)
+    }
+
+    observeByEntryId(id: string, options: EntryObserverOptions<T>): ListenerUnsubscriber {
+        return this.flamelink.observeByEntryId(id, this.Type, options);
+    }
+
+    observeSingle(options: EntryObserverOptions<T>): ListenerUnsubscriber {
+        return this.flamelink.observeSingle(this.Type, options);
+    }
+
+    async getFirstByField(args: { name: string, value: string }): Promise<T | undefined> {
+        return this.flamelink.getFirstByField({ ...args, Type: this.Type });
+    }
+
+    async getAllWhere(args: { name: string, value: FlamelinkValue }): Promise<QueryResult<T>> {
+        return this.flamelink.getAllWhere({ ...args, Type: this.Type });
+    }
+
+    observeByField(args: { name: string, value: string, Type: { new(): T } }, options: EntryObserverOptions<T>): ListenerUnsubscriber {
+        return this.flamelink.observeByField({...args, Type: this.Type}, options);
+    }
+}
+
 export default class FlamelinkService {
     flamelink: flamelink.app.App;
     content: flamelink.content.Content;
