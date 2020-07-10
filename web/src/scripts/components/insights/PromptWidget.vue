@@ -198,12 +198,12 @@
     }
 
     .blob {
-        animation: rotateInfinite 60s infinite;
+        animation: 30s ease-in reverse forwards rotate180;
         height: auto;
         left: -3.2rem;
         position: absolute;
         top: -3.2rem;
-        transform-origin: left top;
+        transform-origin: 20rem 20rem;
         width: 100vw;
         z-index: 0;
 
@@ -212,12 +212,12 @@
         }
 
         &:nth-child(2) {
-            animation-direction: reverse;
+            animation-direction: normal;
+            animation-duration: 45s;
             bottom: -3.2rem;
             left: auto;
             right: -3.2rem;
             top: auto;
-            transform-origin: right bottom;
         }
     }
 
