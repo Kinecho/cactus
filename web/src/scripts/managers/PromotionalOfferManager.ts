@@ -4,6 +4,7 @@ import CactusMember from "@shared/models/CactusMember";
 import CactusMemberService from "@web/services/CactusMemberService";
 import Logger from "@shared/Logger"
 import { isPremiumTier } from "@shared/models/MemberSubscription";
+import { isAndroidApp } from "@web/DeviceUtil";
 
 const logger = new Logger("PromotionalOfferManager");
 
@@ -76,4 +77,11 @@ export default class PromotionalOfferManager {
     }
 
 
+    getCurrentOffer(member?: CactusMember | undefined | null): OfferDetails | null {
+        const offer = member.currentOffer ?? this.getSessionOfferDetails();
+        if (isAndroidApp()) {
+            return null;
+        }
+        return offer;
+    }
 }
