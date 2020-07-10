@@ -31,9 +31,9 @@
                     <flamelink-image :image="image"/>
                 </div>
 
-                <div class="buttonContainer" v-if="!hasNote | !hasReflected">
-                    <router-link v-if="link & !hasReflected" :to="link" tag="button">Reflect</router-link>
-                    <button v-if="!hasNote && !isEditingNote" @click="isEditingNote = true" class="secondary"><img class="pen" src="/assets/images/pen.svg" alt=""/>Add a Note</button>
+                <div class="buttonContainer" v-if="!hasNote | !hasReflected && !isEditingNote">
+                    <router-link v-if="link && !hasReflected" :to="link" tag="button">Reflect</router-link>
+                    <button v-if="!hasNote && !isEditingNote && hasReflected" @click="isEditingNote = true" class="secondary"><img class="pen" src="/assets/images/pen.svg" alt=""/>Add a Note</button>
                 </div>
             </div>
         </transition>
