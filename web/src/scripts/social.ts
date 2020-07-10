@@ -1,26 +1,27 @@
-import {Endpoint, getAuthHeaders, request} from "@web/requestUtils";
-import {EmailContact} from "@shared/types/EmailContactTypes";
-import {InvitationResponse, SocialInviteRequest} from "@shared/types/SocialInviteTypes";
-import {SocialConnectionRequestNotification} from "@shared/types/SocialConnectionRequestTypes";
-import {ActivitySummaryResponse, SocialActivityFeedResponse} from "@shared/types/SocialTypes";
-import {getAuth} from "@web/firebase";
+import { Endpoint, getAuthHeaders, request } from "@web/requestUtils";
+import { EmailContact } from "@shared/types/EmailContactTypes";
+import { InvitationResponse, SocialInviteRequest } from "@shared/types/SocialInviteTypes";
+import { SocialConnectionRequestNotification } from "@shared/types/SocialConnectionRequestTypes";
+import { ActivitySummaryResponse, SocialActivityFeedResponse } from "@shared/types/SocialTypes";
+import { getAuth } from "@web/firebase";
 import MemberProfileService from '@web/services/MemberProfileService';
 import SocialConnectionRequest from "@shared/models/SocialConnectionRequest";
 import CactusMember from "@shared/models/CactusMember";
-import {AxiosError} from "axios";
+import { AxiosError } from "axios";
 import Logger from "@shared/Logger";
-import {getAppType} from "@web/DeviceUtil";
+import { getAppType } from "@web/DeviceUtil";
 
 const logger = new Logger("social.ts");
 
 export async function sendInvite(contact: EmailContact, message: string): Promise<InvitationResponse> {
     const currentUser = getAuth().currentUser;
     if (!currentUser) {
+        logger.info("User is not logged in, can not send invite email.")
         return {
             success: false,
             toEmails: [contact.email],
             error: "Current user is not logged in.",
-            message: "Current user is not logged in."
+            message: "You must be logged in to send an invite."
         }
     } else {
         logger.log("current user", currentUser);
@@ -32,7 +33,7 @@ export async function sendInvite(contact: EmailContact, message: string): Promis
 
         try {
             const headers = await getAuthHeaders();
-            const apiResponse = await request.post(Endpoint.sendInvite, requestOptions, {headers});
+            const apiResponse = await request.post(Endpoint.sendInvite, requestOptions, { headers });
             return apiResponse.data;
         } catch (e) {
             logger.error("API Call to social invite failed", e.response?.data ? e.response.data : e);
@@ -65,7 +66,7 @@ export async function notifyFriendRequest(socialConnectionRequest: SocialConnect
 
         try {
             const headers = await getAuthHeaders();
-            return await request.post(Endpoint.notifyFriendRequest, requestOptions, {headers});
+            return await request.post(Endpoint.notifyFriendRequest, requestOptions, { headers });
         } catch (e) {
             logger.error("Failed to notify friend request. The API call threw an error", e);
             return {
@@ -91,7 +92,7 @@ export async function getSocialActivity(member: CactusMember): Promise<SocialAct
 
         try {
             const headers = await getAuthHeaders();
-            const apiResponse = await request.get(Endpoint.activityFeed, {headers});
+            const apiResponse = await request.get(Endpoint.activityFeed, { headers });
             return apiResponse.data;
         } catch (e) {
             logger.error("Failed get activity feed. The API call threw an error", e);
@@ -106,7 +107,7 @@ export async function getSocialActivity(member: CactusMember): Promise<SocialAct
 
 export async function fetchActivityFeedSummary(): Promise<ActivitySummaryResponse | undefined> {
     try {
-        const response = await request.get(Endpoint.activityFeedSummary, {headers: await getAuthHeaders()});
+        const response = await request.get(Endpoint.activityFeedSummary, { headers: await getAuthHeaders() });
         return response.data;
     } catch (error) {
         if (error.isAxiosError) {

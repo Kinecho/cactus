@@ -12,6 +12,9 @@
         ],
         "storybook": [
           "cactus-storybook-stage"
+        ],
+        "webapp:alt": [
+          "cactus-app-stage-alt"
         ]
       }
     },
@@ -22,6 +25,9 @@
         ],
         "webapp": [
           "cactus-app-prod"
+        ],
+        "webapp:alt": [
+          "cactus-app-prod-alt"
         ]
       }
     }

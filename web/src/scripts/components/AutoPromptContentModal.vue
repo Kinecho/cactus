@@ -3,7 +3,7 @@
             v-on:close="showContent = false"
             :showCloseButton="false"
     >
-        <PromptContent slot="body"
+        <LegacyPromptContent slot="body"
                 v-bind:promptContentEntryId="entryId"
                 v-bind:isModal="true"
                 v-on:close="showContent = false"
@@ -16,7 +16,7 @@
     import {QueryParam} from "@shared/util/queryParams"
     import {getQueryParam, removeQueryParam, updateQueryParam} from "@web/util"
     import Modal from "@components/Modal.vue";
-    import PromptContent from "@components/PromptContent.vue";
+    import LegacyPromptContent from "@components/LegacyPromptContent.vue";
     import Logger from "@shared/Logger";
 
     const logger = new Logger("AutoPromptContentModal.vue");
@@ -25,7 +25,7 @@
 
         components: {
             Modal,
-            PromptContent,
+            LegacyPromptContent: LegacyPromptContent,
         },
         created() {
             const entryId = getQueryParam(QueryParam.PROMPT_CONTENT_ENTRY_ID);

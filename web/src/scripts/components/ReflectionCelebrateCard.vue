@@ -90,7 +90,7 @@
                 </div>
             </div>
             <div :class="[ 'flip-card', 'back']">
-                <prompt-content-card
+                <legacy-prompt-content-card
                         v-if="showTradeNote"
                         :content="sharingContentCard"
                         :response="reflectionResponse"
@@ -136,7 +136,7 @@
     import { ElementCopy, PromptCopy } from '@shared/copy/CopyTypes'
     import PromptContent, { Content, ContentType } from '@shared/models/PromptContent'
     import { isBlank } from "@shared/util/StringUtil"
-    import PromptContentCard from '@components/PromptContentCard.vue'
+    import LegacyPromptContentCard from '@components/LegacyPromptContentCard.vue'
     import Modal from "@components/Modal.vue";
     import { CactusElement } from "@shared/models/CactusElement";
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
@@ -160,7 +160,7 @@
             Modal,
             Spinner,
             MagicLink,
-            PromptContentCard,
+            LegacyPromptContentCard,
             ElementDescriptionModal,
             InputNameModal,
             UpgradeBanner: ReflectionCelebrateUpgradeBanner,

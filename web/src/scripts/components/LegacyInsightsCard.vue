@@ -26,7 +26,6 @@
     import PositivityRating from "@components/PositivityRating.vue";
     import ToneAnalysis from "@components/ToneAnalysis.vue";
     import Spinner from "@components/Spinner.vue";
-    import { isNull } from "@shared/util/ObjectUtil";
 
     @Component({
         components: {
@@ -35,7 +34,7 @@
             Spinner,
         }
     })
-    export default class InsightsCard extends Vue {
+    export default class LegacyInsightsCard extends Vue {
 
         @Prop({ type: Object as () => ReflectionResponse, required: false, default: undefined })
         reflectionResponse!: ReflectionResponse | null | undefined;

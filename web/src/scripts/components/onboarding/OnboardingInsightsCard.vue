@@ -2,9 +2,6 @@
     <div class="insights-card">
         <spinner v-if="loading"/>
         <div class="textBox">
-            <!-- <p v-if="reflectionResponse.toneAnalysis">
-                This is the positivity rating of your note. Write more to reveal different emotions.
-            </p> -->
             <p>This is what your note reveals about your emotions.</p>
         </div>
         <div class="insightsContainer">
@@ -27,13 +24,11 @@
     import { ListenerUnsubscriber } from "@web/services/FirestoreService";
     import ReflectionResponseService from "@web/services/ReflectionResponseService";
     import Spinner from "@components/Spinner.vue";
-    import InsightsCard from "@components/InsightsCard.vue";
     import PositivityRating from "@components/PositivityRating.vue";
     import ToneAnalysis from "@components/ToneAnalysis.vue";
 
     @Component({
         components: {
-            InsightsCard,
             Spinner,
             PositivityRating,
             ToneAnalysis,

@@ -196,7 +196,7 @@ export function toCamelCamse(input: string): string {
 }
 
 
-export function getResponseText(responses?: ReflectionResponse[]): string | undefined {
+export function getResponseText(responses?: ReflectionResponse[] | null | undefined): string | undefined {
     if (!responses) {
         return;
     }

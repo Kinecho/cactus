@@ -32,7 +32,7 @@
                         <copy-text-input v-if="shareableLinkUrl" :text="shareableLinkUrl" :queryParams="shareableLinkParams" :editable="false" buttonStyle="primary"/>
                         <div v-if="nativeShareEnabled" class="sharing">
                             <button class="btn secondary" @click="shareNatively()">
-                                <img class="shareIcon" src="/assets/images/share.svg" alt="Share Icon"/>Share
+                                <img class="shareIcon" src="/assets/icons/share.svg" alt="Share Icon"/>Share
                             </button>
                         </div>
                     </div>
@@ -243,7 +243,7 @@
     import { appendQueryParams, isBlank } from "@shared/util/StringUtil";
     import PricingModal from "@components/PricingModal.vue";
     import { PageRoute } from "@shared/PageRoutes";
-    import InsightsCard from "@components/InsightsCard.vue";
+    import LegacyInsightsCard from "@components/LegacyInsightsCard.vue";
 
     const logger = new Logger("PromptContentCard.vue");
     const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
@@ -262,7 +262,7 @@
             ElementDescriptionModal,
             MarkdownText,
             PricingModal,
-            InsightsCard,
+            InsightsCard: LegacyInsightsCard,
         },
         props: {
             content: {
@@ -332,7 +332,7 @@
         },
         computed: {
             isInsightsCard(): boolean {
-                return this.response && this.processedContent?.contentType === ContentType.insights;
+                return this.response && this.processedContent?.contentType === ContentType.reflection_analysis;
             },
             shareableLinkParams(): {} | undefined {
                 if (this.shareableLinkUrl && this.member?.email) {
