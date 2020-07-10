@@ -14,7 +14,7 @@ export class OfferDetails {
      * The date the user clicked the link that enabled the offer
      */
     appliedAt?: Date;
-
+    trialDays?: number | null;
     /**
      * The date the user redeemed the offer
      */
@@ -41,6 +41,7 @@ export default class PromotionalOffer extends FlamelinkModel {
     displayName?: string;
     continueUrl?: string;
     description?: string;
+    trialDays?: number | null;
 
     constructor(data?: Partial<PromotionalOffer>) {
         super(data);
@@ -52,6 +53,7 @@ export default class PromotionalOffer extends FlamelinkModel {
             entryId: this.entryId,
             displayName: this.displayName,
             description: this.description,
+            trialDays: this.trialDays,
             appliedAt,
         });
     }
