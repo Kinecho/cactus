@@ -32,8 +32,8 @@
                 </section>
                 <router-link v-else tag="section" class="novaluesContainer" :class="{plus: isPlusMember}" :to="coreValuesHref">
                     <svg class="lock" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                    <h2>Get My Core Values</h2>
-                    <p class="subtext">Discover what is most important & understand yourself better.</p>
+                    <h2>What Are Your Core Values?</h2>
+                    <p class="subtext">Discover what drives your life decisions and deepest needs.</p>
                     <router-link v-if="isPlusMember" tag="button" class="secondary esButton" :to="coreValuesHref">Take the Assessment</router-link>
                 </router-link>
                 <gap-analysis-widget :loading="gapResultsLoading"
