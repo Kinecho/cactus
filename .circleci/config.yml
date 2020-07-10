@@ -262,9 +262,11 @@ jobs:
     steps:
       - checkout
       - restore-module:
-          module: web
+          module: *root-module
       - restore-module:
-          module: shared
+          module: *web-module
+      - restore-module:
+          module: *shared-module
       - run:
           name: "TSLint"
           command: npm --prefix web run lint:ci
