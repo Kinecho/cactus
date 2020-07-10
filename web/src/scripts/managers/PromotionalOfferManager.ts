@@ -77,6 +77,15 @@ export default class PromotionalOfferManager {
     }
 
 
+    /**
+     * Get the current offer for presentation. Pulls the offer from the member, if provided,
+     * or from the session, if available.
+     *
+     * This method also ensures the current environment (Android/web) is able to display the offer.
+     *
+     * @param {CactusMember | undefined | null} member
+     * @return {OfferDetails | null}
+     */
     getCurrentOffer(member?: CactusMember | undefined | null): OfferDetails | null {
         const offer = member?.currentOffer ?? this.getSessionOfferDetails();
         if (isAndroidApp()) {
