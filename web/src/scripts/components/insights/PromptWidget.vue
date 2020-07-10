@@ -11,18 +11,18 @@
             <p class="previewText" v-if="!hasReflected && !reflectionText">
                 <markdown-text :source="previewText"/>
             </p>
-            <p class="entry" v-if="!canReflectInline && hasReflected && reflectionText" @click="canReflectInline = true">
+            <p class="entry" v-if="!isEditingNote && hasReflected && reflectionText" @click="isEditingNote = true">
                 {{reflectionText}}
             </p>
-            
+
             <edit-reflection
-                :show="canReflectInline"
-                :responses="entry.responses"
-                :prompt-content="entry.promptContent"
-                :prompt="entry.prompt"
-                :member="member"
-                :responseMedium="responseMedium"
-                @close="canReflectInline = false"
+                    :show="isEditingNote"
+                    :responses="entry.responses"
+                    :prompt-content="entry.promptContent"
+                    :prompt="entry.prompt"
+                    :member="member"
+                    :responseMedium="responseMedium"
+                    @close="isEditingNote = false"
             />
 
             <div class="backgroundImage">
@@ -69,7 +69,7 @@
     //import LegacyPromptContentCard from "@components/LegacyPromptContentCard.vue"
     //import PromptSharing from "@components/PromptContentSharing.vue";
     import EditReflection from "@components/ReflectionResponseTextEdit.vue"
-    import {isBlank} from "@shared/util/StringUtil"
+    import { isBlank } from "@shared/util/StringUtil"
     import ReflectionResponse, {
         getResponseMedium,
         ResponseMedium,
@@ -102,11 +102,10 @@
         // @Prop({ type: Boolean, required: false, default: false })
         // showShareNote!: boolean;
 
-        @Prop({ type: Boolean, required: false, default: false })
-        canReflectInline!: boolean;
+        isEditingNote: boolean = false;
 
-        @Prop({ type: String as () => ResponseMedium, required: false })
-        responseMedium: ResponseMedium.JOURNAL_WEB;
+        @Prop({ type: String as () => ResponseMedium, required: false, default: ResponseMedium.JOURNAL_WEB })
+        responseMedium!: ResponseMedium;
 
         @Prop({ type: Object as () => JournalEntry | null, required: false, default: null })
         entry!: JournalEntry | null;
@@ -120,7 +119,7 @@
         }
 
         get hasNote(): boolean {
-            return !isBlank(getResponseText(this.entry.responses));
+            return !isBlank(getResponseText(this.entry?.responses));
         }
 
         get linkItems(): {
@@ -136,7 +135,7 @@
                 {
                     title: this.hasNote ? copy.prompts.EDIT_NOTE : copy.prompts.ADD_A_NOTE,
                     onClick: () => {
-                        this.canReflectInline = true;
+                        this.isEditingNote = true;
                     }
                 },
                 // {
@@ -207,9 +206,9 @@
         background-color: $beige;
         border-radius: 1.6rem;
         box-shadow: 0 6.9px 21px -24px rgba(0, 0, 0, 0.032),
-            0 11.5px 32.3px -24px rgba(0, 0, 0, 0.056),
-            0 13.9px 37.7px -24px rgba(0, 0, 0, 0.094),
-            0 24px 63px -24px rgba(0, 0, 0, 0.35);
+        0 11.5px 32.3px -24px rgba(0, 0, 0, 0.056),
+        0 13.9px 37.7px -24px rgba(0, 0, 0, 0.094),
+        0 24px 63px -24px rgba(0, 0, 0, 0.35);
         margin: 0 2.4rem 3.2rem;
         overflow: hidden;
         padding: 2.4rem;

@@ -1,5 +1,6 @@
 import { Route, RouteConfig } from "vue-router";
 import Logger from "@shared/Logger";
+import { RouteConfigSingleView } from "vue-router/types/router";
 
 const logger = new Logger("router-meta");
 
@@ -40,7 +41,7 @@ export const DEFAULT_IMAGE_META: MetaImage = {
     type: "image/png",
 }
 
-export interface MetaRouteConfig extends RouteConfig {
+export interface MetaRouteConfig extends RouteConfigSingleView {
     meta?: RoutePageMeta
 }
 
