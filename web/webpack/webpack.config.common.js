@@ -7,14 +7,13 @@ const helpers = require('./../helpers')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const WebpackNotifierPlugin = require('webpack-notifier')
 const chalk = require('chalk')
-const simplegit = require('simple-git/promise')
+const simpleGit = require('simple-git')
 const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
 
 function getCommitHash() {
-    const git = simplegit()
+    const git = simpleGit()
     return git.revparse(['HEAD'])
 }
-
 
 function recursiveIssuer(m) {
     if (m.issuer) {
@@ -261,7 +260,7 @@ module.exports = (config) => {
                         console.log(chalk.green('Configuring HTML page ', filename, 'chunks: ', chunks.join(', ')))
                         return new HtmlWebpackPlugin({
                             chunks,
-                            title: page.title,
+                            analyticsId: config.__GOOGLE_ANALYTICS_ID__,
                             template: `${helpers.htmlDir}/${filename}.html`,
                             filename: `${filename}.html`,
                             favicon: `${helpers.srcDir}/favicon.ico`,

@@ -1,6 +1,8 @@
 import { getCactusConfig, Project } from "@scripts/config";
-import AdminSlackService, { ChatMessage } from "@admin/services/AdminSlackService";
+import AdminSlackService, { ChannelName, ChatMessage } from "@admin/services/AdminSlackService";
+import simpleGit, { SimpleGit } from 'simple-git';
 
+const git: SimpleGit = simpleGit();
 (async () => {
     const projectId = process.env.GCLOUD_PROJECT;
     const isProd = projectId === 'cactus-app-prod';
@@ -20,28 +22,37 @@ import AdminSlackService, { ChatMessage } from "@admin/services/AdminSlackServic
     if (resource.toLowerCase().trim().includes("hosting") && !resource.toLowerCase().includes("storybook")) {
         isHosting = true;
     }
+    const isAlt = isHosting && resource.includes("alt");
+
     console.log("is hosting deploy: ", isHosting);
 
     AdminSlackService.initialize(config);
 
+    const branch = (await git.branchLocal()).current;
+
     if (isProd && isHosting) {
+        const appName = isAlt ? `Prod-Alt \`${ branch }\`` : "Prod"
+        const url = isAlt ? "https://cactus-app-prod-alt.web.app" : "https://cactus.app";
         const message: ChatMessage = {
             text: "",
             attachments: [{
-                text: `:white_check_mark: *Prod* has been updated. <https://cactus.app|Check it out>.`,
+                text: `:white_check_mark: *${ appName }* has been updated. <${ url }|Check it out>.`,
                 color: "good",
                 ts: `${ (new Date()).getTime() / 1000 }`
             }],
         };
         await AdminSlackService.getSharedInstance().sendGeneralMessage(message);
     } else if (isHosting) {
+        const appName = isAlt ? `Stage - Alt \`${ branch }\`` : "Stage"
+        const url = isAlt ? "https://cactus-app-stage-alt.web.app" : "https://cactus-app-stage.web.app";
+        const emoji = isAlt ? ":fire:" : ""
         const message: ChatMessage = {
             text: "",
             attachments: [{
-                text: `*Stage* has been updated. <https://cactus-app-stage.web.app|Check it out>.`,
+                text: `${ emoji } *${ appName }* has been updated. <${ url }|Check it out>.`.trim(),
                 ts: `${ (new Date()).getTime() / 1000 }`
             }],
         };
-        await AdminSlackService.getSharedInstance().sendGeneralMessage(message);
+        await AdminSlackService.getSharedInstance().sendArbitraryMessage(ChannelName.general, message);
     }
 })().then(() => console.log("Done")).catch(e => console.error("Failed to execute slack command", e));

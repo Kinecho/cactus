@@ -20,13 +20,13 @@
     import OnboardingCardViewModel from "@components/onboarding/OnboardingCardViewModel";
     import { Prop } from "vue-property-decorator";
     import MarkdownText from "@components/MarkdownText.vue";
-    import ActionButton from "@components/ActionButton.vue";
+    import OnboardingActionButton from "@components/OnboardingActionButton.vue";
     import CactusMember from "@shared/models/CactusMember";
 
     @Component({
         components: {
             MarkdownText,
-            ActionButton,
+            ActionButton: OnboardingActionButton,
         }
     })
     export default class OnboardingTextCard extends Vue {

@@ -27,8 +27,8 @@
     }
 
     @Component
-    export default class ActionButton extends Vue {
-        name = "ActionButton";
+    export default class OnboardingActionButton extends Vue {
+        name = "OnboardingActionButton";
 
         @Prop({ type: Object as () => LinkableActionButton, required: true })
         button!: LinkableActionButton;

@@ -1,20 +1,20 @@
 <template>
-    <Prompt v-on:close="redirectToJournal"/>
+    <legacy-prompt-content v-on:close="redirectToJournal"/>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
     import { PageRoute } from "@shared/PageRoutes";
-    import Prompt from "@components/PromptContent.vue"
+    import LegacyPromptContent from "@components/LegacyPromptContent.vue"
     import Component from "vue-class-component";
     import Logger from "@shared/Logger"
     import { pushRoute } from "@web/NavigationUtil";
 
-    const logger = new Logger("PromptContentPage");
+    const logger = new Logger("LegacyPromptContentPage.vue");
 
     @Component({
         components: {
-            Prompt,
+            LegacyPromptContent,
         }
     })
     export default class PromptContentPage extends Vue {

@@ -61,11 +61,11 @@
         "@web": "build/web/src"
     },
     "dependencies": {
-        "firebase": "^7.14.6",
         "express": "^4.17.1",
+        "firebase": "^7.14.6",
         "firebase-admin": "^8.12.1",
         "module-alias": "^2.2.2",
-        "typescript": "^3.9.5"
+        "typescript": "^3.9.6"
     },
     "devDependencies": {
         "firebase-tools": "^8.4.3",

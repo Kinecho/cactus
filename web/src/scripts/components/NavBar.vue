@@ -5,12 +5,12 @@
                 <img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" :src="'/assets/images/' + logoSrc" alt="Cactus logo"/>
             </router-link>
             <div v-if="!loggedIn" class="anonLinks">
-                <router-link v-if="displayLoginButton"
-                        class="login"
-                        :to="sponsorHref"
+                <router-link
+                        v-if="displayLoginButton"
+                        :to="pricingHref"
                         type="link"
                 >
-                    <span>Sponsor</span>
+                    <span>Pricing</span>
                 </router-link>
                 <router-link v-if="displayLoginButton"
                         class="login "
@@ -19,6 +19,13 @@
                         type="link"
                 >
                     <span>{{copy.common.LOG_IN}}</span>
+                </router-link>
+                <router-link v-if="displayLoginButton"
+                        class="login"
+                        :to="signupHref"
+                        type="link"
+                >
+                    <span>{{copy.common.SIGN_UP}}</span>
                 </router-link>
             </div>
             <div class="navContainer" v-if="loggedIn && showLinks">
@@ -33,13 +40,12 @@
                         <title>Journal</title>
                         <path fill="#07454C" d="M7.636 0c1.785 0 3.37.857 4.365 2.182A5.44 5.44 0 0116.364 0h6.545C23.512 0 24 .488 24 1.09v16.365a1.09 1.09 0 01-1.09 1.09h-7.637a2.182 2.182 0 00-2.177 2.026l-.005.156c0 1.455-2.182 1.455-2.182 0a2.182 2.182 0 00-2.182-2.182H1.091A1.09 1.09 0 010 17.455V1.09C0 .488.488 0 1.09 0h6.546zm0 2.182H2.182v14.182h6.545c.696 0 1.353.162 1.937.452l.245.131V5.455a3.273 3.273 0 00-3.273-3.273zm14.182 0h-5.454a3.273 3.273 0 00-3.273 3.273v11.492a4.344 4.344 0 012.182-.583h6.545V2.182zM7.636 12.545a1.09 1.09 0 010 2.182H4.364a1.09 1.09 0 110-2.182zm1.091-4.363a1.09 1.09 0 110 2.182H4.364a1.09 1.09 0 010-2.182zm-1.09-4.364a1.09 1.09 0 010 2.182H4.363a1.09 1.09 0 110-2.182z"/>
                     </svg>
-
                     <span class="navLabel">{{copy.navigation.JOURNAL}}</span>
                 </router-link>
                 <dropdown-menu :items="links" v-if="loggedIn" :displayName="displayName" :email="email">
                     <div class="navbar-avatar-container" slot="custom-button">
                         <div v-if="!profileImageUrl" class="initials">{{initials}}</div>
-                        <img v-if="profileImageUrl" alt="Account" :src="profileImageUrl"/>
+                        <img @error="avatarImageError = true" v-if="profileImageUrl" alt="Account" :src="profileImageUrl"/>
                     </div>
                 </dropdown-menu>
             </div>
@@ -86,6 +92,7 @@
         memberProfile: MemberProfile | undefined,
         memberProfileUnsubscriber: ListenerUnsubscriber | undefined,
         activityBadgeCount: number,
+        avatarImageError: boolean,
     }
 
     export default Vue.extend({
@@ -156,6 +163,7 @@
                 activityBadgeCount: StorageService.getNumber(LocalStorageKey.activityBadgeCount, 0)!,
                 memberProfileUnsubscriber: undefined,
                 memberProfile: undefined,
+                avatarImageError: false,
             }
         },
         computed: {
@@ -186,7 +194,8 @@
                 return this.user ? this.user.email : null;
             },
             profileImageUrl(): string | undefined | null {
-                return (this.memberProfile?.avatarUrl) ? this.memberProfile.avatarUrl : getRandomAvatar(this.member?.id);
+
+                return (!this.avatarImageError && this.memberProfile?.avatarUrl) ? this.memberProfile.avatarUrl : getRandomAvatar(this.member?.id);
             },
             displayLoginButton(): boolean {
                 return this.showLogin && this.authLoaded && !this.user;
@@ -229,6 +238,9 @@
             },
             insightsHref(): string {
                 return PageRoute.INSIGHTS
+            },
+            pricingHref(): string {
+                return PageRoute.PRICING;
             }
         },
         methods: {
@@ -296,21 +308,32 @@
         justify-content: flex-end;
         white-space: nowrap;
 
-        .login {
+        a {
             display: block;
             font-size: 1.6rem;
             margin: 0;
             padding-left: 3vw;
             text-decoration: none;
             transition: background-color .2s ease-in-out;
-
             @include r(600) {
                 font-size: 1.8rem;
 
+            }
+        }
+
+        .login {
+            &:last-child {
+                border: 1px solid $lightGreen;
+                border-radius: 3rem;
+                margin-left: 3.2vw;
+                padding: .4rem 1.0rem;
+
+                &:hover, &.router-link-active {
+                    background-color: $lightGreen;
+                }
+            }
+            @include r(600) {
                 &:last-child {
-                    border: 1px solid $lightGreen;
-                    border-radius: 3rem;
-                    margin-left: 3.2vw;
                     padding: .8rem 1.6rem;
 
                     &:hover, &.router-link-active {

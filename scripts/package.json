@@ -50,7 +50,7 @@
         "md5": "^2.2.1",
         "module-alias": "^2.2.0",
         "prompts": "^2.3.2",
-        "simple-git": "^1.121.0",
+        "simple-git": "^2.11.0",
         "stripe": "8.17.0",
         "yesno": "^0.2.0"
     },
@@ -69,6 +69,6 @@
         "ts-node": "^8.10.1",
         "tsconfig-paths": "^3.8.0",
         "tslint": "^5.20.1",
-        "typescript": "^3.9.2"
+        "typescript": "^3.9.6"
     }
 }

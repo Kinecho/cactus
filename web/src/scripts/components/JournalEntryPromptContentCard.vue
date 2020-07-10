@@ -63,7 +63,7 @@
         </modal>
         <modal :show="showShareNote" v-on:close="showShareNote = false" :showCloseButton="true" v-if="!!shareNote">
             <div class="sharing-card note" slot="body">
-                <prompt-content-card
+                <legacy-prompt-content-card
                         :prompt-content="entry.promptContent"
                         :content="shareNote.content"
                         :response="shareNote.response"/>
@@ -76,7 +76,7 @@
     import Vue from "vue";
     import { Content, ContentType, Image } from "@shared/models/PromptContent"
     import { PageRoute } from "@shared/PageRoutes"
-    import PromptContentVue from "@components/PromptContent.vue"
+    import PromptContentVue from "@components/LegacyPromptContent.vue"
     import { formatDate } from "@shared/util/DateUtil"
     import ReflectionResponse, {
         getResponseMedium,
@@ -100,7 +100,7 @@
     import { hasImage } from '@shared/util/FlamelinkUtils'
     import CopyService from "@shared/copy/CopyService";
     import { PromptCopy } from "@shared/copy/CopyTypes"
-    import PromptContentCard from "@components/PromptContentCard.vue"
+    import LegacyPromptContentCard from "@components/LegacyPromptContentCard.vue"
     import JournalEntry from '@web/datasource/models/JournalEntry'
     import Logger from "@shared/Logger";
     import { getAppType } from "@web/DeviceUtil";
@@ -114,8 +114,8 @@
         components: {
             Modal,
             DropdownMenu,
-            PromptContent: PromptContentVue,
-            PromptContentCard,
+            LegacyPromptContent: PromptContentVue,
+            LegacyPromptContentCard,
             EditReflection,
             PromptSharing,
             FlamelinkImage,
