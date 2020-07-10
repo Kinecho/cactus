@@ -259,6 +259,7 @@ app.post("/sessions/create-subscription", async (req: express.Request, res: expr
             sessionId: session.id,
             amount: chargeAmount,
             planId: plan.id,
+            offerDetails: currentOffer,
             raw: session,
         });
 
@@ -314,16 +315,23 @@ async function buildStripeSubscriptionCheckoutSessionOptions(options: {
         stripeSubscriptionData.trial_period_days = trialDays
     }
 
+    const metadata: Record<string, string> = {
+        memberId: `${ memberId }`,
+        subscriptionProductId: `${ subscriptionProductId }`,
+    }
+
+    if (currentOffer) {
+        metadata.offerEntryId = currentOffer.entryId;
+        metadata.offerName = currentOffer.displayName;
+    }
+
     const stripeOptions: Stripe.Checkout.SessionCreateParams = {
         payment_method_types: ['card'],
         success_url: updatedSuccessUrl,
         cancel_url: cancelUrl,
         customer_email: member.stripeCustomerId ? undefined : member.email,
         customer: member.stripeCustomerId,
-        metadata: {
-            memberId: `${ memberId }`,
-            subscriptionProductId: `${ subscriptionProductId }`,
-        },
+        metadata,
         subscription_data: stripeSubscriptionData,
     };
     logger.info("Successfully constructed stripe checkout options", stringifyJSON(stripeOptions, 2));
