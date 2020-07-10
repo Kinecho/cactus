@@ -65,6 +65,7 @@ export enum ChannelName {
     subscription_status = "subscription-status",
     cancellation_processing = "cancellation-processing",
     customer_data_export = "customer-data-export",
+    promo_activity = "promo-activity",
 }
 
 export enum SlackResponseType {

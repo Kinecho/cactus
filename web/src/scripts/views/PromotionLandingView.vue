@@ -1,7 +1,5 @@
 <template>
     <div>
-        <h1>Promos</h1>
-
         <spinner v-if="loading">Loading....</spinner>
         <template v-if="!loading">
             <p>
@@ -29,6 +27,13 @@
     import { Prop, Watch } from "vue-property-decorator";
     import Spinner from "@components/Spinner.vue";
     import PromotionalOfferService from "@web/services/PromotionalOfferService";
+    import { pushRoute } from "@web/NavigationUtil";
+    import { PageRoute } from "@shared/PageRoutes";
+    import { isBlank } from "@shared/util/StringUtil";
+    import PromotionalOfferManager from "@web/managers/PromotionalOfferManager";
+    import Logger from "@shared/Logger"
+
+    const logger = new Logger("PromotionLandingView");
 
     @Component({
         components: {
@@ -58,10 +63,21 @@
         async fetchOffer() {
             const slug = this.slug;
             this.loading = true;
-            this.offer = await PromotionalOfferService.shared.getBySlug(slug);
-            this.loading = false;
-        }
+            const offer = await PromotionalOfferService.shared.getBySlug(slug);
+            if (offer) {
+                logger.debug("applying offer", offer.displayName)
+                await PromotionalOfferManager.shared.applyOffer(offer);
+            }
 
+            this.offer = offer;
+            this.loading = false;
+            const url = this.offer?.continueUrl;
+            if (!isBlank(url)) {
+                await pushRoute(url);
+            } else {
+                await pushRoute(PageRoute.HOME);
+            }
+        }
     }
 </script>
 

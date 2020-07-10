@@ -1,5 +1,4 @@
-import FlamelinkService, { FlamelinkModelService } from "@web/services/FlamelinkService";
-import PromptContent from "@shared/models/PromptContent";
+import { FlamelinkModelService } from "@web/services/FlamelinkService";
 import PromotionalOffer from "@shared/models/PromotionalOffer";
 import Logger from "@shared/Logger"
 import { isBlank } from "@shared/util/StringUtil";
@@ -15,14 +14,12 @@ export default class PromotionalOfferService extends FlamelinkModelService<Promo
 
     constructor() {
         super();
-        const m = this.getByEntryId();
-        logger.info("m", m)
     }
 
-    async getBySlug(slug?: string | null | undefined): Promise<PromotionalOffer | undefined> {
+    async getBySlug(slug?: string | null | undefined): Promise<PromotionalOffer | null> {
         if (isBlank(slug)) {
-            return undefined;
+            return null;
         }
-        return this.getFirstByField({ name: PromotionalOffer.Field.urlSlug, value: slug });
+        return await this.getFirstByField({ name: PromotionalOffer.Field.urlSlug, value: slug }) ?? null;
     }
 }

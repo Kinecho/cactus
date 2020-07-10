@@ -68,7 +68,7 @@ export default class AdminRevenueCatService {
     private async fetchCactusProducts() {
         const products = await AdminSubscriptionProductService.getSharedInstance().getAll();
         products.forEach(p => {
-            this.cactusSubscriptionProductsById[p.entryId!] = p;
+            this.cactusSubscriptionProductsById[p.entryId] = p;
         });
         this.hasFetchedProducts = true;
         return this.cactusSubscriptionProductsById;

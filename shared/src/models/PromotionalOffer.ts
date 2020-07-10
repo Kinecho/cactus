@@ -1,7 +1,37 @@
 import FlamelinkModel, { SchemaName } from "@shared/FlamelinkModel";
+import { isBlank } from "@shared/util/StringUtil";
 
 enum Field {
     urlSlug = "urlSlug",
+}
+
+
+export class OfferDetails {
+    entryId: string;
+    displayName?: string;
+    description?: string;
+    /**
+     * The date the user clicked the link that enabled the offer
+     */
+    appliedAt?: Date;
+
+    /**
+     * The date the user redeemed the offer
+     */
+    redeemedAt?: Date | null = null;
+
+    constructor(data: Partial<OfferDetails> & { entryId: string }) {
+        Object.assign(this, data);
+        this.entryId = data.entryId;
+        this.appliedAt = data.appliedAt ? new Date(data.appliedAt) : undefined;
+    }
+
+    static fromJSON(json: any | null): OfferDetails | null {
+        if (isBlank(json?.entryId)) {
+            return null;
+        }
+        return new OfferDetails(json);
+    }
 }
 
 export default class PromotionalOffer extends FlamelinkModel {
@@ -9,10 +39,20 @@ export default class PromotionalOffer extends FlamelinkModel {
     schema = SchemaName.promotionalOffer;
     urlSlug?: string;
     displayName?: string;
-
+    continueUrl?: string;
+    description?: string;
 
     constructor(data?: Partial<PromotionalOffer>) {
         super(data);
         Object.assign(this, data);
+    }
+
+    toOfferDetails(appliedAt: Date = new Date()): OfferDetails {
+        return new OfferDetails({
+            entryId: this.entryId,
+            displayName: this.displayName,
+            description: this.description,
+            appliedAt,
+        });
     }
 }

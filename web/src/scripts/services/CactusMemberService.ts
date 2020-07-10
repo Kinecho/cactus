@@ -7,6 +7,7 @@ import Logger from "@shared/Logger";
 import StorageService, { LocalStorageKey } from "@web/services/StorageService";
 import { CactusElement } from "@shared/models/CactusElement";
 import RevenueCatService from "@web/services/RevenueCatService";
+import PromotionalOfferManager from "@web/managers/PromotionalOfferManager";
 
 const logger = new Logger("CactusMemberService");
 
@@ -33,12 +34,16 @@ export default class CactusMemberService {
             if (user) {
                 this.currentMemberUnsubscriber = this.observeByUserId(user.uid, {
                     onData: async member => {
+                        logger.info("Member update recieved from server");
+                        const memberChanged = this.currentMember?.id !== member?.id
                         this.currentMember = member;
                         this.memberHasLoaded = true;
-                        if (member) {
+                        if (member && memberChanged) {
+                            logger.info("Member changed - updating member values like timezone, revenuecat + session offers");
                             await Promise.all([
                                 this.updateMemberSettingsIfNeeded(member),
-                                RevenueCatService.shared.updateLastSeen(member)
+                                RevenueCatService.shared.updateLastSeen(member),
+                                PromotionalOfferManager.shared.applySessionOffers(member),
                             ]);
                         }
                     }

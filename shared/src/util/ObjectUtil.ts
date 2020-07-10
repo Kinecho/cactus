@@ -161,6 +161,9 @@ export function transformObjectSync(input: any, transform: (value: any) => any, 
 }
 
 export function toPlainObject(input: any): any {
+    if (!input) {
+        return input;
+    }
     return transformObjectSync(input, (value => {
         if (isNonEmptyObject(value)) {
             return Object.assign({}, value)
