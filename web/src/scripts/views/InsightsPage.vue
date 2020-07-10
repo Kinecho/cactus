@@ -30,11 +30,11 @@
                     </div>
                     <dropdown-menu :items="coreValuesDropdownLinks" class="dotsBtn"/>
                 </section>
-                <router-link v-else tag="section" class="novaluesContainer" :to="coreValuesHref">
+                <router-link v-else tag="section" class="novaluesContainer" :class="{plus: isPlusMember}" :to="coreValuesHref">
                     <svg class="lock" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                     <h2>Get My Core Values</h2>
                     <p class="subtext">Discover what is most important & understand yourself better.</p>
-                    <!-- <router-link tag="button" class="secondary esButton" :to="coreValuesHref">Get My Core Values</router-link> -->
+                    <router-link v-if="isPlusMember" tag="button" class="secondary esButton" :to="coreValuesHref">Take the Assessment</router-link>
                 </router-link>
                 <gap-analysis-widget :loading="gapResultsLoading"
                         :gap-assessment-results="gapAssessmentResults"
@@ -333,11 +333,6 @@
         padding: 2.4rem 3.2rem 3.2rem 5.6rem;
         position: relative;
 
-        .subtext {
-            max-width: 56rem;
-            opacity: .8;
-        }
-
         @include r(600) {
             transition: box-shadow .3s, transform .3s ease-in;
 
@@ -348,6 +343,37 @@
                     0 24px 63px -24px rgba(0, 0, 0, 0.15);
                 transform: translateY(-.2rem);
             }
+        }
+
+        &.plus {
+            padding-left: 3.2rem;
+
+            @include r(600) {
+                background-image: url(/assets/images/grainy.png), url(/assets/images/cvBlob.png), url(/assets/images/pinkVs.svg), url(/assets/images/cvBlob.png);
+                background-position: 0 0, -17rem -7rem, right -6rem top -4rem, right -6rem bottom -14rem;
+                background-repeat: repeat, no-repeat, no-repeat, no-repeat;
+                background-size: auto, 28rem, auto, auto;
+
+                .subtext {
+                    font-size: 1.8rem;
+                }
+
+                .subtext + button {
+                    display: block;
+                    margin-top: 2.4rem;
+                    width: auto;
+                }
+            }
+
+            .lock,
+            button {
+                display: none;
+            }
+        }
+
+        .subtext {
+            max-width: 56rem;
+            opacity: .8;
         }
     }
 
