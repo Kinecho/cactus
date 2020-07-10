@@ -16,6 +16,7 @@ import { CoreValue } from "@shared/models/CoreValueTypes";
 import { CactusElement } from "@shared/models/CactusElement";
 import { InsightWord } from "@shared/api/InsightLanguageTypes";
 import { OfferDetails } from "@shared/models/PromotionalOffer";
+import { isNull } from "@shared/util/ObjectUtil";
 
 export enum JournalStatus {
     PREMIUM = "PREMIUM",
@@ -279,6 +280,10 @@ export default class CactusMember extends BaseModel {
 
     get tier(): SubscriptionTier {
         return this.subscription?.tier ?? DEFAULT_SUBSCRIPTION_TIER
+    }
+
+    get hasTrialed(): boolean {
+        return !isNull(this.subscription?.optOutTrial?.startedAt);
     }
 
     get tierDisplayName(): string | undefined {
