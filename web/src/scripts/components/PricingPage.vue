@@ -1,6 +1,5 @@
 <template>
     <div>
-        <NavBar/>
         <section class="hero">
             <div class="centered" v-if="!coreValues">
                 <h1>Get more with Cactus&nbsp;Plus</h1>

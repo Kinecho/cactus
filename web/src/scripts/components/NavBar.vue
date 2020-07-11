@@ -1,5 +1,5 @@
 <template lang="html">
-    <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent, noborder: largeLogoOnDesktop}" v-if="!hidden">
+    <header v-bind:class="mainClasses" v-if="!hidden">
         <div class="centered">
             <router-link :to="logoHref">
                 <img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" :src="logoSrc" alt="Cactus logo"/>
@@ -42,7 +42,13 @@
                     </svg>
                     <span class="navLabel">{{copy.navigation.JOURNAL}}</span>
                 </router-link>
-                <dropdown-menu :items="links" v-if="loggedIn" :displayName="displayName" :email="email">
+                <dropdown-menu
+                        v-if="loggedIn"
+                        :items="links"
+                        :displayName="displayName"
+                        :email="email"
+                        :hide-on-route-change="true"
+                >
                     <div class="navbar-avatar-container" slot="custom-button">
                         <div v-if="!profileImageUrl" class="initials">{{initials}}</div>
                         <img @error="avatarImageError = true" v-if="profileImageUrl" alt="Account" :src="profileImageUrl"/>
@@ -129,12 +135,12 @@
 
         copy = copy;
         user: FirebaseUser | null | undefined = null;
-        authUnsubscribe: ListenerUnsubscriber|undefined = undefined;
+        authUnsubscribe: ListenerUnsubscriber | undefined = undefined;
         authLoaded: boolean = false;
         hidden = false;
         member: CactusMember | undefined = undefined;
         memberUnsubscriber: ListenerUnsubscriber | undefined = undefined;
-        memberProfileUnsubscriber: ListenerUnsubscriber|undefined = undefined;
+        memberProfileUnsubscriber: ListenerUnsubscriber | undefined = undefined;
         memberProfile: MemberProfile | undefined = undefined;
         avatarImageError = false;
 
@@ -165,10 +171,20 @@
             });
         }
 
-        destroyed() {
+        beforeDestroy() {
             this.authUnsubscribe?.();
             this.memberUnsubscriber?.();
             this.memberProfileUnsubscriber?.();
+        }
+
+        get mainClasses(): Record<string, boolean> {
+            return {
+                loggedIn: this.loggedIn,
+                loaded: this.authLoaded,
+                sticky: this.isSticky,
+                transparent: this.forceTransparent,
+                noborder: this.largeLogoOnDesktop
+            }
         }
 
         get loggedIn(): boolean {

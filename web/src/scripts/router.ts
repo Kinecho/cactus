@@ -75,6 +75,8 @@ const routes: MetaRouteConfig[] = [
         alias: PageRoute.INSIGHTS,
         name: "Home",
         meta: {
+            authRequired: true,
+            passMember: true,
             title: "Home | Cactus",
             description: "See yourself and the world more positively. Questions to help you become more mindful and reflect on what makes you happy.",
             navBar: true,
@@ -115,6 +117,16 @@ const routes: MetaRouteConfig[] = [
             usePrevious: true,
             title: "Sign Up | Cactus",
             description: "See yourself and the world more positively. Questions to help you become more mindful and reflect on what makes you happy.",
+            navBar: {
+                showLinks: false,
+                showSignup: false,
+                showLogin: false,
+                redirectOnSignOut: false,
+                isSticky: false,
+                forceTransparent: true,
+                largeLogoOnDesktop: true,
+                whiteLogo: true,
+            }
         }
     }, {
         component: () => lazyLoadView(import(/* webpackPreload: true, webpackPrefetch: true, webpackChunkName: "pages" */ "@web/views/SignUpView.vue")),
@@ -124,6 +136,16 @@ const routes: MetaRouteConfig[] = [
             usePrevious: true,
             title: "Log In | Cactus",
             description: "See yourself and the world more positively. Questions to help you become more mindful and reflect on what makes you happy.",
+            navBar: {
+                showLinks: false,
+                showSignup: false,
+                showLogin: false,
+                redirectOnSignOut: false,
+                isSticky: false,
+                forceTransparent: true,
+                largeLogoOnDesktop: true,
+                whiteLogo: true,
+            }
         }
     },
     /**
@@ -213,7 +235,8 @@ const routes: MetaRouteConfig[] = [
                 height: 630,
                 width: 1200,
                 type: "image/jpeg",
-            }
+            },
+            navBar: true,
         }
     },
     {
@@ -328,12 +351,6 @@ const routes: MetaRouteConfig[] = [
         name: "Sign up",
         path: PageRoute.SIGNUP_CONFIRMED,
     },
-    // {
-    //     component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
-    //     "@web/views/InsightsPage.vue")),
-    //     name: "Insights",
-    //     path: PageRoute.INSIGHTS,
-    // },
     {
         component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
         "@web/views/OnboardingPage.vue")),

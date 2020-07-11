@@ -10,6 +10,8 @@ import RevenueCatService from "@web/services/RevenueCatService";
 
 const logger = new Logger("CactusMemberService");
 
+export type AuthAction = (params: {member: CactusMember}) => Promise<any>;
+
 export default class CactusMemberService {
     public static sharedInstance = new CactusMemberService();
     firestoreService = FirestoreService.sharedInstance;
@@ -19,6 +21,8 @@ export default class CactusMemberService {
     currentMember?: CactusMember;
     currentUser?: FirebaseUser | null;
     protected memberHasLoaded = false;
+
+    pendingActions: AuthAction[] = []
 
     get isLoggedIn(): boolean {
         return !!this.currentMember;
@@ -33,12 +37,16 @@ export default class CactusMemberService {
             if (user) {
                 this.currentMemberUnsubscriber = this.observeByUserId(user.uid, {
                     onData: async member => {
+                        logger.info("Member update received from server");
+                        const memberChanged = this.currentMember?.id !== member?.id
                         this.currentMember = member;
                         this.memberHasLoaded = true;
-                        if (member) {
+                        if (member && memberChanged) {
+                            logger.info("Member changed - updating member values like timezone, revenuecat + session offers");
                             await Promise.all([
                                 this.updateMemberSettingsIfNeeded(member),
-                                RevenueCatService.shared.updateLastSeen(member)
+                                RevenueCatService.shared.updateLastSeen(member),
+                                this.processActions(member),
                             ]);
                         }
                     }
@@ -47,6 +55,27 @@ export default class CactusMemberService {
                 this.currentMember = undefined;
             }
         });
+    }
+
+    async addAuthAction(action: AuthAction) {
+        if (this.currentMember) {
+            await action({member: this.currentMember});
+        } else {
+            this.pendingActions.push(action);
+        }
+    }
+
+    protected async processActions(member: CactusMember): Promise<void> {
+        let action = this.pendingActions.shift();
+        while (action) {
+            try {
+                await action({member});
+            } catch (error) {
+                logger.error("Failed to process pending action", error);
+            } finally {
+                action = this.pendingActions.shift();
+            }
+        }
     }
 
     /**

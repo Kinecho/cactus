@@ -35,7 +35,7 @@
     import CactusMember from '@shared/models/CactusMember'
     import { FirebaseUser } from "@web/firebase"
     import CactusMemberService from '@web/services/CactusMemberService'
-    import { sendLoginEvent } from "@web/auth";
+    import { sendLoginEventForMember } from "@web/auth";
     import MagicLink from "@components/MagicLinkInput.vue"
     import { PageRoute } from "@shared/PageRoutes"
     import { QueryParam } from "@shared/util/queryParams"
@@ -61,7 +61,7 @@
     const copy = locale.copy;
 
     export default Vue.extend({
-            components: {
+        components: {
             MagicLink,
             Spinner,
         },
@@ -110,9 +110,9 @@
             redirectUrl: { type: String, required: false },
             showMagicLink: { type: Boolean, default: true },
             twitterEnabled: { type: Boolean, default: true },
-            showLoginSwitcher: {type: Boolean, default: true},
-            switcherLinkStyle: {type: String, default: "light"},
-            mode: {type: String as () => "SIGN_UP" | "LOG_IN", required: false, default: "SIGN_UP"}
+            showLoginSwitcher: { type: Boolean, default: true },
+            switcherLinkStyle: { type: String, default: "light" },
+            mode: { type: String as () => "SIGN_UP" | "LOG_IN", required: false, default: "SIGN_UP" }
         },
         data(): {
             memberListener: ListenerUnsubscriber | undefined,
@@ -229,26 +229,38 @@
                 this.$emit("loading", pending);
             },
             async doRedirect(doRedirect) {
-                //TODO: probalby make this method more clear what it does by renaming/refactoring
+                //TODO: make this method more clear what it does by renaming/refactoring
                 if (!doRedirect) {
                     return;
                 }
-                if (this.authResult && this.authResult.user) {
+                if (!this.authResult || !this.authResult.user) {
+                    logger.error("No auth result or auth result user found");
+                    return;
+                }
+                const authResult = this.authResult;
+                logger.info("User is logged in, working on redirecting the user....")
+                await CactusMemberService.sharedInstance.addAuthAction(async ({ member }) => {
+                    logger.info("Sending login event via Auth Actions");
                     try {
-                        await sendLoginEvent(this.authResult)
+                        await sendLoginEventForMember({ ...authResult, member });
                     } catch (e) {
                         logger.error("failed to log login event", e);
-                    } finally {
-                        // append the memberId to any feature-auth urls
-                        if (this.member?.id && this.pendingRedirectUrl && isFeatureAuthUrl(this.pendingRedirectUrl)) {
-                            this.pendingRedirectUrl = appendQueryParams(this.pendingRedirectUrl, { memberId: this.member.id });
-                        }
-
-                        if (this.redirectOnSignIn) {
-                            await pushRoute(this.pendingRedirectUrl || PageRoute.MEMBER_HOME)
-                        }
                     }
-                }
+                })
+
+                await CactusMemberService.sharedInstance.addAuthAction(async ({ member }) => {
+                    // append the memberId to any feature-auth urls
+                    // const member = await CactusMemberService.sharedInstance.getCurrentMember();
+                    if (member.id && this.pendingRedirectUrl && isFeatureAuthUrl(this.pendingRedirectUrl)) {
+                        this.pendingRedirectUrl = appendQueryParams(this.pendingRedirectUrl, { memberId: member.id });
+                    }
+
+                    if (this.redirectOnSignIn) {
+                        await CactusMemberService.sharedInstance.addAuthAction(() => {
+                            return pushRoute(this.pendingRedirectUrl || PageRoute.MEMBER_HOME)
+                        })
+                    }
+                })
             }
         }
     })

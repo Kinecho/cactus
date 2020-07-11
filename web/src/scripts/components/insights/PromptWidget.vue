@@ -4,7 +4,7 @@
         <img class="blob" src="/assets/images/transparentBlob2.svg"/>
         <p class="date">Today</p>
         <transition name="component-fade" appear>
-            <spinner v-if="loading || !entry.allLoaded" :delay="1500"/>
+            <spinner v-if="loading || !allLoaded" :delay="1500"/>
             <!-- Using a div here so that the fade transition works -->
             <div v-else>
                 <h2 class="question">
@@ -33,7 +33,9 @@
 
                 <div class="buttonContainer" v-if="!hasNote | !hasReflected && !isEditingNote">
                     <router-link v-if="link && !hasReflected" :to="link" tag="button">Reflect</router-link>
-                    <button v-if="!hasNote && !isEditingNote && hasReflected" @click="isEditingNote = true" class="secondary"><img class="pen" src="/assets/images/pen.svg" alt=""/>Add a Note</button>
+                    <button v-if="!hasNote && !isEditingNote && hasReflected" @click="isEditingNote = true" class="secondary">
+                        <img class="pen" src="/assets/images/pen.svg" alt=""/>Add a Note
+                    </button>
                 </div>
             </div>
         </transition>
@@ -98,6 +100,10 @@
 
         @Prop({ type: Object as () => CactusMember, required: true })
         member!: CactusMember;
+
+        get allLoaded(): boolean {
+            return this.entry?.allLoaded === true;
+        }
 
         get link(): string | null {
             const entryId = this.entry?.promptContent?.entryId;

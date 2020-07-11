@@ -263,7 +263,7 @@
                 windowScrollHandler: undefined,
             };
         },
-        destroyed() {
+        beforeDestroy() {
             this.authUnsubscribe?.();
             this.todayUnsubscriber?.();
             this.dataSource?.stop();

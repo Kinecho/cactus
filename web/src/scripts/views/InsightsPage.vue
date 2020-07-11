@@ -1,6 +1,6 @@
 <template>
     <div class="insightsDash">
-        <div class="centered" v-if="authLoaded">
+        <div class="centered">
             <h1>Welcome back{{displayName ? ', ' + displayName : ''}}</h1>
 
             <div class="insightsGrid">
@@ -30,10 +30,15 @@
                     <dropdown-menu :items="coreValuesDropdownLinks" class="dotsBtn"/>
                 </section>
                 <router-link v-else tag="section" class="novaluesContainer" :class="{plus: isPlusMember}" :to="coreValuesHref">
-                    <svg class="lock" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    <svg class="lock" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.8">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
                     <h2>What Are Your Core Values?</h2>
                     <p class="subtext">Discover what drives your life decisions and deepest needs.</p>
-                    <router-link v-if="isPlusMember" tag="button" class="secondary esButton" :to="coreValuesHref">Take the Assessment</router-link>
+                    <router-link v-if="isPlusMember" tag="button" class="secondary esButton" :to="coreValuesHref">Take
+                        the Assessment
+                    </router-link>
                 </router-link>
                 <gap-analysis-widget :loading="gapResultsLoading"
                         :gap-assessment-results="gapAssessmentResults"
@@ -77,11 +82,11 @@
     import { logFocusElementSelected } from "@web/analytics";
     import { InsightWord } from "@shared/api/InsightLanguageTypes";
     import PromptWidget from "@components/insights/PromptWidget.vue";
-    import PromptContent from "@shared/models/PromptContent";
     import PromptContentService from "@web/services/PromptContentService";
     import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
     import JournalEntry from "@web/datasource/models/JournalEntry";
     import SvgIcon from "@components/SvgIcon.vue";
+    import { Prop } from "vue-property-decorator";
 
     const logger = new Logger("InsightsPage");
     const copy = CopyService.getSharedInstance().copy;
@@ -101,46 +106,24 @@
         }
     })
     export default class InsightsPage extends Vue {
-        authLoaded = false;
-        member: CactusMember | null = null;
-        memberObserver?: ListenerUnsubscriber;
+
+        @Prop({ type: Object as () => CactusMember, required: true })
+        member!: CactusMember;
+
         gapResultsLoading = false;
         gapAssessmentResults?: GapAnalysisAssessmentResult | null = null;
         selectFocusEnabled = false;
         currentElementSelection: CactusElement | null = null
 
         todayPromptLoading = false;
-        todayPromptContent: PromptContent | null = null;
         todayEntry: JournalEntry | null = null;
 
         beforeMount() {
-            this.memberObserver = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: async ({ member }) => {
-
-                    if (!member) {
-                        await pushRoute(PageRoute.HOME);
-                        return;
-                    }
-                    const memberChanged = !this.member || this.member.id !== member.id
-
-                    this.member = member ?? null;
-                    this.authLoaded = true;
-
-                    if (memberChanged) {
-                        logger.info("fetching gap results because member id is different / not set")
-                        await Promise.all([
-                            this.fetchGapResults(),
-                            this.fetchTodayPrompt()
-                        ]);
-                    } else {
-                        logger.info("member changed but not fetching results because it's the same member");
-                    }
-                }
-            })
+            this.fetchGapResults()
+            this.fetchTodayPrompt()
         }
 
         destroyed() {
-            this.memberObserver?.();
             this.todayEntry?.stop();
         }
 
@@ -193,7 +176,7 @@
         }
 
         get coreValuesBlob(): CoreValuesBlob | undefined {
-            if (!this.authLoaded || !this.member) {
+            if (!this.member) {
                 return undefined;
             }
             const forceIndex = getQueryParam(QueryParam.BG_INDEX)
@@ -204,7 +187,7 @@
         }
 
         get wordCloud(): InsightWord[] {
-            return (this.authLoaded && this.member) ? (this.member?.wordCloud ?? []) : [];
+            return (this.member) ? (this.member?.wordCloud ?? []) : [];
         }
 
         get hasWordCloud(): boolean {
@@ -212,14 +195,14 @@
         }
 
         get coreValues(): CoreValueMeta[] {
-            if (!this.authLoaded || !this.member) {
+            if (!this.member) {
                 return [];
             }
             return (this.member.coreValues ?? []).map(value => CoreValuesService.shared.getMeta(value))
         }
 
         get hasCoreValues(): boolean {
-            return (this.authLoaded && !!this.member) && isPremiumTier(this.member?.tier) && ((this.member?.coreValues?.length ?? 0) > 0);
+            return (!!this.member) && isPremiumTier(this.member?.tier) && ((this.member?.coreValues?.length ?? 0) > 0);
         }
 
         get coreValuesHref(): string {
@@ -227,7 +210,7 @@
         }
 
         get isPlusMember(): boolean {
-            return this.authLoaded && !!this.member?.tier && isPremiumTier(this.member.tier);
+            return !!this.member?.tier && isPremiumTier(this.member.tier);
         }
 
         get reflectionStats(): ReflectionStats | undefined {
@@ -242,9 +225,6 @@
         }
 
         get focusElement(): CactusElement | null {
-            if (!this.authLoaded || !this.member) {
-                return null;
-            }
             return this.member.focusElement ?? null;
         }
     }
@@ -335,9 +315,9 @@
 
             &:hover {
                 box-shadow: 0 6.9px 21px -24px rgba(0, 0, 0, 0.012),
-                    0 11.5px 32.3px -24px rgba(0, 0, 0, 0.036),
-                    0 13.9px 37.7px -24px rgba(0, 0, 0, 0.074),
-                    0 24px 63px -24px rgba(0, 0, 0, 0.15);
+                0 11.5px 32.3px -24px rgba(0, 0, 0, 0.036),
+                0 13.9px 37.7px -24px rgba(0, 0, 0, 0.074),
+                0 24px 63px -24px rgba(0, 0, 0, 0.15);
                 transform: translateY(-.2rem);
             }
         }
@@ -486,7 +466,7 @@
         border-radius: 1.6rem;
         margin: 0 2.4rem 3.2rem;
         padding: 2.4rem 2.4rem 1.6rem;
- 
+
         @include r(374) {
             margin: 0 0 3.2rem;
             padding: 3.2rem 3.2rem 2.4rem;
