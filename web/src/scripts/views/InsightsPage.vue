@@ -1,6 +1,5 @@
 <template>
     <div class="insightsDash">
-        <NavBar/>
         <div class="centered" v-if="authLoaded">
             <h1>Welcome back{{displayName ? ', ' + displayName : ''}}</h1>
 
@@ -52,7 +51,6 @@
     import Vue from "vue";
     import Component from "vue-class-component";
     import Footer from "@components/StandardFooter.vue";
-    import NavBar from "@components/NavBar.vue";
     import WordCloud from "@components/MemberWordCloudInsights.vue";
     import CactusMember, { ReflectionStats } from "@shared/models/CactusMember";
     import { ListenerUnsubscriber } from "@web/services/FirestoreService";
@@ -95,7 +93,6 @@
             GapAnalysisWidget,
             Results,
             ResultElement,
-            NavBar,
             Footer,
             WordCloud,
             DropdownMenu,

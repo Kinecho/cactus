@@ -1,7 +1,7 @@
 import * as functions from 'firebase-functions';
 import mailchimpApp from "@api/endpoints/mailchimpEndpoints";
 import inboundApp from "@api/endpoints/inboundApp";
-import checkoutApp from "@api/endpoints/checkoutApp";
+import checkoutApp from "@api/endpoints/checkoutEndpoints";
 import manageNotificationApp from "@api/endpoints/manageNotificationsEndpoints";
 import testApp from "@api/endpoints/testEndpoints";
 import taskEndpoints from "@api/endpoints/taskEndpoints";

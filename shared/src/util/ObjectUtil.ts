@@ -20,6 +20,10 @@ export function isArray(input: any) {
     return Array.isArray(input);
 }
 
+export function isBoolean(input: any): input is boolean {
+    return input === true || input === false;
+}
+
 export function isNull(input: any): input is undefined|null {
     return input === null || input === undefined;
 }

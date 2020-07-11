@@ -1,6 +1,5 @@
 <template>
     <div class="accountContainer">
-        <NavBar :isSticky="false"/>
         <div class="centered content">
             <h1>{{copy.common.ACCOUNT}}</h1>
             <div class="loading" v-if="loading">
@@ -151,7 +150,6 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import NavBar from "@components/NavBar.vue";
     import Footer from "@components/StandardFooter.vue";
     import Spinner from "@components/Spinner.vue";
     import CactusMember, {
@@ -198,7 +196,6 @@
 
     export default Vue.extend({
         components: {
-            NavBar,
             Footer,
             Spinner,
             CheckBox,

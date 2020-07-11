@@ -1,6 +1,7 @@
 import { Route, RouteConfig } from "vue-router";
 import Logger from "@shared/Logger";
 import { RouteConfigSingleView } from "vue-router/types/router";
+import { NavBarProps } from "@components/NavBarTypes";
 
 const logger = new Logger("router-meta");
 
@@ -25,6 +26,7 @@ export interface RoutePageMeta {
     passMember?: boolean,
     authRequired?: boolean,
     authContinueMessage?: string,
+    navBar?: Partial<NavBarProps>|boolean,
 }
 
 export interface MetaImage {

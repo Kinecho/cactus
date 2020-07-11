@@ -74,6 +74,10 @@
             },
             displayName: {
                 type: String
+            },
+            hideOnRouteChange: {
+                type: Boolean,
+                default: false,
             }
         },
         data(): {

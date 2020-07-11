@@ -55,6 +55,9 @@ const routes: MetaRouteConfig[] = [
             title: "Cactus | Boost your mental fitness",
             description: "Research-backed prompts to increase self-awareness and resilience",
             metaTags: [],
+            navBar: {
+                isSticky: true,
+            },
             image: {
                 url: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/static%2Fog-wall-of-blobs-big.png?alt=media&token=9c2ec0c0-3e76-4603-a5a4-8a79e1373574",
                 height: 630,
@@ -73,7 +76,8 @@ const routes: MetaRouteConfig[] = [
         name: "Home",
         meta: {
             title: "Home | Cactus",
-            description: "See yourself and the world more positively. Questions to help you become more mindful and reflect on what makes you happy."
+            description: "See yourself and the world more positively. Questions to help you become more mindful and reflect on what makes you happy.",
+            navBar: true,
         }
     },
     {
@@ -85,6 +89,9 @@ const routes: MetaRouteConfig[] = [
         name: "Journal",
         meta: {
             title: "Journal | Cactus",
+            navBar: {
+                showLogin: false,
+            }
         }
     },
     {
@@ -293,6 +300,9 @@ const routes: MetaRouteConfig[] = [
         "@components/AccountSettings.vue")),
         path: PageRoute.ACCOUNT,
         name: "Account Settings",
+        meta: {
+            navBar: { isSticky: false },
+        }
     },
     {
         component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */

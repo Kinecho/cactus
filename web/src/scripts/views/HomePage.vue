@@ -1,12 +1,12 @@
 <template>
     <div>
-        <NavBar
-                :is-sticky="true"
-                :show-signup="true"
-                :large-logo-on-desktop="true"
-                :show-login="true"
-                :login-redirect-url="signUpUrl"
-        />
+<!--        <NavBar-->
+<!--                :is-sticky="true"-->
+<!--                :show-signup="true"-->
+<!--                :large-logo-on-desktop="true"-->
+<!--                :show-login="true"-->
+<!--                :login-redirect-url="signUpUrl"-->
+<!--        />-->
         <marketing-home/>
         <StandardFooter :lifted="true"/>
     </div>
@@ -23,7 +23,7 @@
         name: "HomePage",
         components: {
             MarketingHome,
-            NavBar,
+            // NavBar,
             StandardFooter,
         },
         data(): { signUpUrl: string } {

@@ -1,6 +1,5 @@
 <template>
     <div>
-        <NavBar :show-signup="false" :isSticky="false" @logging-out="loggingOut = true"/>
         <upgrade-card class="journalListItem" v-if="showUpgradeCard" :member="cactusMember" :hasPromptToday="(todayEntry && todayLoaded)"/>
         <snackbar-content
                 class="upgrade-confirmation"
@@ -74,7 +73,6 @@
     import { Config } from "@web/config";
     import { FirebaseUser } from '@web/firebase';
     import JournalEntryCard from "@components/JournalEntryCard.vue";
-    import NavBar from '@components/NavBar.vue';
     import { PageRoute } from '@shared/PageRoutes'
     import CactusMember from '@shared/models/CactusMember'
     import CactusMemberService from '@web/services/CactusMemberService'
@@ -117,14 +115,12 @@
         todayLoaded: boolean,
         coreValuesClosed: boolean,
         upgradeConfirmed: boolean,
-        loggingOut: boolean,
         windowScrollHandler: any,
     }
 
     export default Vue.extend({
         components: {
             JournalHomeEmptyState,
-            NavBar,
             entry: JournalEntryCard,
             AutoPromptContentModal,
             SkeletonCard,
@@ -162,11 +158,6 @@
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({ member, user }) => {
                     if (!user) {
-                        if (this.loggingOut) {
-                            return;
-                        } else {
-                            logger.log("JournalHome - auth state changed and user was not logged in. Sending to journal");
-                        }
                         await pushRoute(PageRoute.HOME);
                         return;
                     }
@@ -269,7 +260,6 @@
                 todayLoaded: false,
                 coreValuesClosed: false,
                 upgradeConfirmed: false,
-                loggingOut: false,
                 windowScrollHandler: undefined,
             };
         },
@@ -327,9 +317,6 @@
             },
             loggedIn(): boolean {
                 return !!this.cactusMember;
-            },
-            isSticky(): boolean {
-                return false;
             },
             hasCoreValues(): boolean {
                 return (this.cactusMember?.coreValues ?? []).length > 0
