@@ -1,6 +1,6 @@
 import SignupRequest from "@shared/mailchimp/models/SignupRequest";
 import { getAllQueryParams, getQueryParam } from "@web/util";
-import { AdditionalUserInfo, FirebaseUser, FirebaseUserCredential, getAuth, initializeFirebase, } from "@web/firebase";
+import { AdditionalUserInfo, FirebaseUser, FirebaseUserCredential, } from "@web/firebase";
 import { PageRoute } from "@shared/PageRoutes";
 import { Endpoint, getAuthHeaders, request } from "@web/requestUtils";
 import {
@@ -13,15 +13,14 @@ import {
 } from "@shared/api/SignupEndpointTypes";
 import { QueryParam } from "@shared/util/queryParams";
 import StorageService, { LocalStorageKey } from "@web/services/StorageService";
-import CactusMemberService from "@web/services/CactusMemberService";
 import { fireConfirmedSignupEvent, fireLoginEvent, fireSignupLeadEvent } from "@web/analytics";
 import Logger from "@shared/Logger";
 import { getAppType, isAndroidApp } from "@web/DeviceUtil";
 import { pushRoute } from "@web/NavigationUtil";
 import CactusMember from "@shared/models/CactusMember";
+import CactusMemberService from "@web/services/CactusMemberService";
 
 const logger = new Logger("auth.ts");
-const firebase = initializeFirebase();
 
 export interface LogoutOptions {
     redirectOnSignOut: boolean,
@@ -32,10 +31,10 @@ export const DefaultLogoutOptions = { redirectOnSignOut: true, redirectUrl: "/" 
 
 export async function logout(options: LogoutOptions = DefaultLogoutOptions) {
     try {
-        await getAuth().signOut();
-        StorageService.clear();
         const url = options.redirectUrl ?? DefaultLogoutOptions.redirectUrl;
         await pushRoute(url);
+        await CactusMemberService.sharedInstance.signOut()
+        StorageService.clear();
     } catch (error) {
         logger.error("Exception thrown while logging out", error);
     }

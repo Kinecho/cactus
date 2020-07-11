@@ -23,6 +23,8 @@
     import { MetaRouteConfig } from "@web/router-meta";
     import { NavBarProps } from "@components/NavBarTypes";
     import { isBoolean } from "@shared/util/ObjectUtil";
+    import { Route } from "vue-router";
+    import { Watch } from "vue-property-decorator";
 
     const logger = new Logger("App");
 
@@ -37,6 +39,12 @@
         authLoaded = false;
         member: CactusMember | null = null;
         memberListener!: ListenerUnsubscriber
+        showUnauthorizedRoute = false;
+
+        @Watch("$route")
+        onRoute(route: Route) {
+            return route.meta.authRequired && !this.member && this.authLoaded;
+        }
 
         async beforeMount() {
             await Promise.all([AppSettingsService.sharedInstance.getCurrentSettings()]);
@@ -70,10 +78,6 @@
 
         get showRoute(): boolean {
             return this.$route.meta.authRequired ? !!this.member : true
-        }
-
-        get showUnauthorizedRoute() {
-            return this.$route.meta.authRequired && !this.member && this.authLoaded;
         }
 
         get allLoaded(): boolean {

@@ -10,4 +10,5 @@ export interface NavBarProps {
     forceTransparent?: boolean;
     loginRedirectUrl?: string | null
     showLinks?: boolean;
+    useCurrentRouteAfterLogin?: boolean;
 }

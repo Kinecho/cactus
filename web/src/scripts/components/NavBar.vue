@@ -130,6 +130,9 @@
         @Prop({ type: String, default: null })
         loginRedirectUrl!: string | null;
 
+        @Prop({ type: Boolean, default: false })
+        useCurrentRouteAfterLogin!: boolean;
+
         @Prop({ type: Boolean, default: true })
         showLinks!: boolean;
 
@@ -230,7 +233,12 @@
         }
 
         get loginHref(): string {
-            return `${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ this.loginRedirectUrl || window.location.href }`;
+            let successUrl = this.loginRedirectUrl ?? PageRoute.MEMBER_HOME;
+            if (this.useCurrentRouteAfterLogin) {
+                successUrl = window.location.href;
+            }
+
+            return `${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ successUrl }`;
         }
 
         get logoHref(): string {

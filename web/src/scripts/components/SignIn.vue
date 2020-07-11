@@ -238,29 +238,30 @@
                     return;
                 }
                 const authResult = this.authResult;
+                const successUrl = this.pendingRedirectUrl ?? PageRoute.MEMBER_HOME;
+
                 logger.info("User is logged in, working on redirecting the user....")
-                await CactusMemberService.sharedInstance.addAuthAction(async ({ member }) => {
+                await Promise.all([CactusMemberService.sharedInstance.addAuthAction(async ({ member }) => {
                     logger.info("Sending login event via Auth Actions");
                     try {
                         await sendLoginEventForMember({ ...authResult, member });
                     } catch (e) {
                         logger.error("failed to log login event", e);
                     }
-                })
+                }),
+                    CactusMemberService.sharedInstance.addAuthAction(async ({ member }) => {
+                        // append the memberId to any feature-auth urls
+                        // const member = await CactusMemberService.sharedInstance.getCurrentMember();
+                        let redirectUrl = successUrl;
+                        if (member.id && isFeatureAuthUrl(successUrl)) {
+                            redirectUrl = appendQueryParams(successUrl, { memberId: member.id });
+                        }
 
-                await CactusMemberService.sharedInstance.addAuthAction(async ({ member }) => {
-                    // append the memberId to any feature-auth urls
-                    // const member = await CactusMemberService.sharedInstance.getCurrentMember();
-                    if (member.id && this.pendingRedirectUrl && isFeatureAuthUrl(this.pendingRedirectUrl)) {
-                        this.pendingRedirectUrl = appendQueryParams(this.pendingRedirectUrl, { memberId: member.id });
-                    }
-
-                    if (this.redirectOnSignIn) {
-                        await CactusMemberService.sharedInstance.addAuthAction(() => {
-                            return pushRoute(this.pendingRedirectUrl || PageRoute.MEMBER_HOME)
-                        })
-                    }
-                })
+                        if (this.redirectOnSignIn) {
+                            logger.info("Auth Action: push route to ", redirectUrl)
+                            return pushRoute(redirectUrl)
+                        }
+                    })])
             }
         }
     })

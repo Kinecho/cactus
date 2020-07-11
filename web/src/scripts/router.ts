@@ -91,6 +91,8 @@ const routes: MetaRouteConfig[] = [
         name: "Journal",
         meta: {
             title: "Journal | Cactus",
+            authRequired: true,
+            passMember: true,
             navBar: {
                 showLogin: false,
             }
@@ -236,7 +238,7 @@ const routes: MetaRouteConfig[] = [
                 width: 1200,
                 type: "image/jpeg",
             },
-            navBar: true,
+            navBar: { loginRedirectUrl: PageRoute.PRICING },
         }
     },
     {
