@@ -134,7 +134,7 @@
                 systemDate: new Date(),
             })
             if (promptContent?.promptId) {
-                this.todayEntry = new JournalEntry(promptContent.promptId);
+                this.todayEntry = new JournalEntry(promptContent.promptId, undefined, this.member);
                 this.todayEntry.start();
             }
             this.todayPromptLoading = false;

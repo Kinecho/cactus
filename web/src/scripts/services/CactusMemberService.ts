@@ -255,8 +255,8 @@ export default class CactusMemberService {
     }
 
     async signOut() {
-        this.currentMemberUnsubscriber?.()
         JournalFeedDataSource.current?.stop();
+        this.currentMemberUnsubscriber?.()
         await getAuth().signOut();
     }
 }

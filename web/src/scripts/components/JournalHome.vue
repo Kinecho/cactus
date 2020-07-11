@@ -164,11 +164,11 @@
                             let todayEntry = undefined;
 
                             if (todaySentPrompt?.promptId && !todaySentPrompt.completed) {
-                                todayEntry = new JournalEntry(todaySentPrompt.promptId, todaySentPrompt);
+                                todayEntry = new JournalEntry(todaySentPrompt.promptId, todaySentPrompt, this.member);
                             } else if (!todaySentPrompt && todaysPromptContent?.promptId) {
                                 // they don't have a SentPrompt for today's prompt
                                 // but we show it to them anyway
-                                todayEntry = new JournalEntry(todaysPromptContent.promptId);
+                                todayEntry = new JournalEntry(todaysPromptContent.promptId, undefined, this.member);
                             }
 
                             if (todayEntry) {
