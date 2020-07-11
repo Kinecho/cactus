@@ -48,21 +48,15 @@
     </section>
     <!-- Show PLUS User Empty State message -->
     <section v-else-if="isPlusMember" class="plus nogapContainer">
-        <h2>Happiness Quiz</h2>
-        <p class="subtext">Find the gap between what is important to you and how satisfied you are regarding
-            that area of your&nbsp;life.</p>
-        <router-link tag="button" class="esButton" :to="gapAssessmentHref">Take the
-            <span>Mental Fitness</span> quiz
-        </router-link>
+        <h2>What Makes You Happy?</h2>
+        <p class="subtext">Understand what contributes to (and detracts from) your satisfaction.</p>
+        <router-link tag="button" class="secondary esButton" :to="gapAssessmentHref">Take the Quiz</router-link>
     </section>
     <!-- Show BASIC User Upgrade message -->
     <router-link v-else-if="!isPlusMember" tag="section" class="basic nogapContainer" :to="pricingHref">
         <svg class="lock" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-        <h2>What Makes Me Happy?</h2>
-        <p class="subtext">Discover the people, places, & things that make you happy.</p>
-        <!-- <router-link tag="button" class="secondary esButton" :to="pricingHref">Take the
-            Mental Fitness quiz
-        </router-link> -->
+        <h2>What Makes You Happy?</h2>
+        <p class="subtext">Understand what contributes to (and detracts from) your satisfaction.</p>
     </router-link>
 </template>
 
@@ -248,17 +242,43 @@
         position: relative;
 
         &.plus {
-            @include shadowbox;
-            background-image: url(/assets/images/crosses2.svg),
-                url(/assets/images/outlineBlob.svg),
-                url(/assets/images/royalBlob.svg),
-                url(/assets/images/pinkBlob5.svg);
-            background-position: -1rem 18rem, right -29rem top -32rem, -11rem 16rem, 61% -133px;
-            background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
-            background-size: 20rem, 48rem, 30rem, 23rem;
+            background-color: $royal;
+            background-image: url(/assets/images/grainy.png), url(/assets/images/radarChartGraphicGreen.svg);
+            background-position: 0 0, right -17rem bottom -9rem;
+            background-repeat: repeat, no-repeat;
+            background-size: 16rem, 43rem;
+            border-radius: 1.6rem;
+            color: $white;
+            padding: 2.4rem 3.2rem 3.2rem;
 
-            @include r(768) {
-                background-position: -1rem 28rem, right -9rem top -32rem, -11rem 32rem, 61% -133px;
+            @include r(600) {
+                transition: box-shadow .3s, transform .3s ease-in;
+
+                &:hover {
+                    box-shadow: 0 6.9px 21px -24px rgba(0, 0, 0, 0.012),
+                        0 11.5px 32.3px -24px rgba(0, 0, 0, 0.036),
+                        0 13.9px 37.7px -24px rgba(0, 0, 0, 0.074),
+                        0 24px 63px -24px rgba(0, 0, 0, 0.15);
+                    transform: translateY(-.2rem);
+                }
+
+                .subtext {
+                    font-size: 1.8rem;
+                }
+
+                .subtext + button {
+                    display: block;
+                    margin-top: 2.4rem;
+                    width: auto;
+                }
+
+                button:hover {
+                    background-color: $white;
+                }
+            }
+
+            button {
+                display: none;
             }
         }
 
@@ -267,7 +287,7 @@
             background-image: url(/assets/images/grainy.png), url(/assets/images/radarChartGraphicGreen.svg);
             background-position: 0 0, right -11rem center;
             background-repeat: repeat, no-repeat;
-            background-size: auto, 19rem;
+            background-size: 16rem, 19rem;
             border-radius: 1.6rem;
             color: $white;
             padding: 2.4rem 3.2rem 3.2rem 5.6rem;

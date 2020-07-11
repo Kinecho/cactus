@@ -31,8 +31,9 @@
                     <flamelink-image :image="image"/>
                 </div>
 
-                <div class="buttonContainer" v-if="!hasReflected">
-                    <router-link v-if="link" :to="link" tag="button">Reflect</router-link>
+                <div class="buttonContainer" v-if="!hasNote | !hasReflected && !isEditingNote">
+                    <router-link v-if="link && !hasReflected" :to="link" tag="button">Reflect</router-link>
+                    <button v-if="!hasNote && !isEditingNote && hasReflected" @click="isEditingNote = true" class="secondary"><img class="pen" src="/assets/images/pen.svg" alt=""/>Add a Note</button>
                 </div>
             </div>
         </transition>
@@ -198,12 +199,12 @@
     }
 
     .blob {
-        animation: rotateInfinite 60s infinite;
+        animation: 30s ease-in reverse forwards rotate180;
         height: auto;
         left: -3.2rem;
         position: absolute;
         top: -3.2rem;
-        transform-origin: left top;
+        transform-origin: 20rem 20rem;
         width: 100vw;
         z-index: 0;
 
@@ -212,12 +213,12 @@
         }
 
         &:nth-child(2) {
-            animation-direction: reverse;
+            animation-direction: normal;
+            animation-duration: 45s;
             bottom: -3.2rem;
             left: auto;
             right: -3.2rem;
             top: auto;
-            transform-origin: right bottom;
         }
     }
 
@@ -270,11 +271,14 @@
             content: '';
             display: block;
             height: 100%;
-            left: -1.2rem;
+            left: -.4rem;
             position: absolute;
             top: 0;
             width: .4rem;
 
+            @include r(374) {
+                left: -1.2rem;
+            }
             @include r(600) {
                 border-radius: .4rem;
                 left: 0;
@@ -321,6 +325,25 @@
             @include r(600) {
                 min-width: 16rem;
                 width: auto;
+            }
+        }
+
+        .pen {
+            height: 1.8rem;
+            margin-right: .8rem;
+            width: 1.8rem;
+        }
+
+        button.secondary {
+            align-items: center;
+            display: flex;
+
+            &:hover {
+                background-color: $white;
+
+                .pen {
+                    animation: wiggle .5s forwards;
+                }
             }
         }
     }
