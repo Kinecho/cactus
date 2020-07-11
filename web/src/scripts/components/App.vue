@@ -1,7 +1,7 @@
 <template>
     <div>
         <nav-bar v-if="showNav" v-bind="navProps" class="app-nav"/>
-
+        <upgrade-success-banner v-if="showUpgradeSuccessBanner" @close="hasUpgradeSuccessParam = false"/>
         <transition name="component-fade" appear mode="out-in">
             <router-view v-if="allLoaded && showRoute" v-bind="props"/>
             <div v-else-if="showUnauthorizedRoute">
@@ -25,11 +25,18 @@
     import { isBoolean } from "@shared/util/ObjectUtil";
     import { Route } from "vue-router";
     import { Watch } from "vue-property-decorator";
+    import UpgradeSuccessBanner from "@components/upgrade/UpgradeSuccessBanner.vue";
+    import { getQueryParam, removeQueryParam } from "@web/util";
+    import { QueryParam } from "@shared/util/queryParams";
+    import StorageService, { LocalStorageKey } from "@web/services/StorageService";
+    import { fireOptInStartTrialEvent } from "@web/analytics";
+    import { isPremiumTier } from "@shared/models/MemberSubscription";
 
     const logger = new Logger("App");
 
     @Component({
         components: {
+            UpgradeSuccessBanner,
             NavBar
         }
     })
@@ -40,10 +47,34 @@
         member: CactusMember | null = null;
         memberListener!: ListenerUnsubscriber
         showUnauthorizedRoute = false;
+        hasUpgradeSuccessParam = false;
 
         @Watch("$route")
         onRoute(route: Route) {
-            return route.meta.authRequired && !this.member && this.authLoaded;
+            this.showUnauthorizedRoute = route.meta.authRequired && !this.member && this.authLoaded;
+
+            if (getQueryParam(QueryParam.UPGRADE_SUCCESS) === 'success') {
+                this.hasUpgradeSuccessParam = true;
+                removeQueryParam(QueryParam.UPGRADE_SUCCESS)
+            }
+        }
+
+        @Watch("showUpgradeBanner")
+        onUpgradeConfirmed(current: boolean, previous: boolean) {
+            if (current && !previous) {
+                logger.info("Firing upgrade confirmed event");
+                let priceDollars = StorageService.getNumber(LocalStorageKey.subscriptionPriceCents);
+
+                if (priceDollars) {
+                    priceDollars = priceDollars / 100;
+                }
+
+                fireOptInStartTrialEvent({ value: priceDollars });
+            }
+        }
+
+        get showUpgradeSuccessBanner(): boolean {
+            return this.authLoaded && !!this.member && this.hasUpgradeSuccessParam && isPremiumTier(this.member?.tier)
         }
 
         async beforeMount() {

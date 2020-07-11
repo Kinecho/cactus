@@ -1,21 +1,6 @@
 <template>
     <div>
         <upgrade-card class="journalListItem" v-if="showUpgradeCard" :member="member" :hasPromptToday="(todayEntry && todayLoaded)"/>
-        <snackbar-content
-                class="upgrade-confirmation"
-                v-if="upgradeConfirmed"
-                :closeable="true"
-                key="upgrade-confirmation"
-                :autoHide="false"
-                @close="upgradeConfirmed = false"
-                color="successAlt">
-            <div slot="text" class="centered">
-                <h3>Welcome to Cactus Plus!</h3>
-                <p>Now you have full access to personalized activities, insights, and tools to help you better know
-                    yourself. If you have questions or feedback, please reach out to us at
-                    <a href="mailto:help@cactus.app">help@cactus.app</a>.</p>
-            </div>
-        </snackbar-content>
         <div class="container centered">
             <transition name="fade-in-fast" appear mode="out-in">
                 <div class="page-loading" v-if="!dataHasLoaded">
@@ -81,11 +66,7 @@
     import UpgradeSubscriptionJournalEntryCard from "@components/UpgradeSubscriptionJournalEntryCard.vue";
     import Logger from "@shared/Logger";
     import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
-    import { QueryParam } from "@shared/util/queryParams";
-    import { getQueryParam, removeQueryParam } from "@web/util";
     import SnackbarContent from "@components/SnackbarContent.vue";
-    import { fireOptInStartTrialEvent } from "@web/analytics";
-    import StorageService, { LocalStorageKey } from "@web/services/StorageService";
     import JournalHomeEmptyState from "@components/JournalHomeEmptyState.vue";
     import { CactusElement } from "@shared/models/CactusElement";
     import { Prop } from "vue-property-decorator";
@@ -124,7 +105,6 @@
         todayEntry: JournalEntry | null = null;
         todayLoaded: boolean = false;
         coreValuesClosed: boolean = false;
-        upgradeConfirmed: boolean = false;
         windowScrollHandler: any = undefined;
 
         mounted() {
@@ -133,23 +113,10 @@
             window.addEventListener('scroll', handler);
             this.scrollHandler();
 
-            if (this.upgradeConfirmed) {
-                let priceDollars = StorageService.getNumber(LocalStorageKey.subscriptionPriceCents);
-
-                if (priceDollars) {
-                    priceDollars = priceDollars / 100;
-                }
-
-                fireOptInStartTrialEvent({ value: priceDollars });
-            }
         }
 
         async beforeMount() {
             logger.log("Journal Home calling Created function");
-
-            const upgradeQueryParam = getQueryParam(QueryParam.UPGRADE_SUCCESS);
-            this.upgradeConfirmed = upgradeQueryParam === 'success';
-            removeQueryParam(QueryParam.UPGRADE_SUCCESS)
 
             if (this.member?.id) {
                 const tier = this.member?.tier ?? SubscriptionTier.PLUS;
@@ -280,11 +247,11 @@
         }
 
         get showCoreValuesBanner(): boolean {
-            return !this.hasCoreValues && !this.upgradeConfirmed && !this.coreValuesClosed
+            return !this.hasCoreValues && !this.coreValuesClosed
         }
 
         get showUpgradeCard(): boolean {
-            return !this.plusUser && !this.showCoreValuesBanner && !this.showOnboardingPrompt && this.dataHasLoaded && !this.upgradeConfirmed
+            return !this.plusUser && !this.showCoreValuesBanner && !this.showOnboardingPrompt && this.dataHasLoaded;
         }
 
         get showOnboardingPrompt(): boolean {

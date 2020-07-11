@@ -2,7 +2,6 @@
     <snackbar-content
             class="upgrade-confirmation"
             :closeable="true"
-            key="upgrade-confirmation"
             :autoHide="false"
             @close="close"
             color="successAlt">
@@ -28,12 +27,36 @@
     export default class UpgradeSuccessBanner extends Vue {
         name = "UpgradeSuccessBanner";
 
-        close(){
+        close() {
             this.$emit('close');
         }
     }
 </script>
 
 <style scoped lang="scss">
+    @import "mixins";
+    @import "variables";
 
+    .upgrade-confirmation {
+        border-radius: 0;
+        display: block;
+        padding: 3.2rem 2.4rem;
+
+        .centered {
+            max-width: 64rem;
+        }
+
+        h3 {
+            font-size: 2.4rem;
+            margin-bottom: .4rem;
+        }
+
+        p {
+            opacity: .9;
+        }
+
+        a {
+            @include fancyLinkLight;
+        }
+    }
 </style>
