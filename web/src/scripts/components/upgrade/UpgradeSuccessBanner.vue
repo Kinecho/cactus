@@ -6,10 +6,8 @@
             @close="close"
             color="successAlt">
         <div slot="text" class="centered">
-            <h3>Welcome to Cactus Plus!</h3>
-            <p>Now you have full access to personalized activities, insights, and tools to help you better know
-                yourself. If you have questions or feedback, please reach out to us at
-                <a href="mailto:help@cactus.app">help@cactus.app</a>.</p>
+            <h3>Success! You're on Cactus Plus.</h3>
+            <p>Now you have full access to personalized activities, insights, & tools to help you better know yourself.</p>
         </div>
     </snackbar-content>
 </template>
@@ -44,6 +42,11 @@
 
         .centered {
             max-width: 64rem;
+            text-align: left;
+
+            @include r(600) {
+                text-align: center;
+            }
         }
 
         h3 {
@@ -52,7 +55,7 @@
         }
 
         p {
-            opacity: .9;
+            opacity: .8;
         }
 
         a {
