@@ -8,9 +8,7 @@ import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 
 const logger = new Logger("PromptContentService");
 
-export type GetByEntry = { entryId: string, promptId?: string };
-export type GetByPrompt = { promptId: string, entryId?: string };
-export type GetContentParams = GetByEntry | GetByPrompt | { promptId: string, entryId: string };
+export type GetContentParams = { promptId?: string | null, entryId?: string | null };
 
 export default class PromptContentService {
     public static sharedInstance = new PromptContentService();
@@ -32,13 +30,13 @@ export default class PromptContentService {
         }, options)
     }
 
-    observeByPromptOrEntryId(params: GetContentParams, options: EntryObserverOptions<PromptContent>): ListenerUnsubscriber {
+    observeByPromptOrEntryId(params: GetContentParams, options: EntryObserverOptions<PromptContent>): ListenerUnsubscriber | undefined {
         if (params.entryId) {
             return this.observeByEntryId(params.entryId, options);
         } else if (params.promptId) {
             return this.observeByPromptId(params.promptId, options)
         } else {
-            options.onData(undefined, "No prompt or entry ID was provided. Can not load contnet");
+            options.onData(undefined, "No prompt or entry ID was provided. Can not load content.");
             return;
         }
     }

@@ -1,10 +1,14 @@
 <template>
-    <transition name="component-fade" appear mode="out-in">
-        <router-view v-if="allLoaded && showRoute" v-bind="props"/>
-        <div v-else-if="showUnauthorizedRoute">
-            <h2>Please log in to continue</h2>
-        </div>
-    </transition>
+    <div>
+        <nav-bar v-if="showNav" v-bind="navProps" class="app-nav"/>
+        <upgrade-success-banner v-if="showUpgradeSuccessBanner" @close="hasUpgradeSuccessParam = false"/>
+        <transition name="component-fade" appear mode="out-in">
+            <router-view v-if="allLoaded && showRoute" v-bind="props"/>
+            <div v-else-if="showUnauthorizedRoute">
+                <h2>Please log in to continue</h2>
+            </div>
+        </transition>
+    </div>
 </template>
 
 <script lang="ts">
@@ -15,15 +19,63 @@
     import { ListenerUnsubscriber } from "@web/services/FirestoreService";
     import CactusMember from "@shared/models/CactusMember";
     import Logger from "@shared/Logger"
+    import NavBar from "@components/NavBar.vue";
+    import { MetaRouteConfig } from "@web/router-meta";
+    import { NavBarProps } from "@components/NavBarTypes";
+    import { isBoolean } from "@shared/util/ObjectUtil";
+    import { Route } from "vue-router";
+    import { Watch } from "vue-property-decorator";
+    import UpgradeSuccessBanner from "@components/upgrade/UpgradeSuccessBanner.vue";
+    import { getQueryParam, removeQueryParam } from "@web/util";
+    import { QueryParam } from "@shared/util/queryParams";
+    import StorageService, { LocalStorageKey } from "@web/services/StorageService";
+    import { fireOptInStartTrialEvent } from "@web/analytics";
+    import { isPremiumTier } from "@shared/models/MemberSubscription";
 
     const logger = new Logger("App");
 
-    @Component
+    @Component({
+        components: {
+            UpgradeSuccessBanner,
+            NavBar
+        }
+    })
     export default class App extends Vue {
+        name = "App"
         settingsLoaded = false;
         authLoaded = false;
         member: CactusMember | null = null;
         memberListener!: ListenerUnsubscriber
+        showUnauthorizedRoute = false;
+        hasUpgradeSuccessParam = false;
+
+        @Watch("$route")
+        onRoute(route: Route) {
+            this.showUnauthorizedRoute = route.meta.authRequired && !this.member && this.authLoaded;
+
+            if (getQueryParam(QueryParam.UPGRADE_SUCCESS) === 'success') {
+                this.hasUpgradeSuccessParam = true;
+                removeQueryParam(QueryParam.UPGRADE_SUCCESS)
+            }
+        }
+
+        @Watch("showUpgradeBanner")
+        onUpgradeConfirmed(current: boolean, previous: boolean) {
+            if (current && !previous) {
+                logger.info("Firing upgrade confirmed event");
+                let priceDollars = StorageService.getNumber(LocalStorageKey.subscriptionPriceCents);
+
+                if (priceDollars) {
+                    priceDollars = priceDollars / 100;
+                }
+
+                fireOptInStartTrialEvent({ value: priceDollars });
+            }
+        }
+
+        get showUpgradeSuccessBanner(): boolean {
+            return this.authLoaded && !!this.member && this.hasUpgradeSuccessParam && isPremiumTier(this.member?.tier)
+        }
 
         async beforeMount() {
             await Promise.all([AppSettingsService.sharedInstance.getCurrentSettings()]);
@@ -43,12 +95,20 @@
             return { member: this.member }
         }
 
-        get showRoute(): boolean {
-            return this.$route.meta.authRequired ? !!this.member : true
+        get showNav(): boolean {
+            return !!(this.$route as MetaRouteConfig)?.meta?.navBar;
         }
 
-        get showUnauthorizedRoute() {
-            return this.$route.meta.authRequired && !this.member && this.authLoaded;
+        get navProps(): Partial<NavBarProps | null> {
+            const props = (this.$route as MetaRouteConfig).meta?.navBar ?? null;
+            if (isBoolean(props)) {
+                return null;
+            }
+            return props;
+        }
+
+        get showRoute(): boolean {
+            return this.$route.meta.authRequired ? !!this.member : true
         }
 
         get allLoaded(): boolean {
@@ -60,4 +120,8 @@
 <style lang="scss">
     @import "common";
     @import "transitions";
+
+    .app-nav {
+        z-index: 1001;
+    }
 </style>

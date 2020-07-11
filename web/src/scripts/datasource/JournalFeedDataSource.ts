@@ -8,7 +8,7 @@ import Logger from "@shared/Logger";
 
 const logger = new Logger("JournalFeedDataSource");
 
-interface JournalFeedDataSourceDelegate {
+export interface JournalFeedDataSourceDelegate {
     didLoad?: (hasData: boolean) => void
     updateAll?: (journalEntries: JournalEntry[]) => void
     onAdded?: (journalEntry: JournalEntry, newIndex: number) => void
@@ -17,13 +17,16 @@ interface JournalFeedDataSourceDelegate {
     pageLoaded?: (hasMore: boolean) => void
 }
 
-interface SetupJournalEntryResult {
+export interface SetupJournalEntryResult {
     created: boolean,
     entry?: JournalEntry,
 
 }
 
 class JournalFeedDataSource implements JournalEntryDelegate {
+
+    static current: JournalFeedDataSource | null = null;
+    running = false;
     member: CactusMember;
     pageSize: number = 10;
     delegate?: JournalFeedDataSourceDelegate;
@@ -51,7 +54,27 @@ class JournalFeedDataSource implements JournalEntryDelegate {
         this.onlyCompleted = onlyCompleted;
     }
 
+    static with(member: CactusMember, options?: { onlyCompleted?: boolean }): JournalFeedDataSource {
+        const current = JournalFeedDataSource.current;
+        if (current && (current.member?.id === member.id || current.memberId === member.id) && current.onlyCompleted === options?.onlyCompleted) {
+            return current;
+        }
+
+        const source = new JournalFeedDataSource(member, options);
+        JournalFeedDataSource.current = source;
+        // source.start();
+        return source;
+    }
+
+
     start() {
+        if (this.running) {
+            logger.info("Data source is running, returning current entries");
+            this.delegate?.didLoad?.(true);
+            return;
+        }
+
+        this.running = true;
         const futurePage = new PageLoader<SentPrompt>();
         const firstPage = new PageLoader<SentPrompt>();
         this.loadingPage = true;
@@ -146,7 +169,7 @@ class JournalFeedDataSource implements JournalEntryDelegate {
             return { created: false, entry }
         }
 
-        entry = new JournalEntry(promptId, sentPrompt);
+        entry = new JournalEntry(promptId, sentPrompt, this.member);
         entry.delegate = this;
         entry.start();
         this.journalEntriesByPromptId[promptId] = entry;
@@ -202,6 +225,7 @@ class JournalFeedDataSource implements JournalEntryDelegate {
     }
 
     stop() {
+        logger.info("Stopping journal feed data source");
         this.pages.forEach(page => {
             page.stop()
         });
@@ -210,6 +234,8 @@ class JournalFeedDataSource implements JournalEntryDelegate {
             entry.stop()
         });
 
+        this.journalEntries = [];
+        this.pages = []
     }
 
     entryUpdated(entry: JournalEntry) {

@@ -7,8 +7,11 @@ import Logger from "@shared/Logger";
 import StorageService, { LocalStorageKey } from "@web/services/StorageService";
 import { CactusElement } from "@shared/models/CactusElement";
 import RevenueCatService from "@web/services/RevenueCatService";
+import JournalFeedDataSource from "@web/datasource/JournalFeedDataSource";
 
 const logger = new Logger("CactusMemberService");
+
+export type AuthAction = (params: { member: CactusMember }) => Promise<any>;
 
 export default class CactusMemberService {
     public static sharedInstance = new CactusMemberService();
@@ -20,6 +23,8 @@ export default class CactusMemberService {
     currentUser?: FirebaseUser | null;
     protected memberHasLoaded = false;
 
+    pendingLoginActions: AuthAction[] = []
+
     get isLoggedIn(): boolean {
         return !!this.currentMember;
     }
@@ -28,17 +33,22 @@ export default class CactusMemberService {
         this.authUnsubscriber = getAuth().onAuthStateChanged(async user => {
             if (this.currentMemberUnsubscriber) {
                 this.currentMemberUnsubscriber();
+                this.currentMember = undefined;
             }
             this.currentUser = user;
             if (user) {
                 this.currentMemberUnsubscriber = this.observeByUserId(user.uid, {
                     onData: async member => {
+                        logger.info("Member update received from server");
+                        const memberChanged = this.currentMember?.id !== member?.id
                         this.currentMember = member;
                         this.memberHasLoaded = true;
-                        if (member) {
+                        if (member && memberChanged) {
+                            logger.info("Member changed - updating member values like timezone, revenuecat + session offers");
                             await Promise.all([
                                 this.updateMemberSettingsIfNeeded(member),
-                                RevenueCatService.shared.updateLastSeen(member)
+                                RevenueCatService.shared.updateLastSeen(member),
+                                this.processActions(member),
                             ]);
                         }
                     }
@@ -47,6 +57,30 @@ export default class CactusMemberService {
                 this.currentMember = undefined;
             }
         });
+    }
+
+    async addAuthAction(action: AuthAction) {
+        if (this.currentMember) {
+            logger.info("add action - Processing immediately")
+            await action({ member: this.currentMember });
+        } else {
+            logger.info("added auth action, not processing yet");
+            this.pendingLoginActions.push(action);
+        }
+    }
+
+    protected async processActions(member: CactusMember): Promise<void> {
+        logger.info(`Processing ${ this.pendingLoginActions.length } auth actions`);
+        let action = this.pendingLoginActions.shift();
+        while (action) {
+            try {
+                await action({ member });
+            } catch (error) {
+                logger.error("Failed to process pending action", error);
+            } finally {
+                action = this.pendingLoginActions.shift();
+            }
+        }
     }
 
     /**
@@ -218,5 +252,11 @@ export default class CactusMemberService {
             return;
         }
         await ref.update({ [CactusMember.Field.focusElement]: params.element });
+    }
+
+    async signOut() {
+        JournalFeedDataSource.current?.stop();
+        this.currentMemberUnsubscriber?.()
+        await getAuth().signOut();
     }
 }

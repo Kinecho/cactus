@@ -471,9 +471,9 @@
                 }
 
             },
-            promptContent(newContent: PromptContent | undefined, oldContent: PromptContent | undefined) {
+            async promptContent(newContent: PromptContent | undefined, oldContent: PromptContent | undefined) {
                 if (!newContent || (!oldContent || newContent.promptId !== oldContent.promptId)) {
-                    this.subscribeToResponse();
+                    await this.subscribeToResponse();
                 }
             },
         },
@@ -599,7 +599,7 @@
                     }, interval)
                 }
             },
-            subscribeToResponse() {
+            async subscribeToResponse() {
                 if (this.reflectionResponseUnsubscriber) {
                     logger.log("Reflection response unsubscriber already exists, resetting in now");
                     this.reflectionResponseUnsubscriber();
@@ -619,6 +619,7 @@
 
                     // logger.log("subscribing to responses for promptId", promptId);
                     this.reflectionResponseUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(promptId, {
+                        member: this.member,
                         onData: async (responses) => {
 
                             //TODO: combine if there are multiple?

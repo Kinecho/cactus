@@ -57,7 +57,7 @@
         },
         computed: {
             checkoutSuccessUrl(): string | undefined {
-                return appendQueryParams(PageRoute.JOURNAL_HOME, { [QueryParam.UPGRADE_SUCCESS]: "success" });
+                return appendQueryParams(PageRoute.MEMBER_HOME, { [QueryParam.UPGRADE_SUCCESS]: "success" });
             },
             checkoutCancelUrl(): string | undefined {
                 return window.location.href;

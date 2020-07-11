@@ -27,9 +27,8 @@
     import { FirebaseUser, getAuth } from "@web/firebase";
     import { handleEmailLinkSignIn } from "@web/authUi";
     import Logger from "@shared/Logger";
-    import { EmailLinkSignupResult, sendLoginEvent } from "@web/auth";
+    import { EmailLinkSignupResult, sendLoginEventForMember } from "@web/auth";
     import { LocalStorageKey } from "@web/services/StorageService";
-    import CactusMember from "@shared/models/CactusMember";
     import CactusMemberService from "@web/services/CactusMemberService";
     import { getQueryParam } from "@web/util";
     import { QueryParam } from "@shared/util/queryParams";
@@ -44,11 +43,6 @@
             document.body.classList.add("simplyCentered");
             this.authListener = getAuth().onAuthStateChanged(async (user) => {
                 this.user = user;
-                // if (!this.authLoaded) {
-                //     const response = handleEmailLinkSignIn();
-                // }
-                // this.authLoaded = true;
-                //
 
                 logger.log("auth state changed. Has Loaded = ", this.authLoaded, " User = ", user);
                 if (!this.authLoaded && !user) {
@@ -80,42 +74,41 @@
         },
         methods: {
             async handleExistingUserLoginSuccess(user: FirebaseUser): Promise<void> {
-                logger.log("redirecting...");
+                logger.log("redirecting after existing user login success...");
+                await CactusMemberService.sharedInstance.addAuthAction(async ({ member }) => {
+                    await sendLoginEventForMember({ user, member });
+                    let redirectUrl = getQueryParam(QueryParam.REDIRECT_URL);
 
-                await sendLoginEvent({ user });
+                    if (member?.id && redirectUrl && isFeatureAuthUrl(redirectUrl)) {
+                        redirectUrl = appendQueryParams(redirectUrl, { memberId: member.id });
+                    }
 
-                const member: CactusMember | undefined = CactusMemberService.sharedInstance.currentMember;
-                let redirectUrl = getQueryParam(QueryParam.REDIRECT_URL);
-
-                if (member?.id && redirectUrl && isFeatureAuthUrl(redirectUrl)) {
-                    redirectUrl = appendQueryParams(redirectUrl, { memberId: member.id });
-                }
-
-                await pushRoute(redirectUrl || PageRoute.JOURNAL_HOME);
+                    await pushRoute(redirectUrl || PageRoute.MEMBER_HOME);
+                })
             },
             async handleResponse(response: EmailLinkSignupResult) {
                 if (response.credential) {
+                    const { user, additionalUserInfo } = response.credential;
                     try {
-                        if (response.credential.additionalUserInfo && response.credential.additionalUserInfo.isNewUser) {
-                            localStorage.setItem(LocalStorageKey.newUserSignIn, response.credential.user ? response.credential.user.uid : "true");
+                        if (additionalUserInfo?.isNewUser) {
+                            localStorage.setItem(LocalStorageKey.newUserSignIn, user?.uid ?? "true");
                         } else {
                             localStorage.removeItem(LocalStorageKey.newUserSignIn);
                         }
                     } catch (e) {
                         logger.error("unable to persist new user status to localstorage");
                     } finally {
-                        await sendLoginEvent(response.credential);
+                        await CactusMemberService.sharedInstance.addAuthAction(async ({ member }) => {
+                            await sendLoginEventForMember({ user, additionalUserInfo, member });
 
-                        const member: CactusMember | undefined = CactusMemberService.sharedInstance.currentMember;
-                        let redirectUrl = getQueryParam(QueryParam.REDIRECT_URL);
+                            let redirectUrl = getQueryParam(QueryParam.REDIRECT_URL);
 
-                        if (member?.id && redirectUrl && isFeatureAuthUrl(redirectUrl)) {
-                            redirectUrl = appendQueryParams(redirectUrl, { memberId: member.id });
-                        }
-
-                        await pushRoute(redirectUrl || PageRoute.JOURNAL_HOME);
+                            if (member?.id && redirectUrl && isFeatureAuthUrl(redirectUrl)) {
+                                redirectUrl = appendQueryParams(redirectUrl, { memberId: member.id });
+                            }
+                            await pushRoute(redirectUrl || PageRoute.MEMBER_HOME);
+                        })
                     }
-
                     return;
                 }
 

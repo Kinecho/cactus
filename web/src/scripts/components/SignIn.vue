@@ -35,7 +35,7 @@
     import CactusMember from '@shared/models/CactusMember'
     import { FirebaseUser } from "@web/firebase"
     import CactusMemberService from '@web/services/CactusMemberService'
-    import { sendLoginEvent } from "@web/auth";
+    import { sendLoginEventForMember } from "@web/auth";
     import MagicLink from "@components/MagicLinkInput.vue"
     import { PageRoute } from "@shared/PageRoutes"
     import { QueryParam } from "@shared/util/queryParams"
@@ -61,7 +61,7 @@
     const copy = locale.copy;
 
     export default Vue.extend({
-            components: {
+        components: {
             MagicLink,
             Spinner,
         },
@@ -110,9 +110,9 @@
             redirectUrl: { type: String, required: false },
             showMagicLink: { type: Boolean, default: true },
             twitterEnabled: { type: Boolean, default: true },
-            showLoginSwitcher: {type: Boolean, default: true},
-            switcherLinkStyle: {type: String, default: "light"},
-            mode: {type: String as () => "SIGN_UP" | "LOG_IN", required: false, default: "SIGN_UP"}
+            showLoginSwitcher: { type: Boolean, default: true },
+            switcherLinkStyle: { type: String, default: "light" },
+            mode: { type: String as () => "SIGN_UP" | "LOG_IN", required: false, default: "SIGN_UP" }
         },
         data(): {
             memberListener: ListenerUnsubscriber | undefined,
@@ -170,7 +170,7 @@
             setupAuthUi() {
                 this.firebaseUiLoading = true;
                 const ui = getAuthUI();
-                let emailLinkSignInPath = this.redirectUrl || redirectUrlParam || PageRoute.JOURNAL_HOME;
+                let emailLinkSignInPath = this.redirectUrl || redirectUrlParam || PageRoute.MEMBER_HOME;
                 logger.info("SignIn.vue emailLinkSignInPath = ", emailLinkSignInPath);
                 logger.info("SignIn.vue signInSuccessPath = ", emailLinkSignInPath);
                 let includeEmailLink = false;
@@ -184,7 +184,7 @@
                 const config = getAuthUIConfig({
                     includeEmailLink,
                     includeTwitter: this.twitterEnabled,
-                    signInSuccessPath: this.redirectUrl || redirectUrlParam || PageRoute.JOURNAL_HOME,
+                    signInSuccessPath: this.redirectUrl || redirectUrlParam || PageRoute.MEMBER_HOME,
                     emailLinkSignInPath, //Note: normal magic link is handled in signupEndpoints.ts. This is for the special case of federated login connecting to an existing magic link acct.
                     signInSuccess: (authResult, redirectUrl) => {
                         this.isSigningIn = true;
@@ -229,26 +229,39 @@
                 this.$emit("loading", pending);
             },
             async doRedirect(doRedirect) {
-                //TODO: probalby make this method more clear what it does by renaming/refactoring
+                //TODO: make this method more clear what it does by renaming/refactoring
                 if (!doRedirect) {
                     return;
                 }
-                if (this.authResult && this.authResult.user) {
+                if (!this.authResult || !this.authResult.user) {
+                    logger.error("No auth result or auth result user found");
+                    return;
+                }
+                const authResult = this.authResult;
+                const successUrl = this.pendingRedirectUrl ?? PageRoute.MEMBER_HOME;
+
+                logger.info("User is logged in, working on redirecting the user....")
+                await Promise.all([CactusMemberService.sharedInstance.addAuthAction(async ({ member }) => {
+                    logger.info("Sending login event via Auth Actions");
                     try {
-                        await sendLoginEvent(this.authResult)
+                        await sendLoginEventForMember({ ...authResult, member });
                     } catch (e) {
                         logger.error("failed to log login event", e);
-                    } finally {
+                    }
+                }),
+                    CactusMemberService.sharedInstance.addAuthAction(async ({ member }) => {
                         // append the memberId to any feature-auth urls
-                        if (this.member?.id && this.pendingRedirectUrl && isFeatureAuthUrl(this.pendingRedirectUrl)) {
-                            this.pendingRedirectUrl = appendQueryParams(this.pendingRedirectUrl, { memberId: this.member.id });
+                        // const member = await CactusMemberService.sharedInstance.getCurrentMember();
+                        let redirectUrl = successUrl;
+                        if (member.id && isFeatureAuthUrl(successUrl)) {
+                            redirectUrl = appendQueryParams(successUrl, { memberId: member.id });
                         }
 
                         if (this.redirectOnSignIn) {
-                            await pushRoute(this.pendingRedirectUrl || PageRoute.JOURNAL_HOME)
+                            logger.info("Auth Action: push route to ", redirectUrl)
+                            return pushRoute(redirectUrl)
                         }
-                    }
-                }
+                    })])
             }
         }
     })

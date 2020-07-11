@@ -50,84 +50,92 @@
     import { clickOutsideDirective } from '@web/vueDirectives'
     import { ComputedMenuLink, DropdownMenuLink } from "@components/DropdownMenuTypes"
     import Logger from "@shared/Logger";
+    import Component from "vue-class-component";
+    import { Prop, Watch } from "vue-property-decorator";
 
     const logger = new Logger("DropdownMenu.vue");
 
-    export default Vue.extend({
-        created() {
-
-        },
+    @Component({
         directives: {
             'click-outside': clickOutsideDirective(),
-        },
-        props: {
-            items: {
-                type: Array as () => DropdownMenuLink[],
-                required: true,
-            },
-            makeTextNonBreaking: {
-                type: Boolean,
-                default: true,
-            },
-            email: {
-                type: String
-            },
-            displayName: {
-                type: String
-            }
-        },
-        data(): {
-            menuOpen: boolean,
-        } {
-            return {
-                menuOpen: false,
-            }
-        },
-        computed: {
-            hasCustomButton(): boolean {
-                return !!this.$slots['custom-button'];
-            },
-            links(): ComputedMenuLink[] {
-                const clickHandler = (onClick: ((event: Event | any) => void) | undefined) => {
-                    if (onClick) {
-                        return (event: Event) => {
-                            this.menuOpen = false;
-                            event.preventDefault();
-                            onClick(event);
-                        };
-                    }
-                    return;
-                };
-
-                return this.items.map(item => {
-                    return {
-                        title: item.title,
-                        href: item.href || null,
-                        onClick: clickHandler(item.onClick),
-                        event: item.onClick ? "click" : null,
-                        calloutText: item.calloutText,
-                        static: item.static,
-                        badge: item.badge,
-                    }
-                })
-            }
-        },
-        methods: {
-            processTitle(input: string): string {
-                if (this.makeTextNonBreaking) {
-                    return input.replace(/\s/g, "&nbsp;")
-                } else {
-                    return input;
-                }
-            },
-            toggleMenu() {
-                this.menuOpen = !this.menuOpen;
-            },
-            closeMenu() {
-                this.menuOpen = false;
-            },
         }
     })
+    export default class DropdownMenu extends Vue {
+
+        @Prop({
+            type: Array as () => DropdownMenuLink[],
+            required: true,
+        })
+        items!: DropdownMenuLink[];
+
+        @Prop({ type: Boolean, default: true, })
+        makeTextNonBreaking!: boolean;
+
+        @Prop({ type: String, required: false, default: null })
+        email!: string | null;
+
+        @Prop({ type: String, default: null })
+        displayName!: string | null;
+
+        @Prop({ type: Boolean, default: false })
+        hideOnRouteChange!: boolean;
+
+        menuOpen: boolean = false;
+
+        @Watch("$route")
+        onRouteChanged() {
+            if (this.hideOnRouteChange) {
+                this.menuOpen = false;
+            }
+        }
+
+        get hasCustomButton(): boolean {
+            return !!this.$slots['custom-button'];
+        }
+
+        get links(): ComputedMenuLink[] {
+            const clickHandler = (onClick: ((event: Event | any) => void) | undefined) => {
+                if (onClick) {
+                    return (event: Event) => {
+                        this.menuOpen = false;
+                        event.preventDefault();
+                        onClick(event);
+                    };
+                }
+                return;
+            };
+
+            return this.items.map(item => {
+                return {
+                    title: item.title,
+                    href: item.href || null,
+                    onClick: clickHandler(item.onClick),
+                    event: item.onClick ? "click" : null,
+                    calloutText: item.calloutText,
+                    static: item.static,
+                    badge: item.badge,
+                }
+            })
+        }
+
+
+        processTitle(input: string): string {
+            if (this.makeTextNonBreaking) {
+                return input.replace(/\s/g, "&nbsp;")
+            } else {
+                return input;
+            }
+        }
+
+        toggleMenu() {
+            this.menuOpen = !this.menuOpen;
+        }
+
+        closeMenu() {
+            this.menuOpen = false;
+        }
+
+    }
 </script>
 
 

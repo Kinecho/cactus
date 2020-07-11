@@ -153,7 +153,7 @@
         }
 
         async close() {
-            await pushRoute(PageRoute.JOURNAL_HOME);
+            await pushRoute(PageRoute.MEMBER_HOME);
         }
 
         async setPageIndex(index: number) {
@@ -191,7 +191,7 @@
                     }
                     this.promptContent = promptContent ?? null;
                 }
-            });
+            }) ?? null;
         }
 
         setupResponseObserver() {

@@ -86,7 +86,7 @@
             logger.info("set max text height to ", this.maxTextareaHeight);
         }
 
-        observeResponses() {
+        async observeResponses() {
             this.responsesLoading = true;
             this.reflectionUnsubscriber?.();
             if (this.card.promptContentEntryId) {

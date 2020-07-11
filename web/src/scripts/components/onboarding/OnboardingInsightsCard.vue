@@ -48,7 +48,7 @@
             this.$emit("previous");
         }
 
-        beforeMount() {
+        async beforeMount() {
             const promptEntryId = this.card.promptContentEntryId;
             if (!promptEntryId) {
                 //TODO: handle error state

@@ -245,7 +245,7 @@
 
             try {
                 if (this.member) {
-                    await pushRoute(PageRoute.JOURNAL_HOME);
+                    await pushRoute(PageRoute.MEMBER_HOME);
                 } else {
                     await pushRoute(PageRoute.HOME);
                 }

@@ -1,7 +1,6 @@
 <template>
     <div class="stat">
         <div class="statIcon">
-            <!--            <img :src="`/assets/images/${stat.icon}.svg`" :alt="`${stat.label} icon`"/>-->
             <svg-icon :icon="stat.icon"/>
         </div>
         <div class="textContainer">
@@ -40,9 +39,13 @@
         border-radius: 1.2rem;
         display: flex;
         flex-basis: 33%;
-        margin-right: 1.6rem;
-        padding: 3.2rem;
+        margin-right: .8rem;
+        padding: 2.4rem;
 
+        @include r(600) {
+            margin-right: 1.6rem;
+            padding: 3.2rem;
+        }
         @include r(960) {
             @include shadowbox;
             border: 0;
@@ -55,27 +58,43 @@
     }
 
     .statIcon {
-        align-items: center;
-        background-color: $bgGreen;
-        border-radius: 50%;
-        display: flex;
-        flex-shrink: 0;
-        height: 8rem;
-        justify-content: center;
-        margin-right: 1.6rem;
-        width: 8rem;
+        display: none;
 
-        img {
-            height: 3.2rem;
-            width: 3.2rem;
+        @include r(600) {
+            align-items: center;
+            background-color: $bgGreen;
+            border-radius: 50%;
+            display: flex;
+            flex-shrink: 0;
+            height: 8rem;
+            justify-content: center;
+            margin-right: 1.6rem;
+            width: 8rem;
+
+            img {
+                height: 3.2rem;
+                width: 3.2rem;
+            }
+        }
+    }
+
+    .statLabel {
+        margin-bottom: .4rem;
+
+        @include r(600) {
+            margin-bottom: 0;
         }
     }
 
     .statValue {
         color: $mediumDolphin;
-        font-size: 5.6rem;
+        font-size: 3.2rem;
         font-weight: bold;
         line-height: 1;
+
+        @include r(600) {
+            font-size: 5.6rem;
+        }
     }
 
     .unit {

@@ -36,13 +36,6 @@
 
             const stats: StatWidgetData[] = [];
 
-            stats.push({
-                value: `${ memberStats.totalCount }`,
-                label: "Reflections",
-                unit: "",
-                icon: "journal"
-            });
-
             if (memberStats.currentStreakDays > 1) {
                 stats.push({
                     value: `${ memberStats.currentStreakDays }`,
@@ -65,6 +58,13 @@
                     icon: "flame"
                 })
             }
+
+            stats.push({
+                value: `${ memberStats.totalCount }`,
+                label: "Reflections",
+                unit: "",
+                icon: "journal"
+            });
 
             let totalDuration = memberStats.totalDurationMs ?? 0;
             let durationValue = `${ totalDuration.toFixed(0) }`;
@@ -96,19 +96,23 @@
     @import "variables";
 
     .statsContainer {
+        animation: .3s ease-in slideX;
         display: flex;
-        margin: 0 -2.4rem 2.4rem 2.4rem;
+        margin: 0 -2.4rem 1.6rem 2.4rem;
         overflow: auto;
         padding-bottom: 1.6rem;
 
         @include r(374) {
-            margin: 0 -2.4rem 2.4rem 0;
+            margin: 0 -2.4rem 1.6rem;
+            padding-left: 2.4rem;
         }
-
+        @include r(600) {
+            animation: none;
+        }
         @include r(960) {
             margin: 0 0 2.4rem;
             overflow: visible;
-            padding-bottom: 2.4rem;
+            padding: 0 0 2.4rem;
         }
     }
 </style>

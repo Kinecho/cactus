@@ -16,7 +16,6 @@ body {
   font: 1.8rem $font-stack;
   line-height: 1.43;
   margin: 0;
-
   &.transparent {
     background-color: transparent;
   }
@@ -189,4 +188,8 @@ h4 {
   @include r(768) {
     height: 4.8rem;
   }
+}
+
+#auth-confirm-modal {
+    color: $darkestGreen;
 }

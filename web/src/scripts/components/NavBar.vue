@@ -1,8 +1,8 @@
 <template lang="html">
-    <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent, noborder: largeLogoOnDesktop}" v-if="!hidden">
+    <header v-bind:class="mainClasses" v-if="!hidden">
         <div class="centered">
             <router-link :to="logoHref">
-                <img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" :src="'/assets/images/' + logoSrc" alt="Cactus logo"/>
+                <img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" :src="logoSrc" alt="Cactus logo"/>
             </router-link>
             <div v-if="!loggedIn" class="anonLinks">
                 <router-link
@@ -29,24 +29,29 @@
                 </router-link>
             </div>
             <div class="navContainer" v-if="loggedIn && showLinks">
-                <router-link class="navbarLink home" :to="journalHref" v-if="loggedIn">
-                    <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Home to My
-                        Journal</title>
+                <router-link class="navbarLink home" :to="memberHomeHref" v-if="loggedIn">
+                    <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Home</title>
                         <path fill="#07454C" d="M5 23a3 3 0 01-3-3V9a1 1 0 01.386-.79l9-7a1 1 0 011.228 0l9 7A1 1 0 0122 9v11a3 3 0 01-3 3H5zm7-19.733L4 9.489V20a1 1 0 001 1h3v-9a1 1 0 01.883-.993L9 11h6a1 1 0 011 1v9h3a1 1 0 001-1V9.49l-8-6.223zM14 13h-4v8h4v-8z"/>
                     </svg>
                     <span class="navLabel">{{copy.navigation.HOME}}</span>
                 </router-link>
-                <router-link class="navbarLink" :to="insightsHref" v-if="loggedIn">
-                    <svg class="navIcon pie" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><title>
-                        Insights</title>
-                        <path fill="#07454C" d="M6.601.913a1 1 0 01.8 1.834A9 9 0 1019.29 14.5a1 1 0 011.842.778A11 11 0 116.601.913zm4.4-.913a11 11 0 0111 11 1 1 0 01-1 1h-10a1 1 0 01-1-1V1a1 1 0 011-1zm1 2.056V10h7.944a9 9 0 00-7.944-7.944z"/>
+                <router-link class="navbarLink" :to="journalHref" v-if="loggedIn">
+                    <svg class="navIcon journal" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 22">
+                        <title>Journal</title>
+                        <path fill="#07454C" d="M7.636 0c1.785 0 3.37.857 4.365 2.182A5.44 5.44 0 0116.364 0h6.545C23.512 0 24 .488 24 1.09v16.365a1.09 1.09 0 01-1.09 1.09h-7.637a2.182 2.182 0 00-2.177 2.026l-.005.156c0 1.455-2.182 1.455-2.182 0a2.182 2.182 0 00-2.182-2.182H1.091A1.09 1.09 0 010 17.455V1.09C0 .488.488 0 1.09 0h6.546zm0 2.182H2.182v14.182h6.545c.696 0 1.353.162 1.937.452l.245.131V5.455a3.273 3.273 0 00-3.273-3.273zm14.182 0h-5.454a3.273 3.273 0 00-3.273 3.273v11.492a4.344 4.344 0 012.182-.583h6.545V2.182zM7.636 12.545a1.09 1.09 0 010 2.182H4.364a1.09 1.09 0 110-2.182zm1.091-4.363a1.09 1.09 0 110 2.182H4.364a1.09 1.09 0 010-2.182zm-1.09-4.364a1.09 1.09 0 010 2.182H4.363a1.09 1.09 0 110-2.182z"/>
                     </svg>
-                    <span class="navLabel">{{copy.navigation.INSIGHTS}}</span>
+                    <span class="navLabel">{{copy.navigation.JOURNAL}}</span>
                 </router-link>
-                <dropdown-menu :items="links" v-if="loggedIn" :displayName="displayName" :email="email">
+                <dropdown-menu
+                        v-if="loggedIn"
+                        :items="links"
+                        :displayName="displayName"
+                        :email="email"
+                        :hide-on-route-change="true"
+                >
                     <div class="navbar-avatar-container" slot="custom-button">
                         <div v-if="!profileImageUrl" class="initials">{{initials}}</div>
-                        <img @error="avatarImageError = true" v-if="profileImageUrl" :alt="(displayName || email) + `'s Profile Image`" :src="profileImageUrl"/>
+                        <img @error="avatarImageError = true" v-if="profileImageUrl" alt="Account" :src="profileImageUrl"/>
                     </div>
                 </dropdown-menu>
             </div>
@@ -65,43 +70,83 @@
     import { DropdownMenuLink } from "@components/DropdownMenuTypes"
     import { QueryParam } from '@shared/util/queryParams'
     import CopyService from '@shared/copy/CopyService'
-    import { LocalizedCopy } from '@shared/copy/CopyTypes'
     import { getRandomAvatar } from '@web/AvatarUtil'
     import { getQueryParam } from '@web/util'
     import CactusMemberService from '@web/services/CactusMemberService'
     import CactusMember from "@shared/models/CactusMember"
     import { ListenerUnsubscriber } from '@web/services/FirestoreService';
-    import StorageService, { LocalStorageKey } from "@web/services/StorageService";
     import MemberProfile from "@shared/models/MemberProfile"
     import MemberProfileService from '@web/services/MemberProfileService'
     import Logger from "@shared/Logger";
     import { isPremiumTier, subscriptionTierDisplayName } from "@shared/models/MemberSubscription";
     import { pushRoute } from "@web/NavigationUtil";
+    import SvgIcon from "@components/SvgIcon.vue";
+    import Component from "vue-class-component";
+    import { Prop, Watch } from "vue-property-decorator";
+    import { NavBarProps } from "@components/NavBarTypes";
 
-    const logger = new Logger("NavBar.vue");
+    const logger = new Logger("NavBar");
     const copy = CopyService.getSharedInstance().copy;
 
-    declare interface NavBarData {
-        authUnsubscribe: (() => void) | undefined,
-        user: FirebaseUser | undefined | null,
-        member: CactusMember | undefined,
-        memberUnsubscriber: ListenerUnsubscriber | undefined,
-        authLoaded: boolean,
-        copy: LocalizedCopy,
-        hidden: boolean,
-        memberProfile: MemberProfile | undefined,
-        memberProfileUnsubscriber: ListenerUnsubscriber | undefined,
-        activityBadgeCount: number,
-        avatarImageError: boolean,
-    }
-
-    export default Vue.extend({
+    @Component({
         directives: {
             'click-outside': clickOutsideDirective(),
         },
         components: {
+            SvgIcon,
             DropdownMenu,
-        },
+        }
+    })
+    export default class NavBar extends Vue implements NavBarProps {
+        name = "NavBar";
+
+        @Prop({ type: Boolean, default: false })
+        showSignup!: boolean;
+
+        @Prop({ type: String, default: null, required: false })
+        signOutRedirectUrl!: string | null;
+
+        @Prop({ type: Boolean, default: true })
+        redirectOnSignOut!: boolean;
+
+        @Prop({ type: String, default: "signupAnchor" })
+        signupFormAnchorId!: string;
+
+        @Prop({ type: Boolean, default: false })
+        largeLogoOnDesktop!: boolean;
+
+        @Prop({ type: Boolean, default: false })
+        isSticky!: boolean;
+
+        @Prop({ type: Boolean, default: false })
+        whiteLogo!: boolean;
+
+        @Prop({ type: Boolean, default: true })
+        showLogin!: boolean;
+
+        @Prop({ type: Boolean, default: false })
+        forceTransparent!: boolean;
+
+        @Prop({ type: String, default: null })
+        loginRedirectUrl!: string | null;
+
+        @Prop({ type: Boolean, default: false })
+        useCurrentRouteAfterLogin!: boolean;
+
+        @Prop({ type: Boolean, default: true })
+        showLinks!: boolean;
+
+        copy = copy;
+        user: FirebaseUser | null | undefined = null;
+        authUnsubscribe: ListenerUnsubscriber | undefined = undefined;
+        authLoaded: boolean = false;
+        hidden = false;
+        member: CactusMember | undefined = undefined;
+        memberUnsubscriber: ListenerUnsubscriber | undefined = undefined;
+        memberProfileUnsubscriber: ListenerUnsubscriber | undefined = undefined;
+        memberProfile: MemberProfile | undefined = undefined;
+        avatarImageError = false;
+
         beforeMount() {
             let NO_NAV = getQueryParam(QueryParam.NO_NAV);
             if (!isBlank(NO_NAV)) {
@@ -124,168 +169,141 @@
                         })
                     }
 
-                    // const oldMember = this.member;
                     this.member = member;
-                    // if (member && member.activityStatus?.lastSeenOccurredAt !== oldMember?.activityStatus?.lastSeenOccurredAt || member?.id !== oldMember?.id) {
-                    //     await this.updateActivityCount();
-                    // }
                 }
             });
-        },
-        destroyed() {
+        }
+
+        beforeDestroy() {
             this.authUnsubscribe?.();
             this.memberUnsubscriber?.();
             this.memberProfileUnsubscriber?.();
-        },
-        props: {
-            showSignup: { type: Boolean, default: false },
-            signOutRedirectUrl: String,
-            redirectOnSignOut: Boolean,
-            signupFormAnchorId: { type: String, default: "signupAnchor" },
-            largeLogoOnDesktop: Boolean,
-            isSticky: { type: Boolean, default: true },
-            whiteLogo: { type: Boolean, default: false },
-            showLogin: { type: Boolean, default: true },
-            forceTransparent: { type: Boolean, default: false },
-            loginRedirectUrl: String,
-            showLinks: { type: Boolean, default: true },
-        },
-        data(): NavBarData {
-            return {
-                copy: copy,
-                user: undefined,
-                authUnsubscribe: undefined,
-                authLoaded: false,
-                hidden: false,
-                member: undefined,
-                memberUnsubscriber: undefined,
-                activityBadgeCount: StorageService.getNumber(LocalStorageKey.activityBadgeCount, 0)!,
-                memberProfileUnsubscriber: undefined,
-                memberProfile: undefined,
-                avatarImageError: false,
-            }
-        },
-        computed: {
-            loggedIn(): boolean {
-                return !!this.user;
-            },
-            links(): DropdownMenuLink[] {
-                return [{
-                    //     title: copy.navigation.CORE_VALUES,
-                    //     href: PageRoute.CORE_VALUES,
-                    //     calloutText: !isPremiumTier(this.member?.tier) ? "Plus" : null
-                    // }, {
-                    title: copy.navigation.ACCOUNT,
-                    href: PageRoute.ACCOUNT,
-                    badge: subscriptionTierDisplayName(this.member?.tier, this.member?.isOptInTrialing)
-                }, {
-                    title: copy.common.LOG_OUT,
-                    onClick: async () => {
-                        this.$emit("logging-out")
-                        await this.logout()
-                    }
-                }];
-            },
-            displayName(): string | undefined | null {
-                return this.member ? this.member.getFullName() : null;
-            },
-            email(): string | undefined | null {
-                return this.user ? this.user.email : null;
-            },
-            profileImageUrl(): string | undefined | null {
-
-                return (!this.avatarImageError && this.memberProfile?.avatarUrl) ? this.memberProfile.avatarUrl : getRandomAvatar(this.member?.id);
-            },
-            displayLoginButton(): boolean {
-                return this.showLogin && this.authLoaded && !this.user;
-            },
-            initials(): string {
-                if (this.user) {
-                    return getInitials(this.user.displayName || this.user.email || "")
-                }
-                return "";
-            },
-            loginHref(): string {
-                return `${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ this.loginRedirectUrl || window.location.href }`;
-            },
-            logoHref(): string {
-                return this.loggedIn ? PageRoute.JOURNAL_HOME : PageRoute.HOME;
-            },
-            isPaidTier(): boolean {
-                return isPremiumTier(this.member?.tier);
-            },
-            sponsorHref(): string {
-                return PageRoute.SPONSOR;
-            },
-            signupHref(): string {
-                return PageRoute.SIGNUP;
-            },
-            assessmentHref(): string {
-                return PageRoute.GAP_ANALYSIS;
-            },
-            journalHref(): string {
-                return PageRoute.JOURNAL_HOME;
-            },
-            // socialHref(): string {
-            //     return PageRoute.SOCIAL;
-            // },
-            logoSrc(): string {
-                return this.whiteLogo ? "logoWhite.svg" : "logo.svg";
-            },
-            insightsHref(): string {
-                return PageRoute.INSIGHTS
-            },
-            pricingHref(): string {
-                return PageRoute.PRICING;
-            }
-        },
-        methods: {
-            async logout(): Promise<void> {
-                logger.log('Logging out...');
-                try {
-                    await logout({
-                        redirectUrl: this.signOutRedirectUrl || "/",
-                        redirectOnSignOut: this.redirectOnSignOut
-                    })
-                } catch (error) {
-                    logger.error("Log out threw an error", error);
-                }
-            },
-            async goToLogin() {
-                await pushRoute(this.loginHref);
-            },
-            async goToSignup() {
-                await pushRoute(this.signupHref);
-            },
-            // scrollToSignup() {
-            //     if (!this.signupFormAnchorId) {
-            //         return;
-            //     }
-            //
-            //     const scrollToId = this.signupFormAnchorId;
-            //
-            //     const content = document.getElementById(scrollToId);
-            //     gtag("event", "scroll_to", { formId: this.signupFormAnchorId });
-            //     if (content) content.scrollIntoView();
-            // },
-            // async updateActivityCount() {
-            //     logger.log("Refreshing activity count");
-            //     const member = this.member;
-            //     if (!member) {
-            //         return;
-            //     }
-            //
-            //     const activitySummary = await fetchActivityFeedSummary();
-            //     if (!activitySummary) {
-            //         logger.error("Failed to fetch activity summary");
-            //         this.activityBadgeCount = 0;
-            //         return;
-            //     }
-            //     this.activityBadgeCount = activitySummary.unseenCount;
-            //     StorageService.saveNumber(LocalStorageKey.activityBadgeCount, activitySummary.unseenCount);
-            // }
         }
-    })
+
+        get mainClasses(): Record<string, boolean> {
+            return {
+                loggedIn: this.loggedIn,
+                loaded: this.authLoaded,
+                sticky: this.isSticky,
+                transparent: this.forceTransparent,
+                noborder: this.largeLogoOnDesktop
+            }
+        }
+
+        get loggedIn(): boolean {
+            return !!this.user;
+        }
+
+        get links(): DropdownMenuLink[] {
+            return [{
+                title: copy.navigation.ACCOUNT,
+                href: PageRoute.ACCOUNT,
+                badge: subscriptionTierDisplayName(this.member?.tier, this.member?.isOptInTrialing)
+            }, {
+                title: copy.common.LOG_OUT,
+                onClick: async () => {
+                    this.$emit("logging-out")
+                    await this.logout()
+                }
+            }];
+        }
+
+        get displayName(): string | undefined | null {
+            return this.member ? this.member.getFullName() : null;
+        }
+
+        get email(): string | undefined | null {
+            return this.user ? this.user.email : null;
+        }
+
+        get profileImageUrl(): string | undefined | null {
+
+            return (!this.avatarImageError && this.memberProfile?.avatarUrl) ? this.memberProfile.avatarUrl : getRandomAvatar(this.member?.id);
+        }
+
+        get displayLoginButton(): boolean {
+            return this.showLogin && this.authLoaded && !this.user;
+        }
+
+        get initials(): string {
+            if (this.user) {
+                return getInitials(this.user.displayName || this.user.email || "")
+            }
+            return "";
+        }
+
+        get loginHref(): string {
+            let successUrl = this.loginRedirectUrl ?? PageRoute.MEMBER_HOME;
+            if (this.useCurrentRouteAfterLogin) {
+                successUrl = window.location.href;
+            }
+
+            return `${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ successUrl }`;
+        }
+
+        get logoHref(): string {
+            return this.loggedIn ? PageRoute.MEMBER_HOME : PageRoute.HOME;
+        }
+
+        get isPaidTier(): boolean {
+            return isPremiumTier(this.member?.tier);
+        }
+
+        get sponsorHref(): string {
+            return PageRoute.SPONSOR;
+        }
+
+        get signupHref(): string {
+            return PageRoute.SIGNUP;
+        }
+
+        get assessmentHref(): string {
+            return PageRoute.GAP_ANALYSIS;
+        }
+
+        get memberHomeHref(): string {
+            return PageRoute.MEMBER_HOME;
+        }
+
+        get journalHref(): string {
+            return PageRoute.JOURNAL;
+        }
+
+        get logoSrc(): string {
+            return `/assets/images/${ this.whiteLogo ? "logoWhite.svg" : "logo.svg" }`;
+        }
+
+        get insightsHref(): string {
+            return PageRoute.INSIGHTS
+        }
+
+        get pricingHref(): string {
+            return PageRoute.PRICING;
+        }
+
+
+        async logout(): Promise<void> {
+            logger.log('Logging out...');
+            try {
+                await logout({
+                    redirectUrl: this.signOutRedirectUrl || "/",
+                    redirectOnSignOut: this.redirectOnSignOut
+                })
+            } catch (error) {
+                logger.error("Log out threw an error", error);
+            }
+        }
+
+        async goToLogin() {
+            await pushRoute(this.loginHref);
+        }
+
+        async goToSignup() {
+            await pushRoute(this.signupHref);
+        }
+
+
+    }
 </script>
 
 <style lang="scss">
@@ -328,6 +346,7 @@
                     background-color: $lightGreen;
                 }
             }
+
             @include r(600) {
                 &:last-child {
                     padding: .8rem 1.6rem;
@@ -431,6 +450,10 @@
 
             @include r(600) {
                 display: none;
+            }
+
+            path {
+                fill: #07454C;
             }
         }
 

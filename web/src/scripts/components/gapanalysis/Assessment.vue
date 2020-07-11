@@ -25,7 +25,7 @@
                     help you identify and focus on the people, places, and things that make you happy.</p>
                 <button class="btn primary" @click="start">Let's go!</button>
                 <div class="private">
-                    <img class="lock" src="/assets/images/lock.svg" alt=""/>
+                    <img class="lock" src="/assets/icons/lock.svg" alt=""/>
                     All answers are private and confidential and will be used solely to help tune Cactus to be most
                     effective for you.
                 </div>
@@ -388,14 +388,14 @@
         }
 
         async skipCheckout() {
-            await pushRoute(PageRoute.JOURNAL_HOME);
+            await pushRoute(PageRoute.MEMBER_HOME);
         }
 
         async startCheckout(subscriptionProduct: SubscriptionProduct | undefined | null) {
             logger.info("Starting checkout handler");
             if (subscriptionProduct?.entryId) {
                 logger.info("Starting checkout for product entry ID = ", subscriptionProduct?.entryId)
-                let defaultSuccessPath = `${ PageRoute.JOURNAL_HOME }?${ QueryParam.UPGRADE_SUCCESS }=success`
+                let defaultSuccessPath = `${ PageRoute.MEMBER_HOME }?${ QueryParam.UPGRADE_SUCCESS }=success`
                 if (this.result?.id) {
                     defaultSuccessPath = `${ PageRoute.GAP_ANALYSIS }/${this.result.id}/${Screen.results}?${ QueryParam.UPGRADE_SUCCESS }=success`
                 }
