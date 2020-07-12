@@ -38,24 +38,27 @@
                     </button>
                 </div>
             </div>
-            <div v-else-if="!entry && !loading">
+            <div v-else-if="noPromptFound">
                 <h1>No prompt found for today</h1>
             </div>
         </transition>
-        <dropdown-menu :items="linkItems" class="dotsBtn"/>
+        <dropdown-menu :items="linkItems" class="dotsBtn" v-if="!noPromptFound"/>
         <!-- <modal :show="showSharing" v-on:close="showSharing = false" :showCloseButton="true">
             <div class="sharing-card" slot="body">
                 <PromptSharing :promptContent="entry.promptContent"/>
             </div>
         </modal> -->
-        <!-- <modal :show="showShareNote" v-on:close="showShareNote = false" :showCloseButton="true" v-if="!!shareNote">
+        <modal :show="shareModalOpen"
+                v-on:close="shareModalOpen = false"
+                :showCloseButton="true"
+                v-if="shareModalOpen && entry && hasNote">
             <div class="sharing-card note" slot="body">
                 <legacy-prompt-content-card
                         :prompt-content="entry.promptContent"
-                        :content="shareNote.content"
-                        :response="shareNote.response"/>
+                        :content="entry.promptContent"
+                        :response="entry.responses[0]"/>
             </div>
-        </modal> -->
+        </modal>
     </div>
 </template>
 
@@ -75,6 +78,7 @@
     import CopyService from "@shared/copy/CopyService";
     import EditReflection from "@components/ReflectionResponseTextEdit.vue"
     import { ResponseMedium } from "@shared/models/ReflectionResponse"
+    import { DropdownMenuLink } from "@components/DropdownMenuTypes";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -104,6 +108,12 @@
         @Prop({ type: Object as () => CactusMember, required: true })
         member!: CactusMember;
 
+        shareModalOpen = false;
+
+        get noPromptFound(): boolean {
+            return !this.entry && !this.loading
+        }
+
         get allLoaded(): boolean {
             return this.entry?.allLoaded === true;
         }
@@ -117,23 +127,32 @@
             return !isBlank(getResponseText(this.entry?.responses));
         }
 
-        get linkItems(): {
-            title: string,
-            href?: string | null,
-            onClick?: () => void,
-        }[] {
-            return [
+        get linkItems(): DropdownMenuLink[] {
+            const links: DropdownMenuLink[] = [
                 {
                     title: copy.prompts.REFLECT,
                     href: this.link,
                 },
-                {
+            ]
+            if (this.hasReflected) {
+                links.push({
                     title: this.hasNote ? copy.prompts.EDIT_NOTE : copy.prompts.ADD_A_NOTE,
                     onClick: () => {
                         this.isEditingNote = true;
                     }
-                },
-            ]
+                });
+            }
+
+            if (this.hasNote) {
+                links.push({
+                    title: copy.prompts.SHARE_YOUR_NOTE,
+                    onClick: () => {
+                        this.shareModalOpen = true;
+                    }
+                })
+            }
+
+            return links;
         }
 
         get hasReflected(): boolean {
