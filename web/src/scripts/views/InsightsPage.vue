@@ -120,10 +120,8 @@
         gapAssessmentResults?: GapAnalysisAssessmentResult | null = null;
         selectFocusEnabled = false;
         currentElementSelection: CactusElement | null = null
-
-        todayPromptLoading = false;
         todayEntry: JournalEntry | null = null;
-
+        todayLoaded = false;
         dataSource?: JournalFeedDataSource
         journalLoaded: boolean = false;
 
@@ -131,7 +129,7 @@
             this.dataSource = JournalFeedDataSource.setup(this.member, { onlyCompleted: true, delegate: this })
             this.dataSource?.start()
             this.fetchGapResults()
-            this.fetchTodayPrompt()
+            // this.fetchTodayPrompt()
         }
 
         destroyed() {
@@ -139,7 +137,7 @@
         }
 
         async fetchTodayPrompt() {
-            this.todayPromptLoading = true;
+            // this.todayPromptLoading = true;
             const promptContent = await PromptContentService.sharedInstance.getPromptContentForDate({
                 subscriptionTier: this.member?.tier ?? SubscriptionTier.BASIC,
                 systemDate: new Date(),
@@ -148,7 +146,11 @@
                 this.todayEntry = new JournalEntry(promptContent.promptId, undefined, this.member);
                 this.todayEntry.start();
             }
-            this.todayPromptLoading = false;
+            // this.todayPromptLoading = false;
+        }
+
+        get todayPromptLoading(): boolean {
+            return !this.todayEntry && !this.todayLoaded;
         }
 
         async fetchGapResults() {
@@ -258,6 +260,12 @@
         /* START: JOURNAL FEED DATA SOURCE DELEGATE */
         didLoad(hasData: boolean): void {
             this.journalLoaded = true;
+        }
+
+        todayEntryUpdated(entry?: JournalEntry|null) {
+            logger.info("Insights today entry loaded");
+            this.todayEntry = entry ?? null;
+            this.todayLoaded = true;
         }
 
         /* END: JOURNAL FEED DATA SOURCE DELEGATE */

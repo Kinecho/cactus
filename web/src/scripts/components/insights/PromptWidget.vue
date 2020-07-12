@@ -4,9 +4,9 @@
         <img class="blob" src="/assets/images/transparentBlob2.svg"/>
         <p class="date">Today</p>
         <transition name="component-fade" appear>
-            <spinner v-if="loading || !allLoaded" :delay="1500"/>
+            <spinner v-if="loading || (entry && !allLoaded)" :delay="1500"/>
             <!-- Using a div here so that the fade transition works -->
-            <div v-else>
+            <div v-else-if="entry">
                 <h2 class="question">
                     <markdown-text :source="questionText"/>
                 </h2>
@@ -31,12 +31,15 @@
                     <flamelink-image :image="image"/>
                 </div>
 
-                <div class="buttonContainer" v-if="!hasNote | !hasReflected && !isEditingNote">
+                <div class="buttonContainer" v-if="!hasNote || !hasReflected && !isEditingNote">
                     <router-link v-if="link && !hasReflected" :to="link" tag="button">Reflect</router-link>
                     <button v-if="!hasNote && !isEditingNote && hasReflected" @click="isEditingNote = true" class="secondary">
                         <img class="pen" src="/assets/images/pen.svg" alt=""/>Add a Note
                     </button>
                 </div>
+            </div>
+            <div v-else-if="!entry && !loading">
+                <h1>No prompt found for today</h1>
             </div>
         </transition>
         <dropdown-menu :items="linkItems" class="dotsBtn"/>

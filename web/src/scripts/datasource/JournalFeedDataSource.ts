@@ -5,6 +5,7 @@ import SentPromptService from "@web/services/SentPromptService";
 import { PageResult } from "@web/services/FirestoreService";
 import JournalEntry, { JournalEntryDelegate } from "@web/datasource/models/JournalEntry";
 import Logger from "@shared/Logger";
+import TodayPromptDataSource, { TodayPromptDataSourceDelegate } from "@web/datasource/TodayPromptDataSource";
 
 const logger = new Logger("JournalFeedDataSource");
 
@@ -15,6 +16,7 @@ export interface JournalFeedDataSourceDelegate {
     onRemoved?: (journalEntry: JournalEntry, removedIndex: number) => void
     onUpdated?: (journalEntry: JournalEntry, index: number) => void
     pageLoaded?: (hasMore: boolean) => void
+    todayEntryUpdated?: (entry?: JournalEntry|null) => void;
 }
 
 export interface SetupJournalEntryResult {
@@ -23,8 +25,7 @@ export interface SetupJournalEntryResult {
 
 }
 
-class JournalFeedDataSource implements JournalEntryDelegate {
-
+class JournalFeedDataSource implements JournalEntryDelegate, TodayPromptDataSourceDelegate {
     static current: JournalFeedDataSource | null = null;
     running = false;
     member: CactusMember;
@@ -37,21 +38,23 @@ class JournalFeedDataSource implements JournalEntryDelegate {
     pages: PageLoader<SentPrompt>[] = [];
 
     sentPrompts: SentPrompt[] = [];
-    orderedPromptIds: string[] = [];
-    journalEntriesByPromptId: { [promptId: string]: JournalEntry } = {};
 
+    journalEntriesByPromptId: { [promptId: string]: JournalEntry } = {};
+    todayDataSource: TodayPromptDataSource;
+    todayEntry: JournalEntry | null = null;
     loadingPage: boolean = false;
 
     journalEntries: JournalEntry[] = [];
 
     onlyCompleted: boolean = false;
 
-    constructor(member: CactusMember, options?: { onlyCompleted?: boolean }) {
+    protected constructor(member: CactusMember, options?: { onlyCompleted?: boolean }) {
         this.member = member;
         this.memberId = member.id!;
         this.startDate = new Date();
         const { onlyCompleted = false } = options || {};
         this.onlyCompleted = onlyCompleted;
+        this.todayDataSource = new TodayPromptDataSource({ member, delegate: this });
     }
 
     static setup(member: CactusMember, options?: { onlyCompleted?: boolean, delegate?: JournalFeedDataSourceDelegate }): JournalFeedDataSource {
@@ -81,10 +84,11 @@ class JournalFeedDataSource implements JournalEntryDelegate {
         if (this.running) {
             logger.info("Data source is running, returning current entries");
             this.delegate?.didLoad?.(this.journalEntries.length > 0);
+            this.delegate?.todayEntryUpdated?.(this.todayEntry);
             return;
         }
-
         this.running = true;
+        this.todayDataSource.start().then(() => logger.info("JournalFeed.start - today data source loaded"));
         const futurePage = new PageLoader<SentPrompt>();
         const firstPage = new PageLoader<SentPrompt>();
         this.loadingPage = true;
@@ -135,29 +139,41 @@ class JournalFeedDataSource implements JournalEntryDelegate {
     }
 
     configureData() {
-        const currentPromptIds = this.orderedPromptIds;
-        const currentSentPrompts = this.sentPrompts;
-
-        const updatedSentPrompts: SentPrompt[] = [];
-        const updatedPromptIds: string[] = [];
+        const orderedSentPrompts: SentPrompt[] = [];
         this.pages.forEach(page => {
-            updatedSentPrompts.push(...(page.result?.results || []))
+            orderedSentPrompts.push(...(page.result?.results || []))
         });
 
         const journalEntries: JournalEntry[] = [];
-        updatedSentPrompts.forEach(sentPrompt => {
-            if (sentPrompt.promptId) {
-                updatedPromptIds.push(sentPrompt.promptId);
-
-                const entry = this.journalEntriesByPromptId[sentPrompt.promptId];
-                if (entry) {
-                    journalEntries.push(entry);
-                }
+        let hasTodaySentPrompt = false;
+        orderedSentPrompts.forEach(sentPrompt => {
+            const promptId = sentPrompt.promptId;
+            if (!promptId) {
+                return;
             }
+            if (promptId === this.todayEntry?.promptId) {
+                hasTodaySentPrompt = true;
+            }
+            const entry = this.journalEntriesByPromptId[promptId];
+            if (entry) {
+                journalEntries.push(entry);
+            }
+
         });
 
-        this.sentPrompts = updatedSentPrompts;
-        this.orderedPromptIds = updatedPromptIds;
+        const todayFirstSentAt = this.todayEntry?.sentPrompt?.firstSentAt ?? this.todayEntry?.sentPrompt?.createdAt;
+        const todaySentPromptIndex = journalEntries.findIndex(entry => {
+            const sendDate = entry.sentPrompt?.firstSentAt ?? entry.sentPrompt?.createdAt
+            if (!sendDate || !todayFirstSentAt) {
+                return false;
+            }
+            return sendDate < todayFirstSentAt
+        })
+
+        if (this.todayEntry && !hasTodaySentPrompt) {
+            journalEntries.splice(Math.max(todaySentPromptIndex, 0), 0, this.todayEntry);
+        }
+
         this.journalEntries = journalEntries;
         this.delegate?.updateAll?.(this.journalEntries);
 
@@ -259,7 +275,17 @@ class JournalFeedDataSource implements JournalEntryDelegate {
         if (!promptId) {
             return -1;
         }
-        return this.orderedPromptIds.indexOf(promptId);
+        return this.journalEntries.findIndex(e => e.promptId === promptId);
+    }
+
+    todayEntryUpdated(entry?: JournalEntry | null) {
+        logger.info("Today entry updated", entry);
+        this.todayEntry = entry ?? null;
+        if (entry?.promptId) {
+            this.journalEntriesByPromptId[entry.promptId] = entry;
+        }
+        this.configureData();
+        this.delegate?.todayEntryUpdated?.(entry);
     }
 
 }

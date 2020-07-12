@@ -117,6 +117,16 @@
         async beforeMount() {
             logger.log("Journal Home calling Created function");
 
+
+            // async this.setupTodayObserver();
+            this.dataSource = JournalFeedDataSource.setup(this.member, { onlyCompleted: true, delegate: this });
+            this.dataSource.start()
+        }
+
+        /**
+         * @Deprecated
+         **/
+        async setupTodayObserver() {
             if (this.member?.id) {
                 const tier = this.member?.tier ?? SubscriptionTier.PLUS;
                 const todaysPromptContent = await PromptContentService.sharedInstance.getPromptContentForDate({
@@ -157,9 +167,6 @@
                     this.todayLoaded = true;
                 }
             }
-
-            this.dataSource = JournalFeedDataSource.setup(this.member, { onlyCompleted: true, delegate: this });
-            this.dataSource.start()
         }
 
         /* START OF JOURNAL DATASOURCE DELEGATE */
