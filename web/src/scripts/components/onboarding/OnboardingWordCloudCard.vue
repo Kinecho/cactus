@@ -3,7 +3,9 @@
         <div class="textBox">
             <markdown-text :source="card.text"/>
         </div>
+        <spinner :delay="1500" message="Loading..." v-if="!words"/>
         <word-chart :words="words"
+                v-if="words"
                 :blurry="false"
                 :selectable="true"
                 :chart-config="chartConfig"
@@ -21,9 +23,11 @@
     import WordChart from "@components/InsightWordChart.vue";
     import { WordBubbleConfig } from "@web/charts/wordBubbles";
     import { InsightWord } from "@shared/api/InsightLanguageTypes";
+    import Spinner from "@components/Spinner.vue";
 
     @Component({
         components: {
+            Spinner,
             MarkdownText,
             WordChart,
         }
@@ -45,7 +49,7 @@
         }
 
         get chartConfig(): Partial<WordBubbleConfig> {
-            return {numFillerBubbles: 0}
+            return { numFillerBubbles: 0 }
         }
     }
 </script>

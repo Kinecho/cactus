@@ -183,10 +183,13 @@
         }
 
         get welcomeMessage(): string {
+            if (getQueryParam(QueryParam.FROM) === "onboarding") {
+                return "Welcome to Cactus!"
+            }
             if (this.showEmptyState) {
                 return "Welcome!"
             }
-            const greeting = "Welcome"
+            const greeting = "Welcome back";
             const displayName = this.displayName;
             return `${ greeting }${ displayName ? ', ' + displayName : '' }`
         }

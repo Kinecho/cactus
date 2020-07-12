@@ -50,6 +50,7 @@ export enum QueryParam {
     CLEAR_CACHE = "cc",
     CHECKOUT_SUCCESS_URL = "checkoutSuccessUrl",
     CHECKOUT_CANCEL_URL = "checkoutCancelUrl",
+    FROM = "from"
 }
 
 export function includesLandingQueryParams(params: object | undefined): boolean {
