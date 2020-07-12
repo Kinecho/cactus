@@ -230,14 +230,14 @@
 
     .date {
         font-size: 1.6rem;
-        margin: .8rem 0 .4rem;
+        margin: .8rem 0 1.6rem;
         opacity: .8;
     }
 
     .question {
         font-size: 2.1rem;
         line-height: 1.3;
-        margin-bottom: .8rem;
+        margin-bottom: .4rem;
 
         @include r(600) {
             font-size: 2.4rem;
@@ -250,14 +250,17 @@
         @include r(600) {
             width: 66%;
         }
+        @include r(960) {
+            width: 50%;
+
+            .reflected & {
+                width: 66%;
+            }
+        }
     }
 
     .previewText {
-        margin-bottom: 2.4rem;
-
-        @include r(600) {
-            margin: 1.6rem 0;
-        }
+        margin: 0 0 1.6rem;
     }
 
     .entry {
@@ -311,6 +314,13 @@
         @include r(768) {
             width: 36rem;
         }
+        @include r(960) {
+            left: 50%;
+
+            .reflected & {
+                left: 66%;
+            }
+        }
 
         img {
             display: block;
@@ -343,6 +353,7 @@
         button.secondary {
             align-items: center;
             display: flex;
+            justify-content: center;
 
             &:hover {
                 background-color: $white;
