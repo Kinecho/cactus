@@ -129,24 +129,10 @@
             this.dataSource = JournalFeedDataSource.setup(this.member, { onlyCompleted: true, delegate: this })
             this.dataSource?.start()
             this.fetchGapResults()
-            // this.fetchTodayPrompt()
         }
 
         destroyed() {
             this.todayEntry?.stop();
-        }
-
-        async fetchTodayPrompt() {
-            // this.todayPromptLoading = true;
-            const promptContent = await PromptContentService.sharedInstance.getPromptContentForDate({
-                subscriptionTier: this.member?.tier ?? SubscriptionTier.BASIC,
-                systemDate: new Date(),
-            })
-            if (promptContent?.promptId) {
-                this.todayEntry = new JournalEntry(promptContent.promptId, undefined, this.member);
-                this.todayEntry.start();
-            }
-            // this.todayPromptLoading = false;
         }
 
         get todayPromptLoading(): boolean {

@@ -59,9 +59,6 @@
     import JournalEntry from '@web/datasource/models/JournalEntry'
     import { debounce } from "debounce"
     import Spinner from "@components/Spinner.vue"
-    import PromptContentService from "@web/services/PromptContentService";
-    import SentPromptService from "@web/services/SentPromptService";
-    import SentPrompt from "@shared/models/SentPrompt";
     import UpgradeSubscriptionJournalEntryCard from "@components/UpgradeSubscriptionJournalEntryCard.vue";
     import Logger from "@shared/Logger";
     import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
@@ -116,57 +113,9 @@
 
         async beforeMount() {
             logger.log("Journal Home calling Created function");
-
-
             // async this.setupTodayObserver();
             this.dataSource = JournalFeedDataSource.setup(this.member, { onlyCompleted: true, delegate: this });
             this.dataSource.start()
-        }
-
-        /**
-         * @Deprecated
-         **/
-        async setupTodayObserver() {
-            if (this.member?.id) {
-                const tier = this.member?.tier ?? SubscriptionTier.PLUS;
-                const todaysPromptContent = await PromptContentService.sharedInstance.getPromptContentForDate({
-                    systemDate: new Date(),
-                    subscriptionTier: tier
-                });
-
-                if (todaysPromptContent?.promptId) {
-                    this.todayUnsubscriber = SentPromptService.sharedInstance.observeByPromptId(this.member.id, todaysPromptContent.promptId, {
-                        onData: async (todaySentPrompt: SentPrompt | undefined) => {
-                            let todayEntry = undefined;
-
-                            if (todaySentPrompt?.promptId && !todaySentPrompt.completed) {
-                                todayEntry = new JournalEntry(todaySentPrompt.promptId, todaySentPrompt, this.member);
-                            } else if (!todaySentPrompt && todaysPromptContent?.promptId) {
-                                // they don't have a SentPrompt for today's prompt
-                                // but we show it to them anyway
-                                todayEntry = new JournalEntry(todaysPromptContent.promptId, undefined, this.member);
-                            }
-
-                            if (todayEntry) {
-                                todayEntry.delegate = {
-                                    entryUpdated: entry => {
-                                        if (entry.allLoaded) {
-                                            this.todayLoaded = true;
-                                        }
-                                    }
-                                };
-                                todayEntry.start();
-                                this.todayEntry = todayEntry;
-                            } else {
-                                this.todayEntry = null;
-                            }
-                        }
-                    });
-                } else {
-                    logger.error("Today's prompt could not be found for member");
-                    this.todayLoaded = true;
-                }
-            }
         }
 
         /* START OF JOURNAL DATASOURCE DELEGATE */
