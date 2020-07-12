@@ -267,12 +267,20 @@
     })
 </script>
 <style lang="scss">
-
     .sign-up-component {
         .firebaseui-container {
             box-shadow: none;
             border: none;
             background: transparent;
+
+            &.firebaseui-id-page-email-link-sign-in-confirmation {
+                background: white;
+                .firebaseui-info-bar-message {
+                    .firebaseui-link {
+                        color: unset;
+                    }
+                }
+            }
         }
     }
 

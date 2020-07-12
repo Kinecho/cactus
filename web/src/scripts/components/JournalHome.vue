@@ -6,8 +6,8 @@
                 <div class="page-loading" v-if="!dataHasLoaded">
                     <spinner message="Loading..." :delay="1200"/>
                 </div>
-                <div class="section-container" v-else-if="showOnboardingPrompt" :key="'empty'">
-                    <journal-home-empty-state :focus-element="focusElement" :tier="tier"/>
+                <div class="section-container" v-else-if="showEmptyState" :key="'empty'">
+                    <empty-state :focus-element="focusElement" :tier="tier"/>
                 </div>
 
                 <div class="section-container" v-else-if=" journalEntries.length > 0">
@@ -36,7 +36,6 @@
                                     :data-index="index"
                             ></entry>
                         </transition-group>
-
                     </section>
                     <spinner message="Loading More" v-show="showPageLoading"/>
                 </div>
@@ -67,17 +66,17 @@
     import Logger from "@shared/Logger";
     import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
     import SnackbarContent from "@components/SnackbarContent.vue";
-    import JournalHomeEmptyState from "@components/JournalHomeEmptyState.vue";
     import { CactusElement } from "@shared/models/CactusElement";
     import { Prop } from "vue-property-decorator";
     import Component from "vue-class-component";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
+    import JournalHomeEmptyState from "@components/JournalHomeEmptyState.vue";
 
     const logger = new Logger("JournalHome.vue");
 
     @Component({
         components: {
-            JournalHomeEmptyState,
+            EmptyState: JournalHomeEmptyState,
             entry: JournalEntryCard,
             AutoPromptContentModal,
             SkeletonCard,
@@ -159,11 +158,8 @@
                 }
             }
 
-            const dataSource = JournalFeedDataSource.with(this.member, { onlyCompleted: true });
-            this.dataSource = dataSource;
-
-            dataSource.delegate = this;
-            dataSource.start()
+            this.dataSource = JournalFeedDataSource.setup(this.member, { onlyCompleted: true, delegate: this });
+            this.dataSource.start()
         }
 
         /* START OF JOURNAL DATASOURCE DELEGATE */
@@ -251,10 +247,10 @@
         }
 
         get showUpgradeCard(): boolean {
-            return !this.plusUser && !this.showCoreValuesBanner && !this.showOnboardingPrompt && this.dataHasLoaded;
+            return !this.plusUser && !this.showCoreValuesBanner && !this.showEmptyState && this.dataHasLoaded;
         }
 
-        get showOnboardingPrompt(): boolean {
+        get showEmptyState(): boolean {
             return this.dataHasLoaded && this.journalEntries.length === 0
         }
 

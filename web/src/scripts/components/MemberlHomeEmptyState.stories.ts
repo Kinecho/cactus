@@ -1,11 +1,11 @@
 import Vue from "vue";
-import JournalHomeEmptyState from "@components/JournalHomeEmptyState.vue";
+import MemberHomeEmptyState from "@components/MemberHomeEmptyState.vue";
 import { boolean, select } from "@storybook/addon-knobs";
 import { CactusElement } from "@shared/models/CactusElement";
 import AppSettingsService from "@web/services/AppSettingsService";
 
 export default {
-    title: "Empty States/Journal Home"
+    title: "Empty States/Member Home"
 }
 
 export const WithFocusElement = () => Vue.extend({
@@ -14,7 +14,7 @@ export const WithFocusElement = () => Vue.extend({
             <empty-state :focus-element="focusElement" :tier="tier"/>
         </div>`,
     components: {
-        EmptyState: JournalHomeEmptyState,
+        EmptyState: MemberHomeEmptyState,
     },
     props: {
         tier: {
@@ -51,7 +51,7 @@ export const NoFocusElement = () => Vue.extend({
             <empty-state :tier="tier"/>
         </div>`,
     components: {
-        EmptyState: JournalHomeEmptyState,
+        EmptyState: MemberHomeEmptyState,
     },
     props: {
         tier: {

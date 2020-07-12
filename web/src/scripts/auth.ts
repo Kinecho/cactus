@@ -87,23 +87,23 @@ export async function sendMagicLink(options: MagicLinkRequest): Promise<MagicLin
     }
 }
 
-export async function sendEmailLinkSignIn(subscription: SignupRequest): Promise<EmailLinkSignupResult> {
-    const email = subscription.email;
+export async function sendEmailLinkSignIn(params: SignupRequest): Promise<EmailLinkSignupResult> {
+    const email = params.email;
     const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
-    let emailLinkRedirectUrl: string = PageRoute.SIGNUP_CONFIRMED;
+    let completeSignInPath = PageRoute.LOGIN;
     if (redirectUrlParam) {
-        emailLinkRedirectUrl = `${ emailLinkRedirectUrl }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(redirectUrlParam) }`
+        completeSignInPath = `${ completeSignInPath }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(redirectUrlParam) }`
     }
 
     const landingParams = StorageService.getJSON(LocalStorageKey.landingQueryParams);
     const sourceApp = isAndroidApp() ? SourceApp.android : SourceApp.web;
 
-    logger.log("Setting redirect url for email link signup to be ", emailLinkRedirectUrl);
+    logger.log("Setting redirect url for email link signup to be ", completeSignInPath);
 
     const statusResponse = await sendMagicLink({
         email: email,
-        referredBy: subscription.referredByEmail,
-        continuePath: emailLinkRedirectUrl,
+        referredBy: params.referredByEmail,
+        continuePath: completeSignInPath,
         queryParams: landingParams,
         sourceApp: sourceApp
     });

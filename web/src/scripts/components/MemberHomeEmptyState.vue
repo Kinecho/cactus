@@ -1,20 +1,18 @@
 <template>
     <section class="empty journalHome">
-
-        <p>
-            {{introText}}
+        <p v-if="!focusElement || !isPlusMember">
+            To get started, you'll learn about how Cactus works and reflect on your first question of
+            the&nbsp;day.
         </p>
 
-        <!--        <template v-if="focusElement && isPlusMember">-->
-        <!--            <p>-->
-        <!--                To get started, you'll learn about how Cactus works and reflect on your first question-->
-        <!--                about&nbsp;<strong>{{focusElement}}</strong>.-->
-        <!--            </p>-->
-        <!--        </template>-->
-        <img class="graphic"
-                src="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200319.png?alt=media&token=9142500c-eb79-4691-8062-9017abd37ff3"
-                alt="Journal Image"/>
-        <router-link class="button primary" tag="button" :to="onboardingPath">Get started</router-link>
+        <template v-if="focusElement && isPlusMember">
+            <p>
+                To get started, you'll learn about how Cactus works and reflect on your first question
+                about&nbsp;<strong>{{focusElement}}</strong>.
+            </p>
+        </template>
+        <img class="graphic" src="/assets/images/emptyState.png" alt="Three friends welcoming you"/>
+        <router-link class="button primary" tag="button" :to="onboardingPath">Let's begin</router-link>
     </section>
 </template>
 
@@ -30,7 +28,6 @@
     import ResultElement from "@components/gapanalysis/ResultElement.vue";
     import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
-    import { preventOrphanedWords } from "@shared/util/StringUtil";
 
     const logger = new Logger("MemberHomeEmptyState.vue");
 
@@ -39,8 +36,8 @@
             ResultElement,
         }
     })
-    export default class JournalHomeEmptyState extends Vue {
-        name = "JournalHomeEmptyState.vue";
+    export default class MemberHomeEmptyState extends Vue {
+        name = "MemberHomeEmptyState.vue";
 
         @Prop({ type: String as () => CactusElement, default: null, required: false })
         focusElement!: CactusElement | null;
@@ -54,10 +51,6 @@
 
         get onboardingPath(): PageRoute {
             return PageRoute.HELLO_ONBOARDING;
-        }
-
-        get introText() {
-            return preventOrphanedWords("Once you complete your first question, your journal entries will show up here.");
         }
 
         get firstPromptPath(): string {

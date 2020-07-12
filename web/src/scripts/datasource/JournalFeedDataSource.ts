@@ -54,23 +54,33 @@ class JournalFeedDataSource implements JournalEntryDelegate {
         this.onlyCompleted = onlyCompleted;
     }
 
-    static with(member: CactusMember, options?: { onlyCompleted?: boolean }): JournalFeedDataSource {
+    static setup(member: CactusMember, options?: { onlyCompleted?: boolean, delegate?: JournalFeedDataSourceDelegate }): JournalFeedDataSource {
+        const { delegate, onlyCompleted } = options ?? {};
+        logger.info("Setting up data source", { memberId: member.id, onlyCompleted, delegate: !!delegate });
+        let source: JournalFeedDataSource;
         const current = JournalFeedDataSource.current;
-        if (current && (current.member?.id === member.id || current.memberId === member.id) && current.onlyCompleted === options?.onlyCompleted) {
-            return current;
+        if (current && (current.member?.id === member.id || current.memberId === member.id) && current.onlyCompleted === onlyCompleted) {
+            logger.debug("using current data source = true")
+            source = current;
+        } else {
+            logger.debug("using current data source = false")
+            source = new JournalFeedDataSource(member, options);
         }
 
-        const source = new JournalFeedDataSource(member, options);
+        if (delegate) {
+            source.delegate = delegate
+        }
         JournalFeedDataSource.current = source;
-        // source.start();
+        source.start();
         return source;
     }
 
 
     start() {
+        logger.debug("Starting data source. Has has delegate = ", !!this.delegate);
         if (this.running) {
             logger.info("Data source is running, returning current entries");
-            this.delegate?.didLoad?.(true);
+            this.delegate?.didLoad?.(this.journalEntries.length > 0);
             return;
         }
 
@@ -105,6 +115,7 @@ class JournalFeedDataSource implements JournalEntryDelegate {
                 this.handlePageResult(page);
                 this.hasLoaded = true;
                 this.loadingPage = false;
+                logger.info(this.delegate ? "sending results to delegate" : "No delegate present");
                 this.delegate?.didLoad?.(page.results.length > 0);
             }
         });

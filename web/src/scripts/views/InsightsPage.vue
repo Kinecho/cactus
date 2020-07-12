@@ -1,9 +1,14 @@
 <template>
     <div class="insightsDash">
         <div class="centered">
-            <h1>Welcome back{{displayName ? ', ' + displayName : ''}}</h1>
-
-            <div class="insightsGrid">
+            <h1 v-if="!loading">{{welcomeMessage}}</h1>
+            <div v-if="loading">
+                <spinner :delay="1500" message="Loading..."/>
+            </div>
+            <div v-else-if="showEmptyState">
+                <EmptyState :tier="member.tier"/>
+            </div>
+            <div v-else class="insightsGrid">
                 <reflection-stats-widget :reflection-stats="reflectionStats" v-if="reflectionStats"/>
                 <prompt-widget :entry="todayEntry" :member="member" :loading="todayPromptLoading"/>
                 <section class="bubblesContainer" v-if="hasWordCloud">
@@ -58,7 +63,6 @@
     import Footer from "@components/StandardFooter.vue";
     import WordCloud from "@components/MemberWordCloudInsights.vue";
     import CactusMember, { ReflectionStats } from "@shared/models/CactusMember";
-    import { ListenerUnsubscriber } from "@web/services/FirestoreService";
     import CactusMemberService from "@web/services/CactusMemberService";
     import { CoreValueMeta, CoreValuesService } from "@shared/models/CoreValueTypes";
     import { PageRoute } from "@shared/PageRoutes";
@@ -70,7 +74,6 @@
     import { getQueryParam } from "@web/util";
     import Logger from "@shared/Logger"
     import { isPremiumTier } from "@shared/models/MemberSubscription";
-    import { pushRoute } from "@web/NavigationUtil";
     import Results from "@components/gapanalysis/Results.vue";
     import ResultElement from "@components/gapanalysis/ResultElement.vue";
     import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
@@ -87,12 +90,15 @@
     import JournalEntry from "@web/datasource/models/JournalEntry";
     import SvgIcon from "@components/SvgIcon.vue";
     import { Prop } from "vue-property-decorator";
+    import JournalFeedDataSource, { JournalFeedDataSourceDelegate } from "@web/datasource/JournalFeedDataSource";
+    import MemberHomeEmptyState from "@components/MemberHomeEmptyState.vue";
 
     const logger = new Logger("InsightsPage");
     const copy = CopyService.getSharedInstance().copy;
 
     @Component({
         components: {
+            EmptyState: MemberHomeEmptyState,
             PromptWidget,
             ReflectionStatsWidget,
             GapAnalysisWidget,
@@ -105,7 +111,7 @@
             SvgIcon,
         }
     })
-    export default class InsightsPage extends Vue {
+    export default class InsightsPage extends Vue implements JournalFeedDataSourceDelegate {
 
         @Prop({ type: Object as () => CactusMember, required: true })
         member!: CactusMember;
@@ -118,7 +124,12 @@
         todayPromptLoading = false;
         todayEntry: JournalEntry | null = null;
 
+        dataSource?: JournalFeedDataSource
+        journalLoaded: boolean = false;
+
         beforeMount() {
+            this.dataSource = JournalFeedDataSource.setup(this.member, { onlyCompleted: true, delegate: this })
+            this.dataSource?.start()
             this.fetchGapResults()
             this.fetchTodayPrompt()
         }
@@ -169,6 +180,19 @@
         cancelSetFocus() {
             this.selectFocusEnabled = false;
             this.currentElementSelection = null;
+        }
+
+        get welcomeMessage(): string {
+            if (this.showEmptyState) {
+                return "Welcome!"
+            }
+            const greeting = "Welcome"
+            const displayName = this.displayName;
+            return `${ greeting }${ displayName ? ', ' + displayName : '' }`
+        }
+
+        get loading(): boolean {
+            return !this.journalLoaded
         }
 
         get displayName(): string | undefined {
@@ -227,6 +251,18 @@
         get focusElement(): CactusElement | null {
             return this.member.focusElement ?? null;
         }
+
+        /* START: JOURNAL FEED DATA SOURCE DELEGATE */
+        didLoad(hasData: boolean): void {
+            this.journalLoaded = true;
+        }
+
+        /* END: JOURNAL FEED DATA SOURCE DELEGATE */
+
+        get showEmptyState(): boolean {
+            return this.dataSource?.journalEntries.length === 0
+        }
+
     }
 </script>
 
