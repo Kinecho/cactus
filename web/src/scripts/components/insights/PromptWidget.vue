@@ -51,12 +51,10 @@
         <modal :show="shareModalOpen"
                 v-on:close="shareModalOpen = false"
                 :showCloseButton="true"
-                v-if="shareModalOpen && entry && hasNote">
+                v-if="shareNoteCard">
             <div class="sharing-card note" slot="body">
-                <legacy-prompt-content-card
-                        :prompt-content="entry.promptContent"
-                        :content="entry.promptContent"
-                        :response="entry.responses[0]"/>
+                <share-note-card
+                        :card="shareNoteCard"/>
             </div>
         </modal>
     </div>
@@ -79,12 +77,17 @@
     import EditReflection from "@components/ReflectionResponseTextEdit.vue"
     import { ResponseMedium } from "@shared/models/ReflectionResponse"
     import { DropdownMenuLink } from "@components/DropdownMenuTypes";
+    import Modal from "@components/Modal.vue";
+    import ShareNoteCard from "@components/promptcontent/ShareNoteCard.vue";
+    import PromptContentCardViewModel from "@components/promptcontent/PromptContentCardViewModel";
 
     const copy = CopyService.getSharedInstance().copy;
 
     @Component({
         components: {
+            ShareNoteCard,
             Spinner,
+            Modal,
             MarkdownText,
             EditReflection,
             DropdownMenu,
@@ -125,6 +128,20 @@
 
         get hasNote(): boolean {
             return !isBlank(getResponseText(this.entry?.responses));
+        }
+
+        get shareNoteCard(): PromptContentCardViewModel | null {
+            if (this.entry?.promptContent && this.entry?.prompt && this.hasNote) {
+                return PromptContentCardViewModel.createShareNote({
+                    member: this.member,
+                    responses: this.entry?.responses ?? [],
+                    promptContent: this.entry?.promptContent,
+                    prompt: this.entry?.prompt,
+                })
+            } else {
+                return null
+            }
+
         }
 
         get linkItems(): DropdownMenuLink[] {

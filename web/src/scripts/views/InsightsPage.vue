@@ -85,8 +85,6 @@
     import { logFocusElementSelected } from "@web/analytics";
     import { InsightWord } from "@shared/api/InsightLanguageTypes";
     import PromptWidget from "@components/insights/PromptWidget.vue";
-    import PromptContentService from "@web/services/PromptContentService";
-    import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
     import JournalEntry from "@web/datasource/models/JournalEntry";
     import SvgIcon from "@components/SvgIcon.vue";
     import { Prop } from "vue-property-decorator";
@@ -248,7 +246,7 @@
             this.journalLoaded = true;
         }
 
-        todayEntryUpdated(entry?: JournalEntry|null) {
+        todayEntryUpdated(entry?: JournalEntry | null) {
             logger.info("Insights today entry loaded");
             this.todayEntry = entry ?? null;
             this.todayLoaded = true;

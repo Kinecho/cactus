@@ -140,6 +140,19 @@ export default class PromptContentCardViewModel {
         return new PromptContentCardViewModel({ prompt, promptContent, responses, content, member });
     }
 
+    static createShareNote(params: {
+        prompt: ReflectionPrompt,
+        promptContent: PromptContent,
+        responses: ReflectionResponse[] | null,
+        member: CactusMember
+    }): PromptContentCardViewModel {
+        const { prompt, promptContent, responses, member } = params;
+        const content: Content = {
+            contentType: ContentType.share_reflection,
+        }
+        return new PromptContentCardViewModel({ prompt, promptContent, responses, content, member });
+    }
+
     static createAll(params: {
         prompt: ReflectionPrompt,
         promptContent: PromptContent,
