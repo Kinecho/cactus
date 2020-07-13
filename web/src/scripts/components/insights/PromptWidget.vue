@@ -2,11 +2,11 @@
     <div class="today-widget" :class="{reflected: hasReflected}">
         <img class="blob" src="/assets/images/transparentBlob1.svg"/>
         <img class="blob" src="/assets/images/transparentBlob2.svg"/>
-        <p class="date">Today</p>
         <transition name="component-fade" appear>
             <spinner v-if="loading || (entry && !allLoaded)" :delay="1500"/>
             <!-- Using a div here so that the fade transition works -->
             <div v-else-if="entry">
+                <p class="date">Today</p>
                 <h2 class="question">
                     <markdown-text :source="questionText"/>
                 </h2>
@@ -38,8 +38,12 @@
                     </button>
                 </div>
             </div>
-            <div v-else-if="noPromptFound">
-                <h1>No prompt found for today</h1>
+            <div v-else-if="noPromptFound" class="noPrompt">
+                <h2 class="question">Uh oh</h2>
+                <p class="previewText">There seems to be an issue finding today's prompt. Please check back a little later.</p>
+                <div class="backgroundImage">
+                    <img src="/assets/images/error.png" alt="Cactus Error Image"/>
+                </div>
             </div>
         </transition>
         <dropdown-menu :items="linkItems" class="dotsBtn" v-if="!noPromptFound"/>
@@ -407,5 +411,17 @@
     form {
         position: relative;
         z-index: 1;
+    }
+
+    .noPrompt {
+        padding: 1.6rem .8rem 0;
+
+        .previewText {
+            font-size: 2rem;
+        }
+
+        .backgroundImage {
+            transform: scaleX(-1);
+        }
     }
 </style>
