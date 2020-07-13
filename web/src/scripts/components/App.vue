@@ -31,6 +31,8 @@
     import StorageService, { LocalStorageKey } from "@web/services/StorageService";
     import { fireOptInStartTrialEvent } from "@web/analytics";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
+    import AppSettings from "@shared/models/AppSettings";
+    import { FirebaseUser } from "@web/firebase";
 
     const logger = new Logger("App");
 
@@ -42,10 +44,13 @@
     })
     export default class App extends Vue {
         name = "App"
-        settingsLoaded = false;
+        settings: AppSettings | null = null;
+        settingsUnsubscriber!: ListenerUnsubscriber;
         authLoaded = false;
+        settingsLoaded = false;
         member: CactusMember | null = null;
-        memberListener!: ListenerUnsubscriber
+        user: FirebaseUser|null = null;
+        memberListener!: ListenerUnsubscriber;
         showUnauthorizedRoute = false;
         hasUpgradeSuccessParam = false;
 
@@ -78,21 +83,36 @@
         }
 
         async beforeMount() {
-            await Promise.all([AppSettingsService.sharedInstance.getCurrentSettings()]);
-            this.settingsLoaded = true;
+            this.settingsUnsubscriber = AppSettingsService.sharedInstance.observeAppSettings({
+                onData: (settings) => {
+                    this.settings = settings ?? null;
+                    this.settingsLoaded = true;
+                }
+            });
+
             this.memberListener = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({ member }) => {
+                onData: ({ member, user }) => {
                     this.member = member ?? null;
+                    this.user = user ?? null;
                     this.authLoaded = true;
                 }
             })
         }
 
-        get props(): any {
+        get props(): Record<string, any> {
+            const props: Record<string, any> = {}
             if (this.$route.meta.passMember) {
-
+                props.member = this.member;
             }
-            return { member: this.member }
+            if (this.$route.meta.passUser){
+                props.user = this.user;
+            }
+
+            if (this.$route.meta.passSettings) {
+                props.settings = this.settings
+            }
+
+            return props
         }
 
         get showNav(): boolean {

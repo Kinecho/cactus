@@ -92,9 +92,9 @@
         getDigitalWalletDetails
     } from "@shared/util/SubscriptionProductUtil";
     import Spinner from "@components/Spinner.vue";
-    import { SnackbarMessage } from "@components/SnackbarContent.vue";
     import { appendQueryParams, isBlank } from "@shared/util/StringUtil";
     import Logger from "@shared/Logger"
+    import { SnackbarMessage } from "@components/SnackbarContentTypes";
 
     const logger = new Logger("ManageActiveSubscription");
     const copy = CopyService.getSharedInstance().copy;
