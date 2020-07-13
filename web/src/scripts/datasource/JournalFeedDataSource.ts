@@ -80,7 +80,7 @@ class JournalFeedDataSource implements JournalEntryDelegate, TodayPromptDataSour
 
     async start() {
         logger.debug("Starting data source. Has has delegate = ", !!this.delegate);
-        if (this.running) {
+        if (this.running && this.hasLoaded) {
             logger.info("Data source is running, returning current entries");
             this.delegate?.didLoad?.(this.journalEntries.length > 0);
             this.delegate?.todayEntryUpdated?.(this.todayEntry);

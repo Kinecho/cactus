@@ -122,6 +122,7 @@
         todayLoaded = false;
         dataSource?: JournalFeedDataSource
         journalLoaded: boolean = false;
+        showEmptyState: boolean = false;
 
         async beforeMount() {
             this.dataSource = JournalFeedDataSource.setup(this.member, { onlyCompleted: true, delegate: this })
@@ -243,7 +244,10 @@
 
         /* START: JOURNAL FEED DATA SOURCE DELEGATE */
         didLoad(hasData: boolean): void {
+            logger.info("Insights page data source did load");
             this.journalLoaded = true;
+            this.todayEntry = this.dataSource?.todayEntry
+            this.showEmptyState = !hasData;
         }
 
         todayEntryUpdated(entry?: JournalEntry | null) {
@@ -253,11 +257,6 @@
         }
 
         /* END: JOURNAL FEED DATA SOURCE DELEGATE */
-
-        get showEmptyState(): boolean {
-            return this.dataSource?.journalEntries.length === 0
-        }
-
     }
 </script>
 
