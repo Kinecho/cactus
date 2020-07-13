@@ -1,4 +1,3 @@
-import Timeout = NodeJS.Timeout;
 import Logger from "@shared/Logger"
 import JournalEntry from "@web/datasource/models/JournalEntry";
 import CactusMember from "@shared/models/CactusMember";
