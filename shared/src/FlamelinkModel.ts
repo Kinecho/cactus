@@ -29,12 +29,11 @@ export interface FlamelinkMeta {
 
 }
 
-export interface FlamelinkData {
+export interface FlamelinkData extends Record<string, any> {
     _fl_meta_?: FlamelinkMeta
     id?: string;
     parentId?: string | number;
-    order?: number,
-    // [key: string]: any
+    order?: number;
 }
 
 export interface FlamelinkIdentifiable extends FlamelinkData {
