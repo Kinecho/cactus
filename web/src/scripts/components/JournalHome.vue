@@ -115,7 +115,7 @@
             logger.log("Journal Home calling Created function");
             // async this.setupTodayObserver();
             this.dataSource = JournalFeedDataSource.setup(this.member, { onlyCompleted: true, delegate: this });
-            this.dataSource.start()
+            await this.dataSource.start()
         }
 
         /* START OF JOURNAL DATASOURCE DELEGATE */

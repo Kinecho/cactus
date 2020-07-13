@@ -74,12 +74,11 @@ class JournalFeedDataSource implements JournalEntryDelegate, TodayPromptDataSour
             source.delegate = delegate
         }
         JournalFeedDataSource.current = source;
-        source.start();
         return source;
     }
 
 
-    start() {
+    async start() {
         logger.debug("Starting data source. Has has delegate = ", !!this.delegate);
         if (this.running) {
             logger.info("Data source is running, returning current entries");
@@ -88,7 +87,7 @@ class JournalFeedDataSource implements JournalEntryDelegate, TodayPromptDataSour
             return;
         }
         this.running = true;
-        this.todayDataSource.start().then(() => logger.info("JournalFeed.start - today data source loaded"));
+        await this.todayDataSource.start()
         const futurePage = new PageLoader<SentPrompt>();
         const firstPage = new PageLoader<SentPrompt>();
         this.loadingPage = true;

@@ -123,10 +123,10 @@
         dataSource?: JournalFeedDataSource
         journalLoaded: boolean = false;
 
-        beforeMount() {
+        async beforeMount() {
             this.dataSource = JournalFeedDataSource.setup(this.member, { onlyCompleted: true, delegate: this })
-            this.dataSource?.start()
-            this.fetchGapResults()
+            await this.dataSource?.start()
+            await this.fetchGapResults()
         }
 
         destroyed() {
