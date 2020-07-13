@@ -15,13 +15,7 @@
 
 <script lang="ts">
     import Vue from "vue";
-
-    const DEFAULT_DURATION_MS = 5000;
-
-    export type SnackbarColor = 'success' | 'successAlt' | 'dolphin' | 'warning' | 'danger' | "info" | "default";
-    export type SnackbarMessage =
-        | string
-        | { message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean, color?: SnackbarColor }
+    import { DEFAULT_DURATION_MS } from "@components/SnackbarContentTypes";
 
     export default Vue.extend({
         created() {

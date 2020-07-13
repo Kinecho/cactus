@@ -327,6 +327,10 @@ const routes: MetaRouteConfig[] = [
         path: PageRoute.ACCOUNT,
         name: "Account Settings",
         meta: {
+            passMember: true,
+            authRequired: true,
+            passSettings: true,
+            passUser: true,
             navBar: { isSticky: false },
         }
     },
