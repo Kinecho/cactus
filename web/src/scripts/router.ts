@@ -358,6 +358,13 @@ const routes: MetaRouteConfig[] = [
     },
     {
         component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
+        "@web/views/PromotionLandingView.vue")),
+        name: "Promotions",
+        props: true,
+        path: `${ PageRoute.PROMOS_ROOT }/:slug`,
+    },
+    {
+        component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
         "@web/views/OnboardingPage.vue")),
         name: "Onboarding",
         path: PageRoute.HELLO_ONBOARDING,

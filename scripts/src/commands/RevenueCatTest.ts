@@ -112,7 +112,7 @@ export default class RevenueCatTest extends FirebaseCommand {
     async fetchCactusProducts() {
         const products = await AdminSubscriptionProductService.getSharedInstance().getAll();
         products.forEach(p => {
-            this.productsById[p.entryId!] = p;
+            this.productsById[p.entryId] = p;
         });
         return this.productsById;
     }

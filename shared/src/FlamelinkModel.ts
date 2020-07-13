@@ -9,6 +9,7 @@ export enum SchemaName {
     subscriptionProducts = "subscriptionProducts",
     subscriptionProductGroups = "subscriptionProductGroups",
     appSettings = "appSettings_web",
+    promotionalOffer = "promotionalOffer",
     // coreValuesAssessment = "coreValuesAssessment",
 }
 
@@ -32,11 +33,11 @@ export interface FlamelinkData extends Record<string, any> {
     _fl_meta_?: FlamelinkMeta
     id?: string;
     parentId?: string | number;
-    order?: number,
+    order?: number;
 }
 
 export interface FlamelinkIdentifiable extends FlamelinkData {
-    schema: SchemaName,
+    readonly schema: SchemaName,
     _fl_meta_?: FlamelinkMeta
 }
 
@@ -46,7 +47,7 @@ export default abstract class FlamelinkModel implements FlamelinkIdentifiable {
     parentId?: string | number;
     order?: number;
     documentId?: string;
-    entryId?: string;
+    entryId!: string;
     _fl_meta_?: FlamelinkMeta;
 
     protected constructor(data?: FlamelinkData) {
@@ -61,7 +62,11 @@ export default abstract class FlamelinkModel implements FlamelinkIdentifiable {
         this.parentId = data.parentId;
         this.order = data.order;
 
-        this.entryId = this._fl_meta_ ? this._fl_meta_.fl_id : undefined;
+        const entryId = this._fl_meta_?.fl_id
+        if (entryId) {
+            this.entryId = entryId;
+        }
+        // this.entryId = this._fl_meta_ ? this._fl_meta_.fl_id : undefined;
         //this seems to happen when updating after saving the object via Flamelink SDK
         if (data["_fl_meta_.fl_id"] && !this.entryId) {
             this.entryId = data["_fl_meta_.fl_id"]
@@ -116,5 +121,4 @@ export default abstract class FlamelinkModel implements FlamelinkIdentifiable {
             return { message: "Error processing this model toJSON", error };
         }
     }
-
 }

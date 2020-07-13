@@ -236,7 +236,7 @@
                     return;
                 }
                 const result = await startCheckout({
-                    subscriptionProductId: this.product.entryId!,
+                    subscriptionProductId: this.product.entryId,
                     subscriptionProduct: this.product,
                     member: this.member,
                     stripeSuccessUrl: successPath,

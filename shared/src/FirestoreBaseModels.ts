@@ -1,4 +1,4 @@
-import { convertDateToJSON, convertDateToTimestamp } from "@shared/util/FirestoreUtil";
+import { convertDateToJSON, convertDateToTimestamp, isTimestamp, TimestampInterface } from "@shared/util/FirestoreUtil";
 import Logger from "@shared/Logger";
 import { toPlainObject } from "@shared/util/ObjectUtil";
 
@@ -53,7 +53,7 @@ export abstract class BaseModel implements FirestoreIdentifiable {
     deletedAt?: Date;
 
     prepareForFirestore(): any {
-        return this;
+        return { ...this };
     }
 
     prepareFromFirestore(data: any): any {
@@ -66,7 +66,7 @@ export abstract class BaseModel implements FirestoreIdentifiable {
             throw new Error("Unable to prepare for firestore");
         }
         let data = convertDateToTimestamp(prepared);
-        // logger.log("data after converting to dates", data);
+        logger.debug("data after converting to dates", data);
 
         if (removeKeys && data) {
             removeKeys.forEach(key => {
@@ -115,9 +115,12 @@ export abstract class BaseModel implements FirestoreIdentifiable {
         this.deletedAt = this.decodeDate(json.deletedAt);
     }
 
-    decodeDate(input?: number | null | undefined | string | Date): Date | undefined {
+    decodeDate(input?: number | null | undefined | string | Date | TimestampInterface): Date | undefined {
         if (!input) {
             return undefined;
+        }
+        if (isTimestamp(input)) {
+            return input.toDate()
         }
 
         try {

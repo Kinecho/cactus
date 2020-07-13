@@ -2,6 +2,13 @@ import CactusMember from "@shared/models/CactusMember";
 import { CoreValue } from "@shared/models/CoreValueTypes";
 import { BillingPlatform, CancellationReasonCode } from "@shared/models/MemberSubscription";
 import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
+import { OfferDetails } from "@shared/models/PromotionalOffer";
+import Logger from "@shared/Logger"
+import { fromFirestoreData, TimestampInterface } from "@shared/util/FirestoreUtil";
+import * as firebase from "firebase";
+import Timestamp = firebase.firestore.Timestamp;
+
+const logger = new Logger("CactusMember.test");
 
 describe("core values getters", () => {
     test("get core value - with values", () => {
@@ -133,5 +140,40 @@ describe("encode/decode JSON", () => {
         expect(model.lastJournalEntryAt).toEqual(date);
         expect(model.adminEmailUnsubscribedAt).toEqual(date);
         expect(model.id).toEqual("one");
+    })
+})
+
+describe("current offer encoding/decoding", () => {
+
+    test("encode currentOffer to firestore data ", () => {
+        const currentOffer = new OfferDetails({ entryId: "e123", appliedAt: new Date(1594353524418) })
+        const member = new CactusMember();
+        member.id = "123";
+        member.currentOffer = currentOffer;
+        const data = member.toFirestoreData();
+        logger.info("data", data);
+        expect(data.currentOffer.appliedAt).toBeDefined();
+        expect((data.currentOffer.appliedAt as TimestampInterface).seconds).toBeDefined()
+        expect((data.currentOffer.appliedAt as TimestampInterface).nanoseconds).toBeDefined()
+
+        expect(data.currentOffer).not.toBeInstanceOf(OfferDetails);
+    })
+
+    test("decode currentOffer to firestore data ", () => {
+        const memberData: any = {
+            id: "123",
+            currentOffer: {
+                appliedAt: Timestamp.fromMillis(1594353524418),
+                entryId: "e123",
+            }
+        }
+
+        const member = fromFirestoreData(memberData, CactusMember);
+        expect(member.id).toEqual("123");
+        expect(member.currentOffer).toBeDefined();
+        expect(member.currentOffer!.entryId).toEqual("e123")
+        expect(member.currentOffer!.appliedAt!.getTime()).toEqual(1594353524418);
+        expect(member.currentOffer).toBeInstanceOf(OfferDetails);
+
     })
 })

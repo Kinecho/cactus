@@ -22,7 +22,7 @@ export interface TimestampInterface {
     isEqual(other: TimestampInterface): boolean;
 }
 
-export function isTimestamp(value: any): boolean {
+export function isTimestamp(value: any): value is TimestampInterface {
     return isNotNull(value) && (value instanceof TimestampClass || (value.seconds && value.nanoseconds))
 }
 

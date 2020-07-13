@@ -15,6 +15,8 @@ import { DEFAULT_SUBSCRIPTION_TIER, SubscriptionTier } from "@shared/models/Subs
 import { CoreValue } from "@shared/models/CoreValueTypes";
 import { CactusElement } from "@shared/models/CactusElement";
 import { InsightWord } from "@shared/api/InsightLanguageTypes";
+import { OfferDetails } from "@shared/models/PromotionalOffer";
+import { isNull } from "@shared/util/ObjectUtil";
 
 export enum JournalStatus {
     PREMIUM = "PREMIUM",
@@ -84,6 +86,7 @@ export enum Field {
     coreValues = "coreValues",
     focusElement = "focusElement",
     lastReplyAt = "lastReplyAt",
+    currentOffer = "currentOffer",
 }
 
 export interface PromptSendTime {
@@ -153,10 +156,8 @@ export default class CactusMember extends BaseModel {
     coreValues?: CoreValue[];
 
     focusElement?: CactusElement | null;
+    currentOffer?: OfferDetails | null;
 
-    toMemberData(): any {
-        return this.toJSON()
-    }
 
     decodeJSON(json: any) {
         super.decodeJSON(json);
@@ -190,6 +191,8 @@ export default class CactusMember extends BaseModel {
         this.lastReplyAt = this.decodeDate(this.lastReplyAt);
         this.lastJournalEntryAt = this.decodeDate(this.lastJournalEntryAt);
         this.adminEmailUnsubscribedAt = this.decodeDate(this.adminEmailUnsubscribedAt);
+
+        this.currentOffer = OfferDetails.fromJSON(this.currentOffer);
     }
 
     static fromMemberData(data: any): CactusMember {
@@ -198,11 +201,16 @@ export default class CactusMember extends BaseModel {
         return model;
     }
 
+    prepareFromFirestore(data: any): any {
+        this.decodeJSON(data);
+    }
+
     prepareForFirestore(): any {
-        super.prepareForFirestore();
-        this.email = this.email ? this.email.toLowerCase().trim() : this.email;
-        this.referredByEmail = this.getReferredBy();
-        return this;
+        const data = super.prepareForFirestore();
+        data.email = this.email ? this.email.toLowerCase().trim() : this.email;
+        data.referredByEmail = this.getReferredBy();
+        data.currentOffer = Object.assign({}, data.currentOffer);
+        return data
     }
 
     getSignupSource(): string | undefined {
@@ -272,6 +280,10 @@ export default class CactusMember extends BaseModel {
 
     get tier(): SubscriptionTier {
         return this.subscription?.tier ?? DEFAULT_SUBSCRIPTION_TIER
+    }
+
+    get hasTrialed(): boolean {
+        return !isNull(this.subscription?.optOutTrial?.startedAt);
     }
 
     get tierDisplayName(): string | undefined {

@@ -10,7 +10,7 @@ executors:
   cactus-web:
     working_directory: ~/project
     docker:
-      - image: circleci/node:10.18.1-browsers
+      - image: cimg/node:10.18.1
 aliases:
   ## Module Names
   - &root-module ""
@@ -262,9 +262,11 @@ jobs:
     steps:
       - checkout
       - restore-module:
-          module: web
+          module: *root-module
       - restore-module:
-          module: shared
+          module: *web-module
+      - restore-module:
+          module: *shared-module
       - run:
           name: "TSLint"
           command: npm --prefix web run lint:ci
@@ -283,6 +285,8 @@ jobs:
     resource_class: small
     steps:
       - checkout
+      - restore-module:
+          module: *root-module
       - restore-module:
           module: *functions-module
       - restore-module:
@@ -312,6 +316,8 @@ jobs:
     steps:
       - checkout
       - restore-module:
+          module: *root-module
+      - restore-module:
           module: shared
       - run:
           name: "TSLint"
@@ -332,9 +338,11 @@ jobs:
     steps:
       - checkout
       - restore-module:
-          module: shared
+          module: *root-module
       - restore-module:
-          module: scripts
+          module: *shared-module
+      - restore-module:
+          module: *scripts-module
       - restore-module:
           module: *admin-module
       - run:

@@ -715,7 +715,7 @@ export default class PromptNotificationManager {
             email: member.email,
             firstName: member.firstName,
             memberId: member.id,
-            promptContentEntryId: promptContent.entryId!,
+            promptContentEntryId: promptContent.entryId,
             reflectUrl: promptUrl,
             mainText: introText,
             isPlus: isPremiumTier(member.tier),

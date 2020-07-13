@@ -31,6 +31,7 @@ import { PageRoute } from "@shared/PageRoutes";
 import StripeService from "@admin/services/StripeService";
 import { isWebhookPayload } from "@shared/api/RevenueCatApi";
 import { publishWebhookEvent as submitRevenueCatEvent } from "@api/pubsub/subscribers/RevenueCatPubSub";
+import { OfferDetails } from "@shared/models/PromotionalOffer";
 
 const bodyParser = require('body-parser');
 const logger = new Logger("checkoutApp");
@@ -131,7 +132,7 @@ app.post("/stripe/webhooks/main", bodyParser.raw({ type: 'application/json' }), 
 });
 
 /**
- * Get a sessionID to setup a subscription
+ * Get a sessionID to setup billing info on an existing subscription
  */
 app.post("/sessions/setup-subscription", async (req: express.Request, res: express.Response) => {
     const userId = await getAuthUserId(req);
@@ -158,6 +159,7 @@ app.post("/sessions/setup-subscription", async (req: express.Request, res: expre
         res.status(400).send(response);
         return;
     }
+
     const { successUrl, cancelUrl } = req.body as CreateSetupSubscriptionSessionRequest;
     try {
         const session = await stripe.checkout.sessions.create({
@@ -229,12 +231,13 @@ app.post("/sessions/create-subscription", async (req: express.Request, res: expr
         }
 
         await AdminSubscriptionService.getSharedInstance().addStripeCustomerToMember(member);
-
+        const currentOffer = member.currentOffer;
         const { createOptions, plan, error } = await buildStripeSubscriptionCheckoutSessionOptions({
             successUrl,
             cancelUrl,
             member,
-            subscriptionProduct
+            subscriptionProduct,
+            currentOffer,
         });
 
         if (error || !(createOptions && plan)) {
@@ -256,6 +259,7 @@ app.post("/sessions/create-subscription", async (req: express.Request, res: expr
             sessionId: session.id,
             amount: chargeAmount,
             planId: plan.id,
+            offerDetails: currentOffer,
             raw: session,
         });
 
@@ -280,9 +284,10 @@ async function buildStripeSubscriptionCheckoutSessionOptions(options: {
     subscriptionProduct: SubscriptionProduct,
     member: CactusMember,
     successUrl: string,
-    cancelUrl: string
+    cancelUrl: string,
+    currentOffer?: OfferDetails | null,
 }): Promise<{ createOptions?: Stripe.Checkout.SessionCreateParams, error?: string, plan?: Stripe.Plan }> {
-    const { subscriptionProduct, member, successUrl, cancelUrl } = options;
+    const { subscriptionProduct, member, successUrl, cancelUrl, currentOffer } = options;
     const planId = subscriptionProduct.stripePlanId;
     const subscriptionProductId = subscriptionProduct.entryId;
     const memberId = member.id;
@@ -297,7 +302,7 @@ async function buildStripeSubscriptionCheckoutSessionOptions(options: {
         logger.error(`failed to retrieve the plan from stripe with Id: ${ planId }`);
         return { error: `Unable to find plan '${ planId }' in stripe. Can not complete checkout.` };
     }
-    const trialDays = subscriptionProduct.trialDays ?? 0;
+    const trialDays = currentOffer?.trialDays ?? subscriptionProduct.trialDays ?? 0;
 
     const chargeAmount = plan.amount;
     const updatedSuccessUrl = appendQueryParams(successUrl, {
@@ -305,7 +310,21 @@ async function buildStripeSubscriptionCheckoutSessionOptions(options: {
         [QueryParam.SUBSCRIPTION_PRODUCT_ID]: `${ subscriptionProductId }`,
     });
 
-    const stripeSubscriptionData: Stripe.Checkout.SessionCreateParams.SubscriptionData = { items: [{ plan: planId }] };
+
+    const metadata: Record<string, string> = {
+        memberId: `${ memberId }`,
+        subscriptionProductId: `${ subscriptionProductId }`,
+    }
+
+    if (currentOffer) {
+        metadata.offerEntryId = currentOffer.entryId ?? "";
+        metadata.offerName = currentOffer.displayName ?? "";
+    }
+
+    const stripeSubscriptionData: Stripe.Checkout.SessionCreateParams.SubscriptionData = {
+        items: [{ plan: planId }],
+        metadata,
+    };
     if (trialDays > 0) {
         stripeSubscriptionData.trial_period_days = trialDays
     }
@@ -316,10 +335,7 @@ async function buildStripeSubscriptionCheckoutSessionOptions(options: {
         cancel_url: cancelUrl,
         customer_email: member.stripeCustomerId ? undefined : member.email,
         customer: member.stripeCustomerId,
-        metadata: {
-            memberId: `${ memberId }`,
-            subscriptionProductId: `${ subscriptionProductId }`,
-        },
+        metadata,
         subscription_data: stripeSubscriptionData,
     };
     logger.info("Successfully constructed stripe checkout options", stringifyJSON(stripeOptions, 2));

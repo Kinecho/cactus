@@ -8,6 +8,7 @@ import StorageService, { LocalStorageKey } from "@web/services/StorageService";
 import { CactusElement } from "@shared/models/CactusElement";
 import RevenueCatService from "@web/services/RevenueCatService";
 import JournalFeedDataSource from "@web/datasource/JournalFeedDataSource";
+import PromotionalOfferManager from "@web/managers/PromotionalOfferManager";
 
 const logger = new Logger("CactusMemberService");
 
@@ -50,6 +51,7 @@ export default class CactusMemberService {
                                 this.updateMemberSettingsIfNeeded(member),
                                 RevenueCatService.shared.updateLastSeen(member),
                                 this.processActions(member),
+                                PromotionalOfferManager.shared.applySessionOffers(member),
                                 dataSource.start(),
                             ]);
                         }
