@@ -24,6 +24,8 @@ export interface RoutePageMeta {
     metaTags?: MetaTag[],
     usePrevious?: boolean,
     passMember?: boolean,
+    passUser?: boolean,
+    passSettings?: boolean,
     authRequired?: boolean,
     authContinueMessage?: string,
     navBar?: Partial<NavBarProps>|boolean,

@@ -10,6 +10,7 @@ import { Component } from "vue";
 import { Screen } from "@components/gapanalysis/GapAssessmentTypes";
 import CactusMemberService from "@web/services/CactusMemberService";
 import { QueryParam } from "@shared/util/queryParams";
+import AndroidStart from "@web/views/AndroidStart.vue";
 
 const logger = new Logger("router.ts");
 
@@ -214,8 +215,11 @@ const routes: MetaRouteConfig[] = [
     },
     {
         path: PageRoute.WELCOME,
-        redirect: PageRoute.GET_STARTED,
+        component: AndroidStart,
         name: "Welcome",
+        meta: {
+            passMember: true,
+        }
     },
     {
         component: () => lazyLoadView(import(
@@ -327,6 +331,10 @@ const routes: MetaRouteConfig[] = [
         path: PageRoute.ACCOUNT,
         name: "Account Settings",
         meta: {
+            passMember: true,
+            authRequired: true,
+            passSettings: true,
+            passUser: true,
             navBar: { isSticky: false },
         }
     },

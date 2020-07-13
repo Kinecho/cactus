@@ -2,9 +2,6 @@
     <div class="accountContainer">
         <div class="centered content">
             <h1>{{copy.common.ACCOUNT}}</h1>
-            <div class="loading" v-if="loading">
-                <Spinner :message="`${copy.common.LOADING}...`" :delay="1200"/>
-            </div>
             <div v-if="error" class="alert error">
                 {{error}}
             </div>
@@ -159,7 +156,6 @@
     } from "@shared/models/CactusMember";
     import CheckBox from "@components/CheckBox.vue";
     import CactusMemberService from '@web/services/CactusMemberService';
-    import { ListenerUnsubscriber } from '@web/services/FirestoreService';
     import { formatDate } from '@shared/util/DateUtil';
     import TimezonePicker from "@components/TimezonePicker.vue"
     import { findByZoneName, ZoneInfo } from '@shared/timezones'
@@ -171,7 +167,7 @@
     import CopyService from "@shared/copy/CopyService";
     import DeleteAccountModal from "@components/DeleteAccountModal.vue";
     import { LocalizedCopy } from '@shared/copy/CopyTypes'
-    import SnackbarContent, { SnackbarMessage } from "@components/SnackbarContent.vue";
+    import SnackbarContent from "@components/SnackbarContent.vue";
     import TimePicker from "@components/TimePicker.vue"
     import * as uuid from "uuid/v4";
     import { getDeviceLocale, getDeviceTimeZone } from '@web/DeviceUtil'
@@ -183,7 +179,10 @@
     import DataExport from "@components/DataExport.vue";
     import AppSettings from "@shared/models/AppSettings";
     import AppSettingsService from "@web/services/AppSettingsService";
-    import { pushRoute } from "@web/NavigationUtil";
+    import { isSnackbarMessageData, SnackbarMessage } from "@components/SnackbarContentTypes";
+    import Component from "vue-class-component";
+    import { isString } from "@shared/util/ObjectUtil";
+    import { Prop } from "vue-property-decorator";
 
     const logger = new Logger("AccountSettings.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -194,7 +193,7 @@
         providerId: string
     }
 
-    export default Vue.extend({
+    @Component({
         components: {
             Footer,
             Spinner,
@@ -207,286 +206,272 @@
             Upgrade: PremiumPricing,
             ManageSubscription: ManageActiveSubscription,
             DeleteAccountModal,
-        },
+        }
+    })
+    export default class AccountSettings extends Vue {
+
+        @Prop({ type: Object as () => CactusMember, required: true })
+        member!: CactusMember;
+
+        @Prop({ type: Object as () => FirebaseUser | null, required: false, default: null })
+        user!: FirebaseUser | null;
+
+        @Prop({
+            type: Object as () => AppSettings,
+            required: false,
+            default: AppSettingsService.sharedInstance.currentSettings
+        })
+        settings!: AppSettings | null;
+
+        error: string | undefined = undefined;
+        removedProviderIds: string[] = [];
+        copy: LocalizedCopy = copy;
+        snackbars: SnackbarMessage[] = [];
+        notificationValues = {
+            TRUE: NotificationStatus.ACTIVE,
+            FALSE: NotificationStatus.INACTIVE,
+        };
+        changesToSave = false;
+        deviceTimezone: string | undefined = getDeviceTimeZone();
+        deviceLocale: string | undefined = getDeviceLocale();
+        tzAlertDismissed = false;
+        upgradeRoute: string | PageRoute = PageRoute.PRICING;
+        deleteAccountModalVisible = false;
+
         mounted(): void {
             const message = getQueryParam(QueryParam.MESSAGE);
             if (message) {
                 this.addSnackbar({ message, timeoutMs: 10000, closeable: true });
                 removeQueryParam(QueryParam.MESSAGE);
             }
-        },
-        beforeMount() {
-            this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: async ({ member, user }) => {
-                    this.member = member;
-                    this.user = user;
-                    this.authLoaded = true;
-                    if (!member) {
-                        await pushRoute(PageRoute.HOME)
-                    }
+        }
+
+
+        get showExportData(): boolean {
+            const tier = this.member?.tier;
+            if (!tier) {
+                return false
+            }
+            return this.settings?.dataExportEnabledTiers.includes(tier) ?? false
+        }
+
+        get hasActiveSubscription(): boolean {
+            return this.member?.hasActiveSubscription ?? false;
+        }
+
+        get promptSendTime(): PromptSendTime {
+            return this.member?.promptSendTime ||
+            this.member?.getLocalPromptSendTimeFromUTC() ||
+            DEFAULT_PROMPT_SEND_TIME;
+        }
+
+        get memberSince(): string | undefined {
+            return this.member ? formatDate(this.member.signupConfirmedAt, 'LLLL dd, yyyy') : undefined;
+        }
+
+        get displayName(): string {
+            return this.member ? this.member.getFullName() : '';
+        }
+
+        get differentTimezone(): boolean {
+            if (this.member?.timeZone) {
+                const d = new Date();
+                const localeTimeParts = d.toLocaleTimeString('en-us', { timeZoneName: 'short' }).split(' ');
+                const memberTimeParts = d.toLocaleTimeString('en-us', {
+                    timeZoneName: 'short',
+                    timeZone: this.member.timeZone
+                }).split(' ');
+
+                return localeTimeParts[0] !== memberTimeParts[0] || localeTimeParts[1] !== memberTimeParts[1];
+            }
+
+            return !!(this.deviceTimezone && this.member?.timeZone && this.deviceTimezone !== this.member?.timeZone);
+        }
+
+        get deviceTimezoneName(): string | undefined {
+            if (this.deviceTimezone) {
+                const zoneInfo = findByZoneName(this.deviceTimezone);
+                if (zoneInfo) {
+                    return zoneInfo.displayName;
+                } else {
+                    const locale = this.deviceLocale;
+                    return new Date().toLocaleTimeString(locale, { timeZoneName: 'long' }).split(' ')[2];
+                }
+            }
+            return;
+        }
+
+        get providers(): Provider[] {
+            let providerData = this.user?.providerData;
+
+            if (!providerData || providerData.length === 0) {
+                return [];
+            }
+
+
+            let info = providerData.filter(provider => provider &&
+            provider.providerId !== "password" &&
+            !this.removedProviderIds.includes(provider.providerId)).map(provider => {
+                if (provider == null) {
+                    return null;
+                }
+                return {
+                    providerId: provider.providerId,
+                    displayName: getProviderDisplayName(provider.providerId),
                 }
             });
 
-            this.settingsObserver = AppSettingsService.sharedInstance.observeAppSettings({
-                onData: (settings) => {
-                    if (settings) {
-                        this.settings = settings;
-                    }
-                }
-            })
-        },
-        destroyed() {
-            if (this.memberUnsubscriber) {
-                this.memberUnsubscriber();
-            }
-            this.settingsObserver?.();
-        },
-        data(): {
-            authLoaded: boolean,
-            member: CactusMember | undefined | null,
-            user: FirebaseUser | undefined | null,
-            memberUnsubscriber: ListenerUnsubscriber | undefined,
-            error: string | undefined,
-            removedProviderIds: string[],
-            copy: LocalizedCopy,
-            snackbars: { id: string, message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean, color?: string }[],
-            notificationValues: {
-                TRUE: NotificationStatus,
-                FALSE: NotificationStatus,
-            },
-            changesToSave: boolean,
-            deviceTimezone: string | undefined,
-            deviceLocale: string | undefined,
-            tzAlertDismissed: boolean,
-            upgradeRoute: string,
-            deleteAccountModalVisible: boolean,
-            settingsObserver: ListenerUnsubscriber | undefined,
-            settings: AppSettings | null,
-        } {
-            return {
-                authLoaded: false,
-                member: undefined,
-                user: undefined,
-                memberUnsubscriber: undefined,
-                error: undefined,
-                removedProviderIds: [],
-                copy,
-                snackbars: [],
-                notificationValues: {
-                    TRUE: NotificationStatus.ACTIVE,
-                    FALSE: NotificationStatus.INACTIVE,
-                },
-                changesToSave: false,
-                deviceTimezone: getDeviceTimeZone(),
-                deviceLocale: getDeviceLocale(),
-                tzAlertDismissed: false,
-                upgradeRoute: PageRoute.PRICING,
-                deleteAccountModalVisible: false,
-                settingsObserver: undefined,
-                settings: AppSettingsService.sharedInstance.currentSettings
-            }
-        },
-        computed: {
-            showExportData(): boolean {
-                const tier = this.member?.tier;
-                if (!tier) {
-                    return false
-                }
-                return this.settings?.dataExportEnabledTiers.includes(tier) ?? false
-            },
-            hasActiveSubscription(): boolean {
-                return this.member?.hasActiveSubscription ?? false;
-            },
-            promptSendTime(): PromptSendTime {
-                return this.member?.promptSendTime ||
-                this.member?.getLocalPromptSendTimeFromUTC() ||
-                DEFAULT_PROMPT_SEND_TIME;
-            },
-            loading(): boolean {
-                return !this.authLoaded;
-            },
-            memberSince(): string | undefined {
-                return this.member ? formatDate(this.member.signupConfirmedAt, 'LLLL dd, yyyy') : undefined;
-            },
-            displayName(): string {
-                return this.member ? this.member.getFullName() : '';
-            },
-            differentTimezone(): boolean {
-                if (this.member?.timeZone) {
-                    const d = new Date();
-                    const localeTimeParts = d.toLocaleTimeString('en-us', { timeZoneName: 'short' }).split(' ');
-                    const memberTimeParts = d.toLocaleTimeString('en-us', {
-                        timeZoneName: 'short',
-                        timeZone: this.member.timeZone
-                    }).split(' ');
+            return info as Provider[];
+        }
 
-                    return localeTimeParts[0] !== memberTimeParts[0] || localeTimeParts[1] !== memberTimeParts[1];
-                }
+        get showProviders(): boolean {
+            const user = this.user;
+            if (!user) {
+                return false;
+            }
 
-                return !!(this.deviceTimezone && this.member?.timeZone && this.deviceTimezone !== this.member?.timeZone);
-            },
-            deviceTimezoneName(): string | undefined {
-                if (this.deviceTimezone) {
-                    const zoneInfo = findByZoneName(this.deviceTimezone);
-                    if (zoneInfo) {
-                        return zoneInfo.displayName;
-                    } else {
-                        const locale = this.deviceLocale;
-                        return new Date().toLocaleTimeString(locale, { timeZoneName: 'long' }).split(' ')[2];
-                    }
-                }
+            return user.providerData.filter(provider => provider &&
+            provider.providerId !== "password" &&
+            !this.removedProviderIds.includes(provider.providerId)).length > 0;
+        }
+
+
+        async removeProvider(providerId: string): Promise<void> {
+            if (!this.user) {
                 return;
-            },
-            providers(): Provider[] {
-                let providerData = this.user && this.user.providerData;
-
-                if (!providerData || providerData.length === 0) {
-                    return [];
-                }
-
-
-                let info = providerData.filter(provider => provider &&
-                provider.providerId !== "password" &&
-                !this.removedProviderIds.includes(provider.providerId)).map(provider => {
-                    if (provider == null) {
-                        return null;
-                    }
-                    return {
-                        providerId: provider.providerId,
-                        displayName: getProviderDisplayName(provider.providerId),
-                    }
-                });
-
-                return info as Provider[];
-            },
-            showProviders(): boolean {
-                const user = this.user;
-                if (!user) {
-                    return false;
-                }
-
-                return user.providerData.filter(provider => provider &&
-                provider.providerId !== "password" &&
-                !this.removedProviderIds.includes(provider.providerId)).length > 0;
             }
-        },
-        methods: {
-            async removeProvider(providerId: string): Promise<void> {
-                if (!this.user) {
-                    return;
+            const c = confirm(`Are you sure you want to remove ${ getProviderDisplayName(providerId) }?`);
+            if (c) {
+                this.removedProviderIds.push(providerId);
+                await this.user.unlink(providerId);
+                this.addSnackbar(`${ getProviderDisplayName(providerId) } Removed`);
+                this.user.reload();
+            }
+            return;
+        }
+
+        beforeLeave(el: any) {
+            const { marginLeft, marginTop, width, height } = window.getComputedStyle(el);
+            el.style.left = `${ el.offsetLeft - parseFloat(marginLeft as string) }px`;
+            // el.style.top = `${el.offsetTop - parseFloat(marginTop as string)}px`;
+            el.style.top = `${ el.offsetTop }px`;
+            el.style.width = width;
+            el.style.height = height;
+        }
+
+        addSnackbar(message: SnackbarMessage): string {
+            const id = uuid();
+            if (typeof message === "string") {
+                this.snackbars.push({ id, message: message, autoHide: true });
+            } else {
+                this.snackbars.push({ id, autoHide: true, closeable: true, ...message });
+            }
+
+            return id;
+        }
+
+        removeSnackbar(id: string) {
+            logger.log("removing snackbar", id);
+            this.snackbars = this.snackbars.filter(snack => {
+                if (isSnackbarMessageData(snack)) {
+                    return snack.id !== id
                 }
-                const c = confirm(`Are you sure you want to remove ${ getProviderDisplayName(providerId) }?`);
-                if (c) {
-                    this.removedProviderIds.push(providerId);
-                    await this.user.unlink(providerId);
-                    this.addSnackbar(`${ getProviderDisplayName(providerId) } Removed`);
-                    this.user.reload();
+                return false;
+            });
+        }
+
+        updateSnackbar(id: string, message: SnackbarMessage) {
+            const snackbar = this.snackbars.find(snack => {
+                if (isSnackbarMessageData(snack)) {
+                    return snack.id === id
                 }
+                return false;
+            });
+
+            if (!snackbar || !isSnackbarMessageData(snackbar)) {
+                logger.log("no snackbar found with id");
                 return;
-            },
-            beforeLeave(el: any) {
-                const { marginLeft, marginTop, width, height } = window.getComputedStyle(el);
-                el.style.left = `${ el.offsetLeft - parseFloat(marginLeft as string) }px`;
-                // el.style.top = `${el.offsetTop - parseFloat(marginTop as string)}px`;
-                el.style.top = `${ el.offsetTop }px`;
-                el.style.width = width;
-                el.style.height = height;
-            },
-            addSnackbar(message: SnackbarMessage): string {
-                const id = uuid();
-                if (typeof message === "string") {
-                    this.snackbars.push({ id, message: message, autoHide: true });
-                } else {
-                    this.snackbars.push({ id, autoHide: true, closeable: true, ...message });
-                }
-
-                return id;
-            },
-            removeSnackbar(id: string) {
-                logger.log("removing snackbar", id);
-                this.snackbars = this.snackbars.filter(snack => snack.id !== id);
-            },
-            updateSnackbar(id: string, message: string | { message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean, color?: string }) {
-                const snackbar = this.snackbars.find(snack => snack.id === id);
-
-                if (!snackbar) {
-                    logger.log("no snackbar found with id");
-                    return;
-                }
-                logger.log("Found snackbar ", id);
-                if (typeof message === "string") {
-                    snackbar.message = message;
-                } else {
-                    Object.assign(snackbar, message);
-                }
-            },
-            async save() {
-                if (this.member) {
-                    await CactusMemberService.sharedInstance.save(this.member);
-                    logger.log("Save success");
-                    this.addSnackbar({ message: "Changes Saved", color: "success" });
-                    this.changesToSave = false;
-                }
-            },
-            async saveEmailStatus(status: NotificationStatus) {
-                const snackId = this.addSnackbar({
-                    message: "Saving notification settings...",
-                    closeable: false,
-                    autoHide: false,
-                    color: "info",
-                });
-                logger.log("Saving status...", status);
-                this.error = undefined;
-                if (this.member && this.member.email) {
-                    const result = await updateSubscriptionStatus(status, this.member.email);
-                    if (!result.success) {
-                        this.addSnackbar("Oops! Unable to save email settings.");
-                        logger.log("Unsetting notification status change since the update failed");
-
-                        let errorMessage = "Oops, we're unable to save your email notification settings right now. Please try again later.";
-
-                        if (result.error && result.error.title === "Member In Compliance State") {
-                            errorMessage = "Cactus is unable to subscribe you to receive email notifications because you previously unsubscribed. Please email help@cactus.app to resolve this issue."
-                        }
-
-                        this.member.notificationSettings.email = status === NotificationStatus.ACTIVE ? NotificationStatus.INACTIVE : NotificationStatus.ACTIVE;
-                        this.error = errorMessage;
-                        this.removeSnackbar(snackId)
-                    } else {
-                        this.updateSnackbar(snackId, {
-                            message: "Email Settings Updated",
-                            autoHide: true,
-                            closeable: true,
-                            color: "success",
-                        });
-                    }
-                }
-            },
-            async setToDeviceZone() {
-                if (this.member) {
-                    this.member.timeZone = this.deviceTimezone;
-                    await this.save();
-                }
-            },
-            async tzSelected(value: ZoneInfo | null | undefined) {
-                if (this.member) {
-                    this.member.timeZone = value ? value.zoneName : null;
-                    this.changesToSave = true;
-                }
-            },
-            async timeSelected(value: PromptSendTime) {
-                if (this.member) {
-                    this.member.promptSendTime = value;
-                    // this.$set(this.member, this.member);
-
-                    this.changesToSave = true
-                }
-            },
-            reloadPage() {
-                window.location.reload();
+            }
+            logger.log("Found snackbar ", id);
+            if (isString(message)) {
+                snackbar.message = message;
+            } else {
+                Object.assign(snackbar, message);
             }
         }
-    })
+
+        async save() {
+            if (this.member) {
+                await CactusMemberService.sharedInstance.save(this.member);
+                logger.log("Save success");
+                this.addSnackbar({ message: "Changes Saved", color: "success" });
+                this.changesToSave = false;
+            }
+        }
+
+        async saveEmailStatus(status: NotificationStatus) {
+            const snackId = this.addSnackbar({
+                message: "Saving notification settings...",
+                closeable: false,
+                autoHide: false,
+                color: "info",
+            });
+            logger.log("Saving status...", status);
+            this.error = undefined;
+            if (this.member && this.member.email) {
+                const result = await updateSubscriptionStatus(status, this.member.email);
+                if (!result.success) {
+                    this.addSnackbar("Oops! Unable to save email settings.");
+                    logger.log("Unsetting notification status change since the update failed");
+
+                    let errorMessage = "Oops, we're unable to save your email notification settings right now. Please try again later.";
+
+                    if (result.error && result.error.title === "Member In Compliance State") {
+                        errorMessage = "Cactus is unable to subscribe you to receive email notifications because you previously unsubscribed. Please email help@cactus.app to resolve this issue."
+                    }
+
+                    this.member.notificationSettings.email = status === NotificationStatus.ACTIVE ? NotificationStatus.INACTIVE : NotificationStatus.ACTIVE;
+                    this.error = errorMessage;
+                    this.removeSnackbar(snackId)
+                } else {
+                    this.updateSnackbar(snackId, {
+                        message: "Email Settings Updated",
+                        autoHide: true,
+                        closeable: true,
+                        color: "success",
+                    });
+                }
+            }
+        }
+
+        async setToDeviceZone() {
+            if (this.member) {
+                this.member.timeZone = this.deviceTimezone;
+                await this.save();
+            }
+        }
+
+        async tzSelected(value: ZoneInfo | null | undefined) {
+            if (this.member) {
+                this.member.timeZone = value ? value.zoneName : null;
+                this.changesToSave = true;
+            }
+        }
+
+        async timeSelected(value: PromptSendTime) {
+            if (this.member) {
+                this.member.promptSendTime = value;
+                // this.$set(this.member, this.member);
+
+                this.changesToSave = true
+            }
+        }
+
+        reloadPage() {
+            window.location.reload();
+        }
+
+    }
 </script>
 
 <style lang="scss" scoped>
