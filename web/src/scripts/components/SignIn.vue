@@ -267,6 +267,9 @@
     })
 </script>
 <style lang="scss">
+    @import "variables";
+    @import "mixins";
+
     .sign-up-component {
         .firebaseui-container {
             box-shadow: none;
@@ -275,23 +278,63 @@
 
             &.firebaseui-id-page-email-link-sign-in-confirmation {
                 background: white;
-                .firebaseui-info-bar-message {
-                    .firebaseui-link {
-                        color: unset;
-                    }
-                }
             }
         }
     }
 
-    .firebaseui-tos,
-    .firebaseui-link {
-        color: white;
+    .firebaseui-tos {
+        color: $white;
+
+        .firebaseui-link {
+            color: $white;
+        }
     }
 
     .firebaseui-link {
         text-decoration: underline;
     }
+
+    .firebaseui-info-bar.firebaseui-id-info-bar {
+        top: -75px;
+    }
+
+    .firebaseui-info-bar-message {
+        .firebaseui-link {
+            color: unset;
+        }
+    }
+
+    .mdl-card.firebaseui-id-page-email-link-sign-in-confirmation {
+        font-family: $font-stack;
+
+        .firebaseui-tos-list {
+            .firebaseui-link {
+                color: $green;
+            }
+        }
+
+    }
+
+    .firebase-ui-card-header {
+        .firebase-title {
+            font-weight: bold;
+        }
+    }
+
+    .firebaseui-form-actions {
+        button.firebaseui-id-submit.mdl-button--raised.mdl-button--colored {
+            height: unset;
+            font-family: $font-stack;
+            @include button;
+            @include smallButton;
+        }
+
+        button.firebaseui-id-secondary-link.mdl-js-button.mdl-button--primary.firebaseui-button {
+            font-family: $font-stack;
+            box-shadow: none;
+        }
+    }
+
 
 </style>
 

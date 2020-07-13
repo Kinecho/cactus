@@ -133,11 +133,11 @@
 
         .firebaseui-tos,
         .firebaseui-link {
-            color: $white;
+            //color: $white;
         }
 
         .firebaseui-link {
-            text-decoration: underline;
+            //text-decoration: underline;
         }
     }
 
