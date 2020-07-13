@@ -90,7 +90,7 @@ export async function sendMagicLink(options: MagicLinkRequest): Promise<MagicLin
 export async function sendEmailLinkSignIn(params: SignupRequest): Promise<EmailLinkSignupResult> {
     const email = params.email;
     const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
-    let completeSignInPath = PageRoute.LOGIN;
+    let completeSignInPath:PageRoute|string = PageRoute.LOGIN;
     if (redirectUrlParam) {
         completeSignInPath = `${ completeSignInPath }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(redirectUrlParam) }`
     }
