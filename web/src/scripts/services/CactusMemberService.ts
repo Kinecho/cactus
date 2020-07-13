@@ -7,8 +7,8 @@ import Logger from "@shared/Logger";
 import StorageService, { LocalStorageKey } from "@web/services/StorageService";
 import { CactusElement } from "@shared/models/CactusElement";
 import RevenueCatService from "@web/services/RevenueCatService";
-import PromotionalOfferManager from "@web/managers/PromotionalOfferManager";
 import JournalFeedDataSource from "@web/datasource/JournalFeedDataSource";
+import PromotionalOfferManager from "@web/managers/PromotionalOfferManager";
 
 const logger = new Logger("CactusMemberService");
 
