@@ -20,7 +20,6 @@
         },
         props: {
             member: {type: CactusMember},
-            hasPromptToday: {type: Boolean}
         },
         data(): {
             upgradeRoute: string

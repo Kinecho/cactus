@@ -1,6 +1,6 @@
 <template>
     <div>
-        <upgrade-card class="journalListItem" v-if="showUpgradeCard" :member="member" :hasPromptToday="(todayEntry && todayLoaded)"/>
+        <upgrade-card class="journalListItem" v-if="showUpgradeCard" :member="member" />
         <div class="container centered">
             <transition name="fade-in-fast" appear mode="out-in">
                 <div class="page-loading" v-if="!dataHasLoaded">
@@ -18,13 +18,6 @@
                                 v-bind:css="false"
                                 v-on:before-enter="beforeEnter"
                                 v-on:enter="enter">
-
-                            <entry
-                                    class="journalListItem"
-                                    v-if="todayEntry && todayLoaded"
-                                    :journalEntry="todayEntry"
-                                    v-bind:key="todayEntry.promptId"
-                            ></entry>
                             <entry
                                     v-for="(entry, index) in journalEntries"
                                     :class="['journalListItem', {even: index%2}]"
@@ -98,8 +91,6 @@
         showPageLoading: boolean = false;
         dataHasLoaded: boolean = false;
         todayUnsubscriber: ListenerUnsubscriber | undefined = undefined;
-        todayEntry: JournalEntry | null = null;
-        todayLoaded: boolean = false;
         coreValuesClosed: boolean = false;
         windowScrollHandler: any = undefined;
 

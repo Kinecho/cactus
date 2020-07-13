@@ -17,7 +17,6 @@ export interface JournalEntryDelegate {
 
 class JournalEntry {
     promptId: string;
-
     member?: CactusMember | null = null;
 
     delegate?: JournalEntryDelegate = undefined;
