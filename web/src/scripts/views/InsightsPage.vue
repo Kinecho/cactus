@@ -1,7 +1,7 @@
 <template>
     <div class="insightsDash">
         <div class="centered">
-            <h1 v-if="!loading">{{welcomeMessage}}</h1>
+            <h1 v-if="!loading" :class="showEmptyState ? 'center' : '' ">{{welcomeMessage}}</h1>
             <div v-if="loading">
                 <spinner :delay="1500" message="Loading..."/>
             </div>
@@ -297,6 +297,11 @@
         }
         @include r(768) {
             margin: 6.4rem 0 4rem;
+        }
+
+        &.center {
+            margin-bottom: 0;
+            text-align: center;
         }
     }
 
