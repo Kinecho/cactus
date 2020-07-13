@@ -284,7 +284,8 @@ export interface AttributesInput {
     name?: string,
     currentOfferName?: string,
     currentOfferId?: string,
-    offerRedeemed?: boolean,
+    offerRedeemed?: string,
+
     [key: string]: AttributeType
 }
 
@@ -305,7 +306,7 @@ export function getSubscriberAttributes(member?: CactusMember): AttributesInput 
         attributes.reflectionMinutes = millisecondsToMinutes(member.stats.reflections.totalDurationMs);
         attributes.currentOfferName = member.currentOffer?.displayName;
         attributes.currentOfferId = member.currentOffer?.entryId;
-        attributes.offerRedeemed = !!member.currentOffer?.redeemedAt;
+        attributes.offerRedeemed = member.currentOffer ? "" : (!!member.currentOffer?.redeemedAt ? "Yes" : "No");
     }
 
     if (member.getReferredBy()) {
