@@ -22,6 +22,7 @@ import { destructureDisplayName, isBlank } from "@shared/util/StringUtil";
 import StripeService from "@admin/services/StripeService";
 import { formatDateTime } from "@shared/util/DateUtil";
 import AdminRevenueCatService from "@admin/services/AdminRevenueCatService";
+import RevenueCatService from "../../../web/src/scripts/services/RevenueCatService";
 
 const logger = new Logger("StripeWebhookService");
 
@@ -255,10 +256,11 @@ export default class StripeWebhookService {
                 subscriptionId: stripeSubscriptionId
             });
         }
-
-        await AdminPaymentService.getSharedInstance().save(payment);
-        await AdminCactusMemberService.getSharedInstance().save(cactusMember, { setUpdatedAt: false });
-
+        await Promise.all([
+            AdminPaymentService.getSharedInstance().save(payment),
+            AdminCactusMemberService.getSharedInstance().save(cactusMember, { setUpdatedAt: false }),
+            RevenueCatService.shared.updateAttributes(cactusMember),
+        ])
         return { statusCode: 200, body: `Member ${ cactusMember.email } was upgraded to ${ cactusSubscription.tier }` };
     };
 
