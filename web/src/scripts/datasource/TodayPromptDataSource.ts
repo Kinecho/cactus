@@ -42,7 +42,7 @@ export default class TodayPromptDataSource {
         window.clearInterval(this.checkDateInterval)
     }
 
-    checkDateChange() {
+    async checkDateChange() {
         const current = new Date()
         const changed = this.didDayChange(current)
         this.lastChecked = current;
@@ -50,7 +50,7 @@ export default class TodayPromptDataSource {
             logger.info("Date changed. Current Date = ", current.toLocaleDateString());
             this.delegate?.dateChanged?.();
             this.hasLoaded = false;
-            this.start().then(r => logger.info("Finished setting up today observers"));
+            await this.start()
         }
     }
 
@@ -72,8 +72,8 @@ export default class TodayPromptDataSource {
         }
 
         window.clearInterval(this.checkDateInterval);
-        this.checkDateInterval = window.setInterval(() => {
-            this.checkDateChange()
+        this.checkDateInterval = window.setInterval(async () => {
+            await this.checkDateChange()
         }, 30000)
 
         const tier = this.member?.tier ?? SubscriptionTier.PLUS;
