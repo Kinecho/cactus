@@ -51,11 +51,6 @@
     import { pushRoute } from "@web/NavigationUtil";
 
     const logger = new Logger("SignIn.vue");
-    const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
-    let emailLinkRedirectUrl: string = PageRoute.SIGNUP_CONFIRMED;
-    if (redirectUrlParam) {
-        emailLinkRedirectUrl = `${ emailLinkRedirectUrl }?${ QueryParam.REDIRECT_URL }=${ redirectUrlParam }`
-    }
 
     const locale = CopyService.getSharedInstance();
     const copy = locale.copy;
@@ -75,9 +70,7 @@
                 logger.log("Is pending redirect.... need to log the user in");
             }
 
-            // this.message = getQueryParam(QueryParam.MESSAGE) || undefined;
             this.email = StorageService.getItem(LocalStorageKey.emailAutoFill) || getQueryParam(QueryParam.EMAIL) || "";
-
             this.memberListener = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: (({ member, user }) => {
                     this.member = member;
@@ -170,16 +163,11 @@
             setupAuthUi() {
                 this.firebaseUiLoading = true;
                 const ui = getAuthUI();
+                const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
                 let emailLinkSignInPath = this.redirectUrl || redirectUrlParam || PageRoute.MEMBER_HOME;
                 logger.info("SignIn.vue emailLinkSignInPath = ", emailLinkSignInPath);
                 logger.info("SignIn.vue signInSuccessPath = ", emailLinkSignInPath);
                 let includeEmailLink = false;
-
-                //TODO: this was in there before, but i don't think we need it... leaving for a bit.
-                // if (ui.isPendingRedirect()) {
-                // includeEmailLink = true;
-                // emailLinkSignInPath = PageRoute.LOGIN;
-                // }
 
                 const config = getAuthUIConfig({
                     includeEmailLink,
