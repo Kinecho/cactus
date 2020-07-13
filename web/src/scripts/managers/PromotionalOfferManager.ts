@@ -6,6 +6,7 @@ import Logger from "@shared/Logger"
 import { isPremiumTier } from "@shared/models/MemberSubscription";
 import { isAndroidApp } from "@web/DeviceUtil";
 import { logOfferApplied, logOfferViewed } from "@web/analytics";
+import RevenueCatService from "@web/services/RevenueCatService";
 
 const logger = new Logger("PromotionalOfferManager");
 
@@ -42,6 +43,7 @@ export default class PromotionalOfferManager {
             member.currentOffer = offerDetails
             await CactusMemberService.sharedInstance.save(member);
             logOfferApplied(offerDetails)
+            await RevenueCatService.shared.updateAttributes(member);
             logger.info(`Applied offer ${ offerDetails.displayName } to member ${ member.email }`);
             await this.clearSessionOffers();
         } else if (offerDetails.entryId === existingOffer?.entryId) {
