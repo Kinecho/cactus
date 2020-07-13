@@ -258,7 +258,7 @@ export default class StripeWebhookService {
         await Promise.all([
             AdminPaymentService.getSharedInstance().save(payment),
             AdminCactusMemberService.getSharedInstance().save(cactusMember, { setUpdatedAt: false }),
-            AdminRevenueCatService.shared.updateAttributes(cactusMember),
+            AdminRevenueCatService.shared.updateSubscriberAttributes(cactusMember),
         ])
         return { statusCode: 200, body: `Member ${ cactusMember.email } was upgraded to ${ cactusSubscription.tier }` };
     };
