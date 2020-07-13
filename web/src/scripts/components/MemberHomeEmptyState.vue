@@ -12,7 +12,7 @@
             </p>
         </template>
         <img class="graphic" src="/assets/images/emptyState.png" alt="Three friends welcoming you"/>
-        <router-link class="button primary" tag="button" :to="onboardingPath">Let's begin</router-link>
+        <router-link class="button primary" tag="button" :to="onboardingPath">Let's Begin</router-link>
     </section>
 </template>
 
@@ -77,24 +77,20 @@
     .empty {
         align-items: center;
         justify-content: center;
-        padding: 2.4rem;
+        padding: 0 2.4rem 2.4rem;
         text-align: center;
         flex-direction: column;
         display: flex;
 
         h1 {
             line-height: 1.2;
-            margin-bottom: .4rem;
         }
 
         p {
+            font-size: 2rem;
             margin: 0 auto 2.4rem;
             max-width: 60rem;
             opacity: .8;
-
-            @include r(768) {
-                margin-bottom: 1.6rem;
-            }
         }
 
         .graphic {
@@ -103,7 +99,7 @@
             width: 90%;
 
             @include r(768) {
-                margin-bottom: 1.6rem;
+                margin-bottom: 2.4rem;
             }
         }
 

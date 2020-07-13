@@ -1,20 +1,9 @@
 <template>
     <section class="empty journalHome">
-
-        <p>
-            {{introText}}
-        </p>
-
-        <!--        <template v-if="focusElement && isPlusMember">-->
-        <!--            <p>-->
-        <!--                To get started, you'll learn about how Cactus works and reflect on your first question-->
-        <!--                about&nbsp;<strong>{{focusElement}}</strong>.-->
-        <!--            </p>-->
-        <!--        </template>-->
-        <img class="graphic"
-                src="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200319.png?alt=media&token=9142500c-eb79-4691-8062-9017abd37ff3"
-                alt="Journal Image"/>
-        <router-link class="button primary" tag="button" :to="onboardingPath">Get started</router-link>
+        <h1>This is your journal.</h1>
+        <p>{{introText}}</p>
+        <skeleton-card :animating="false"/>
+        <router-link class="button primary" tag="button" :to="onboardingPath">Get Started</router-link>
     </section>
 </template>
 
@@ -31,12 +20,14 @@
     import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
     import { preventOrphanedWords } from "@shared/util/StringUtil";
+    import SkeletonCard from "@components/JournalEntrySkeleton.vue";
 
     const logger = new Logger("MemberHomeEmptyState.vue");
 
     @Component({
         components: {
             ResultElement,
+            SkeletonCard,
         }
     })
     export default class JournalHomeEmptyState extends Vue {
@@ -57,7 +48,7 @@
         }
 
         get introText() {
-            return preventOrphanedWords("Once you complete your first question, your journal entries will show up here.");
+            return preventOrphanedWords("It's a little empty now, but once you complete your first question, your journal entries will appear here.");
         }
 
         get firstPromptPath(): string {
@@ -82,36 +73,24 @@
     @import "variables";
 
     .empty {
-        align-items: center;
-        justify-content: center;
+        display: block;
+        margin: 0 auto;
+        max-width: 64rem;
         padding: 2.4rem;
         text-align: center;
-        flex-direction: column;
-        display: flex;
 
         h1 {
-            line-height: 1.2;
-            margin-bottom: .4rem;
+            margin-top: 2.4rem;
         }
 
         p {
-            margin: 0 auto 2.4rem;
-            max-width: 60rem;
+            font-size: 2rem;
+            margin-bottom: 3.2rem;
             opacity: .8;
-
-            @include r(768) {
-                margin-bottom: 1.6rem;
-            }
         }
 
-        .graphic {
-            margin-bottom: 2.4rem;
-            max-width: 56rem;
-            width: 90%;
-
-            @include r(768) {
-                margin-bottom: 1.6rem;
-            }
+        .skeleton {
+            width: 100%;
         }
 
         .button {
