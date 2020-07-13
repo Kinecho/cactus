@@ -1,9 +1,18 @@
 <template>
     <section class="empty journalHome">
-        <h1>This is your journal.</h1>
-        <p>{{introText}}</p>
-        <skeleton-card :animating="false"/>
-        <router-link class="button primary" tag="button" :to="onboardingPath">Get Started</router-link>
+        <p v-if="!focusElement || !isPlusMember">
+            To get started, you'll learn about how Cactus works and reflect on your first question of
+            the&nbsp;day.
+        </p>
+
+        <template v-if="focusElement && isPlusMember">
+            <p>
+                To get started, you'll learn about how Cactus works and reflect on your first question
+                about&nbsp;<strong>{{focusElement}}</strong>.
+            </p>
+        </template>
+        <img class="graphic" src="/assets/images/emptyState.png" alt="Three friends welcoming you"/>
+        <router-link class="button primary" tag="button" :to="onboardingPath">Let's Begin</router-link>
     </section>
 </template>
 
@@ -19,19 +28,16 @@
     import ResultElement from "@components/gapanalysis/ResultElement.vue";
     import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
-    import { preventOrphanedWords } from "@shared/util/StringUtil";
-    import SkeletonCard from "@components/JournalEntrySkeleton.vue";
 
     const logger = new Logger("MemberHomeEmptyState.vue");
 
     @Component({
         components: {
             ResultElement,
-            SkeletonCard,
         }
     })
-    export default class JournalHomeEmptyState extends Vue {
-        name = "JournalHomeEmptyState.vue";
+    export default class MemberHomeEmptyState extends Vue {
+        name = "MemberHomeEmptyState.vue";
 
         @Prop({ type: String as () => CactusElement, default: null, required: false })
         focusElement!: CactusElement | null;
@@ -45,10 +51,6 @@
 
         get onboardingPath(): PageRoute {
             return PageRoute.HELLO_ONBOARDING;
-        }
-
-        get introText() {
-            return preventOrphanedWords("It's a little empty now, but once you complete your first question, your journal entries will appear here.");
         }
 
         get firstPromptPath(): string {
@@ -73,24 +75,32 @@
     @import "variables";
 
     .empty {
-        display: block;
-        margin: 0 auto;
-        max-width: 64rem;
-        padding: 2.4rem;
+        align-items: center;
+        justify-content: center;
+        padding: 0 2.4rem 2.4rem;
         text-align: center;
+        flex-direction: column;
+        display: flex;
 
         h1 {
-            margin-top: 2.4rem;
+            line-height: 1.2;
         }
 
         p {
             font-size: 2rem;
-            margin-bottom: 3.2rem;
+            margin: 0 auto 2.4rem;
+            max-width: 60rem;
             opacity: .8;
         }
 
-        .skeleton {
-            width: 100%;
+        .graphic {
+            margin-bottom: 2.4rem;
+            max-width: 56rem;
+            width: 90%;
+
+            @include r(768) {
+                margin-bottom: 2.4rem;
+            }
         }
 
         .button {

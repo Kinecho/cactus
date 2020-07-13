@@ -1,9 +1,14 @@
 <template>
     <div class="insightsDash">
         <div class="centered">
-            <h1>Welcome back{{displayName ? ', ' + displayName : ''}}</h1>
-
-            <div class="insightsGrid">
+            <h1 v-if="!loading" :class="showEmptyState ? 'center' : '' ">{{welcomeMessage}}</h1>
+            <div v-if="loading">
+                <spinner :delay="1500" message="Loading..."/>
+            </div>
+            <div v-else-if="showEmptyState">
+                <EmptyState :tier="member.tier"/>
+            </div>
+            <div v-else class="insightsGrid">
                 <reflection-stats-widget :reflection-stats="reflectionStats" v-if="reflectionStats"/>
                 <prompt-widget :entry="todayEntry" :member="member" :loading="todayPromptLoading"/>
                 <section class="bubblesContainer" v-if="hasWordCloud">
@@ -58,7 +63,6 @@
     import Footer from "@components/StandardFooter.vue";
     import WordCloud from "@components/MemberWordCloudInsights.vue";
     import CactusMember, { ReflectionStats } from "@shared/models/CactusMember";
-    import { ListenerUnsubscriber } from "@web/services/FirestoreService";
     import CactusMemberService from "@web/services/CactusMemberService";
     import { CoreValueMeta, CoreValuesService } from "@shared/models/CoreValueTypes";
     import { PageRoute } from "@shared/PageRoutes";
@@ -70,7 +74,6 @@
     import { getQueryParam } from "@web/util";
     import Logger from "@shared/Logger"
     import { isPremiumTier } from "@shared/models/MemberSubscription";
-    import { pushRoute } from "@web/NavigationUtil";
     import Results from "@components/gapanalysis/Results.vue";
     import ResultElement from "@components/gapanalysis/ResultElement.vue";
     import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
@@ -82,17 +85,18 @@
     import { logFocusElementSelected } from "@web/analytics";
     import { InsightWord } from "@shared/api/InsightLanguageTypes";
     import PromptWidget from "@components/insights/PromptWidget.vue";
-    import PromptContentService from "@web/services/PromptContentService";
-    import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
     import JournalEntry from "@web/datasource/models/JournalEntry";
     import SvgIcon from "@components/SvgIcon.vue";
     import { Prop } from "vue-property-decorator";
+    import JournalFeedDataSource, { JournalFeedDataSourceDelegate } from "@web/datasource/JournalFeedDataSource";
+    import MemberHomeEmptyState from "@components/MemberHomeEmptyState.vue";
 
     const logger = new Logger("InsightsPage");
     const copy = CopyService.getSharedInstance().copy;
 
     @Component({
         components: {
+            EmptyState: MemberHomeEmptyState,
             PromptWidget,
             ReflectionStatsWidget,
             GapAnalysisWidget,
@@ -105,7 +109,7 @@
             SvgIcon,
         }
     })
-    export default class InsightsPage extends Vue {
+    export default class InsightsPage extends Vue implements JournalFeedDataSourceDelegate {
 
         @Prop({ type: Object as () => CactusMember, required: true })
         member!: CactusMember;
@@ -114,30 +118,23 @@
         gapAssessmentResults?: GapAnalysisAssessmentResult | null = null;
         selectFocusEnabled = false;
         currentElementSelection: CactusElement | null = null
-
-        todayPromptLoading = false;
         todayEntry: JournalEntry | null = null;
+        todayLoaded = false;
+        dataSource?: JournalFeedDataSource
+        journalLoaded: boolean = false;
 
-        beforeMount() {
-            this.fetchGapResults()
-            this.fetchTodayPrompt()
+        async beforeMount() {
+            this.dataSource = JournalFeedDataSource.setup(this.member, { onlyCompleted: true, delegate: this })
+            await this.dataSource?.start()
+            await this.fetchGapResults()
         }
 
         destroyed() {
             this.todayEntry?.stop();
         }
 
-        async fetchTodayPrompt() {
-            this.todayPromptLoading = true;
-            const promptContent = await PromptContentService.sharedInstance.getPromptContentForDate({
-                subscriptionTier: this.member?.tier ?? SubscriptionTier.BASIC,
-                systemDate: new Date(),
-            })
-            if (promptContent?.promptId) {
-                this.todayEntry = new JournalEntry(promptContent.promptId, undefined, this.member);
-                this.todayEntry.start();
-            }
-            this.todayPromptLoading = false;
+        get todayPromptLoading(): boolean {
+            return !this.todayEntry && !this.todayLoaded;
         }
 
         async fetchGapResults() {
@@ -169,6 +166,22 @@
         cancelSetFocus() {
             this.selectFocusEnabled = false;
             this.currentElementSelection = null;
+        }
+
+        get welcomeMessage(): string {
+            if (getQueryParam(QueryParam.FROM) === "onboarding") {
+                return "Welcome to Cactus!"
+            }
+            if (this.showEmptyState) {
+                return "Welcome!"
+            }
+            const greeting = "Welcome back";
+            const displayName = this.displayName;
+            return `${ greeting }${ displayName ? ', ' + displayName : '' }`
+        }
+
+        get loading(): boolean {
+            return !this.journalLoaded
         }
 
         get displayName(): string | undefined {
@@ -227,6 +240,24 @@
         get focusElement(): CactusElement | null {
             return this.member.focusElement ?? null;
         }
+
+        /* START: JOURNAL FEED DATA SOURCE DELEGATE */
+        didLoad(hasData: boolean): void {
+            this.journalLoaded = true;
+        }
+
+        todayEntryUpdated(entry?: JournalEntry | null) {
+            logger.info("Insights today entry loaded");
+            this.todayEntry = entry ?? null;
+            this.todayLoaded = true;
+        }
+
+        /* END: JOURNAL FEED DATA SOURCE DELEGATE */
+
+        get showEmptyState(): boolean {
+            return this.dataSource?.journalEntries.length === 0
+        }
+
     }
 </script>
 
@@ -266,6 +297,11 @@
         }
         @include r(768) {
             margin: 6.4rem 0 4rem;
+        }
+
+        &.center {
+            margin-bottom: 0;
+            text-align: center;
         }
     }
 

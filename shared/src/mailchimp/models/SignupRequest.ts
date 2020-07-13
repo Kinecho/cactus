@@ -12,7 +12,6 @@ export default class SignupRequest {
     referredByEmail?: string;
     subscriptionLocation?: SubscriptionFormLocation;
     subscriptionTier?: SubscriptionTier;
-
     constructor(email: string,){
         this.email = email;
     }

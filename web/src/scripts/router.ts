@@ -133,6 +133,7 @@ const routes: MetaRouteConfig[] = [
     }, {
         component: () => lazyLoadView(import(/* webpackPreload: true, webpackPrefetch: true, webpackChunkName: "pages" */ "@web/views/SignUpView.vue")),
         path: PageRoute.LOGIN,
+        alias: [PageRoute.SIGNUP_CONFIRMED],
         name: "Log In",
         meta: {
             usePrevious: true,
@@ -346,12 +347,6 @@ const routes: MetaRouteConfig[] = [
         "@web/views/StripeCheckoutRedirect.vue")),
         name: "Checkout",
         path: PageRoute.CHECKOUT,
-    },
-    {
-        component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
-        "@web/views/SignupConfirmed.vue")),
-        name: "Sign up",
-        path: PageRoute.SIGNUP_CONFIRMED,
     },
     {
         component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */

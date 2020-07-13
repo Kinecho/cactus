@@ -73,6 +73,8 @@
         maxTextareaHeight = 200;
         debounceWindowSizeHandler: any;
 
+        startAt!: Date;
+
         get markdownText(): string | undefined {
             return this.card.getMarkdownText({ selectedInsight: this.selectedInsightWord })
         }
@@ -111,6 +113,7 @@
 
         mounted() {
             logger.info("Reflect card mounted");
+            this.startAt = new Date();
             if (this.autofocusInput) {
                 (this.$refs.textInput as HTMLElement | undefined)?.focus();
             }
@@ -131,7 +134,7 @@
             const entryId = this.card.promptContentEntryId;
             logger.info("Saving and continuing for entryId", entryId);
             this.saving = true;
-
+            const duration = Date.now() - this.startAt.getTime();
             let response: ReflectionResponse | undefined;
 
             if (this.reflectionResponses && this.reflectionResponses.length > 0) {
@@ -148,7 +151,8 @@
                 this.saving = false;
                 return;
             }
-
+            const currentDuration = response.reflectionDurationMs ?? 0;
+            response.reflectionDurationMs = currentDuration + duration;
             response.content.text = this.responseText;
             if (this.selectedInsightWord) {
                 response.dynamicValues = {

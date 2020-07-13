@@ -236,16 +236,3 @@ function getPhoneProviderConfig() {
         defaultNationalNumber: '1234567890',
     };
 }
-
-
-export function createAuthModal(): string {
-    const modalId = 'auth-modal';
-    addModal(modalId, {});
-
-    const ui = getAuthUI();
-    ui.start(`#${ modalId } > div`, getAuthUIConfig({
-        signInSuccessPath: PageRoute.SIGNUP_CONFIRMED,
-        emailLinkSignInPath: PageRoute.SIGNUP_CONFIRMED
-    }));
-    return modalId;
-}

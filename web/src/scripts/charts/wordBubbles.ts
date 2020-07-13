@@ -96,7 +96,6 @@ export function drawWordBubbleChart(parentSelector: string, words: InsightWord[]
         selected: false,
         originalValue: d.frequency ?? 0
     }));
-    logger.info("dataset", dataset);
 
     //Sets up a hierarchy of data object
     const root = d3Hierarchy({ children: dataset })

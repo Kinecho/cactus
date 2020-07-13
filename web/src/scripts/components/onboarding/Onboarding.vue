@@ -69,6 +69,7 @@
     import Modal from "@components/Modal.vue";
     import { pushRoute } from "@web/NavigationUtil";
     import { InsightWord } from "@shared/api/InsightLanguageTypes";
+    import { QueryParam } from "@shared/util/queryParams";
 
     const logger = new Logger("Onboarding");
 
@@ -218,7 +219,7 @@
 
         async closeOnboarding(force: boolean = false) {
             if (this.showCloseConfirm || force) {
-                await pushRoute(PageRoute.MEMBER_HOME);
+            await pushRoute(`${PageRoute.MEMBER_HOME}?${QueryParam.FROM}=onboarding`);
                 return;
             }
             this.showCloseConfirm = true;

@@ -2,11 +2,11 @@
     <div class="today-widget" :class="{reflected: hasReflected}">
         <img class="blob" src="/assets/images/transparentBlob1.svg"/>
         <img class="blob" src="/assets/images/transparentBlob2.svg"/>
-        <p class="date">Today</p>
         <transition name="component-fade" appear>
-            <spinner v-if="loading || !allLoaded" :delay="1500"/>
+            <spinner v-if="loading || (entry && !allLoaded)" :delay="1500"/>
             <!-- Using a div here so that the fade transition works -->
-            <div v-else>
+            <div v-else-if="entry">
+                <p class="date">Today</p>
                 <h2 class="question">
                     <markdown-text :source="questionText"/>
                 </h2>
@@ -31,28 +31,36 @@
                     <flamelink-image :image="image"/>
                 </div>
 
-                <div class="buttonContainer" v-if="!hasNote | !hasReflected && !isEditingNote">
+                <div class="buttonContainer" v-if="!hasNote || !hasReflected && !isEditingNote">
                     <router-link v-if="link && !hasReflected" :to="link" tag="button">Reflect</router-link>
                     <button v-if="!hasNote && !isEditingNote && hasReflected" @click="isEditingNote = true" class="secondary">
                         <img class="pen" src="/assets/images/pen.svg" alt=""/>Add a Note
                     </button>
                 </div>
             </div>
+            <div v-else-if="noPromptFound" class="noPrompt">
+                <h2 class="question">Uh oh</h2>
+                <p class="previewText">There seems to be an issue finding today's prompt. Please check back a little later.</p>
+                <div class="backgroundImage">
+                    <img src="/assets/images/error.png" alt="Cactus Error Image"/>
+                </div>
+            </div>
         </transition>
-        <dropdown-menu :items="linkItems" class="dotsBtn"/>
+        <dropdown-menu :items="linkItems" class="dotsBtn" v-if="!noPromptFound"/>
         <!-- <modal :show="showSharing" v-on:close="showSharing = false" :showCloseButton="true">
             <div class="sharing-card" slot="body">
                 <PromptSharing :promptContent="entry.promptContent"/>
             </div>
         </modal> -->
-        <!-- <modal :show="showShareNote" v-on:close="showShareNote = false" :showCloseButton="true" v-if="!!shareNote">
+        <modal :show="shareModalOpen"
+                v-on:close="shareModalOpen = false"
+                :showCloseButton="true"
+                v-if="shareNoteCard">
             <div class="sharing-card note" slot="body">
-                <legacy-prompt-content-card
-                        :prompt-content="entry.promptContent"
-                        :content="shareNote.content"
-                        :response="shareNote.response"/>
+                <share-note-card
+                        :card="shareNoteCard"/>
             </div>
-        </modal> -->
+        </modal>
     </div>
 </template>
 
@@ -72,12 +80,18 @@
     import CopyService from "@shared/copy/CopyService";
     import EditReflection from "@components/ReflectionResponseTextEdit.vue"
     import { ResponseMedium } from "@shared/models/ReflectionResponse"
+    import { DropdownMenuLink } from "@components/DropdownMenuTypes";
+    import Modal from "@components/Modal.vue";
+    import ShareNoteCard from "@components/promptcontent/ShareNoteCard.vue";
+    import PromptContentCardViewModel from "@components/promptcontent/PromptContentCardViewModel";
 
     const copy = CopyService.getSharedInstance().copy;
 
     @Component({
         components: {
+            ShareNoteCard,
             Spinner,
+            Modal,
             MarkdownText,
             EditReflection,
             DropdownMenu,
@@ -101,6 +115,12 @@
         @Prop({ type: Object as () => CactusMember, required: true })
         member!: CactusMember;
 
+        shareModalOpen = false;
+
+        get noPromptFound(): boolean {
+            return !this.entry && !this.loading
+        }
+
         get allLoaded(): boolean {
             return this.entry?.allLoaded === true;
         }
@@ -114,23 +134,46 @@
             return !isBlank(getResponseText(this.entry?.responses));
         }
 
-        get linkItems(): {
-            title: string,
-            href?: string | null,
-            onClick?: () => void,
-        }[] {
-            return [
+        get shareNoteCard(): PromptContentCardViewModel | null {
+            if (this.entry?.promptContent && this.entry?.prompt && this.hasNote) {
+                return PromptContentCardViewModel.createShareNote({
+                    member: this.member,
+                    responses: this.entry?.responses ?? [],
+                    promptContent: this.entry?.promptContent,
+                    prompt: this.entry?.prompt,
+                })
+            } else {
+                return null
+            }
+
+        }
+
+        get linkItems(): DropdownMenuLink[] {
+            const links: DropdownMenuLink[] = [
                 {
                     title: copy.prompts.REFLECT,
                     href: this.link,
                 },
-                {
+            ]
+            if (this.hasReflected) {
+                links.push({
                     title: this.hasNote ? copy.prompts.EDIT_NOTE : copy.prompts.ADD_A_NOTE,
                     onClick: () => {
                         this.isEditingNote = true;
                     }
-                },
-            ]
+                });
+            }
+
+            if (this.hasNote) {
+                links.push({
+                    title: copy.prompts.SHARE_YOUR_NOTE,
+                    onClick: () => {
+                        this.shareModalOpen = true;
+                    }
+                })
+            }
+
+            return links;
         }
 
         get hasReflected(): boolean {
@@ -368,5 +411,17 @@
     form {
         position: relative;
         z-index: 1;
+    }
+
+    .noPrompt {
+        padding: 1.6rem .8rem 0;
+
+        .previewText {
+            font-size: 2rem;
+        }
+
+        .backgroundImage {
+            transform: scaleX(-1);
+        }
     }
 </style>

@@ -5,9 +5,9 @@
             <p>This is what your note reveals about your emotions.</p>
         </div>
         <div class="insightsContainer">
-            <positivity-rating :sentiment-score="reflectionResponse.sentiment.documentSentiment"/>
-            <tone-analysis :tone-result="reflectionResponse.toneAnalysis"
-                    :original-text="reflectionResponse.content.text"
+            <positivity-rating :sentiment-score="documentSentiment"/>
+            <tone-analysis :tone-result="toneAnalysis"
+                    :original-text="originalText"
                     :sentences-on-new-line="false"
                     @previous="previous"
             />
@@ -26,6 +26,8 @@
     import Spinner from "@components/Spinner.vue";
     import PositivityRating from "@components/PositivityRating.vue";
     import ToneAnalysis from "@components/ToneAnalysis.vue";
+    import { SentimentResult, SentimentScore } from "@shared/api/InsightLanguageTypes";
+    import { ToneResult } from "@shared/api/ToneAnalyzerTypes";
 
     @Component({
         components: {
@@ -65,6 +67,18 @@
                     this.loading = false;
                 },
             });
+        }
+
+        get documentSentiment(): SentimentScore|null {
+            return this.reflectionResponse?.sentiment?.documentSentiment ?? null;
+        }
+
+        get toneAnalysis(): ToneResult|null {
+            return this.reflectionResponse?.toneAnalysis ?? null;
+        }
+
+        get originalText(): string|null {
+            return this.reflectionResponse?.content.text ?? null;
         }
 
         beforeDestroy() {

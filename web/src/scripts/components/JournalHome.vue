@@ -6,8 +6,8 @@
                 <div class="page-loading" v-if="!dataHasLoaded">
                     <spinner message="Loading..." :delay="1200"/>
                 </div>
-                <div class="section-container" v-else-if="showOnboardingPrompt" :key="'empty'">
-                    <journal-home-empty-state :focus-element="focusElement" :tier="tier"/>
+                <div class="section-container" v-else-if="showEmptyState" :key="'empty'">
+                    <empty-state :focus-element="focusElement" :tier="tier"/>
                 </div>
 
                 <div class="section-container" v-else-if=" journalEntries.length > 0">
@@ -36,7 +36,6 @@
                                     :data-index="index"
                             ></entry>
                         </transition-group>
-
                     </section>
                     <spinner message="Loading More" v-show="showPageLoading"/>
                 </div>
@@ -60,24 +59,21 @@
     import JournalEntry from '@web/datasource/models/JournalEntry'
     import { debounce } from "debounce"
     import Spinner from "@components/Spinner.vue"
-    import PromptContentService from "@web/services/PromptContentService";
-    import SentPromptService from "@web/services/SentPromptService";
-    import SentPrompt from "@shared/models/SentPrompt";
     import UpgradeSubscriptionJournalEntryCard from "@components/UpgradeSubscriptionJournalEntryCard.vue";
     import Logger from "@shared/Logger";
     import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
     import SnackbarContent from "@components/SnackbarContent.vue";
-    import JournalHomeEmptyState from "@components/JournalHomeEmptyState.vue";
     import { CactusElement } from "@shared/models/CactusElement";
     import { Prop } from "vue-property-decorator";
     import Component from "vue-class-component";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
+    import JournalHomeEmptyState from "@components/JournalHomeEmptyState.vue";
 
     const logger = new Logger("JournalHome.vue");
 
     @Component({
         components: {
-            JournalHomeEmptyState,
+            EmptyState: JournalHomeEmptyState,
             entry: JournalEntryCard,
             AutoPromptContentModal,
             SkeletonCard,
@@ -117,53 +113,9 @@
 
         async beforeMount() {
             logger.log("Journal Home calling Created function");
-
-            if (this.member?.id) {
-                const tier = this.member?.tier ?? SubscriptionTier.PLUS;
-                const todaysPromptContent = await PromptContentService.sharedInstance.getPromptContentForDate({
-                    systemDate: new Date(),
-                    subscriptionTier: tier
-                });
-
-                if (todaysPromptContent?.promptId) {
-                    this.todayUnsubscriber = SentPromptService.sharedInstance.observeByPromptId(this.member.id, todaysPromptContent.promptId, {
-                        onData: async (todaySentPrompt: SentPrompt | undefined) => {
-                            let todayEntry = undefined;
-
-                            if (todaySentPrompt?.promptId && !todaySentPrompt.completed) {
-                                todayEntry = new JournalEntry(todaySentPrompt.promptId, todaySentPrompt, this.member);
-                            } else if (!todaySentPrompt && todaysPromptContent?.promptId) {
-                                // they don't have a SentPrompt for today's prompt
-                                // but we show it to them anyway
-                                todayEntry = new JournalEntry(todaysPromptContent.promptId, undefined, this.member);
-                            }
-
-                            if (todayEntry) {
-                                todayEntry.delegate = {
-                                    entryUpdated: entry => {
-                                        if (entry.allLoaded) {
-                                            this.todayLoaded = true;
-                                        }
-                                    }
-                                };
-                                todayEntry.start();
-                                this.todayEntry = todayEntry;
-                            } else {
-                                this.todayEntry = null;
-                            }
-                        }
-                    });
-                } else {
-                    logger.error("Today's prompt could not be found for member");
-                    this.todayLoaded = true;
-                }
-            }
-
-            const dataSource = JournalFeedDataSource.with(this.member, { onlyCompleted: true });
-            this.dataSource = dataSource;
-
-            dataSource.delegate = this;
-            dataSource.start()
+            // async this.setupTodayObserver();
+            this.dataSource = JournalFeedDataSource.setup(this.member, { onlyCompleted: true, delegate: this });
+            await this.dataSource.start()
         }
 
         /* START OF JOURNAL DATASOURCE DELEGATE */
@@ -251,10 +203,10 @@
         }
 
         get showUpgradeCard(): boolean {
-            return !this.plusUser && !this.showCoreValuesBanner && !this.showOnboardingPrompt && this.dataHasLoaded;
+            return !this.plusUser && !this.showCoreValuesBanner && !this.showEmptyState && this.dataHasLoaded;
         }
 
-        get showOnboardingPrompt(): boolean {
+        get showEmptyState(): boolean {
             return this.dataHasLoaded && this.journalEntries.length === 0
         }
 

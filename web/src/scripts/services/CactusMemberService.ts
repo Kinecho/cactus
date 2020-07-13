@@ -45,10 +45,12 @@ export default class CactusMemberService {
                         this.memberHasLoaded = true;
                         if (member && memberChanged) {
                             logger.info("Member changed - updating member values like timezone, revenuecat + session offers");
+                            const dataSource = JournalFeedDataSource.setup(member, { onlyCompleted: true });
                             await Promise.all([
                                 this.updateMemberSettingsIfNeeded(member),
                                 RevenueCatService.shared.updateLastSeen(member),
                                 this.processActions(member),
+                                dataSource.start(),
                             ]);
                         }
                     }

@@ -133,10 +133,9 @@
 }
 
 
-input[type=email]:not(.firebaseui-input) {
+input[type=email]:not(.firebaseui-input):not(.firebaseui-input-invalid) {
   @include textInput();
 }
-
 
 input[type=password]:not(.firebaseui-input) {
   @include textInput();
