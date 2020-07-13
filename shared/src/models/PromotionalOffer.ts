@@ -17,7 +17,7 @@ export class OfferDetails {
      */
     appliedAt?: Date;
     trialDays?: number | null;
-    redeemedAt?: Date|null;
+    redeemedAt?: Date | null;
 
     constructor(data: Partial<OfferDetails> & { entryId: string }) {
         Object.assign(this, data);
@@ -32,7 +32,7 @@ export class OfferDetails {
         return new OfferDetails(json);
     }
 
-    isMemberEligible(member?: CactusMember): boolean {
+    isMemberEligible(member?: CactusMember | null): boolean {
         if (!member) {
             return true;
         }

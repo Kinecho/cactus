@@ -34,8 +34,7 @@ export interface FlamelinkData {
     id?: string;
     parentId?: string | number;
     order?: number,
-
-    [key: string]: any
+    // [key: string]: any
 }
 
 export interface FlamelinkIdentifiable extends FlamelinkData {
@@ -123,5 +122,4 @@ export default abstract class FlamelinkModel implements FlamelinkIdentifiable {
             return { message: "Error processing this model toJSON", error };
         }
     }
-
 }
