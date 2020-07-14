@@ -311,7 +311,7 @@ export function logPresentSubscriptionOffers(options: {
 }
 
 export function logOfferViewed(offer: OfferDetails) {
-    firebaseAnalytics().logEvent("select_promotion", {
+    firebaseAnalytics().logEvent("view_promotion", {
         promotion_name: offer.displayName,
         promotion_id: offer.entryId,
     })

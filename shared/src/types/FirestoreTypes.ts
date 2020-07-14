@@ -3,17 +3,17 @@ import { BaseModel } from "@shared/FirestoreBaseModels";
 import { QuerySortDirection } from "@shared/types/FirestoreConstants";
 import { DocumentSnapshot } from "@shared/util/FirestoreUtil";
 
-declare enum OperationState {
+export enum OperationState {
     SUCCESSFUL = "SUCCESSFUL",
     PROCESSING = "PROCESSING",
 }
 
-declare interface ProgressWork {
+export interface ProgressWork {
     estimatedWork: string,
     completedWork: string,
 }
 
-declare interface OperationMetadata {
+export interface OperationMetadata {
     "@type": string,
     startTime?: ISODate,
     endTime: ISODate,
@@ -24,7 +24,7 @@ declare interface OperationMetadata {
     outputUriPrefix: string,
 }
 
-declare interface Operation {
+export interface Operation {
     name: string,
     metadata: OperationMetadata,
     done?: boolean,
@@ -36,7 +36,7 @@ declare interface Operation {
 /**
  * See [GRPC Errors](https://github.com/grpc/grpc/blob/master/doc/statuscodes.md) for more details
  */
-declare enum FirestoreErrorCode {
+export enum FirestoreErrorCode {
     OK = 0,
     /**
      * The operation was cancelled, typically by the caller.
@@ -64,18 +64,18 @@ declare enum FirestoreErrorCode {
     DATA_LOSS = 15,
 }
 
-declare interface IGetOptions {
+export interface IGetOptions {
     queryName?: string,
     includeDeleted?: boolean,
     onlyDeleted?: boolean,
 }
 
-declare interface DocObserverOptions<IModel extends BaseModel> extends IGetOptions {
+export interface DocObserverOptions<IModel extends BaseModel> extends IGetOptions {
     queryName?: string,
     onData: (model?: IModel, error?: any) => void | Promise<void>
 }
 
-declare interface IQueryOptions<IQueryCursor> extends IGetOptions {
+export interface IQueryOptions<IQueryCursor> extends IGetOptions {
     pagination?: {
         startAt?: IQueryCursor,
         startAfter?: IQueryCursor,
@@ -87,7 +87,7 @@ declare interface IQueryOptions<IQueryCursor> extends IGetOptions {
     }
 }
 
-declare interface IQueryObserverOptions<IQueryCursor, IModel extends BaseModel> extends IQueryOptions<IQueryCursor> {
+export interface IQueryObserverOptions<IQueryCursor, IModel extends BaseModel> extends IQueryOptions<IQueryCursor> {
     onModified?: (model: IModel) => void | Promise<void>,
     onRemoved?: (removed: IModel) => void | Promise<void>,
     onAdded?: (added: IModel) => void | Promise<void>,
@@ -95,14 +95,14 @@ declare interface IQueryObserverOptions<IQueryCursor, IModel extends BaseModel> 
     queryName?: string,
 }
 
-declare interface QueryResult<T> {
+export interface QueryResult<T> {
     results: T[],
     size: number,
     error?: any,
     lastCursor?: any | undefined,
 }
 
-declare interface IPageResult<T extends BaseModel, S extends DocumentSnapshot> {
+export interface IPageResult<T extends BaseModel, S extends DocumentSnapshot> {
     error?: any,
     results: T[],
     firstSnapshot?: S,
@@ -111,7 +111,7 @@ declare interface IPageResult<T extends BaseModel, S extends DocumentSnapshot> {
     mightHaveMore: boolean,
 }
 
-declare interface IPageListenerResult<T extends BaseModel, S extends DocumentSnapshot> extends IPageResult<T, S> {
+export interface IPageListenerResult<T extends BaseModel, S extends DocumentSnapshot> extends IPageResult<T, S> {
     added?: T[],
     removed?: T[],
     updated?: T[],
