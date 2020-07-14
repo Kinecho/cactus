@@ -290,7 +290,7 @@ export default class AdminFirestoreService {
 
             messageParts.push(`\n\`\`\`${ e }\`\`\``);
             const errorMessage = messageParts.join(" ");
-            if (!(options.silentErrorCodes?.includes(error.code) ?? false)) {
+            if (!(options.silentErrorCodes?.includes(e.code) ?? false)) {
                 logger.error(errorMessage, e);
                 Sentry.captureException(e);
                 await AdminSlackService.getSharedInstance().sendDbAlertsMessage(errorMessage);
