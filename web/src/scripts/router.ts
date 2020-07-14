@@ -192,6 +192,11 @@ const routes: MetaRouteConfig[] = [
             {
                 path: ":page",
                 props: true,
+                // meta: {
+                    // passMember: true,
+                    // authRequired: true,
+                    // authContinueMessage: "You must be signed in to view this content"
+                // },
             }
         ]
     },

@@ -90,7 +90,7 @@
             const responses = this.responses;
             const member = this.member;
 
-            if (!prompt || !promptContent) {
+            if (!prompt || !promptContent || this.loading) {
                 return [];
             }
 

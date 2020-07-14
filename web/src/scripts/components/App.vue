@@ -20,7 +20,7 @@
     import CactusMember from "@shared/models/CactusMember";
     import Logger from "@shared/Logger"
     import NavBar from "@components/NavBar.vue";
-    import { MetaRouteConfig } from "@web/router-meta";
+    import { doPassMember, doPassSettings, doPassUser, isAuthRequired, MetaRouteConfig } from "@web/router-meta";
     import { NavBarProps } from "@components/NavBarTypes";
     import { isBoolean } from "@shared/util/ObjectUtil";
     import { Route } from "vue-router";
@@ -49,14 +49,18 @@
         authLoaded = false;
         settingsLoaded = false;
         member: CactusMember | null = null;
-        user: FirebaseUser|null = null;
+        user: FirebaseUser | null = null;
         memberListener!: ListenerUnsubscriber;
         showUnauthorizedRoute = false;
         hasUpgradeSuccessParam = false;
 
+        // get authRequiredForRoute(): boolean {
+        //
+        // }
+
         @Watch("$route")
         onRoute(route: Route) {
-            this.showUnauthorizedRoute = route.meta.authRequired && !this.member && this.authLoaded;
+            this.showUnauthorizedRoute = isAuthRequired(route) && !this.member && this.authLoaded;
 
             if (getQueryParam(QueryParam.UPGRADE_SUCCESS) === 'success') {
                 this.hasUpgradeSuccessParam = true;
@@ -101,14 +105,14 @@
 
         get props(): Record<string, any> {
             const props: Record<string, any> = {}
-            if (this.$route.meta.passMember) {
+            if (doPassMember(this.$route)) {
                 props.member = this.member;
             }
-            if (this.$route.meta.passUser){
+            if (doPassUser(this.$route)) {
                 props.user = this.user;
             }
 
-            if (this.$route.meta.passSettings) {
+            if (doPassSettings(this.$route)) {
                 props.settings = this.settings
             }
 

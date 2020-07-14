@@ -117,7 +117,22 @@ export function updateRouteMeta(to: Route, from?: Route): PageMetaInfo | null {
     }
 
     return setPageMeta(routeMeta, title);
+}
 
+export function isAuthRequired(route: Route): boolean {
+    return route.meta.authRequired || route.matched.slice().reverse().find(r => r.meta?.authRequired === true);
+}
+
+export function doPassMember(route: Route): boolean {
+    return route.meta.passMember || route.matched.slice().reverse().find(r => r.meta?.passMember === true);
+}
+
+export function doPassUser(route: Route): boolean {
+    return route.meta.passUser || route.matched.slice().reverse().find(r => r.meta?.passUser === true);
+}
+
+export function doPassSettings(route: Route): boolean {
+    return route.meta.passSettings || route.matched.slice().reverse().find(r => r.meta?.passSettings === true);
 }
 
 export function setPageMeta(routeMeta?: RoutePageMeta | null, title?: string): PageMetaInfo | null {
