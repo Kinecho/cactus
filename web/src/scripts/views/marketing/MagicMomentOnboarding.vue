@@ -1,7 +1,7 @@
 <template>
     <div>
         <hero title="Magic Moment Page" sub-text="Research-backed prompts to increase self-awareness and resilience">
-            <router-link :to="mainCtaPath" tag="button" class="quizBtn primary">Try It Free</router-link>
+            <router-link :to="mainCtaPath" tag="button" class="mainCta primary">Try It Free</router-link>
         </hero>
         <why-cactus/>
         <split-view>
@@ -10,14 +10,13 @@
         </split-view>
         <testimonials/>
         <pre-footer>
-            <router-link :to="mainCtaPath" tag="button" class="quizBtn primary">Try It Free</router-link>
+            <router-link :to="mainCtaPath" tag="button" class="mainCta primary">Try It Free</router-link>
         </pre-footer>
     </div>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
-    import { isAndroidApp, isAndroidDevice, isIosDevice } from "@web/DeviceUtil";
     import AppStoreIcon from "@components/AppStoreIcon.vue";
     import PlayStoreIcon from "@components/PlayStoreIcon.vue";
     import Component from "vue-class-component";
@@ -48,24 +47,8 @@
     export default class MagicMomentOnboarding extends Vue {
         name = "MagicMomentOnboarding.vue";
 
-        beforeMount() {
-            this.isMobileDevice = (isAndroidDevice() || isIosDevice());
-            this.isAndroidApp = isAndroidApp();
-        }
-
-        isMobileDevice = false;
-        isAndroidApp = false;
-
-        get assessmentHref(): string {
-            return PageRoute.GAP_ANALYSIS;
-        }
-
         get mainCtaPath(): string {
             return PageRoute.HELLO_ONBOARDING
-        }
-
-        get showTryItHeader(): boolean {
-            return this.isMobileDevice && this.isAndroidApp;
         }
 
     }
@@ -75,7 +58,7 @@
     @import "styles/mixins";
     @import "styles/variables";
 
-    .quizBtn {
+    .mainCta {
         min-width: 24rem;
     }
 

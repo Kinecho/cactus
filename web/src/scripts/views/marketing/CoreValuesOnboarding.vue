@@ -17,7 +17,6 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import { isAndroidApp, isAndroidDevice, isIosDevice } from "@web/DeviceUtil";
     import AppStoreIcon from "@components/AppStoreIcon.vue";
     import PlayStoreIcon from "@components/PlayStoreIcon.vue";
     import Component from "vue-class-component";
@@ -48,24 +47,8 @@
     export default class CoreValuesOnboarding extends Vue {
         name = "CoreValuesOnboarding.vue";
 
-        beforeMount() {
-            this.isMobileDevice = (isAndroidDevice() || isIosDevice());
-            this.isAndroidApp = isAndroidApp();
-        }
-
-        isMobileDevice = false;
-        isAndroidApp = false;
-
-        get assessmentHref(): string {
-            return PageRoute.GAP_ANALYSIS;
-        }
-
         get mainCtaPath(): string {
             return PageRoute.CORE_VALUES
-        }
-
-        get showTryItHeader(): boolean {
-            return this.isMobileDevice && this.isAndroidApp;
         }
 
     }
