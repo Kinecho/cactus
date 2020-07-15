@@ -6,7 +6,8 @@ import AdminFirestoreService, {
     GetBatchOptions,
     GetOptions,
     QueryOptions,
-    SaveOptions, Timestamp
+    SaveOptions,
+    Timestamp
 } from "@admin/services/AdminFirestoreService";
 import CactusMember, {
     DEFAULT_PROMPT_SEND_TIME,
@@ -17,13 +18,7 @@ import CactusMember, {
     ReflectionStats
 } from "@shared/models/CactusMember";
 import { BaseModelField, Collection } from "@shared/FirestoreBaseModels";
-import {
-    getDateAtMidnightDenver,
-    getDateFromISOString,
-    getSendTimeUTC,
-    minusDays,
-    plusDays
-} from "@shared/util/DateUtil";
+import { getDateAtMidnightDenver, getDateFromISOString, getSendTimeUTC, plusDays } from "@shared/util/DateUtil";
 import {
     ListMember,
     ListMemberStatus,
@@ -37,11 +32,11 @@ import * as admin from "firebase-admin";
 import { QueryWhereClauses, removeDuplicates } from "@shared/util/FirestoreUtil";
 import { isBlank } from "@shared/util/StringUtil";
 import { CoreValue } from "@shared/models/CoreValueTypes";
-import DocumentReference = admin.firestore.DocumentReference;
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 import HoboCache from "@admin/HoboCache";
 import { InsightWord } from "@shared/api/InsightLanguageTypes";
 import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
+import DocumentReference = admin.firestore.DocumentReference;
 
 const logger = new Logger("AdminCactusMemberService");
 let firestoreService: AdminFirestoreService;
