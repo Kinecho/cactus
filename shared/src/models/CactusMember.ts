@@ -87,6 +87,8 @@ export enum Field {
     focusElement = "focusElement",
     lastReplyAt = "lastReplyAt",
     currentOffer = "currentOffer",
+    currentOfferAppliedAt = "currentOffer.appliedAt",
+    currentOfferRedeemedAt = "currentOffer.redeemedAt",
 }
 
 export interface PromptSendTime {
