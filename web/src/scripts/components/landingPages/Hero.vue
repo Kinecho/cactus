@@ -45,7 +45,6 @@
 
     .hero {
         display: grid;
-
         //Below gives warning that grid alea "target" is not found, so i removed it
         //grid-template-areas: "heroText" "demo" "target" "form";
         grid-template-areas: "heroText" "demo" "form";
