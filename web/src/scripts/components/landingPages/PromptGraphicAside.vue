@@ -24,15 +24,21 @@
 <style scoped lang="scss">
     @import "variables";
     @import "mixins";
+ 
     .graphicContainer {
-        align-self: end;
         background: url(/assets/images/demoBg.png) no-repeat center bottom -10rem/38rem;
-        grid-area: demo;
         overflow: hidden;
         position: relative;
 
+        @include r(768) {
+            padding-top: 4.8rem;
+            width: 50%;
+        }
         @include r(960) {
             background-size: 47rem;
+        }
+        @include r(1024) {
+            width: 47%;
         }
 
         .promptDemo {
@@ -97,10 +103,10 @@
 
             &:nth-child(1) {
                 right: 1.6rem;
-                top: 3.2rem;
+                top: 8rem;
 
                 @include r(960) {
-                    top: 4.8rem;
+                    top: 9.6rem;
                 }
             }
 
