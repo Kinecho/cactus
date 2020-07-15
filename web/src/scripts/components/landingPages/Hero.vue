@@ -45,7 +45,10 @@
 
     .hero {
         display: grid;
-        grid-template-areas: "heroText" "demo" "target" "form";
+
+        //Below gives warning that grid alea "target" is not found, so i removed it
+        //grid-template-areas: "heroText" "demo" "target" "form";
+        grid-template-areas: "heroText" "demo" "form";
         grid-template-rows: auto;
         margin: 2.4rem auto 0;
         max-width: 50rem;
