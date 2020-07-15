@@ -1,5 +1,5 @@
 <template>
-    <aside class="graphicContainer">
+    <aside class="graphicContainer centered">
         <p class="sampleQuestion">What helps you unwind and recuperate?</p>
         <p class="sampleQuestion">When did you first fall in love?</p>
         <div class="promptDemo">

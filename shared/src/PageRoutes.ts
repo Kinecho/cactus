@@ -24,12 +24,6 @@ export enum PageRoute {
     GAP_ANALYSIS = "/gap-analysis",
     HELLO_ONBOARDING = "/hello",
     PROMOS_ROOT = "/promos",
-    /**
-     * @deprecated
-     * This is the legacy core values page. It is now redirected to the /core-values route via vue Router
-     * @type {string}
-     */
-    VALUES_HOME = "/values",
     WELCOME = "/welcome",
     INSIGHTS_EMBED = '/insights-embed',
     INSIGHTS = "/insights",
