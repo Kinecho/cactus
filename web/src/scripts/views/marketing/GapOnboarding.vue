@@ -76,8 +76,6 @@
 <style scoped lang="scss">
     @import "styles/mixins";
     @import "styles/variables";
-    @import "styles/common";
-    @import "styles/modal";
 
     .quizBtn {
         min-width: 24rem;
