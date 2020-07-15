@@ -8,7 +8,9 @@
         <template v-else>
             <div class="alert error" v-if="errorMessage">{{errorMessage}}</div>
             <div class="upsellContainer">
-                <h2><markdown-text v-if="markdownText" :source="markdownText"/></h2>
+                <h2>
+                    <markdown-text v-if="markdownText" :source="markdownText"/>
+                </h2>
                 <ul class="upsellInfo">
                     <li>
                         <svg-icon icon="heartOutline" class="icon"/>
@@ -25,9 +27,11 @@
                 </ul>
                 <div class="btnContainer">
                     <button class="tryIt" @click="checkout" :disabled="checkoutLoading">{{ctaText}}</button>
-                    <router-link :to="pricingHref" tag="a" class="moreInfo button tertiary" target="_blank">More info & other plans</router-link>
-                    <p class="finePrint" v-if="product.trialDays && product.trialDays > 0">
-                        Cactus Plus is free for {{product.trialDays}} days, then {{pricePerMonth}} /
+                    <router-link :to="pricingHref" tag="a" class="moreInfo button tertiary" target="_blank">More info &
+                        other plans
+                    </router-link>
+                    <p class="finePrint" v-if="trialDays && trialDays > 0">
+                        Cactus Plus is free for {{trialDays}} days, then {{pricePerMonth}} /
                         {{displayPeriod}}<span v-if="isAnnualBilling"> (billed annually)</span>. No commitment. Cancel
                         anytime.
                     </p>
@@ -120,6 +124,13 @@
                 return "month"
             }
             return this.product.billingPeriod;
+        }
+
+        get trialDays(): number | null {
+            if (this.member.currentOffer?.trialDays) {
+                return this.member.currentOffer.trialDays;
+            }
+            return this.product?.trialDays ?? null
         }
 
         get isAnnualBilling(): boolean {
