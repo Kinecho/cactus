@@ -246,7 +246,7 @@
         didLoad(hasData: boolean): void {
             logger.info("Insights page data source did load");
             this.journalLoaded = true;
-            this.todayEntry = this.dataSource?.todayEntry
+            this.todayEntry = this.dataSource?.todayEntry ?? null;
             this.showEmptyState = !hasData;
         }
 

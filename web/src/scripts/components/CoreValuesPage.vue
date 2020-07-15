@@ -81,7 +81,7 @@
     import CactusMemberService from '@web/services/CactusMemberService'
     import { PageRoute } from '@shared/PageRoutes'
     import { ListenerUnsubscriber } from "@web/services/FirestoreService";
-    import { getIntegerFromStringBetween, isBlank } from "@shared/util/StringUtil";
+    import { isBlank } from "@shared/util/StringUtil";
     import Assessment from "@components/corevalues/Assessment.vue";
     import CoreValuesAssessment from "@shared/models/CoreValuesAssessment";
     import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
