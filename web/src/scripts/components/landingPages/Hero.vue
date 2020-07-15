@@ -35,14 +35,6 @@
     @import "variables";
     @import "mixins";
 
-    .subtext {
-        opacity: .8;
-
-        @include r(960) {
-            font-size: 2rem;
-        }
-    }
-
     .hero {
         margin: 2.4rem auto 0;
         max-width: 50rem;
@@ -111,10 +103,14 @@
         .subtext {
             margin: 0 2.4rem 2.4rem;
             max-width: 44rem;
+            opacity: .8;
 
             @include r(768) {
                 margin: 0 2.4rem 3.2rem 0;
                 max-width: 48rem;
+            }
+            @include r(960) {
+                font-size: 2rem;
             }
         }
 

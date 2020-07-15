@@ -35,7 +35,12 @@
 
         .subtext {
             margin: 0 0 2.4rem;
+            opacity: .8;
             padding: 0 2.4rem;
+
+            @include r(960) {
+                font-size: 2rem;
+            }
         }
 
         .lowerForm {

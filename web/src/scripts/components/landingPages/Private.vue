@@ -30,6 +30,20 @@
     @import "mixins";
     @import "variables";
 
+    .subtext {
+        opacity: .8;
+        margin: 0 auto 2.4rem;
+        max-width: 40rem;
+        text-align: center;
+
+        @include r(768) {
+            margin-bottom: 5.6rem;
+        }
+        @include r(960) {
+            font-size: 2rem;
+        }
+    }
+
     section.private {
         align-items: center;
         background: $beige url(/assets/images/pinkBlobNeedleBg.png) no-repeat center top 16rem/36rem;

@@ -39,7 +39,7 @@
                     name: "Mike P",
                 },
                 {
-                    quote: "First thing in the morning, in the midst of checking work emails and feeling the anxiety of the day cree, the Cactus emails **me me pause**, reset my attitude, and begin the day on a positive note before I even get out of bed.",
+                    quote: "First thing in the morning, in the midst of checking work emails and feeling the anxiety of the day creep, the Cactus emails **help me pause**, reset my attitude, and begin the day on a positive note before I even get out of bed.",
                     avatarUrl: "/assets/images/avatars/testimonialAvatar4.png",
                     name: "Nicole P",
                 }
@@ -61,10 +61,14 @@
         }
 
         .subtext {
+            opacity: .8;
             padding: 0 2.4rem 2.4rem;
 
             @include r(768) {
                 padding-bottom: 4rem;
+            }
+            @include r(960) {
+                font-size: 2rem;
             }
         }
 
