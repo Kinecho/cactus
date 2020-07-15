@@ -3,7 +3,7 @@
         <h2>Fortify your EQ</h2>
         <p class="subtext">Cactus helps make you more optimistic, generous to yourself and others,
             and&nbsp;healthier.</p>
-        <img src="/assets/images/fortify.png" alt="Fortify image" class="sectionImg"/>
+        <img src="/assets/images/200629.png" alt="Fortify image" class="sectionImg"/>
     </section>
 </template>
 
