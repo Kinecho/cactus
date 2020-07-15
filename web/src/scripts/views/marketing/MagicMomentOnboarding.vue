@@ -148,7 +148,7 @@
         }
     })
     export default class MarketingHome extends Vue {
-        name = "MarketingHome";
+        name = "MagicMomentOnboarding.vue";
 
         beforeMount() {
             this.isMobileDevice = (isAndroidDevice() || isIosDevice());
@@ -174,10 +174,10 @@
 </script>
 
 <style scoped lang="scss">
-    @import "mixins";
-    @import "variables";
-    @import "common";
-    @import "modal.scss";
+    @import "styles/mixins";
+    @import "styles/variables";
+    @import "styles/common";
+    @import "styles/modal";
 
     //This is the target for the sign-up jump button
     #sign-up {

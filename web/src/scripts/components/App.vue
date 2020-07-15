@@ -20,7 +20,14 @@
     import CactusMember from "@shared/models/CactusMember";
     import Logger from "@shared/Logger"
     import NavBar from "@components/NavBar.vue";
-    import { doPassMember, doPassSettings, doPassUser, isAuthRequired, MetaRouteConfig } from "@web/router-meta";
+    import {
+        doPassMember,
+        doPassSettings,
+        doPassUser,
+        doShowNavBar,
+        isAuthRequired,
+        MetaRouteConfig
+    } from "@web/router-meta";
     import { NavBarProps } from "@components/NavBarTypes";
     import { isBoolean } from "@shared/util/ObjectUtil";
     import { Route } from "vue-router";
@@ -120,7 +127,7 @@
         }
 
         get showNav(): boolean {
-            return !!(this.$route as MetaRouteConfig)?.meta?.navBar;
+            return doShowNavBar(this.$route);
         }
 
         get navProps(): Partial<NavBarProps | null> {

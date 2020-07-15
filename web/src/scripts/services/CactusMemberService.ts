@@ -25,12 +25,18 @@ export default class CactusMemberService {
     protected memberHasLoaded = false;
 
     pendingLoginActions: AuthAction[] = []
+    ready: Promise<void>;
+
+    private onStart!: () => void;
 
     get isLoggedIn(): boolean {
         return !!this.currentMember;
     }
 
     constructor() {
+        this.ready = new Promise(resolve => {
+            this.onStart = resolve;
+        })
         this.authUnsubscriber = getAuth().onAuthStateChanged(async user => {
             if (this.currentMemberUnsubscriber) {
                 this.currentMemberUnsubscriber();
@@ -44,6 +50,7 @@ export default class CactusMemberService {
                         const memberChanged = this.currentMember?.id !== member?.id
                         this.currentMember = member;
                         this.memberHasLoaded = true;
+                        this.onStart();
                         if (member && memberChanged) {
                             logger.info("Member changed - updating member values like timezone, revenuecat + session offers");
                             const dataSource = JournalFeedDataSource.setup(member, { onlyCompleted: true });
@@ -58,9 +65,18 @@ export default class CactusMemberService {
                     }
                 })
             } else {
+                this.onStart();
                 this.currentMember = undefined;
             }
         });
+    }
+
+    async authReady(): Promise<void> {
+        if (this.memberHasLoaded) {
+            return;
+        }
+        await this.getCurrentMember()
+        return;
     }
 
     async addAuthAction(action: AuthAction) {

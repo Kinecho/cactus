@@ -223,7 +223,7 @@
         })
         settings!: AppSettings | null;
 
-        error: string | undefined = undefined;
+        error: string | null = null;
         removedProviderIds: string[] = [];
         copy: LocalizedCopy = copy;
         snackbars: SnackbarMessage[] = [];
@@ -417,7 +417,7 @@
                 color: "info",
             });
             logger.log("Saving status...", status);
-            this.error = undefined;
+            this.error = null;
             if (this.member && this.member.email) {
                 const result = await updateSubscriptionStatus(status, this.member.email);
                 if (!result.success) {

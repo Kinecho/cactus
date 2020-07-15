@@ -1,20 +1,20 @@
 <template>
     <div>
-        <marketing-home/>
+        <magic-moment-onboarding/>
         <StandardFooter :lifted="true"/>
     </div>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
-    import MarketingHome from "@components/MarketingHome.vue";
+    import MagicMomentOnboarding from "@web/views/marketing/MagicMomentOnboarding.vue";
     import StandardFooter from "@components/StandardFooter.vue";
     import { PageRoute } from "@shared/PageRoutes";
 
     export default Vue.extend({
         name: "HomePage",
         components: {
-            MarketingHome,
+            MagicMomentOnboarding,
             StandardFooter,
         },
         data(): { signUpUrl: string } {

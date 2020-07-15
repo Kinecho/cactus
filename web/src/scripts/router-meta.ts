@@ -2,6 +2,8 @@ import { Route, RouteConfig } from "vue-router";
 import Logger from "@shared/Logger";
 import { RouteConfigSingleView } from "vue-router/types/router";
 import { NavBarProps } from "@components/NavBarTypes";
+import { StandardFooterProps } from "@components/StandardFooterTypes";
+import { isBoolean } from "@shared/util/ObjectUtil";
 
 const logger = new Logger("router-meta");
 
@@ -28,7 +30,8 @@ export interface RoutePageMeta {
     passSettings?: boolean,
     authRequired?: boolean,
     authContinueMessage?: string,
-    navBar?: Partial<NavBarProps>|boolean,
+    navBar?: Partial<NavBarProps> | boolean,
+    footer?: Partial<StandardFooterProps> | boolean,
 }
 
 export interface MetaImage {
@@ -120,19 +123,35 @@ export function updateRouteMeta(to: Route, from?: Route): PageMetaInfo | null {
 }
 
 export function isAuthRequired(route: Route): boolean {
-    return route.meta.authRequired || route.matched.slice().reverse().find(r => r.meta?.authRequired === true);
+    return route.meta.authRequired || route.matched.slice().reverse().some(r => r.meta?.authRequired === true);
 }
 
 export function doPassMember(route: Route): boolean {
-    return route.meta.passMember || route.matched.slice().reverse().find(r => r.meta?.passMember === true);
+    return route.meta.passMember || route.matched.slice().reverse().some(r => r.meta?.passMember === true);
 }
 
 export function doPassUser(route: Route): boolean {
-    return route.meta.passUser || route.matched.slice().reverse().find(r => r.meta?.passUser === true);
+    return route.meta.passUser || route.matched.slice().reverse().some(r => r.meta?.passUser === true);
 }
 
 export function doPassSettings(route: Route): boolean {
-    return route.meta.passSettings || route.matched.slice().reverse().find(r => r.meta?.passSettings === true);
+    return route.meta.passSettings || route.matched.slice().reverse().some(r => r.meta?.passSettings === true);
+}
+
+export function doShowNavBar(route: Route): boolean {
+    return !!(route.meta?.navBar ?? false) || route.matched.slice().reverse().some(r => !!(r.meta?.navBar ?? false));
+}
+
+export function getFooterConfig(route: Route): Partial<StandardFooterProps> | undefined {
+    const footer = (route as MetaRouteConfig).meta?.footer ?? route.matched.slice().reverse().some(r => (r as MetaRouteConfig).meta?.footer);
+    if (isBoolean(footer)) {
+        return undefined;
+    }
+    return footer;
+}
+
+export function doShowFooter(route: Route): boolean {
+    return !!((route as MetaRouteConfig).meta?.footer ?? true) || route.matched.slice().reverse().some(r => !!((r as MetaRouteConfig).meta?.footer ?? true));
 }
 
 export function setPageMeta(routeMeta?: RoutePageMeta | null, title?: string): PageMetaInfo | null {

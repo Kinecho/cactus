@@ -41,23 +41,29 @@
     import AppStoreIcon from "@web/components/AppStoreIcon.vue";
     import PlayStoreIcon from "@web/components/PlayStoreIcon.vue";
     import { isAndroidApp } from '@web/DeviceUtil'
+    import Component from "vue-class-component";
+    import { Prop } from "vue-property-decorator";
+    import { StandardFooterProps } from "@components/StandardFooterTypes";
 
-    export default Vue.extend({
-        props: {
-            lifted: { type: Boolean, required: false, default: false },
-            isTransparent: { type: Boolean, default: false },
-        },
+    @Component({
         components: {
             AppStoreIcon,
             PlayStoreIcon
-        },
-        computed: {
-            isAndroidApp(): boolean {
-                return isAndroidApp();
-            }
         }
     })
+    export default class StandardFooter extends Vue implements StandardFooterProps {
 
+        @Prop({ type: Boolean, required: false, default: false })
+        lifted!: boolean;
+
+        @Prop({ type: Boolean, default: false })
+        isTransparent!: boolean;
+
+
+        get isAndroidApp(): boolean {
+            return isAndroidApp();
+        }
+    }
 </script>
 
 <style scoped lang="scss">
