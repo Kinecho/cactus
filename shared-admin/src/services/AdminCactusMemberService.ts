@@ -17,7 +17,13 @@ import CactusMember, {
     ReflectionStats
 } from "@shared/models/CactusMember";
 import { BaseModelField, Collection } from "@shared/FirestoreBaseModels";
-import { getDateAtMidnightDenver, getDateFromISOString, getSendTimeUTC } from "@shared/util/DateUtil";
+import {
+    getDateAtMidnightDenver,
+    getDateFromISOString,
+    getSendTimeUTC,
+    minusDays,
+    plusDays
+} from "@shared/util/DateUtil";
 import {
     ListMember,
     ListMemberStatus,
@@ -35,6 +41,7 @@ import DocumentReference = admin.firestore.DocumentReference;
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 import HoboCache from "@admin/HoboCache";
 import { InsightWord } from "@shared/api/InsightLanguageTypes";
+import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 
 const logger = new Logger("AdminCactusMemberService");
 let firestoreService: AdminFirestoreService;
@@ -507,21 +514,6 @@ export default class AdminCactusMemberService {
         }
     }
 
-    async getMembersUnsubscribedSince(date: Date = new Date()): Promise<CactusMember[]> {
-        const ts = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(date));
-
-        const query = this.getCollectionRef().where(CactusMember.Field.unsubscribedAt, ">=", ts);
-
-        try {
-            const results = await AdminFirestoreService.getSharedInstance().executeQuery(query, CactusMember);
-
-            return results.results;
-        } catch (error) {
-            logger.error(error);
-            return [];
-        }
-    }
-
     /**
      * Get members where the opt-out trial started after the provided Date.
      * This is typically used to look at members for the previous day in the Slack job.
@@ -543,6 +535,22 @@ export default class AdminCactusMemberService {
     async getCancellationsInitiatedSince(date: Date): Promise<CactusMember[]> {
         const ts = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(date));
         const query = this.getCollectionRef().where(CactusMember.Field.subscriptionCancellationInitiatedAt, ">=", ts);
+        return (await firestoreService.executeQuery(query, CactusMember)).results;
+    }
+
+    /**
+     * Get members where their trial has ended and they converted to paid
+     * @param {Date} date
+     * @return {Promise<CactusMember[]>}
+     */
+    async getOptTrialsConvertedToPaidSince(date: Date): Promise<CactusMember[]> {
+        const tomorrow = plusDays(1, date);
+        const todayTs = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(date));
+        const tomorrowTs = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(tomorrow))
+        const query = this.getCollectionRef()
+            .where(CactusMember.Field.subscriptionOptOutTrialEndsAt, ">=", todayTs)
+            .where(CactusMember.Field.subscriptionOptOutTrialEndsAt, "<=", tomorrowTs)
+            .where(CactusMember.Field.subscriptionTier, "==", SubscriptionTier.PLUS);
         return (await firestoreService.executeQuery(query, CactusMember)).results;
     }
 
