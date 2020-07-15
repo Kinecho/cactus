@@ -325,7 +325,10 @@ export const routes: MetaRouteConfig[] = [
         "@web/views/GapAnalysisPage.vue")),
         name: "GapAnalysisPage",
         meta: {
-            title: "Happiness Quiz | Cactus"
+            title: "Happiness Quiz | Cactus",
+            passMember: true,
+            authRequired: true,
+            authContinueMessage: "Please sign in to take the quiz."
         },
         props: (route) => {
             return {
