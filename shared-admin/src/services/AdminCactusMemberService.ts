@@ -549,6 +549,26 @@ export default class AdminCactusMemberService {
         return (await firestoreService.executeQuery(query, CactusMember)).results;
     }
 
+    async getPromotionalOffersAppliedOn(date: Date): Promise<CactusMember[]> {
+        const tomorrow = plusDays(1, date);
+        const todayTs = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(date));
+        const tomorrowTs = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(tomorrow))
+        const query = this.getCollectionRef()
+        .where(CactusMember.Field.currentOfferAppliedAt, ">=", todayTs)
+        .where(CactusMember.Field.currentOfferAppliedAt, "<=", tomorrowTs)
+        return (await firestoreService.executeQuery(query, CactusMember)).results;
+    }
+
+    async getPromotionalOffersRedeemedOn(date: Date): Promise<CactusMember[]> {
+        const tomorrow = plusDays(1, date);
+        const todayTs = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(date));
+        const tomorrowTs = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(tomorrow))
+        const query = this.getCollectionRef()
+        .where(CactusMember.Field.currentOfferRedeemedAt, ">=", todayTs)
+        .where(CactusMember.Field.currentOfferRedeemedAt, "<=", tomorrowTs)
+        return (await firestoreService.executeQuery(query, CactusMember)).results;
+    }
+
     async getMembersForUTCSendPromptTime(sendTime: PromptSendTime, options?: GetOptions): Promise<CactusMember[]> {
         const query = this.getCollectionRef().where(CactusMember.Field.promptSendTimeUTC_hour, "==", sendTime.hour)
         .where(CactusMember.Field.promptSendTimeUTC_minute, "==", sendTime.minute);

@@ -331,17 +331,23 @@ async function getTodayStatFields(todayDate: Date): Promise<SlackAttachmentField
         trialStartMembers,
         cancellationInitiatedMembers,
         trialConvertedMembers,
+        offersApplied,
+        offersRedeemed,
     ] = await Promise.all([
         AdminCactusMemberService.getSharedInstance().getMembersCreatedSince(todayDate),
         AdminReflectionResponseService.getSharedInstance().getResponseSinceDate(todayDate),
         AdminDeletedUserService.getSharedInstance().getAllSince(todayDate),
         AdminCactusMemberService.getSharedInstance().getOptOutTrialStartedSince(todayDate),
         AdminCactusMemberService.getSharedInstance().getCancellationsInitiatedSince(todayDate),
-        AdminCactusMemberService.getSharedInstance().getOptTrialsConvertedToPaidSince(todayDate)
+        AdminCactusMemberService.getSharedInstance().getOptTrialsConvertedToPaidSince(todayDate),
+        AdminCactusMemberService.getSharedInstance().getPromotionalOffersAppliedOn(todayDate),
+        AdminCactusMemberService.getSharedInstance().getPromotionalOffersRedeemedOn(todayDate),
     ]) as [
         CactusMember[],
         ReflectionResponse[],
         DeletedUser[],
+        CactusMember[],
+        CactusMember[],
         CactusMember[],
         CactusMember[],
         CactusMember[],
@@ -388,15 +394,41 @@ async function getTodayStatFields(todayDate: Date): Promise<SlackAttachmentField
 
     sortedResponseStats.unshift(`\`TOTAL\` - ${ allResponses.length } from ${ countMembersReflected } members`);
 
+
+    const offersMap: Record<string, {redeemed: number, applied: number}> = {};
+    offersApplied.forEach(a => {
+        const name = a.currentOffer?.displayName;
+        if (!name) {
+            return;
+        }
+        const r = offersMap[name] ?? {redeemed: 0, applied: 0};
+        r.applied += 1;
+    })
+
+    offersRedeemed.forEach(m => {
+        const name = m.currentOffer?.displayName;
+        if (!name) {
+            return;
+        }
+        const r = offersMap[name] ?? {redeemed: 0, applied: 0};
+        r.redeemed += 1;
+    })
+
+
+    const offerFieldValue = Object.keys(offersMap).map(offerName => {
+        const {redeemed, applied} = offersMap[offerName]
+        return `\`${offerName}\` - ${redeemed} / ${applied} (${applied > 0 ? (redeemed/applied).toFixed(1) : "∞"}%)`;
+    }).join('\n')
+
     todayFields.push({
         title: `Sign Ups`,
         value: `${ confirmedMemberCount }`,
-        short: true,
+        short: false,
     },
     {
         title: "Reflection Responses",
         value: `${ sortedResponseStats.join("\n") }`,
-        short: true
+        short: false
     }, {
         title: "Referrers",
         value: `${ Object.entries(topReferrers).sort(([, v1], [, v2]) => v2 - v1).map(([email, count]) => {
@@ -404,11 +436,15 @@ async function getTodayStatFields(todayDate: Date): Promise<SlackAttachmentField
         }).join("\n") || "None" }`
     },
     {
+        title: "Offers: Redeemed / Applied",
+        value: offerFieldValue,
+    },
+    {
         title: "Deleted Users",
         value: `${ deletedUsers.length }`
     },
     {
-        title: "Trials Started (Opt Out)",
+        title: "Trials Starts",
         value: `${ trialStartMembers.length }`
     },
     {
