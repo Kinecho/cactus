@@ -88,7 +88,7 @@
         ctaText!: string;
 
         get upgradeSuccess(): boolean {
-            return isPremiumTier(this.member.tier) || this.checkoutInfo?.success ?? false
+            return isPremiumTier(this.member.tier) || (this.checkoutInfo?.success ?? false)
         }
 
         get checkoutLoading(): boolean {
@@ -96,7 +96,11 @@
         }
 
         get markdownText(): string | undefined {
-            return this.card.getMarkdownText();
+            // return this.card.getMarkdownText();
+            if (this.trialDays && this.trialDays > 0) {
+                return `Discover your core values when you start a free ${this.trialDays}-day trial`
+            }
+            return `Discover your core values when you upgrade to Cactus Plus`
         }
 
         get errorMessage(): string | null {
