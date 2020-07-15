@@ -317,34 +317,35 @@ async function processToday(job: JobRequest): Promise<SlashCommandResponse> {
     };
 }
 
-
+/**
+ * Get stats about the activity that occurred on a given date.
+ * @param {Date} todayDate
+ * @return {Promise<SlackAttachmentField[]>}
+ */
 async function getTodayStatFields(todayDate: Date): Promise<SlackAttachmentField[]> {
-
     const todayFields: SlackAttachmentField[] = [];
 
-
     const [allMembers,
-        unsubscriberes,
         allResponses,
         deletedUsers,
         trialStartMembers,
         cancellationInitiatedMembers,
+        trialConvertedMembers,
     ] = await Promise.all([
         AdminCactusMemberService.getSharedInstance().getMembersCreatedSince(todayDate),
-        AdminCactusMemberService.getSharedInstance().getMembersUnsubscribedSince(todayDate),
         AdminReflectionResponseService.getSharedInstance().getResponseSinceDate(todayDate),
         AdminDeletedUserService.getSharedInstance().getAllSince(todayDate),
         AdminCactusMemberService.getSharedInstance().getOptOutTrialStartedSince(todayDate),
         AdminCactusMemberService.getSharedInstance().getCancellationsInitiatedSince(todayDate),
+        AdminCactusMemberService.getSharedInstance().getOptTrialsConvertedToPaidSince(todayDate)
     ]) as [
-        CactusMember[],
         CactusMember[],
         ReflectionResponse[],
         DeletedUser[],
         CactusMember[],
         CactusMember[],
+        CactusMember[],
     ];
-
 
     logger.log(`All tasks have completed for Today Stats for ${ getISODate(todayDate) }`);
 
@@ -391,10 +392,6 @@ async function getTodayStatFields(todayDate: Date): Promise<SlackAttachmentField
         title: `Sign Ups`,
         value: `${ confirmedMemberCount }`,
         short: true,
-    }, {
-        title: `Unsubscribers`,
-        value: `${ unsubscriberes.length }`,
-        short: true,
     },
     {
         title: "Reflection Responses",
@@ -413,6 +410,10 @@ async function getTodayStatFields(todayDate: Date): Promise<SlackAttachmentField
     {
         title: "Trials Started (Opt Out)",
         value: `${ trialStartMembers.length }`
+    },
+    {
+        title: "Trials Converted to Paid",
+        value: `${ trialConvertedMembers.length }`
     },
     {
         title: "Subscription Cancellations Initiated",

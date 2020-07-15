@@ -315,6 +315,24 @@
           "order": "ASCENDING"
         },
         {
+          "fieldPath": "subscription.optOutTrial.endsAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "members",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "deleted",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "subscription.tier",
+          "order": "ASCENDING"
+        },
+        {
           "fieldPath": "subscription.trial.endsAt",
           "order": "ASCENDING"
         }
