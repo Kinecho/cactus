@@ -256,10 +256,6 @@ export const routes: MetaRouteConfig[] = [
         name: "Terms of Service",
     },
     {
-        path: PageRoute.VALUES_HOME,
-        redirect: PageRoute.CORE_VALUES,
-    },
-    {
         component: () => lazyLoadView(import(
         /* webpackPrefetch: true, webpackChunkName: "pages" */
         "@components/SharedReflectionPage.vue")),
@@ -322,10 +318,6 @@ export const routes: MetaRouteConfig[] = [
             description: "Core values are the general expression of what is most important for you, and they help you " +
             "understand past decisions and make better decisions in the future."
         }
-    },
-    {
-        path: PageRoute.VALUES_HOME,
-        redirect: PageRoute.CORE_VALUES,
     },
     {
         path: PageRoute.GAP_ANALYSIS,

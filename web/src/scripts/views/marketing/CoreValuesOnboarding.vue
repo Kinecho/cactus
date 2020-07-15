@@ -1,7 +1,7 @@
 <template>
     <div>
         <hero title="Core Values Onboarding Page" sub-text="Research-backed prompts to increase self-awareness and resilience">
-            <router-link :to="mainCtaPath" tag="button" class="quizBtn primary">Try It Free</router-link>
+            <router-link :to="mainCtaPath" tag="button" class="mainCta primary">Try It Free</router-link>
         </hero>
         <why-cactus/>
         <split-view>
@@ -10,7 +10,7 @@
         </split-view>
         <testimonials/>
         <pre-footer>
-            <router-link :to="mainCtaPath" tag="button" class="quizBtn primary">Try It Free</router-link>
+            <router-link :to="mainCtaPath" tag="button" class="mainCta primary">Try It Free</router-link>
         </pre-footer>
     </div>
 </template>
@@ -61,7 +61,7 @@
         }
 
         get mainCtaPath(): string {
-            return PageRoute.HELLO_ONBOARDING
+            return PageRoute.CORE_VALUES
         }
 
         get showTryItHeader(): boolean {
@@ -75,7 +75,7 @@
     @import "styles/mixins";
     @import "styles/variables";
 
-    .quizBtn {
+    .mainCta {
         min-width: 24rem;
     }
 

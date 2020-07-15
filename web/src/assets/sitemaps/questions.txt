@@ -1,5 +1,3 @@
-https://cactus.app/values
-https://cactus.app/prompts
 https://cactus.app/terms-of-service
 https://cactus.app/privacy-policy
 https://cactus.app/pricing
