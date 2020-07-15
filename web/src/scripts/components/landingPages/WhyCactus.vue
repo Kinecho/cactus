@@ -60,10 +60,14 @@
 
         .subtext {
             color: $white;
+            opacity: .8;
             padding-bottom: 5.6rem;
 
             @include r(768) {
                 padding-bottom: 7.2rem;
+            }
+            @include r(960) {
+                font-size: 2rem;
             }
         }
 
