@@ -5,10 +5,8 @@
         </hero>
         <why-cactus/>
         <split-view>
-            <template>
-                <fortify-e-q/>
-                <private/>
-            </template>
+            <fortify-e-q/>
+            <private/>
         </split-view>
         <testimonials/>
         <pre-footer>

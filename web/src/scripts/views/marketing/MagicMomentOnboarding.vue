@@ -5,10 +5,8 @@
         </hero>
         <why-cactus/>
         <split-view>
-            <template>
-                <fortify-e-q/>
-                <private/>
-            </template>
+            <fortify-e-q/>
+            <private/>
         </split-view>
         <testimonials/>
         <pre-footer>
@@ -32,6 +30,7 @@
     import Private from "@components/landingPages/Private.vue";
     import FortifyEQ from "@components/landingPages/FortifyEQ.vue";
     import WhyCactus from "@components/landingPages/WhyCactus.vue";
+
     @Component({
         components: {
             Hero,
