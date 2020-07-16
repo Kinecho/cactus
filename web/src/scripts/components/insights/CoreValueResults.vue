@@ -1,5 +1,5 @@
 <template>
-    <section class="valuesContainer" :class="{bordered}">
+    <section class="valuesContainer" :class="{withDescription: showDescription}">
         <h2>{{title}}</h2>
         <div class="flexIt">
             <ul class="core-values-list">
@@ -48,9 +48,6 @@
         @Prop({ type: Boolean, default: true })
         showDropdownMenu!: boolean;
 
-        @Prop({type: Boolean, default: true})
-        bordered!: boolean;
-
         @Prop({type: String|null, default: "Core Values"})
         title!: string|null;
 
@@ -83,34 +80,11 @@
     @import "mixins";
     @import "insights";
 
-    .centered {
-        flex-grow: 1;
-        padding: 0 0 6.4rem;
-        text-align: left;
-
-        @include r(374) {
-            padding: 0 2.4rem 6.4rem;
-        }
-    }
-
     .valuesContainer {
-        margin: 0 2.4rem 3.2rem;
-
-        @include r(374) {
-            margin: 0 0 3.2rem;
-        }
-        @include r(768) {
-            margin: 0 1.6rem 4.8rem 0;
-        }
-    }
-
-    .valuesContainer {
-        &.bordered {
-            border: 1px solid $lightest;
-        }
         border-radius: 1.6rem;
         padding: 2.4rem;
         position: relative;
+        text-align: left;
 
         @include r(374) {
             padding: 2.4rem 3.2rem;
@@ -118,30 +92,33 @@
         @include r(768) {
             display: flex;
             flex-direction: column;
-            margin-bottom: 4.8rem;
         }
 
         h2 {
             @include r(768) {
                 margin-bottom: 3.2rem;
             }
-            @include r(960) {
-                margin-bottom: 0;
-            }
+        }
+    }
+
+    .flexIt {
+        display: flex;
+        flex-grow: 1;
+
+        @include r(600) {
+            justify-content: space-between;
+        }
+        @include r(768) {
+            flex-direction: column;
+        }
+        @include r(960) {
+            flex-direction: row;
         }
 
-        .flexIt {
-            align-items: center;
-            display: flex;
-            flex-grow: 1;
+        .withDescription & {
+            flex-direction: column;
 
             @include r(600) {
-                justify-content: space-between;
-            }
-            @include r(768) {
-                flex-direction: column;
-            }
-            @include r(960) {
                 flex-direction: row;
             }
         }
@@ -160,6 +137,18 @@
             margin: 0;
             width: 50%;
         }
+
+        .withDescription & {
+            margin-right: 0;
+
+            @include r(600) {
+                width: 50%;
+            }
+            @include r(768) {
+                margin-right: 2.4rem;
+                width: auto;
+            }
+        }
     }
 
     .core-value {
@@ -169,6 +158,20 @@
 
         @include r(600) {
             margin-bottom: 1.6rem;
+        }
+
+        .withDescription & {
+            background-color: $white;
+            margin-bottom: 1.6rem;
+        }
+    }
+
+    .description {
+        font-size: 1.6rem;
+        opacity: .8;
+
+        @include r(600) {
+            font-size: 1.8rem;
         }
     }
 
@@ -182,6 +185,16 @@
         }
         @include r(960) {
             width: 40%;
+        }
+
+        .withDescription & {
+            position: absolute;
+            right: -4.8rem;
+            top: -4.8rem;
+
+            @include r(600) {
+                position: static;
+            }
         }
 
         img {
