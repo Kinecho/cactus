@@ -14,30 +14,27 @@
                     <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
                 </svg>
             </button>
-            <div class="paddingContainer">
-                <template v-if="showResults">
-                    <h2>Core Values</h2>
-                    <core-value-results
-                            :core-values="coreValues"
-                            :show-dropdown-menu="false"
-                            :bordered="false"
-                            :title="null"
-                            :show-description="true"/>
-                    <button @click="restart">Re-take the assessment</button>
-                </template>
-                <div v-else-if="showUpgradeRequired">
-                    <h3>You must be a Cactus Plus member to see your results.</h3>
-                    <button @click="upgrade">Try it free</button>
-                </div>
-                <template v-else-if="closed && (!assessmentResponse || !assessmentResponse.completed)">
-                    <p>You may close this screen.</p>
-                </template>
-                <template v-else-if="showSpinner || error">
-                    <h2>Core Values</h2>
-                    <spinner v-if="showSpinner" message="Loading..." class="loader" :delay="1200"/>
-                    <p v-if="error">{{error}}</p>
-                </template>
+            <template v-if="showResults">
+                <core-value-results
+                        :core-values="coreValues"
+                        :show-dropdown-menu="false"
+                        :bordered="false"
+                        title="Core Values"
+                        :show-description="true"/>
+                <button class="secondary retakeBtn" @click="restart">Retake the Assessment</button>
+            </template>
+            <div v-else-if="showUpgradeRequired">
+                <h3>You must be a Cactus Plus member to see your results.</h3>
+                <button @click="upgrade">Try it free</button>
             </div>
+            <template v-else-if="closed && (!assessmentResponse || !assessmentResponse.completed)">
+                <p>You may close this screen.</p>
+            </template>
+            <template v-else-if="showSpinner || error">
+                <h2>Core Values</h2>
+                <spinner v-if="showSpinner" message="Loading..." class="loader"/>
+                <p v-if="error">{{error}}</p>
+            </template>
         </div>
         <div class="debug">
             <button @click="upgrade">Upgrade</button>
@@ -288,5 +285,15 @@
 
     .loader {
         padding: 3rem;
+    }
+
+    .retakeBtn {
+        margin: -1.6rem 2.4rem 2.4rem;
+        width: calc(100% - 4.8rem);
+
+        @include r(600) {
+            display: block;
+            margin: 0 0 4rem 3.2rem;
+        }
     }
 </style>
