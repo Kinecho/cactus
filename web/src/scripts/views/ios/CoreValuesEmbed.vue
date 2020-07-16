@@ -14,7 +14,8 @@
                     <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
                 </svg>
             </button>
-            <template v-if="showResults">
+            <loadable-quiz-results-upsell v-if="showUpsell" :billing-period="billingPeriod"/>
+            <template v-else-if="showResults">
                 <core-value-results
                         :core-values="coreValues"
                         :show-dropdown-menu="false"
@@ -23,6 +24,7 @@
                         :show-description="true"/>
                 <button class="secondary retakeBtn" @click="restart">Retake the Assessment</button>
             </template>
+
             <div v-else-if="showUpgradeRequired">
                 <h3>You must be a Cactus Plus member to see your results.</h3>
                 <button @click="upgrade">Try it free</button>
@@ -86,8 +88,8 @@
     import CoreValueResults from "@components/insights/CoreValueResults.vue";
     import { CoreValue } from "@shared/models/CoreValueTypes";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
-    import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
-    import { stringifyJSON } from "@shared/util/ObjectUtil";
+    import LoadableQuizResultsUpsell from "@components/upgrade/LoadableQuizResultsUpsell.vue";
+    import { BillingPeriod } from "@shared/models/SubscriptionProduct";
 
     const logger = new Logger("CoreValuesEmbed");
 
@@ -96,6 +98,7 @@
             CoreValueResults,
             Spinner,
             Assessment,
+            LoadableQuizResultsUpsell
         }
     })
     export default class CoreValuesEmbed extends Vue implements IosDelegate {
@@ -107,6 +110,7 @@
         assessment: CoreValuesAssessment = CoreValuesAssessment.default();
         assessmentResponse: CoreValuesAssessmentResponse | null = null;
 
+        billingPeriod: BillingPeriod = BillingPeriod.yearly;
         appMemberId: string | null = null;
         appDisplayName: string | null = null;
         appSubscriptionTier: SubscriptionTier | null = null;
@@ -118,7 +122,7 @@
         closed = false;
         existingResults: CoreValuesAssessmentResponse | null = null;
         previousResults: CoreValuesAssessmentResponse | null = null;
-
+        showUpsell = false;
         appMethods: string = "not set"
 
         beforeMount() {
@@ -161,12 +165,12 @@
 
             if (!id) {
                 this.error = "Oops, we are unable to load the Core Values assessment. Please try again later";
-                return
+                return "You must pass a member ID";
             }
 
             this.appMemberId = id;
-            this.appDisplayName = displayName;
-            this.appSubscriptionTier = tier;
+            this.appDisplayName = displayName ?? "";
+            this.appSubscriptionTier = tier ?? SubscriptionTier.BASIC;
             this.appRegistered = true;
             setUserId(id)
 
@@ -175,24 +179,13 @@
             this.initAssessment(id);
             this.loading = false
 
-
-            let appMethods = window.webkit?.messageHandlers ?? { none: "not found" }
-            appMethods = `methods: ${ JSON.stringify({
-                appMounted: !!window.webkit?.messageHandlers?.appMounted,
-                closeCoreValues: !!window.webkit?.messageHandlers?.closeCoreValues,
-                showPricing: !!window.webkit?.messageHandlers?.showPricing,
-            }, null, 2) }`
-            this.appMethods = appMethods = `hasWebkit: ${ !!window.webkit } | methods: ${ appMethods }`
-            // FOR TESTING
-            // this.assessmentResponse.results = { values: [CoreValue.Power, CoreValue.Nature, CoreValue.Humor] };
-            // this.assessmentResponse.completed = true;
-
             return "success"
         }
 
         async updateMember(id?: string | null, displayName?: string | null, tier?: SubscriptionTier | null): Promise<string> {
             logger.info("updating member", id, displayName, tier);
             this.appSubscriptionTier = tier ?? SubscriptionTier.BASIC;
+            return "success";
         }
 
         initAssessment(memberId: string) {
@@ -229,7 +222,8 @@
         }
 
         async upgrade() {
-            IosAppService.showPricing();
+            // IosAppService.showPricing();
+            this.showUpsell = true;
         }
 
         async complete(assessmentResponse: CoreValuesAssessmentResponse) {
@@ -246,18 +240,18 @@
             return isPremiumTier(this.appSubscriptionTier);
         }
 
-        async loadCurrentResults(): Promise<GapAnalysisAssessmentResult | undefined> {
+        async loadCurrentResults(): Promise<CoreValuesAssessmentResponse | null> {
             this.resultsLoading = true;
             const memberId = this.appMemberId;
             if (!memberId) {
                 this.resultsLoading = false;
                 this.error = "You must be signed in to complete the assessment.";
-                return
+                return null
             }
             const currentResults = await AssessmentResponseService.sharedInstance.getLatestForUser(memberId);
 
             this.resultsLoading = false;
-            return currentResults;
+            return currentResults ?? null;
         }
 
         async save(assessmentResponse: CoreValuesAssessmentResponse) {
