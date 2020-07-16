@@ -3,7 +3,14 @@
         <div class="main">
             <!--            <span class="select" @click="clicked">{{selected ? 'Selected' : 'Not selected'}}</span>-->
 
-            <div class="grow"><check-box :model-value="selected" :label="option.title" @change="selectionChanged" :type="this.type" :disabled="disabled" :extraPadding="true"/></div>
+            <div class="grow"><check-box
+                    :model-value="selected"
+                    :label="option.title"
+                    @change="selectionChanged"
+                    :type="this.type"
+                    :disabled="disabled"
+                    :extraPadding="true"/>
+            </div>
 
             <button class="expand-toggle tertiary icon" @click="expanded = !expanded">
                 <svg class="arrowIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 8"><path d="M1.707.293A1 1 0 10.293 1.707l6 6a1 1 0 001.414 0l6-6A1 1 0 1012.293.293L7 5.586 1.707.293z"/></svg>

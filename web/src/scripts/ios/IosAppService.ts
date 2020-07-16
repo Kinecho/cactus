@@ -13,7 +13,7 @@ export default class IosAppService {
                 setTimeout(async () => {
                     const success = await window.CactusIosDelegate?.register("mPXI1Hz9iWgYxVcYTnWKWxw9Xq72",
                     "Neil IoSMock",
-                    SubscriptionTier.PLUS)
+                    SubscriptionTier.BASIC)
                     logger.info("Mock register app result = ", success);
                 }, 3000)
             } else {
