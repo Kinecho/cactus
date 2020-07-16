@@ -124,7 +124,7 @@
                 this.loading = false;
             }, 15000)
             window.CactusIosDelegate = this;
-            IosAppService.notifyAppMounted();
+            IosAppService.notifyAppMounted(true);
         }
 
         destroyed() {

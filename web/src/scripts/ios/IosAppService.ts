@@ -6,7 +6,7 @@ import CactusMember from "@shared/models/CactusMember";
 
 const logger = new Logger("IosAppManager");
 
-export type WebkitMessageBody = string|boolean;
+export type WebkitMessageBody = string | boolean;
 
 export interface WebkitMessageHandler<T extends WebkitMessageBody> {
     postMessage: (body: T) => void;
@@ -21,7 +21,13 @@ export interface IosAppInterface {
 export default class IosAppService {
     static notifyAppMounted(mockRegister: boolean = false) {
         try {
-            window.webkit?.messageHandlers?.appMounted.postMessage(true);
+            if (window.webkit?.messageHandlers?.appMounted) {
+                window.webkit?.messageHandlers?.appMounted.postMessage(true);
+            } else {
+                if (mockRegister || Config.isDev) {
+                    IosAppService.mockAppMounted()
+                }
+            }
         } catch (error) {
             if (mockRegister || Config.isDev) {
                 IosAppService.mockAppMounted()
@@ -31,7 +37,7 @@ export default class IosAppService {
         }
     }
 
-    static closeCoreValues(): Promise<{ error?: string }> {
+    static closeCoreValues(): { error?: string } {
         try {
             window.webkit?.messageHandlers?.closeCoreValues?.postMessage(true);
             return {};
@@ -46,6 +52,7 @@ export default class IosAppService {
     }
 
     protected static mockAppMounted() {
+        logger.info("Mocking app mounted");
         const currentMember = CactusMemberService.sharedInstance.currentMember;
 
         setTimeout(async () => {
