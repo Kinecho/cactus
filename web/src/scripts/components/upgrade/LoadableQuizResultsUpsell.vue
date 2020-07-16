@@ -1,5 +1,5 @@
 <template>
-    <GapAnalysisUpsell :checkout-loading="loading"
+    <results-upsell :checkout-loading="loading"
             :subscription-product="product"
             :element="selectedElement"
             @checkout="checkout"
@@ -9,7 +9,7 @@
 <script lang="ts">
     import Vue from "vue";
     import Component from "vue-class-component"
-    import GapAnalysisUpsell from "@components/gapanalysis/GapAnalysisUpsell.vue";
+    import ResultsUpsell from "@components/upgrade/QuizResultsUpsell.vue";
     import SubscriptionProduct, { BillingPeriod } from "@shared/models/SubscriptionProduct";
     import { CactusElement } from "@shared/models/CactusElement";
     import { Prop, Watch } from "vue-property-decorator";
@@ -18,13 +18,13 @@
     import { getQueryParam } from "@web/util";
     import { QueryParam } from "@shared/util/queryParams";
 
-    const logger = new Logger("LoadableGapAnalysisUpsell");
+    const logger = new Logger("LoadableQuizResultsUpsell");
 
     @Component({
-        components: { GapAnalysisUpsell: ResultsUpsell }
+        components: { ResultsUpsell }
     })
-    export default class LoadableGapAnalysisUpsell extends Vue {
-        name = "LoadableGapAnalysisUpsell";
+    export default class LoadableQuizResultsUpsell extends Vue {
+        name = "LoadableQuizResultsUpsell";
 
         @Prop({ type: String as () => CactusElement, required: false, default: null })
         element!: CactusElement | null;

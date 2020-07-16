@@ -1,7 +1,8 @@
 <template>
     <div>
         <nav-bar v-if="showNav" v-bind="navProps" class="app-nav"/>
-        <upgrade-success-banner v-if="showUpgradeSuccessBanner" @close="hasUpgradeSuccessParam = false"/>
+        <upgrade-success-banner v-if="showUpgradeSuccessBanner"
+                @close="hasUpgradeSuccessParam = false"/>
         <transition name="component-fade" appear mode="out-in">
             <router-view v-if="allLoaded && showRoute" v-bind="props"/>
             <div v-else-if="showUnauthorizedRoute">

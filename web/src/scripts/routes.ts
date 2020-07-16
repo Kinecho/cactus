@@ -316,9 +316,42 @@ export const routes: MetaRouteConfig[] = [
         meta: {
             title: "Discover your core values",
             description: "Core values are the general expression of what is most important for you, and they help you " +
-            "understand past decisions and make better decisions in the future."
-        }
+            "understand past decisions and make better decisions in the future.",
+            // authRequired: true,
+            passMember: true,
+            // authContinueMessage: "Please sign in to take the quiz."
+        },
+        children: [
+            {
+                path: "assessment",
+                component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
+                "@components/CoreValuesAssessmentPage.vue")),
+                meta: {
+                    title: "Discover your core values",
+                    description: "Core values are the general expression of what is most important for you, and they help you " +
+                    "understand past decisions and make better decisions in the future.",
+                    authRequired: true,
+                    passMember: true,
+                    authContinueMessage: "Please sign in to take the quiz."
+                }
+            },
+            {
+                path: "embed",
+                component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "ios" */
+                "@web/views/ios/CoreValuesEmbed.vue")),
+                meta: {
+                    title: "Discover your core values",
+                    description: "Core values are the general expression of what is most important for you, and they help you " +
+                    "understand past decisions and make better decisions in the future.",
+                    authRequired: false,
+                    // passMember: true,
+                    // authContinueMessage: "Please sign in to take the quiz."
+                }
+            },
+        ]
+
     },
+
     {
         path: PageRoute.GAP_ANALYSIS,
         component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */

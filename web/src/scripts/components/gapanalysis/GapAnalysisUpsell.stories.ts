@@ -24,7 +24,7 @@ export const StaticProduct = () => Vue.extend({
             />
         </div>`,
     components: {
-        GapAnalysisUpsell,
+        GapAnalysisUpsell: ResultsUpsell,
     },
     props: {
         element: {

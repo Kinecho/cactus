@@ -1,4 +1,5 @@
 import { AndroidAppDelegateInterface, AndroidAppInterface } from "@web/android/AndroidAppInterface";
+import { IosDelegate } from "@web/ios/IosAppTypes";
 
 interface VisualViewportEventMap {
     "resize": UIEvent;
@@ -37,7 +38,8 @@ declare global {
         AndroidDelegate?: AndroidAppDelegateInterface,
         androidCheckoutFinished?: (success: boolean, message?: string | undefined) => void
         branch: any,
-        cloudsponge: any,
+        cloudsponge: any;
+        CactusIosDelegate?: IosDelegate;
         readonly visualViewport?: VisualViewport;
 
         [key: string]: any; // Add index signature

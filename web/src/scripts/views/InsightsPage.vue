@@ -19,21 +19,22 @@
                         <WordCloud class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
                     </div>
                 </section>
-                <section class="valuesContainer" v-if="hasCoreValues">
-                    <h2>Core Values</h2>
-                    <div class="flexIt">
-                        <ul class="core-values-list">
-                            <li v-for="(coreValue, index) in coreValues" :key="`value_${index}`" class="core-value">
-                                <h3>{{coreValue.value}}</h3>
-                                <!-- <p class="description">{{coreValue.description}}</p> -->
-                            </li>
-                        </ul>
-                        <div class="imgContainer" v-if="coreValuesBlob">
-                            <img :src="coreValuesBlob.imageUrl" alt="Core Values Graphic"/>
-                        </div>
-                    </div>
-                    <dropdown-menu :items="coreValuesDropdownLinks" class="dotsBtn"/>
-                </section>
+                <!--                <section class="valuesContainer" v-if="hasCoreValues">-->
+                <!--                    <h2>Core Values</h2>-->
+                <!--                    <div class="flexIt">-->
+                <!--                        <ul class="core-values-list">-->
+                <!--                            <li v-for="(coreValue, index) in coreValues" :key="`value_${index}`" class="core-value">-->
+                <!--                                <h3>{{coreValue.value}}</h3>-->
+                <!--                                &lt;!&ndash; <p class="description">{{coreValue.description}}</p> &ndash;&gt;-->
+                <!--                            </li>-->
+                <!--                        </ul>-->
+                <!--                        <div class="imgContainer" v-if="coreValuesBlob">-->
+                <!--                            <img :src="coreValuesBlob.imageUrl" alt="Core Values Graphic"/>-->
+                <!--                        </div>-->
+                <!--                    </div>-->
+                <!--                    <dropdown-menu :items="coreValuesDropdownLinks" class="dotsBtn"/>-->
+                <!--                </section>-->
+                <core-value-results v-if="hasCoreValues" :core-values="coreValues" :show-description="false" :show-dropdown-menu="true"/>
                 <router-link v-else tag="section" class="novaluesContainer" :class="{plus: isPlusMember}" :to="coreValuesHref">
                     <svg class="lock" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.8">
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
@@ -64,7 +65,7 @@
     import WordCloud from "@components/MemberWordCloudInsights.vue";
     import CactusMember, { ReflectionStats } from "@shared/models/CactusMember";
     import CactusMemberService from "@web/services/CactusMemberService";
-    import { CoreValueMeta, CoreValuesService } from "@shared/models/CoreValueTypes";
+    import { CoreValue, CoreValueMeta, CoreValuesService } from "@shared/models/CoreValueTypes";
     import { PageRoute } from "@shared/PageRoutes";
     import { QueryParam } from "@shared/util/queryParams";
     import CopyService from "@shared/copy/CopyService";
@@ -90,12 +91,14 @@
     import { Prop } from "vue-property-decorator";
     import JournalFeedDataSource, { JournalFeedDataSourceDelegate } from "@web/datasource/JournalFeedDataSource";
     import MemberHomeEmptyState from "@components/MemberHomeEmptyState.vue";
+    import CoreValueResults from "@components/insights/CoreValueResults.vue";
 
     const logger = new Logger("InsightsPage");
     const copy = CopyService.getSharedInstance().copy;
 
     @Component({
         components: {
+            CoreValueResults,
             EmptyState: MemberHomeEmptyState,
             PromptWidget,
             ReflectionStatsWidget,
@@ -208,11 +211,11 @@
             return (this.wordCloud.length ?? 0) > 0;
         }
 
-        get coreValues(): CoreValueMeta[] {
+        get coreValues(): CoreValue[] {
             if (!this.member) {
                 return [];
             }
-            return (this.member.coreValues ?? []).map(value => CoreValuesService.shared.getMeta(value))
+            return (this.member.coreValues ?? [])
         }
 
         get hasCoreValues(): boolean {
@@ -220,7 +223,7 @@
         }
 
         get coreValuesHref(): string {
-            return `${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`;
+            return PageRoute.CORE_VALUES_ASSESSMENT;
         }
 
         get isPlusMember(): boolean {
@@ -234,7 +237,7 @@
         get coreValuesDropdownLinks(): DropdownMenuLink[] {
             return [{
                 title: "Retake Assessment",
-                href: `${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`,
+                href: PageRoute.CORE_VALUES_ASSESSMENT,
             }];
         }
 

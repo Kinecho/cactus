@@ -1,7 +1,7 @@
 <template>
     <div>
         <hero title="Core Values Onboarding Page" sub-text="Research-backed prompts to increase self-awareness and resilience">
-            <router-link :to="mainCtaPath" tag="button" class="mainCta primary">Try It Free</router-link>
+            <router-link :to="mainCtaPath" tag="a" class="mainCta button primary">Try It Free</router-link>
         </hero>
         <why-cactus/>
         <split-view>
@@ -10,7 +10,7 @@
         </split-view>
         <testimonials/>
         <pre-footer>
-            <router-link :to="mainCtaPath" tag="button" class="mainCta primary">Try It Free</router-link>
+            <router-link :to="mainCtaPath" tag="a" class="mainCta button primary">Try It Free</router-link>
         </pre-footer>
     </div>
 </template>
@@ -48,7 +48,7 @@
         name = "CoreValuesOnboarding.vue";
 
         get mainCtaPath(): string {
-            return PageRoute.CORE_VALUES
+            return PageRoute.CORE_VALUES_ASSESSMENT
         }
 
     }
