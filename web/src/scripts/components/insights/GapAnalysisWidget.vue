@@ -187,7 +187,7 @@
         }
 
         @include r(960) {
-            width: 45%;
+            padding-right: 1.6rem;
 
             .legend {
                 display: flex;
@@ -212,9 +212,13 @@
     }
 
     .radarChartContainer {
-        margin: 0 auto 3.2rem;
+        margin: 0 auto;
         max-width: 38rem;
         width: 100%;
+
+        .legend {
+            margin-bottom: 3.2rem;
+        }
 
         @include r(960) {
             width: 66%;
