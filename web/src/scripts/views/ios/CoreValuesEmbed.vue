@@ -12,11 +12,7 @@
                 <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
             </svg>
         </button>
-        <loadable-quiz-results-upsell v-if="showUpsell"
-                :billing-period="billingPeriod"
-                @checkout="checkout"
-        />
-        <template v-else-if="showResults">
+        <template v-if="showResults">
             <core-value-results
                     :core-values="coreValues"
                     :show-dropdown-menu="false"
@@ -24,14 +20,6 @@
                     title="Core Values"
                     :show-description="true"/>
             <button class="secondary retakeBtn" @click="restart">Retake the Assessment</button>
-        </template>
-
-        <div v-else-if="showUpgradeRequired">
-            <h3>You must be a Cactus Plus member to see your results.</h3>
-            <button @click="upgrade">Try it free</button>
-        </div>
-        <template v-else-if="closed && (!assessmentResponse || !assessmentResponse.completed)">
-            <p>You may close this screen.</p>
         </template>
         <template v-else-if="showSpinner || error">
             <h2>Core Values</h2>
@@ -61,9 +49,8 @@
     import { CoreValue } from "@shared/models/CoreValueTypes";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
     import LoadableQuizResultsUpsell from "@components/upgrade/LoadableQuizResultsUpsell.vue";
-    import SubscriptionProduct, { BillingPeriod } from "@shared/models/SubscriptionProduct";
+    import { BillingPeriod } from "@shared/models/SubscriptionProduct";
     import { isIosApp } from "@web/DeviceUtil";
-    import { startCheckout } from "@web/checkoutService";
 
     const logger = new Logger("CoreValuesEmbed");
 
@@ -199,13 +186,14 @@
             if (isIosApp()) {
                 IosAppService.showPricing();
             } else {
+                alert("WIll show iOS Upsell")
                 this.showUpsell = true;
             }
         }
 
-        async checkout(subscriptionProduct: SubscriptionProduct | undefined | null) {
-            IosAppService.showPricing();
-        }
+        // async checkout(subscriptionProduct: SubscriptionProduct | undefined | null) {
+        //     IosAppService.showPricing();
+        // }
 
         async complete(assessmentResponse: CoreValuesAssessmentResponse) {
             logCoreValuesAssessmentCompleted();
@@ -214,7 +202,13 @@
             this.assessmentResponse = assessmentResponse
             await this.save(assessmentResponse);
             assessmentResponse.completed = true;
-            this.closed = true;
+            // this.closed = true;
+
+            if (this.isPlusMember) {
+                this.closed = true;
+            } else {
+                await this.upgrade()
+            }
         }
 
         get isPlusMember(): boolean {
