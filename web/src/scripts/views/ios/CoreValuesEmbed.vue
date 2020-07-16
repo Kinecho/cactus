@@ -82,6 +82,7 @@
         showAssessment = false;
         existingResults: CoreValuesAssessmentResponse | null = null;
         previousResults: CoreValuesAssessmentResponse | null = null;
+        isUpgrading = false;
 
         beforeMount() {
             this.loading = true;
@@ -97,8 +98,16 @@
             window.clearTimeout(this.initTimeout ?? undefined);
         }
 
+        get hasExistingResults(): boolean {
+            return !!this.existingResults
+        }
+
         get showResults(): boolean {
-            return this.isPlusMember && (!!this.existingResults || (!this.showAssessment && this.assessmentResponse?.completed === true));
+            return this.isPlusMember && (this.hasExistingResults || (!this.showAssessment && this.completed));
+        }
+
+        get completed(): boolean {
+            return this.assessmentResponse?.completed === true
         }
 
         get showSpinner(): boolean {
@@ -138,6 +147,10 @@
 
         async updateMember(id?: string | null, displayName?: string | null, tier?: SubscriptionTier | null): Promise<string> {
             logger.info("updating member", id, displayName, tier);
+            if (isPremiumTier(tier) && !isPremiumTier(this.appSubscriptionTier) && this.isUpgrading) {
+                this.showAssessment = false;
+                this.isUpgrading = false;
+            }
             this.appSubscriptionTier = tier ?? SubscriptionTier.BASIC;
             return "success";
         }
@@ -164,11 +177,11 @@
             if (error) {
                 this.error = "Oops, unable to exit the assessment. " + error;
             }
-            // this.showAssessment = false;
             this.existingResults = this.previousResults;
         }
 
         async upgrade() {
+            this.isUpgrading = true;
             IosAppService.showPricing();
         }
 
