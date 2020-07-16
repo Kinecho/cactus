@@ -58,14 +58,6 @@
             <strong>Error:</strong> {{error}}
         </pre>
         </div>
-        <template v-else-if="closed && (!assessmentResponse || !assessmentResponse.completed)">
-            <p>You may close this screen.</p>
-        </template>
-        <template v-else-if="showSpinner || error">
-            <h2>Core Values</h2>
-            <spinner v-if="showSpinner" message="Loading..." class="loader"/>
-            <p v-if="error">{{error}}</p>
-        </template>
     </div>
 </template>
 
