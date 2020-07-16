@@ -27,7 +27,7 @@
                 <p class="titleMarkdown">You completed the quiz!</p>
             </template>
 
-            <!-- <div v-if="questionIndex === 0" class="intro">
+            <div v-if="!started" class="intro">
                 <h1>What are your core values?</h1>
                 <p>Core values are the general expression of what is most important for you, and they help you understand past decisions and make better decisions in the future.</p>
                 <button class="btn primary" @click="start">Let's go!</button>
@@ -36,7 +36,7 @@
                     All answers are private and confidential and will be used solely to help tune Cactus to be most
                     effective for you.
                 </div>
-            </div> -->
+            </div>
 
             <template v-else-if="currentQuestion && currentResponse">
                 <button class="backArrowbtn btn tertiary icon" @click="previousQuestion()" v-if="hasPreviousQuestion">
@@ -55,13 +55,16 @@
                     <p class="validation" v-show="showValidation && responseValidation && responseValidation.message">
                         {{responseValidation.message}}</p>
                 </transition>
-                <button class="btn btn primary no-loading"
+                <button v-if="hasNextQuestion && started"
+                        class="btn btn primary no-loading"
                         @click="nextQuestion()"
-                        v-if="hasNextQuestion"
+
                         :class="{disabled: this.responseValidation && !this.responseValidation.isValid}">
                     Next
                 </button>
-                <button @click="finish" class="btn btn primary no-loading" v-if="!hasNextQuestion && questionIndex > 0 && completed" :disabled="this.responseValidation && !this.responseValidation.isValid">
+                <button v-if="!hasNextQuestion && questionIndex > 0 && completed"
+                        @click="finish" class="btn btn primary no-loading"
+                        :disabled="this.responseValidation && !this.responseValidation.isValid">
                     Get My Results
                 </button>
             </div>
@@ -102,6 +105,7 @@
         @Prop({ type: Object as () => CoreValuesAssessmentResponse, required: true })
         assessmentResponse!: CoreValuesAssessmentResponse;
 
+        started = false;
         loading: boolean = false;
         questionIndex: number | null = 0;
         completed: boolean = false;
@@ -168,6 +172,7 @@
         }
 
         start() {
+            this.started = true;
             this.questionIndex = 0;
         }
 
