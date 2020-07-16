@@ -8,6 +8,7 @@ module.exports = function (config) {
             contentBase: helpers.srcDir,
             stats: 'errors-warnings',
             hot: true,
+            host: "0.0.0.0",
             https: config.https || false,
             historyApiFallback: {
                 disableDotRule: true,

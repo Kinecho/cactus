@@ -1,6 +1,7 @@
 import Logger from "@shared/Logger"
 import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 import { Config } from "@web/config";
+import CactusMemberService from "@web/services/CactusMemberService";
 
 const logger = new Logger("IosAppManager");
 
@@ -10,10 +11,11 @@ export default class IosAppService {
             window.webkit.messageHandlers.appMounted.postMessage(true);
         } catch (error) {
             if (mockRegister || Config.isDev) {
+                const currentMember = CactusMemberService.sharedInstance.currentMember;
                 setTimeout(async () => {
-                    const success = await window.CactusIosDelegate?.register("mPXI1Hz9iWgYxVcYTnWKWxw9Xq72",
-                    "Neil IoSMock",
-                    SubscriptionTier.BASIC)
+                    const success = await window.CactusIosDelegate?.register(currentMember,
+                    currentMember?.getFullName() ?? "Mock User Display Name",
+                    currentMember?.tier ?? SubscriptionTier.BASIC)
                     logger.info("Mock register app result = ", success);
                 }, 3000)
             } else {
