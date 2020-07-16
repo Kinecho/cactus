@@ -13,7 +13,7 @@ export default class IosAppService {
             if (mockRegister || Config.isDev) {
                 const currentMember = CactusMemberService.sharedInstance.currentMember;
                 setTimeout(async () => {
-                    const success = await window.CactusIosDelegate?.register(currentMember,
+                    const success = await window.CactusIosDelegate?.register(currentMember?.id ?? "none",
                     currentMember?.getFullName() ?? "Mock User Display Name",
                     currentMember?.tier ?? SubscriptionTier.BASIC)
                     logger.info("Mock register app result = ", success);
