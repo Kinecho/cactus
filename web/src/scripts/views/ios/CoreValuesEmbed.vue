@@ -1,13 +1,13 @@
 <template>
-    <div v-if="!showResults && assessment && assessmentResponse && !closed">
+    <div v-if="!showResults && assessment && assessmentResponse && showAssessment">
         <assessment :assessment="assessment"
                 :assessmentResponse="assessmentResponse"
-                @close="closeAssessment"
+                @close="close"
                 @save="save"
                 @completed="complete"/>
     </div>
     <div v-else class="assessment-container">
-        <button aria-label="Close" @click="closeAssessment" title="Close" class="close tertiary icon">
+        <button aria-label="Close" @click="close" title="Close" class="close tertiary icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
                 <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
             </svg>
@@ -50,7 +50,6 @@
     import { isPremiumTier } from "@shared/models/MemberSubscription";
     import LoadableQuizResultsUpsell from "@components/upgrade/LoadableQuizResultsUpsell.vue";
     import { BillingPeriod } from "@shared/models/SubscriptionProduct";
-    import { isIosApp } from "@web/DeviceUtil";
 
     const logger = new Logger("CoreValuesEmbed");
 
@@ -80,11 +79,9 @@
         resultsLoading = false;
         initTimeout: number | null = null;
         error: string | null = null;
-        closed = false;
+        showAssessment = false;
         existingResults: CoreValuesAssessmentResponse | null = null;
         previousResults: CoreValuesAssessmentResponse | null = null;
-        showUpsell = false;
-        appMethods: string = "not set"
 
         beforeMount() {
             this.loading = true;
@@ -100,16 +97,8 @@
             window.clearTimeout(this.initTimeout ?? undefined);
         }
 
-        get userAgent(): string | null | undefined {
-            return window.navigator.userAgent
-        }
-
         get showResults(): boolean {
-            return this.isPlusMember && (!!this.existingResults || this.closed && this.assessmentResponse?.completed === true);
-        }
-
-        get showUpgradeRequired(): boolean {
-            return !this.isPlusMember && this.closed && this.assessmentResponse?.completed === true;
+            return this.isPlusMember && (!!this.existingResults || (!this.showAssessment && this.assessmentResponse?.completed === true));
         }
 
         get showSpinner(): boolean {
@@ -135,7 +124,11 @@
             this.appRegistered = true;
             setUserId(id)
 
-            this.existingResults = await this.loadCurrentResults();
+            if (this.isPlusMember) {
+                this.existingResults = await this.loadCurrentResults();
+            } else {
+                this.showAssessment = true;
+            }
 
             this.initAssessment(id);
             this.loading = false
@@ -162,38 +155,22 @@
             this.previousResults = this.existingResults ?? this.previousResults;
             this.existingResults = null;
             this.initAssessment(this.appMemberId!)
-            this.closed = false;
+            this.showAssessment = true;
         }
 
-        closeIos() {
-            const { error } = IosAppService.closeCoreValues();
-            if (error) {
-                this.error = error;
-            }
-        }
-
-        async closeAssessment() {
+        async close() {
             logger.info("Closing assessment....");
             const { error } = IosAppService.closeCoreValues();
             if (error) {
-                this.error = "Failed to close with iOS: " + error;
+                this.error = "Oops, unable to exit the assessment. " + error;
             }
-            this.closed = true;
+            // this.showAssessment = false;
             this.existingResults = this.previousResults;
         }
 
         async upgrade() {
-            if (isIosApp()) {
-                IosAppService.showPricing();
-            } else {
-                alert("WIll show iOS Upsell")
-                this.showUpsell = true;
-            }
+            IosAppService.showPricing();
         }
-
-        // async checkout(subscriptionProduct: SubscriptionProduct | undefined | null) {
-        //     IosAppService.showPricing();
-        // }
 
         async complete(assessmentResponse: CoreValuesAssessmentResponse) {
             logCoreValuesAssessmentCompleted();
@@ -202,10 +179,9 @@
             this.assessmentResponse = assessmentResponse
             await this.save(assessmentResponse);
             assessmentResponse.completed = true;
-            // this.closed = true;
 
             if (this.isPlusMember) {
-                this.closed = true;
+                this.showAssessment = false;
             } else {
                 await this.upgrade()
             }
