@@ -1,5 +1,6 @@
 import { AndroidAppDelegateInterface, AndroidAppInterface } from "@web/android/AndroidAppInterface";
 import { IosDelegate } from "@web/ios/IosAppTypes";
+import { IosAppInterface } from "@web/ios/IosAppService";
 
 interface VisualViewportEventMap {
     "resize": UIEvent;
@@ -42,6 +43,9 @@ declare global {
         CactusIosDelegate?: IosDelegate;
         readonly visualViewport?: VisualViewport;
 
+        webkit?: {
+            messageHandlers?: {} & IosAppInterface
+        }
         [key: string]: any; // Add index signature
     }
 

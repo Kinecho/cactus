@@ -1,35 +1,65 @@
 <template>
-    <div v-if="!showResults && assessment && assessmentResponse && !closed">
-        <assessment :assessment="assessment"
-                :assessmentResponse="assessmentResponse"
-                @close="closeAssessment"
-                @save="save"
-                @completed="complete"/>
-    </div>
-    <div v-else class="assessment-container">
-        <div class="paddingContainer">
-            <template v-if="showResults">
-                <h2>Core Values</h2>
-                <core-value-results
-                        :core-values="coreValues"
-                        :show-dropdown-menu="false"
-                        :bordered="false"
-                        :title="null"
-                        :show-description="true"/>
-                <button @click="restart">Re-take the assessment</button>
-            </template>
-            <div v-else-if="showUpgradeRequired">
-                <h3>You must be a Cactus Plus member to see your results.</h3>
-                <button @click="upgrade">Try it free</button>
+    <!--    Might not need this container when done testing - i wanted to put some extra details in here-->
+    <div class="embed-container">
+        <div v-if="!showResults && assessment && assessmentResponse && !closed">
+            <assessment :assessment="assessment"
+                    :assessmentResponse="assessmentResponse"
+                    @close="closeAssessment"
+                    @save="save"
+                    @completed="complete"/>
+        </div>
+        <div v-else class="assessment-container">
+            <div class="paddingContainer">
+                <template v-if="showResults">
+                    <h2>Core Values</h2>
+                    <core-value-results
+                            :core-values="coreValues"
+                            :show-dropdown-menu="false"
+                            :bordered="false"
+                            :title="null"
+                            :show-description="true"/>
+                    <button @click="restart">Re-take the assessment</button>
+                </template>
+                <div v-else-if="showUpgradeRequired">
+                    <h3>You must be a Cactus Plus member to see your results.</h3>
+                    <button @click="upgrade">Try it free</button>
+                </div>
+                <template v-else-if="closed && (!assessmentResponse || !assessmentResponse.completed)">
+                    <p>You may close this screen.</p>
+                </template>
+                <template v-else-if="showSpinner || error">
+                    <h2>Core Values</h2>
+                    <spinner v-if="showSpinner" message="Loading..." class="loader"/>
+                    <p v-if="error">{{error}}</p>
+                </template>
             </div>
-            <template v-else-if="closed && (!assessmentResponse || !assessmentResponse.completed)">
-                <p>You may close this screen.</p>
-            </template>
-            <template v-else-if="showSpinner || error">
-                <h2>Core Values</h2>
-                <spinner v-if="showSpinner" message="Loading..." class="loader"/>
-                <p v-if="error">{{error}}</p>
-            </template>
+        </div>
+        <div class="debug">
+
+            <button @click="closeIos">CLOSE IOS</button>
+
+            <pre>
+            <strong>Registered methods:</strong>
+            {{appMethods}}
+        </pre>
+            <pre>
+            <strong>Assessment Closed:</strong> {{closed}}
+        </pre>
+            <pre>
+            <strong>App Registered:</strong> {{appRegistered}}
+        </pre>
+            <pre>
+            <strong>App Member ID:</strong> {{appMemberId}}
+        </pre>
+            <pre>
+            <strong>App Member DisplayName:</strong> {{appDisplayName}}
+        </pre>
+            <pre>
+            <strong>App Member Tier:</strong> {{appSubscriptionTier}}
+        </pre>
+            <pre>
+            <strong>Error:</strong> {{error}}
+        </pre>
         </div>
     </div>
 </template>
@@ -53,6 +83,7 @@
     import { CoreValue } from "@shared/models/CoreValueTypes";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
     import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
+    import { stringifyJSON } from "@shared/util/ObjectUtil";
 
     const logger = new Logger("CoreValuesEmbed");
 
@@ -72,8 +103,8 @@
         assessment: CoreValuesAssessment = CoreValuesAssessment.default();
         assessmentResponse: CoreValuesAssessmentResponse | null = null;
 
-        appMemberId!: string;
-        appDisplayName!: string;
+        appMemberId: string | null = null;
+        appDisplayName: string | null = null;
         appSubscriptionTier: SubscriptionTier | null = null;
         appRegistered: boolean = false;
         loading = true;
@@ -83,6 +114,8 @@
         closed = false;
         existingResults: CoreValuesAssessmentResponse | null = null;
         previousResults: CoreValuesAssessmentResponse | null = null;
+
+        appMethods: string = "not set"
 
         beforeMount() {
             this.loading = true;
@@ -114,9 +147,15 @@
             return this.assessmentResponse?.results?.values ?? this.existingResults?.results?.values ?? [];
         }
 
-        async register(id: string, displayName: string, tier: SubscriptionTier): Promise<string> {
+        async register(id?: string | null, displayName?: string | null, tier?: SubscriptionTier | null): Promise<string> {
             window.clearTimeout(this.initTimeout ?? undefined);
             logger.info(`Registered iOS app for user ${ id }`)
+
+            if (!id) {
+                this.error = "Oops, we are unable to load the Core Values assessment. Please try again later";
+                return
+            }
+
             this.appMemberId = id;
             this.appDisplayName = displayName;
             this.appSubscriptionTier = tier;
@@ -128,11 +167,24 @@
             this.initAssessment(id);
             this.loading = false
 
+
+            let appMethods = window.webkit?.messageHandlers ?? { none: "not found" }
+            appMethods = `methods: ${ JSON.stringify({
+                appMounted: !!window.webkit?.messageHandlers?.appMounted,
+                closeCoreValues: !!window.webkit?.messageHandlers?.closeCoreValues,
+                showPricing: !!window.webkit?.messageHandlers?.showPricing,
+            }, null, 2) }`
+            this.appMethods = appMethods = `hasWebkit: ${ !!window.webkit } | methods: ${ appMethods }`
             // FOR TESTING
             // this.assessmentResponse.results = { values: [CoreValue.Power, CoreValue.Nature, CoreValue.Humor] };
             // this.assessmentResponse.completed = true;
 
             return "success"
+        }
+
+        async updateMember(id?: string | null, displayName?: string | null, tier?: SubscriptionTier | null): Promise<string> {
+            logger.info("updating member", id, displayName, tier);
+            this.appSubscriptionTier = tier ?? SubscriptionTier.BASIC;
         }
 
         initAssessment(memberId: string) {
@@ -151,8 +203,19 @@
             this.closed = false;
         }
 
+        closeIos() {
+            const { error } = IosAppService.closeCoreValues();
+            if (error) {
+                this.error = error;
+            }
+        }
+
         async closeAssessment() {
             logger.info("Closing assessment....");
+            const { error } = IosAppService.closeCoreValues();
+            if (error) {
+                this.error = "Failed to close with iOS: " + error;
+            }
             this.closed = true;
             this.existingResults = this.previousResults;
         }
@@ -200,6 +263,17 @@
 
 <style scoped lang="scss">
     @import "assessment";
+
+    .debug {
+        overflow: scroll;
+        overflow-scrolling: touch;
+
+        white-space: pre-line;
+
+        pre {
+            white-space: pre-line;
+        }
+    }
 
     .loader {
         padding: 3rem;
