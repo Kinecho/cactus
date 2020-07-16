@@ -7,30 +7,26 @@
                 @completed="complete"/>
     </div>
     <div v-else class="assessment-container">
-        <div class="paddingContainer">
-            <template v-if="showResults">
-                <h2>Core Values</h2>
-                <core-value-results
-                        :core-values="coreValues"
-                        :show-dropdown-menu="false"
-                        :bordered="false"
-                        :title="null"
-                        :show-description="true"/>
-                <button @click="restart">Re-take the assessment</button>
-            </template>
-            <div v-else-if="showUpgradeRequired">
-                <h3>You must be a Cactus Plus member to see your results.</h3>
-                <button @click="upgrade">Try it free</button>
-            </div>
-            <template v-else-if="closed && (!assessmentResponse || !assessmentResponse.completed)">
-                <p>You may close this screen.</p>
-            </template>
-            <template v-else-if="showSpinner || error">
-                <h2>Core Values</h2>
-                <spinner v-if="showSpinner" message="Loading..." class="loader"/>
-                <p v-if="error">{{error}}</p>
-            </template>
+        <template v-if="showResults">
+            <core-value-results
+                    :core-values="coreValues"
+                    :show-dropdown-menu="false"
+                    title="Core Values"
+                    :show-description="true"/>
+            <button class="secondary retakeBtn" @click="restart">Retake the Assessment</button>
+        </template>
+        <div v-else-if="showUpgradeRequired">
+            <h3>You must be a Cactus Plus member to see your results.</h3>
+            <button @click="upgrade">Try it free</button>
         </div>
+        <template v-else-if="closed && (!assessmentResponse || !assessmentResponse.completed)">
+            <p>You may close this screen.</p>
+        </template>
+        <template v-else-if="showSpinner || error">
+            <h2>Core Values</h2>
+            <spinner v-if="showSpinner" message="Loading..." class="loader"/>
+            <p v-if="error">{{error}}</p>
+        </template>
     </div>
 </template>
 
@@ -203,5 +199,15 @@
 
     .loader {
         padding: 3rem;
+    }
+
+    .retakeBtn {
+        margin: -1.6rem 2.4rem 2.4rem;
+        width: calc(100% - 4.8rem);
+
+        @include r(600) {
+            display: block;
+            margin: 0 0 4rem 3.2rem;
+        }
     }
 </style>
