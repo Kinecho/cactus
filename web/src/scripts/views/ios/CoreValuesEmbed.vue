@@ -9,6 +9,11 @@
                     @completed="complete"/>
         </div>
         <div v-else class="assessment-container">
+            <button aria-label="Close" @click="closeAssessment" title="Close" class="close tertiary icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
+                    <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
+                </svg>
+            </button>
             <div class="paddingContainer">
                 <template v-if="showResults">
                     <h2>Core Values</h2>
@@ -29,37 +34,39 @@
                 </template>
                 <template v-else-if="showSpinner || error">
                     <h2>Core Values</h2>
-                    <spinner v-if="showSpinner" message="Loading..." class="loader"/>
+                    <spinner v-if="showSpinner" message="Loading..." class="loader" :delay="1200"/>
                     <p v-if="error">{{error}}</p>
                 </template>
             </div>
         </div>
         <div class="debug">
-
-            <button @click="closeIos">CLOSE IOS</button>
-
+            <button @click="upgrade">Upgrade</button>
             <pre>
-            <strong>Registered methods:</strong>
-            {{appMethods}}
-        </pre>
+                <strong>User Agent</strong>
+                {{userAgent}}
+            </pre>
             <pre>
-            <strong>Assessment Closed:</strong> {{closed}}
-        </pre>
+                <strong>Registered methods:</strong>
+                {{appMethods}}
+            </pre>
             <pre>
-            <strong>App Registered:</strong> {{appRegistered}}
-        </pre>
+                <strong>Assessment Closed:</strong> {{closed}}
+            </pre>
             <pre>
-            <strong>App Member ID:</strong> {{appMemberId}}
-        </pre>
+                <strong>App Member Tier:</strong> {{appSubscriptionTier}}
+            </pre>
             <pre>
-            <strong>App Member DisplayName:</strong> {{appDisplayName}}
-        </pre>
+                <strong>App Registered:</strong> {{appRegistered}}
+            </pre>
             <pre>
-            <strong>App Member Tier:</strong> {{appSubscriptionTier}}
-        </pre>
+                <strong>App Member ID:</strong> {{appMemberId}}
+            </pre>
             <pre>
-            <strong>Error:</strong> {{error}}
-        </pre>
+                <strong>App Member DisplayName:</strong> {{appDisplayName}}
+            </pre>
+            <pre>
+                <strong>Error:</strong> {{error}}
+            </pre>
         </div>
     </div>
 </template>
@@ -129,6 +136,10 @@
 
         destroyed() {
             window.clearTimeout(this.initTimeout ?? undefined);
+        }
+
+        get userAgent(): string | null | undefined {
+            return window.navigator.userAgent
         }
 
         get showResults(): boolean {

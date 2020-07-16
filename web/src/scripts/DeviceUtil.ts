@@ -52,6 +52,10 @@ export function isIosDevice(): boolean {
     return /iPad|iPhone|iPod/.test(getUserAgent()) && !window.MSStream;
 }
 
+export function isIosApp(): boolean {
+    return navigator.userAgent === Config.iosUserAgent;
+}
+
 export function isAndroidApp(): boolean {
     return navigator.userAgent === Config.androidUserAgent;
 }
