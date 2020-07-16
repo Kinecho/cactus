@@ -2,7 +2,7 @@
     <div class="assessment-container">
         <progress-stepper :current="questionIndex" :total="questions.length"/>
         <div class="paddingContainer">
-            <h4>{{(questionIndex || 0) + 1}} of {{questions.length}}</h4>
+            <h4 v-if="started">{{(questionIndex || 0) + 1}} of {{questions.length}}</h4>
             <template v-if="loading">
                 <h3>Loading</h3>
             </template>
