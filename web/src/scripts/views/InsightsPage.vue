@@ -19,33 +19,20 @@
                         <WordCloud class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
                     </div>
                 </section>
-                <!--                <section class="valuesContainer" v-if="hasCoreValues">-->
-                <!--                    <h2>Core Values</h2>-->
-                <!--                    <div class="flexIt">-->
-                <!--                        <ul class="core-values-list">-->
-                <!--                            <li v-for="(coreValue, index) in coreValues" :key="`value_${index}`" class="core-value">-->
-                <!--                                <h3>{{coreValue.value}}</h3>-->
-                <!--                                &lt;!&ndash; <p class="description">{{coreValue.description}}</p> &ndash;&gt;-->
-                <!--                            </li>-->
-                <!--                        </ul>-->
-                <!--                        <div class="imgContainer" v-if="coreValuesBlob">-->
-                <!--                            <img :src="coreValuesBlob.imageUrl" alt="Core Values Graphic"/>-->
-                <!--                        </div>-->
-                <!--                    </div>-->
-                <!--                    <dropdown-menu :items="coreValuesDropdownLinks" class="dotsBtn"/>-->
-                <!--                </section>-->
-                <core-value-results v-if="hasCoreValues" :core-values="coreValues" :show-description="false" :show-dropdown-menu="true"/>
-                <router-link v-else tag="section" class="novaluesContainer" :class="{plus: isPlusMember}" :to="coreValuesHref">
-                    <svg class="lock" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.8">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                    <h2>What Are Your Core Values?</h2>
-                    <p class="subtext">Discover what drives your life decisions and deepest needs.</p>
-                    <router-link v-if="isPlusMember" tag="button" class="secondary esButton" :to="coreValuesHref">Take
-                        the Assessment
+                <div class="valuesWrapper">
+                    <core-value-results v-if="hasCoreValues" :core-values="coreValues" :show-description="false" :show-dropdown-menu="true"/>
+                    <router-link v-else tag="section" class="novaluesContainer" :class="{plus: isPlusMember}" :to="coreValuesHref">
+                        <svg class="lock" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.8">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        <h2>What Are Your Core Values?</h2>
+                        <p class="subtext">Discover what drives your life decisions and deepest needs.</p>
+                        <router-link v-if="isPlusMember" tag="button" class="secondary esButton" :to="coreValuesHref">Take
+                            the Assessment
+                        </router-link>
                     </router-link>
-                </router-link>
+                </div>
                 <gap-analysis-widget :loading="gapResultsLoading"
                         :gap-assessment-results="gapAssessmentResults"
                         :is-plus-member="isPlusMember"
@@ -325,8 +312,7 @@
             .bubblesContainer {
                 grid-area: bubbles;
             }
-            .novaluesContainer,
-            .valuesContainer {
+            .valuesWrapper {
                 grid-area: values;
             }
             .nogapContainer,
@@ -396,106 +382,17 @@
         }
     }
 
-    .novaluesContainer,
-    .valuesContainer {
+    .valuesWrapper {
+        border: 1px solid $lightest;
+        border-radius: 1.6rem;
         margin: 0 2.4rem 3.2rem;
 
         @include r(374) {
             margin: 0 0 3.2rem;
         }
         @include r(768) {
+            display: flex;
             margin: 0 1.6rem 4.8rem 0;
-        }
-    }
-
-    .valuesContainer {
-        border: 1px solid $lightest;
-        border-radius: 1.6rem;
-        padding: 2.4rem;
-        position: relative;
-
-        @include r(374) {
-            padding: 2.4rem 3.2rem;
-        }
-        @include r(768) {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 4.8rem;
-        }
-
-        h2 {
-            @include r(768) {
-                margin-bottom: 3.2rem;
-            }
-            @include r(960) {
-                margin-bottom: 0;
-            }
-        }
-
-        .flexIt {
-            align-items: center;
-            display: flex;
-            flex-grow: 1;
-
-            @include r(600) {
-                justify-content: space-between;
-            }
-            @include r(768) {
-                flex-direction: column;
-            }
-            @include r(960) {
-                flex-direction: row;
-            }
-        }
-    }
-
-    .imgContainer {
-
-        @include r(600) {
-            width: 40%;
-        }
-        @include r(768) {
-            width: 100%;
-        }
-        @include r(960) {
-            width: 40%;
-        }
-
-        img {
-            max-height: 16rem;
-            position: relative;
-
-            @include r(600) {
-                height: auto;
-                max-height: 32rem;
-                max-width: 100%;
-                width: auto;
-            }
-        }
-    }
-
-    .core-values-list {
-        list-style: none;
-        margin: 2.4rem 2.4rem .8rem 0;
-        padding: 0;
-
-        @include r(768) {
-            margin: 0;
-            width: 100%;
-        }
-        @include r(960) {
-            margin: 0;
-            width: 50%;
-        }
-    }
-
-    .core-value {
-        list-style: none;
-        margin: 0 0 .8rem;
-        padding: 0;
-
-        @include r(600) {
-            margin-bottom: 1.6rem;
         }
     }
 
@@ -532,14 +429,6 @@
             }
         }
     }
-
-    // .nogapContainer + .bubblesContainer {
-    //     @include r(768) {
-    //         flex-basis: 50%;
-    //         margin-right: 1.6rem;
-    //         order: 1;
-    //     }
-    // }
 
     .focusElement {
         font-size: 2rem;
