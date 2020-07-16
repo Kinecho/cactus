@@ -1,73 +1,45 @@
 <template>
-    <!--    Might not need this container when done testing - i wanted to put some extra details in here-->
-    <div class="embed-container">
-        <div v-if="!showResults && assessment && assessmentResponse && !closed">
-            <assessment :assessment="assessment"
-                    :assessmentResponse="assessmentResponse"
-                    @close="closeAssessment"
-                    @save="save"
-                    @completed="complete"/>
-        </div>
-        <div v-else class="assessment-container">
-            <button aria-label="Close" @click="closeAssessment" title="Close" class="close tertiary icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
-                    <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
-                </svg>
-            </button>
-            <loadable-quiz-results-upsell v-if="showUpsell" :billing-period="billingPeriod"/>
-            <template v-else-if="showResults">
-                <core-value-results
-                        :core-values="coreValues"
-                        :show-dropdown-menu="false"
-                        :bordered="false"
-                        title="Core Values"
-                        :show-description="true"/>
-                <button class="secondary retakeBtn" @click="restart">Retake the Assessment</button>
-            </template>
-
-            <div v-else-if="showUpgradeRequired">
-                <h3>You must be a Cactus Plus member to see your results.</h3>
-                <button @click="upgrade">Try it free</button>
-            </div>
-            <template v-else-if="closed && (!assessmentResponse || !assessmentResponse.completed)">
-                <p>You may close this screen.</p>
-            </template>
-            <template v-else-if="showSpinner || error">
-                <h2>Core Values</h2>
-                <spinner v-if="showSpinner" message="Loading..." class="loader"/>
-                <p v-if="error">{{error}}</p>
-            </template>
-        </div>
-        <div class="debug">
-            <button @click="upgrade">Upgrade</button>
-            <pre>
-                <strong>User Agent</strong>
-                {{userAgent}}
-            </pre>
-            <pre>
-                <strong>Registered methods:</strong>
-                {{appMethods}}
-            </pre>
-            <pre>
-                <strong>Assessment Closed:</strong> {{closed}}
-            </pre>
-            <pre>
-                <strong>App Member Tier:</strong> {{appSubscriptionTier}}
-            </pre>
-            <pre>
-                <strong>App Registered:</strong> {{appRegistered}}
-            </pre>
-            <pre>
-                <strong>App Member ID:</strong> {{appMemberId}}
-            </pre>
-            <pre>
-                <strong>App Member DisplayName:</strong> {{appDisplayName}}
-            </pre>
-            <pre>
-                <strong>Error:</strong> {{error}}
-            </pre>
-        </div>
+    <div v-if="!showResults && assessment && assessmentResponse && !closed">
+        <assessment :assessment="assessment"
+                :assessmentResponse="assessmentResponse"
+                @close="closeAssessment"
+                @save="save"
+                @completed="complete"/>
     </div>
+    <div v-else class="assessment-container">
+        <button aria-label="Close" @click="closeAssessment" title="Close" class="close tertiary icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
+                <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
+            </svg>
+        </button>
+        <loadable-quiz-results-upsell v-if="showUpsell"
+                :billing-period="billingPeriod"
+                @checkout="checkout"
+        />
+        <template v-else-if="showResults">
+            <core-value-results
+                    :core-values="coreValues"
+                    :show-dropdown-menu="false"
+                    :bordered="false"
+                    title="Core Values"
+                    :show-description="true"/>
+            <button class="secondary retakeBtn" @click="restart">Retake the Assessment</button>
+        </template>
+
+        <div v-else-if="showUpgradeRequired">
+            <h3>You must be a Cactus Plus member to see your results.</h3>
+            <button @click="upgrade">Try it free</button>
+        </div>
+        <template v-else-if="closed && (!assessmentResponse || !assessmentResponse.completed)">
+            <p>You may close this screen.</p>
+        </template>
+        <template v-else-if="showSpinner || error">
+            <h2>Core Values</h2>
+            <spinner v-if="showSpinner" message="Loading..." class="loader"/>
+            <p v-if="error">{{error}}</p>
+        </template>
+    </div>
+
 </template>
 
 <script lang="ts">
@@ -89,7 +61,9 @@
     import { CoreValue } from "@shared/models/CoreValueTypes";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
     import LoadableQuizResultsUpsell from "@components/upgrade/LoadableQuizResultsUpsell.vue";
-    import { BillingPeriod } from "@shared/models/SubscriptionProduct";
+    import SubscriptionProduct, { BillingPeriod } from "@shared/models/SubscriptionProduct";
+    import { isIosApp } from "@web/DeviceUtil";
+    import { startCheckout } from "@web/checkoutService";
 
     const logger = new Logger("CoreValuesEmbed");
 
@@ -222,8 +196,15 @@
         }
 
         async upgrade() {
-            // IosAppService.showPricing();
-            this.showUpsell = true;
+            if (isIosApp()) {
+                IosAppService.showPricing();
+            } else {
+                this.showUpsell = true;
+            }
+        }
+
+        async checkout(subscriptionProduct: SubscriptionProduct | undefined | null) {
+            IosAppService.showPricing();
         }
 
         async complete(assessmentResponse: CoreValuesAssessmentResponse) {
