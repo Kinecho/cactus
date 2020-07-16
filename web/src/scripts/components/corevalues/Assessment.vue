@@ -27,6 +27,17 @@
                 <p class="titleMarkdown">You completed the quiz!</p>
             </template>
 
+            <!-- <div v-if="questionIndex === 0" class="intro">
+                <h1>What are your core values?</h1>
+                <p>Core values are the general expression of what is most important for you, and they help you understand past decisions and make better decisions in the future.</p>
+                <button class="btn primary" @click="start">Let's go!</button>
+                <div class="private">
+                    <img class="lock" src="/assets/icons/lock.svg" alt=""/>
+                    All answers are private and confidential and will be used solely to help tune Cactus to be most
+                    effective for you.
+                </div>
+            </div> -->
+
             <template v-else-if="currentQuestion && currentResponse">
                 <button class="backArrowbtn btn tertiary icon" @click="previousQuestion()" v-if="hasPreviousQuestion">
                     <svg class="backArrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
