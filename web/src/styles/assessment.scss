@@ -8,7 +8,7 @@
   @include r(768) {
     @include shadowbox;
     margin: 6.4rem auto;
-    //min-height: 50vh;
+    min-height: 40rem;
     overflow: hidden;
     //padding-bottom: 6.4rem;
   }
@@ -130,7 +130,8 @@ button.close {
 }
 
 .titleMarkdown {
-  margin: 3.2rem auto 4rem;
+    font-size: 2.4rem;
+    margin: 3.2rem auto 4rem;
 }
 
 .question-option {
