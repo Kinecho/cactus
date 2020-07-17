@@ -333,6 +333,7 @@
         cursor: pointer;
         padding: 2.4rem 3.2rem 3.2rem 5.6rem;
         position: relative;
+        width: 100%;
 
         @include r(600) {
             transition: box-shadow .3s, transform .3s ease-in;
