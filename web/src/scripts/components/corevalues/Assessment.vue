@@ -2,7 +2,7 @@
     <div class="assessment-container">
         <progress-stepper :current="questionIndex" :total="questions.length"/>
         <div class="paddingContainer">
-            <h4 v-if="started">{{(questionIndex || 0) + 1}} of {{questions.length}}</h4>
+            <h4 v-if="started">{{displayIndex}} of {{questions.length}}</h4>
             <template v-if="loading">
                 <h3>Loading</h3>
             </template>
@@ -11,25 +11,13 @@
                     <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
                 </svg>
             </button>
-            <modal :show="showCloseConfirm" @close="showCloseConfirm = false" :dark="true">
-                <div class="close-confirm-modal paddingContainer" slot="body">
-                    <h3>Leave Core Values?</h3>
-                    <p class="subtext">Are you sure you want to leave the Core Values exercise? Your progess will be
-                        lost.</p>
-                    <div class="btnContainer">
-                        <button @click="showCloseConfirm = false">No, keep going</button>
-                        <button class="secondary" @click="close">Leave exercise</button>
-                    </div>
-                </div>
-            </modal>
-
-            <template v-if="completed">
+            <template v-if="done">
                 <p class="titleMarkdown">You completed the quiz!</p>
             </template>
-
-            <div v-if="!started" class="intro">
+            <div v-else-if="!started" class="intro">
                 <h1>What are your core values?</h1>
-                <p>Core values are the general expression of what is most important for you, and they help you understand past decisions and make better decisions in the future.</p>
+                <p>Core values are the general expression of what is most important for you, and they help you
+                    understand past decisions and make better decisions in the future.</p>
                 <button class="btn primary" @click="start">Let's go!</button>
                 <div class="private">
                     <img class="lock" src="/assets/icons/lock.svg" alt=""/>
@@ -38,7 +26,7 @@
                 </div>
             </div>
 
-            <template v-else-if="currentQuestion && currentResponse">
+            <template v-else-if="currentQuestion && currentResponse && !completed">
                 <button class="backArrowbtn btn tertiary icon" @click="previousQuestion()" v-if="hasPreviousQuestion">
                     <svg class="backArrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
                         <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
@@ -46,29 +34,38 @@
                 </button>
                 <question-card :question="currentQuestion"
                         :response="currentResponse"
-                        :assessment-response="assessmentResponse"
-                        :assessment="assessment"
+                        :options="currentQuestionOptions"
                         @updated="updateResponse"/>
             </template>
             <div class="cvActions" v-if="started">
                 <transition name="fade-in-fast" appear>
-                    <p class="validation" v-show="showValidation && responseValidation && responseValidation.message">
-                        {{responseValidation.message}}</p>
+                    <p class="validation" v-if="showValidation && responseValidation && responseValidation.message">
+                        {{responseValidation && responseValidation.message}}</p>
                 </transition>
                 <button v-if="hasNextQuestion && started"
                         class="btn btn primary no-loading"
                         @click="nextQuestion()"
-
                         :class="{disabled: this.responseValidation && !this.responseValidation.isValid}">
                     Next
                 </button>
                 <button v-if="!hasNextQuestion && questionIndex > 0 && completed"
                         @click="finish" class="btn btn primary no-loading"
-                        :disabled="this.responseValidation && !this.responseValidation.isValid">
+                        :disabled="!completed && this.responseValidation && !this.responseValidation.isValid">
                     Get My Results
                 </button>
             </div>
         </div>
+        <modal :show="showCloseConfirm" @close="showCloseConfirm = false" :dark="true">
+            <div class="close-confirm-modal paddingContainer" slot="body">
+                <h3>Leave Core Values?</h3>
+                <p class="subtext">Are you sure you want to leave the Core Values exercise? Your progress will be
+                    lost.</p>
+                <div class="btnContainer">
+                    <button @click="showCloseConfirm = false">No, keep going</button>
+                    <button class="secondary" @click="close">Leave exercise</button>
+                </div>
+            </div>
+        </modal>
     </div>
 </template>
 
@@ -85,7 +82,8 @@
     import Logger from "@shared/Logger";
     import { logCoreValuesAssessmentProgress } from "@web/analytics";
     import Component from "vue-class-component";
-    import { Prop } from "vue-property-decorator";
+    import { Prop, Watch } from "vue-property-decorator";
+    import CoreValuesQuestionOption from "@shared/models/CoreValuesQuestionOption";
 
     const logger = new Logger("Assessment");
 
@@ -102,19 +100,63 @@
         @Prop({ type: Object as () => CoreValuesAssessment, required: true })
         assessment!: CoreValuesAssessment;
 
-        @Prop({ type: Object as () => CoreValuesAssessmentResponse, required: true })
-        assessmentResponse!: CoreValuesAssessmentResponse;
+        @Prop({ type: Object as () => CoreValuesAssessmentResponse, required: false })
+        assessmentResponse!: CoreValuesAssessmentResponse | null;
 
-        started = false;
-        loading: boolean = false;
-        questionIndex: number | null = 0;
-        completed: boolean = false;
+        @Prop({ type: Number, default: 0 })
+        questionIndex!: number | null;
+
+        @Prop({ type: Boolean, default: false })
+        loading!: boolean;
+
+        @Prop({ type: Array as () => CoreValuesQuestion[], default: [] })
+        questions!: CoreValuesQuestion[];
+
+        @Prop({ type: Boolean, default: false })
+        done!: boolean;
+
         showValidation: boolean = false;
         showCloseConfirm: boolean = false;
-        questions: CoreValuesQuestion[] = []
+        responseValidation: ResponseValidation | null = null;
+        currentQuestionOptions: CoreValuesQuestionOption[] = []
+        currentQuestion: CoreValuesQuestion | null = null
+        currentResponse: CoreValuesQuestionResponse | null = null;
+
+        @Watch("assessmentResponse")
+        onResponseChanged() {
+            this.updateAll()
+        }
+
+        @Watch("questionIndex")
+        onIndexChange(newIndex: number | null, oldIndex: number | null) {
+            this.updateAll()
+        }
+
+        updateAll() {
+            logger.info("Updating all things...");
+            this.updateCurrentQuestion();
+            this.updateCurrentResponse();
+            this.updateCurrentQuestionOptions()
+            this.updateResponseValidation();
+        }
 
         beforeMount() {
-            this.questions = this.assessment.getQuestions(this.assessmentResponse);
+            this.onIndexChange(this.questionIndex, null);
+        }
+
+        get displayIndex(): number {
+            if (this.completed) {
+                return this.questions.length;
+            }
+            return (this.questionIndex ?? 0) + 1
+        }
+
+        get started(): boolean {
+            return !isNull(this.questionIndex) && !isNull(this.assessmentResponse);
+        }
+
+        get completed(): boolean {
+            return (this.questionIndex ?? 0) >= this.questions.length || this.done;
         }
 
         get hasPreviousQuestion(): boolean {
@@ -123,38 +165,54 @@
 
         get hasNextQuestion(): boolean {
             return !this.completed
-            // if (isNumber(this.questionIndex)) {
-            //     let nextIndex = this.questionIndex + 1;
-            //     return nextIndex < this.questions.length;
-            // }
-            // return false;
         }
 
-        get currentQuestion(): CoreValuesQuestion | null {
+
+        updateCurrentQuestion() {
             const index = this.questionIndex;
             if (isNumber(index) && index < this.questions.length) {
-                return this.questions[index];
+                this.currentQuestion = this.questions[index];
+            } else {
+                this.currentQuestion = null
             }
-            return null;
         }
 
-        get responseValidation(): ResponseValidation | undefined {
+
+        updateResponseValidation() {
             const question = this.currentQuestion;
             const response = this.currentResponse;
 
             if (question && response) {
-                return response.isValid(question)
+                logger.info("Updating response validation because both question & response are present");
+                this.responseValidation = response.isValid(question)
+            } else {
+                this.responseValidation = { isValid: false };
             }
 
-            return undefined;
         }
 
-        get currentResponse(): CoreValuesQuestionResponse | null {
+
+        updateCurrentResponse() {
             const questionId = this.currentQuestion?.id;
             if (!questionId) {
-                return null;
+                this.currentResponse = null
+                return;
             }
-            return this.assessmentResponse?.getResponseForQuestion(questionId) ?? null;
+            this.currentResponse = this.assessmentResponse?.getResponseForQuestion(questionId) ?? null;
+        }
+
+        updateCurrentQuestionOptions() {
+            if (!this.assessmentResponse) {
+                this.currentQuestionOptions = []
+                return;
+            }
+            debugger;
+            const responses = this.assessment.orderedResponses(this.assessmentResponse) ?? [];
+            this.currentQuestionOptions = this.currentQuestion?.options({
+                responses,
+                currentIndex: this.questionIndex ?? 0,
+            }) ?? []
+            return;
         }
 
         close() {
@@ -167,39 +225,35 @@
         }
 
         async save() {
-            this.$emit("save", this.assessmentResponse);
-            this.questions = this.assessment.getQuestions(this.assessmentResponse);
+            this.$emit("save");
+            // this.questions = this.assessment.getQuestions(this.assessmentResponse);
         }
 
         start() {
-            this.started = true;
-            this.questionIndex = 0;
+            this.$emit("start");
         }
 
         async finish() {
-            this.completed = true;
-            this.assessmentResponse.completed = true;
-            this.$emit("completed", this.assessmentResponse);
+            this.$emit("completed");
         }
 
         async updateResponse(response: CoreValuesQuestionResponse) {
-            this.assessmentResponse?.setResponse(response);
-            await this.save()
+            // this.assessmentResponse?.setResponse(response);
+            // await this.save()
+            this.updateResponseValidation();
+            this.$emit('response', response)
         }
 
         previousQuestion() {
             if (isNull(this.currentQuestion)) {
-                this.questionIndex = 0;
                 return;
             } else if (isNumber(this.questionIndex)) {
-                this.questionIndex = Math.max(0, this.questionIndex - 1);
-                this.completed = false
+                this.$emit("previous");
             }
         }
 
         nextQuestion() {
-
-            this.questions = this.assessment.getQuestions(this.assessmentResponse);
+            this.updateResponseValidation();
             if (this.responseValidation?.isValid === false) {
                 this.showValidation = true
                 return;
@@ -209,16 +263,21 @@
 
 
             if (isNull(this.currentQuestion)) {
-                this.questionIndex = 0;
+                // this.questionIndex = 0;
+                this.$emit('next');
                 return;
             } else if (isNumber(this.questionIndex)) {
                 let nextIndex = this.questionIndex + 1;
                 if (nextIndex >= this.questions.length) {
-                    this.completed = true;
+                    // this.completed = true;
+                    // this.$emit('completed');
                 } else {
                     logCoreValuesAssessmentProgress(nextIndex);
-                    this.questionIndex = nextIndex;
+                    // this.questionIndex = nextIndex;
                 }
+                // this.$emit('next');
+                this.$emit('next');
+
             }
         }
 

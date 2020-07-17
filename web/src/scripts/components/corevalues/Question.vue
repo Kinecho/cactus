@@ -1,7 +1,11 @@
 <template>
     <div class="cvQuestion">
-        <div class="titleMarkdown"><markdown-text v-if="question.titleMarkdown" :source="question.titleMarkdown"/></div>
-        <div class="descriptionMarkdown"><markdown-text v-if="question.descriptionMarkdown" :source="question.descriptionMarkdown"/></div>
+        <div class="titleMarkdown">
+            <markdown-text v-if="question.titleMarkdown" :source="question.titleMarkdown"/>
+        </div>
+        <div class="descriptionMarkdown">
+            <markdown-text v-if="question.descriptionMarkdown" :source="question.descriptionMarkdown"/>
+        </div>
 
         <div class="question-options">
             <template v-for="(option, index) in options">
@@ -26,58 +30,66 @@
     import QuestionOption from "@components/corevalues/QuestionOption.vue";
     import CoreValuesQuestionOption from "@shared/models/CoreValuesQuestionOption";
     import Logger from "@shared/Logger";
-    import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
-    import CoreValuesAssessment from "@shared/models/CoreValuesAssessment";
     import { QuestionType } from "@shared/models/Questions";
+    import Component from "vue-class-component";
+    import { Prop } from "vue-property-decorator";
 
     const logger = new Logger("Question");
 
-    export default Vue.extend({
-        name: "Question",
-        components: {
+    @Component({
+         components: {
             MarkdownText,
             QuestionOption
-        },
-        props: {
-            question: { type: Object as () => CoreValuesQuestion, required: true },
-            response: { type: Object as () => CoreValuesQuestionResponse, required: true },
-            assessment: {type: Object as () => CoreValuesAssessment, required: true},
-            assessmentResponse: {type: Object as () => CoreValuesAssessmentResponse, required: true},
-        },
-        computed: {
-            options(): CoreValuesQuestionOption[] {
-                return this.question.options({assessmentResponse: this.assessmentResponse, assessment: this.assessment})
-            }
-        },
-        methods: {
-            selectOption(index: number, option: CoreValuesQuestionOption) {
-                if (this.question.type === QuestionType.RADIO) {
-                    logger.info("Radio - setting single value", option.value);
-                    this.response.setSingeValue(option.value);
-                } else {
-                    logger.info("Multi select - adding value", option.value);
-                    this.response.addValue(option.value)
-                }
-                this.$emit("updated", this.response);
-                logger.info(`response contains(${ option.value }) = ${ this.response.contains(option.value) }`);
-            },
-            removeOption(index: number, option: CoreValuesQuestionOption) {
-                this.response.removeValue(option.value);
-                this.$emit("updated", this.response)
-            },
-            optionDisabled(option: CoreValuesQuestionOption): boolean {
-                const response = this.response;
-                const question = this.question;
-
-                //Always let the user de-select an option
-                if (response.contains(option.value)) {
-                    return false
-                }
-
-                return !response.canSelectMore(question);
-            }
         }
     })
+    export default class Question extends Vue {
+        name = "Question";
+
+        @Prop({ type: Object as () => CoreValuesQuestion, required: true })
+        question!: CoreValuesQuestion;
+
+        @Prop({ type: Object as () => CoreValuesQuestionResponse, required: true })
+        response!: CoreValuesQuestionResponse;
+
+        // @Prop({ type: Object as () => CoreValuesAssessment, required: true })
+        // assessment!: CoreValuesAssessment;
+        //
+        // @Prop({ type: Object as () => CoreValuesAssessmentResponse, required: true })
+        // assessmentResponse!: CoreValuesAssessmentResponse;
+
+        @Prop({type: Array as () => CoreValuesQuestionOption[], default: [], required: true})
+        options!: CoreValuesQuestionOption[]
+
+        selectOption(index: number, option: CoreValuesQuestionOption) {
+            if (this.question.type === QuestionType.RADIO) {
+                logger.info("Radio - setting single value", option.value);
+                this.response.setSingeValue(option.value);
+            } else {
+                logger.info("Multi select - adding value", option.value);
+                this.response.addValue(option.value)
+            }
+            this.$emit("updated", this.response);
+            logger.info(`response contains(${ option.value }) = ${ this.response.contains(option.value) }`);
+        }
+
+        removeOption(index: number, option: CoreValuesQuestionOption) {
+            this.response.removeValue(option.value);
+            this.$emit("updated", this.response)
+        }
+
+        optionDisabled(option: CoreValuesQuestionOption): boolean {
+            const response = this.response;
+            const question = this.question;
+
+            //Always let the user de-select an option
+            if (response.contains(option.value)) {
+                return false
+            }
+
+            return !response.canSelectMore(question);
+        }
+
+    }
 </script>
 
 <style scoped lang="scss">

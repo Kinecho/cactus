@@ -2,169 +2,170 @@
 @import "mixins";
 
 .assessment-container {
-    position: relative;
-    text-align: center;
+  position: relative;
+  text-align: center;
 
-    @include r(768) {
-        @include shadowbox;
-        margin: 6.4rem auto;
-        //min-height: 50vh;
-        overflow: hidden;
-        //padding-bottom: 6.4rem;
-    }
+  @include r(768) {
+    @include shadowbox;
+    margin: 6.4rem auto;
+    //min-height: 50vh;
+    overflow: hidden;
+    //padding-bottom: 6.4rem;
+  }
 }
 
 .paddingContainer {
-    padding: 2.4rem;
+  padding: 2.4rem;
 
-    @include r(768) {
-        padding: 3.2rem;
-    }
+  @include r(768) {
+    padding: 3.2rem;
+  }
 }
 
 .cvActions {
-    background-color: transparentize($white, .15);
-    bottom: 0;
-    display: flex;
-    left: 0;
-    padding: 1.6rem;
-    position: fixed;
-    right: 0;
+  background-color: transparentize($white, .15);
+  bottom: 0;
+  display: flex;
+  left: 0;
+  padding: 1.6rem;
+  position: fixed;
+  right: 0;
 
-    @include r(768) {
-        background-color: transparent;
-        display: block;
-        padding: 0;
-        position: relative;
+  @include r(768) {
+    background-color: transparent;
+    display: block;
+    padding: 0;
+    position: relative;
+  }
+
+  button {
+    width: 100%;
+
+    @include r(600) {
+      margin: 0 auto;
+      max-width: 28rem;
     }
-
-    button {
-        width: 100%;
-
-        @include r(600) {
-            margin: 0 auto;
-            max-width: 28rem;
-        }
-    }
+  }
 }
 
 .validation {
-    color: $red;
-    font-size: 1.6rem;
-    padding-bottom: .8rem;
+  color: $red;
+  font-size: 1.6rem;
+  padding-bottom: .8rem;
 
-    @include r(768) {
-        left: 0;
-        position: absolute;
-        right: 0;
-        top: -2.8rem;
-    }
+  @include r(768) {
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: -2.8rem;
+  }
 }
 
 .backArrowbtn {
-    left: 1.2rem;
-    position: absolute;
-    top: 2rem;
+  left: 1.2rem;
+  position: absolute;
+  top: 2rem;
 
-    @include r(768) {
-        left: 1.9rem;
-        top: 3.1rem;
-    }
+  @include r(768) {
+    left: 1.9rem;
+    top: 3.1rem;
+  }
 }
 
 .backArrow {
-    fill: $green;
-    height: 1.4rem;
-    transform: rotate(180deg);
-    width: 1.4rem;
+  fill: $green;
+  height: 1.4rem;
+  transform: rotate(180deg);
+  width: 1.4rem;
 }
 
 button.close {
-    background-color: $white;
-    position: absolute;
-    right: .8rem;
-    top: 1.8rem;
-    z-index: 20;
+  background-color: $white;
+  position: absolute;
+  right: .8rem;
+  top: 1.8rem;
+  z-index: 20;
 
-    @include r(600) {
-        right: 1.6rem;
-        top: 2rem;
-    }
+  @include r(600) {
+    right: 1.6rem;
+    top: 2rem;
+  }
 
-    svg {
-        height: 1.8rem;
-        width: 1.8rem;
-    }
+  svg {
+    height: 1.8rem;
+    width: 1.8rem;
+  }
 }
 
 .close-confirm-modal {
-    @include shadowbox;
-    max-width: 48rem;
-    padding: 2.4rem;
+  @include shadowbox;
+  max-width: 48rem;
+  padding: 2.4rem;
 
-    @include r(600) {
-        max-width: 60rem;
-        padding: 3.2rem;
-    }
+  @include r(600) {
+    max-width: 60rem;
+    padding: 3.2rem;
+  }
 
-    h3 {
-        font-size: 2.8rem;
-    }
+  h3 {
+    font-size: 2.8rem;
+  }
 
-    .subtext {
-        margin-bottom: 1.6rem;
-    }
+  .subtext {
+    margin-bottom: 1.6rem;
+  }
 }
 
 .btnContainer {
-    button {
-        margin-bottom: .8rem;
-        white-space: nowrap;
-        width: 100%;
-
-        @include r(600) {
-            flex-grow: 0;
-            margin: 0 .8rem 0 0;
-            width: auto;
-        }
-    }
+  button {
+    margin-bottom: .8rem;
+    white-space: nowrap;
+    width: 100%;
 
     @include r(600) {
-        display: flex;
+      flex-grow: 0;
+      margin: 0 .8rem 0 0;
+      width: auto;
     }
+  }
+
+  @include r(600) {
+    display: flex;
+  }
 }
 
 .titleMarkdown {
-    margin: 3.2rem auto 4rem;
+  margin: 3.2rem auto 4rem;
 }
 
 .question-option {
-    background-color: $white;
-    border: 1px solid $lightestGreen;
-    margin-bottom: -1px;
-    padding-right: .8rem;
-    transition: all .2s cubic-bezier(.42, .97, .52, 1.49);
+  background-color: $white;
+  border: 1px solid $lightestGreen;
+  margin-bottom: -1px;
+  padding-right: .8rem;
+  transition: all .2s cubic-bezier(.42, .97, .52, 1.49);
 
-    &.selected {
-        background-color: #EFF4F5;
-        font-weight: bold;
-    }
+  &.selected {
+    background-color: #EFF4F5;
+    font-weight: bold;
+  }
 
-    &:first-child {
-        border-radius: .4rem .4rem 0 0;
-    }
-    &:last-child {
-        border-radius: 0 0 .4rem .4rem;
-    }
+  &:first-child {
+    border-radius: .4rem .4rem 0 0;
+  }
 
-    &:focus, .focused {
-        background-color: #EFF4F5;
-        outline: none;
-    }
+  &:last-child {
+    border-radius: 0 0 .4rem .4rem;
+  }
+
+  &:focus, .focused {
+    background-color: #EFF4F5;
+    outline: none;
+  }
 }
 
 .intro {
-    padding: 4rem 0 19.2rem;
+    padding: 6.4rem 2.4rem 19.2rem;
     text-align: left;
 
     @include r(768) {
@@ -172,56 +173,56 @@ button.close {
         text-align: center;
     }
 
-    h1 {
-        margin-bottom: .8rem;
+  h1 {
+    margin-bottom: .8rem;
 
-        @include r(768) {
-            font-size: 4rem;
-        }
+    @include r(768) {
+      font-size: 4rem;
     }
+  }
 
-    p {
-        font-size: 2rem;
-        margin-bottom: 3.2rem;
-        opacity: .8;
+  p {
+    font-size: 2rem;
+    margin-bottom: 3.2rem;
+    opacity: .8;
+  }
+
+  button {
+    width: 100%;
+
+    @include r(600) {
+      min-width: 18rem;
+      width: auto;
     }
+  }
 
-    button {
-        width: 100%;
+  .private {
+    background-color: #EFF4F5;
+    bottom: 0;
+    display: flex;
+    font-size: 1.4rem;
+    left: 0;
+    padding: 1.6rem 2.4rem;
+    position: fixed;
+    right: 0;
 
-        @include r(600) {
-            min-width: 18rem;
-            width: auto;
-        }
+    @include r(768) {
+      align-items: center;
+      flex-direction: column;
+      padding: 2.4rem 16rem;
+      position: absolute;
     }
+  }
 
-    .private {
-        background-color: #EFF4F5;
-        bottom: 0;
-        display: flex;
-        font-size: 1.4rem;
-        left: 0;
-        padding: 1.6rem 2.4rem;
-        position: fixed;
-        right: 0;
+  .lock {
+    height: 2.4rem;
+    margin: .4rem 1.6rem 0 0;
+    width: 2.4rem;
 
-        @include r(768) {
-            align-items: center;
-            flex-direction: column;
-            padding: 2.4rem 16rem;
-            position: absolute;
-        }
+    @include r(768) {
+      height: 1.8rem;
+      margin: 0 0 .8rem 0;
+      width: 1.8rem;
     }
-
-    .lock {
-        height: 2.4rem;
-        margin: .4rem 1.6rem 0 0;
-        width: 2.4rem;
-
-        @include r(768) {
-            height: 1.8rem;
-            margin: 0 0 .8rem 0;
-            width: 1.8rem;
-        }
-    }
+  }
 }

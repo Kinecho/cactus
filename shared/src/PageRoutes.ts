@@ -30,3 +30,10 @@ export enum PageRoute {
     UNSUBSCRIBE_SUCCESS = "/unsubscribe-confirmed",
     WELCOME = "/welcome",
 }
+
+
+export enum NamedRoute {
+    CORE_VALUES_NEW = "coreValues.new",
+    CORE_VALUES_RESULT = "coreValues.result",
+    CORE_VALUES_RESULT_PAGE = "coreValues.result.page",
+}

@@ -1,71 +1,43 @@
 <template>
-    <!--    Might not need this container when done testing - i wanted to put some extra details in here-->
-    <div class="embed-container">
-        <div v-if="!showResults && assessment && assessmentResponse && !closed">
-            <assessment :assessment="assessment"
-                    :assessmentResponse="assessmentResponse"
-                    @close="closeAssessment"
-                    @save="save"
-                    @completed="complete"/>
-        </div>
-        <div v-else class="assessment-container">
-            <button aria-label="Close" @click="closeAssessment" title="Close" class="close tertiary icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
-                    <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
-                </svg>
-            </button>
-            <template v-if="showResults">
-                <core-value-results
-                        :core-values="coreValues"
-                        :show-dropdown-menu="false"
-                        :bordered="false"
-                        title="Core Values"
-                        :show-description="true"/>
-                <button class="secondary retakeBtn" @click="restart">Retake the Assessment</button>
-            </template>
-            <div v-else-if="showUpgradeRequired">
-                <h3>You must be a Cactus Plus member to see your results.</h3>
-                <button @click="upgrade">Try it free</button>
-            </div>
-            <template v-else-if="closed && (!assessmentResponse || !assessmentResponse.completed)">
-                <p>You may close this screen.</p>
-            </template>
-            <template v-else-if="showSpinner || error">
-                <h2>Core Values</h2>
-                <spinner v-if="showSpinner" message="Loading..." class="loader"/>
-                <p v-if="error">{{error}}</p>
-            </template>
-        </div>
-        <div class="debug">
-            <button @click="upgrade">Upgrade</button>
-            <pre>
-                <strong>User Agent</strong>
-                {{userAgent}}
-            </pre>
-            <pre>
-                <strong>Registered methods:</strong>
-                {{appMethods}}
-            </pre>
-            <pre>
-                <strong>Assessment Closed:</strong> {{closed}}
-            </pre>
-            <pre>
-                <strong>App Member Tier:</strong> {{appSubscriptionTier}}
-            </pre>
-            <pre>
-                <strong>App Registered:</strong> {{appRegistered}}
-            </pre>
-            <pre>
-                <strong>App Member ID:</strong> {{appMemberId}}
-            </pre>
-            <pre>
-                <strong>App Member DisplayName:</strong> {{appDisplayName}}
-            </pre>
-            <pre>
-                <strong>Error:</strong> {{error}}
-            </pre>
-        </div>
+    <div v-if="!showResults && assessment && assessmentResponse && showAssessment">
+        <assessment
+                :assessment="assessment"
+                :assessmentResponse="assessmentResponse"
+                :question-index="questionIndex"
+                :loading="loading"
+                :questions="questions"
+                :done="done"
+                @start="onStart"
+                @response="onResponse"
+                @next="next"
+                @previous="previous"
+                @save="save"
+                @close="close"
+                @completed="complete"
+        />
     </div>
+    <div v-else class="assessment-container">
+        <button aria-label="Close" @click="close" title="Close" class="close tertiary icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
+                <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
+            </svg>
+        </button>
+        <template v-if="showResults">
+            <core-value-results
+                    :core-values="coreValues"
+                    :show-dropdown-menu="false"
+                    :bordered="false"
+                    title="Core Values"
+                    :show-description="true"/>
+            <button class="secondary retakeBtn" @click="restart">Retake the Assessment</button>
+        </template>
+        <template v-else-if="showSpinner || error">
+            <h2>Core Values</h2>
+            <spinner v-if="showSpinner" message="Loading..." class="loader"/>
+            <p v-if="error">{{error}}</p>
+        </template>
+    </div>
+
 </template>
 
 <script lang="ts">
@@ -75,7 +47,7 @@
     import { Prop } from "vue-property-decorator";
     import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
     import { logCoreValuesAssessmentCompleted, setUserId } from "@web/analytics";
-    import AssessmentResponseService from "@web/services/AssessmentResponseService";
+    import CoreValuesAssessmentResponseService from "@web/services/CoreValuesAssessmentResponseService";
     import CoreValuesAssessment from "@shared/models/CoreValuesAssessment";
     import Assessment from "@components/corevalues/Assessment.vue";
     import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
@@ -86,8 +58,10 @@
     import CoreValueResults from "@components/insights/CoreValueResults.vue";
     import { CoreValue } from "@shared/models/CoreValueTypes";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
-    import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
-    import { stringifyJSON } from "@shared/util/ObjectUtil";
+    import LoadableQuizResultsUpsell from "@components/upgrade/LoadableQuizResultsUpsell.vue";
+    import { BillingPeriod } from "@shared/models/SubscriptionProduct";
+    import { isIosApp } from "@web/DeviceUtil";
+    import CoreValuesQuestionResponse from "@shared/models/CoreValuesQuestionResponse";
 
     const logger = new Logger("CoreValuesEmbed");
 
@@ -96,6 +70,7 @@
             CoreValueResults,
             Spinner,
             Assessment,
+            LoadableQuizResultsUpsell
         }
     })
     export default class CoreValuesEmbed extends Vue implements IosDelegate {
@@ -107,6 +82,7 @@
         assessment: CoreValuesAssessment = CoreValuesAssessment.default();
         assessmentResponse: CoreValuesAssessmentResponse | null = null;
 
+        billingPeriod: BillingPeriod = BillingPeriod.yearly;
         appMemberId: string | null = null;
         appDisplayName: string | null = null;
         appSubscriptionTier: SubscriptionTier | null = null;
@@ -115,11 +91,13 @@
         resultsLoading = false;
         initTimeout: number | null = null;
         error: string | null = null;
-        closed = false;
+        showAssessment = false;
         existingResults: CoreValuesAssessmentResponse | null = null;
         previousResults: CoreValuesAssessmentResponse | null = null;
+        isUpgrading = false;
 
-        appMethods: string = "not set"
+        questionIndex: number = 0;
+        done: boolean = false;
 
         beforeMount() {
             this.loading = true;
@@ -135,16 +113,53 @@
             window.clearTimeout(this.initTimeout ?? undefined);
         }
 
-        get userAgent(): string | null | undefined {
-            return window.navigator.userAgent
+        async onStart() {
+            if (!this.assessmentResponse) {
+                this.assessmentResponse = CoreValuesAssessmentResponse.create({
+                    version: this.assessment.version,
+                    memberId: this.appMemberId!
+                });
+            }
+            await this.save();
+            this.questionIndex = 0;
+        }
+
+        get questions() {
+            return this.assessment.getQuestions(this.assessmentResponse);
+        }
+
+        async next() {
+            const nextIndex = (this.questionIndex ?? 0) + 1;
+            await this.goToIndex(nextIndex);
+        }
+
+        async previous() {
+            const nextIndex = Math.max((this.questionIndex ?? 0) - 1, 0);
+            await this.goToIndex(nextIndex);
+        }
+
+        async goToIndex(index: number) {
+            if (index >= this.questions.length) {
+                this.done = true;
+            }
+            this.questionIndex = index;
+        }
+
+        async onResponse(response: CoreValuesQuestionResponse) {
+            this.assessmentResponse?.setResponse(response);
+            await this.save()
+        }
+
+        get hasExistingResults(): boolean {
+            return !!this.existingResults
         }
 
         get showResults(): boolean {
-            return this.isPlusMember && (!!this.existingResults || this.closed && this.assessmentResponse?.completed === true);
+            return this.isPlusMember && (this.hasExistingResults || (!this.showAssessment && this.completed));
         }
 
-        get showUpgradeRequired(): boolean {
-            return !this.isPlusMember && this.closed && this.assessmentResponse?.completed === true;
+        get completed(): boolean {
+            return this.assessmentResponse?.completed === true
         }
 
         get showSpinner(): boolean {
@@ -161,38 +176,35 @@
 
             if (!id) {
                 this.error = "Oops, we are unable to load the Core Values assessment. Please try again later";
-                return
+                return "You must pass a member ID";
             }
 
             this.appMemberId = id;
-            this.appDisplayName = displayName;
-            this.appSubscriptionTier = tier;
+            this.appDisplayName = displayName ?? "";
+            this.appSubscriptionTier = tier ?? SubscriptionTier.BASIC;
             this.appRegistered = true;
             setUserId(id)
 
-            this.existingResults = await this.loadCurrentResults();
+            if (this.isPlusMember) {
+                this.existingResults = await this.loadCurrentResults();
+            } else {
+                this.showAssessment = true;
+            }
 
             this.initAssessment(id);
             this.loading = false
-
-
-            let appMethods = window.webkit?.messageHandlers ?? { none: "not found" }
-            appMethods = `methods: ${ JSON.stringify({
-                appMounted: !!window.webkit?.messageHandlers?.appMounted,
-                closeCoreValues: !!window.webkit?.messageHandlers?.closeCoreValues,
-                showPricing: !!window.webkit?.messageHandlers?.showPricing,
-            }, null, 2) }`
-            this.appMethods = appMethods = `hasWebkit: ${ !!window.webkit } | methods: ${ appMethods }`
-            // FOR TESTING
-            // this.assessmentResponse.results = { values: [CoreValue.Power, CoreValue.Nature, CoreValue.Humor] };
-            // this.assessmentResponse.completed = true;
 
             return "success"
         }
 
         async updateMember(id?: string | null, displayName?: string | null, tier?: SubscriptionTier | null): Promise<string> {
             logger.info("updating member", id, displayName, tier);
+            if (isPremiumTier(tier) && !isPremiumTier(this.appSubscriptionTier) && this.isUpgrading) {
+                this.showAssessment = false;
+                this.isUpgrading = false;
+            }
             this.appSubscriptionTier = tier ?? SubscriptionTier.BASIC;
+            return "success";
         }
 
         initAssessment(memberId: string) {
@@ -208,60 +220,69 @@
             this.previousResults = this.existingResults ?? this.previousResults;
             this.existingResults = null;
             this.initAssessment(this.appMemberId!)
-            this.closed = false;
+            this.showAssessment = true;
         }
 
-        closeIos() {
-            const { error } = IosAppService.closeCoreValues();
-            if (error) {
-                this.error = error;
-            }
-        }
-
-        async closeAssessment() {
+        async close() {
             logger.info("Closing assessment....");
             const { error } = IosAppService.closeCoreValues();
             if (error) {
-                this.error = "Failed to close with iOS: " + error;
+                this.error = "Oops, unable to exit the assessment. " + error;
             }
-            this.closed = true;
             this.existingResults = this.previousResults;
         }
 
         async upgrade() {
+            this.isUpgrading = true;
             IosAppService.showPricing();
+            if (!isIosApp()) {
+                logger.warn("This is not an iOS app, can not trigger pricing modal");
+            }
         }
 
-        async complete(assessmentResponse: CoreValuesAssessmentResponse) {
+        async complete() {
             logCoreValuesAssessmentCompleted();
+            const assessmentResponse = this.assessmentResponse;
+            if (!assessmentResponse) {
+                return;
+            }
             assessmentResponse.completed = true;
             assessmentResponse.results = this.assessment.getResults(assessmentResponse);
             this.assessmentResponse = assessmentResponse
-            await this.save(assessmentResponse);
+            await this.save();
             assessmentResponse.completed = true;
-            this.closed = true;
+
+            if (this.isPlusMember) {
+                this.showAssessment = false;
+            } else {
+                await this.upgrade()
+            }
         }
 
         get isPlusMember(): boolean {
             return isPremiumTier(this.appSubscriptionTier);
         }
 
-        async loadCurrentResults(): Promise<GapAnalysisAssessmentResult | undefined> {
+        async loadCurrentResults(): Promise<CoreValuesAssessmentResponse | null> {
             this.resultsLoading = true;
             const memberId = this.appMemberId;
             if (!memberId) {
                 this.resultsLoading = false;
                 this.error = "You must be signed in to complete the assessment.";
-                return
+                return null
             }
-            const currentResults = await AssessmentResponseService.sharedInstance.getLatestForUser(memberId);
+            const currentResults = await CoreValuesAssessmentResponseService.sharedInstance.getLatestForUser(memberId);
 
             this.resultsLoading = false;
-            return currentResults;
+            return currentResults ?? null;
         }
 
-        async save(assessmentResponse: CoreValuesAssessmentResponse) {
-            const saved = await AssessmentResponseService.sharedInstance.save(assessmentResponse);
+        async save() {
+            const assessmentResponse = this.assessmentResponse;
+            if (!assessmentResponse) {
+                return;
+            }
+            const saved = await CoreValuesAssessmentResponseService.sharedInstance.save(assessmentResponse);
             if (saved) {
                 this.assessmentResponse = saved;
             }

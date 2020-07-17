@@ -19,7 +19,7 @@
 <script lang="ts">
     import Vue from "vue";
     import Component from "vue-class-component"
-    import { Prop } from "vue-property-decorator";
+    import { Prop, Watch } from "vue-property-decorator";
     import { CoreValue, CoreValueMeta, CoreValuesService } from "@shared/models/CoreValueTypes";
     import { DropdownMenuLink } from "@components/DropdownMenuTypes";
     import { PageRoute } from "@shared/PageRoutes";
@@ -48,23 +48,37 @@
         @Prop({ type: Boolean, default: true })
         showDropdownMenu!: boolean;
 
-        @Prop({type: String|null, default: "Core Values"})
-        title!: string|null;
+        @Prop({ type: String as () => string | null, default: "Core Values" })
+        title!: string | null;
 
-        get displayValues(): CoreValueMeta[] {
-            return (this.coreValues ?? []).map(value => CoreValuesService.shared.getMeta(value))
+        displayValues: CoreValueMeta[] = [];
+        coreValuesBlob: CoreValuesBlob | null = null;
+
+        @Watch("coreValues")
+        onCoreValues(updated: CoreValue[]) {
+            this.coreValuesBlob = getCoreValuesBlob(updated) ?? null;
+            this.displayValues = (this.coreValues ?? []).map(value => CoreValuesService.shared.getMeta(value))
         }
 
-        get coreValuesBlob(): CoreValuesBlob | undefined {
-            if (!this.coreValues || this.coreValues.length === 0) {
-                return undefined;
-            }
-            const forceIndex = getQueryParam(QueryParam.BG_INDEX)
-            logger.info("Forcing index: ", forceIndex);
-            const blob = getCoreValuesBlob(this.coreValues, forceIndex);
-            logger.info("Blob info:", blob);
-            return blob;
+
+        beforeMount() {
+            this.onCoreValues(this.coreValues);
         }
+
+        // get displayValues(): CoreValueMeta[] {
+        //     return (this.coreValues ?? []).map(value => CoreValuesService.shared.getMeta(value))
+        // }
+
+        // get coreValuesBlob(): CoreValuesBlob | null {
+        //     if (!this.coreValues || this.coreValues.length === 0) {
+        //         return null;
+        //     }
+        //     // const forceIndex = getQueryParam(QueryParam.BG_INDEX)
+        //     // logger.info("Forcing index: ", forceIndex);
+        //     const blob = getCoreValuesBlob(this.coreValues);
+        //     // logger.info("Blob info:", blob);
+        //     return blob ?? null;
+        // }
 
         get coreValuesDropdownLinks(): DropdownMenuLink[] {
             return [{

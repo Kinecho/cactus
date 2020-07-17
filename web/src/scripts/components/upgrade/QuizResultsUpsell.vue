@@ -58,8 +58,8 @@
             Spinner,
         }
     })
-    export default class GapAnalysisUpsell extends Vue {
-        name = "GapAnalysisUpsell";
+    export default class QuizResultsUpsell extends Vue {
+        name = "QuizResultsUpsell";
 
         @Prop({ type: String as () => CactusElement, required: false, default: null })
         element!: CactusElement|null;

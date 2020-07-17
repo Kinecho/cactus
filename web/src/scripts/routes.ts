@@ -2,10 +2,11 @@ import { Component } from "vue";
 import LoadingPage from "@web/views/LoadingPage.vue";
 import ErrorPage from "@web/views/ErrorPage.vue";
 import { MetaRouteConfig } from "@web/router-meta";
-import { PageRoute } from "@shared/PageRoutes";
+import { NamedRoute, PageRoute } from "@shared/PageRoutes";
 import { QueryParam } from "@shared/util/queryParams";
 import AndroidStart from "@web/views/AndroidStart.vue";
 import { Screen } from "@components/gapanalysis/GapAssessmentTypes";
+import { isNumber } from "@shared/util/ObjectUtil";
 
 function lazyLoadView(AsyncView: any): Promise<Component<any>> {
     const AsyncHandler = (): any => ({
@@ -99,7 +100,6 @@ export const routes: MetaRouteConfig[] = [
         "@web/views/HomePage.vue"
         )),
         path: "/",
-        name: "Cactus",
         meta: {
             title: "Cactus | Boost your mental fitness",
             description: "Research-backed prompts to increase self-awareness and resilience",
@@ -122,7 +122,6 @@ export const routes: MetaRouteConfig[] = [
         )),
         path: PageRoute.MEMBER_HOME,
         alias: PageRoute.INSIGHTS,
-        name: "Home",
         meta: {
             authRequired: true,
             passMember: true,
@@ -137,7 +136,6 @@ export const routes: MetaRouteConfig[] = [
         "@components/JournalHome.vue"
         )),
         path: PageRoute.JOURNAL,
-        name: "Journal",
         meta: {
             title: "Journal | Cactus",
             authRequired: true,
@@ -151,7 +149,6 @@ export const routes: MetaRouteConfig[] = [
         component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
         "@web/views/WordBubbleEmbedPage.vue")),
         path: PageRoute.INSIGHTS_EMBED,
-        name: "Insights Embed",
         meta: {
             title: "Insights",
             description: "See yourself and the world more positively. Questions to help you become more mindful and reflect on what makes you happy."
@@ -163,7 +160,6 @@ export const routes: MetaRouteConfig[] = [
         "@web/views/GetStartedPage.vue")),
         path: PageRoute.SIGNUP,
         alias: PageRoute.GET_STARTED,
-        name: "Sign Up",
         meta: {
             usePrevious: true,
             title: "Sign Up | Cactus",
@@ -183,7 +179,6 @@ export const routes: MetaRouteConfig[] = [
         component: () => lazyLoadView(import(/* webpackPreload: true, webpackPrefetch: true, webpackChunkName: "pages" */ "@web/views/SignUpView.vue")),
         path: PageRoute.LOGIN,
         alias: [PageRoute.SIGNUP_CONFIRMED],
-        name: "Log In",
         meta: {
             usePrevious: true,
             title: "Log In | Cactus",
@@ -208,7 +203,6 @@ export const routes: MetaRouteConfig[] = [
         /* webpackPrefetch: true, webpackPreload: true, webpackChunkName: "pages" */
         "@web/views/LegacyPromptContentPage.vue")),
         path: `${ PageRoute.PROMPTS_ROOT }-legacy/:entryId`,
-        name: "LegacyPrompt",
         meta: {
             title: "Reflection Prompt",
             description: "Take a moment for mindful reflection",
@@ -219,7 +213,6 @@ export const routes: MetaRouteConfig[] = [
         /* webpackPrefetch: true, webpackPreload: true, webpackChunkName: "pages" */
         "@web/views/PromptPage.vue")),
         path: `${ PageRoute.PROMPTS_ROOT }/:id`,
-        name: "Prompt",
         props: (route) => {
             const usePrompt = route.query[QueryParam.USE_PROMPT_ID] === "true";
             const pageParam = route.query[QueryParam.CONTENT_INDEX]
@@ -253,19 +246,16 @@ export const routes: MetaRouteConfig[] = [
         /* webpackPrefetch: true, webpackChunkName: "pages" */
         "@web/views/TermsOfServicePage.vue")),
         path: PageRoute.TERMS_OF_SERVICE,
-        name: "Terms of Service",
     },
     {
         component: () => lazyLoadView(import(
         /* webpackPrefetch: true, webpackChunkName: "pages" */
         "@components/SharedReflectionPage.vue")),
         path: `${ PageRoute.SHARED_REFLECTION }/:reflectionId`,
-        name: "Reflection"
     },
     {
         path: PageRoute.WELCOME,
         component: AndroidStart,
-        name: "Welcome",
         meta: {
             passMember: true,
         }
@@ -275,13 +265,11 @@ export const routes: MetaRouteConfig[] = [
         /* webpackPrefetch: true, webpackChunkName: "pages" */
         "@components/MagicLinkAppContinue.vue")),
         path: PageRoute.NATIVE_APP_MAGIC_LINK_LOGIN,
-        name: "App Login",
     },
     {
         component: () => lazyLoadView(import(
         /* webpackPrefetch: true, webpackChunkName: "pages" */
         "@components/PricingPage.vue")),
-        name: "Pricing",
         path: PageRoute.PRICING,
         meta: {
             title: "Cactus Plus",
@@ -299,20 +287,52 @@ export const routes: MetaRouteConfig[] = [
         component: () => lazyLoadView(import(
         /* webpackPrefetch: true, webpackChunkName: "pages" */
         "@components/SocialHome.vue")),
-        name: "Friends & Activity | Cactus",
         path: PageRoute.SOCIAL,
     },
     {
         component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
         "@components/SocialInvite.vue")),
-        name: "Invite Friends | Cactus",
         path: PageRoute.FRIENDS
+    },
+    {
+        path: PageRoute.CORE_VALUES_ASSESSMENT,
+        name: NamedRoute.CORE_VALUES_NEW,
+        component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
+        "@components/CoreValuesAssessmentPage.vue")),
+        meta: {
+            title: "Discover your core values",
+            description: "Core values are the general expression of what is most important for you, and they help you " +
+            "understand past decisions and make better decisions in the future.",
+            authRequired: true,
+            passMember: true,
+            authContinueMessage: "Please sign in to take the quiz."
+        },
+        props: (route) => {
+            return {
+                responseId: route.params.resultsId,
+                page: isNumber(Number(route.params.index)) ? Number(route.params.index ?? 0) : null,
+                done: route.params.index === "done"
+            }
+        },
+        children: [
+            {
+                name: NamedRoute.CORE_VALUES_RESULT,
+                path: ":resultsId",
+                props: true,
+                children: [
+                    {
+                        name: NamedRoute.CORE_VALUES_RESULT_PAGE,
+                        path: ":index",
+                        props: true,
+                    }
+                ]
+            }
+        ]
     },
     {
         component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
         "@components/CoreValuesPage.vue")),
         path: PageRoute.CORE_VALUES,
-        name: "Core Values",
         meta: {
             title: "Discover your core values",
             description: "Core values are the general expression of what is most important for you, and they help you " +
@@ -322,19 +342,6 @@ export const routes: MetaRouteConfig[] = [
             // authContinueMessage: "Please sign in to take the quiz."
         },
         children: [
-            {
-                path: "assessment",
-                component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
-                "@components/CoreValuesAssessmentPage.vue")),
-                meta: {
-                    title: "Discover your core values",
-                    description: "Core values are the general expression of what is most important for you, and they help you " +
-                    "understand past decisions and make better decisions in the future.",
-                    authRequired: true,
-                    passMember: true,
-                    authContinueMessage: "Please sign in to take the quiz."
-                }
-            },
             {
                 path: "embed",
                 component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "ios" */
@@ -356,7 +363,6 @@ export const routes: MetaRouteConfig[] = [
         path: PageRoute.GAP_ANALYSIS,
         component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
         "@web/views/GapAnalysisPage.vue")),
-        name: "GapAnalysisPage",
         meta: {
             title: "Happiness Quiz | Cactus",
             passMember: true,
@@ -392,25 +398,21 @@ export const routes: MetaRouteConfig[] = [
         component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
         "@components/EmailActionHandler.vue")),
         path: PageRoute.AUTHENTICATE_ACTIONS,
-        name: "Authentication",
     },
     {
         component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
         "@components/SponsorPage.vue")),
         path: PageRoute.SPONSOR,
-        name: "Sponsor",
     },
     {
         component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
         "@web/views/PrivacyPolicyPage.vue")),
         path: PageRoute.PRIVACY_POLICY,
-        name: "Privacy Policy",
     },
     {
         component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
         "@components/AccountSettings.vue")),
         path: PageRoute.ACCOUNT,
-        name: "Account Settings",
         meta: {
             passMember: true,
             authRequired: true,
@@ -422,32 +424,27 @@ export const routes: MetaRouteConfig[] = [
     {
         component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
         "@web/views/PaymentCanceled.vue")),
-        name: "Payment Canceled",
         path: PageRoute.PAYMENT_CANCELED,
     },
     {
         component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
         "@components/UnsubscribeConfirmedPage.vue")),
-        name: "Unsubscribe Confirmed",
         path: PageRoute.UNSUBSCRIBE_SUCCESS
     },
     {
         component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
         "@web/views/StripeCheckoutRedirect.vue")),
-        name: "Checkout",
         path: PageRoute.CHECKOUT,
     },
     {
         component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
         "@web/views/PromotionLandingView.vue")),
-        name: "Promotions",
         props: true,
         path: `${ PageRoute.PROMOS_ROOT }/:slug`,
     },
     {
         component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
         "@web/views/OnboardingPage.vue")),
-        name: "Onboarding",
         path: PageRoute.HELLO_ONBOARDING,
         meta: {
             passMember: true,
@@ -476,7 +473,6 @@ export const routes: MetaRouteConfig[] = [
         component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
         "@components/404.vue")),
         path: "*",
-        name: "Page Not Found",
     },
 
 ]

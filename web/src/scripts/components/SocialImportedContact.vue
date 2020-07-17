@@ -202,7 +202,7 @@
                 if (this.imported_contact?.avatarUrl) {
                     return this.imported_contact.avatarUrl;
                 } else if (this.contact) {
-                    return 'assets/images/avatars/avatar' + this.avatarNumber(this.contact.email) + '.png';
+                    return '/assets/images/avatars/avatar' + this.avatarNumber(this.contact.email) + '.png';
                 }
                 return;
             }
