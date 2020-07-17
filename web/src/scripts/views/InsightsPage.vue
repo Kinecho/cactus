@@ -8,7 +8,7 @@
             <div v-else-if="showEmptyState">
                 <EmptyState :tier="member.tier"/>
             </div>
-            <div v-else class="insightsGrid">
+            <div v-else class="insightsGrid" :class="insightsGridClassNames">
                 <reflection-stats-widget :reflection-stats="reflectionStats" v-if="reflectionStats"/>
                 <prompt-widget :entry="todayEntry" :member="member" :loading="todayPromptLoading"/>
                 <section class="bubblesContainer" v-if="hasWordCloud">
@@ -128,6 +128,12 @@
 
         get todayPromptLoading(): boolean {
             return !this.todayEntry && !this.todayLoaded;
+        }
+
+        get insightsGridClassNames(): Record<string, boolean | string> {
+            return {
+                highlightCV: this.fromParam === "core-values"
+            }
         }
 
         async fetchGapResults() {
@@ -284,6 +290,14 @@
                 "values values values gap gap gap";
             grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
             grid-template-rows: auto;
+
+
+            &.highlightCV {
+                grid-template-areas: "values values values values values values"
+                    "stats stats stats stats stats stats"
+                    "today today today today bubbles bubbles"
+                    "gap gap gap gap gap gap";
+            }
 
             .statsContainer {
                 grid-area: stats;
