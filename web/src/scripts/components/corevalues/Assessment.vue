@@ -110,13 +110,16 @@
         @Prop({ type: Boolean, default: false })
         loading!: boolean;
 
+        @Prop({ type: Array as () => CoreValuesQuestion[], default: [] })
+        questions!: CoreValuesQuestion[];
+
         // started = false;
 
         // questionIndex: number | null = 0;
         // completed: boolean = false;
         showValidation: boolean = false;
         showCloseConfirm: boolean = false;
-        questions: CoreValuesQuestion[] = []
+
 
         get displayIndex(): number {
             if (this.completed) {
@@ -125,9 +128,9 @@
             return (this.questionIndex ?? 0) + 1
         }
 
-        beforeMount() {
-            this.questions = this.assessment.getQuestions(this.assessmentResponse);
-        }
+        // beforeMount() {
+        //     this.questions = this.assessment.getQuestions(this.assessmentResponse);
+        // }
 
         get started(): boolean {
             return !isNull(this.questionIndex) && !isNull(this.assessmentResponse);
@@ -182,8 +185,8 @@
         }
 
         async save() {
-            this.$emit("save", this.assessmentResponse);
-            this.questions = this.assessment.getQuestions(this.assessmentResponse);
+            this.$emit("save");
+            // this.questions = this.assessment.getQuestions(this.assessmentResponse);
         }
 
         start() {
@@ -212,7 +215,7 @@
         }
 
         nextQuestion() {
-            this.questions = this.assessment.getQuestions(this.assessmentResponse);
+            // this.questions = this.assessment.getQuestions(this.assessmentResponse);
             if (this.responseValidation?.isValid === false) {
                 this.showValidation = true
                 return;

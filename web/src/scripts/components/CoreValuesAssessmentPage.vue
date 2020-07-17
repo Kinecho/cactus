@@ -7,6 +7,7 @@
                     :assessmentResponse="assessmentResponse"
                     :question-index="questionIndex"
                     :loading="loading"
+                    :questions="questions"
                     @next="next"
                     @previous="previous"
                     @start="onStart"
@@ -36,7 +37,7 @@
     import Vue from "vue";
     import Component from "vue-class-component"
     import CactusMember from "@shared/models/CactusMember";
-    import { Prop } from "vue-property-decorator";
+    import { Prop, Watch } from "vue-property-decorator";
     import Assessment from "@components/corevalues/Assessment.vue";
     import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
     import CoreValuesAssessment from "@shared/models/CoreValuesAssessment";
@@ -54,6 +55,7 @@
     import { appendQueryParams } from "@shared/util/StringUtil";
     import { QueryParam } from "@shared/util/queryParams";
     import { isNotNull, isNull } from "@shared/util/ObjectUtil";
+    import CoreValuesQuestion from "@shared/models/CoreValuesQuestion";
 
     const logger = new Logger("CoreValuesAssessmentPage");
 
@@ -86,6 +88,8 @@
         checkoutLoading = false;
         checkoutError: string | null = null;
 
+        // questions: CoreValuesQuestion[] = []
+
         async beforeMount() {
             this.assessment = CoreValuesAssessment.default();
 
@@ -95,12 +99,16 @@
                 logger.info("Fetched existing response");
                 this.loading = false;
             }
+            // this.onResponse(this.assessmentResponse);
             // this.assessmentResponse = CoreValuesAssessmentResponse.create({
             //     version: this.assessment.version,
             //     memberId: this.member.id!
             // });
         }
 
+        get questions() {
+            return this.assessment.getQuestions(this.assessmentResponse);
+        }
 
         get questionIndex(): number {
             if (isNull(this.page)) {
@@ -113,6 +121,7 @@
             return !!this.assessment && !!this.assessmentResponse;
         }
 
+
         async complete() {
             logCoreValuesAssessmentCompleted();
             const assessmentResponse = this.assessmentResponse;
@@ -122,7 +131,7 @@
             assessmentResponse.completed = true;
             assessmentResponse.results = this.assessment.getResults(assessmentResponse);
             this.assessmentResponse = assessmentResponse
-            await this.save(assessmentResponse);
+            await this.save();
             assessmentResponse.completed = true;
 
             if (isPremiumTier(this.member.tier)) {
@@ -151,7 +160,7 @@
                     memberId: this.member.id!
                 });
             }
-            await this.save(this.assessmentResponse);
+            await this.save();
             const id = this.assessmentResponse.id;
             if (!id) {
                 this.error = "Uh oh, something went wrong. Please try again later.";
@@ -191,7 +200,11 @@
             await this.goToIndex(nextIndex);
         }
 
-        async save(assessmentResponse: CoreValuesAssessmentResponse) {
+        async save() {
+            const assessmentResponse = this.assessmentResponse;
+            if (!assessmentResponse) {
+                return;
+            }
             const saved = await CoreValuesAssessmentResponseService.sharedInstance.save(assessmentResponse);
             if (saved) {
                 this.assessmentResponse = saved;
