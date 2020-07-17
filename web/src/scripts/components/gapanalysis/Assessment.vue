@@ -450,14 +450,6 @@
         opacity: .8;
     }
 
-    .flexActions {
-        flex-direction: column;
-
-        @include r(768) {
-            display: flex;
-        }
-    }
-
     .radarChartContainer {
         margin: 3.2rem auto;
 

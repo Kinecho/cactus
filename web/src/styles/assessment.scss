@@ -48,17 +48,12 @@
   }
 }
 
-.validation {
-  color: $red;
-  font-size: 1.6rem;
-  padding-bottom: .8rem;
+.flexActions {
+    flex-direction: column;
 
-  @include r(768) {
-    left: 0;
-    position: absolute;
-    right: 0;
-    top: -2.8rem;
-  }
+    @include r(768) {
+        display: flex;
+    }
 }
 
 .backArrowbtn {

@@ -43,7 +43,7 @@
                             :options="currentQuestionOptions"
                             @updated="updateResponse"/>
                     </transition>
-                    <div class="cvActions" v-if="started">
+                    <div class="cvActions flexActions" v-if="started">
                         <transition name="fade-in-fast" appear>
                             <p class="validation" v-if="showValidation && responseValidation && responseValidation.message">
                                 {{responseValidation && responseValidation.message}}</p>
@@ -292,4 +292,19 @@
     @import "mixins";
     @import "transitions";
     @import "assessment.scss";
+
+    .validation {
+        color: $red;
+        font-size: 1.6rem;
+        padding-bottom: .8rem;
+
+        @include r(768) {
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: -2.8rem;
+        }
+    }
+
+
 </style>
