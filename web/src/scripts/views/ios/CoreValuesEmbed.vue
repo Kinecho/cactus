@@ -37,7 +37,7 @@
     import { Prop } from "vue-property-decorator";
     import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
     import { logCoreValuesAssessmentCompleted, setUserId } from "@web/analytics";
-    import AssessmentResponseService from "@web/services/AssessmentResponseService";
+    import CoreValuesAssessmentResponseService from "@web/services/CoreValuesAssessmentResponseService";
     import CoreValuesAssessment from "@shared/models/CoreValuesAssessment";
     import Assessment from "@components/corevalues/Assessment.vue";
     import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
@@ -212,14 +212,14 @@
                 this.error = "You must be signed in to complete the assessment.";
                 return null
             }
-            const currentResults = await AssessmentResponseService.sharedInstance.getLatestForUser(memberId);
+            const currentResults = await CoreValuesAssessmentResponseService.sharedInstance.getLatestForUser(memberId);
 
             this.resultsLoading = false;
             return currentResults ?? null;
         }
 
         async save(assessmentResponse: CoreValuesAssessmentResponse) {
-            const saved = await AssessmentResponseService.sharedInstance.save(assessmentResponse);
+            const saved = await CoreValuesAssessmentResponseService.sharedInstance.save(assessmentResponse);
             if (saved) {
                 this.assessmentResponse = saved;
             }

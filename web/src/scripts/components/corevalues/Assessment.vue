@@ -2,7 +2,7 @@
     <div class="assessment-container">
         <progress-stepper :current="questionIndex" :total="questions.length"/>
         <div class="paddingContainer">
-            <h4 v-if="started">{{(questionIndex || 0) + 1}} of {{questions.length}}</h4>
+            <h4 v-if="started">{{displayIndex}} of {{questions.length}}</h4>
             <template v-if="loading">
                 <h3>Loading</h3>
             </template>
@@ -41,13 +41,12 @@
             </template>
             <div class="cvActions">
                 <transition name="fade-in-fast" appear>
-                    <p class="validation" v-show="showValidation && responseValidation && responseValidation.message">
-                        {{responseValidation.message}}</p>
+                    <p class="validation" v-if="showValidation && responseValidation && responseValidation.message">
+                        {{responseValidation && responseValidation.message}}</p>
                 </transition>
                 <button v-if="hasNextQuestion && started"
                         class="btn btn primary no-loading"
                         @click="nextQuestion()"
-
                         :class="{disabled: this.responseValidation && !this.responseValidation.isValid}">
                     Next
                 </button>
@@ -69,7 +68,6 @@
                 </div>
             </div>
         </modal>
-
     </div>
 </template>
 
@@ -103,19 +101,40 @@
         @Prop({ type: Object as () => CoreValuesAssessment, required: true })
         assessment!: CoreValuesAssessment;
 
-        @Prop({ type: Object as () => CoreValuesAssessmentResponse, required: true })
-        assessmentResponse!: CoreValuesAssessmentResponse;
+        @Prop({ type: Object as () => CoreValuesAssessmentResponse, required: false })
+        assessmentResponse!: CoreValuesAssessmentResponse | null;
 
-        started = false;
-        loading: boolean = false;
-        questionIndex: number | null = 0;
-        completed: boolean = false;
+        @Prop({ type: Number, default: 0 })
+        questionIndex!: number | null;
+
+        @Prop({ type: Boolean, default: false })
+        loading!: boolean;
+
+        // started = false;
+
+        // questionIndex: number | null = 0;
+        // completed: boolean = false;
         showValidation: boolean = false;
         showCloseConfirm: boolean = false;
         questions: CoreValuesQuestion[] = []
 
+        get displayIndex(): number {
+            if (this.completed) {
+                return this.questions.length;
+            }
+            return (this.questionIndex ?? 0) + 1
+        }
+
         beforeMount() {
             this.questions = this.assessment.getQuestions(this.assessmentResponse);
+        }
+
+        get started(): boolean {
+            return !isNull(this.questionIndex) && !isNull(this.assessmentResponse);
+        }
+
+        get completed(): boolean {
+            return (this.questionIndex ?? 0) >= this.questions.length
         }
 
         get hasPreviousQuestion(): boolean {
@@ -124,11 +143,6 @@
 
         get hasNextQuestion(): boolean {
             return !this.completed
-            // if (isNumber(this.questionIndex)) {
-            //     let nextIndex = this.questionIndex + 1;
-            //     return nextIndex < this.questions.length;
-            // }
-            // return false;
         }
 
         get currentQuestion(): CoreValuesQuestion | null {
@@ -173,14 +187,11 @@
         }
 
         start() {
-            this.started = true;
-            this.questionIndex = 0;
+            this.$emit("start");
         }
 
         async finish() {
-            this.completed = true;
-            this.assessmentResponse.completed = true;
-            this.$emit("completed", this.assessmentResponse);
+            this.$emit("completed");
         }
 
         async updateResponse(response: CoreValuesQuestionResponse) {
@@ -190,16 +201,17 @@
 
         previousQuestion() {
             if (isNull(this.currentQuestion)) {
-                this.questionIndex = 0;
+                // this.questionIndex = 0;
                 return;
             } else if (isNumber(this.questionIndex)) {
-                this.questionIndex = Math.max(0, this.questionIndex - 1);
-                this.completed = false
+                // this.questionIndex = Math.max(0, this.questionIndex - 1);
+                // this.completed = false
+                // this.assessmentResponse?.completed = false;
+                this.$emit("previous");
             }
         }
 
         nextQuestion() {
-
             this.questions = this.assessment.getQuestions(this.assessmentResponse);
             if (this.responseValidation?.isValid === false) {
                 this.showValidation = true
@@ -210,16 +222,21 @@
 
 
             if (isNull(this.currentQuestion)) {
-                this.questionIndex = 0;
+                // this.questionIndex = 0;
+                this.$emit('next');
                 return;
             } else if (isNumber(this.questionIndex)) {
                 let nextIndex = this.questionIndex + 1;
                 if (nextIndex >= this.questions.length) {
-                    this.completed = true;
+                    // this.completed = true;
+                    // this.$emit('completed');
                 } else {
                     logCoreValuesAssessmentProgress(nextIndex);
-                    this.questionIndex = nextIndex;
+                    // this.questionIndex = nextIndex;
                 }
+                // this.$emit('next');
+                this.$emit('next');
+
             }
         }
 

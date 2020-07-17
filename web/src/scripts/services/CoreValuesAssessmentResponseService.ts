@@ -3,8 +3,8 @@ import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentRes
 import { BaseModelField, Collection } from "@shared/FirestoreBaseModels";
 import { DocObserverOptions } from "@shared/types/FirestoreTypes";
 
-export default class AssessmentResponseService {
-    public static sharedInstance = new AssessmentResponseService();
+export default class CoreValuesAssessmentResponseService {
+    public static sharedInstance = new CoreValuesAssessmentResponseService();
     firestoreService = FirestoreService.sharedInstance;
 
     getCollectionRef() {

@@ -2,7 +2,7 @@ export enum PageRoute {
     ACCOUNT = "/account",
     AUTHENTICATE_ACTIONS = "/authenticate-actions",
     CHECKOUT = "/checkout",
-    CORE_VALUES = "/core-values",
+    CORE_VALUES = "/core-values/assessment",
     CORE_VALUES_ASSESSMENT = "/core-values/assessment",
     CORE_VALUES_EMBED = "/core-values/embed",
     FRIENDS = "/friends",
@@ -29,4 +29,11 @@ export enum PageRoute {
     TERMS_OF_SERVICE = "/terms-of-service",
     UNSUBSCRIBE_SUCCESS = "/unsubscribe-confirmed",
     WELCOME = "/welcome",
+}
+
+
+export enum NamedRoute {
+    CORE_VALUES_NEW = "coreValues.new",
+    CORE_VALUES_RESULT = "coreValues.result",
+    CORE_VALUES_RESULT_PAGE = "coreValues.result.page",
 }

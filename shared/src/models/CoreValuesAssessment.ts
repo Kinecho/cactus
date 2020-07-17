@@ -24,7 +24,7 @@ export default class CoreValuesAssessment {
      */
     protected questions: Question[] = [];
 
-    getQuestions(response?: CoreValuesAssessmentResponse): Question[] {
+    getQuestions(response?: CoreValuesAssessmentResponse|null): Question[] {
         if (!response) {
             return this.questions;
         }

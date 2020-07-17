@@ -1,27 +1,35 @@
 <template>
-    <assessment
-            v-if="!showUpgrade"
-            :assessment="assessment"
-            :assessmentResponse="assessmentResponse"
-            @close="closeAssessment"
-            @save="save"
-            @completed="complete"
-    />
-    <div v-else-if="showResults">
-        <core-value-results
-                :core-values="coreValues"
-                :show-dropdown-menu="false"
-        />
+    <div class="coreValuesPage">
+        <div class="centered">
+            <assessment
+                    v-if="!showUpgrade"
+                    :assessment="assessment"
+                    :assessmentResponse="assessmentResponse"
+                    :question-index="questionIndex"
+                    :loading="loading"
+                    @next="next"
+                    @previous="previous"
+                    @start="onStart"
+                    @close="closeAssessment"
+                    @save="save"
+                    @completed="complete"
+            />
+            <div v-else-if="showResults">
+                <core-value-results
+                        :core-values="coreValues"
+                        :show-dropdown-menu="false"
+                />
+            </div>
+            <div v-else-if="showUpgrade" class="assessment-container">
+                <div v-if="checkoutError" class="error alert">{{checkoutError}}</div>
+                <quiz-results-upsell
+                        :billing-period="billingPeriod"
+                        :checkout-loading="checkoutLoading"
+                        @checkout="checkout"
+                />
+            </div>
+        </div>
     </div>
-    <div v-else-if="showUpgrade" class="assessment-container">
-        <div v-if="checkoutError" class="error alert">{{checkoutError}}</div>
-        <quiz-results-upsell
-                :billing-period="billingPeriod"
-                :checkout-loading="checkoutLoading"
-                @checkout="checkout"
-        />
-    </div>
-
 </template>
 
 <script lang="ts">
@@ -34,17 +42,18 @@
     import CoreValuesAssessment from "@shared/models/CoreValuesAssessment";
     import { logCoreValuesAssessmentCompleted } from "@web/analytics";
     import { pushRoute } from "@web/NavigationUtil";
-    import { PageRoute } from "@shared/PageRoutes";
-    import AssessmentResponseService from "@web/services/AssessmentResponseService";
+    import { NamedRoute, PageRoute } from "@shared/PageRoutes";
+    import CoreValuesAssessmentResponseService from "@web/services/CoreValuesAssessmentResponseService";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
     import QuizResultsUpsell from "@components/upgrade/LoadableQuizResultsUpsell.vue";
     import SubscriptionProduct, { BillingPeriod } from "@shared/models/SubscriptionProduct";
     import CoreValueResults from "@components/insights/CoreValueResults.vue";
-    import { CoreValue } from "@shared/models/CoreValueTypes";
+    import { CoreValue, CoreValuesService } from "@shared/models/CoreValueTypes";
     import { startCheckout } from "@web/checkoutService";
     import Logger from "@shared/Logger"
     import { appendQueryParams } from "@shared/util/StringUtil";
     import { QueryParam } from "@shared/util/queryParams";
+    import { isNotNull, isNull } from "@shared/util/ObjectUtil";
 
     const logger = new Logger("CoreValuesAssessmentPage");
 
@@ -61,23 +70,55 @@
         @Prop({ type: Object as () => CactusMember, required: true })
         member!: CactusMember;
 
+        @Prop({ type: Number, required: false, default: null })
+        page!: number | null;
+
+        @Prop({ type: String, required: false, default: null })
+        responseId!: string | null;
+
+
+        loading = false;
+        error: string | null = null;
         assessment!: CoreValuesAssessment;
-        assessmentResponse!: CoreValuesAssessmentResponse;
+        assessmentResponse: CoreValuesAssessmentResponse | null = null;
         showUpgrade = false;
         showResults = false;
         checkoutLoading = false;
         checkoutError: string | null = null;
 
-        beforeMount() {
+        async beforeMount() {
             this.assessment = CoreValuesAssessment.default();
-            this.assessmentResponse = CoreValuesAssessmentResponse.create({
-                version: this.assessment.version,
-                memberId: this.member.id!
-            });
+
+            if (this.responseId) {
+                this.loading = true;
+                this.assessmentResponse = await CoreValuesAssessmentResponseService.sharedInstance.getById(this.responseId) ?? null
+                logger.info("Fetched existing response");
+                this.loading = false;
+            }
+            // this.assessmentResponse = CoreValuesAssessmentResponse.create({
+            //     version: this.assessment.version,
+            //     memberId: this.member.id!
+            // });
         }
 
-        async complete(assessmentResponse: CoreValuesAssessmentResponse) {
+
+        get questionIndex(): number {
+            if (isNull(this.page)) {
+                return 0;
+            }
+            return Math.max(this.page - 1, 0);
+        }
+
+        get assessmentReady() {
+            return !!this.assessment && !!this.assessmentResponse;
+        }
+
+        async complete() {
             logCoreValuesAssessmentCompleted();
+            const assessmentResponse = this.assessmentResponse;
+            if (!assessmentResponse) {
+                return;
+            }
             assessmentResponse.completed = true;
             assessmentResponse.results = this.assessment.getResults(assessmentResponse);
             this.assessmentResponse = assessmentResponse
@@ -103,8 +144,55 @@
             return this.assessmentResponse?.results?.values ?? []
         }
 
+        async onStart() {
+            if (!this.assessmentResponse) {
+                this.assessmentResponse = CoreValuesAssessmentResponse.create({
+                    version: this.assessment.version,
+                    memberId: this.member.id!
+                });
+            }
+            await this.save(this.assessmentResponse);
+            const id = this.assessmentResponse.id;
+            if (!id) {
+                this.error = "Uh oh, something went wrong. Please try again later.";
+                return;
+            }
+            // await this.goToIndex(0, id);
+            await this.$router.push({ name: NamedRoute.CORE_VALUES_RESULT, params: { resultsId: id } })
+            // await this.$router.push({ name: NamedRoute.CORE_VALUES_RESULT, params: { resultsId: id } })
+            // await this.goToIndex(0);
+        }
+
+        async goToIndex(index: number | null, id?: string) {
+            try {
+                const idParam = id ?? this.responseId
+                const params: Record<string, string> = {};
+                // if (idParam) {
+                //     params.resultsId = idParam;
+                // }
+                if (!isNull(index)) {
+                    params.index = `${ index + 1 }`
+                }
+                logger.info("Route params", params);
+                await this.$router.push({ name: NamedRoute.CORE_VALUES_RESULT_PAGE, params })
+            } catch (error) {
+                logger.error("Failed to navigate to route", error);
+                this.error = error.message ?? "Whoops, something went wrong there."
+            }
+        }
+
+        async next() {
+            const nextIndex = (this.questionIndex ?? 0) + 1;
+            await this.goToIndex(nextIndex);
+        }
+
+        async previous() {
+            const nextIndex = Math.max((this.questionIndex ?? 0) - 1, 0);
+            await this.goToIndex(nextIndex);
+        }
+
         async save(assessmentResponse: CoreValuesAssessmentResponse) {
-            const saved = await AssessmentResponseService.sharedInstance.save(assessmentResponse);
+            const saved = await CoreValuesAssessmentResponseService.sharedInstance.save(assessmentResponse);
             if (saved) {
                 this.assessmentResponse = saved;
             }
