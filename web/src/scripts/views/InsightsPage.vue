@@ -28,7 +28,8 @@
                         </svg>
                         <h2>What Are Your Core Values?</h2>
                         <p class="subtext">Discover what drives your life decisions and deepest needs.</p>
-                        <router-link v-if="isPlusMember" tag="button" class="secondary esButton" :to="coreValuesHref">Take
+                        <router-link v-if="isPlusMember" tag="button" class="secondary esButton" :to="coreValuesHref">
+                            Take
                             the Assessment
                         </router-link>
                     </router-link>
@@ -52,14 +53,14 @@
     import WordCloud from "@components/MemberWordCloudInsights.vue";
     import CactusMember, { ReflectionStats } from "@shared/models/CactusMember";
     import CactusMemberService from "@web/services/CactusMemberService";
-    import { CoreValue, CoreValueMeta, CoreValuesService } from "@shared/models/CoreValueTypes";
+    import { CoreValue } from "@shared/models/CoreValueTypes";
     import { PageRoute } from "@shared/PageRoutes";
     import { QueryParam } from "@shared/util/queryParams";
     import CopyService from "@shared/copy/CopyService";
     import { DropdownMenuLink } from "@components/DropdownMenuTypes";
     import DropdownMenu from "@components/DropdownMenu.vue";
     import { CoreValuesBlob, getCoreValuesBlob } from "@shared/util/CoreValuesUtil";
-    import { getQueryParam } from "@web/util";
+    import { getQueryParam, removeQueryParam } from "@web/util";
     import Logger from "@shared/Logger"
     import { isPremiumTier } from "@shared/models/MemberSubscription";
     import Results from "@components/gapanalysis/Results.vue";
@@ -114,10 +115,15 @@
         journalLoaded: boolean = false;
         showEmptyState: boolean = false;
 
+        fromParam: string | null = null
+
         async beforeMount() {
             this.dataSource = JournalFeedDataSource.setup(this.member, { onlyCompleted: true, delegate: this })
             await this.dataSource?.start()
             await this.fetchGapResults()
+
+            this.fromParam = getQueryParam(QueryParam.FROM);
+            removeQueryParam(QueryParam.FROM);
         }
 
         destroyed() {
@@ -160,10 +166,10 @@
         }
 
         get welcomeMessage(): string {
-            if (getQueryParam(QueryParam.FROM) === "onboarding") {
+            if (this.fromParam === "onboarding") {
                 return "Welcome to Cactus!"
             }
-            if (getQueryParam(QueryParam.FROM) === "core-values") {
+            if (this.fromParam === "core-values") {
                 return "Welcome! Your results are below."
             }
             if (this.showEmptyState) {

@@ -15,16 +15,16 @@
                     @previous="previous"
                     @save="save"
                     @close="close"
-                    @completed="complete"
+                    @completed="completed"
             />
             <div v-else-if="upsell" class="assessment-container">
                 <div v-if="checkoutError" class="error alert">{{checkoutError}}</div>
-<!--Need some way to cancel/skip/close-->
-<!--                <button aria-label="Close" @click="close" title="Close" class="close tertiary icon">-->
-<!--                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">-->
-<!--                        <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>-->
-<!--                    </svg>-->
-<!--                </button>-->
+                <!--Need some way to cancel/skip/close-->
+                <!--                <button aria-label="Close" @click="close" title="Close" class="close tertiary icon">-->
+                <!--                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">-->
+                <!--                        <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>-->
+                <!--                    </svg>-->
+                <!--                </button>-->
                 <quiz-results-upsell
                         :billing-period="billingPeriod"
                         :checkout-loading="checkoutLoading"
@@ -83,7 +83,7 @@
         @Prop({ type: Boolean, required: false, default: false })
         done!: boolean;
 
-        @Prop({type: Boolean, default: false})
+        @Prop({ type: Boolean, default: false })
         upsell!: boolean;
 
         loading = false;
@@ -123,7 +123,7 @@
             return Math.max(this.page - 1, 0);
         }
 
-        async complete() {
+        async completed() {
             logCoreValuesAssessmentCompleted();
             const assessmentResponse = this.assessmentResponse;
             if (!assessmentResponse) {
@@ -136,11 +136,10 @@
             assessmentResponse.completed = true;
 
             if (isPremiumTier(this.member.tier)) {
-                await this.close();
+                await pushRoute(this.resultsRoute);
                 return;
             }
-            // this.upsell = true;
-            this.goToUpgrade();
+            await this.goToUpgrade();
         }
 
         get billingPeriod(): BillingPeriod {
@@ -149,6 +148,10 @@
 
         async close() {
             await pushRoute(PageRoute.MEMBER_HOME)
+        }
+
+        get resultsRoute(): string {
+            return appendQueryParams(PageRoute.MEMBER_HOME, { [QueryParam.FROM]: "core-values" });
         }
 
         async onResponse(response: CoreValuesQuestionResponse) {
@@ -326,7 +329,7 @@
             margin: 3.2rem 0 1.6rem;
 
             @include r(768) {
-            margin: 6.4rem 0 1.6rem;
+                margin: 6.4rem 0 1.6rem;
             }
         }
 

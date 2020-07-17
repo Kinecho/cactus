@@ -54,8 +54,10 @@
                 <p class="titleMarkdown">You completed the quiz!</p>
                 <div class="cvActions flexActions">
                     <button v-if="!hasNextQuestion && questionIndex > 0 && done"
-                            @click="finish" class="btn btn primary no-loading"
-                            :disabled="!done && this.responseValidation && !this.responseValidation.isValid">
+                            @click="completed"
+                            class="btn btn primary no-loading"
+                            :disabled="!done && this.responseValidation && !this.responseValidation.isValid"
+                    >
                         Get My Results
                     </button>
                 </div>
@@ -230,7 +232,7 @@
             this.$emit("start");
         }
 
-        async finish() {
+        async completed() {
             this.$emit("completed");
         }
 
