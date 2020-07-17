@@ -21,7 +21,7 @@
     const logger = new Logger("LoadableGapAnalysisUpsell");
 
     @Component({
-        components: { GapAnalysisUpsell: ResultsUpsell }
+        components: { GapAnalysisUpsell }
     })
     export default class LoadableGapAnalysisUpsell extends Vue {
         name = "LoadableGapAnalysisUpsell";
