@@ -6,9 +6,10 @@
                         :model-value="selected"
                         :label="option.title"
                         @change="selectionChanged"
-                        :type="this.type"
+                        :type="type"
                         :disabled="disabled"
-                        :extraPadding="true"/>
+                        :extraPadding="true"
+                />
             </div>
 
             <button class="expand-toggle tertiary icon" @click="expanded = !expanded">
@@ -19,7 +20,7 @@
         </div>
 
         <div class="expandable" :class="{closed: !expanded}" v-show="expanded">
-            <markdown-text :source="option.description"/>
+            <markdown-text v-if="option.description" :source="option.description"/>
         </div>
 
     </div>
@@ -32,45 +33,51 @@
     import Logger from "@shared/Logger";
     import CheckBox from "@components/CheckBox.vue";
     import { QuestionType } from "@shared/models/Questions";
+    import Component from "vue-class-component";
+    import { Prop } from "vue-property-decorator";
 
     const logger = new Logger("QuestionOption");
-    export default Vue.extend({
-        name: "QuestionOption",
+    @Component({
         components: {
             MarkdownText,
             CheckBox,
-        },
-        props: {
-            option: { type: Object as () => CoreValuesQuestionOption, required: true },
-            type: { type: String as () => QuestionType, required: true, default: QuestionType.MULTI_SELECT },
-            selected: { type: Boolean, default: false },
-            disabled: { type: Boolean, default: false },
-        },
-        data(): {
-            expanded: boolean
-        } {
-            return {
-                expanded: false,
-            }
-        },
-        methods: {
-            selectionChanged(selected: boolean) {
-                if (!selected) {
-                    this.$emit("removed")
-                } else {
-                    this.$emit("selected")
-                }
-            },
-            clicked() {
-                logger.info("toggling item. settting to", !this.selected);
-                if (this.selected) {
-                    this.$emit("removed")
-                } else {
-                    this.$emit("selected")
-                }
-            }
         }
     })
+    export default class QuestionOption extends Vue {
+        name = "QuestionOption";
+
+        @Prop({ type: Object as () => CoreValuesQuestionOption, required: true })
+        option!: CoreValuesQuestionOption;
+
+        @Prop({ type: String as () => QuestionType, required: true, default: QuestionType.MULTI_SELECT })
+        type!: QuestionType;
+
+        @Prop({ type: Boolean, default: false })
+        selected!: boolean;
+
+        @Prop({ type: Boolean, default: false })
+        disabled!: boolean;
+
+        expanded: boolean = false;
+
+        selectionChanged(selected: boolean) {
+            if (!selected) {
+                this.$emit("removed")
+            } else {
+                this.$emit("selected")
+            }
+        }
+
+        clicked() {
+            logger.info("toggling item. settting to", !this.selected);
+            if (this.selected) {
+                this.$emit("removed")
+            } else {
+                this.$emit("selected")
+            }
+        }
+
+    }
 </script>
 
 <style scoped lang="scss">
