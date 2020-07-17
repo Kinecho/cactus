@@ -274,7 +274,6 @@
         overflow: hidden;
         position: relative;
 
-
         &:after {
             background: url(/assets/images/cvBlob.png) no-repeat;
             content: "";
@@ -301,7 +300,7 @@
         }
 
         @include r(768) {
-            background-color: $beige;
+            background: $mediumDolphin url(/assets/images/grainy.png);
 
             &:after {
                 top: -22rem;
