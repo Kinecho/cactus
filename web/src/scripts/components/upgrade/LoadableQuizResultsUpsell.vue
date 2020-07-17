@@ -32,6 +32,9 @@
         @Prop({ type: String as () => BillingPeriod, required: true, default: BillingPeriod.yearly })
         billingPeriod!: BillingPeriod;
 
+        @Prop({type: Boolean, default: false})
+        checkoutLoading!: boolean;
+
         @Watch("billingPeriod")
         async billingPeriodChanged(current: BillingPeriod, previous: BillingPeriod | undefined) {
             if (current !== previous) {
@@ -55,7 +58,7 @@
         }
 
         get loading(): boolean {
-            return !this.loaded
+            return !this.loaded || this.checkoutLoading;
         }
 
         /**

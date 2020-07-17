@@ -7,10 +7,21 @@
             @save="save"
             @completed="complete"
     />
-    <quiz-results-upsell
-            v-else-if="showUpgrade"
-            :billing-period="billingPeriod"
-    />
+    <div v-else-if="showResults">
+        <core-value-results
+                :core-values="coreValues"
+                :show-dropdown-menu="false"
+        />
+    </div>
+    <div v-else-if="showUpgrade" class="assessment-container">
+        <div v-if="checkoutError" class="error alert">{{checkoutError}}</div>
+        <quiz-results-upsell
+                :billing-period="billingPeriod"
+                :checkout-loading="checkoutLoading"
+                @checkout="checkout"
+        />
+    </div>
+
 </template>
 
 <script lang="ts">
@@ -27,10 +38,17 @@
     import AssessmentResponseService from "@web/services/AssessmentResponseService";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
     import QuizResultsUpsell from "@components/upgrade/LoadableQuizResultsUpsell.vue";
-    import { BillingPeriod } from "@shared/models/SubscriptionProduct";
+    import SubscriptionProduct, { BillingPeriod } from "@shared/models/SubscriptionProduct";
+    import CoreValueResults from "@components/insights/CoreValueResults.vue";
+    import { CoreValue } from "@shared/models/CoreValueTypes";
+    import { startCheckout } from "@web/checkoutService";
+    import Logger from "@shared/Logger"
+
+    const logger = new Logger("CoreValuesAssessmentPage");
 
     @Component({
         components: {
+            CoreValueResults,
             QuizResultsUpsell,
             Assessment,
         }
@@ -43,8 +61,10 @@
 
         assessment!: CoreValuesAssessment;
         assessmentResponse!: CoreValuesAssessmentResponse;
-        resultsLoading: boolean = false;
         showUpgrade = false;
+        showResults = false;
+        checkoutLoading = false;
+        checkoutError: string | null = null;
 
         beforeMount() {
             this.assessment = CoreValuesAssessment.default();
@@ -77,6 +97,9 @@
             await pushRoute(PageRoute.MEMBER_HOME)
         }
 
+        get coreValues(): CoreValue[] {
+            return this.assessmentResponse?.results?.values ?? []
+        }
 
         async save(assessmentResponse: CoreValuesAssessmentResponse) {
             const saved = await AssessmentResponseService.sharedInstance.save(assessmentResponse);
@@ -84,9 +107,49 @@
                 this.assessmentResponse = saved;
             }
         }
+
+
+        async checkout(subscriptionProduct: SubscriptionProduct | undefined | null) {
+            logger.info("Starting checkout handler");
+            this.checkoutError = null;
+            if (subscriptionProduct?.entryId) {
+                this.checkoutLoading = true;
+                logger.info("Starting checkout for product entry ID = ", subscriptionProduct?.entryId)
+
+                // if (this.result?.id) {
+                //     defaultSuccessPath = `${ PageRoute.GAP_ANALYSIS }/${ this.result.id }/${ Screen.results }?${ QueryParam.UPGRADE_SUCCESS }=success`
+                // }
+
+                let checkoutSuccessUrl = window.location.href;
+                let checkoutCancelUrl = window.location.href;
+
+                // if (this.selectedElement) {
+                //     checkoutCancelUrl = appendQueryParams(checkoutCancelUrl, { [QueryParam.SELECTED_ELEMENT]: this.selectedElement });
+                // }
+
+                const checkoutResult = await startCheckout({
+                    subscriptionProductId: subscriptionProduct.entryId,
+                    subscriptionProduct: subscriptionProduct,
+                    stripeSuccessUrl: checkoutSuccessUrl,
+                    stripeCancelUrl: checkoutCancelUrl,
+                });
+
+                if (checkoutResult.success) {
+                    await pushRoute(checkoutSuccessUrl)
+                } else {
+                    this.checkoutError = "Oops, something's not right. Please try again later.";
+                }
+
+            } else {
+                logger.warn("no subscription product or entry id was found");
+            }
+        }
     }
 </script>
 
 <style scoped lang="scss">
+    @import "variables";
+    @import "mixins";
+    @import "assessment";
 
 </style>
