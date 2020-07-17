@@ -10,7 +10,7 @@
             <h3>Loading</h3>
         </template>
         <transition name="component-fade" mode="out-in" appear>
-            <div v-if="!started" class="intro">
+            <div v-if="!started" class="intro" key="intro">
                 <h1>What are your core values?</h1>
                 <p>Core values are the general expression of what is most important for you, and they help you
                     understand past decisions and make better decisions in the future.</p>
@@ -21,45 +21,47 @@
                     effective for you.
                 </div>
             </div>
-            <div v-else-if="currentQuestion && currentResponse && !completed">
-                <div class="paddingContainer">
-                    <h4>{{displayIndex}} of {{questions.length}}</h4>
-                    <button class="backArrowbtn btn tertiary icon" @click="previousQuestion()" v-if="hasPreviousQuestion">
-                        <svg class="backArrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-                            <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
-                        </svg>
-                    </button>
-                    <transition name="component-fade" mode="out-in">
-                        <question-card :question="currentQuestion"
-                                :response="currentResponse"
-                                :options="currentQuestionOptions"
-                                @updated="updateResponse"/>
+            <div v-else-if="currentQuestion && currentResponse && !done"
+                    class="paddingContainer"
+                    :key="'questions'">
+                <h4>{{displayIndex}} of {{questions.length}}</h4>
+                <button class="backArrowbtn btn tertiary icon" @click="previousQuestion()" v-if="hasPreviousQuestion">
+                    <svg class="backArrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                        <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                    </svg>
+                </button>
+                <transition name="component-fade" mode="out-in">
+                    <question-card :question="currentQuestion"
+                            :key="`question_${questionIndex}`"
+                            :response="currentResponse"
+                            :options="currentQuestionOptions"
+                            @updated="updateResponse"/>
+                </transition>
+                <div class="cvActions flexActions" v-if="started">
+                    <transition name="fade-in-fast" appear>
+                        <p class="validation" v-if="showValidation && responseValidation && responseValidation.message" :key="'error'">
+                            {{responseValidation && responseValidation.message}}</p>
                     </transition>
-                    <div class="cvActions flexActions" v-if="started">
-                        <transition name="fade-in-fast" appear>
-                            <p class="validation" v-if="showValidation && responseValidation && responseValidation.message">
-                                {{responseValidation && responseValidation.message}}</p>
-                        </transition>
-                        <button v-if="hasNextQuestion && started"
-                                class="btn btn primary no-loading"
-                                @click="nextQuestion()"
-                                :class="{disabled: this.responseValidation && !this.responseValidation.isValid}">
-                            Next
-                        </button>
-                    </div>
+                    <button v-if="hasNextQuestion && started"
+                            class="btn btn primary no-loading"
+                            @click="nextQuestion()"
+                            :class="{disabled: this.responseValidation && !this.responseValidation.isValid}">
+                        Next
+                    </button>
+                </div>
+            </div>
+            <div v-else-if="done" class="paddingContainer">
+                <p class="titleMarkdown">You completed the quiz!</p>
+                <div class="cvActions flexActions">
+                    <button v-if="!hasNextQuestion && questionIndex > 0 && done"
+                            @click="finish" class="btn btn primary no-loading"
+                            :disabled="!done && this.responseValidation && !this.responseValidation.isValid">
+                        Get My Results
+                    </button>
                 </div>
             </div>
         </transition>
-        <div v-if="done" class="paddingContainer">
-            <p class="titleMarkdown">You completed the quiz!</p>
-            <div class="cvActions flexActions">
-                <button v-if="!hasNextQuestion && questionIndex > 0 && completed"
-                        @click="finish" class="btn btn primary no-loading"
-                        :disabled="!completed && this.responseValidation && !this.responseValidation.isValid">
-                    Get My Results
-                </button>
-            </div>
-        </div>
+
         <modal :show="showCloseConfirm" @close="showCloseConfirm = false" :dark="true">
             <div class="close-confirm-modal paddingContainer" slot="body">
                 <h3>Leave Core Values?</h3>
@@ -150,7 +152,7 @@
         }
 
         get displayIndex(): number {
-            if (this.completed) {
+            if (this.done) {
                 return this.questions.length;
             }
             return (this.questionIndex ?? 0) + 1
@@ -160,19 +162,13 @@
             return !isNull(this.questionIndex) && !isNull(this.assessmentResponse);
         }
 
-        get completed(): boolean {
-            // return (this.questionIndex ?? 0) >= this.questions.length || this.done;
-            return this.done;
-        }
-
         get hasPreviousQuestion(): boolean {
             return isNumber(this.questionIndex) && this.questionIndex > 0
         }
 
         get hasNextQuestion(): boolean {
-            return !this.completed
+            return !this.done
         }
-
 
         updateCurrentQuestion() {
             const index = this.questionIndex;
@@ -182,7 +178,6 @@
                 this.currentQuestion = null
             }
         }
-
 
         updateResponseValidation() {
             const question = this.currentQuestion;
@@ -194,9 +189,7 @@
             } else {
                 this.responseValidation = { isValid: false };
             }
-
         }
-
 
         updateCurrentResponse() {
             const questionId = this.currentQuestion?.id;
@@ -231,7 +224,6 @@
 
         async save() {
             this.$emit("save");
-            // this.questions = this.assessment.getQuestions(this.assessmentResponse);
         }
 
         start() {
@@ -243,8 +235,6 @@
         }
 
         async updateResponse(response: CoreValuesQuestionResponse) {
-            // this.assessmentResponse?.setResponse(response);
-            // await this.save()
             this.updateResponseValidation();
             this.$emit('response', response)
         }
@@ -266,26 +256,18 @@
                 this.showValidation = false;
             }
 
-
             if (isNull(this.currentQuestion)) {
-                // this.questionIndex = 0;
                 this.$emit('next');
                 return;
             } else if (isNumber(this.questionIndex)) {
                 let nextIndex = this.questionIndex + 1;
                 if (nextIndex >= this.questions.length) {
-                    // this.completed = true;
-                    // this.$emit('completed');
                 } else {
                     logCoreValuesAssessmentProgress(nextIndex);
-                    // this.questionIndex = nextIndex;
                 }
-                // this.$emit('next');
                 this.$emit('next');
-
             }
         }
-
     }
 </script>
 
