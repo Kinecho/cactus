@@ -163,6 +163,9 @@
             if (getQueryParam(QueryParam.FROM) === "onboarding") {
                 return "Welcome to Cactus!"
             }
+            if (getQueryParam(QueryParam.FROM) === "core-values") {
+                return "Welcome! Your results are below."
+            }
             if (this.showEmptyState) {
                 return "Welcome!"
             }
