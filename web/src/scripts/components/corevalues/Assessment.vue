@@ -50,7 +50,7 @@
                         :assessment="assessment"
                         @updated="updateResponse"/>
             </template>
-            <div class="cvActions">
+            <div class="cvActions" v-if="started">
                 <transition name="fade-in-fast" appear>
                     <p class="validation" v-show="showValidation && responseValidation && responseValidation.message">
                         {{responseValidation.message}}</p>
