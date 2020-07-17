@@ -11,25 +11,14 @@
                     <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
                 </svg>
             </button>
-            <modal :show="showCloseConfirm" @close="showCloseConfirm = false" :dark="true">
-                <div class="close-confirm-modal paddingContainer" slot="body">
-                    <h3>Leave Core Values?</h3>
-                    <p class="subtext">Are you sure you want to leave the Core Values exercise? Your progess will be
-                        lost.</p>
-                    <div class="btnContainer">
-                        <button @click="showCloseConfirm = false">No, keep going</button>
-                        <button class="secondary" @click="close">Leave exercise</button>
-                    </div>
-                </div>
-            </modal>
-
             <template v-if="completed">
                 <p class="titleMarkdown">You completed the quiz!</p>
             </template>
 
             <div v-if="!started" class="intro">
                 <h1>What are your core values?</h1>
-                <p>Core values are the general expression of what is most important for you, and they help you understand past decisions and make better decisions in the future.</p>
+                <p>Core values are the general expression of what is most important for you, and they help you
+                    understand past decisions and make better decisions in the future.</p>
                 <button class="btn primary" @click="start">Let's go!</button>
                 <div class="private">
                     <img class="lock" src="/assets/icons/lock.svg" alt=""/>
@@ -69,6 +58,18 @@
                 </button>
             </div>
         </div>
+        <modal :show="showCloseConfirm" @close="showCloseConfirm = false" :dark="true">
+            <div class="close-confirm-modal paddingContainer" slot="body">
+                <h3>Leave Core Values?</h3>
+                <p class="subtext">Are you sure you want to leave the Core Values exercise? Your progress will be
+                    lost.</p>
+                <div class="btnContainer">
+                    <button @click="showCloseConfirm = false">No, keep going</button>
+                    <button class="secondary" @click="close">Leave exercise</button>
+                </div>
+            </div>
+        </modal>
+
     </div>
 </template>
 

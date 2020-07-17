@@ -43,6 +43,8 @@
     import { CoreValue } from "@shared/models/CoreValueTypes";
     import { startCheckout } from "@web/checkoutService";
     import Logger from "@shared/Logger"
+    import { appendQueryParams } from "@shared/util/StringUtil";
+    import { QueryParam } from "@shared/util/queryParams";
 
     const logger = new Logger("CoreValuesAssessmentPage");
 
@@ -120,7 +122,7 @@
                 //     defaultSuccessPath = `${ PageRoute.GAP_ANALYSIS }/${ this.result.id }/${ Screen.results }?${ QueryParam.UPGRADE_SUCCESS }=success`
                 // }
 
-                let checkoutSuccessUrl = window.location.href;
+                let checkoutSuccessUrl = appendQueryParams(PageRoute.MEMBER_HOME, { [QueryParam.FROM]: "core-values" });
                 let checkoutCancelUrl = window.location.href;
 
                 // if (this.selectedElement) {
