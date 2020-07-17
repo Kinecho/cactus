@@ -62,10 +62,6 @@
         showUnauthorizedRoute = false;
         hasUpgradeSuccessParam = false;
 
-        // get authRequiredForRoute(): boolean {
-        //
-        // }
-
         @Watch("$route")
         onRoute(route: Route) {
             this.showUnauthorizedRoute = isAuthRequired(route) && !this.member && this.authLoaded;
@@ -73,6 +69,8 @@
             if (getQueryParam(QueryParam.UPGRADE_SUCCESS) === 'success') {
                 this.hasUpgradeSuccessParam = true;
                 removeQueryParam(QueryParam.UPGRADE_SUCCESS)
+            } else {
+                this.hasUpgradeSuccessParam = false;
             }
         }
 

@@ -57,9 +57,7 @@
     import { PageRoute } from "@shared/PageRoutes";
     import { QueryParam } from "@shared/util/queryParams";
     import CopyService from "@shared/copy/CopyService";
-    import { DropdownMenuLink } from "@components/DropdownMenuTypes";
     import DropdownMenu from "@components/DropdownMenu.vue";
-    import { CoreValuesBlob, getCoreValuesBlob } from "@shared/util/CoreValuesUtil";
     import { getQueryParam, removeQueryParam } from "@web/util";
     import Logger from "@shared/Logger"
     import { isPremiumTier } from "@shared/models/MemberSubscription";
@@ -107,14 +105,12 @@
 
         gapResultsLoading = false;
         gapAssessmentResults?: GapAnalysisAssessmentResult | null = null;
-        selectFocusEnabled = false;
         currentElementSelection: CactusElement | null = null
         todayEntry: JournalEntry | null = null;
         todayLoaded = false;
         dataSource?: JournalFeedDataSource
         journalLoaded: boolean = false;
         showEmptyState: boolean = false;
-
         fromParam: string | null = null
 
         async beforeMount() {
@@ -160,11 +156,6 @@
             }
         }
 
-        cancelSetFocus() {
-            this.selectFocusEnabled = false;
-            this.currentElementSelection = null;
-        }
-
         get welcomeMessage(): string {
             if (this.fromParam === "onboarding") {
                 return "Welcome to Cactus!"
@@ -186,17 +177,6 @@
 
         get displayName(): string | undefined {
             return this.member?.firstName;
-        }
-
-        get coreValuesBlob(): CoreValuesBlob | undefined {
-            if (!this.member) {
-                return undefined;
-            }
-            const forceIndex = getQueryParam(QueryParam.BG_INDEX)
-            logger.info("Forcing index: ", forceIndex);
-            const blob = getCoreValuesBlob(this.member?.coreValues, forceIndex);
-            logger.info("Blob info:", blob);
-            return blob;
         }
 
         get wordCloud(): InsightWord[] {
@@ -228,13 +208,6 @@
 
         get reflectionStats(): ReflectionStats | undefined {
             return this.member?.stats.reflections;
-        }
-
-        get coreValuesDropdownLinks(): DropdownMenuLink[] {
-            return [{
-                title: "Retake Assessment",
-                href: PageRoute.CORE_VALUES_ASSESSMENT,
-            }];
         }
 
         get focusElement(): CactusElement | null {
