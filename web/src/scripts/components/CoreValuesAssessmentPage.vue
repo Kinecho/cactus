@@ -8,11 +8,12 @@
                     :question-index="questionIndex"
                     :loading="loading"
                     :questions="questions"
+                    :done="done"
+                    @start="onStart"
                     @next="next"
                     @previous="previous"
-                    @start="onStart"
-                    @close="closeAssessment"
                     @save="save"
+                    @close="closeAssessment"
                     @completed="complete"
             />
             <div v-else-if="showResults">
@@ -78,6 +79,8 @@
         @Prop({ type: String, required: false, default: null })
         responseId!: string | null;
 
+        @Prop({ type: Boolean, required: false, default: false })
+        done!: boolean;
 
         loading = false;
         error: string | null = null;
@@ -111,9 +114,14 @@
         }
 
         get questionIndex(): number {
+            if (this.done) {
+                return this.questions.length - 1;
+            }
+
             if (isNull(this.page)) {
                 return 0;
             }
+
             return Math.max(this.page - 1, 0);
         }
 
@@ -172,6 +180,14 @@
             // await this.goToIndex(0);
         }
 
+        async goToDone() {
+            try {
+                await this.$router.push({ name: NamedRoute.CORE_VALUES_RESULT_PAGE, params: { index: "done" } })
+            } catch (error) {
+                logger.error("Failed to push route", error);
+            }
+        }
+
         async goToIndex(index: number | null, id?: string) {
             try {
                 const idParam = id ?? this.responseId
@@ -180,6 +196,11 @@
                 //     params.resultsId = idParam;
                 // }
                 if (!isNull(index)) {
+                    if (index >= this.questions.length) {
+                        await this.goToDone()
+                        return;
+                    }
+
                     params.index = `${ index + 1 }`
                 }
                 logger.info("Route params", params);

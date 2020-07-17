@@ -295,7 +295,7 @@ export const routes: MetaRouteConfig[] = [
         path: PageRoute.FRIENDS
     },
     {
-        path: "/core-values/assessment",
+        path: PageRoute.CORE_VALUES_ASSESSMENT,
         name: NamedRoute.CORE_VALUES_NEW,
         component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
         "@components/CoreValuesAssessmentPage.vue")),
@@ -311,6 +311,7 @@ export const routes: MetaRouteConfig[] = [
             return {
                 responseId: route.params.resultsId,
                 page: isNumber(Number(route.params.index)) ? Number(route.params.index ?? 0) : null,
+                done: route.params.index === "done"
             }
         },
         children: [

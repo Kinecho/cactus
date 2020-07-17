@@ -1,10 +1,19 @@
 <template>
     <div v-if="!showResults && assessment && assessmentResponse && showAssessment">
-        <assessment :assessment="assessment"
+        <assessment
+                :assessment="assessment"
                 :assessmentResponse="assessmentResponse"
-                @close="close"
+                :question-index="questionIndex"
+                :loading="loading"
+                :questions="questions"
+                :done="done"
+                @start="onStart"
+                @next="next"
+                @previous="previous"
                 @save="save"
-                @completed="complete"/>
+                @close="close"
+                @completed="complete"
+        />
     </div>
     <div v-else class="assessment-container">
         <button aria-label="Close" @click="close" title="Close" class="close tertiary icon">
@@ -50,6 +59,8 @@
     import { isPremiumTier } from "@shared/models/MemberSubscription";
     import LoadableQuizResultsUpsell from "@components/upgrade/LoadableQuizResultsUpsell.vue";
     import { BillingPeriod } from "@shared/models/SubscriptionProduct";
+    import { NamedRoute } from "@shared/PageRoutes";
+    import { isIosApp } from "@web/DeviceUtil";
 
     const logger = new Logger("CoreValuesEmbed");
 
@@ -84,6 +95,9 @@
         previousResults: CoreValuesAssessmentResponse | null = null;
         isUpgrading = false;
 
+        questionIndex: number = 0;
+        done: boolean = false;
+
         beforeMount() {
             this.loading = true;
             this.initTimeout = window.setTimeout(() => {
@@ -96,6 +110,47 @@
 
         destroyed() {
             window.clearTimeout(this.initTimeout ?? undefined);
+        }
+
+        async onStart() {
+            if (!this.assessmentResponse) {
+                this.assessmentResponse = CoreValuesAssessmentResponse.create({
+                    version: this.assessment.version,
+                    memberId: this.appMemberId!
+                });
+            }
+            await this.save();
+            this.questionIndex = 0;
+            // const id = this.assessmentResponse.id;
+            // if (!id) {
+            //     this.error = "Uh oh, something went wrong. Please try again later.";
+            //     return;
+            // }
+            // // await this.goToIndex(0, id);
+            // await this.$router.push({ name: NamedRoute.CORE_VALUES_RESULT, params: { resultsId: id } })
+            // await this.$router.push({ name: NamedRoute.CORE_VALUES_RESULT, params: { resultsId: id } })
+            // await this.goToIndex(0);
+        }
+
+        get questions() {
+            return this.assessment.getQuestions(this.assessmentResponse);
+        }
+
+        async next() {
+            const nextIndex = (this.questionIndex ?? 0) + 1;
+            await this.goToIndex(nextIndex);
+        }
+
+        async previous() {
+            const nextIndex = Math.max((this.questionIndex ?? 0) - 1, 0);
+            await this.goToIndex(nextIndex);
+        }
+
+        async goToIndex(index: number) {
+            if (index >= this.questions.length) {
+                this.done = true;
+            }
+            this.questionIndex = index;
         }
 
         get hasExistingResults(): boolean {
@@ -183,14 +238,21 @@
         async upgrade() {
             this.isUpgrading = true;
             IosAppService.showPricing();
+            if (!isIosApp()) {
+                logger.warn("This is not an iOS app, can not trigger pricing modal");
+            }
         }
 
-        async complete(assessmentResponse: CoreValuesAssessmentResponse) {
+        async complete() {
             logCoreValuesAssessmentCompleted();
+            const assessmentResponse = this.assessmentResponse;
+            if (!assessmentResponse) {
+                return;
+            }
             assessmentResponse.completed = true;
             assessmentResponse.results = this.assessment.getResults(assessmentResponse);
             this.assessmentResponse = assessmentResponse
-            await this.save(assessmentResponse);
+            await this.save();
             assessmentResponse.completed = true;
 
             if (this.isPlusMember) {
@@ -218,7 +280,11 @@
             return currentResults ?? null;
         }
 
-        async save(assessmentResponse: CoreValuesAssessmentResponse) {
+        async save() {
+            const assessmentResponse = this.assessmentResponse;
+            if (!assessmentResponse) {
+                return;
+            }
             const saved = await CoreValuesAssessmentResponseService.sharedInstance.save(assessmentResponse);
             if (saved) {
                 this.assessmentResponse = saved;

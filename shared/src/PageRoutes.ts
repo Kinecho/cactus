@@ -2,7 +2,7 @@ export enum PageRoute {
     ACCOUNT = "/account",
     AUTHENTICATE_ACTIONS = "/authenticate-actions",
     CHECKOUT = "/checkout",
-    CORE_VALUES = "/core-values/assessment",
+    CORE_VALUES = "/core-values",
     CORE_VALUES_ASSESSMENT = "/core-values/assessment",
     CORE_VALUES_EMBED = "/core-values/embed",
     FRIENDS = "/friends",

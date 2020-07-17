@@ -11,11 +11,10 @@
                     <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
                 </svg>
             </button>
-            <template v-if="completed">
+            <template v-if="done">
                 <p class="titleMarkdown">You completed the quiz!</p>
             </template>
-
-            <div v-if="!started" class="intro">
+            <div v-else-if="!started" class="intro">
                 <h1>What are your core values?</h1>
                 <p>Core values are the general expression of what is most important for you, and they help you
                     understand past decisions and make better decisions in the future.</p>
@@ -113,13 +112,11 @@
         @Prop({ type: Array as () => CoreValuesQuestion[], default: [] })
         questions!: CoreValuesQuestion[];
 
-        // started = false;
+        @Prop({ type: Boolean, default: false })
+        done!: boolean;
 
-        // questionIndex: number | null = 0;
-        // completed: boolean = false;
         showValidation: boolean = false;
         showCloseConfirm: boolean = false;
-
 
         get displayIndex(): number {
             if (this.completed) {
@@ -128,16 +125,12 @@
             return (this.questionIndex ?? 0) + 1
         }
 
-        // beforeMount() {
-        //     this.questions = this.assessment.getQuestions(this.assessmentResponse);
-        // }
-
         get started(): boolean {
             return !isNull(this.questionIndex) && !isNull(this.assessmentResponse);
         }
 
         get completed(): boolean {
-            return (this.questionIndex ?? 0) >= this.questions.length
+            return (this.questionIndex ?? 0) >= this.questions.length || this.done;
         }
 
         get hasPreviousQuestion(): boolean {
