@@ -1,60 +1,11 @@
 <template>
     <div class="assessment-container">
         <progress-stepper :current="questionIndex" :total="questions.length"/>
-        <div class="paddingContainer">
-            <h4 v-if="started">{{displayIndex}} of {{questions.length}}</h4>
-            <template v-if="loading">
-                <h3>Loading</h3>
-            </template>
-            <button aria-label="Close" @click="close" title="Close" class="close tertiary icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
-                    <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
-                </svg>
-            </button>
-            <template v-if="done">
-                <p class="titleMarkdown">You completed the quiz!</p>
-            </template>
-            <div v-else-if="!started" class="intro">
-                <h1>What are your core values?</h1>
-                <p>Core values are the general expression of what is most important for you, and they help you
-                    understand past decisions and make better decisions in the future.</p>
-                <button class="btn primary" @click="start">Let's go!</button>
-                <div class="private">
-                    <img class="lock" src="/assets/icons/lock.svg" alt=""/>
-                    All answers are private and confidential and will be used solely to help tune Cactus to be most
-                    effective for you.
-                </div>
-            </div>
-
-            <template v-else-if="currentQuestion && currentResponse && !completed">
-                <button class="backArrowbtn btn tertiary icon" @click="previousQuestion()" v-if="hasPreviousQuestion">
-                    <svg class="backArrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-                        <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
-                    </svg>
-                </button>
-                <question-card :question="currentQuestion"
-                        :response="currentResponse"
-                        :options="currentQuestionOptions"
-                        @updated="updateResponse"/>
-            </template>
-            <div class="cvActions" v-if="started">
-                <transition name="fade-in-fast" appear>
-                    <p class="validation" v-if="showValidation && responseValidation && responseValidation.message">
-                        {{responseValidation && responseValidation.message}}</p>
-                </transition>
-                <button v-if="hasNextQuestion && started"
-                        class="btn btn primary no-loading"
-                        @click="nextQuestion()"
-                        :class="{disabled: this.responseValidation && !this.responseValidation.isValid}">
-                    Next
-                </button>
-                <button v-if="!hasNextQuestion && questionIndex > 0 && completed"
-                        @click="finish" class="btn btn primary no-loading"
-                        :disabled="!completed && this.responseValidation && !this.responseValidation.isValid">
-                    Get My Results
-                </button>
-            </div>
-        </div>
+        <button aria-label="Close" @click="close" title="Close" class="close tertiary icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
+                <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
+            </svg>
+        </button>
         <modal :show="showCloseConfirm" @close="showCloseConfirm = false" :dark="true">
             <div class="close-confirm-modal paddingContainer" slot="body">
                 <h3>Leave Core Values?</h3>
@@ -66,6 +17,58 @@
                 </div>
             </div>
         </modal>
+        <transition name="component-fade" mode="out-in" appear>
+            <div v-if="!started" class="intro">
+                <h1>What are your core values?</h1>
+                <p>Core values are the general expression of what is most important for you, and they help you
+                    understand past decisions and make better decisions in the future.</p>
+                <button class="btn primary" @click="start">Let's go!</button>
+                <div class="private">
+                    <img class="lock" src="/assets/icons/lock.svg" alt=""/>
+                    All answers are private and confidential and will be used solely to help tune Cactus to be most
+                    effective for you.
+                </div>
+            </div>
+            <div v-else-if="currentQuestion && currentResponse && !completed">
+                <div class="paddingContainer">
+                    <h4 >{{displayIndex}} of {{questions.length}}</h4>
+                    <button class="backArrowbtn btn tertiary icon" @click="previousQuestion()" v-if="hasPreviousQuestion">
+                        <svg class="backArrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                            <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                        </svg>
+                    </button>
+                    <transition name="component-fade" mode="out-in">
+                        <question-card :question="currentQuestion"
+                            :response="currentResponse"
+                            :options="currentQuestionOptions"
+                            @updated="updateResponse"/>
+                    </transition>
+                    <div class="cvActions" v-if="started">
+                        <transition name="fade-in-fast" appear>
+                            <p class="validation" v-if="showValidation && responseValidation && responseValidation.message">
+                                {{responseValidation && responseValidation.message}}</p>
+                        </transition>
+                        <button v-if="hasNextQuestion && started"
+                                class="btn btn primary no-loading"
+                                @click="nextQuestion()"
+                                :class="{disabled: this.responseValidation && !this.responseValidation.isValid}">
+                            Next
+                        </button>
+                        <button v-if="!hasNextQuestion && questionIndex > 0 && completed"
+                                @click="finish" class="btn btn primary no-loading"
+                                :disabled="!completed && this.responseValidation && !this.responseValidation.isValid">
+                            Get My Results
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </transition>
+        <template v-if="loading">
+            <h3>Loading</h3>
+        </template>
+        <template v-if="done">
+            <p class="titleMarkdown">You completed the quiz!</p>
+        </template>
     </div>
 </template>
 
@@ -287,5 +290,6 @@
 <style scoped lang="scss">
     @import "variables";
     @import "mixins";
+    @import "transitions";
     @import "assessment.scss";
 </style>
