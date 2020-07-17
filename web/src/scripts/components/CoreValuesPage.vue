@@ -26,10 +26,6 @@
         @Prop({ type: Object as () => CactusMember, required: false, default: null })
         member!: CactusMember | null;
 
-        mounted(): void {
-
-        }
-
         async beforeMount() {
             const embed = !isBlank(getQueryParam(QueryParam.EMBED))
             if (this.$route.path === PageRoute.CORE_VALUES_EMBED || this.$route.path === PageRoute.CORE_VALUES_ASSESSMENT) {

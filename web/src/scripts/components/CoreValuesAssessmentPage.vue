@@ -1,14 +1,16 @@
 <template>
-    <div>
-        <assessment :assessment="assessment"
-                :assessmentResponse="assessmentResponse"
-                v-if="!showUpgrade"
-                @close="closeAssessment"
-                @save="save"
-                @completed="complete"/>
-
-        <quiz-results-upsell v-if="showUpgrade" :billing-period="billingPeriod"/>
-    </div>
+    <assessment
+            v-if="!showUpgrade"
+            :assessment="assessment"
+            :assessmentResponse="assessmentResponse"
+            @close="closeAssessment"
+            @save="save"
+            @completed="complete"
+    />
+    <quiz-results-upsell
+            v-else-if="showUpgrade"
+            :billing-period="billingPeriod"
+    />
 </template>
 
 <script lang="ts">
@@ -24,7 +26,7 @@
     import { PageRoute } from "@shared/PageRoutes";
     import AssessmentResponseService from "@web/services/AssessmentResponseService";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
-    import QuizResultsUpsell from "@components/upgrade/QuizResultsUpsell.vue";
+    import QuizResultsUpsell from "@components/upgrade/LoadableQuizResultsUpsell.vue";
     import { BillingPeriod } from "@shared/models/SubscriptionProduct";
 
     @Component({
@@ -50,7 +52,6 @@
                 version: this.assessment.version,
                 memberId: this.member.id!
             });
-            // this.loadCurrentResults()
         }
 
         async complete(assessmentResponse: CoreValuesAssessmentResponse) {
@@ -74,9 +75,6 @@
 
         async closeAssessment() {
             await pushRoute(PageRoute.MEMBER_HOME)
-            // this.assessmentInProgress = false;
-            // await this.loadCurrentResults();
-            // this.loading = false
         }
 
 
@@ -86,24 +84,6 @@
                 this.assessmentResponse = saved;
             }
         }
-
-        async loadCurrentResults() {
-            this.resultsLoading = true;
-            const memberId = this.member.id
-            if (!memberId) {
-                this.resultsLoading = false;
-                return
-            }
-            const currentResults = await AssessmentResponseService.sharedInstance.getLatestForUser(memberId);
-            if (currentResults) {
-                this.assessmentResponse = currentResults;
-                // if (currentResults.assessmentVersion.localeCompare(this.assessment.version) < 0) {
-                //     this.newAssessmentAvailable = true;
-                // }
-            }
-            this.resultsLoading = false;
-        }
-
     }
 </script>
 
