@@ -2,7 +2,7 @@
     <div class="coreValuesPage">
         <div class="centered">
             <assessment
-                    v-if="!showUpgrade"
+                    v-if="!upsell"
                     :assessment="assessment"
                     :assessmentResponse="assessmentResponse"
                     :question-index="questionIndex"
@@ -14,11 +14,17 @@
                     @next="next"
                     @previous="previous"
                     @save="save"
-                    @close="closeAssessment"
+                    @close="close"
                     @completed="complete"
             />
-            <div v-else-if="showUpgrade" class="assessment-container">
+            <div v-else-if="upsell" class="assessment-container">
                 <div v-if="checkoutError" class="error alert">{{checkoutError}}</div>
+<!--Need some way to cancel/skip/close-->
+<!--                <button aria-label="Close" @click="close" title="Close" class="close tertiary icon">-->
+<!--                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">-->
+<!--                        <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>-->
+<!--                    </svg>-->
+<!--                </button>-->
                 <quiz-results-upsell
                         :billing-period="billingPeriod"
                         :checkout-loading="checkoutLoading"
@@ -77,11 +83,14 @@
         @Prop({ type: Boolean, required: false, default: false })
         done!: boolean;
 
+        @Prop({type: Boolean, default: false})
+        upsell!: boolean;
+
         loading = false;
         error: string | null = null;
         assessment!: CoreValuesAssessment;
         assessmentResponse: CoreValuesAssessmentResponse | null = null;
-        showUpgrade = false;
+
         // showResults = false;
         checkoutLoading = false;
         checkoutError: string | null = null;
@@ -127,17 +136,18 @@
             assessmentResponse.completed = true;
 
             if (isPremiumTier(this.member.tier)) {
-                await this.closeAssessment();
+                await this.close();
                 return;
             }
-            this.showUpgrade = true;
+            // this.upsell = true;
+            this.goToUpgrade();
         }
 
         get billingPeriod(): BillingPeriod {
             return BillingPeriod.yearly;
         }
 
-        async closeAssessment() {
+        async close() {
             await pushRoute(PageRoute.MEMBER_HOME)
         }
 
@@ -166,6 +176,14 @@
         async goToDone() {
             try {
                 await this.$router.push({ name: NamedRoute.CORE_VALUES_RESULT_PAGE, params: { index: "done" } })
+            } catch (error) {
+                logger.error("Failed to push route", error);
+            }
+        }
+
+        async goToUpgrade() {
+            try {
+                await this.$router.push({ name: NamedRoute.CORE_VALUES_RESULT_PAGE, params: { index: "upgrade" } })
             } catch (error) {
                 logger.error("Failed to push route", error);
             }

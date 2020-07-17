@@ -311,7 +311,8 @@ export const routes: MetaRouteConfig[] = [
             return {
                 responseId: route.params.resultsId,
                 page: isNumber(Number(route.params.index)) ? Number(route.params.index ?? 0) : null,
-                done: route.params.index === "done"
+                done: route.params.index === "done",
+                upsell: route.params.index === "upgrade",
             }
         },
         children: [
