@@ -43,8 +43,6 @@
 
         focusedIndex: number | null = null;
 
-        keyListener: any;
-
         setValue(selected: boolean, value: number | undefined) {
             this.focusedIndex = null;
             this.$emit("change", selected ? value : undefined);

@@ -30,8 +30,6 @@
     import QuestionOption from "@components/corevalues/QuestionOption.vue";
     import CoreValuesQuestionOption from "@shared/models/CoreValuesQuestionOption";
     import Logger from "@shared/Logger";
-    import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
-    import CoreValuesAssessment from "@shared/models/CoreValuesAssessment";
     import { QuestionType } from "@shared/models/Questions";
     import Component from "vue-class-component";
     import { Prop } from "vue-property-decorator";
@@ -53,16 +51,14 @@
         @Prop({ type: Object as () => CoreValuesQuestionResponse, required: true })
         response!: CoreValuesQuestionResponse;
 
-        @Prop({ type: Object as () => CoreValuesAssessment, required: true })
-        assessment!: CoreValuesAssessment;
+        // @Prop({ type: Object as () => CoreValuesAssessment, required: true })
+        // assessment!: CoreValuesAssessment;
+        //
+        // @Prop({ type: Object as () => CoreValuesAssessmentResponse, required: true })
+        // assessmentResponse!: CoreValuesAssessmentResponse;
 
-        @Prop({ type: Object as () => CoreValuesAssessmentResponse, required: true })
-        assessmentResponse!: CoreValuesAssessmentResponse;
-
-
-        get options(): CoreValuesQuestionOption[] {
-            return this.question.options({ assessmentResponse: this.assessmentResponse, assessment: this.assessment })
-        }
+        @Prop({type: Array as () => CoreValuesQuestionOption[], default: [], required: true})
+        options!: CoreValuesQuestionOption[]
 
         selectOption(index: number, option: CoreValuesQuestionOption) {
             if (this.question.type === QuestionType.RADIO) {

@@ -36,6 +36,10 @@ export default class CoreValuesAssessmentResponse extends BaseModel {
         return [...new Set(coreValues)]
     }
 
+    get allResponses(): CoreValuesQuestionResponse[] {
+        return Object.values(this.questionResponses);
+    }
+
     prepareForFirestore(): any {
         // const data = super.prepareForFirestore();
         // return stringifyJSON(data);
@@ -65,7 +69,10 @@ export default class CoreValuesAssessmentResponse extends BaseModel {
     }
 
     setResponse(response: CoreValuesQuestionResponse) {
-        this.questionResponses = { ...this.questionResponses, [response.questionId]: response };
+        this.questionResponses = {
+            ...this.questionResponses,
+            [response.questionId]: response
+        };
     }
 
     /**

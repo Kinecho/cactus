@@ -34,8 +34,7 @@
                 </button>
                 <question-card :question="currentQuestion"
                         :response="currentResponse"
-                        :assessment-response="assessmentResponse"
-                        :assessment="assessment"
+                        :options="currentQuestionOptions"
                         @updated="updateResponse"/>
             </template>
             <div class="cvActions">
@@ -83,7 +82,8 @@
     import Logger from "@shared/Logger";
     import { logCoreValuesAssessmentProgress } from "@web/analytics";
     import Component from "vue-class-component";
-    import { Prop } from "vue-property-decorator";
+    import { Prop, Watch } from "vue-property-decorator";
+    import CoreValuesQuestionOption from "@shared/models/CoreValuesQuestionOption";
 
     const logger = new Logger("Assessment");
 
@@ -117,6 +117,32 @@
 
         showValidation: boolean = false;
         showCloseConfirm: boolean = false;
+        responseValidation: ResponseValidation | null = null;
+        currentQuestionOptions: CoreValuesQuestionOption[] = []
+        currentQuestion: CoreValuesQuestion | null = null
+        currentResponse: CoreValuesQuestionResponse | null = null;
+
+        @Watch("assessmentResponse")
+        onResponseChanged() {
+            this.updateAll()
+        }
+
+        @Watch("questionIndex")
+        onIndexChange(newIndex: number | null, oldIndex: number | null) {
+            this.updateAll()
+        }
+
+        updateAll() {
+            logger.info("Updating all things...");
+            this.updateCurrentQuestion();
+            this.updateCurrentResponse();
+            this.updateCurrentQuestionOptions()
+            this.updateResponseValidation();
+        }
+
+        beforeMount() {
+            this.onIndexChange(this.questionIndex, null);
+        }
 
         get displayIndex(): number {
             if (this.completed) {
@@ -141,31 +167,52 @@
             return !this.completed
         }
 
-        get currentQuestion(): CoreValuesQuestion | null {
+
+        updateCurrentQuestion() {
             const index = this.questionIndex;
             if (isNumber(index) && index < this.questions.length) {
-                return this.questions[index];
+                this.currentQuestion = this.questions[index];
+            } else {
+                this.currentQuestion = null
             }
-            return null;
         }
 
-        get responseValidation(): ResponseValidation | undefined {
+
+        updateResponseValidation() {
             const question = this.currentQuestion;
             const response = this.currentResponse;
 
             if (question && response) {
-                return response.isValid(question)
+                logger.info("Updating response validation because both question & response are present");
+                this.responseValidation = response.isValid(question)
+            } else {
+                this.responseValidation = { isValid: false };
             }
 
-            return undefined;
         }
 
-        get currentResponse(): CoreValuesQuestionResponse | null {
+
+        updateCurrentResponse() {
             const questionId = this.currentQuestion?.id;
             if (!questionId) {
-                return null;
+                this.currentResponse = null
+                return;
             }
-            return this.assessmentResponse?.getResponseForQuestion(questionId) ?? null;
+            this.currentResponse = this.assessmentResponse?.getResponseForQuestion(questionId) ?? null;
+        }
+
+        updateCurrentQuestionOptions() {
+            if (!this.assessmentResponse) {
+                this.currentQuestionOptions = []
+                return;
+            }
+            debugger;
+            const responses = this.assessment.orderedResponses(this.assessmentResponse) ?? [];
+            this.currentQuestionOptions = this.currentQuestion?.options({
+                responses,
+                currentIndex: this.questionIndex ?? 0,
+            }) ?? []
+            return;
         }
 
         close() {
@@ -191,24 +238,22 @@
         }
 
         async updateResponse(response: CoreValuesQuestionResponse) {
-            this.assessmentResponse?.setResponse(response);
-            await this.save()
+            // this.assessmentResponse?.setResponse(response);
+            // await this.save()
+            this.updateResponseValidation();
+            this.$emit('response', response)
         }
 
         previousQuestion() {
             if (isNull(this.currentQuestion)) {
-                // this.questionIndex = 0;
                 return;
             } else if (isNumber(this.questionIndex)) {
-                // this.questionIndex = Math.max(0, this.questionIndex - 1);
-                // this.completed = false
-                // this.assessmentResponse?.completed = false;
                 this.$emit("previous");
             }
         }
 
         nextQuestion() {
-            // this.questions = this.assessment.getQuestions(this.assessmentResponse);
+            this.updateResponseValidation();
             if (this.responseValidation?.isValid === false) {
                 this.showValidation = true
                 return;

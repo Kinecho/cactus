@@ -8,6 +8,7 @@
                 :questions="questions"
                 :done="done"
                 @start="onStart"
+                @response="onResponse"
                 @next="next"
                 @previous="previous"
                 @save="save"
@@ -59,8 +60,8 @@
     import { isPremiumTier } from "@shared/models/MemberSubscription";
     import LoadableQuizResultsUpsell from "@components/upgrade/LoadableQuizResultsUpsell.vue";
     import { BillingPeriod } from "@shared/models/SubscriptionProduct";
-    import { NamedRoute } from "@shared/PageRoutes";
     import { isIosApp } from "@web/DeviceUtil";
+    import CoreValuesQuestionResponse from "@shared/models/CoreValuesQuestionResponse";
 
     const logger = new Logger("CoreValuesEmbed");
 
@@ -121,15 +122,6 @@
             }
             await this.save();
             this.questionIndex = 0;
-            // const id = this.assessmentResponse.id;
-            // if (!id) {
-            //     this.error = "Uh oh, something went wrong. Please try again later.";
-            //     return;
-            // }
-            // // await this.goToIndex(0, id);
-            // await this.$router.push({ name: NamedRoute.CORE_VALUES_RESULT, params: { resultsId: id } })
-            // await this.$router.push({ name: NamedRoute.CORE_VALUES_RESULT, params: { resultsId: id } })
-            // await this.goToIndex(0);
         }
 
         get questions() {
@@ -151,6 +143,11 @@
                 this.done = true;
             }
             this.questionIndex = index;
+        }
+
+        async onResponse(response: CoreValuesQuestionResponse) {
+            this.assessmentResponse?.setResponse(response);
+            await this.save()
         }
 
         get hasExistingResults(): boolean {
