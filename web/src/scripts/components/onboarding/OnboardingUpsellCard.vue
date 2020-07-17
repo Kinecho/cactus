@@ -84,7 +84,7 @@
         @Prop({ type: Object as () => CactusMember, required: true })
         member!: CactusMember;
 
-        @Prop({ type: String, default: "Try it free" })
+        @Prop({ type: String, default: "Try It Free" })
         ctaText!: string;
 
         get upgradeSuccess(): boolean {

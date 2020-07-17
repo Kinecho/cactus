@@ -57,7 +57,7 @@
         @Prop({ type: Boolean, required: false, default: false })
         checkoutLoading!: boolean;
 
-        @Prop({ type: String, default: "Try it free" })
+        @Prop({ type: String, default: "Try It Free" })
         ctaText!: string;
 
         get loading(): boolean {

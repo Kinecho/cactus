@@ -25,7 +25,7 @@
                     <spinner message="Loading..." :delay="1200"/>
                 </div>
                 <div v-else key="checkout-info" class="checkout-info">
-                    <button @click="checkout" :disabled="checkoutLoading">Try it free</button>
+                    <button @click="checkout" :disabled="checkoutLoading">Try It Free</button>
                     <p class="small" v-if="subscriptionProduct.trialDays && subscriptionProduct.trialDays > 0">
                         Cactus Plus is free for {{subscriptionProduct.trialDays}} days, then {{pricePerMonth}} /
                         {{displayPeriod}}<span v-if="isAnnualBilling"> (billed annually)</span>. No commitment. Cancel anytime.
