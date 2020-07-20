@@ -146,8 +146,7 @@
 
         get resultsRoute(): string {
             return appendQueryParams(PageRoute.MEMBER_HOME, {
-                [QueryParam.FROM]: "core-values",
-                [QueryParam.UPGRADE_SUCCESS]: "success",
+                [QueryParam.FROM]: "core-values"
             });
         }
 
