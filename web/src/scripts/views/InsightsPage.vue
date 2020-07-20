@@ -1,22 +1,20 @@
 <template>
     <div class="insightsDash">
         <div class="centered">
-            <h1 v-if="!loading" :class="showEmptyState ? 'center' : '' ">{{welcomeMessage}}</h1>
+            <h1 v-if="!loading" :class="{center: showEmptyState }">{{welcomeMessage}}</h1>
             <div v-if="loading">
                 <spinner :delay="1500" message="Loading..."/>
             </div>
-            <div v-else-if="showEmptyState">
-                <EmptyState :tier="member.tier"/>
-            </div>
             <div v-else class="insightsGrid" :class="insightsGridClassNames">
-                <reflection-stats-widget :reflection-stats="reflectionStats" v-if="reflectionStats"/>
-                <prompt-widget :entry="todayEntry" :member="member" :loading="todayPromptLoading"/>
+                <reflection-stats-widget v-if="!showEmptyState && reflectionStats" :reflection-stats="reflectionStats"/>
+
+                <prompt-widget v-if="" :entry="todayEntry" :member="member" :loading="todayPromptLoading"/>
                 <section class="bubblesContainer" v-if="hasWordCloud">
                     <div class="flexIt">
                         <h2>Word Bubbles</h2>
                     </div>
                     <div class="wordCloud">
-                        <WordCloud class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
+                        <WordClou d class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
                     </div>
                 </section>
                 <div class="valuesWrapper">

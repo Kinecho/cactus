@@ -37,3 +37,7 @@ export enum NamedRoute {
     CORE_VALUES_RESULT = "coreValues.result",
     CORE_VALUES_RESULT_PAGE = "coreValues.result.page",
 }
+
+export function getPromptContentPath(entryId: string): string {
+    return `${PageRoute.PROMPTS_ROOT}/${entryId}`;
+}

@@ -7,7 +7,7 @@
                     <spinner message="Loading..." :delay="1200"/>
                 </div>
                 <div class="section-container" v-else-if="showEmptyState" :key="'empty'">
-                    <empty-state :focus-element="focusElement" :tier="tier"/>
+                    <empty-state :focus-element="focusElement" :tier="tier" :to="emptyStateRoute"/>
                 </div>
 
                 <div class="section-container" v-else-if=" journalEntries.length > 0">
@@ -43,7 +43,7 @@
     import Vue from 'vue'
     import { Config } from "@web/config";
     import JournalEntryCard from "@components/JournalEntryCard.vue";
-    import { PageRoute } from '@shared/PageRoutes'
+    import { getPromptContentPath, PageRoute } from '@shared/PageRoutes'
     import CactusMember from '@shared/models/CactusMember'
     import { ListenerUnsubscriber } from '@web/services/FirestoreService'
     import AutoPromptContentModal from "@components/AutoPromptContentModal.vue";
@@ -61,6 +61,7 @@
     import Component from "vue-class-component";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
     import JournalHomeEmptyState from "@components/JournalHomeEmptyState.vue";
+    import { buildPromptContentURL } from "../../../../shared-admin/src/util/StringUtil";
 
     const logger = new Logger("JournalHome.vue");
 
@@ -99,7 +100,6 @@
             this.windowScrollHandler = handler;
             window.addEventListener('scroll', handler);
             this.scrollHandler();
-
         }
 
         async beforeMount() {
@@ -172,6 +172,10 @@
             return -1 * ((window.innerHeight + document.documentElement.scrollTop) - document.body.offsetHeight)
         }
 
+        get emptyStateRoute(): PageRoute|string|null {
+            const todayEntryId = this.dataSource?.todayEntry?.promptContent?.entryId
+            return todayEntryId ? getPromptContentPath(todayEntryId) : null;
+        }
 
         get tier(): SubscriptionTier | null {
             return this.member?.tier ?? null;

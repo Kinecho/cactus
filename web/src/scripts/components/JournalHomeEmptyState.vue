@@ -3,7 +3,7 @@
         <h1>This is your journal.</h1>
         <p>{{introText}}</p>
         <skeleton-card :animating="false"/>
-        <router-link class="button primary" tag="button" :to="onboardingPath">Get Started</router-link>
+        <router-link class="button primary" tag="a" :to="onboardingPath">Get Started</router-link>
     </section>
 </template>
 
@@ -11,14 +11,11 @@
     import Vue from "vue";
     import Component from "vue-class-component"
     import { PageRoute } from "@shared/PageRoutes";
-    import { Config } from "@web/config";
-    import AppSettingsService from "@web/services/AppSettingsService";
     import { CactusElement } from "@shared/models/CactusElement";
     import { Prop } from "vue-property-decorator";
     import Logger from "@shared/Logger"
     import ResultElement from "@components/gapanalysis/ResultElement.vue";
     import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
-    import { isPremiumTier } from "@shared/models/MemberSubscription";
     import { preventOrphanedWords } from "@shared/util/StringUtil";
     import SkeletonCard from "@components/JournalEntrySkeleton.vue";
 
@@ -39,31 +36,15 @@
         @Prop({ type: String as () => SubscriptionTier, default: null, required: false })
         tier!: SubscriptionTier | null
 
-        get isPlusMember(): boolean {
-            return !!this.tier && isPremiumTier(this.tier);
-        }
+        @Prop({type: String as () => string|PageRoute, default: null})
+        to!: string|PageRoute|null;
 
         get onboardingPath(): PageRoute {
-            return PageRoute.HELLO_ONBOARDING;
+            return this.to ?? PageRoute.HELLO_ONBOARDING;
         }
 
         get introText() {
             return preventOrphanedWords("It's a little empty now, but once you complete your first question, your journal entries will appear here.");
-        }
-
-        get firstPromptPath(): string {
-            const appSettings = AppSettingsService.sharedInstance.currentSettings;
-            const entryId = this.focusElement ? appSettings?.getElementOnboardingPromptEntryId(this.focusElement) : undefined;
-
-            if (!entryId && this.focusElement) {
-                logger.warn("No entry id found for element", this.focusElement)
-            }
-
-            if (!this.focusElement || !entryId || !this.isPlusMember) {
-                return PageRoute.PROMPTS_ROOT + '/' + Config.firstPromptId;
-            }
-
-            return `${ PageRoute.PROMPTS_ROOT }/${ entryId }`;
         }
     }
 </script>
