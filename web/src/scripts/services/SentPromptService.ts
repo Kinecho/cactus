@@ -131,8 +131,7 @@ export default class SentPromptService {
 
         if (beforeOrEqualTo) {
             const beforeTimestamp = toTimestamp(beforeOrEqualTo);
-            logger.log("beforeOrEqualTo Timestamp", beforeTimestamp);
-            query = query.where(SentPrompt.Fields.firstSentAt, "<=", beforeOrEqualTo)
+            query = query.where(SentPrompt.Fields.firstSentAt, "<=", beforeTimestamp)
         }
 
         if (onlyCompleted) {

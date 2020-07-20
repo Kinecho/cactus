@@ -9,6 +9,7 @@ import { CactusElement } from "@shared/models/CactusElement";
 import RevenueCatService from "@web/services/RevenueCatService";
 import JournalFeedDataSource from "@web/datasource/JournalFeedDataSource";
 import PromotionalOfferManager from "@web/managers/PromotionalOfferManager";
+import IosAppService from "@web/ios/IosAppService";
 
 const logger = new Logger("CactusMemberService");
 
@@ -25,12 +26,18 @@ export default class CactusMemberService {
     protected memberHasLoaded = false;
 
     pendingLoginActions: AuthAction[] = []
+    ready: Promise<void>;
+
+    private onStart!: () => void;
 
     get isLoggedIn(): boolean {
         return !!this.currentMember;
     }
 
     constructor() {
+        this.ready = new Promise(resolve => {
+            this.onStart = resolve;
+        })
         this.authUnsubscriber = getAuth().onAuthStateChanged(async user => {
             if (this.currentMemberUnsubscriber) {
                 this.currentMemberUnsubscriber();
@@ -44,6 +51,8 @@ export default class CactusMemberService {
                         const memberChanged = this.currentMember?.id !== member?.id
                         this.currentMember = member;
                         this.memberHasLoaded = true;
+                        await this.onMemberDataFetched(member);
+                        this.onStart();
                         if (member && memberChanged) {
                             logger.info("Member changed - updating member values like timezone, revenuecat + session offers");
                             const dataSource = JournalFeedDataSource.setup(member, { onlyCompleted: true });
@@ -58,9 +67,27 @@ export default class CactusMemberService {
                     }
                 })
             } else {
+                this.onStart();
                 this.currentMember = undefined;
             }
         });
+    }
+
+    /**
+     * Hook to do any actions when the member is updated from the server
+     * @param {CactusMember} member
+     * @return {Promise<void>}
+     */
+    async onMemberDataFetched(member: CactusMember) {
+        IosAppService.updateMember(member);
+    }
+
+    async authReady(): Promise<void> {
+        if (this.memberHasLoaded) {
+            return;
+        }
+        await this.getCurrentMember()
+        return;
     }
 
     async addAuthAction(action: AuthAction) {

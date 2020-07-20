@@ -46,6 +46,7 @@ export const Config: {
     isProd: boolean,
     version: string | undefined,
     androidUserAgent: string,
+    iosUserAgent: string,
     branchLiveKey: string,
     revenueCatApiKey: string,
 } = {
@@ -71,6 +72,7 @@ export const Config: {
     isProd: process.env.__BUILD_ENV__ === "prod",
     version: process.env.__SENTRY_VERSION__ as any,
     androidUserAgent: "CactusAndroid",
+    iosUserAgent: "CactusIos",
     branchLiveKey: process.env.__BRANCH_LIVE_KEY__ as any,
     revenueCatApiKey: process.env.__REVENUECAT_API_KEY__ as any,
 };

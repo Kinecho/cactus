@@ -426,69 +426,10 @@
 
 <style scoped lang="scss">
     //noinspection CssUnknownTarget
-    @import "~assessment";
     @import "variables";
     @import "mixins";
     @import "transitions";
-
-    .intro {
-        padding: 8rem 2.4rem 19.2rem;
-        text-align: left;
-
-        @include r(768) {
-            padding: 8rem 6.4rem 19.2rem;
-            text-align: center;
-        }
-
-        h1 {
-            margin-bottom: .8rem;
-        }
-
-        p {
-            font-size: 2rem;
-            margin-bottom: 3.2rem;
-            opacity: .8;
-        }
-
-        button {
-            width: 100%;
-
-            @include r(600) {
-                min-width: 18rem;
-                width: auto;
-            }
-        }
-    }
-
-    .private {
-        background-color: #EFF4F5;
-        bottom: 0;
-        display: flex;
-        font-size: 1.4rem;
-        left: 0;
-        padding: 1.6rem 2.4rem;
-        position: fixed;
-        right: 0;
-
-        @include r(768) {
-            align-items: center;
-            flex-direction: column;
-            padding: 2.4rem 16rem;
-            position: absolute;
-        }
-    }
-
-    .lock {
-        height: 2.4rem;
-        margin: .4rem 1.6rem 0 0;
-        width: 2.4rem;
-
-        @include r(768) {
-            height: 1.8rem;
-            margin: 0 0 .8rem 0;
-            width: 1.8rem;
-        }
-    }
+    @import "~assessment";
 
     .whiteBg {
         background-color: $white;
@@ -507,14 +448,6 @@
         margin: 0 auto 2.4rem;
         max-width: 48rem;
         opacity: .8;
-    }
-
-    .flexActions {
-        flex-direction: column;
-
-        @include r(768) {
-            display: flex;
-        }
     }
 
     .radarChartContainer {

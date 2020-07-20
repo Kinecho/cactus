@@ -1,23 +1,10 @@
 <template>
-    <div class="gapAnalysisPage" :class="{signin: !member && memberLoaded}">
-        <div class="centered">
-            <div class="sign-in" v-if="!member && memberLoaded">
-                <sign-in :show-magic-link="false"
-                        :show-title="true"
-                        title="Sign In"
-                        message="Please sign in to continue to the quiz."
-                        :sign-in-success-path="signInSuccessRoute"
-                        :redirect-on-sign-in="false"
-                        :redirect-url="signInSuccessRoute"
-                        :twitterEnabled="false"
-                        spinner-color="light"
-                        :show-login-switcher="false"
-                />
-            </div>
-            <div class="centered" v-if="memberLoaded && !!member && !resultsLoaded">
-                <spinner color="dark" message="Loading quiz..." :delay="1200"/>
-            </div>
-            <assessment v-if="member && resultsLoaded"
+    <div class="gapAnalysisPage" :class="{signin: !member, loading,}">
+        <div class="loader" v-if="loading">
+            <spinner color="light" message="Loading quiz..." :delay="1200"/>
+        </div>
+        <div class="centered" v-else>
+            <assessment
                     :assessment="assessment"
                     :result="assessmentResults"
                     :include-upsell="includeUpsell"
@@ -46,8 +33,6 @@
     import { pushRoute } from "@web/NavigationUtil";
     import { PageRoute } from "@shared/PageRoutes";
     import CactusMember from "@shared/models/CactusMember";
-    import { ListenerUnsubscriber } from "@web/services/FirestoreService";
-    import CactusMemberService from "@web/services/CactusMemberService";
     import GapAnalysisService from "@web/services/GapAnalysisService";
     import SignIn from "@components/SignIn.vue";
     import LoadingPage from "@web/views/LoadingPage.vue";
@@ -83,10 +68,10 @@
     export default class GapAnalysisPage extends Vue {
         assessment = GapAnalysisAssessment.create();
         latestResults: GapAnalysisAssessmentResult | null = null;
-        memberLoaded = false;
         resultsLoaded = false;
-        memberUnsubscriber?: ListenerUnsubscriber;
-        member: CactusMember | undefined | null = null;
+
+        @Prop({ type: Object as () => CactusMember, required: true })
+        member!: CactusMember;
 
         @Prop({ type: String, required: false })
         resultsId?: string;
@@ -115,13 +100,9 @@
         }
 
         async beforeMount() {
-            this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: async ({ member }) => {
-                    this.member = member;
-                    this.memberLoaded = true;
-                    await this.fetchOrCreateResults()
-                }
-            })
+            if (this.member) {
+                await this.fetchOrCreateResults()
+            }
         }
 
         async mounted() {
@@ -134,6 +115,10 @@
                 }
                 await fireOptInStartTrialEvent({ value: priceDollars })
             }
+        }
+
+        get loading(): boolean {
+            return !this.resultsLoaded;
         }
 
         async upsellProductLoaded(product: SubscriptionProduct | null | undefined) {
@@ -276,6 +261,7 @@
     @import "mixins";
     @import "variables";
 
+
     .gapAnalysisPage {
         display: flex;
         flex-flow: column nowrap;
@@ -283,6 +269,16 @@
         justify-content: space-between;
         overflow: hidden;
         position: relative;
+
+        &.loading {
+            color: $white;
+            justify-content: center;
+            align-items: center;
+
+            .loader {
+                z-index: 1;
+            }
+        }
 
         &:after {
             background-image: url(/assets/images/crosses2.svg),
@@ -339,15 +335,9 @@
         display: flex;
         min-height: 100vh;
         padding: 0 2.4rem;
-
-        /*.centered {*/
-            text-align: center;
-        /*}*/
-
-        /*position: relative;*/
+        text-align: center;
         justify-content: center;
         z-index: 1;
-        /*padding: 6.4rem 2.4rem 0;*/
 
         @include r(600) {
             padding: 12rem 0 0;

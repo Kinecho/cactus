@@ -8,7 +8,7 @@
             <div v-else-if="showEmptyState">
                 <EmptyState :tier="member.tier"/>
             </div>
-            <div v-else class="insightsGrid">
+            <div v-else class="insightsGrid" :class="insightsGridClassNames">
                 <reflection-stats-widget :reflection-stats="reflectionStats" v-if="reflectionStats"/>
                 <prompt-widget :entry="todayEntry" :member="member" :loading="todayPromptLoading"/>
                 <section class="bubblesContainer" v-if="hasWordCloud">
@@ -19,32 +19,21 @@
                         <WordCloud class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
                     </div>
                 </section>
-                <section class="valuesContainer" v-if="hasCoreValues">
-                    <h2>Core Values</h2>
-                    <div class="flexIt">
-                        <ul class="core-values-list">
-                            <li v-for="(coreValue, index) in coreValues" :key="`value_${index}`" class="core-value">
-                                <h3>{{coreValue.value}}</h3>
-                                <!-- <p class="description">{{coreValue.description}}</p> -->
-                            </li>
-                        </ul>
-                        <div class="imgContainer" v-if="coreValuesBlob">
-                            <img :src="coreValuesBlob.imageUrl" alt="Core Values Graphic"/>
-                        </div>
-                    </div>
-                    <dropdown-menu :items="coreValuesDropdownLinks" class="dotsBtn"/>
-                </section>
-                <router-link v-else tag="section" class="novaluesContainer" :class="{plus: isPlusMember}" :to="coreValuesHref">
-                    <svg class="lock" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.8">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                    <h2>What Are Your Core Values?</h2>
-                    <p class="subtext">Discover what drives your life decisions and deepest needs.</p>
-                    <router-link v-if="isPlusMember" tag="button" class="secondary esButton" :to="coreValuesHref">Take
-                        the Assessment
+                <div class="valuesWrapper">
+                    <core-value-results v-if="hasCoreValues" :core-values="coreValues" :show-description="false" :show-dropdown-menu="true"/>
+                    <router-link v-else tag="section" class="novaluesContainer" :class="{plus: isPlusMember}" :to="coreValuesHref">
+                        <svg class="lock" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.8">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        <h2>What Are Your Core Values?</h2>
+                        <p class="subtext">Discover what drives your life decisions and deepest needs.</p>
+                        <router-link v-if="isPlusMember" tag="button" class="secondary esButton" :to="coreValuesHref">
+                            Take
+                            the Assessment
+                        </router-link>
                     </router-link>
-                </router-link>
+                </div>
                 <gap-analysis-widget :loading="gapResultsLoading"
                         :gap-assessment-results="gapAssessmentResults"
                         :is-plus-member="isPlusMember"
@@ -64,14 +53,12 @@
     import WordCloud from "@components/MemberWordCloudInsights.vue";
     import CactusMember, { ReflectionStats } from "@shared/models/CactusMember";
     import CactusMemberService from "@web/services/CactusMemberService";
-    import { CoreValueMeta, CoreValuesService } from "@shared/models/CoreValueTypes";
+    import { CoreValue } from "@shared/models/CoreValueTypes";
     import { PageRoute } from "@shared/PageRoutes";
     import { QueryParam } from "@shared/util/queryParams";
     import CopyService from "@shared/copy/CopyService";
-    import { DropdownMenuLink } from "@components/DropdownMenuTypes";
     import DropdownMenu from "@components/DropdownMenu.vue";
-    import { CoreValuesBlob, getCoreValuesBlob } from "@shared/util/CoreValuesUtil";
-    import { getQueryParam } from "@web/util";
+    import { getQueryParam, removeQueryParam } from "@web/util";
     import Logger from "@shared/Logger"
     import { isPremiumTier } from "@shared/models/MemberSubscription";
     import Results from "@components/gapanalysis/Results.vue";
@@ -90,12 +77,14 @@
     import { Prop } from "vue-property-decorator";
     import JournalFeedDataSource, { JournalFeedDataSourceDelegate } from "@web/datasource/JournalFeedDataSource";
     import MemberHomeEmptyState from "@components/MemberHomeEmptyState.vue";
+    import CoreValueResults from "@components/insights/CoreValueResults.vue";
 
     const logger = new Logger("InsightsPage");
     const copy = CopyService.getSharedInstance().copy;
 
     @Component({
         components: {
+            CoreValueResults,
             EmptyState: MemberHomeEmptyState,
             PromptWidget,
             ReflectionStatsWidget,
@@ -116,18 +105,21 @@
 
         gapResultsLoading = false;
         gapAssessmentResults?: GapAnalysisAssessmentResult | null = null;
-        selectFocusEnabled = false;
         currentElementSelection: CactusElement | null = null
         todayEntry: JournalEntry | null = null;
         todayLoaded = false;
         dataSource?: JournalFeedDataSource
         journalLoaded: boolean = false;
         showEmptyState: boolean = false;
+        fromParam: string | null = null
 
         async beforeMount() {
             this.dataSource = JournalFeedDataSource.setup(this.member, { onlyCompleted: true, delegate: this })
             await this.dataSource?.start()
             await this.fetchGapResults()
+
+            this.fromParam = getQueryParam(QueryParam.FROM);
+            removeQueryParam(QueryParam.FROM);
         }
 
         destroyed() {
@@ -136,6 +128,12 @@
 
         get todayPromptLoading(): boolean {
             return !this.todayEntry && !this.todayLoaded;
+        }
+
+        get insightsGridClassNames(): Record<string, boolean | string> {
+            return {
+                highlightCV: this.fromParam === "core-values"
+            }
         }
 
         async fetchGapResults() {
@@ -164,14 +162,12 @@
             }
         }
 
-        cancelSetFocus() {
-            this.selectFocusEnabled = false;
-            this.currentElementSelection = null;
-        }
-
         get welcomeMessage(): string {
-            if (getQueryParam(QueryParam.FROM) === "onboarding") {
+            if (this.fromParam === "onboarding") {
                 return "Welcome to Cactus!"
+            }
+            if (this.fromParam === "core-values") {
+                return "Welcome! Your Core Values:"
             }
             if (this.showEmptyState) {
                 return "Welcome!"
@@ -189,17 +185,6 @@
             return this.member?.firstName;
         }
 
-        get coreValuesBlob(): CoreValuesBlob | undefined {
-            if (!this.member) {
-                return undefined;
-            }
-            const forceIndex = getQueryParam(QueryParam.BG_INDEX)
-            logger.info("Forcing index: ", forceIndex);
-            const blob = getCoreValuesBlob(this.member?.coreValues, forceIndex);
-            logger.info("Blob info:", blob);
-            return blob;
-        }
-
         get wordCloud(): InsightWord[] {
             return (this.member) ? (this.member?.wordCloud ?? []) : [];
         }
@@ -208,11 +193,11 @@
             return (this.wordCloud.length ?? 0) > 0;
         }
 
-        get coreValues(): CoreValueMeta[] {
+        get coreValues(): CoreValue[] {
             if (!this.member) {
                 return [];
             }
-            return (this.member.coreValues ?? []).map(value => CoreValuesService.shared.getMeta(value))
+            return (this.member.coreValues ?? [])
         }
 
         get hasCoreValues(): boolean {
@@ -220,7 +205,7 @@
         }
 
         get coreValuesHref(): string {
-            return `${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`;
+            return PageRoute.CORE_VALUES_ASSESSMENT;
         }
 
         get isPlusMember(): boolean {
@@ -231,13 +216,6 @@
             return this.member?.stats.reflections;
         }
 
-        get coreValuesDropdownLinks(): DropdownMenuLink[] {
-            return [{
-                title: "Retake Assessment",
-                href: `${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`,
-            }];
-        }
-
         get focusElement(): CactusElement | null {
             return this.member.focusElement ?? null;
         }
@@ -246,7 +224,7 @@
         didLoad(hasData: boolean): void {
             logger.info("Insights page data source did load");
             this.journalLoaded = true;
-            this.todayEntry = this.dataSource?.todayEntry
+            this.todayEntry = this.dataSource?.todayEntry ?? null;
             this.showEmptyState = !hasData;
         }
 
@@ -305,6 +283,18 @@
     }
 
     .insightsGrid {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+
+        &.highlightCV {
+            .valuesWrapper {
+                @include shadowbox;
+                border: 0;
+                order: -1;
+            }
+        }
+
         @include r(768) {
             display: grid;
             grid-template-areas: "stats stats stats stats stats stats"
@@ -312,6 +302,14 @@
                 "values values values gap gap gap";
             grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
             grid-template-rows: auto;
+            width: auto;
+
+            &.highlightCV {
+                grid-template-areas: 
+                "values values values values gap gap"
+                "stats stats stats stats stats stats"
+                "today today today today bubbles bubbles";
+            }
 
             .statsContainer {
                 grid-area: stats;
@@ -322,8 +320,7 @@
             .bubblesContainer {
                 grid-area: bubbles;
             }
-            .novaluesContainer,
-            .valuesContainer {
+            .valuesWrapper {
                 grid-area: values;
             }
             .nogapContainer,
@@ -344,6 +341,7 @@
         cursor: pointer;
         padding: 2.4rem 3.2rem 3.2rem 5.6rem;
         position: relative;
+        width: 100%;
 
         @include r(600) {
             transition: box-shadow .3s, transform .3s ease-in;
@@ -393,106 +391,17 @@
         }
     }
 
-    .novaluesContainer,
-    .valuesContainer {
+    .valuesWrapper {
+        border: 1px solid $lightest;
+        border-radius: 1.6rem;
         margin: 0 2.4rem 3.2rem;
 
         @include r(374) {
             margin: 0 0 3.2rem;
         }
         @include r(768) {
+            display: flex;
             margin: 0 1.6rem 4.8rem 0;
-        }
-    }
-
-    .valuesContainer {
-        border: 1px solid $lightest;
-        border-radius: 1.6rem;
-        padding: 2.4rem;
-        position: relative;
-
-        @include r(374) {
-            padding: 2.4rem 3.2rem;
-        }
-        @include r(768) {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 4.8rem;
-        }
-
-        h2 {
-            @include r(768) {
-                margin-bottom: 3.2rem;
-            }
-            @include r(960) {
-                margin-bottom: 0;
-            }
-        }
-
-        .flexIt {
-            align-items: center;
-            display: flex;
-            flex-grow: 1;
-
-            @include r(600) {
-                justify-content: space-between;
-            }
-            @include r(768) {
-                flex-direction: column;
-            }
-            @include r(960) {
-                flex-direction: row;
-            }
-        }
-    }
-
-    .imgContainer {
-
-        @include r(600) {
-            width: 40%;
-        }
-        @include r(768) {
-            width: 100%;
-        }
-        @include r(960) {
-            width: 40%;
-        }
-
-        img {
-            max-height: 16rem;
-            position: relative;
-
-            @include r(600) {
-                height: auto;
-                max-height: 32rem;
-                max-width: 100%;
-                width: auto;
-            }
-        }
-    }
-
-    .core-values-list {
-        list-style: none;
-        margin: 2.4rem 2.4rem .8rem 0;
-        padding: 0;
-
-        @include r(768) {
-            margin: 0;
-            width: 100%;
-        }
-        @include r(960) {
-            margin: 0;
-            width: 50%;
-        }
-    }
-
-    .core-value {
-        list-style: none;
-        margin: 0 0 .8rem;
-        padding: 0;
-
-        @include r(600) {
-            margin-bottom: 1.6rem;
         }
     }
 
@@ -529,14 +438,6 @@
             }
         }
     }
-
-    // .nogapContainer + .bubblesContainer {
-    //     @include r(768) {
-    //         flex-basis: 50%;
-    //         margin-right: 1.6rem;
-    //         order: 1;
-    //     }
-    // }
 
     .focusElement {
         font-size: 2rem;

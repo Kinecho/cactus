@@ -3,7 +3,6 @@
         <div class="page-content">
             <spinner message="Loading..."/>
         </div>
-
     </div>
 </template>
 

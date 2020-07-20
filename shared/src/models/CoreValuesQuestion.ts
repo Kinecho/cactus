@@ -1,12 +1,11 @@
 import CoreValuesQuestionOption from "@shared/models/CoreValuesQuestionOption";
-import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
-import CoreValuesAssessment from "@shared/models/CoreValuesAssessment";
 import Logger from "@shared/Logger";
 import { QuestionType } from "@shared/models/Questions";
+import CoreValuesQuestionResponse from "@shared/models/CoreValuesQuestionResponse";
 
 export interface DynamicAssessmentParams {
-    assessment: CoreValuesAssessment
-    assessmentResponse: CoreValuesAssessmentResponse
+    responses: CoreValuesQuestionResponse[],
+    currentIndex: number,
 }
 
 export default class CoreValuesQuestion {
@@ -33,7 +32,7 @@ export default class CoreValuesQuestion {
 
     /**
      *
-     * @param {{assessment?: CoreValuesAssessment, assessmentResponse?: CoreValuesAssessmentResponse}} params
+     * @param {DynamicAssessmentParams} params
      * @return {CoreValuesQuestionOption[]}
      */
     options = (params: DynamicAssessmentParams): CoreValuesQuestionOption[] => {

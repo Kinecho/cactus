@@ -1,11 +1,11 @@
 import Vue from "vue";
-import GapAnalysisUpsell from "@components/gapanalysis/GapAnalysisUpsell.vue";
 import { CactusElement } from "@shared/models/CactusElement";
 import { boolean, number, select } from "@storybook/addon-knobs";
 import SubscriptionProduct, { BillingPeriod } from "@shared/models/SubscriptionProduct";
 import { action } from "@storybook/addon-actions";
 import Logger from "@shared/Logger"
 import LoadableGapAnalysisUpsell from "@components/gapanalysis/LoadableGapAnalysisUpsell.vue";
+import GapAnalysisUpsell from "@components/gapanalysis/GapAnalysisUpsell.vue";
 
 const logger = new Logger("GapAnalysisUpsell.stories");
 
@@ -24,7 +24,7 @@ export const StaticProduct = () => Vue.extend({
             />
         </div>`,
     components: {
-        GapAnalysisUpsell,
+        GapAnalysisUpsell: GapAnalysisUpsell,
     },
     props: {
         element: {

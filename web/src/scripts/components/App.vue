@@ -1,7 +1,8 @@
 <template>
     <div>
         <nav-bar v-if="showNav" v-bind="navProps" class="app-nav"/>
-        <upgrade-success-banner v-if="showUpgradeSuccessBanner" @close="hasUpgradeSuccessParam = false"/>
+        <upgrade-success-banner v-if="showUpgradeSuccessBanner"
+                @close="hasUpgradeSuccessParam = false"/>
         <transition name="component-fade" appear mode="out-in">
             <router-view v-if="allLoaded && showRoute" v-bind="props"/>
             <div v-else-if="showUnauthorizedRoute">
@@ -20,7 +21,14 @@
     import CactusMember from "@shared/models/CactusMember";
     import Logger from "@shared/Logger"
     import NavBar from "@components/NavBar.vue";
-    import { doPassMember, doPassSettings, doPassUser, isAuthRequired, MetaRouteConfig } from "@web/router-meta";
+    import {
+        doPassMember,
+        doPassSettings,
+        doPassUser,
+        doShowNavBar,
+        isAuthRequired,
+        MetaRouteConfig
+    } from "@web/router-meta";
     import { NavBarProps } from "@components/NavBarTypes";
     import { isBoolean } from "@shared/util/ObjectUtil";
     import { Route } from "vue-router";
@@ -54,10 +62,6 @@
         showUnauthorizedRoute = false;
         hasUpgradeSuccessParam = false;
 
-        // get authRequiredForRoute(): boolean {
-        //
-        // }
-
         @Watch("$route")
         onRoute(route: Route) {
             this.showUnauthorizedRoute = isAuthRequired(route) && !this.member && this.authLoaded;
@@ -65,6 +69,8 @@
             if (getQueryParam(QueryParam.UPGRADE_SUCCESS) === 'success') {
                 this.hasUpgradeSuccessParam = true;
                 removeQueryParam(QueryParam.UPGRADE_SUCCESS)
+            } else {
+                this.hasUpgradeSuccessParam = false;
             }
         }
 
@@ -120,7 +126,7 @@
         }
 
         get showNav(): boolean {
-            return !!(this.$route as MetaRouteConfig)?.meta?.navBar;
+            return doShowNavBar(this.$route);
         }
 
         get navProps(): Partial<NavBarProps | null> {
