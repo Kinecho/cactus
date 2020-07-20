@@ -141,21 +141,8 @@
             return this.product?.billingPeriod === BillingPeriod.yearly;
         }
 
-        startCheckout() {
-            this.$emit('checkout');
-
-            // setTimeout(() => {
-            //     this.checkoutLoading = false;
-            //     this.purchaseSuccess();
-            // }, 2000)
-        }
-
-        purchaseSuccess() {
-            this.$emit("next");
-        }
-
         checkout() {
-            this.$emit('checkout', this.subscriptionProduct);
+            this.$emit('checkout', this.product);
         }
     }
 </script>
