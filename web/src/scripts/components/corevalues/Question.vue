@@ -51,12 +51,6 @@
         @Prop({ type: Object as () => CoreValuesQuestionResponse, required: true })
         response!: CoreValuesQuestionResponse;
 
-        // @Prop({ type: Object as () => CoreValuesAssessment, required: true })
-        // assessment!: CoreValuesAssessment;
-        //
-        // @Prop({ type: Object as () => CoreValuesAssessmentResponse, required: true })
-        // assessmentResponse!: CoreValuesAssessmentResponse;
-
         @Prop({type: Array as () => CoreValuesQuestionOption[], default: [], required: true})
         options!: CoreValuesQuestionOption[]
 
@@ -88,7 +82,6 @@
 
             return !response.canSelectMore(question);
         }
-
     }
 </script>
 
