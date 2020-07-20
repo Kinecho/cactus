@@ -106,6 +106,7 @@
         @include r(768) {
             display: flex;
             flex-direction: column;
+            width: 100%;
         }
 
         h2 {

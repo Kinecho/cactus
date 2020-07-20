@@ -167,7 +167,7 @@
                 return "Welcome to Cactus!"
             }
             if (this.fromParam === "core-values") {
-                return "Welcome! Your results are below."
+                return "Welcome! Your Core Values:"
             }
             if (this.showEmptyState) {
                 return "Welcome!"
@@ -283,6 +283,18 @@
     }
 
     .insightsGrid {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+
+        &.highlightCV {
+            .valuesWrapper {
+                @include shadowbox;
+                border: 0;
+                order: -1;
+            }
+        }
+
         @include r(768) {
             display: grid;
             grid-template-areas: "stats stats stats stats stats stats"
@@ -290,13 +302,13 @@
                 "values values values gap gap gap";
             grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
             grid-template-rows: auto;
-
+            width: auto;
 
             &.highlightCV {
-                grid-template-areas: "values values values values values values"
-                    "stats stats stats stats stats stats"
-                    "today today today today bubbles bubbles"
-                    "gap gap gap gap gap gap";
+                grid-template-areas: 
+                "values values values values gap gap"
+                "stats stats stats stats stats stats"
+                "today today today today bubbles bubbles";
             }
 
             .statsContainer {
