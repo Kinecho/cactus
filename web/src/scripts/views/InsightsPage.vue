@@ -1,7 +1,7 @@
 <template>
     <div class="insightsDash">
         <div class="centered">
-            <h1 v-if="!loading" :class="{center: showEmptyState }">{{welcomeMessage}}</h1>
+            <h1 v-if="!loading">{{welcomeMessage}}</h1>
             <div v-if="loading">
                 <spinner :delay="1500" message="Loading..."/>
             </div>
