@@ -161,8 +161,7 @@
         get welcomeMessage(): string {
             if (this.fromParam === "onboarding") {
                 return "Welcome to Cactus!"
-            }
-            if (this.fromParam === "core-values") {
+            } else if (this.fromParam === "core-values") {
                 return "Welcome! Your Core Values:"
             }
             if (this.showEmptyState) {

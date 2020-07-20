@@ -39,7 +39,7 @@
         border-radius: 0;
         display: block;
         padding: 3.2rem 2.4rem;
-
+        margin-bottom: 0;
         .centered {
             max-width: 64rem;
             text-align: left;

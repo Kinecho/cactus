@@ -69,14 +69,6 @@
             if (getQueryParam(QueryParam.UPGRADE_SUCCESS) === 'success') {
                 this.hasUpgradeSuccessParam = true;
                 removeQueryParam(QueryParam.UPGRADE_SUCCESS)
-            } else {
-                this.hasUpgradeSuccessParam = false;
-            }
-        }
-
-        @Watch("showUpgradeBanner")
-        onUpgradeConfirmed(current: boolean, previous: boolean) {
-            if (current && !previous) {
                 logger.info("Firing upgrade confirmed event");
                 let priceDollars = StorageService.getNumber(LocalStorageKey.subscriptionPriceCents);
 
@@ -85,7 +77,24 @@
                 }
 
                 fireOptInStartTrialEvent({ value: priceDollars });
+            } else {
+                this.hasUpgradeSuccessParam = false;
             }
+        }
+
+        @Watch("showUpgradeBanner")
+        onUpgradeConfirmed(current: boolean, previous: boolean) {
+
+            // if (current && !previous) {
+            //     logger.info("Firing upgrade confirmed event");
+            //     let priceDollars = StorageService.getNumber(LocalStorageKey.subscriptionPriceCents);
+            //
+            //     if (priceDollars) {
+            //         priceDollars = priceDollars / 100;
+            //     }
+            //
+            //     fireOptInStartTrialEvent({ value: priceDollars });
+            // }
         }
 
         get showUpgradeSuccessBanner(): boolean {
@@ -93,6 +102,7 @@
         }
 
         async beforeMount() {
+            // this.onRoute(this.$route)
             this.settingsUnsubscriber = AppSettingsService.sharedInstance.observeAppSettings({
                 onData: (settings) => {
                     this.settings = settings ?? null;
