@@ -74,7 +74,6 @@
     import SvgIcon from "@components/SvgIcon.vue";
     import { Prop } from "vue-property-decorator";
     import JournalFeedDataSource, { JournalFeedDataSourceDelegate } from "@web/datasource/JournalFeedDataSource";
-    import MemberHomeEmptyState from "@components/MemberHomeEmptyState.vue";
     import CoreValueResults from "@components/insights/CoreValueResults.vue";
 
     const logger = new Logger("InsightsPage");
@@ -83,7 +82,6 @@
     @Component({
         components: {
             CoreValueResults,
-            EmptyState: MemberHomeEmptyState,
             PromptWidget,
             ReflectionStatsWidget,
             GapAnalysisWidget,
