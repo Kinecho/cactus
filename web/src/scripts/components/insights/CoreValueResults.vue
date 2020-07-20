@@ -24,8 +24,6 @@
     import { DropdownMenuLink } from "@components/DropdownMenuTypes";
     import { PageRoute } from "@shared/PageRoutes";
     import { CoreValuesBlob, getCoreValuesBlob } from "@shared/util/CoreValuesUtil";
-    import { getQueryParam } from "@web/util";
-    import { QueryParam } from "@shared/util/queryParams";
     import Logger from "@shared/Logger"
     import DropdownMenu from "@components/DropdownMenu.vue";
 
@@ -60,25 +58,9 @@
             this.displayValues = (this.coreValues ?? []).map(value => CoreValuesService.shared.getMeta(value))
         }
 
-
         beforeMount() {
             this.onCoreValues(this.coreValues);
         }
-
-        // get displayValues(): CoreValueMeta[] {
-        //     return (this.coreValues ?? []).map(value => CoreValuesService.shared.getMeta(value))
-        // }
-
-        // get coreValuesBlob(): CoreValuesBlob | null {
-        //     if (!this.coreValues || this.coreValues.length === 0) {
-        //         return null;
-        //     }
-        //     // const forceIndex = getQueryParam(QueryParam.BG_INDEX)
-        //     // logger.info("Forcing index: ", forceIndex);
-        //     const blob = getCoreValuesBlob(this.coreValues);
-        //     // logger.info("Blob info:", blob);
-        //     return blob ?? null;
-        // }
 
         get coreValuesDropdownLinks(): DropdownMenuLink[] {
             return [{
