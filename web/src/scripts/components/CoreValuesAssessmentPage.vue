@@ -19,12 +19,11 @@
             />
             <div v-else-if="upsell" class="assessment-container">
                 <div v-if="checkoutError" class="error alert">{{checkoutError}}</div>
-                <!--Need some way to cancel/skip/close-->
-                <!--                <button aria-label="Close" @click="close" title="Close" class="close tertiary icon">-->
-                <!--                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">-->
-                <!--                        <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>-->
-                <!--                    </svg>-->
-                <!--                </button>-->
+                <button aria-label="Close" @click="close" title="Close" class="close tertiary icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
+                        <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
+                    </svg>
+                </button>
                 <quiz-results-upsell
                         :billing-period="billingPeriod"
                         :checkout-loading="checkoutLoading"
@@ -90,14 +89,9 @@
         error: string | null = null;
         assessment!: CoreValuesAssessment;
         assessmentResponse: CoreValuesAssessmentResponse | null = null;
-
-        // showResults = false;
         checkoutLoading = false;
         checkoutError: string | null = null;
-
         questions: CoreValuesQuestion[] = []
-
-        // coreValues: CoreValue[] = []; //used for showing results
 
         async beforeMount() {
             this.assessment = CoreValuesAssessment.default();

@@ -12,10 +12,6 @@
     import { QuestionType } from "@shared/models/Questions";
     import { SvgIconName } from "@shared/types/IconTypes";
     import SvgIcon from "@components/SvgIcon.vue";
-    import Logger from "@shared/Logger"
-
-    const logger = new Logger("CheckBox");
-
 
     export default Vue.extend({
         components: { SvgIcon },
@@ -94,7 +90,6 @@
                 }
             },
             shouldBeChecked() {
-                logger.info("checkbox Checking should be checked")
                 if (Array.isArray(this.modelValue)) {
                     return this.modelValue.includes(this.value)
                 }
