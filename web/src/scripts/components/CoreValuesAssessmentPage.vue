@@ -238,7 +238,10 @@
                 this.checkoutLoading = true;
                 logger.info("Starting checkout for product entry ID = ", subscriptionProduct?.entryId)
 
-                let checkoutSuccessUrl = appendQueryParams(PageRoute.MEMBER_HOME, { [QueryParam.FROM]: "core-values" });
+                let checkoutSuccessUrl = appendQueryParams(PageRoute.MEMBER_HOME, {
+                    [QueryParam.FROM]: "core-values",
+                    [QueryParam.UPGRADE_SUCCESS]: "success"
+                });
                 let checkoutCancelUrl = window.location.href;
 
                 const checkoutResult = await startCheckout({
