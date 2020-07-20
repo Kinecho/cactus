@@ -292,7 +292,7 @@
                 },
                 {
                     "source": "**",
-                    "destination": "/single_page_index.html"
+                    "destination": "/main.html"
                 }
             ]
         }
