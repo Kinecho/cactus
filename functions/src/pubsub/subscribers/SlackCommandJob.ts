@@ -394,7 +394,6 @@ async function getTodayStatFields(todayDate: Date): Promise<SlackAttachmentField
 
     sortedResponseStats.unshift(`\`TOTAL\` - ${ allResponses.length } from ${ countMembersReflected } members`);
 
-
     const offersMap: Record<string, {redeemed: number, applied: number}> = {};
     offersApplied.forEach(a => {
         const name = a.currentOffer?.displayName;
