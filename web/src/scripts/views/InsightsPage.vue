@@ -14,7 +14,7 @@
                         <h2>Word Bubbles</h2>
                     </div>
                     <div class="wordCloud">
-                        <WordClou d class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
+                        <WordCloud class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
                     </div>
                 </section>
                 <div class="valuesWrapper">
