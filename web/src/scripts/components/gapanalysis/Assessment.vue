@@ -397,11 +397,17 @@
                 logger.info("Starting checkout for product entry ID = ", subscriptionProduct?.entryId)
                 let defaultSuccessPath = `${ PageRoute.MEMBER_HOME }?${ QueryParam.UPGRADE_SUCCESS }=success`
                 if (this.result?.id) {
-                    defaultSuccessPath = `${ PageRoute.GAP_ANALYSIS }/${this.result.id}/${Screen.results}?${ QueryParam.UPGRADE_SUCCESS }=success`
+                    defaultSuccessPath = `${ PageRoute.GAP_ANALYSIS }/${ this.result.id }/${ Screen.results }`
                 }
 
                 let checkoutSuccessUrl = this.checkoutSuccessPath ?? defaultSuccessPath;
                 let checkoutCancelUrl = this.checkoutCancelPath ?? window.location.href;
+
+
+                checkoutSuccessUrl = appendQueryParams(checkoutSuccessUrl, {
+                    [QueryParam.UPGRADE_SUCCESS]: "success",
+                    [QueryParam.FROM]: "gap",
+                })
 
                 if (this.selectedElement) {
                     checkoutCancelUrl = appendQueryParams(checkoutCancelUrl, { [QueryParam.SELECTED_ELEMENT]: this.selectedElement });

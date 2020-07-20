@@ -60,7 +60,7 @@ export const routes: MetaRouteConfig[] = [
                 "@web/views/marketing/GapOnboarding.vue"
                 )),
                 meta: {
-                    title: "Cactus | Boost your mental fitness",
+                    title: "Cactus | Mindfulness without meditation",
                     description: "Research-backed prompts to increase self-awareness and resilience",
                     footer: { lifted: true },
                 },
@@ -72,7 +72,7 @@ export const routes: MetaRouteConfig[] = [
                 "@web/views/marketing/CoreValuesOnboarding.vue"
                 )),
                 meta: {
-                    title: "Cactus | Boost your mental fitness",
+                    title: "Cactus | Mindfulness without meditation",
                     description: "Research-backed prompts to increase self-awareness and resilience",
                     footer: { lifted: true },
                 },
@@ -84,7 +84,7 @@ export const routes: MetaRouteConfig[] = [
                 "@web/views/marketing/MagicMomentOnboarding.vue"
                 )),
                 meta: {
-                    title: "Cactus | Boost your mental fitness",
+                    title: "Cactus | Mindfulness without meditation",
                     description: "Research-backed prompts to increase self-awareness and resilience",
                     footer: { lifted: true },
                 },
@@ -101,7 +101,7 @@ export const routes: MetaRouteConfig[] = [
         )),
         path: "/",
         meta: {
-            title: "Cactus | Boost your mental fitness",
+            title: "Cactus | Mindfulness without meditation",
             description: "Research-backed prompts to increase self-awareness and resilience",
             metaTags: [],
             navBar: {
