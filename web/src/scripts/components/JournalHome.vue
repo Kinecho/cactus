@@ -61,7 +61,6 @@
     import Component from "vue-class-component";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
     import JournalHomeEmptyState from "@components/JournalHomeEmptyState.vue";
-    import { buildPromptContentURL } from "../../../../shared-admin/src/util/StringUtil";
 
     const logger = new Logger("JournalHome.vue");
 
