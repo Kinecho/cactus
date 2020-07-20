@@ -1,6 +1,6 @@
 <template>
     <div>
-        <hero title="Gap Onboarding Page" sub-text="Research-backed prompts to increase self-awareness and resilience">
+        <hero title="Mindfulness without meditation" sub-text="Research-backed prompts to increase self-awareness and resilience">
             <router-link :to="mainCtaPath" tag="button" class="mainCta primary">Try It Free</router-link>
         </hero>
         <why-cactus/>
