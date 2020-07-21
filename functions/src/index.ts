@@ -16,7 +16,6 @@ import {
 import * as SlackCommandJob from "@api/pubsub/subscribers/SlackCommandJob";
 import * as MemberStatsJob from "@api/pubsub/subscribers/MemberStatsJob";
 import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
-import * as SentPromptTriggers from "@api/triggers/SentPromptTriggers";
 import { onDelete } from "@api/triggers/UserTriggers";
 import { PubSubTopic } from "@shared/types/PubSubTypes";
 import slackEndpoints from "@api/endpoints/slackEndpoints";
@@ -102,7 +101,6 @@ export const cloudFunctions = {
     //firestore triggers
     db1: {
         reflectionResponseCreatedTrigger: onReflectionResponseCreated,
-        sentPromptPushNotificationTrigger: SentPromptTriggers.sentPromptPushNotificationTrigger,
         updateReflectionStatsTrigger: updateReflectionStatsTrigger,
         updateMemberProfileTrigger: updateMemberProfileTrigger,
         updateSentPromptOnReflectionWrite: updateSentPromptOnReflectionWrite,

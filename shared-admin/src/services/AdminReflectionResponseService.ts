@@ -116,6 +116,12 @@ export default class AdminReflectionResponseService {
         return results.results
     }
 
+    /**
+     * Set last journal date in mailchimp
+     * @param {string} email
+     * @param {Date} date
+     * @return {Promise<ApiResponse>}
+     */
     static async setLastJournalDate(email?: string, date?: Date): Promise<ApiResponse> {
         const mailchimpService = MailchimpService.getSharedInstance();
 
@@ -139,6 +145,11 @@ export default class AdminReflectionResponseService {
 
     }
 
+    /**
+     * Update mailchimp member reminder settings
+     * @param {string} email
+     * @return {Promise<ResetUserResponse>}
+     */
     static async resetUserReminder(email?: string): Promise<ResetUserResponse> {
         try {
             const mailchimpService = MailchimpService.getSharedInstance();

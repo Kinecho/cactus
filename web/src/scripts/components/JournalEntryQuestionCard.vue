@@ -35,7 +35,7 @@
 <script lang="ts">
     import Vue from "vue";
     import ReflectionPrompt from '@shared/models/ReflectionPrompt'
-    import ReflectionResponse, {ResponseMedium} from "@shared/models/ReflectionResponse"
+    import ReflectionResponse from "@shared/models/ReflectionResponse"
     import {getResponseText} from "@shared/util/StringUtil"
     import {formatDate} from "@shared/util/DateUtil"
     import SentPrompt from "@shared/models/SentPrompt"
@@ -44,6 +44,7 @@
     import JournalEntry from '@web/datasource/models/JournalEntry'
     import CopyService from "@shared/copy/CopyService";
     import CactusMember from "@shared/models/CactusMember";
+    import { ResponseMedium } from "@shared/util/ReflectionResponseUtil";
 
     const copy = CopyService.getSharedInstance().copy;
 

@@ -79,11 +79,11 @@
     import DropdownMenu from "@components/DropdownMenu.vue";
     import CopyService from "@shared/copy/CopyService";
     import EditReflection from "@components/ReflectionResponseTextEdit.vue"
-    import { ResponseMedium } from "@shared/models/ReflectionResponse"
     import { DropdownMenuLink } from "@components/DropdownMenuTypes";
     import Modal from "@components/Modal.vue";
     import ShareNoteCard from "@components/promptcontent/ShareNoteCard.vue";
     import PromptContentCardViewModel from "@components/promptcontent/PromptContentCardViewModel";
+    import { ResponseMedium } from "@shared/util/ReflectionResponseUtil";
 
     const copy = CopyService.getSharedInstance().copy;
 

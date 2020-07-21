@@ -25,7 +25,7 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import ReflectionResponse, { ResponseMedium } from "@shared/models/ReflectionResponse"
+    import ReflectionResponse from "@shared/models/ReflectionResponse"
     import SentPromptService from "@web/services/SentPromptService"
     import ReflectionResponseService from "@web/services/ReflectionResponseService"
     import ReflectionPrompt from "@shared/models/ReflectionPrompt"
@@ -34,6 +34,7 @@
     import Logger from "@shared/Logger";
     import PromptContent from "@shared/models/PromptContent";
     import CactusMember from "@shared/models/CactusMember";
+    import { ResponseMedium } from "@shared/util/ReflectionResponseUtil";
 
     const logger = new Logger("ReflectionResponseTextEdit.vue");
     export default Vue.extend({

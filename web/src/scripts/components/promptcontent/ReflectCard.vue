@@ -41,13 +41,14 @@
     import ElementAnimation from "@components/elements/animations/ElementAnimation.vue";
     import MarkdownText from "@components/MarkdownText.vue";
     import ResizableTextarea from "@components/ResizableTextarea.vue";
-    import ReflectionResponse, { ResponseMedium } from "@shared/models/ReflectionResponse";
+    import ReflectionResponse from "@shared/models/ReflectionResponse";
     import ReflectionResponseService from "@web/services/ReflectionResponseService";
     import Logger from "@shared/Logger"
     import { getDeviceDimensions, isIosDevice } from "@web/DeviceUtil";
     import { debounce } from "debounce";
     import ShareWarning from "@components/promptcontent/ShareWarning.vue";
     import { isBlank } from "@shared/util/StringUtil";
+    import { ResponseMedium } from "@shared/util/ReflectionResponseUtil";
 
     const logger = new Logger("ReflectCard");
 

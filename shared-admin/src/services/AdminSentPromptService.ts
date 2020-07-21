@@ -10,6 +10,7 @@ import { QuerySortDirection } from "@shared/types/FirestoreConstants";
 import PromptContent from "@shared/models/PromptContent";
 import { TimestampInterface, toTimestamp } from "@shared/util/FirestoreUtil";
 import Logger from "@shared/Logger";
+import ReflectionResponse from "@shared/models/ReflectionResponse";
 
 const logger = new Logger("AdminSentPromptService");
 
@@ -68,6 +69,23 @@ export default class AdminSentPromptService {
         .where(SentPrompt.Fields.cactusMemberId, "==", cactusMemberId);
 
         return await this.getFirst(query);
+    }
+
+    /**
+     * For a given Reflection Response, find the related Sent Prompt.
+     * @param {ReflectionResponse} reflectionResponse
+     * @return {Promise<SentPrompt | null>}
+     */
+    async getSentPromptForReflectionResponse(reflectionResponse: ReflectionResponse): Promise<SentPrompt|null> {
+        const memberId = reflectionResponse.cactusMemberId;
+        const promptId = reflectionResponse.promptId;
+
+        if (!memberId || !promptId) {
+            return null;
+        }
+
+        const sentPrompt = await this.getSentPromptForCactusMemberId({memberId, promptId})
+        return sentPrompt ?? null;
     }
 
     async getAllForCactusMemberId(cactusMemberId: string): Promise<SentPrompt[]> {

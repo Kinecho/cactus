@@ -1,13 +1,7 @@
 import * as functions from "firebase-functions";
 import { Collection } from "@shared/FirestoreBaseModels";
 import { fromDocumentSnapshot } from "@shared/util/FirestoreUtil";
-import ReflectionResponse, {
-    getAppTypeFromResponseMedium,
-    getResponseMediumDisplayName,
-    getResponseMediumSlackEmoji,
-    isJournal,
-    ResponseMedium
-} from "@shared/models/ReflectionResponse";
+import ReflectionResponse from "@shared/models/ReflectionResponse";
 import AdminSlackService, {
     AttachmentColor,
     SlackAttachment,
@@ -26,6 +20,13 @@ import Logger from "@shared/Logger";
 import AdminRevenueCatService from "@admin/services/AdminRevenueCatService";
 import HoboCache from "@admin/HoboCache";
 import { isNull } from "@shared/util/ObjectUtil";
+import SlackManager from "@admin/managers/SlackManager";
+import {
+    getAppTypeFromResponseMedium,
+    getResponseMediumDisplayName,
+    getResponseMediumSlackEmoji,
+    isJournal, ResponseMedium
+} from "@shared/util/ReflectionResponseUtil";
 
 const logger = new Logger("ReflectionResponseTriggers");
 
@@ -95,7 +96,7 @@ export const updateReflectionStatsTrigger = functions.firestore
 
 export const updateSentPromptOnReflectionWrite = functions.firestore
 .document(`${ Collection.reflectionResponses }/{responseId}`)
-.onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
+.onUpdate(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
     logger.log("starting updateSentPromptOnReflectionWrite");
     try {
         const snapshot = change.after;
@@ -195,11 +196,9 @@ export const onReflectionResponseCreated = functions.firestore
     const memberId = reflectionResponse.cactusMemberId;
     if (reflectionResponse.cactusMemberId) {
         member = await AdminCactusMemberService.getSharedInstance().getById(reflectionResponse.cactusMemberId);
-        if (member) {
+        if (member?.email) {
             memberEmail = member.email;
         }
-    } else if (reflectionResponse.mailchimpUniqueEmailId) {
-        member = await AdminCactusMemberService.getSharedInstance().getByMailchimpUniqueEmailId(reflectionResponse.mailchimpUniqueEmailId);
     }
 
     let prompt: ReflectionPrompt | undefined;
@@ -210,120 +209,32 @@ export const onReflectionResponseCreated = functions.firestore
         await slackService.sendEngineeringMessage(`\`ReflectionPromptCreatedTrigger\`: No \`ReflectionPrompt\` found in the data base for  for promptId \`${ reflectionResponse.promptId }\`. Member Email \`${ memberEmail }\``);
     }
 
-
-    const attachments: SlackAttachment[] = [];
-    let messageText = `${ getResponseMediumSlackEmoji(reflectionResponse.responseMedium) } ${ memberEmail || "A member without email" } recorded a Reflection Response via *${ getResponseMediumDisplayName(reflectionResponse.responseMedium) }*`;
-    const fields: SlackAttachmentField[] = [];
-
-    if (member && member.mailchimpListMember) {
-        logger.log(`Resetting the reminder for ${ member.mailchimpListMember.email_address }`);
-        const resetUserResponse = await AdminReflectionResponseService.resetUserReminder(member.mailchimpListMember.email_address);
-        if (!resetUserResponse.success) {
-            logger.log("reset user reminder failed", resetUserResponse);
-            attachments.push({
-                text: `Failed to reset reminder\n\`\`\`${ JSON.stringify(resetUserResponse) }`,
-                color: "danger"
-            });
-            await slackService.sendActivityNotification(`:warning: Failed to reset user reminder for ${ member.mailchimpListMember.email_address }\n\`\`\`${ JSON.stringify(resetUserResponse) }\`\`\``)
-        }
-    } else {
-        await AdminCactusMemberService.getSharedInstance().updateLastReplyByMemberId(memberId, new Date());
-        logger.log("not resetting user reminder for email " + memberEmail)
-    }
-
-    if (member && memberEmail && isJournal(reflectionResponse.responseMedium)) {
-        const setLastJournalDateResult = await AdminReflectionResponseService.setLastJournalDate(memberEmail);
-        if (setLastJournalDateResult.error) {
-            logger.error("Failed to set the last journal date", setLastJournalDateResult.error);
-        }
-    }
+    await AdminCactusMemberService.getSharedInstance().updateLastReplyByMemberId(memberId, new Date());
+    logger.log("not resetting user reminder for email " + memberEmail)
 
     const { sentPrompt, created: sentPromptCreated } = await createSentPromptIfNeeded({
         member,
         prompt,
         reflectionResponse
     });
-    if (sentPrompt && sentPromptCreated) {
-        logger.log("Created sent prompt", sentPrompt.toJSON());
-        fields.push({
-            title: "SentPrompt created",
-            value: `${ sentPrompt.id }`
-        })
-    }
 
-    if (member?.subscription?.tier) {
-        const isTrialing = member?.isOptInTrialing || member?.isOptOutTrialing;
-        const trialDaysLeft = member?.daysLeftInTrial;
-        let daysLeftText = '';
-
-        if (isTrialing && trialDaysLeft > 0) {
-            daysLeftText = ' (' + trialDaysLeft + ' days left)';
-        } else if (isTrialing && trialDaysLeft === 0) {
-            daysLeftText = ' (Ends Today)';
-        }
-
-        fields.push({
-            title: "Subscription",
-            value: `${ member.tierDisplayName }${ daysLeftText }`
-        })
-    }
-
-    if (member?.stats?.reflections?.totalCount) {
-        let reflectionText = 'reflection';
-
-        if (member.stats.reflections.totalCount > 1) {
-            reflectionText = reflectionText + 's';
-        }
-
-        let streakText = ', ';
-        if (member.stats.reflections.currentStreakDays > 1) {
-            streakText = streakText + member.stats.reflections.currentStreakDays + ' day streak'
-        } else if (member.stats.reflections.currentStreakWeeks > 1) {
-            streakText = streakText + member.stats.reflections.currentStreakWeeks + ' week streak'
-        } else if (member.stats.reflections.currentStreakMonths > 1) {
-            streakText = streakText + member.stats.reflections.currentStreakMonths + ' month streak'
-        } else {
-            streakText = streakText + '1 day streak';
-        }
-
-        fields.push({
-            title: "Engagement",
-            value: `${ member.stats.reflections.totalCount } ${ reflectionText }${ streakText }`
-        })
-    }
-
-    if (prompt && prompt.question) {
-        let contentLink = prompt.question;
-
-        const link = buildPromptURL(prompt);
-
-        if (prompt.contentPath) {
-            contentLink = `<${ link }|${ prompt.question }>`
-        }
-
-        fields.push(
-        {
-            title: "Prompt Question",
-            value: `${ contentLink }`,
-            short: false,
-        }
-        )
-    } else {
-        messageText += "\nNo prompt content link/question could be found."
-    }
-
-    attachments.unshift({
-        fields,
-        color: AttachmentColor.info
-    });
-    const slackMessage: SlackMessage = { attachments: attachments, text: messageText };
-    await slackService.sendActivityNotification(slackMessage);
+    await SlackManager.shared.notifyMemberActivity({ member, reflectionResponse, sentPromptCreated, sentPrompt   })
 });
 
-
-async function createSentPromptIfNeeded(options: { member?: CactusMember, prompt?: ReflectionPrompt, reflectionResponse?: ReflectionResponse }): Promise<{ created: boolean, sentPrompt?: SentPrompt }> {
+/**
+ * For the given combination of Member + Prompt, get existing sent prompt, if it exists.
+ * If no SentPrompt exists, create it, and save it.
+ *
+ * @param {{member?: CactusMember, prompt?: ReflectionPrompt, reflectionResponse?: ReflectionResponse}} options
+ * @return {Promise<{created: boolean, sentPrompt?: SentPrompt}>}
+ */
+async function createSentPromptIfNeeded(options: {
+    member?: CactusMember,
+    prompt?: ReflectionPrompt,
+    reflectionResponse?: ReflectionResponse
+}): Promise<{ created: boolean, sentPrompt?: SentPrompt }> {
     const { member, prompt, reflectionResponse } = options;
-    let sentPrompt = await getSentPrompt({ member, prompt, reflectionResponse });
+    let sentPrompt = await AdminSentPromptService.getSharedInstance().getSentPromptForReflectionResponse(reflectionResponse)
     if (sentPrompt) {
         return { created: false, sentPrompt };
     }
