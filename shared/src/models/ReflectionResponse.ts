@@ -4,6 +4,8 @@ import { CoreValue } from "@shared/models/CoreValueTypes";
 import { ToneResult } from "@shared/api/ToneAnalyzerTypes";
 import { InsightWordsResult, SentimentResult } from "@shared/api/InsightLanguageTypes";
 import { ResponseMedium } from "@shared/util/ReflectionResponseUtil";
+import { PromptType } from "@shared/models/ReflectionPrompt";
+import { isNull } from "@shared/util/ObjectUtil";
 
 export enum ResponseMediumType {
     PROMPT = "PROMPT",
@@ -81,6 +83,12 @@ export default class ReflectionResponse extends BaseModel {
 
     mightNeedInsightsUpdate?: boolean = false;
     insightsUpdatedAt?: Date;
+
+    promptType?: PromptType|null;
+
+    get hasAllInsights(): boolean {
+        return !isNull(this.sentiment) && !isNull(this.toneAnalysis) && !isNull(this.insights?.insightWords)
+    }
 
     /**
      * Only Add a date log if the new date is not within 10 minutes of an existing date

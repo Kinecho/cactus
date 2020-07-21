@@ -5,6 +5,8 @@ import { Campaign } from "@shared/mailchimp/models/MailchimpTypes";
 import { getDateFromISOString } from "@shared/util/DateUtil";
 import Logger from "@shared/Logger";
 import { QuerySortDirection } from "@shared/types/FirestoreConstants";
+import ReflectionResponse from "@shared/models/ReflectionResponse";
+import CactusMember from "@shared/models/CactusMember";
 
 const logger = new Logger("AdminReflectionPromptService");
 let firestoreService: AdminFirestoreService;
@@ -126,5 +128,17 @@ export default class AdminReflectionPromptService {
 
     async get(id: string): Promise<ReflectionPrompt | undefined> {
         return firestoreService.getById(id, ReflectionPrompt);
+    }
+
+    async updateSharingForReflection(reflection: ReflectionResponse, member: CactusMember): Promise<void> {
+        const memberId = member.id;
+        const promptId = reflection.promptId
+        if (!memberId || !promptId) {
+            return;
+        }
+        const prompt = await AdminReflectionPromptService.getSharedInstance().get(promptId);
+        if (prompt && prompt.memberId === memberId) {
+            await this.setShared(promptId, reflection.shared);
+        }
     }
 }

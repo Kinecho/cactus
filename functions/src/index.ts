@@ -9,9 +9,8 @@ import * as DailySentPromptJob from "@api/pubsub/subscribers/DailySentPromptJob"
 import { backupFirestore, exportFirestoreToBigQuery } from "@api/endpoints/DataExportJob";
 import * as UnsubscriberReportSyncJob from "@api/pubsub/subscribers/UnsubscriberReportSyncJob";
 import {
-    onReflectionResponseCreated,
-    updateReflectionStatsTrigger,
-    updateSentPromptOnReflectionWrite,
+    onWriteReflectionResponse,
+
 } from "@api/triggers/ReflectionResponseTriggers";
 import * as SlackCommandJob from "@api/pubsub/subscribers/SlackCommandJob";
 import * as MemberStatsJob from "@api/pubsub/subscribers/MemberStatsJob";
@@ -100,10 +99,8 @@ export const cloudFunctions = {
 
     //firestore triggers
     db1: {
-        reflectionResponseCreatedTrigger: onReflectionResponseCreated,
-        updateReflectionStatsTrigger: updateReflectionStatsTrigger,
+        reflectionResponseWrite: onWriteReflectionResponse,
         updateMemberProfileTrigger: updateMemberProfileTrigger,
-        updateSentPromptOnReflectionWrite: updateSentPromptOnReflectionWrite,
     },
     db2: {
         updatePromptSendTimeTrigger: updatePromptSendTimeTrigger,

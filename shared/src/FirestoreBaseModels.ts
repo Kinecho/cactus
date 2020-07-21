@@ -66,7 +66,6 @@ export abstract class BaseModel implements FirestoreIdentifiable {
             throw new Error("Unable to prepare for firestore");
         }
         let data = convertDateToTimestamp(prepared);
-        logger.debug("data after converting to dates", data);
 
         if (removeKeys && data) {
             removeKeys.forEach(key => {

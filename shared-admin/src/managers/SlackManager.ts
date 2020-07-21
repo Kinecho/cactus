@@ -5,17 +5,20 @@ import AdminSlackService, {
     SlackAttachmentField,
     SlackMessage
 } from "@admin/services/AdminSlackService";
-import { buildPromptURL } from "@admin/util/StringUtil";
 import { getResponseMediumDisplayName, getResponseMediumSlackEmoji } from "@shared/util/ReflectionResponseUtil";
+import Logger from "@shared/Logger"
+
+const logger = new Logger("SlackManager");
+
 
 export default class SlackManager {
     static shared = new SlackManager()
 
     async notifyMemberActivity(params: ReflectionActivityParams): Promise<void> {
-        const {member, reflectionResponse, sentPrompt, sentPromptCreated  } = params;
+        const { member, reflectionResponse, sentPrompt, sentPromptCreated } = params;
 
         const attachments: SlackAttachment[] = [];
-        let messageText = `${ getResponseMediumSlackEmoji(reflectionResponse.responseMedium) } ${ memberEmail || "A member without email" } recorded a Reflection Response via *${ getResponseMediumDisplayName(reflectionResponse.responseMedium) }*`;
+        let messageText = `${ getResponseMediumSlackEmoji(reflectionResponse?.responseMedium) } ${ member?.email ?? "A member without email" } recorded a Reflection Response via *${ getResponseMediumDisplayName(reflectionResponse?.responseMedium) }*`;
         const fields: SlackAttachmentField[] = [];
 
         if (sentPrompt && sentPromptCreated) {
@@ -67,22 +70,12 @@ export default class SlackManager {
             })
         }
 
-        if (prompt && prompt.question) {
-            let contentLink = prompt.question;
-
-            const link = buildPromptURL(prompt);
-
-            if (prompt.contentPath) {
-                contentLink = `<${ link }|${ prompt.question }>`
-            }
-
-            fields.push(
-            {
+        if (reflectionResponse?.promptQuestion) {
+            fields.push({
                 title: "Prompt Question",
-                value: `${ contentLink }`,
+                value: `${ reflectionResponse.promptQuestion }`,
                 short: false,
-            }
-            )
+            })
         } else {
             messageText += "\nNo prompt content link/question could be found."
         }

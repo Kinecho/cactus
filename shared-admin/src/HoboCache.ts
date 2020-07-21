@@ -41,7 +41,7 @@ export default class HoboCache {
         return this.promptContentByEntryId[entryId]
     }
 
-    async getMemberById(id?: string): Promise<{ member?: CactusMember | null, cached: boolean }> {
+    async getMemberById(id?: string | null): Promise<{ member?: CactusMember | null, cached: boolean }> {
         if (!id) {
             return { member: undefined, cached: false };
         }
@@ -86,7 +86,7 @@ export default class HoboCache {
         HoboCache.initialize(this.maxAge)
     }
 
-    static purge(){
+    static purge() {
         logger.info("Purging the hobo cache")
         HoboCache.initialize(HoboCache.shared.maxAge);
     }

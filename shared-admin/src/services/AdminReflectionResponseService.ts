@@ -375,6 +375,15 @@ export default class AdminReflectionResponseService {
         return totalDeleted
     }
 
+    async setMightNeedInsights(responseId: string, mightNeedInsights: boolean): Promise<void> {
+        try {
+            const doc = this.getCollectionRef().doc(responseId);
+            await doc.update({ [ReflectionResponse.Field.mightNeedInsightsUpdate]: mightNeedInsights })
+        } catch (error) {
+            logger.error("Failed to update response might need insights")
+        }
+    }
+
     async getAllBatch(options: {
         batchSize?: number,
         onData: (sentPrompts: ReflectionResponse[], batchNumber: number) => Promise<void>
