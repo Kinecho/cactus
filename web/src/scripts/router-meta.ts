@@ -88,7 +88,16 @@ interface PageMetaInfo {
 }
 
 
-function buildRouteMeta(routeMeta?: RoutePageMeta | null, routeTitle?: string): PageMetaInfo {
+function buildMetaForRoute(route: Route):PageMetaInfo {
+    let meta: RoutePageMeta = {};
+    route.matched.forEach(r => {
+        meta = {...meta, ...r.meta}
+    })
+    return buildPageMeta(meta);
+}
+
+
+function buildPageMeta(routeMeta?: RoutePageMeta | null, routeTitle?: string): PageMetaInfo {
     const title = routeMeta?.title ?? routeTitle ?? "Cactus"
 
     const tags = baseMetaTags({ ...routeMeta, title: title });
@@ -110,15 +119,15 @@ export function updateRouteMeta(to: Route, from?: Route): PageMetaInfo | null {
     // If a route with a title was found, set the document (page) title to that value.
     const title = nearestWithTitle?.meta?.title ?? to.name;
 
-    const routeConfig = to as MetaRouteConfig
-    let routeMeta = routeConfig.meta;
+    let routeMeta = buildMetaForRoute(to)
 
     if (to.meta?.usePrevious === true && from) {
         logger.info("Using previous meta")
-        const previousWithMeta = from.matched.slice().reverse().find(r => r.meta && !r.meta.usePrevious);
-        routeMeta = previousWithMeta?.meta ?? to.meta;
+        // const previousWithMeta = from.matched.slice().reverse().find(r => r.meta && !r.meta.usePrevious);
+        routeMeta = buildMetaForRoute(from) ?? routeMeta;
     }
 
+    logger.debug("Set page meta to", routeMeta)
     return setPageMeta(routeMeta, title);
 }
 
@@ -156,7 +165,7 @@ export function doShowFooter(route: Route): boolean {
 
 export function setPageMeta(routeMeta?: RoutePageMeta | null, title?: string): PageMetaInfo | null {
     // Turn the meta tag definitions into actual elements in the head.
-    const meta = buildRouteMeta(routeMeta, title);
+    const meta = buildPageMeta(routeMeta, title);
     if (title) document.title = title;
 
     // Remove any stale meta tags from the document using the key attribute we set below.

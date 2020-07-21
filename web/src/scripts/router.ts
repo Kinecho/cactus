@@ -27,6 +27,7 @@ const authReady = CactusMemberService.sharedInstance.ready
 router.beforeEach((to, from, next) => {
     try {
         updateRouteMeta(to, from);
+        window.prerenderReady = true;
     } catch (error) {
         logger.error("Failed to update meta", error);
     } finally {

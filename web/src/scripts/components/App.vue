@@ -27,7 +27,7 @@
         doPassUser,
         doShowNavBar,
         isAuthRequired,
-        MetaRouteConfig
+        MetaRouteConfig,
     } from "@web/router-meta";
     import { NavBarProps } from "@components/NavBarTypes";
     import { isBoolean } from "@shared/util/ObjectUtil";
@@ -80,6 +80,7 @@
             } else {
                 this.hasUpgradeSuccessParam = false;
             }
+            // updateRouteMeta(route)
         }
 
         @Watch("showUpgradeBanner")
