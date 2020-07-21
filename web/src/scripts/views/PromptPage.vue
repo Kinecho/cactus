@@ -36,6 +36,8 @@
     import { QueryParam } from "@shared/util/queryParams";
     import { removeQueryParam } from "@web/util";
     import PromptContentCardViewModel from "@components/promptcontent/PromptContentCardViewModel";
+    import { RoutePageMeta, setPageMeta } from "@web/router-meta";
+    import { getCloudinaryUrlFromStorageUrl } from "@shared/util/ImageUtil";
 
     const logger = new Logger("PromptPage");
 
@@ -171,7 +173,6 @@
             } else {
                 await pushRoute(`${ basePath }`);
             }
-
         }
 
         setupPromptContentObserver() {
@@ -190,6 +191,7 @@
                         return
                     }
                     this.promptContent = promptContent ?? null;
+                    this.updateDocumentMeta()
                 }
             }) ?? null;
         }
@@ -228,6 +230,36 @@
                     this.promptHasLoaded = true;
                 }
             })
+        }
+
+        updateDocumentMeta() {
+            logger.info("Prompt content updating meta");
+            let title = this.promptContent?.subjectLine ?? this.promptContent?.getPreviewText() ?? 'Cactus Mindful Moment';
+
+            const description = "Reflect on this mindful moment from Cactus.";
+            let pageMeta: RoutePageMeta = {
+                description,
+                title,
+            }
+
+            const imageUrl = this.promptContent?.getOpenGraphImageUrl();
+            let pngUrl: string | null = null;
+            if (imageUrl) {
+                pngUrl = getCloudinaryUrlFromStorageUrl({
+                    storageUrl: imageUrl,
+                    width: 1200,
+                    transforms: ["w_1200", "h_630", "f_png", "c_lpad"]
+                });
+                pageMeta.image = {
+                    url: pngUrl,
+                    height: 630,
+                    width: 1200,
+                    type: "image/png",
+                }
+            }
+            logger.info("Prompt Content Meta Image is", pageMeta.image);
+            setPageMeta(pageMeta, title)
+            window.prerenderReady = true;
         }
     }
 </script>

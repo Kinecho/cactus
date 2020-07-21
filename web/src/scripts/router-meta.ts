@@ -21,6 +21,7 @@ export type MetaTag = MetaTagName | MetaTagProperty
 
 export interface RoutePageMeta {
     title?: string,
+    asyncMeta?: boolean,
     description?: string,
     image?: MetaImage,
     metaTags?: MetaTag[],

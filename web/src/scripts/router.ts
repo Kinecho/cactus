@@ -2,7 +2,7 @@ import VueRouter from "vue-router";
 import { PageRoute } from "@shared/PageRoutes";
 import { logRouteChanged } from "@web/analytics";
 import Logger from "@shared/Logger";
-import { updateRouteMeta } from "@web/router-meta";
+import { RoutePageMeta, updateRouteMeta } from "@web/router-meta";
 import { isBlank, isExternalUrl } from "@shared/util/StringUtil";
 import CactusMemberService from "@web/services/CactusMemberService";
 import { QueryParam } from "@shared/util/queryParams";
@@ -27,7 +27,9 @@ const authReady = CactusMemberService.sharedInstance.ready
 router.beforeEach((to, from, next) => {
     try {
         updateRouteMeta(to, from);
-        window.prerenderReady = true;
+        if (!(to.meta as RoutePageMeta).asyncMeta) {
+            window.prerenderReady = true;
+        }
     } catch (error) {
         logger.error("Failed to update meta", error);
     } finally {

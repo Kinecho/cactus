@@ -204,7 +204,8 @@ export const routes: MetaRouteConfig[] = [
         "@web/views/LegacyPromptContentPage.vue")),
         path: `${ PageRoute.PROMPTS_ROOT }-legacy/:entryId`,
         meta: {
-            title: "Reflection Prompt",
+            // title: "Reflection Prompt",
+            asyncMeta: true,
             description: "Take a moment for mindful reflection",
         }
     },
@@ -223,6 +224,7 @@ export const routes: MetaRouteConfig[] = [
             }
         },
         meta: {
+            asyncMeta: true,
             title: "Reflection Prompt",
             description: "Take a moment for mindful reflection",
             passMember: true,
