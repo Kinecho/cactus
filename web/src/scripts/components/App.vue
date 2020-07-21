@@ -83,21 +83,6 @@
             // updateRouteMeta(route)
         }
 
-        @Watch("showUpgradeBanner")
-        onUpgradeConfirmed(current: boolean, previous: boolean) {
-
-            // if (current && !previous) {
-            //     logger.info("Firing upgrade confirmed event");
-            //     let priceDollars = StorageService.getNumber(LocalStorageKey.subscriptionPriceCents);
-            //
-            //     if (priceDollars) {
-            //         priceDollars = priceDollars / 100;
-            //     }
-            //
-            //     fireOptInStartTrialEvent({ value: priceDollars });
-            // }
-        }
-
         get showUpgradeSuccessBanner(): boolean {
             return this.authLoaded && !!this.member && this.hasUpgradeSuccessParam && isPremiumTier(this.member?.tier)
         }
@@ -149,7 +134,7 @@
         }
 
         get showRoute(): boolean {
-            return this.$route.meta.authRequired ? !!this.member : true
+            return isAuthRequired(this.$route) ? !!this.member : true
         }
 
         get allLoaded(): boolean {

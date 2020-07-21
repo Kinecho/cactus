@@ -225,6 +225,7 @@ export const routes: MetaRouteConfig[] = [
         },
         meta: {
             asyncMeta: true,
+            allowRobots: true,
             title: "Reflection Prompt",
             description: "Take a moment for mindful reflection",
             passMember: true,

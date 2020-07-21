@@ -41,6 +41,7 @@ declare global {
         branch: any,
         cloudsponge: any;
         CactusIosDelegate?: IosDelegate;
+        prerenderReady?: boolean;
         readonly visualViewport?: VisualViewport;
 
         webkit?: {

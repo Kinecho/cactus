@@ -4,6 +4,7 @@ import { RouteConfigSingleView } from "vue-router/types/router";
 import { NavBarProps } from "@components/NavBarTypes";
 import { StandardFooterProps } from "@components/StandardFooterTypes";
 import { isBoolean } from "@shared/util/ObjectUtil";
+import { isPreRender } from "@web/DeviceUtil";
 
 const logger = new Logger("router-meta");
 
@@ -30,6 +31,10 @@ export interface RoutePageMeta {
     passUser?: boolean,
     passSettings?: boolean,
     authRequired?: boolean,
+    /**
+     * Used in combination with authRequired, allows robots to fetch the page to get the meta information
+     */
+    allowRobots?: boolean,
     authContinueMessage?: string,
     navBar?: Partial<NavBarProps> | boolean,
     footer?: Partial<StandardFooterProps> | boolean,
@@ -89,10 +94,10 @@ interface PageMetaInfo {
 }
 
 
-function buildMetaForRoute(route: Route):PageMetaInfo {
+function buildMetaForRoute(route: Route): PageMetaInfo {
     let meta: RoutePageMeta = {};
     route.matched.forEach(r => {
-        meta = {...meta, ...r.meta}
+        meta = { ...meta, ...r.meta }
     })
     return buildPageMeta(meta);
 }
@@ -133,7 +138,12 @@ export function updateRouteMeta(to: Route, from?: Route): PageMetaInfo | null {
 }
 
 export function isAuthRequired(route: Route): boolean {
-    return route.meta.authRequired || route.matched.slice().reverse().some(r => r.meta?.authRequired === true);
+    const isRobot = isPreRender();
+    const robotsAllowed = (route.meta as RoutePageMeta).allowRobots
+    if (isRobot && robotsAllowed) {
+        return false;
+    }
+    return (route.meta as RoutePageMeta).authRequired || route.matched.slice().reverse().some(r => (r.meta as RoutePageMeta | undefined)?.authRequired === true);
 }
 
 export function doPassMember(route: Route): boolean {

@@ -7,6 +7,7 @@ import { isBlank, isExternalUrl } from "@shared/util/StringUtil";
 import CactusMemberService from "@web/services/CactusMemberService";
 import { QueryParam } from "@shared/util/queryParams";
 import { routes } from "@web/routes";
+import { isPreRender } from "@web/DeviceUtil";
 
 const logger = new Logger("router.ts");
 
@@ -40,13 +41,15 @@ router.beforeEach((to, from, next) => {
 //we now can trust the member has been loaded from auth during app start
 router.beforeEach(async (to, from, next) => {
     await authReady
+
     try {
-        const extUrl = to.fullPath.startsWith("/") ? to.fullPath.substring(1) : to.fullPath
+        const isRobot = isPreRender();
+        const extUrl = to.fullPath.startsWith("/") ? to.fullPath.substring(1) : to.fullPath;
         if (isExternalUrl(extUrl)) {
             window.location.href = extUrl;
             next();
             return;
-        } else if (to.meta.authRequired && !CactusMemberService.sharedInstance.isLoggedIn) {
+        } else if (to.meta.authRequired && !CactusMemberService.sharedInstance.isLoggedIn && (!(to.meta as RoutePageMeta).allowRobots || !isRobot)) {
             const query: Record<string, string> = {
                 [QueryParam.REDIRECT_URL]: to.fullPath
             }
