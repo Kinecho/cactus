@@ -8,7 +8,7 @@
             </svg>
             <span>{{copy.navigation.COMPOSE}}</span>
         </button>
-        <compose-modal :show="editing" @close="editing = false"/>
+        <compose-modal :show="editing" @close="editing = false" :member="member"/>
     </div>
 </template>
 
