@@ -16,8 +16,8 @@ import CactusMember from "@shared/models/CactusMember";
 const logger = new Logger("ReflectionManager");
 
 
-export default class ReflectionManager {
-    static shared = new ReflectionManager();
+export default class AdminReflectionManager {
+    static shared = new AdminReflectionManager();
 
     async handleReflectionChange(change: IChange<ReflectionResponse>): Promise<void> {
         try {
