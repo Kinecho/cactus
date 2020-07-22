@@ -2,7 +2,7 @@
     <modal :show="show" @close="close" :show-close-button="false" :dark="true" id="freeform-compose-modal">
         <template v-slot:body>
             <div class="freeform-modal">
-                <compose-freeform @cancel="close"/>
+                <compose-freeform @cancel="close" :member="member"/>
             </div>
         </template>
     </modal>
@@ -14,6 +14,7 @@
     import { Prop } from "vue-property-decorator";
     import Modal from "@components/Modal.vue";
     import ComposeFreeform from "@components/compose/ComposeFreeform.vue";
+    import CactusMember from "@shared/models/CactusMember";
 
     @Component({
         components: {
@@ -26,6 +27,9 @@
 
         @Prop({ type: Boolean, default: false })
         show!: boolean;
+
+        @Prop({type: Object as () => CactusMember, required: true})
+        member!: CactusMember;
 
         close() {
             this.$emit('close')

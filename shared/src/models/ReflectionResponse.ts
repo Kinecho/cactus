@@ -6,6 +6,7 @@ import { InsightWordsResult, SentimentResult } from "@shared/api/InsightLanguage
 import { ResponseMedium } from "@shared/util/ReflectionResponseUtil";
 import { PromptType } from "@shared/models/ReflectionPrompt";
 import { isNull } from "@shared/util/ObjectUtil";
+import CactusMember from "@shared/models/CactusMember";
 
 export enum ResponseMediumType {
     PROMPT = "PROMPT",
@@ -79,15 +80,36 @@ export default class ReflectionResponse extends BaseModel {
 
     insights?: InsightWordsResult;
     toneAnalysis?: ToneResult;
-    sentiment?: SentimentResult|null;
+    sentiment?: SentimentResult | null;
 
     mightNeedInsightsUpdate?: boolean = false;
     insightsUpdatedAt?: Date;
 
-    promptType?: PromptType|null;
+    promptType?: PromptType | null;
 
     get hasAllInsights(): boolean {
         return !isNull(this.sentiment) && !isNull(this.toneAnalysis) && !isNull(this.insights?.insightWords)
+    }
+
+    static createFreeform(params: {
+        promptId: string,
+        note: string,
+        title: string,
+        member: CactusMember,
+        duration: number,
+    }): ReflectionResponse {
+        const { note, member, promptId, title, duration } = params;
+        const response = new ReflectionResponse();
+        response.memberEmail = member.email;
+        response.cactusMemberId = member.id;
+        response.promptId = promptId;
+        response.promptType = PromptType.FREE_FORM;
+        response.content.text = note;
+        response.mightNeedInsightsUpdate = true;
+        response.promptQuestion = title;
+        response.reflectionDurationMs = duration;
+        response.addReflectionLog(new Date());
+        return response;
     }
 
     /**

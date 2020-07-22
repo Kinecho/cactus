@@ -1,12 +1,12 @@
 <template>
     <div class="compose-container">
         <section class="title">
-            <input type="text" placeholder="Enter a title"/>
+            <input type="text" placeholder="Enter a title" v-model="form.title"/>
         </section>
         <section class="note">
             <resizable-textarea :max-height-px="maxTextareaHeight">
                     <textarea placeholder="Write something..."
-                            v-model="editedNote"
+                            v-model="form.note"
                             type="text"
                             ref="noteInput"
                             :disabled="saving"
@@ -37,6 +37,8 @@
     import Component from "vue-class-component"
     import ResizableTextarea from "@components/ResizableTextarea.vue";
     import ReflectionManager from "@web/managers/ReflectionManager";
+    import CactusMember from "@shared/models/CactusMember";
+    import { Prop } from "vue-property-decorator";
 
     @Component({
         components: {
@@ -46,16 +48,31 @@
     export default class ComposeFreeform extends Vue {
         name = "ComposeFreeform";
 
-        editedNote: string = ""
+        @Prop({ type: Object as () => CactusMember, required: true })
+        member!: CactusMember
+
+        form = {
+            title: "",
+            note: ""
+        }
+
         maxTextareaHeight = 250;
         saving = false;
         error: string | null = null;
+        startTime = Date.now()
+
+        beforeMount() {
+            this.startTime = Date.now()
+        }
 
         async save() {
             this.saving = true;
+            const duration = Date.now() - this.startTime;
             const saveResult = await ReflectionManager.shared.createFreeformReflection({
-                title: "title",
-                text: this.editedNote
+                title: this.form.title,
+                note: this.form.note,
+                member: this.member,
+                duration,
             })
             this.saving = false;
             if (saveResult.success) {
