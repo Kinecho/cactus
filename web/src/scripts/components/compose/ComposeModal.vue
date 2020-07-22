@@ -47,5 +47,11 @@
         padding: 2.4rem;
         position: relative;
         width: 100%;
+
+        @include r(768) {
+            align-items: center;
+            display: flex;
+            justify-content: center;
+        }
     }
 </style>
