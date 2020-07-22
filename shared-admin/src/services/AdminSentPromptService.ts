@@ -201,7 +201,7 @@ export default class AdminSentPromptService {
             return result;
         }
 
-        const memberId = member.id as string | undefined;
+        const memberId = member.id;
         if (!memberId) {
             result.error = "No member ID could be found";
             return result;
