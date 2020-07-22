@@ -54,12 +54,12 @@ export interface UnsubscribeLapsedMemberResult {
     unsubscribed: boolean,
 }
 
-export default class PromptNotificationManager {
+export default class AdminPromptNotificationManager {
 
-    static shared: PromptNotificationManager;
+    static shared: AdminPromptNotificationManager;
 
     static initialize(config: CactusConfig) {
-        PromptNotificationManager.shared = new PromptNotificationManager(config);
+        AdminPromptNotificationManager.shared = new AdminPromptNotificationManager(config);
     }
 
     config: CactusConfig

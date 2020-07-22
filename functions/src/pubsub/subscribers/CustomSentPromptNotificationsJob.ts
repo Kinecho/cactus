@@ -8,7 +8,7 @@ import { NewPromptNotificationPushResult } from "@admin/PushNotificationTypes";
 import { convertDateToSendTimeUTC } from "@shared/util/DateUtil";
 import AdminSlackService, { ChannelName } from "@admin/services/AdminSlackService";
 import Logger from "@shared/Logger";
-import PromptNotificationManager from "@admin/managers/PromptNotificationManager";
+import AdminPromptNotificationManager from "@admin/managers/AdminPromptNotificationManager";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
 
 const logger = new Logger("CustomSentPromptNotificationsJob");
@@ -72,7 +72,7 @@ export async function onPublish(message: Message, context: functions.EventContex
 export async function runCustomNotificationJob(job: CustomNotificationJob): Promise<CustomNotificationJobResult> {
     const sendTimeUTC = job.sendTimeUTC || convertDateToSendTimeUTC(new Date());
     const jobStartTime = Date.now();
-    const { tasks: taskResults, emails } = await PromptNotificationManager.shared.createNotificationTasksForUTCSendTime(sendTimeUTC);
+    const { tasks: taskResults, emails } = await AdminPromptNotificationManager.shared.createNotificationTasksForUTCSendTime(sendTimeUTC);
 
     const result: CustomNotificationJobResult = {
         sendTimeUTC,

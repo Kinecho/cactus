@@ -21,7 +21,7 @@ import { runMemberStatsJob } from "@api/pubsub/subscribers/MemberStatsJob";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
 import ToneAnalyzerService from "@admin/services/ToneAnalyzerService";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
-import PromptNotificationManager from "@admin/managers/PromptNotificationManager";
+import AdminPromptNotificationManager from "@admin/managers/AdminPromptNotificationManager";
 import { MemberPromptNotificationTaskParams } from "@admin/tasks/PromptNotificationTypes";
 import { isBlank } from "@shared/util/StringUtil";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
@@ -148,7 +148,7 @@ app.get("/start-notif-task", async (req, resp) => {
         systemDateObject: DateTime.local().toObject(),
         promptSendTimeUTC: member?.promptSendTime ?? DEFAULT_PROMPT_SEND_TIME,
     }
-    const result = await PromptNotificationManager.shared.createDailyPromptSetupTask(payload);
+    const result = await AdminPromptNotificationManager.shared.createDailyPromptSetupTask(payload);
     resp.send({ result });
     return;
 })

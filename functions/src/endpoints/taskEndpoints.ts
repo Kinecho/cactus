@@ -5,7 +5,7 @@ import {
     SendEmailNotificationParams,
     SendPushNotificationParams
 } from "@admin/tasks/PromptNotificationTypes";
-import PromptNotificationManager from "@admin/managers/PromptNotificationManager";
+import AdminPromptNotificationManager from "@admin/managers/AdminPromptNotificationManager";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
 import HoboCache from "@admin/HoboCache";
 
@@ -21,7 +21,7 @@ app.post("/daily-prompt-email", async (req: express.Request, resp: express.Respo
     logger.info("Send Emails task called", stringifyJSON(params, 2));
 
     try {
-        const result = await PromptNotificationManager.shared.sendPromptNotificationEmail(params);
+        const result = await AdminPromptNotificationManager.shared.sendPromptNotificationEmail(params);
         const logData = { taskInfo: { taskId, retryCount, executionCount }, params, result };
         logger.info(stringifyJSON(logData, 2));
         resp.sendStatus(204);
@@ -38,7 +38,7 @@ app.post("/daily-prompt-push", async (req: express.Request, resp: express.Respon
     const executionCount = req.header("x-cloudtasks-taskexecutioncount");
     const params = req.body as SendPushNotificationParams;
     try {
-        const pushResult = await PromptNotificationManager.shared.sendPromptNotificationPush(params);
+        const pushResult = await AdminPromptNotificationManager.shared.sendPromptNotificationPush(params);
         const logData = { taskInfo: { taskId, retryCount, executionCount }, pushResult, params, };
         logger.info(stringifyJSON(logData));
         if (pushResult.retryable) {
@@ -69,7 +69,7 @@ app.post("/daily-prompt-setup", async (req: express.Request, resp: express.Respo
         });
     }
     try {
-        const result = await PromptNotificationManager.shared.createMemberDailyPromptNotifications(params);
+        const result = await AdminPromptNotificationManager.shared.createMemberDailyPromptNotifications(params);
         logger.info(stringifyJSON({
             params, result,
             taskInfo: {
