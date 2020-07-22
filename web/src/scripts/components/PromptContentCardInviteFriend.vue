@@ -48,14 +48,12 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {formatDate} from '@shared/util/DateUtil'
     import CopyService from "@shared/copy/CopyService"
-    import {getDeviceDimensions, MOBILE_BREAKPOINT_PX} from "@web/DeviceUtil"
-    import {isValidEmail} from "@shared/util/StringUtil"
-    import {Image} from '@shared/models/PromptContent'
+    import { getDeviceDimensions } from "@web/DeviceUtil"
+    import { isValidEmail } from "@shared/util/StringUtil"
     import SocialActivityCard from "@components/SocialActivityCard.vue"
-    import {sendInvite} from '@web/social';
-    import {EmailContact} from "@shared/types/EmailContactTypes";
+    import { sendInvite } from '@web/social';
+    import { EmailContact } from "@shared/types/EmailContactTypes";
 
     const copy = CopyService.getSharedInstance().copy;
 

@@ -19,7 +19,6 @@ h3 {
 
 .subtext {
     font-size: 1.6rem;
-    margin-bottom: 4rem;
     opacity: .8;
 
     &.light {
@@ -40,18 +39,6 @@ h3 {
     color: $royal;
 }
 
-.borderContainer {
-  border: 1px solid $lightest;
-  border-radius: 1.6rem;
-  margin-bottom: 4rem;
-  padding: 3.2rem;
-  position: relative;
-
-  @include r(768) {
-    margin-bottom: 4.8rem;
-  }
-}
-
 .focusElement {
   font-size: 2rem;
   font-weight: bold;
@@ -62,6 +49,20 @@ h3 {
   position: absolute;
   right: 1rem;
   top: 1.6rem;
+}
+
+.lock {
+    height: 1.6rem;
+    left: 2.4rem;
+    margin-right: 1.6rem;
+    position: absolute;
+    top: 3rem;
+    width: 1.6rem;
+
+    @include r(768) {
+        height: 2rem;
+        width: 2rem;
+    }
 }
 
 .esButton {

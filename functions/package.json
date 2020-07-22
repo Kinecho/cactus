@@ -10,21 +10,17 @@
         "deploy:stage:func": "func() { npx firebase deploy -P stage --only functions:\"$1\"; }; func",
         "deploy:prod": "firebase -- debug deploy --only functions -P prod",
         "deploy:prod:func": "func() { npx firebase deploy --debug -P prod --only functions:\"$1\"; }; func",
-        "_emulator:start": "firebase emulators:start --only functions --inspect-functions=9229",
         "lint": "tslint --project tsconfig.json",
         "lint:ci": "tslint --project tsconfig.json --format junit --out reports/tests/tslint/results.xml",
         "logs": "firebase functions:log",
         "ngrok": "ngrok http -subdomain=cactus-api 5000",
         "serve": "npm run config:get && npm run build && IS_EMULATOR=true firebase serve --only functions",
         "emulate:funcs": "npm run config:get && npm run build && IS_EMULATOR=true GOOGLE_APPLICATION_CREDENTIALS=../applicationCredentials_stage.json firebase emulators:start --only functions,pubsub --inspect-functions=9229",
-        "_emulate:funcs": "npm run config:get && npm run build && IS_EMULATOR=true firebase emulators:start --only functions --inspect-functions=9229",
         "emulate:funcs:pubsub": "npm run config:get && npm run build && IS_EMULATOR=true firebase emulators:start --only functions,pubsub --inspect-functions=9229",
         "emulate:script": "npm run config:get && npm run build && IS_EMULATOR=true firebase emulators:exec --only functions,pubsub \"../scripts/pubsubTest.sh\" --inspect-functions=9229",
-        "emulate:funcs:db": "npm run config:get && npm run build && IS_EMULATOR=true firebase emulators:start --only functions,firestore --import firestore_emulator_export",
+        "emulate:funcs:db": "npm run config:get && npm run build && IS_EMULATOR=true firebase emulators:start --only functions,firestore --import firestore_emulator_export --inspect-functions=9229",
+        "emulator:export": "firebase emulators:export firestore_emulator_export --force",
         "emulate:db": "firebase emulators:start --only firestore",
-        "shell": "npm run build && firebase functions:shell",
-        "start": "npm run shell",
-        "start:funcs": "functions start",
         "test": "FIRESTORE_EMULATOR_HOST=localhost:5005 jest",
         "test:ci": "FIRESTORE_EMULATOR_HOST=localhost:5005 TZ=America/Denver JEST_JUNIT_OUTPUT=reports/tests/jest/results.xml jest --silent --ci --coverageDirectory reports/coverage --coverage --runInBand --reporters=default --reporters=jest-junit",
         "test:watch": "jest --watch",
@@ -112,7 +108,7 @@
         "ts-jest": "^24.1.0",
         "ts-node": "^8.10.1",
         "tslint": "^5.20.1",
-        "typescript": "^3.9.2"
+        "typescript": "^3.9.6"
     },
     "private": true
 }

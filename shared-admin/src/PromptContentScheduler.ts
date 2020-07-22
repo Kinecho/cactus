@@ -145,11 +145,11 @@ export default class PromptContentScheduler {
         const fields: SlackAttachmentField[] = [
             { title: "Question", value: this.promptContent.getQuestion() || "not set" },
             { title: "Scheduled Send Date", value: dateString || "not set" },
-            { title: "Prompt Content Entry ID", value: result.promptContent.entryId! }
+            { title: "Prompt Content Entry ID", value: result.promptContent.entryId }
         ];
 
         if (result.existingPromptContent) {
-            fields.push({ title: "Existing Prompt Content Entry ID", value: result.existingPromptContent.entryId! })
+            fields.push({ title: "Existing Prompt Content Entry ID", value: result.existingPromptContent.entryId })
         }
 
         if (result.promptContent.getQuestion()) {
@@ -200,7 +200,7 @@ export default class PromptContentScheduler {
             {
                 title: "iOS Link (Custom Scheme)",
                 short: true,
-                value: `<${ this.config.ios.custom_scheme }://cactus.app${ PageRoute.PROMPTS_ROOT }/${ this.promptContent.entryId! }|Open in iOS>`,
+                value: `<${ this.config.ios.custom_scheme }://cactus.app${ PageRoute.PROMPTS_ROOT }/${ this.promptContent.entryId }|Open in iOS>`,
             },
             {
                 title: "Web Link",

@@ -11,7 +11,7 @@
     import Vue from "vue";
     import Component from "vue-class-component"
     import MarkdownText from "@components/MarkdownText.vue";
-    import { OnboardingCardViewModel } from "@components/onboarding/OnboardingCardViewModel";
+    import OnboardingCardViewModel from "@components/onboarding/OnboardingCardViewModel";
     import { Prop } from "vue-property-decorator";
     import Elements from "@components/ElementsOverview.vue";
 
@@ -44,7 +44,7 @@
             padding: 0 2.4rem;
         }
 
-        @include r(600) {
+        @include r(768) {
             align-items: center;
             flex-direction: row;
             justify-content: flex-start;
@@ -53,7 +53,7 @@
     }
 
     .textBox {
-        @include r(600) {
+        @include r(768) {
             padding-right: 6.4rem;
             width: 50%;
         }
@@ -63,7 +63,7 @@
         margin: 0 -2.4rem;
         width: calc(100% + 4.8rem);
 
-        @include r(600) {
+        @include r(768) {
             align-self: center;
             margin: 0 auto;
             max-width: 50%;

@@ -19,7 +19,7 @@
     export default Vue.extend({
         props: {
             message: String,
-            color: {type: String as () => SpinnerColor, default: "dark"},
+            color: { type: String as () => SpinnerColor, default: "dark" },
             delay: {
                 type: Number,
                 default: 0,
@@ -56,6 +56,7 @@
 <style scoped lang="scss">
     @import "common";
     @import "mixins";
+    @import "transitions";
 
     .spinner-container {
         align-items: center;
@@ -68,11 +69,12 @@
             /*background: url(/assets/images/loading.svg) no-repeat;*/
             background-size: 2rem;
             content: '';
-            display: inline-block;
+            /*display: inline-block;*/
             height: 2rem;
             transform-origin: center;
             width: 2rem;
             z-index: 1;
+            display: flex;
 
             &.light {
                 svg path {

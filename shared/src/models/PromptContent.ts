@@ -8,7 +8,7 @@ import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 import CactusMember from "@shared/models/CactusMember";
 import { CoreValue } from "@shared/models/CoreValueTypes";
 import ReflectionResponse, { DynamicResponseValues } from "@shared/models/ReflectionResponse";
-import { isString } from "@shared/util/ObjectUtil";
+import { isNonEmptyObject, isNotNull, isString } from "@shared/util/ObjectUtil";
 
 const logger = new Logger("PromptContent.ts");
 
@@ -22,6 +22,10 @@ export interface Image extends FlamelinkFile {
     storageUrl?: string,
     fileIds?: string[],
     altText?: string
+}
+
+export function isImage(input?: Image | undefined | null): input is Image {
+    return isNotNull(input) && (!isBlank(input?.url) || !isBlank(input?.storageUrl));
 }
 
 export interface Video extends FlamelinkFile {
@@ -44,7 +48,7 @@ export enum ContentAction {
     unknown = "unknown",
 }
 
-enum LinkTarget {
+export enum LinkTarget {
     blank = "_blank",
     self = "_self",
     parent = "_parent",
@@ -66,10 +70,26 @@ export interface ContentLink {
     appendMemberId?: boolean
 }
 
+export function isContentLink(link: ContentLink | any): link is ContentLink {
+    if (!isNonEmptyObject(link)) {
+        return false;
+    }
+    const l = link as ContentLink;
+    return !isBlank(l.linkLabel) && !isBlank(l.destinationHref);
+}
+
 export interface ActionButton {
     action?: ContentAction,
     label?: string,
     linkStyle?: LinkStyle,
+}
+
+export function isActionButton(button: ActionButton | any): button is ActionButton {
+    if (!isNonEmptyObject(button)) {
+        return false;
+    }
+    const l = button as ActionButton;
+    return !isBlank(l.label) && !isBlank(l.action);
 }
 
 export interface Quote {
@@ -100,7 +120,7 @@ export enum ContentType {
     elements = "elements",
     share_reflection = "share_reflection",
     invite = "invite",
-    insights = "insights",
+    reflection_analysis = "reflection_analysis",
 }
 
 export enum ContentStatus {
@@ -401,19 +421,16 @@ export default class PromptContent extends FlamelinkModel {
             content,
             dynamicValues = {}
         } = params;
-        logger.info("Building dynamic text");
         const dynamicContent = content.dynamicContent;
         const enabled = dynamicContent?.enabled === true;
         //if not enabled, return undefined
         if (!dynamicContent || !enabled) {
-            logger.info("Dynamic content was not enabled");
             return undefined;
         }
 
         //if the dynamic content does not have a template string or is blank, return undefined
         const templateTextMd = dynamicContent.templateTextMd
         if (!isString(templateTextMd) || isBlank(templateTextMd)) {
-            logger.info("template text was blank or did not exist");
             return undefined;
         }
 

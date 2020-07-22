@@ -1,7 +1,7 @@
 import * as firebaseAdmin from "firebase-admin";
 import { BaseModel, BaseModelField, Collection } from "@shared/FirestoreBaseModels";
 import { fromDocumentSnapshot, fromQuerySnapshot } from "@shared/util/FirestoreUtil";
-import { IGetOptions, IQueryOptions, QueryResult } from "@shared/types/FirestoreTypes";
+import { FirestoreErrorCode, IGetOptions, IQueryOptions, QueryResult } from "@shared/types/FirestoreTypes";
 import * as Sentry from "@sentry/node"
 import AdminSlackService from "@admin/services/AdminSlackService";
 import { QuerySortDirection } from "@shared/types/FirestoreConstants";
@@ -23,10 +23,12 @@ const logger = new Logger("AdminFirestoreService");
 
 export interface QueryOptions extends IQueryOptions<QueryCursor> {
     transaction?: Transaction,
+    silentErrorCodes?: FirestoreErrorCode[],
 }
 
 export interface GetOptions extends IGetOptions {
-    transaction?: Transaction
+    transaction?: Transaction,
+    silentErrorCodes?: FirestoreErrorCode[],
     throwOnError?: boolean,
 }
 
@@ -288,9 +290,12 @@ export default class AdminFirestoreService {
 
             messageParts.push(`\n\`\`\`${ e }\`\`\``);
             const errorMessage = messageParts.join(" ");
-            logger.error(errorMessage, e);
-            Sentry.captureException(e);
-            await AdminSlackService.getSharedInstance().sendDbAlertsMessage(errorMessage);
+            if (!(options.silentErrorCodes?.includes(e.code) ?? false)) {
+                logger.error(errorMessage, e);
+                Sentry.captureException(e);
+                await AdminSlackService.getSharedInstance().sendDbAlertsMessage(errorMessage);
+            }
+
             return { size: 0, results: [], error: e };
         }
 

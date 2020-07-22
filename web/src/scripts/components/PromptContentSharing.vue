@@ -19,7 +19,7 @@
         <div class="sharingContainer">
             <div class="sharing native-sharing" v-if="nativeShareEnabled">
                 <button class="btn wiggle  secondary" @click="shareNatively()" >
-                    <img class="icon" src="/assets/images/share.svg" alt="Share Icon"/>
+                    <img class="icon" src="/assets/icons/share.svg" alt="Share Icon"/>
                 </button>
             </div>
         </div>

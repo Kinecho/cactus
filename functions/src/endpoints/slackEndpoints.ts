@@ -86,6 +86,42 @@ app.post("/commands/stats", async (req: functions.https.Request | any, resp: fun
     return;
 });
 
+
+app.post("/commands/member", async (req: functions.https.Request | any, resp: functions.Response) => {
+    const payload: CommandPayload = req.body;
+    const payloadText = payload.text;
+    const [memberEmail, ...rest] = payloadText.split(" ").map(s => s.trim());
+    const immediate = rest.includes("immediate");
+    logger.info(`Getting stats for ${ memberEmail }`);
+
+    if (isBlank(memberEmail) || !isValidEmail(memberEmail)) {
+        const attachments: SlackAttachment[] = [];
+        attachments.push({
+            text: "Please provide a a valid email address to get stats for. The command should be run like this: `/stats name@example.com",
+            color: "warning"
+        });
+
+        await AdminSlackService.getSharedInstance().sendToResponseUrl(payload.response_url, {
+            attachments,
+            response_type: SlackResponseType.ephemeral
+        });
+        resp.sendStatus(200);
+        return;
+    }
+
+    const job: JobRequest = {
+        type: JobType.user,
+        payload: memberEmail,
+        slackResponseURL: payload.response_url,
+        channelName: payload.channel_id,
+        userId: payload.user_id,
+        userName: payload.user_name
+    };
+
+    await submitJobAndReturn({ job, args: rest, immediate, response: resp });
+    return;
+});
+
 app.post("/commands", async (req: functions.https.Request | any, resp: functions.Response) => {
     logger.log("req", JSON.stringify(req.body, null, 2));
 

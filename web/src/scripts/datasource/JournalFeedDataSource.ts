@@ -5,25 +5,29 @@ import SentPromptService from "@web/services/SentPromptService";
 import { PageResult } from "@web/services/FirestoreService";
 import JournalEntry, { JournalEntryDelegate } from "@web/datasource/models/JournalEntry";
 import Logger from "@shared/Logger";
+import TodayPromptDataSource, { TodayPromptDataSourceDelegate } from "@web/datasource/TodayPromptDataSource";
 
 const logger = new Logger("JournalFeedDataSource");
 
-interface JournalFeedDataSourceDelegate {
+export interface JournalFeedDataSourceDelegate {
     didLoad?: (hasData: boolean) => void
     updateAll?: (journalEntries: JournalEntry[]) => void
     onAdded?: (journalEntry: JournalEntry, newIndex: number) => void
     onRemoved?: (journalEntry: JournalEntry, removedIndex: number) => void
     onUpdated?: (journalEntry: JournalEntry, index: number) => void
     pageLoaded?: (hasMore: boolean) => void
+    todayEntryUpdated?: (entry?: JournalEntry|null) => void;
 }
 
-interface SetupJournalEntryResult {
+export interface SetupJournalEntryResult {
     created: boolean,
     entry?: JournalEntry,
 
 }
 
-class JournalFeedDataSource implements JournalEntryDelegate {
+class JournalFeedDataSource implements JournalEntryDelegate, TodayPromptDataSourceDelegate {
+    static current: JournalFeedDataSource | null = null;
+    running = false;
     member: CactusMember;
     pageSize: number = 10;
     delegate?: JournalFeedDataSourceDelegate;
@@ -34,24 +38,56 @@ class JournalFeedDataSource implements JournalEntryDelegate {
     pages: PageLoader<SentPrompt>[] = [];
 
     sentPrompts: SentPrompt[] = [];
-    orderedPromptIds: string[] = [];
-    journalEntriesByPromptId: { [promptId: string]: JournalEntry } = {};
 
+    journalEntriesByPromptId: { [promptId: string]: JournalEntry } = {};
+    todayDataSource: TodayPromptDataSource;
+    todayEntry: JournalEntry | null = null;
     loadingPage: boolean = false;
 
     journalEntries: JournalEntry[] = [];
 
     onlyCompleted: boolean = false;
 
-    constructor(member: CactusMember, options?: { onlyCompleted?: boolean }) {
+    protected constructor(member: CactusMember, options?: { onlyCompleted?: boolean }) {
         this.member = member;
         this.memberId = member.id!;
         this.startDate = new Date();
         const { onlyCompleted = false } = options || {};
         this.onlyCompleted = onlyCompleted;
+        this.todayDataSource = new TodayPromptDataSource({ member, delegate: this });
     }
 
-    start() {
+    static setup(member: CactusMember, options?: { onlyCompleted?: boolean, delegate?: JournalFeedDataSourceDelegate }): JournalFeedDataSource {
+        const { delegate, onlyCompleted } = options ?? {};
+        logger.info("Setting up data source", { memberId: member.id, onlyCompleted, delegate: !!delegate });
+        let source: JournalFeedDataSource;
+        const current = JournalFeedDataSource.current;
+        if (current && (current.member?.id === member.id || current.memberId === member.id) && current.onlyCompleted === onlyCompleted) {
+            logger.debug("using current data source = true")
+            source = current;
+        } else {
+            logger.debug("using current data source = false")
+            source = new JournalFeedDataSource(member, options);
+        }
+
+        if (delegate) {
+            source.delegate = delegate
+        }
+        JournalFeedDataSource.current = source;
+        return source;
+    }
+
+
+    async start() {
+        logger.debug("Starting data source. Has has delegate = ", !!this.delegate);
+        if (this.running && this.hasLoaded) {
+            logger.info("Data source is running, returning current entries");
+            this.delegate?.didLoad?.(this.journalEntries.length > 0);
+            this.delegate?.todayEntryUpdated?.(this.todayEntry);
+            return;
+        }
+        this.running = true;
+        await this.todayDataSource.start()
         const futurePage = new PageLoader<SentPrompt>();
         const firstPage = new PageLoader<SentPrompt>();
         this.loadingPage = true;
@@ -82,6 +118,7 @@ class JournalFeedDataSource implements JournalEntryDelegate {
                 this.handlePageResult(page);
                 this.hasLoaded = true;
                 this.loadingPage = false;
+                logger.info(this.delegate ? "sending results to delegate" : "No delegate present");
                 this.delegate?.didLoad?.(page.results.length > 0);
             }
         });
@@ -101,29 +138,41 @@ class JournalFeedDataSource implements JournalEntryDelegate {
     }
 
     configureData() {
-        const currentPromptIds = this.orderedPromptIds;
-        const currentSentPrompts = this.sentPrompts;
-
-        const updatedSentPrompts: SentPrompt[] = [];
-        const updatedPromptIds: string[] = [];
+        const orderedSentPrompts: SentPrompt[] = [];
         this.pages.forEach(page => {
-            updatedSentPrompts.push(...(page.result?.results || []))
+            orderedSentPrompts.push(...(page.result?.results || []))
         });
 
         const journalEntries: JournalEntry[] = [];
-        updatedSentPrompts.forEach(sentPrompt => {
-            if (sentPrompt.promptId) {
-                updatedPromptIds.push(sentPrompt.promptId);
-
-                const entry = this.journalEntriesByPromptId[sentPrompt.promptId];
-                if (entry) {
-                    journalEntries.push(entry);
-                }
+        let hasTodaySentPrompt = false;
+        orderedSentPrompts.forEach(sentPrompt => {
+            const promptId = sentPrompt.promptId;
+            if (!promptId) {
+                return;
             }
+            if (promptId === this.todayEntry?.promptId) {
+                hasTodaySentPrompt = true;
+            }
+            const entry = this.journalEntriesByPromptId[promptId];
+            if (entry) {
+                journalEntries.push(entry);
+            }
+
         });
 
-        this.sentPrompts = updatedSentPrompts;
-        this.orderedPromptIds = updatedPromptIds;
+        const todayFirstSentAt = this.todayEntry?.sentPrompt?.firstSentAt ?? this.todayEntry?.sentPrompt?.createdAt;
+        const todaySentPromptIndex = journalEntries.findIndex(entry => {
+            const sendDate = entry.sentPrompt?.firstSentAt ?? entry.sentPrompt?.createdAt
+            if (!sendDate || !todayFirstSentAt) {
+                return false;
+            }
+            return sendDate < todayFirstSentAt
+        })
+
+        if (this.todayEntry && !hasTodaySentPrompt) {
+            journalEntries.splice(Math.max(todaySentPromptIndex, 0), 0, this.todayEntry);
+        }
+
         this.journalEntries = journalEntries;
         this.delegate?.updateAll?.(this.journalEntries);
 
@@ -146,7 +195,7 @@ class JournalFeedDataSource implements JournalEntryDelegate {
             return { created: false, entry }
         }
 
-        entry = new JournalEntry(promptId, sentPrompt);
+        entry = new JournalEntry(promptId, sentPrompt, this.member);
         entry.delegate = this;
         entry.start();
         this.journalEntriesByPromptId[promptId] = entry;
@@ -202,6 +251,7 @@ class JournalFeedDataSource implements JournalEntryDelegate {
     }
 
     stop() {
+        logger.info("Stopping journal feed data source");
         this.pages.forEach(page => {
             page.stop()
         });
@@ -210,6 +260,8 @@ class JournalFeedDataSource implements JournalEntryDelegate {
             entry.stop()
         });
 
+        this.journalEntries = [];
+        this.pages = []
     }
 
     entryUpdated(entry: JournalEntry) {
@@ -222,7 +274,17 @@ class JournalFeedDataSource implements JournalEntryDelegate {
         if (!promptId) {
             return -1;
         }
-        return this.orderedPromptIds.indexOf(promptId);
+        return this.journalEntries.findIndex(e => e.promptId === promptId);
+    }
+
+    todayEntryUpdated(entry?: JournalEntry | null) {
+        logger.info("Today entry updated", entry);
+        this.todayEntry = entry ?? null;
+        if (entry?.promptId) {
+            this.journalEntriesByPromptId[entry.promptId] = entry;
+        }
+        this.configureData();
+        this.delegate?.todayEntryUpdated?.(entry);
     }
 
 }

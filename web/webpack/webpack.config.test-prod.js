@@ -2,14 +2,13 @@ const merge = require('webpack-merge')
 const path = require('path')
 const getCommonWebpackConfig = require('./webpack.config.common')
 const config = require('./config.prod')
-const SentryWebpackPlugin = require('@sentry/webpack-plugin')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const minimizersConfig = require('./minimizers.config')
 
-const simplegit = require('simple-git/promise')
+const simpleGit = require('simple-git')
 
 function getCommitHash() {
-    const git = simplegit()
+    const git = simpleGit()
     return git.revparse(['HEAD'])
 }
 

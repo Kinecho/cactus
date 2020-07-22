@@ -2,15 +2,12 @@
     <div class="insights-card">
         <spinner v-if="loading"/>
         <div class="textBox">
-            <!-- <p v-if="reflectionResponse.toneAnalysis">
-                This is the positivity rating of your note. Write more to reveal different emotions.
-            </p> -->
             <p>This is what your note reveals about your emotions.</p>
         </div>
         <div class="insightsContainer">
-            <positivity-rating :sentiment-score="reflectionResponse.sentiment.documentSentiment"/>
-            <tone-analysis :tone-result="reflectionResponse.toneAnalysis"
-                    :original-text="reflectionResponse.content.text"
+            <positivity-rating :sentiment-score="documentSentiment"/>
+            <tone-analysis :tone-result="toneAnalysis"
+                    :original-text="originalText"
                     :sentences-on-new-line="false"
                     @previous="previous"
             />
@@ -27,13 +24,13 @@
     import { ListenerUnsubscriber } from "@web/services/FirestoreService";
     import ReflectionResponseService from "@web/services/ReflectionResponseService";
     import Spinner from "@components/Spinner.vue";
-    import InsightsCard from "@components/InsightsCard.vue";
     import PositivityRating from "@components/PositivityRating.vue";
     import ToneAnalysis from "@components/ToneAnalysis.vue";
+    import { SentimentResult, SentimentScore } from "@shared/api/InsightLanguageTypes";
+    import { ToneResult } from "@shared/api/ToneAnalyzerTypes";
 
     @Component({
         components: {
-            InsightsCard,
             Spinner,
             PositivityRating,
             ToneAnalysis,
@@ -53,7 +50,7 @@
             this.$emit("previous");
         }
 
-        beforeMount() {
+        async beforeMount() {
             const promptEntryId = this.card.promptContentEntryId;
             if (!promptEntryId) {
                 //TODO: handle error state
@@ -70,6 +67,18 @@
                     this.loading = false;
                 },
             });
+        }
+
+        get documentSentiment(): SentimentScore|null {
+            return this.reflectionResponse?.sentiment?.documentSentiment ?? null;
+        }
+
+        get toneAnalysis(): ToneResult|null {
+            return this.reflectionResponse?.toneAnalysis ?? null;
+        }
+
+        get originalText(): string|null {
+            return this.reflectionResponse?.content.text ?? null;
         }
 
         beforeDestroy() {

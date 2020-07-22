@@ -8,26 +8,30 @@
         <template v-else>
             <div class="alert error" v-if="errorMessage">{{errorMessage}}</div>
             <div class="upsellContainer">
-                <h2><markdown-text v-if="markdownText" :source="markdownText"/></h2>
+                <h2>
+                    <markdown-text v-if="markdownText" :source="markdownText"/>
+                </h2>
                 <ul class="upsellInfo">
                     <li>
                         <svg-icon icon="heartOutline" class="icon"/>
-                        <span>Personalized journal app with daily questions to reflect&nbsp;on</span>
+                        <span><strong>Personalized</strong> journal app with daily questions to reflect&nbsp;on</span>
                     </li>
                     <li>
                         <svg-icon icon="pie" class="icon"/>
-                        <span>Insights dashboard, showing the things that make you&nbsp;happy</span>
+                        <span><strong>Insights</strong> dashboard, showing the things that make you&nbsp;happy</span>
                     </li>
                     <li>
                         <svg-icon icon="checkCircle" class="icon"/>
-                        <span>Personality tests to help you better know&nbsp;yourself</span>
+                        <span><strong>Personality</strong> tests to help you better know&nbsp;yourself</span>
                     </li>
                 </ul>
                 <div class="btnContainer">
                     <button class="tryIt" @click="checkout" :disabled="checkoutLoading">{{ctaText}}</button>
-                    <router-link :to="pricingHref" tag="a" class="button tertiary" target="_blank">More info & other plans</router-link>
-                    <p class="finePrint" v-if="product.trialDays && product.trialDays > 0">
-                        Cactus Plus is free for {{product.trialDays}} days, then {{pricePerMonth}} /
+                    <router-link :to="pricingHref" tag="a" class="moreInfo button tertiary" target="_blank">More info &
+                        other plans
+                    </router-link>
+                    <p class="finePrint" v-if="trialDays && trialDays > 0">
+                        Cactus Plus is free for {{trialDays}} days, then {{pricePerMonth}} /
                         {{displayPeriod}}<span v-if="isAnnualBilling"> (billed annually)</span>. No commitment. Cancel
                         anytime.
                     </p>
@@ -80,11 +84,11 @@
         @Prop({ type: Object as () => CactusMember, required: true })
         member!: CactusMember;
 
-        @Prop({ type: String, default: "Try it free" })
+        @Prop({ type: String, default: "Try It Free" })
         ctaText!: string;
 
         get upgradeSuccess(): boolean {
-            return isPremiumTier(this.member.tier) || this.checkoutInfo?.success ?? false
+            return isPremiumTier(this.member.tier) || (this.checkoutInfo?.success ?? false)
         }
 
         get checkoutLoading(): boolean {
@@ -92,7 +96,11 @@
         }
 
         get markdownText(): string | undefined {
-            return this.card.getMarkdownText();
+            // return this.card.getMarkdownText();
+            if (this.trialDays && this.trialDays > 0) {
+                return `Discover your core values when you start a free ${this.trialDays}-day trial`
+            }
+            return `Discover your core values when you upgrade to Cactus Plus`
         }
 
         get errorMessage(): string | null {
@@ -122,25 +130,19 @@
             return this.product.billingPeriod;
         }
 
+        get trialDays(): number | null {
+            if (this.member.currentOffer?.trialDays) {
+                return this.member.currentOffer.trialDays;
+            }
+            return this.product?.trialDays ?? null
+        }
+
         get isAnnualBilling(): boolean {
             return this.product?.billingPeriod === BillingPeriod.yearly;
         }
 
-        startCheckout() {
-            this.$emit('checkout');
-
-            // setTimeout(() => {
-            //     this.checkoutLoading = false;
-            //     this.purchaseSuccess();
-            // }, 2000)
-        }
-
-        purchaseSuccess() {
-            this.$emit("next");
-        }
-
         checkout() {
-            this.$emit('checkout', this.subscriptionProduct);
+            this.$emit('checkout', this.product);
         }
     }
 </script>
@@ -303,6 +305,10 @@
                 width: auto;
             }
         }
+    }
+
+    a.button.moreInfo {
+        color: $darkerGreen;
     }
 
     .finePrint {

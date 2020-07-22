@@ -1,11 +1,10 @@
 import ReflectionResponse, {
-    getResponseMedium,
-    ResponseMedium,
     ResponseMediumType
 } from "@shared/models/ReflectionResponse";
 import {setTimestamp} from "@shared/util/FirestoreUtil";
 import * as firebase from "firebase";
 import { AppType } from "@shared/types/DeviceTypes";
+import { getResponseMedium, ResponseMedium } from "@shared/util/ReflectionResponseUtil";
 
 beforeEach(() => {
     setTimestamp(firebase.firestore.Timestamp);

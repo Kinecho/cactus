@@ -1,3 +1,5 @@
+import { setTimestamp } from "@shared/util/FirestoreUtil";
+
 window.__APP_CUSTOM_SCHEME__ = "app.stage-cactus";
 window.__GOOGLE_ANALYTICS_ID__ = 'UA-127159143-6';
 window.__GOOGLE_OPTIMIZE_ID__ = '';
@@ -37,29 +39,30 @@ window.__FLAMELINK_ENV_ID__ = "stage";
 window.__BRANCH_LIVE_KEY__ = "key_test";
 
 const firebasemock = require('firebase-mock');
+import * as firebase from "firebase";
 
 export const mockauth = new firebasemock.MockAuthentication();
 const mockfirestore = new firebasemock.MockFirestore();
 const mockstorage = new firebasemock.MockStorage();
 export const mockFirebase = new firebasemock.MockFirebaseSdk(
-    // use null if your code does not use RTDB
-    (path: any) => {
-        return null
-    },
-    // use null if your code does not use AUTHENTICATION
-    () => {
-        return mockauth
-    },
-    // use null if your code does not use FIRESTORE
-    () => {
-        return mockfirestore
-    },
-    // use null if your code does not use STORAGE
-    () => {
-        return mockstorage
-    },
-    // use null if your code does not use MESSAGING
-    () => {
-        return null
-    },
+// use null if your code does not use RTDB
+(path: any) => {
+    return null
+},
+// use null if your code does not use AUTHENTICATION
+() => {
+    return mockauth
+},
+// use null if your code does not use FIRESTORE
+() => {
+    return mockfirestore
+},
+// use null if your code does not use STORAGE
+() => {
+    return mockstorage
+},
+// use null if your code does not use MESSAGING
+() => {
+    return null
+},
 );

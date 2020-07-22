@@ -1,18 +1,9 @@
 <template>
     <section class="empty journalHome">
-        <p v-if="!focusElement || !isPlusMember">
-            To get started, you'll learn about how Cactus works and reflect on your first question of
-            the&nbsp;day.
-        </p>
-
-        <template v-if="focusElement && isPlusMember">
-            <p>
-                To get started, you'll learn about how Cactus works and reflect on your first question
-                about&nbsp;<strong>{{focusElement}}</strong>.
-            </p>
-        </template>
-        <img class="graphic" src="/assets/images/emptyState.png" alt="Three friends welcoming you"/>
-        <router-link class="button primary" tag="button" :to="onboardingPath">Let's begin</router-link>
+        <h1>This is your journal.</h1>
+        <p>{{introText}}</p>
+        <skeleton-card :animating="false"/>
+        <router-link class="button primary" tag="a" :to="onboardingPath">Get Started</router-link>
     </section>
 </template>
 
@@ -20,25 +11,24 @@
     import Vue from "vue";
     import Component from "vue-class-component"
     import { PageRoute } from "@shared/PageRoutes";
-    import { Config } from "@web/config";
-    import AppSettingsService from "@web/services/AppSettingsService";
     import { CactusElement } from "@shared/models/CactusElement";
     import { Prop } from "vue-property-decorator";
     import Logger from "@shared/Logger"
     import ResultElement from "@components/gapanalysis/ResultElement.vue";
     import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
-    import { isPremiumTier } from "@shared/models/MemberSubscription";
+    import { preventOrphanedWords } from "@shared/util/StringUtil";
+    import SkeletonCard from "@components/JournalEntrySkeleton.vue";
 
-    const logger = new Logger("JournalHomeEmptyState");
-
+    const logger = new Logger("MemberHomeEmptyState.vue");
 
     @Component({
         components: {
             ResultElement,
+            SkeletonCard,
         }
     })
     export default class JournalHomeEmptyState extends Vue {
-        name = "JournalHomeEmptyState";
+        name = "JournalHomeEmptyState.vue";
 
         @Prop({ type: String as () => CactusElement, default: null, required: false })
         focusElement!: CactusElement | null;
@@ -46,27 +36,15 @@
         @Prop({ type: String as () => SubscriptionTier, default: null, required: false })
         tier!: SubscriptionTier | null
 
-        get isPlusMember(): boolean {
-            return !!this.tier && isPremiumTier(this.tier);
-        }
+        @Prop({type: String as () => string|PageRoute, default: null})
+        to!: string|PageRoute|null;
 
         get onboardingPath(): PageRoute {
-            return PageRoute.HELLO_ONBOARDING;
+            return this.to ?? PageRoute.HELLO_ONBOARDING;
         }
 
-        get firstPromptPath(): string {
-            const appSettings = AppSettingsService.sharedInstance.currentSettings;
-            const entryId = this.focusElement ? appSettings?.getElementOnboardingPromptEntryId(this.focusElement) : undefined;
-
-            if (!entryId && this.focusElement) {
-                logger.warn("No entry id found for element", this.focusElement)
-            }
-
-            if (!this.focusElement || !entryId || !this.isPlusMember) {
-                return PageRoute.PROMPTS_ROOT + '/' + Config.firstPromptId;
-            }
-
-            return `${ PageRoute.PROMPTS_ROOT }/${ entryId }`;
+        get introText() {
+            return preventOrphanedWords("It's a little empty now, but once you complete your first question, your journal entries will appear here.");
         }
     }
 </script>
@@ -76,36 +54,24 @@
     @import "variables";
 
     .empty {
-        align-items: center;
-        justify-content: center;
+        display: block;
+        margin: 0 auto;
+        max-width: 64rem;
         padding: 2.4rem;
         text-align: center;
-        flex-direction: column;
-        display: flex;
 
         h1 {
-            line-height: 1.2;
-            margin-bottom: .4rem;
+            margin-top: 2.4rem;
         }
 
         p {
-            margin: 0 auto 2.4rem;
-            max-width: 60rem;
+            font-size: 2rem;
+            margin-bottom: 3.2rem;
             opacity: .8;
-
-            @include r(768) {
-                margin-bottom: 1.6rem;
-            }
         }
 
-        .graphic {
-            margin-bottom: 2.4rem;
-            max-width: 56rem;
-            width: 90%;
-
-            @include r(768) {
-                margin-bottom: 1.6rem;
-            }
+        .skeleton {
+            width: 100%;
         }
 
         .button {

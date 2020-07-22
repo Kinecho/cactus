@@ -1,6 +1,6 @@
 import SignupRequest from "@shared/mailchimp/models/SignupRequest";
 import { getAllQueryParams, getQueryParam } from "@web/util";
-import { AdditionalUserInfo, FirebaseUser, FirebaseUserCredential, getAuth, initializeFirebase, } from "@web/firebase";
+import { AdditionalUserInfo, FirebaseUser, FirebaseUserCredential, } from "@web/firebase";
 import { PageRoute } from "@shared/PageRoutes";
 import { Endpoint, getAuthHeaders, request } from "@web/requestUtils";
 import {
@@ -13,14 +13,14 @@ import {
 } from "@shared/api/SignupEndpointTypes";
 import { QueryParam } from "@shared/util/queryParams";
 import StorageService, { LocalStorageKey } from "@web/services/StorageService";
-import CactusMemberService from "@web/services/CactusMemberService";
 import { fireConfirmedSignupEvent, fireLoginEvent, fireSignupLeadEvent } from "@web/analytics";
 import Logger from "@shared/Logger";
 import { getAppType, isAndroidApp } from "@web/DeviceUtil";
 import { pushRoute } from "@web/NavigationUtil";
+import CactusMember from "@shared/models/CactusMember";
+import CactusMemberService from "@web/services/CactusMemberService";
 
 const logger = new Logger("auth.ts");
-const firebase = initializeFirebase();
 
 export interface LogoutOptions {
     redirectOnSignOut: boolean,
@@ -31,10 +31,10 @@ export const DefaultLogoutOptions = { redirectOnSignOut: true, redirectUrl: "/" 
 
 export async function logout(options: LogoutOptions = DefaultLogoutOptions) {
     try {
-        await getAuth().signOut();
-        StorageService.clear();
         const url = options.redirectUrl ?? DefaultLogoutOptions.redirectUrl;
         await pushRoute(url);
+        await CactusMemberService.sharedInstance.signOut()
+        StorageService.clear();
     } catch (error) {
         logger.error("Exception thrown while logging out", error);
     }
@@ -87,23 +87,23 @@ export async function sendMagicLink(options: MagicLinkRequest): Promise<MagicLin
     }
 }
 
-export async function sendEmailLinkSignIn(subscription: SignupRequest): Promise<EmailLinkSignupResult> {
-    const email = subscription.email;
+export async function sendEmailLinkSignIn(params: SignupRequest): Promise<EmailLinkSignupResult> {
+    const email = params.email;
     const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
-    let emailLinkRedirectUrl: string = PageRoute.SIGNUP_CONFIRMED;
+    let completeSignInPath:PageRoute|string = PageRoute.LOGIN;
     if (redirectUrlParam) {
-        emailLinkRedirectUrl = `${ emailLinkRedirectUrl }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(redirectUrlParam) }`
+        completeSignInPath = `${ completeSignInPath }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(redirectUrlParam) }`
     }
 
     const landingParams = StorageService.getJSON(LocalStorageKey.landingQueryParams);
     const sourceApp = isAndroidApp() ? SourceApp.android : SourceApp.web;
 
-    logger.log("Setting redirect url for email link signup to be ", emailLinkRedirectUrl);
+    logger.log("Setting redirect url for email link signup to be ", completeSignInPath);
 
     const statusResponse = await sendMagicLink({
         email: email,
-        referredBy: subscription.referredByEmail,
-        continuePath: emailLinkRedirectUrl,
+        referredBy: params.referredByEmail,
+        continuePath: completeSignInPath,
         queryParams: landingParams,
         sourceApp: sourceApp
     });
@@ -116,75 +116,51 @@ export async function sendEmailLinkSignIn(subscription: SignupRequest): Promise<
     }
 }
 
-export async function sendLoginEvent(args: {
-    user: FirebaseUser | null,
-    additionalUserInfo?: AdditionalUserInfo | null,
-}): Promise<void> {
-    return new Promise(async resolve => {
-        const unsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-            onData: async ({ member }) => {
-                if (member) {
-                    try {
-                        logger.log("[auth.sendLoginEvent] member subscription created at typeof = ", typeof (member?.subscription?.trial?.startedAt));
-                        logger.log("Got cactus member, can send login event", member);
-                        unsubscriber();
-                        let referredByEmail = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);
-                        if (!referredByEmail) {
-                            try {
-                                referredByEmail = window.localStorage.getItem(LocalStorageKey.referredByEmail);
-                            } catch (e) {
-                                logger.error("error trying to get referredByEmail from local storage", e)
-                            }
-                        }
-                        const landingParams = StorageService.getJSON(LocalStorageKey.landingQueryParams);
-
-                        const event: LoginEvent = {
-                            providerId: (args.additionalUserInfo && args.additionalUserInfo.providerId) || undefined,
-                            userId: args.user && args.user.uid,
-                            isNewUser: (args.additionalUserInfo && args.additionalUserInfo.isNewUser) || false,
-                            referredByEmail: referredByEmail,
-                            signupQueryParams: { ...getAllQueryParams(), ...landingParams },
-                            app: getAppType(),
-                        };
-                        logger.log("login-event payload", JSON.stringify(event, null, 2));
-                        const headers = await getAuthHeaders();
-                        await request.post(Endpoint.loginEvent, event, { headers });
-
-                        /* Note: This may move to the backend later when we have time to 
-                           implement the Facebook Ads API */
-                        if (event.isNewUser && isThirdPartySignIn(event.providerId)) {
-                            // new user who did not previous enter their email address
-                            await fireSignupLeadEvent();
-                        }
-                        if (event.isNewUser) {
-                            // all new users
-                            await fireConfirmedSignupEvent({
-                                email: args.user?.email || undefined,
-                                userId: args.user?.uid,
-                                method: event.providerId,
-                            });
-                        } else {
-                            fireLoginEvent({ method: event.providerId });
-                        }
-                    } catch (error) {
-                        logger.error("failed to send login event", error);
-                    } finally {
-                        resolve();
-                    }
-                } else {
-                    logger.log("No member found while observing for member...still waiting");
-                }
+export async function sendLoginEventForMember(params: { user: FirebaseUser | null, member: CactusMember, additionalUserInfo?: AdditionalUserInfo | null }): Promise<void> {
+    const { user, additionalUserInfo, member } = params;
+    try {
+        logger.log("Got cactus member, can send login event", member);
+        let referredByEmail = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);
+        if (!referredByEmail) {
+            try {
+                referredByEmail = window.localStorage.getItem(LocalStorageKey.referredByEmail);
+            } catch (e) {
+                logger.error("error trying to get referredByEmail from local storage", e)
             }
-        });
+        }
+        const landingParams = StorageService.getJSON(LocalStorageKey.landingQueryParams);
 
+        const event: LoginEvent = {
+            providerId: (additionalUserInfo?.providerId) || undefined,
+            userId: user?.uid ?? member?.userId,
+            isNewUser: additionalUserInfo?.isNewUser ?? false,
+            referredByEmail: referredByEmail,
+            signupQueryParams: { ...getAllQueryParams(), ...landingParams },
+            app: getAppType(),
+        };
+        logger.log("login-event payload", JSON.stringify(event, null, 2));
+        const headers = await getAuthHeaders();
+        await request.post(Endpoint.loginEvent, event, { headers });
 
-        window.setTimeout(() => {
-            unsubscriber && unsubscriber();
-            resolve();
-        }, 5000)
-
-
-    });
+        /* Note: This may move to the backend later when we have time to
+           implement the Facebook Ads API */
+        if (event.isNewUser && isThirdPartySignIn(event.providerId)) {
+            // new user who did not previous enter their email address
+            await fireSignupLeadEvent();
+        }
+        if (event.isNewUser) {
+            // all new users
+            await fireConfirmedSignupEvent({
+                email: member?.email ?? user?.email ?? undefined,
+                userId: member?.userId ?? user?.uid,
+                method: event.providerId,
+            });
+        } else {
+            fireLoginEvent({ method: event.providerId });
+        }
+    } catch (error) {
+        logger.error("failed to send login event", error);
+    }
 }
 
 export function isThirdPartySignIn(provider: string | undefined): boolean {

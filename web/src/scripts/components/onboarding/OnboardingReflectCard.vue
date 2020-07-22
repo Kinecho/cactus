@@ -1,7 +1,7 @@
 <template>
     <div class="elementReflectContainer">
-        <svg class="element" xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56">
-            <path vector-effect="non-scaling-stroke" class="path" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6.07718848,33.0659031 C16.9034833,54.199668 20.7179299,20.251021 15.8579151,21.0429343 C10.9979002,21.8348476 13.8625604,37.5930451 19.6773127,37.9894412 C27.6775161,38.5348211 28.0221585,13.1185703 24.5423886,12.1275006 C19.4091615,10.6655114 24.3895721,41.7614486 30.3431156,42.9097293 C36.3335467,44.0651857 38.3505895,18.5270842 34.1893654,16.9067124 C29.4631525,15.0663352 32.4072958,35.8238194 37.147521,38.1746579 C44.9090376,42.0239099 46.864989,20.9520616 43.4838166,19.9890733 C38.3505895,18.5270842 43.573142,45.2571484 50.0771885,28.1235674" transform="rotate(9 28.077 27.513)"/>
+        <svg class="element" xmlns="http://www.w3.org/2000/svg" width="47" height="35" viewBox="0 0 47 35">
+            <path vector-effect="non-scaling-stroke" class="path" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6.07718848,33.0659031 C16.9034833,54.199668 20.7179299,20.251021 15.8579151,21.0429343 C10.9979002,21.8348476 13.8625604,37.5930451 19.6773127,37.9894412 C27.6775161,38.5348211 28.0221585,13.1185703 24.5423886,12.1275006 C19.4091615,10.6655114 24.3895721,41.7614486 30.3431156,42.9097293 C36.3335467,44.0651857 38.3505895,18.5270842 34.1893654,16.9067124 C29.4631525,15.0663352 32.4072958,35.8238194 37.147521,38.1746579 C44.9090376,42.0239099 46.864989,20.9520616 43.4838166,19.9890733 C38.3505895,18.5270842 43.573142,45.2571484 50.0771885,28.1235674" transform="rotate(9 89.608 -2.9)"/>
         </svg>
         <strong>
             <markdown-text :source="markdownText"/>
@@ -35,12 +35,13 @@
     import Logger from "@shared/Logger"
     import ResultElement from "@components/gapanalysis/ResultElement.vue";
     import { ListenerUnsubscriber } from "@web/services/FirestoreService";
-    import ReflectionResponse, { ResponseMedium } from "@shared/models/ReflectionResponse";
+    import ReflectionResponse from "@shared/models/ReflectionResponse";
     import ReflectionResponseService from "@web/services/ReflectionResponseService";
     import Spinner from "@components/Spinner.vue";
     import ResizableTextarea from "@components/ResizableTextarea.vue";
     import { getDeviceDimensions } from "@web/DeviceUtil";
     import { debounce } from "debounce";
+    import { ResponseMedium } from "@shared/util/ReflectionResponseUtil";
 
     const logger = new Logger("OnboardingReflectCard");
 
@@ -73,6 +74,8 @@
         maxTextareaHeight = 200;
         debounceWindowSizeHandler: any;
 
+        startAt!: Date;
+
         get markdownText(): string | undefined {
             return this.card.getMarkdownText({ selectedInsight: this.selectedInsightWord })
         }
@@ -86,7 +89,7 @@
             logger.info("set max text height to ", this.maxTextareaHeight);
         }
 
-        observeResponses() {
+        async observeResponses() {
             this.responsesLoading = true;
             this.reflectionUnsubscriber?.();
             if (this.card.promptContentEntryId) {
@@ -111,6 +114,7 @@
 
         mounted() {
             logger.info("Reflect card mounted");
+            this.startAt = new Date();
             if (this.autofocusInput) {
                 (this.$refs.textInput as HTMLElement | undefined)?.focus();
             }
@@ -131,7 +135,7 @@
             const entryId = this.card.promptContentEntryId;
             logger.info("Saving and continuing for entryId", entryId);
             this.saving = true;
-
+            const duration = Date.now() - this.startAt.getTime();
             let response: ReflectionResponse | undefined;
 
             if (this.reflectionResponses && this.reflectionResponses.length > 0) {
@@ -148,7 +152,8 @@
                 this.saving = false;
                 return;
             }
-
+            const currentDuration = response.reflectionDurationMs ?? 0;
+            response.reflectionDurationMs = currentDuration + duration;
             response.content.text = this.responseText;
             if (this.selectedInsightWord) {
                 response.dynamicValues = {
@@ -171,25 +176,21 @@
     @import "transitions";
 
     .element {
-        height: 30vw;
-        margin-bottom: -1.6rem;
-        margin-left: -3vw;
-        margin-top: -2.4rem;
-        width: 30vw;
+        display: block;
+        height: auto;
+        margin-bottom: .8rem;
+        max-width: 12rem;
+        width: 24vw;
 
         @include r(600) {
-            height: 16vw;
-            margin-bottom: 0;
-            margin-left: -1.5vw;
-            margin-top: -5rem;
-            width: 16vw;
+            margin-bottom: 2.4rem;
         }
 
         .path {
             stroke: $pink;
-            stroke-dasharray: 1500;
-            stroke-dashoffset: 1500;
-            animation: dash 60s ease-out forwards;
+            stroke-dasharray: 700;
+            stroke-dashoffset: 700;
+            animation: dash 35s ease-out .5s forwards;
         }
     }
 

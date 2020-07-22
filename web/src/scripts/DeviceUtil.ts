@@ -7,11 +7,10 @@ export const MOBILE_BREAKPOINT_PX = 600;
 const logger = new Logger("DeviceUtil");
 
 export function getDeviceDimensions(): { height: number, width: number } {
-    const height = window.innerHeight;
-    const width = window.innerWidth;
+    const height = window.visualViewport?.height ?? window.innerHeight;
+    const width = window.visualViewport?.width ?? window.innerWidth;
 
     return { height, width };
-
 }
 
 export function isPreRender(): boolean {
@@ -51,6 +50,10 @@ export function isAndroidDevice(): boolean {
 
 export function isIosDevice(): boolean {
     return /iPad|iPhone|iPod/.test(getUserAgent()) && !window.MSStream;
+}
+
+export function isIosApp(): boolean {
+    return navigator.userAgent === Config.iosUserAgent;
 }
 
 export function isAndroidApp(): boolean {

@@ -3,6 +3,7 @@ import CoreValuesAssessment from "@shared/models/CoreValuesAssessment";
 import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
 import CoreValuesQuestion from "@shared/models/CoreValuesQuestion";
 import CoreValuesQuestionResponse from "@shared/models/CoreValuesQuestionResponse";
+import CoreValuesQuestionOption from "@shared/models/CoreValuesQuestionOption";
 
 export default {
     title: "Core Values/Assessment/Question"
@@ -10,13 +11,16 @@ export default {
 
 export const MultiSelect = () => ({
     template: `
-        <question :assessment="assessment" :assessment-response="assessmentResponse" :response="response" :question="question"/>`,
+        <question
+                :response="response"
+                :question="question"
+                :options="options"
+        />`,
     components: {
         Question,
     },
     data(): {
-        assessment: CoreValuesAssessment,
-        assessmentResponse: CoreValuesAssessmentResponse,
+        options: CoreValuesQuestionOption[],
         question: CoreValuesQuestion,
         response: CoreValuesQuestionResponse,
     } {
@@ -26,21 +30,25 @@ export const MultiSelect = () => ({
             memberId: "test"
         })
         const question = assessment.getQuestions(assessmentResponse)[0];
+
         const response = CoreValuesQuestionResponse.create({ questionId: question.id });
-        return { assessment, response, question, assessmentResponse }
+        const options = question.options({
+            responses: assessment.orderedResponses(assessmentResponse),
+            currentIndex: 0
+        });
+        return { response, question, options }
     }
 })
 
 export const Radio = () => ({
     template: `
-        <question :assessment="assessment" :assessment-response="assessmentResponse" :response="response" :question="question"/>`,
+        <question :response="response" :question="question" :options="options"/>`,
     components: {
         Question,
     },
     data(): {
-        assessment: CoreValuesAssessment,
-        assessmentResponse: CoreValuesAssessmentResponse,
         question: CoreValuesQuestion,
+        options: CoreValuesQuestionOption[],
         response: CoreValuesQuestionResponse,
     } {
         const assessment = CoreValuesAssessment.default();
@@ -50,6 +58,10 @@ export const Radio = () => ({
         })
         const question = assessment.getQuestions(assessmentResponse)[1];
         const response = CoreValuesQuestionResponse.create({ questionId: question.id });
-        return { assessment, response, question, assessmentResponse }
+        const options = question.options({
+            responses: assessment.orderedResponses(assessmentResponse),
+            currentIndex: 1
+        });
+        return { options, response, question }
     }
 })

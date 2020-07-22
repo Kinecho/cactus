@@ -1,35 +1,43 @@
 export enum PageRoute {
-    SIGNUP = "/signup",
-    LOGIN = "/login",
-    GET_STARTED = "/get-started",
-    HOME = "/",
-    SIGNUP_CONFIRMED = "/confirmed",
+    ACCOUNT = "/account",
+    AUTHENTICATE_ACTIONS = "/authenticate-actions",
     CHECKOUT = "/checkout",
-    JOURNAL_HOME = "/home",
-    PROMPTS_ROOT = "/prompts",
+    CORE_VALUES = "/core-values",
+    CORE_VALUES_ASSESSMENT = "/core-values/assessment",
+    CORE_VALUES_EMBED = "/core-values/embed",
     FRIENDS = "/friends",
+    GAP_ANALYSIS = "/gap-analysis",
+    GET_STARTED = "/get-started",
+    HELLO_ONBOARDING = "/hello",
+    HOME = "/",
+    INSIGHTS = "/insights",
+    INSIGHTS_EMBED = '/insights-embed',
+    JOURNAL = "/journal",
+    LOGIN = "/login",
+    MEMBER_HOME = "/home",
+    NATIVE_APP_MAGIC_LINK_LOGIN = "/app-login-continue",
+    PAYMENT_CANCELED = "/cancel",
+    PRICING = "/pricing",
+    PRIVACY_POLICY = "/privacy-policy",
+    PROMOS_ROOT = "/promos",
+    PROMPTS_ROOT = "/prompts",
+    SIGNUP = "/signup",
+    SIGNUP_CONFIRMED = "/confirmed",
     SHARED_REFLECTION = "/reflection",
     SOCIAL = "/activity",
     SPONSOR = "/sponsor",
-    ACCOUNT = "/account",
-    UNSUBSCRIBE_SUCCESS = "/unsubscribe-confirmed",
-    NATIVE_APP_MAGIC_LINK_LOGIN = "/app-login-continue",
-    PRICING = "/pricing",
     TERMS_OF_SERVICE = "/terms-of-service",
-    PRIVACY_POLICY = "/privacy-policy",
-    CORE_VALUES = "/core-values",
-    AUTHENTICATE_ACTIONS = "/authenticate-actions",
-    PAYMENT_CANCELED = "/cancel",
-    GAP_ANALYSIS = "/gap-analysis",
-    HELLO_ONBOARDING = "/hello",
-
-    /**
-     * @deprecated
-     * This is the legacy core values page. It is now redirected to the /core-values route via vue Router
-     * @type {string}
-     */
-    VALUES_HOME = "/values",
+    UNSUBSCRIBE_SUCCESS = "/unsubscribe-confirmed",
     WELCOME = "/welcome",
-    INSIGHTS_EMBED = '/insights-embed',
-    INSIGHTS = "/insights",
+}
+
+
+export enum NamedRoute {
+    CORE_VALUES_NEW = "coreValues.new",
+    CORE_VALUES_RESULT = "coreValues.result",
+    CORE_VALUES_RESULT_PAGE = "coreValues.result.page",
+}
+
+export function getPromptContentPath(entryId: string): string {
+    return `${PageRoute.PROMPTS_ROOT}/${entryId}`;
 }

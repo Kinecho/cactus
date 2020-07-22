@@ -1,0 +1,75 @@
+@import "mixins";
+
+.prompt-content-card {
+    padding: 4rem 2.4rem;
+
+    @include r(374) {
+        padding: 5.6rem 3.2rem;
+    }
+}
+
+.actions {
+    bottom: 0;
+    left: 0;
+    padding: 2.4rem;
+    position: fixed;
+    width: 100%;
+
+    @include r(600) {
+        align-items: center;
+        display: flex;
+        margin-top: 5.6rem;
+        padding: 0;
+        position: static;
+    }
+    @include r(768) {
+        padding: 0;
+    }
+
+    &:empty {
+        display: none;
+    }
+
+    button,
+    .button {
+        display: block;
+        width: 100%;
+
+        @include r(600) {
+            flex-grow: 0;
+            min-width: 16rem;
+            width: auto;
+        }
+    }
+
+    .link {
+        display: inline-block;
+        font-size: 1.8rem;
+        font-weight: bold;
+
+        @include r(600) {
+            width: auto;
+        }
+    }
+
+    .button + .actionButton,
+    .actionButton + .actionButton,
+    .button + .button {
+        margin-top: 1.6rem;
+
+        @include r(600) {
+            margin-left: 1.6rem;
+            margin-top: 0;
+        }
+    }
+}
+
+.caption {
+    font-size: 1.6rem;
+    margin: 0 1.6rem 4rem;
+    opacity: .8;
+
+    @include r(768) {
+        margin: 0 auto 4rem;
+    }
+}

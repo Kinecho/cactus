@@ -206,6 +206,8 @@ export default class StripeWebhookService {
         });
         const customerId = getCustomerId(session.customer);
         const stripeSubscriptionId = getStripeId(session.subscription);
+        const stripeOfferEntryId = session.metadata?.offerEntryId as string | null | undefined;
+
         const stripeSubscription = await StripeService.getSharedInstance().getStripeSubscription(stripeSubscriptionId);
         if (isStripeSubscription(stripeSubscription) && customerId) {
             const paymentMethod = getStripeId(stripeSubscription.default_payment_method);
@@ -236,6 +238,11 @@ export default class StripeWebhookService {
 
 
         cactusMember.subscription = cactusSubscription;
+
+        if (cactusMember.currentOffer && cactusMember.currentOffer?.entryId === stripeOfferEntryId) {
+            cactusMember.currentOffer.redeemedAt = new Date();
+        }
+
         cactusMember.stripeCustomerId = customerId;
         const payment = Payment.fromStripeCheckoutSession({
             memberId,
@@ -243,12 +250,16 @@ export default class StripeWebhookService {
             subscriptionProductId: subscriptionProduct?.entryId
         });
         if (memberId && stripeSubscriptionId) {
-            await AdminRevenueCatService.shared.updateStripeSubscription({ memberId, subscriptionId: stripeSubscriptionId });
+            await AdminRevenueCatService.shared.updateStripeSubscription({
+                memberId,
+                subscriptionId: stripeSubscriptionId
+            });
         }
-
-        await AdminPaymentService.getSharedInstance().save(payment);
-        await AdminCactusMemberService.getSharedInstance().save(cactusMember, { setUpdatedAt: false });
-
+        await Promise.all([
+            AdminPaymentService.getSharedInstance().save(payment),
+            AdminCactusMemberService.getSharedInstance().save(cactusMember, { setUpdatedAt: false }),
+            AdminRevenueCatService.shared.updateSubscriberAttributes(cactusMember),
+        ])
         return { statusCode: 200, body: `Member ${ cactusMember.email } was upgraded to ${ cactusSubscription.tier }` };
     };
 
@@ -337,7 +348,10 @@ export default class StripeWebhookService {
         const memberId = member?.id;
         if (memberId && stripeSubscriptionId) {
             logger.info("Updating stripe subscription in revenue cat");
-            await AdminRevenueCatService.shared.updateStripeSubscription({ memberId, subscriptionId: stripeSubscriptionId });
+            await AdminRevenueCatService.shared.updateStripeSubscription({
+                memberId,
+                subscriptionId: stripeSubscriptionId
+            });
         }
 
         const previousAttributes = event.data.previous_attributes as Partial<Stripe.Subscription>;

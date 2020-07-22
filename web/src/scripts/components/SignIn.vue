@@ -35,7 +35,7 @@
     import CactusMember from '@shared/models/CactusMember'
     import { FirebaseUser } from "@web/firebase"
     import CactusMemberService from '@web/services/CactusMemberService'
-    import { sendLoginEvent } from "@web/auth";
+    import { sendLoginEventForMember } from "@web/auth";
     import MagicLink from "@components/MagicLinkInput.vue"
     import { PageRoute } from "@shared/PageRoutes"
     import { QueryParam } from "@shared/util/queryParams"
@@ -51,17 +51,12 @@
     import { pushRoute } from "@web/NavigationUtil";
 
     const logger = new Logger("SignIn.vue");
-    const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
-    let emailLinkRedirectUrl: string = PageRoute.SIGNUP_CONFIRMED;
-    if (redirectUrlParam) {
-        emailLinkRedirectUrl = `${ emailLinkRedirectUrl }?${ QueryParam.REDIRECT_URL }=${ redirectUrlParam }`
-    }
 
     const locale = CopyService.getSharedInstance();
     const copy = locale.copy;
 
     export default Vue.extend({
-            components: {
+        components: {
             MagicLink,
             Spinner,
         },
@@ -75,9 +70,7 @@
                 logger.log("Is pending redirect.... need to log the user in");
             }
 
-            // this.message = getQueryParam(QueryParam.MESSAGE) || undefined;
             this.email = StorageService.getItem(LocalStorageKey.emailAutoFill) || getQueryParam(QueryParam.EMAIL) || "";
-
             this.memberListener = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: (({ member, user }) => {
                     this.member = member;
@@ -110,9 +103,9 @@
             redirectUrl: { type: String, required: false },
             showMagicLink: { type: Boolean, default: true },
             twitterEnabled: { type: Boolean, default: true },
-            showLoginSwitcher: {type: Boolean, default: true},
-            switcherLinkStyle: {type: String, default: "light"},
-            mode: {type: String as () => "SIGN_UP" | "LOG_IN", required: false, default: "SIGN_UP"}
+            showLoginSwitcher: { type: Boolean, default: true },
+            switcherLinkStyle: { type: String, default: "light" },
+            mode: { type: String as () => "SIGN_UP" | "LOG_IN", required: false, default: "SIGN_UP" }
         },
         data(): {
             memberListener: ListenerUnsubscriber | undefined,
@@ -170,21 +163,16 @@
             setupAuthUi() {
                 this.firebaseUiLoading = true;
                 const ui = getAuthUI();
-                let emailLinkSignInPath = this.redirectUrl || redirectUrlParam || PageRoute.JOURNAL_HOME;
+                const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
+                let emailLinkSignInPath = this.redirectUrl || redirectUrlParam || PageRoute.MEMBER_HOME;
                 logger.info("SignIn.vue emailLinkSignInPath = ", emailLinkSignInPath);
                 logger.info("SignIn.vue signInSuccessPath = ", emailLinkSignInPath);
                 let includeEmailLink = false;
 
-                //TODO: this was in there before, but i don't think we need it... leaving for a bit.
-                // if (ui.isPendingRedirect()) {
-                // includeEmailLink = true;
-                // emailLinkSignInPath = PageRoute.LOGIN;
-                // }
-
                 const config = getAuthUIConfig({
                     includeEmailLink,
                     includeTwitter: this.twitterEnabled,
-                    signInSuccessPath: this.redirectUrl || redirectUrlParam || PageRoute.JOURNAL_HOME,
+                    signInSuccessPath: this.redirectUrl || redirectUrlParam || PageRoute.MEMBER_HOME,
                     emailLinkSignInPath, //Note: normal magic link is handled in signupEndpoints.ts. This is for the special case of federated login connecting to an existing magic link acct.
                     signInSuccess: (authResult, redirectUrl) => {
                         this.isSigningIn = true;
@@ -229,48 +217,112 @@
                 this.$emit("loading", pending);
             },
             async doRedirect(doRedirect) {
-                //TODO: probalby make this method more clear what it does by renaming/refactoring
+                //TODO: make this method more clear what it does by renaming/refactoring
                 if (!doRedirect) {
                     return;
                 }
-                if (this.authResult && this.authResult.user) {
+                if (!this.authResult || !this.authResult.user) {
+                    logger.error("No auth result or auth result user found");
+                    return;
+                }
+                const authResult = this.authResult;
+                const successUrl = this.pendingRedirectUrl ?? PageRoute.MEMBER_HOME;
+
+                logger.info("User is logged in, working on redirecting the user....")
+                await Promise.all([CactusMemberService.sharedInstance.addAuthAction(async ({ member }) => {
+                    logger.info("Sending login event via Auth Actions");
                     try {
-                        await sendLoginEvent(this.authResult)
+                        await sendLoginEventForMember({ ...authResult, member });
                     } catch (e) {
                         logger.error("failed to log login event", e);
-                    } finally {
+                    }
+                }),
+                    CactusMemberService.sharedInstance.addAuthAction(async ({ member }) => {
                         // append the memberId to any feature-auth urls
-                        if (this.member?.id && this.pendingRedirectUrl && isFeatureAuthUrl(this.pendingRedirectUrl)) {
-                            this.pendingRedirectUrl = appendQueryParams(this.pendingRedirectUrl, { memberId: this.member.id });
+                        // const member = await CactusMemberService.sharedInstance.getCurrentMember();
+                        let redirectUrl = successUrl;
+                        if (member.id && isFeatureAuthUrl(successUrl)) {
+                            redirectUrl = appendQueryParams(successUrl, { memberId: member.id });
                         }
 
                         if (this.redirectOnSignIn) {
-                            await pushRoute(this.pendingRedirectUrl || PageRoute.JOURNAL_HOME)
+                            logger.info("Auth Action: push route to ", redirectUrl)
+                            return pushRoute(redirectUrl)
                         }
-                    }
-                }
+                    })])
             }
         }
     })
 </script>
 <style lang="scss">
+    @import "variables";
+    @import "mixins";
 
     .sign-up-component {
         .firebaseui-container {
             box-shadow: none;
             border: none;
             background: transparent;
+
+            &.firebaseui-id-page-email-link-sign-in-confirmation {
+                background: white;
+            }
         }
     }
 
-    .firebaseui-tos,
-    .firebaseui-link {
-        color: white;
+    .firebaseui-tos {
+        color: $white;
+
+        .firebaseui-link {
+            color: $white;
+        }
     }
 
     .firebaseui-link {
         text-decoration: underline;
     }
+
+    .firebaseui-info-bar.firebaseui-id-info-bar {
+        top: -75px;
+    }
+
+    .firebaseui-info-bar-message {
+        .firebaseui-link {
+            color: unset;
+        }
+    }
+
+    .mdl-card.firebaseui-id-page-email-link-sign-in-confirmation {
+        font-family: $font-stack;
+
+        .firebaseui-tos-list {
+            .firebaseui-link {
+                color: $green;
+            }
+        }
+
+    }
+
+    .firebase-ui-card-header {
+        .firebase-title {
+            font-weight: bold;
+        }
+    }
+
+    .firebaseui-form-actions {
+        button.firebaseui-id-submit.mdl-button--raised.mdl-button--colored {
+            height: unset;
+            font-family: $font-stack;
+            @include button;
+            @include smallButton;
+        }
+
+        button.firebaseui-id-secondary-link.mdl-js-button.mdl-button--primary.firebaseui-button {
+            font-family: $font-stack;
+            box-shadow: none;
+        }
+    }
+
 
 </style>
 

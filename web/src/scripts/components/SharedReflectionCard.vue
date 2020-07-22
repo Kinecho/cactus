@@ -14,7 +14,7 @@
             <h3 class="noteQuestion">
                 <markdown-text :source="preventOrphan(questionText)"/>
             </h3>
-            <p class="note-text">{{preventOrphan(response.content.text)}}</p>
+            <p class="note-text">{{noteText}}</p>
         </div>
     </div>
 </template>
@@ -82,17 +82,17 @@
             questionText(): string | undefined {
                 if (this.promptContent && this.response) {
                     const coreValue = this.response.coreValue ?? undefined;
-                    return this.promptContent?.getDynamicQuestionText({ coreValue }) ?? this.response.promptQuestion;
+                    return this.promptContent?.getDynamicQuestionText({ coreValue }) ?? this.response?.promptQuestion;
                 } else if (this.prompt && !isBlank(this.prompt.question)) {
                     return this.prompt.question;
                 }
-                return this.response.promptQuestion;
+                return this.response?.promptQuestion;
             },
             memberEmail(): string | undefined {
                 if (this.fetchedProfile?.email) {
                     return this.fetchedProfile.email;
                 } else {
-                    return this.response.memberEmail;
+                    return this.response?.memberEmail;
                 }
             },
             shareDate(): string | undefined {
@@ -100,7 +100,10 @@
                 return this.response && this.response.sharedAt && `Shared on ${ formatDate(this.response.sharedAt, format) }` || undefined;
             },
             avatarUrl(): string {
-                return this.fetchedProfile?.avatarUrl || getRandomAvatar(this.response.memberEmail);
+                return this.fetchedProfile?.avatarUrl || getRandomAvatar(this.response?.memberEmail);
+            },
+            noteText(): string | undefined {
+                return preventOrphanedWords(this.response?.content.text);
             }
         },
         methods: {

@@ -15,6 +15,7 @@ import { CactusElement } from "@shared/models/CactusElement";
 import { isNumber } from "@shared/util/ObjectUtil";
 import { ScreenName } from "@components/gapanalysis/GapAssessmentTypes";
 import { BillingPeriod } from "@shared/models/SubscriptionProduct";
+import PromotionalOffer, { OfferDetails } from "@shared/models/PromotionalOffer";
 
 const logger = new Logger("Analytics.ts");
 
@@ -306,5 +307,19 @@ export function logPresentSubscriptionOffers(options: {
         items,
         promotion_name: options.promotionName,
         creative_name: options.creativeName,
+    })
+}
+
+export function logOfferViewed(offer: OfferDetails) {
+    firebaseAnalytics().logEvent("view_promotion", {
+        promotion_name: offer.displayName,
+        promotion_id: offer.entryId,
+    })
+}
+
+export function logOfferApplied(offer: OfferDetails) {
+    firebaseAnalytics().logEvent("select_promotion", {
+        promotion_name: offer.displayName,
+        promotion_id: offer.entryId,
     })
 }

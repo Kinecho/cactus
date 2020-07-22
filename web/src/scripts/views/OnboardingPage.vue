@@ -37,9 +37,6 @@
     export default class OnboardingPage extends Vue {
         name = "OnboardingPage";
 
-        // @Prop({ type: Number, required: false, default: 1 })
-        // page: number;
-
         @Prop({ type: String as () => PageStatus, required: false, default: null })
         pageStatus!: PageStatus | null;
 
@@ -53,7 +50,6 @@
         billingPeriod = BillingPeriod.yearly;
         productLoaded = false;
         settings: AppSettings | null = null;
-
 
         async beforeMount() {
             await this.fetchProduct();

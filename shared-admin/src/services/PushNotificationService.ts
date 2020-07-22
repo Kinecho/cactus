@@ -4,14 +4,13 @@ import * as admin from "firebase-admin";
 import * as Sentry from "@sentry/node";
 import PromptContent from "@shared/models/PromptContent";
 import { NewPromptNotificationPushResult } from "@admin/PushNotificationTypes";
-import SentPrompt, { PromptSendMedium } from "@shared/models/SentPrompt";
 import Logger from "@shared/Logger";
 import { chunkArray, stringifyJSON } from "@shared/util/ObjectUtil";
 import HoboCache from "@admin/HoboCache";
 import { BaseMessage } from "firebase-admin/lib/messaging";
+import { PushNotificationData } from "@shared/models/Notification";
 import Message = admin.messaging.Message;
 import BatchResponse = admin.messaging.BatchResponse;
-import { PushNotificationData } from "@shared/models/Notification";
 
 const removeMarkdown = require("remove-markdown");
 
@@ -27,40 +26,6 @@ export default class PushNotificationService {
 
     constructor(app: admin.app.App) {
         this.messaging = app.messaging();
-    }
-
-    async sendNewPromptPushIfNeeded(options: {
-        sentPrompt: SentPrompt,
-        promptContent?: PromptContent,
-        prompt?: ReflectionPrompt,
-        member: CactusMember,
-    }): Promise<NewPromptNotificationPushResult | undefined> {
-        const { sentPrompt, prompt, promptContent, member } = options;
-        try {
-            if (sentPrompt.completed) {
-                return { attempted: false, alreadyAnswered: true };
-            }
-
-            const memberTier = member.subscription?.tier;
-            const contentTiers = promptContent?.subscriptionTiers;
-
-            if (memberTier && contentTiers &&
-            !contentTiers.includes(memberTier)) {
-                return { attempted: false, notAvailableToTier: true };
-            }
-
-            if (!sentPrompt.containsMedium(PromptSendMedium.PUSH)) {
-                return await this.sendPromptNotification({
-                    member,
-                    prompt,
-                    promptContent
-                });
-            }
-            return;
-        } catch (error) {
-            logger.error(`Failed to end push message to ${ member.email }`, error);
-            return;
-        }
     }
 
     /**

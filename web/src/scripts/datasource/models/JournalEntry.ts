@@ -2,11 +2,12 @@ import ReflectionResponse from "@shared/models/ReflectionResponse";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import PromptContent from "@shared/models/PromptContent";
 import SentPrompt from "@shared/models/SentPrompt";
-import {ListenerUnsubscriber} from "@web/services/FirestoreService";
+import { ListenerUnsubscriber } from "@web/services/FirestoreService";
 import ReflectionResponseService from "@web/services/ReflectionResponseService";
 import ReflectionPromptService from "@web/services/ReflectionPromptService";
 import PromptContentService from "@web/services/PromptContentService";
 import Logger from "@shared/Logger";
+import CactusMember from "@shared/models/CactusMember";
 
 const logger = new Logger("JournalEntry.ts");
 
@@ -16,6 +17,7 @@ export interface JournalEntryDelegate {
 
 class JournalEntry {
     promptId: string;
+    member?: CactusMember | null = null;
 
     delegate?: JournalEntryDelegate = undefined;
     sentPrompt?: SentPrompt;
@@ -32,9 +34,9 @@ class JournalEntry {
     promptContentLoaded: boolean = false;
     promptContentUnsubscriber?: ListenerUnsubscriber;
 
-    constructor(promptId: string, sentPrompt?: SentPrompt) {
+    constructor(promptId: string, sentPrompt?: SentPrompt, member?: CactusMember | null) {
         this.promptId = promptId;
-
+        this.member = member;
         if (sentPrompt) {
             this.sentPrompt = sentPrompt;
         }
@@ -47,6 +49,7 @@ class JournalEntry {
     start() {
         const promptId = this.promptId;
         this.responsesUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(promptId, {
+            member: this.member,
             onData: (responses) => {
                 this.responses = responses;
                 this.responsesLoaded = true;

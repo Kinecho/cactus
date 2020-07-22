@@ -6,7 +6,8 @@ import AdminFirestoreService, {
     GetBatchOptions,
     GetOptions,
     QueryOptions,
-    SaveOptions, Timestamp
+    SaveOptions,
+    Timestamp
 } from "@admin/services/AdminFirestoreService";
 import CactusMember, {
     DEFAULT_PROMPT_SEND_TIME,
@@ -17,7 +18,7 @@ import CactusMember, {
     ReflectionStats
 } from "@shared/models/CactusMember";
 import { BaseModelField, Collection } from "@shared/FirestoreBaseModels";
-import { getDateAtMidnightDenver, getDateFromISOString, getSendTimeUTC } from "@shared/util/DateUtil";
+import { getDateAtMidnightDenver, getDateFromISOString, getSendTimeUTC, plusDays } from "@shared/util/DateUtil";
 import {
     ListMember,
     ListMemberStatus,
@@ -31,10 +32,11 @@ import * as admin from "firebase-admin";
 import { QueryWhereClauses, removeDuplicates } from "@shared/util/FirestoreUtil";
 import { isBlank } from "@shared/util/StringUtil";
 import { CoreValue } from "@shared/models/CoreValueTypes";
-import DocumentReference = admin.firestore.DocumentReference;
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 import HoboCache from "@admin/HoboCache";
 import { InsightWord } from "@shared/api/InsightLanguageTypes";
+import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
+import DocumentReference = admin.firestore.DocumentReference;
 
 const logger = new Logger("AdminCactusMemberService");
 let firestoreService: AdminFirestoreService;
@@ -416,7 +418,7 @@ export default class AdminCactusMemberService {
         }
         try {
             const doc = this.getCollectionRef().doc(memberId);
-            await doc.set({ [CactusMember.Field.lastReplyAt]: Timestamp.fromDate(lastReply) }, { merge: true });
+            await doc.update({ [CactusMember.Field.lastReplyAt]: Timestamp.fromDate(lastReply) });
             return;
         } catch (error) {
             logger.error("Failed to update last reply for memberId ", memberId);
@@ -507,21 +509,6 @@ export default class AdminCactusMemberService {
         }
     }
 
-    async getMembersUnsubscribedSince(date: Date = new Date()): Promise<CactusMember[]> {
-        const ts = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(date));
-
-        const query = this.getCollectionRef().where(CactusMember.Field.unsubscribedAt, ">=", ts);
-
-        try {
-            const results = await AdminFirestoreService.getSharedInstance().executeQuery(query, CactusMember);
-
-            return results.results;
-        } catch (error) {
-            logger.error(error);
-            return [];
-        }
-    }
-
     /**
      * Get members where the opt-out trial started after the provided Date.
      * This is typically used to look at members for the previous day in the Slack job.
@@ -543,6 +530,42 @@ export default class AdminCactusMemberService {
     async getCancellationsInitiatedSince(date: Date): Promise<CactusMember[]> {
         const ts = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(date));
         const query = this.getCollectionRef().where(CactusMember.Field.subscriptionCancellationInitiatedAt, ">=", ts);
+        return (await firestoreService.executeQuery(query, CactusMember)).results;
+    }
+
+    /**
+     * Get members where their trial has ended and they converted to paid
+     * @param {Date} date
+     * @return {Promise<CactusMember[]>}
+     */
+    async getOptTrialsConvertedToPaidSince(date: Date): Promise<CactusMember[]> {
+        const tomorrow = plusDays(1, date);
+        const todayTs = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(date));
+        const tomorrowTs = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(tomorrow))
+        const query = this.getCollectionRef()
+            .where(CactusMember.Field.subscriptionOptOutTrialEndsAt, ">=", todayTs)
+            .where(CactusMember.Field.subscriptionOptOutTrialEndsAt, "<=", tomorrowTs)
+            .where(CactusMember.Field.subscriptionTier, "==", SubscriptionTier.PLUS);
+        return (await firestoreService.executeQuery(query, CactusMember)).results;
+    }
+
+    async getPromotionalOffersAppliedOn(date: Date): Promise<CactusMember[]> {
+        const tomorrow = plusDays(1, date);
+        const todayTs = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(date));
+        const tomorrowTs = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(tomorrow))
+        const query = this.getCollectionRef()
+        .where(CactusMember.Field.currentOfferAppliedAt, ">=", todayTs)
+        .where(CactusMember.Field.currentOfferAppliedAt, "<=", tomorrowTs)
+        return (await firestoreService.executeQuery(query, CactusMember)).results;
+    }
+
+    async getPromotionalOffersRedeemedOn(date: Date): Promise<CactusMember[]> {
+        const tomorrow = plusDays(1, date);
+        const todayTs = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(date));
+        const tomorrowTs = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(tomorrow))
+        const query = this.getCollectionRef()
+        .where(CactusMember.Field.currentOfferRedeemedAt, ">=", todayTs)
+        .where(CactusMember.Field.currentOfferRedeemedAt, "<=", tomorrowTs)
         return (await firestoreService.executeQuery(query, CactusMember)).results;
     }
 

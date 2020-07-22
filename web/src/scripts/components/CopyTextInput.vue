@@ -80,6 +80,9 @@
         @include r(374) {
             margin-bottom: 0;
         }
+        @include r(600) {
+            max-width: none;
+        }
     }
 
     .copy-link-container {

@@ -13,6 +13,10 @@ import 'flamelink/storage'
 import StorageService, { LocalStorageKey } from "@web/services/StorageService";
 import FirebaseApp = firebase.app.App;
 import CopyService, { LocaleCode } from "@shared/copy/CopyService";
+import Logger from "@shared/Logger"
+
+const logger = new Logger("firebase");
+
 
 let isInitialized = false;
 let firebaseApp: FirebaseApp;
@@ -28,8 +32,6 @@ export import TwitterProvider = firebase.auth.TwitterAuthProvider;
 export import EmailProvider = firebase.auth.EmailAuthProvider;
 export import PhoneProvider = firebase.auth.PhoneAuthProvider;
 export import OAuthProvider = firebase.auth.OAuthProvider;
-// export import AppleProvider = firebase.auth.AppleAuthProvider;
-// export import AppleProvider = firebase.auth.Apple
 
 export enum FirebaseAppName {
     flamelink = "flamelink",
@@ -43,7 +45,9 @@ export enum EmailActionMode {
 }
 
 export function initializeFirebase(): FirebaseObject {
+
     if (!isInitialized) {
+        logger.info("initializing firebase");
         setTimestamp(firebase.firestore.Timestamp);
         firebaseApp = firebase.initializeApp(Config.firebase); //this is the default app, used in all the services
 

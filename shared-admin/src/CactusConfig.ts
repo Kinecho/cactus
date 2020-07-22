@@ -143,6 +143,7 @@ export interface CactusConfig {
         public_key: string,
         secret_key: string,
         webhook_bearer_token: string,
+        app_id: string,
     },
     tasks: {
         project_id: string,

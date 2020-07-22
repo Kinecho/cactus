@@ -1,6 +1,5 @@
 <template>
     <div>
-        <NavBar/>
         <section class="hero">
             <div class="centered" v-if="!coreValues">
                 <h1>Get more with Cactus&nbsp;Plus</h1>
@@ -32,7 +31,7 @@
                                     personalized mindfulness&nbsp;journey.</p>
                             </div>
                             <div class="benefit">
-                                <span class="benefitIcon"><img src="/assets/images/lock.svg" alt=""/></span>
+                                <span class="benefitIcon"><img src="/assets/icons/lock.svg" alt=""/></span>
                                 <h3>Private + secure</h3>
                                 <p class="text">Your journal entries are yours—encrypted and never read
                                     or&nbsp;sold.</p>
@@ -112,7 +111,7 @@
         },
         computed: {
             checkoutSuccessUrl(): string | undefined {
-                return appendQueryParams(PageRoute.JOURNAL_HOME, { [QueryParam.UPGRADE_SUCCESS]: "success" });
+                return appendQueryParams(PageRoute.MEMBER_HOME, { [QueryParam.UPGRADE_SUCCESS]: "success" });
             },
             checkoutCancelUrl(): string | undefined {
                 return PageRoute.PRICING;

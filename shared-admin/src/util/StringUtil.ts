@@ -25,7 +25,12 @@ export function splitOnFirst(input: string, delimiter: string, trimValues: boole
     return [key && trimValues ? key.trim() : key, value && trimValues ? value.trim() : value];
 }
 
-
+/**
+ * Construct a fully qualified URL from a prompt content objcet.
+ * @param {PromptContent} prompt
+ * @param {CactusConfig} config
+ * @return {string | undefined}
+ */
 export function buildPromptContentURL(prompt?: PromptContent, config: CactusConfig = getConfig()): string | undefined {
     if (!prompt) {
         return;

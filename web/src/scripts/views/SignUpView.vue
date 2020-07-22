@@ -1,14 +1,6 @@
 <template>
     <div class="page-wrapper">
         <div class="signin-wrapper">
-            <NavBar :showLinks="false"
-                    :showSignup="false"
-                    :showLogin="false"
-                    :redirectOnSignOut="false"
-                    :isSticky="false"
-                    :forceTransparent="true"
-                    :largeLogoOnDesktop="true"
-                    :whiteLogo="true"/>
             <div class="centered">
                 <SignIn :message="message"
                         :title="title"
@@ -23,7 +15,6 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import NavBar from "@components/NavBar.vue";
     import SignIn from "@components/SignIn.vue";
     import { PageRoute } from "@shared/PageRoutes";
     import CopyService from "@shared/copy/CopyService";
@@ -32,56 +23,65 @@
     import { getQueryParam } from "@web/util";
     import { QueryParam } from "@shared/util/queryParams";
     import Logger from "@shared/Logger"
+    import Component from "vue-class-component";
 
     const logger = new Logger("SignUpView");
 
     const copy = CopyService.getSharedInstance().copy;
 
-    export default Vue.extend({
+    @Component({
         components: {
-            NavBar,
             SignIn,
             StandardFooter,
-        },
+        }
+    })
+    export default class SignUpView extends Vue {
+
         beforeMount(): void {
             document.body.classList.add("sign-up-body");
-        },
+        }
+
         mounted(): void {
             document.body.classList.add("sign-up-body");
-        },
+        }
+
         beforeDestroy(): void {
-            document.body.classList.remove("sign-up-body");
-        },
+            // document.body.classList.remove("sign-up-body");
+        }
+
         destroyed(): void {
             document.body.classList.remove("sign-up-body");
-        },
-        data(): { copy: LocalizedCopy } {
-            return {
-                copy,
-            }
-        },
-        computed: {
-            message(): string | null {
-                const message = getQueryParam(QueryParam.MESSAGE) ?? this.$route.query.message as string;
-                logger.info("message is", message);
-                return message;
-            },
-            includeTwitter(): boolean {
-                //only show twitter on login screen, not sign up
-                return this.isLogIn;
-            },
-            title(): string {
-                return this.isLogIn ? copy.common.LOG_IN : copy.common.SIGN_UP;
-            },
-            isSignUp(): boolean {
-                return this.$route.path === PageRoute.SIGNUP;
-            },
-            isLogIn(): boolean {
-                return this.$route.path === PageRoute.LOGIN;
-            }
-        },
-        name: "SignUpView"
-    })
+        }
+
+        get copy(): LocalizedCopy {
+            return copy;
+        }
+
+        get message(): string | null {
+            const message = getQueryParam(QueryParam.MESSAGE) ?? this.$route.query.message as string;
+            logger.info("message is", message);
+            return message;
+        }
+
+        get includeTwitter(): boolean {
+            //only show twitter on login screen, not sign up
+            return this.isLogIn;
+        }
+
+        get title(): string {
+            return this.isLogIn ? copy.common.LOG_IN : copy.common.SIGN_UP;
+        }
+
+        get isSignUp(): boolean {
+            return this.$route.path === PageRoute.SIGNUP;
+        }
+
+        get isLogIn(): boolean {
+            return this.$route.path === PageRoute.LOGIN;
+        }
+
+        name = "SignUpView";
+    }
 </script>
 
 <style lang="scss">
@@ -133,11 +133,11 @@
 
         .firebaseui-tos,
         .firebaseui-link {
-            color: $white;
+            //color: $white;
         }
 
         .firebaseui-link {
-            text-decoration: underline;
+            //text-decoration: underline;
         }
     }
 

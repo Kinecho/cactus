@@ -7,8 +7,13 @@ import Logger from "@shared/Logger";
 import StorageService, { LocalStorageKey } from "@web/services/StorageService";
 import { CactusElement } from "@shared/models/CactusElement";
 import RevenueCatService from "@web/services/RevenueCatService";
+import JournalFeedDataSource from "@web/datasource/JournalFeedDataSource";
+import PromotionalOfferManager from "@web/managers/PromotionalOfferManager";
+import IosAppService from "@web/ios/IosAppService";
 
 const logger = new Logger("CactusMemberService");
+
+export type AuthAction = (params: { member: CactusMember }) => Promise<any>;
 
 export default class CactusMemberService {
     public static sharedInstance = new CactusMemberService();
@@ -20,33 +25,93 @@ export default class CactusMemberService {
     currentUser?: FirebaseUser | null;
     protected memberHasLoaded = false;
 
+    pendingLoginActions: AuthAction[] = []
+    ready: Promise<void>;
+
+    private onStart!: () => void;
+
     get isLoggedIn(): boolean {
         return !!this.currentMember;
     }
 
     constructor() {
+        this.ready = new Promise(resolve => {
+            this.onStart = resolve;
+        })
         this.authUnsubscriber = getAuth().onAuthStateChanged(async user => {
             if (this.currentMemberUnsubscriber) {
                 this.currentMemberUnsubscriber();
+                this.currentMember = undefined;
             }
             this.currentUser = user;
             if (user) {
                 this.currentMemberUnsubscriber = this.observeByUserId(user.uid, {
                     onData: async member => {
+                        logger.info("Member update received from server");
+                        const memberChanged = this.currentMember?.id !== member?.id
                         this.currentMember = member;
                         this.memberHasLoaded = true;
-                        if (member) {
+                        await this.onMemberDataFetched(member);
+                        this.onStart();
+                        if (member && memberChanged) {
+                            logger.info("Member changed - updating member values like timezone, revenuecat + session offers");
+                            const dataSource = JournalFeedDataSource.setup(member, { onlyCompleted: true });
                             await Promise.all([
                                 this.updateMemberSettingsIfNeeded(member),
-                                RevenueCatService.shared.updateLastSeen(member)
+                                RevenueCatService.shared.updateLastSeen(member),
+                                this.processActions(member),
+                                PromotionalOfferManager.shared.applySessionOffers(member),
+                                dataSource.start(),
                             ]);
                         }
                     }
                 })
             } else {
+                this.onStart();
                 this.currentMember = undefined;
             }
         });
+    }
+
+    /**
+     * Hook to do any actions when the member is updated from the server
+     * @param {CactusMember} member
+     * @return {Promise<void>}
+     */
+    async onMemberDataFetched(member: CactusMember) {
+        IosAppService.updateMember(member);
+    }
+
+    async authReady(): Promise<void> {
+        if (this.memberHasLoaded) {
+            return;
+        }
+        await this.getCurrentMember()
+        return;
+    }
+
+    async addAuthAction(action: AuthAction) {
+        if (this.currentMember) {
+            logger.info("add action - Processing immediately")
+            await action({ member: this.currentMember });
+        } else {
+            logger.info("added auth action, not processing yet");
+            this.pendingLoginActions.push(action);
+        }
+    }
+
+    protected async processActions(member: CactusMember): Promise<void> {
+        logger.info(`Processing ${ this.pendingLoginActions.length } auth actions`);
+        let action = this.pendingLoginActions.shift();
+        while (action) {
+            try {
+                await action({ member });
+            } catch (error) {
+                logger.error("Failed to process pending action", error);
+            } finally {
+                action = this.pendingLoginActions.shift();
+            }
+        }
     }
 
     /**
@@ -218,5 +283,11 @@ export default class CactusMemberService {
             return;
         }
         await ref.update({ [CactusMember.Field.focusElement]: params.element });
+    }
+
+    async signOut() {
+        JournalFeedDataSource.current?.stop();
+        this.currentMemberUnsubscriber?.()
+        await getAuth().signOut();
     }
 }

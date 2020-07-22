@@ -1,5 +1,5 @@
 import { CactusElement } from "@shared/models/CactusElement";
-import { ActionButton, ContentAction, LinkStyle } from "@shared/models/PromptContent";
+import { ActionButton, ContentAction, LinkStyle, LinkTarget } from "@shared/models/PromptContent";
 import AppSettings from "@shared/models/AppSettings";
 
 export enum CardType {
@@ -19,7 +19,7 @@ export enum TextReplacementType {
 
 export interface LinkableActionButton extends ActionButton {
     href?: string;
-    target?: "_blank" | null | "" | undefined;
+    target?: LinkTarget;
 }
 
 export default class OnboardingCardViewModel {
@@ -157,7 +157,7 @@ export default class OnboardingCardViewModel {
             OnboardingCardViewModel.create({
                 slug: "discover-core-values",
                 type: CardType.upsell,
-                text: "Discover your core values when you start a free 7-day trial",
+                // text: "Discover your core values when you start a free 7-day trial",
             }),
             OnboardingCardViewModel.create({
                 slug: "activity-completed",

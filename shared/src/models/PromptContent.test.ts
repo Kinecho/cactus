@@ -1,4 +1,4 @@
-import PromptContent, { Content, ContentType } from "@shared/models/PromptContent";
+import PromptContent, { Content, ContentType, Image, isImage } from "@shared/models/PromptContent";
 import { fromFlamelinkData } from "@shared/util/FlamelinkUtils";
 import CactusMember from "@shared/models/CactusMember";
 import { CoreValue } from "@shared/models/CoreValueTypes";
@@ -212,4 +212,34 @@ describe("get question", () => {
         expect(isBlank(prompt.getQuestion())).toBeFalsy();
         expect(prompt.getQuestion()).toEqual("Question Text");
     });
+})
+
+describe("isImage typeguard", () => {
+    test("null is false", () => {
+        expect(isImage(null)).toBeFalsy();
+    })
+
+    test("undefined is false", () => {
+        expect(isImage(undefined)).toBeFalsy();
+    })
+
+    test("empty object is false", () => {
+        expect(isImage({})).toBeFalsy();
+    })
+
+
+    test("blank url is false", () => {
+        expect(isImage({ url: "" })).toBeFalsy();
+    })
+
+    test("undefined url is false", () => {
+        expect(isImage({ url: undefined } as Image)).toBeFalsy();
+    })
+
+    test("with a valid url is true", () => {
+        const image: Image = {
+            url: "https://cactus.app/image.png",
+        }
+        expect(isImage(image)).toBeTruthy();
+    })
 })

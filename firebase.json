@@ -164,7 +164,135 @@
                 },
                 {
                     "source": "**",
-                    "destination": "/single_page_index.html"
+                    "destination": "/main.html"
+                }
+            ]
+        },
+        {
+            "target": "webapp:alt",
+            "appAssociation": "AUTO",
+            "predeploy": [
+                "npm --prefix scripts run firebase:predeploy hosting:alt",
+                "bash ./sentry-init.sh",
+                "bash ./sentry-web-start.sh",
+                "npm --prefix ./web run config:get",
+                "npm --prefix ./web run build:firebase:alt",
+                "mkdir web/public/.well-known/",
+                "cp ./apple-app-site-association ./web/public/.well-known/",
+                "cp ./apple-app-site-association ./web/public/",
+                "cp web/apple-developer-merchantid-domain-association web/public/.well-known",
+                "cp web/apple-developer-domain-association.txt web/public/",
+                "cp web/apple-developer-domain-association.txt web/public/.well-known",
+                "SENTRY_NO_PROGRESS_BAR=1 bash ./sentry-web-upload.sh"
+            ],
+            "postdeploy": [
+                "npm --prefix scripts run firebase:postdeploy hosting:alt",
+                "bash ./sentry-web-finish.sh"
+            ],
+            "public": "web/public",
+            "ignore": [
+                "firebase.json",
+                "**/.*",
+                "**/node_modules/**",
+                "package.json",
+                "package-lock.json"
+            ],
+            "headers": [
+                {
+                    "source": "**",
+                    "headers": [
+                        {
+                            "key": "X-Frame-Options",
+                            "value": "DENY"
+                        },
+                        {
+                            "key": "Content-Security-Policy",
+                            "value": "frame-ancestors 'none';"
+                        }
+                    ]
+                },
+                {
+                    "source": "/.well-known/apple-developer-merchantid-domain-association",
+                    "headers": [
+                        {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ]
+                },
+                {
+                    "source": "/apple-developer-merchantid-domain-association",
+                    "headers": [
+                        {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ]
+                },
+                {
+                    "source": "/.well-known/apple-app-site-association",
+                    "headers": [
+                        {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ]
+                },
+                {
+                    "source": "/apple-app-site-association",
+                    "headers": [
+                        {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ]
+                },
+                {
+                    "source": "**/*.@(js|css)",
+                    "headers": [
+                        {
+                            "key": "Cache-Control",
+                            "value": "max-age=5184000"
+                        }
+                    ]
+                }
+            ],
+            "rewrites": [
+                {
+                    "source": "/apple-app-site-association",
+                    "destination": "/.well-known/apple-app-site-association"
+                },
+                {
+                    "source": "/apple-developer-merchantid-domain-association",
+                    "destination": "/.well-known/apple-developer-merchantid-domain-association"
+                },
+                {
+                    "source": "/manage-notifications/**",
+                    "function": "notificationPreferences"
+                },
+                {
+                    "source": "/feature-auth/**",
+                    "function": "user"
+                },
+                {
+                    "source": "/data-exports/**",
+                    "function": "user"
+                },
+                {
+                    "source": "/solo-proxy-auth",
+                    "destination": "/solo_proxy_auth.html"
+                },
+                {
+                    "source": "/p/**",
+                    "dynamicLinks": true
+                },
+                {
+                    "source": "/s/**",
+                    "dynamicLinks": true
+                },
+                {
+                    "source": "**",
+                    "destination": "/main.html"
                 }
             ]
         }

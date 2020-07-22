@@ -1,31 +1,32 @@
 <template>
-    <section v-if="isPlusMember && gapAssessmentResults" class="gapContainer borderContainer">
+    <section v-if="isPlusMember && gapAssessmentResults" class="gapContainer">
+        <h2>Happiness Quiz</h2>
         <div class="flexIt">
-            <h2>Happiness Quiz Results</h2>
-            <p class="subtext">Importance and satisfaction across Cactus's five core elements</p>
-            <div class="gapFocus" v-if="memberFocusElement">
-                <p class="statLabel">Focus</p>
-                <h3>{{memberFocusElement}}</h3>
+            <div class="textContainer">
+                <div class="gapFocus" v-if="memberFocusElement">
+                    <p class="statLabel">Focus</p>
+                    <h3>{{memberFocusElement}}</h3>
+                </div>
+                <div class="legend">
+                    <gap-analysis-legend :stacked="true"/>
+                </div>
             </div>
-            <div class="legend">
-                <gap-analysis-legend :stacked="true"/>
-            </div>
-        </div>
-        <div class="radarChartContainer">
-            <spinner v-if="loading" message="Loading Results..." :delay="1200"/>
-            <Results v-if="!loading && gapAssessmentResults"
-                    :results="gapAssessmentResults"
-                    :selectable-elements="selectFocusEnabled"
-                    :pulsing-enabled="selectFocusEnabled"
-                    :hideElements="false"
-                    :selected-element="radarChartSelectedElement"
-                    @elementSelected="setSelectedElement"
-                    :withLabel="showElementLabels"
-                    :showElementImages="true"
-                    :showLegend="false"
-            />
-            <div class="legend">
-                <gap-analysis-legend/>
+            <div class="radarChartContainer">
+                <spinner v-if="loading" message="Loading Results..." :delay="1200"/>
+                <Results v-if="!loading && gapAssessmentResults"
+                        :results="gapAssessmentResults"
+                        :selectable-elements="selectFocusEnabled"
+                        :pulsing-enabled="selectFocusEnabled"
+                        :hideElements="false"
+                        :selected-element="radarChartSelectedElement"
+                        @elementSelected="setSelectedElement"
+                        :withLabel="showElementLabels"
+                        :showElementImages="true"
+                        :showLegend="false"
+                />
+                <div class="legend">
+                    <gap-analysis-legend/>
+                </div>
             </div>
         </div>
         <div v-if="selectFocusEnabled" class="gapActions">
@@ -46,22 +47,17 @@
         <dropdown-menu :items="mentalFitnessDropdownLinks" class="dotsBtn"/>
     </section>
     <!-- Show PLUS User Empty State message -->
-    <section v-else-if="isPlusMember" class="plus nogapContainer borderContainer">
-        <h2>Happiness Quiz</h2>
-        <p class="subtext">Find the gap between what is important to you and how satisfied you are regarding
-            that area of your&nbsp;life.</p>
-        <router-link tag="button" class="esButton" :to="gapAssessmentHref">Take the
-            <span>Mental Fitness</span> quiz
-        </router-link>
+    <section v-else-if="isPlusMember" class="plus nogapContainer">
+        <h2>What Makes You Happy?</h2>
+        <p class="subtext">Understand what contributes to (and detracts from) your satisfaction.</p>
+        <router-link tag="button" class="secondary esButton" :to="gapAssessmentHref">Take the Quiz</router-link>
     </section>
     <!-- Show BASIC User Upgrade message -->
-    <section v-else-if="!isPlusMember" class="basic nogapContainer borderContainer">
-        <h2>What makes you happy?</h2>
-        <p class="subtext">Get access to the quiz that helps you identify and focus on the people, places, and things
-            that make you happy.</p>
-        <router-link tag="button" class="esButton" :to="pricingHref">Try Cactus Plus
-        </router-link>
-    </section>
+    <router-link v-else-if="!isPlusMember" tag="section" class="basic nogapContainer" :to="pricingHref">
+        <svg class="lock" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        <h2>What Makes You Happy?</h2>
+        <p class="subtext">Understand what contributes to (and detracts from) your satisfaction.</p>
+    </router-link>
 </template>
 
 <script lang="ts">
@@ -76,12 +72,14 @@
     import Results from "@components/gapanalysis/Results.vue";
     import Spinner from "@components/Spinner.vue";
     import GapAnalysisLegend from "@components/gapanalysis/GapAnalysisLegend.vue";
+    import SvgIcon from "@components/SvgIcon.vue";
 
     @Component({
         components: {
             DropdownMenu,
             Results,
             GapAnalysisLegend,
+            SvgIcon,
             Spinner
         }
     })
@@ -159,29 +157,37 @@
     @import "insights";
 
     .gapContainer {
-        @include r(768) {
-            flex-basis: 50%;
-            margin-right: 1.6rem;
+        border: 1px solid $lightest;
+        border-radius: 1.6rem;
+        margin: 0 2.4rem 3.2rem;
+        padding: 2.4rem 2.4rem 0;
+        position: relative;
+
+        @include r(374) {
+            margin: 0 0 3.2rem;
+            padding: 2.4rem 3.2rem 0;
         }
         @include r(960) {
-            display: flex;
-            flex-basis: 66%;
-            flex-direction: row;
-        }
-
-        .subtext {
-            margin: 0 0 4rem;
+            flex-basis: 50%;
+            margin-bottom: 4.8rem;
+            margin-right: 1.6rem;
         }
     }
 
     .flexIt {
+        @include r(960) {
+            align-items: center;
+            display: flex;
+        }
+    }
 
+    .textContainer {
         .legend {
             display: none;
         }
 
         @include r(960) {
-            width: 45%;
+            padding-right: 1.6rem;
 
             .legend {
                 display: flex;
@@ -189,8 +195,16 @@
         }
     }
 
+    h2 {
+        margin-bottom: 3.2rem;
+
+        @include r(960) {
+            margin-bottom: 0;
+        }
+    }
+
     .gapFocus {
-        margin-bottom: 4rem;
+        margin-bottom: 2.4rem;
 
         @include r(960) {
             margin-bottom: 0;
@@ -202,9 +216,12 @@
         max-width: 38rem;
         width: 100%;
 
+        .legend {
+            margin-bottom: 3.2rem;
+        }
+
         @include r(960) {
-            padding-left: 3.2rem;
-            width: 55%;
+            width: 66%;
 
             .legend {
                 display: none;
@@ -212,50 +229,82 @@
         }
     }
 
+    .gapContainer,
     .nogapContainer {
-        @include shadowbox;
-        order: 2;
+        margin: 0 2.4rem 3.2rem;
+
+        @include r(374) {
+            margin: 0 0 3.2rem;
+        }
+        @include r(768) {
+            margin: 0 0 4.8rem 1.6rem;
+        }
+    }
+
+    .nogapContainer {
+        cursor: pointer;
         position: relative;
 
-        @include r(768) {
-            flex-basis: 50%;
-            flex-grow: 1;
-            order: 2;
-        }
-
         &.plus {
-            background-image: url(/assets/images/crosses2.svg),
-            url(/assets/images/outlineBlob.svg),
-            url(/assets/images/royalBlob.svg),
-            url(/assets/images/pinkBlob5.svg);
-            background-position: -1rem 18rem, right -29rem top -32rem, -11rem 16rem, 61% -133px;
-            background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
-            background-size: 20rem, 48rem, 30rem, 23rem;
+            background-color: $royal;
+            background-image: url(/assets/images/grainy.png), url(/assets/images/radarChartGraphicGreen.svg);
+            background-position: 0 0, right -17rem bottom -9rem;
+            background-repeat: repeat, no-repeat;
+            background-size: 16rem, 43rem;
+            border-radius: 1.6rem;
+            color: $white;
+            padding: 2.4rem 3.2rem 3.2rem;
 
-            @include r(768) {
-                background-position: -1rem 28rem, right -9rem top -32rem, -11rem 32rem, 61% -133px;
+            @include r(600) {
+                transition: box-shadow .3s, transform .3s ease-in;
+
+                &:hover {
+                    box-shadow: 0 6.9px 21px -24px rgba(0, 0, 0, 0.012),
+                        0 11.5px 32.3px -24px rgba(0, 0, 0, 0.036),
+                        0 13.9px 37.7px -24px rgba(0, 0, 0, 0.074),
+                        0 24px 63px -24px rgba(0, 0, 0, 0.15);
+                    transform: translateY(-.2rem);
+                }
+
+                .subtext {
+                    font-size: 1.8rem;
+                }
+
+                .subtext + button {
+                    display: block;
+                    margin-top: 2.4rem;
+                    width: auto;
+                }
+
+                button:hover {
+                    background-color: $white;
+                }
+            }
+
+            button {
+                display: none;
             }
         }
 
         &.basic {
-            background: url(/assets/images/radarChartGraphic.svg) center top 14rem no-repeat;
-            padding-bottom: 7.2rem;
+            background-color: $royal;
+            background-image: url(/assets/images/grainy.png), url(/assets/images/radarChartGraphicGreen.svg);
+            background-position: 0 0, right -11rem center;
+            background-repeat: repeat, no-repeat;
+            background-size: 16rem, 19rem;
+            border-radius: 1.6rem;
+            color: $white;
+            padding: 2.4rem 3.2rem 3.2rem 5.6rem;
 
             @include r(600) {
-                background-position: right -38rem center;
-                padding-bottom: 3.2rem;
+                transition: box-shadow .3s, transform .3s ease-in;
 
-                .subtext {
-                    max-width: 66%;
-                }
-            }
-
-            @include r(768) {
-                background-size: 150%;
-                background-position: center top 22rem;
-
-                .subtext {
-                    max-width: none;
+                &:hover {
+                    box-shadow: 0 6.9px 21px -24px rgba(0, 0, 0, 0.012),
+                        0 11.5px 32.3px -24px rgba(0, 0, 0, 0.036),
+                        0 13.9px 37.7px -24px rgba(0, 0, 0, 0.074),
+                        0 24px 63px -24px rgba(0, 0, 0, 0.15);
+                    transform: translateY(-.2rem);
                 }
             }
         }
@@ -263,13 +312,13 @@
         h2 {
             margin-bottom: .4rem;
         }
+    }
 
-        .subtext {
-            margin-bottom: 2.4rem;
+    .esButton {
+        width: 100%;
 
-            @include r(768) {
-                max-width: 48rem;
-            }
+        @include r(768) {
+            width: auto;
         }
     }
 

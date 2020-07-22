@@ -86,7 +86,7 @@ export interface CheckoutRedirectResult {
  * @param {string} options.subscriptionProductId
  * @return {string}
  */
-export function getSignUpStripeCheckoutPath(options: { subscriptionProductId: string, checkoutSuccessUrl?: string, checkoutCancelUrl?: string }): string {
+export function getSignUpStripeCheckoutPath(options: { subscriptionProductId: string, checkoutSuccessUrl?: string, checkoutCancelUrl?: string|null }): string {
     const { subscriptionProductId, checkoutSuccessUrl, checkoutCancelUrl } = options;
     const copy = CopyService.getSharedInstance().copy;
     // const loginRedirectUrl = `${ PageRoute.CHECKOUT }?${ QueryParam.SUBSCRIPTION_PRODUCT_ID }=${ subscriptionProductId }`;
@@ -128,7 +128,7 @@ export function getSignUpAndroidRestoreUrl(): string {
  * checkoutCancelUrl?: string
  * }} options
  */
-export async function sendToLoginForCheckout(options: { subscriptionProductId: string, checkoutSuccessUrl?: string, checkoutCancelUrl?: string }) {
+export async function sendToLoginForCheckout(options: { subscriptionProductId: string, checkoutSuccessUrl?: string, checkoutCancelUrl?: string|null }) {
     logger.warn("Sending to login before checkout can occur");
     if (isAndroidApp()) {
         window.location.href = getSignUpAndroidCheckoutUrl();
@@ -156,7 +156,7 @@ export async function startCheckout(options: {
     subscriptionProduct?: SubscriptionProduct
     member?: CactusMember | null | undefined,
     stripeSuccessUrl?: string,
-    stripeCancelUrl?: string
+    stripeCancelUrl?: string|null
 }): Promise<CheckoutRedirectResult> {
     const {
         subscriptionProductId,
@@ -304,7 +304,7 @@ function createAndroidCheckoutDelegateHandler(): Promise<CheckoutRedirectResult>
  *  cancelUrl: string}} options
  * @return {Promise<CheckoutRedirectResult>}
  */
-export async function redirectToStripeCheckout(options: { subscriptionProductId: string, member: CactusMember, successUrl?: string, cancelUrl?: string }): Promise<CheckoutRedirectResult> {
+export async function redirectToStripeCheckout(options: { subscriptionProductId: string, member: CactusMember, successUrl?: string, cancelUrl?: string|null }): Promise<CheckoutRedirectResult> {
     const { subscriptionProductId, member, successUrl, cancelUrl } = options;
     await CactusMemberService.sharedInstance.getCurrentMember(); //just to ensure we don't prematurely redirect away - this waits for the auth to load at least once
     const sessionResponse = await createStripeSession({

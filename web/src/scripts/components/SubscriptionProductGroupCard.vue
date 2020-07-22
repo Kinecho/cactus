@@ -2,7 +2,7 @@
     <section class="tab-content" :class="[productGroup.tier.toLowerCase() + '-panel', `display-index-${displayIndex}`, {tabsOnMobile}]">
 
         <div class="comfort" v-if="startTrial">
-            First 7 days free!
+            <span v-if="trialDurationMessage">{{trialDurationMessage}}</span>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 15">
                 <path fill="#CC33A1" d="M8.246 1.33a4.54 4.54 0 116.423 6.424l-6.175 6.175a.699.699 0 01-.988 0L1.33 7.754A4.542 4.542 0 017.753 1.33L8 1.577l.246-.246z"/>
             </svg>
@@ -75,202 +75,259 @@
     import { PageRoute } from "@shared/PageRoutes";
     import CactusMember from "@shared/models/CactusMember";
     import Logger from "@shared/Logger";
-    import { stringifyJSON } from "@shared/util/ObjectUtil";
+    import { isNull, stringifyJSON } from "@shared/util/ObjectUtil";
     import { pushRoute } from "@web/NavigationUtil";
+    import Component from "vue-class-component";
+    import { Prop } from "vue-property-decorator";
+    import { isBlank } from "@shared/util/StringUtil";
+    import PromotionalOfferManager from "@web/managers/PromotionalOfferManager";
 
     const copy = CopyService.getSharedInstance().copy;
     const logger = new Logger("SubscriptionProductGroupCard");
 
-    export default Vue.extend({
+    @Component({
         components: {
             Features: ProductFeatureList,
             Markdown: MarkdownText,
-        },
-        props: {
-            productGroup: { type: Object as () => SubscriptionProductGroupEntry, required: true },
-            displayIndex: Number,
-            showFeatures: { type: Boolean, default: false },
-            member: { type: Object as () => CactusMember | undefined },
-            tabsOnMobile: { type: Boolean, default: true },
-            learnMoreLinks: { type: Boolean, default: false },
-            isRestoringPurchases: { type: Boolean, default: false },
-            showFooter: { type: Boolean, default: true },
-            startTrial: { type: Boolean, default: false },
-            checkoutSuccessUrl: { type: String, required: false },
-            checkoutCancelUrl: { type: String, required: false },
-        },
-        data(): {
-            selectedProduct: SubscriptionProduct,
-            copy: LocalizedCopy,
-            isProcessing: boolean,
-            checkoutError: string | undefined,
-            learnMorePath: PageRoute,
-
-        } {
-            return {
-                selectedProduct: this.productGroup.products[0],
-                copy,
-                isProcessing: false,
-                checkoutError: undefined,
-                learnMorePath: PageRoute.PRICING,
-            }
-        },
-        beforeMount() {
-            this.selectedProduct = this.getSelectedProduct();
-        },
-        computed: {
-            planButtonStyles(): any {
-                let numProducts = this.productGroup.products.length ?? 0;
-                if (numProducts === 0) {
-                    numProducts = 1;
-                }
-                return {
-                    width: `${(100 / numProducts) - 1}%`,
-                }
-            },
-            tierName(): string | undefined {
-                return subscriptionTierDisplayName(this.productGroup.tier);
-            },
-            footer(): ProductGroupFooter | undefined {
-                return this.productGroup.productGroup?.footer;
-            },
-            groupDescriptionMarkdown(): string | undefined {
-                if (this.isTrialingTier && this.productGroup.productGroup?.trialUpgradeMarkdown) {
-                    return this.productGroup.productGroup?.trialUpgradeMarkdown
-                }
-                return this.productGroup.productGroup?.descriptionMarkdown
-            },
-            selectedPrice(): string {
-                return this.formatPrice(this.selectedProduct.priceCentsUsd)
-            },
-            isFree(): boolean {
-                return this.selectedProduct?.isFree ?? false;
-            },
-            buttonText(): string {
-                if (this.isProcessing || this.isRestoringPurchases) {
-                    return copy.common.LOADING;
-                }
-
-                if (this.isNotCurrentTier && this.selectedProduct.isFree && !isOptInTrialing) {
-                    return copy.checkout.MANAGE_MY_PLAN;
-                }
-                if (this.selectedProduct.isFree) {
-                    return copy.auth.SIGN_UP_FREE;
-                } else if (this.signedIn) {
-                    return `${ copy.checkout.TRY_CACTUS_PLUS }`;
-                } else {
-                    return `${ copy.checkout.PURCHASE } — ${ this.selectedPrice } / ${ copy.checkout.BILLING_PERIOD_PER[this.selectedProduct.billingPeriod] }`
-                }
-            },
-            sections(): ProductSection[] {
-                return this.productGroup.productGroup?.sections ?? [];
-            },
-            isNotCurrentTier(): boolean {
-                return this.signedIn && !this.isCurrentTier
-            },
-            isCurrentTier(): boolean {
-                return this.productGroup.tier === this.member?.tier;
-            },
-            isOptInTrialing(): boolean {
-                return this.member?.isOptInTrialing ?? false
-            },
-            isTrialingTier(): boolean {
-                return this.productGroup.tier === this.member?.tier && this.member?.isOptInTrialing;
-            },
-            signedIn(): boolean {
-                return !!this.member
-            },
-            showLearnMore(): boolean {
-                return this.learnMoreLinks && this.member && this.canPurchaseTier && this.productGroup.tier !== SubscriptionTier.BASIC || false;
-            },
-            canPurchaseTier(): boolean {
-                return (!this.isCurrentTier || this.isTrialingTier) && (!this.signedIn || this.productGroup.tier !== SubscriptionTier.BASIC)
-            },
-            preSelectedProductEntryId(): string | null {
-                return getQueryParam(QueryParam.SELECTED_PRODUCT);
-            },
-            preSelectedProductTier(): string | null {
-                return getQueryParam(QueryParam.SELECTED_TIER);
-            },
-            preSelectedProductBillingPeriod(): string | null {
-                return getQueryParam(QueryParam.SELECTED_PERIOD);
-            },
-        },
-        methods: {
-            formatPrice(priceCents: number): string {
-                return `$${ (priceCents / 100).toFixed(2) }`.replace(".00", "");
-            },
-            isSelected(product: SubscriptionProduct): boolean {
-                return this.selectedProduct !== undefined && this.selectedProduct?.entryId === product.entryId && this.canPurchaseTier;
-            },
-            getSelectedProduct(): SubscriptionProduct {
-                return this.getPreSelectedProduct() ||
-                this.productGroup.products.find(product => product.billingPeriod == this.productGroup.defaultSelectedPeriod) ||
-                this.productGroup.products[0];
-            },
-            getPreSelectedProduct(): SubscriptionProduct | undefined {
-                const tier = SubscriptionTier[this.preSelectedProductTier as keyof typeof SubscriptionTier];
-                const period = BillingPeriod[this.preSelectedProductBillingPeriod as keyof typeof BillingPeriod];
-
-                if (this.preSelectedProductEntryId) {
-                    return this.productGroup.products.find(product => product.entryId == this.preSelectedProductEntryId);
-                } else if (tier && period) {
-                    return this.productGroup.products.find(product => product.billingPeriod == period && product.subscriptionTier == tier);
-                }
-
-                return undefined;
-            },
-            async checkout() {
-                //todo
-                this.isProcessing = true;
-
-                const product = this.selectedProduct;
-
-                if (this.isCurrentTier && !this.isOptInTrialing) {
-                    await this.goToAccount()
-                    return;
-                }
-
-                if (product.isFree && !this.signedIn) {
-                    await this.goToSignup();
-                    return;
-                }
-
-                const subscriptionProductId = product.entryId;
-                if (!subscriptionProductId) {
-                    this.checkoutError = "The product does not have an entry id. Can not continue checkout";
-                    console.log(this.checkoutError);
-                    this.isProcessing = false;
-                    return;
-                }
-
-                const successUrl = this.checkoutSuccessUrl;
-                const cancelUrl = this.checkoutCancelUrl;
-                const checkoutResult = await startCheckout({
-                    subscriptionProductId,
-                    subscriptionProduct: product,
-                    stripeSuccessUrl: successUrl,
-                    stripeCancelUrl: cancelUrl
-                });
-                if (!checkoutResult.success && !checkoutResult.canceled) {
-                    logger.error("failed to load checkout", stringifyJSON(checkoutResult, 2));
-                    this.checkoutError = "Unable to load checkout. Please try again later";
-                    this.isProcessing = false;
-                } else {
-                    this.isProcessing = false;
-                    this.checkoutError = undefined;
-                }
-            },
-            async goToAccount() {
-                this.isProcessing = false;
-                await pushRoute(PageRoute.ACCOUNT)
-            },
-            async goToSignup() {
-                this.isProcessing = false;
-                await pushRoute(PageRoute.SIGNUP);
-            },
         }
     })
+    export default class SubscriptionProductGroupCard extends Vue {
+
+        @Prop({ type: Object as () => SubscriptionProductGroupEntry, required: true })
+        productGroup!: SubscriptionProductGroupEntry;
+
+        @Prop({ type: Number, default: 0 })
+        displayIndex!: number;
+
+        @Prop({ type: Boolean, default: false })
+        showFeatures!: boolean;
+
+        @Prop({ type: Object as () => CactusMember | undefined, default: undefined })
+        member!: CactusMember | undefined;
+
+        @Prop({ type: Boolean, default: true })
+        tabsOnMobile!: boolean;
+
+        @Prop({ type: Boolean, default: false })
+        learnMoreLinks!: boolean;
+
+        @Prop({ type: Boolean, default: false })
+        isRestoringPurchases!: boolean;
+
+        @Prop({ type: Boolean, default: true })
+        showFooter!: boolean;
+
+        @Prop({ type: Boolean, default: false })
+        startTrial!: boolean;
+
+        @Prop({ type: String, required: false })
+        checkoutSuccessUrl!: string;
+
+        @Prop({ type: String, required: false, default: null })
+        checkoutCancelUrl!: string | null;
+
+        copy: LocalizedCopy = copy;
+
+        selectedProduct: SubscriptionProduct = this.productGroup.products[0];
+        isProcessing = false;
+        checkoutError: string | null = null;
+
+        get learnMorePath(): PageRoute {
+            return PageRoute.PRICING
+        }
+
+        beforeMount() {
+            this.selectedProduct = this.getSelectedProduct();
+        }
+
+        get planButtonStyles(): any {
+            let numProducts = this.productGroup.products.length ?? 0;
+            if (numProducts === 0) {
+                numProducts = 1;
+            }
+            return {
+                width: `${ (100 / numProducts) - 1 }%`,
+            }
+        }
+
+        get tierName(): string | undefined {
+            return subscriptionTierDisplayName(this.productGroup.tier);
+        }
+
+        get footer(): ProductGroupFooter | undefined {
+            const offerTrialDays = PromotionalOfferManager.shared.getCurrentOffer(this.member)?.trialDays;
+            const footer = this.productGroup.productGroup?.footer;
+
+            if (isNull(offerTrialDays) || isBlank(footer?.textMarkdown)) {
+                return footer;
+            } else if (offerTrialDays > 1) {
+                return { textMarkdown: `First ${ offerTrialDays } days free! Cancel anytime.` }
+            } else if (offerTrialDays === 1) {
+                return { textMarkdown: `First day free! Cancel anytime.` }
+            }
+            return undefined;
+
+        }
+
+        get groupDescriptionMarkdown(): string | undefined {
+            if (this.isTrialingTier && this.productGroup.productGroup?.trialUpgradeMarkdown) {
+                return this.productGroup.productGroup?.trialUpgradeMarkdown
+            }
+            return this.productGroup.productGroup?.descriptionMarkdown
+        }
+
+        get selectedPrice(): string {
+            return this.formatPrice(this.selectedProduct.priceCentsUsd)
+        }
+
+        get isFree(): boolean {
+            return this.selectedProduct?.isFree ?? false;
+        }
+
+        get trialDurationMessage(): string | null {
+            return "First 7 days free!"
+        }
+
+        get buttonText(): string {
+            if (this.isProcessing || this.isRestoringPurchases) {
+                return copy.common.LOADING;
+            }
+
+            if (this.isNotCurrentTier && this.selectedProduct.isFree && !isOptInTrialing) {
+                return copy.checkout.MANAGE_MY_PLAN;
+            }
+            if (this.selectedProduct.isFree) {
+                return copy.auth.SIGN_UP_FREE;
+            } else if (this.signedIn) {
+                return `${ copy.checkout.TRY_CACTUS_PLUS }`;
+            } else {
+                return `${ copy.checkout.PURCHASE } — ${ this.selectedPrice } / ${ copy.checkout.BILLING_PERIOD_PER[this.selectedProduct.billingPeriod] }`
+            }
+        }
+
+        get sections(): ProductSection[] {
+            return this.productGroup.productGroup?.sections ?? [];
+        }
+
+        get isNotCurrentTier(): boolean {
+            return this.signedIn && !this.isCurrentTier
+        }
+
+        get isCurrentTier(): boolean {
+            return this.productGroup.tier === this.member?.tier;
+        }
+
+        get isOptInTrialing(): boolean {
+            return this.member?.isOptInTrialing ?? false
+        }
+
+        get isTrialingTier(): boolean {
+            return this.productGroup.tier === this.member?.tier && this.member?.isOptInTrialing;
+        }
+
+        get signedIn(): boolean {
+            return !!this.member
+        }
+
+        get showLearnMore(): boolean {
+            return this.learnMoreLinks && this.member && this.canPurchaseTier && this.productGroup.tier !== SubscriptionTier.BASIC || false;
+        }
+
+        get canPurchaseTier(): boolean {
+            return (!this.isCurrentTier || this.isTrialingTier) && (!this.signedIn || this.productGroup.tier !== SubscriptionTier.BASIC)
+        }
+
+        get preSelectedProductEntryId(): string | null {
+            return getQueryParam(QueryParam.SELECTED_PRODUCT);
+        }
+
+        get preSelectedProductTier(): string | null {
+            return getQueryParam(QueryParam.SELECTED_TIER);
+        }
+
+        get preSelectedProductBillingPeriod(): string | null {
+            return getQueryParam(QueryParam.SELECTED_PERIOD);
+        }
+
+        formatPrice(priceCents: number): string {
+            return `$${ (priceCents / 100).toFixed(2) }`.replace(".00", "");
+        }
+
+        isSelected(product: SubscriptionProduct): boolean {
+            return this.selectedProduct.entryId === product.entryId && this.canPurchaseTier;
+        }
+
+        getSelectedProduct(): SubscriptionProduct {
+            return this.getPreSelectedProduct() ||
+            this.productGroup.products.find(product => product.billingPeriod == this.productGroup.defaultSelectedPeriod) ||
+            this.productGroup.products[0];
+        }
+
+        getPreSelectedProduct(): SubscriptionProduct | undefined {
+            const tier = SubscriptionTier[this.preSelectedProductTier as keyof typeof SubscriptionTier];
+            const period = BillingPeriod[this.preSelectedProductBillingPeriod as keyof typeof BillingPeriod];
+
+            if (this.preSelectedProductEntryId) {
+                return this.productGroup.products.find(product => product.entryId == this.preSelectedProductEntryId);
+            } else if (tier && period) {
+                return this.productGroup.products.find(product => product.billingPeriod == period && product.subscriptionTier == tier);
+            }
+
+            return undefined;
+        }
+
+        async checkout() {
+            //todo
+            this.isProcessing = true;
+
+            const product = this.selectedProduct;
+
+            if (this.isCurrentTier && !this.isOptInTrialing) {
+                await this.goToAccount()
+                return;
+            }
+
+            if (product.isFree && !this.signedIn) {
+                await this.goToSignup();
+                return;
+            }
+
+            const subscriptionProductId = product.entryId;
+            if (!subscriptionProductId) {
+                this.checkoutError = "The product does not have an entry id. Can not continue checkout";
+                console.log(this.checkoutError);
+                this.isProcessing = false;
+                return;
+            }
+
+            const successUrl = this.checkoutSuccessUrl;
+            const cancelUrl = this.checkoutCancelUrl;
+            const checkoutResult = await startCheckout({
+                subscriptionProductId,
+                subscriptionProduct: product,
+                stripeSuccessUrl: successUrl,
+                stripeCancelUrl: cancelUrl
+            });
+            if (!checkoutResult.success && !checkoutResult.canceled) {
+                logger.error("failed to load checkout", stringifyJSON(checkoutResult, 2));
+                this.checkoutError = "Unable to load checkout. Please try again later";
+                this.isProcessing = false;
+            } else {
+                this.isProcessing = false;
+                this.checkoutError = null;
+            }
+        }
+
+        async goToAccount() {
+            this.isProcessing = false;
+            await pushRoute(PageRoute.ACCOUNT)
+        }
+
+        async goToSignup() {
+            this.isProcessing = false;
+            await pushRoute(PageRoute.SIGNUP);
+        }
+    }
 </script>
 
 <style lang="scss" scoped>

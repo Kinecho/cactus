@@ -16,10 +16,10 @@
         computed: {
             sourceCopy(): string {
                 if (this.treatment === 'quote') {
-                    return preventOrphanedWords(`"${ this.source.trim() }"`) ?? "";
+                    return preventOrphanedWords(`"${ this.source?.trim() }"`) ?? "";
                 }
 
-                return preventOrphanedWords(this.source.trim()) ?? "";
+                return preventOrphanedWords(this.source?.trim()) ?? "";
             }
         }
     })

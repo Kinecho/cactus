@@ -1,11 +1,11 @@
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
+import { OfferDetails } from "@shared/models/PromotionalOffer";
 
 
 export interface StripeCheckoutSession {
     sessionId: string,
     planId?: string,
     customerId?: string,
-
     /**
      * The amount to charge, in cents USD
      */
@@ -29,7 +29,7 @@ export default class CheckoutSession extends BaseModel {
     memberId!: string;
     memberEmail?: string;
     stripe?: StripeCheckoutSession;
-
+    promotionalOfferEntryId?: string;
 
     static stripe(args: {
         memberId: string,
@@ -38,14 +38,15 @@ export default class CheckoutSession extends BaseModel {
         planId?: string,
         customerId?: string,
         amount?: number | null,
+        offerDetails?: OfferDetails|null,
         raw?: any,
     }): CheckoutSession {
         const session = new CheckoutSession();
-        const {memberId, email, sessionId, planId, customerId, amount, raw} = args;
+        const {memberId, email, sessionId, planId, customerId, amount, raw, offerDetails} = args;
         session.memberId = memberId;
         session.memberEmail = email;
         session.stripe = {sessionId, planId, customerId, amount, raw};
-
+        session.promotionalOfferEntryId = offerDetails?.entryId;
         return session;
     }
 }

@@ -258,6 +258,7 @@ const defaultTestConfig: CactusConfig = {
         public_key: "public_key",
         secret_key: "secret_key",
         webhook_bearer_token: "test_bearer_token",
+        app_id: "1234",
     },
     tasks: {
         project_id: "cactus-app-stage",

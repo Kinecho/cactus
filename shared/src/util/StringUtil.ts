@@ -196,7 +196,7 @@ export function toCamelCamse(input: string): string {
 }
 
 
-export function getResponseText(responses?: ReflectionResponse[]): string | undefined {
+export function getResponseText(responses?: ReflectionResponse[] | null | undefined): string | undefined {
     if (!responses) {
         return;
     }
@@ -244,12 +244,16 @@ export function getPromptQuestion(args: { prompt?: ReflectionPrompt, promptConte
     return;
 }
 
-export function isBlank(input: string | null | undefined): boolean {
-    if (!input || !input.trim()) {
+export function isBlank(input?: string|null|undefined): input is "" | null | undefined {
+    if (!input || input.trim() === "") {
         return true;
     }
 
     return false;
+}
+
+export function notBlank(input?: string | null | undefined): input is string {
+    return !isBlank(input);
 }
 
 export function getProviderDisplayName(provider?: string): string {

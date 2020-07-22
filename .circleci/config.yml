@@ -10,7 +10,7 @@ executors:
   cactus-web:
     working_directory: ~/project
     docker:
-      - image: circleci/node:10.18.1-browsers
+      - image: cimg/node:10.18.1
 aliases:
   ## Module Names
   - &root-module ""
@@ -262,9 +262,11 @@ jobs:
     steps:
       - checkout
       - restore-module:
-          module: web
+          module: *root-module
       - restore-module:
-          module: shared
+          module: *web-module
+      - restore-module:
+          module: *shared-module
       - run:
           name: "TSLint"
           command: npm --prefix web run lint:ci
@@ -283,6 +285,8 @@ jobs:
     resource_class: small
     steps:
       - checkout
+      - restore-module:
+          module: *root-module
       - restore-module:
           module: *functions-module
       - restore-module:
@@ -312,6 +316,8 @@ jobs:
     steps:
       - checkout
       - restore-module:
+          module: *root-module
+      - restore-module:
           module: shared
       - run:
           name: "TSLint"
@@ -332,9 +338,11 @@ jobs:
     steps:
       - checkout
       - restore-module:
-          module: shared
+          module: *root-module
       - restore-module:
-          module: scripts
+          module: *shared-module
+      - restore-module:
+          module: *scripts-module
       - restore-module:
           module: *admin-module
       - run:
@@ -376,6 +384,11 @@ jobs:
           message: "$CIRCLE_USERNAME has promoted a Stage Build. <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|View Workflow>"
   branch-deploy-started:
     executor: cactus-web
+    parameters:
+      target:
+        type: string
+        description: The name of the project being deployed
+        default: "stage"
     resource_class: small
     steps:
       - run: echo "Notify Feature Branch deploy started"
@@ -386,7 +399,20 @@ jobs:
           include_visit_job_action: false
           include_project_field: false
           ts: "$(date +%s)"
-          message: "$CIRCLE_USERNAME has started deploying \\`${CIRCLE_BRANCH}\\` to stage. <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|View Workflow>"
+          message: "$CIRCLE_USERNAME has started deploying \\`${CIRCLE_BRANCH}\\` to <<parameters.target>>. <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|View Workflow>"
+  branch-deploy-started-prod:
+    executor: cactus-web
+    resource_class: small
+    steps:
+      - run: echo "Notify Feature Branch deploy to prod started"
+      - slack/notify:
+          <<: *webhook-engineering-ci
+          color: 'good'
+          include_job_number_field: false
+          include_visit_job_action: false
+          include_project_field: false
+          ts: "$(date +%s)"
+          message: "$CIRCLE_USERNAME has started deploying \\`${CIRCLE_BRANCH}\\` to prod-alt. <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|View Workflow>"
 
   branch-deploy-finished:
     executor: cactus-web
@@ -714,22 +740,52 @@ workflows:
           filters:
             branches:
               ignore: master
-      - branch_deploy_fe_approval:
+      - branch_deploy_fe_approval_stage_alt:
           type: approval
-          name: &stage_fe_approval_name "Approve Hosting Only To Stage"
+          name: &stage_alt_fe_approval_name "Approve FE To Stage - Branch"
           requires:
             - *all_tests_finished
       - firebase-deploy-some:
-          name: &branch_deploy_only_hosting_name "Deploy Hosting Only to Stage"
+          name: "Deploy FE to Stage-Alt"
+          project: "stage"
+          modules: "hosting:webapp:alt"
+          requires:
+            - *stage_alt_fe_approval_name
+      - branch-deploy-started:
+          name: "Notify Stage-Alt Deploy Started"
+          target: "Stage - Feature Branch"
+          requires:
+            - *stage_alt_fe_approval_name
+      - branch_deploy_fe_approval_prod_alt:
+          type: approval
+          name: &prod_alt_fe_approval_name "Approve FE To Prod-Alt"
+          requires:
+            - *all_tests_finished
+      - firebase-deploy-some:
+          name: "Deploy FE to Prod-Alt"
+          project: "prod"
+          modules: "hosting:webapp:alt"
+          requires:
+            - *prod_alt_fe_approval_name
+      - branch-deploy-started-prod:
+          name: "Notify Prod-Alt Deploy Started"
+          requires:
+            - *prod_alt_fe_approval_name
+      - branch_deploy_fe_approval:
+          type: approval
+          name: &stage_fe_approval_name "Approve FE To Stage"
+          requires:
+            - *all_tests_finished
+      - firebase-deploy-some:
+          name: &branch_deploy_only_hosting_name "Deploy FE to Stage"
           project: "stage"
           modules: "hosting,firestore:rules,firestore:indexes"
           requires:
             - *stage_fe_approval_name
       - branch-deploy-finished:
-          name: "Notify Hosting Finished"
+          name: "Notify FE Finished"
           requires:
             - *branch_deploy_only_hosting_name
-            - *stage_fe_approval_name
       - branch_deploy_all_approval:
           type: approval
           name: &stage_all_approval_name "Approve All To Stage"

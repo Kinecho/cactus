@@ -42,6 +42,7 @@ import ReflectionResponse from "@shared/models/ReflectionResponse";
 import SentPrompt, { PromptSendMedium, SentPromptHistoryItem } from "@shared/models/SentPrompt";
 import MailchimpService from "@admin/services/MailchimpService";
 import { ListMemberStatus } from "@shared/mailchimp/models/MailchimpTypes";
+import { FirestoreErrorCode } from "@shared/types/FirestoreTypes";
 
 const removeMarkdown = require("remove-markdown");
 const logger = new Logger("PromptNotificationManager");
@@ -602,7 +603,11 @@ export default class PromptNotificationManager {
                     contentId: promptContent.entryId,
                     channel: NotificationChannel.PUSH,
                     memberId: member.id!,
-                }, { transaction, queryName: `Get existing Notification log for PUSH channel for ${ member.email } ` })
+                }, {
+                    transaction,
+                    silentErrorCodes: [FirestoreErrorCode.ABORTED],
+                    queryName: `Get existing Notification log for PUSH channel for ${ member.email } `
+                })
 
                 if (!notification) {
                     notification = Notification.createPush({
@@ -665,6 +670,7 @@ export default class PromptNotificationManager {
                             memberId: member.id!,
                         }, {
                             transaction,
+                            silentErrorCodes: [FirestoreErrorCode.ABORTED],
                             queryName: `Get existing Notification log for EMAIL channel for ${ member.email }`
                         })
 
@@ -687,8 +693,10 @@ export default class PromptNotificationManager {
                         }
                         resolve({ notification, existing });
                     } catch (error) {
-                        logger.error("Error executing transaction", error);
-                        await AdminSlackService.getSharedInstance().sendDbAlertsMessage(`\`[PromptNotificationManager]\` Error getting/creating Notification for EMAIL\n\`\`\`${ error }\`\`\``);
+                        if (!(error.code === 10 || error.message?.includes("Too much contention"))) {
+                            logger.error("Error executing transaction", error);
+                            await AdminSlackService.getSharedInstance().sendDbAlertsMessage(`\`[PromptNotificationManager]\` Error getting/creating Notification for EMAIL\n\`\`\`${ error }\`\`\``);
+                        }
                         reject(error);
                     }
                     return;
@@ -715,7 +723,7 @@ export default class PromptNotificationManager {
             email: member.email,
             firstName: member.firstName,
             memberId: member.id,
-            promptContentEntryId: promptContent.entryId!,
+            promptContentEntryId: promptContent.entryId,
             reflectUrl: promptUrl,
             mainText: introText,
             isPlus: isPremiumTier(member.tier),

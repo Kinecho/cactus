@@ -95,6 +95,16 @@ export default class AdminUserService {
         return this.firestoreService.save(model, options);
     }
 
+    async getAuthUserByEmail(email: string): Promise<UserRecord | null> {
+        try {
+            const record = await admin.auth().getUserByEmail(email);
+            logger.info(`Found user record ${ record.uid } for email ${ email }`);
+            return record;
+        } catch (error) {
+            return null;
+        }
+    }
+
     async getMagicLinkUrl(email: string, options: SendMagicLinkOptions = DefaultSendMagicLinkOptions): Promise<SendMagicLinkResult> {
         let successPath = options.successPath || DefaultSendMagicLinkOptions.successPath;
         if (successPath && successPath.length > 0 && !successPath.startsWith("/")) {
@@ -379,10 +389,10 @@ export default class AdminUserService {
         });
 
         await AdminSlackService.getSharedInstance().uploadTextSnippet({
-            message: `Subscription Cancellations for deleted user ${email}`,
+            message: `Subscription Cancellations for deleted user ${ email }`,
             data: stringifyJSON(subscriptionUnsubscribeResults, 2),
             fileType: "json",
-            filename: `${email}-unsubscribe-results.json`,
+            filename: `${ email }-unsubscribe-results.json`,
             channel: ChannelName.deletions,
         });
 

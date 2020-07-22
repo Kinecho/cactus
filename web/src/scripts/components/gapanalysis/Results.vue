@@ -167,7 +167,7 @@
 
     .relationships {
         bottom: 3rem;
-        right: 12%;
+        right: 7%;
 
         .noCacti & {
             right: 0;

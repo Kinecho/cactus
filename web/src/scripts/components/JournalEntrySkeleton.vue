@@ -2,27 +2,27 @@
     <div class="journalEntry skeleton">
         <p class="date" v-if="promptDate">{{promptDate}}</p>
         <p class="date skeleton" v-else>
-            <skeleton-bar :lines="1" size="small"/>
+            <skeleton-bar :animating="animating" :lines="1" size="small"/>
         </p>
 
         <div class="menuParent"></div>
 
         <div class="textContainer">
             <h3 class="skeleton topic">
-                <skeleton-bar :lines="1" size="large"/>
+                <skeleton-bar :animating="animating" :lines="1" size="large"/>
             </h3>
             <p class="subtext">
-                <skeleton-bar :lines="2" size="small"/>
+                <skeleton-bar :animating="animating" :lines="2" size="small"/>
             </p>
         </div>
 
         <div class="entry">
-            <skeleton-bar :lines="2" size="small"/>
+            <skeleton-bar :animating="animating" :lines="2" size="small"/>
         </div>
 
         <div class="skeleton-image">
             <div class="image-wrapper">
-                <skeleton-bar :lines="1" size="block"/>
+                <skeleton-bar :animating="animating" :lines="1" size="block"/>
             </div>
 
         </div>
@@ -44,6 +44,7 @@
 
         },
         props: {
+            animating: {type: Boolean, default: true},
             sentPrompt: Object as () => SentPrompt
         },
         data(): {} {

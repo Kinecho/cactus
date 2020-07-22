@@ -59,16 +59,20 @@
     import ProgressStepper from "@components/ProgressStepper.vue";
     import PhotoCard from "@components/onboarding/OnboardingPhotoCard.vue";
     import OnboardingCard from "@components/onboarding/OnboardingCardWrapper.vue";
-    import { Prop } from "vue-property-decorator";
+    import { Prop, Watch } from "vue-property-decorator";
     import SubscriptionProduct from "@shared/models/SubscriptionProduct";
     import { CheckoutInfo, PageStatus } from "@components/onboarding/OnboardingTypes";
     import { PageRoute } from "@shared/PageRoutes";
     import CactusMember from "@shared/models/CactusMember";
     import { startCheckout } from "@web/checkoutService";
-    import { stringifyJSON } from "@shared/util/ObjectUtil";
+    import { isNumber, stringifyJSON } from "@shared/util/ObjectUtil";
     import Modal from "@components/Modal.vue";
     import { pushRoute } from "@web/NavigationUtil";
     import { InsightWord } from "@shared/api/InsightLanguageTypes";
+    import { QueryParam } from "@shared/util/queryParams";
+    import { fireOptInStartTrialEvent } from "@web/analytics";
+    import StorageService, { LocalStorageKey } from "@web/services/StorageService";
+    import { getQueryParam } from "@web/util";
 
     const logger = new Logger("Onboarding");
 
@@ -111,6 +115,22 @@
         cardTransitionName = transitionName.next;
         keyListener: any = null;
         keyboardNavigationEnabled = true;
+        firedCheckoutSuccessEvent = false;
+
+        @Watch("pageStatus")
+        onPageStatus(current: PageStatus | null) {
+            if (!this.firedCheckoutSuccessEvent && current === PageStatus.success) {
+                let priceDollars = StorageService.getNumber(LocalStorageKey.subscriptionPriceCents) ?? Number(getQueryParam(QueryParam.PURCHASE_AMOUNT));
+
+                if (priceDollars && isNumber(priceDollars)) {
+                    priceDollars = priceDollars / 100;
+                    fireOptInStartTrialEvent({ value: priceDollars })
+                } else {
+                    fireOptInStartTrialEvent({})
+                }
+                this.firedCheckoutSuccessEvent = true;
+            }
+        }
 
         get checkoutInfo(): CheckoutInfo {
             const success = this.pageStatus === PageStatus.success;
@@ -123,6 +143,7 @@
 
         mounted() {
             this.keyListener = document.addEventListener("keyup", this.handleDocumentKeyUp)
+            this.onPageStatus(this.pageStatus);
         }
 
         destroyed() {
@@ -218,7 +239,7 @@
 
         async closeOnboarding(force: boolean = false) {
             if (this.showCloseConfirm || force) {
-                await pushRoute(PageRoute.JOURNAL_HOME);
+                await pushRoute(`${ PageRoute.MEMBER_HOME }?${ QueryParam.FROM }=onboarding`);
                 return;
             }
             this.showCloseConfirm = true;
@@ -235,7 +256,7 @@
                     return;
                 }
                 const result = await startCheckout({
-                    subscriptionProductId: this.product.entryId!,
+                    subscriptionProductId: this.product.entryId,
                     subscriptionProduct: this.product,
                     member: this.member,
                     stripeSuccessUrl: successPath,

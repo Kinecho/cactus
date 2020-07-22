@@ -1,5 +1,5 @@
 <template>
-    <div class="skeleton-bar">
+    <div class="skeleton-bar" :class="{'animating': animating}">
         <div v-for="n in lines" class="line" :class="[size]"></div>
     </div>
 </template>
@@ -12,6 +12,7 @@
 
         },
         props: {
+            animating: {type: Boolean, default: true},
             lines: {type: Number, default: 1},
             size: {
                 validator: (value: string) => ['small', 'medium', 'large', 'xl', 'block'].includes(value),
@@ -34,6 +35,18 @@
     .skeleton-bar {
         height: 100%;
         width: 100%;
+
+        &.animating .line:after {
+            display: block;
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform: translateX(-100%);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .2), transparent);
+            animation: loading 1.5s infinite;
+        }
+ 
         .line {
             color: $lightGray;
             background-color: $lightGray;
@@ -67,17 +80,6 @@
             &.block {
                 height: 100%;
                 margin-bottom: 3rem;
-            }
-
-            &::after {
-                display: block;
-                content: '';
-                position: absolute;
-                width: 100%;
-                height: 100%;
-                transform: translateX(-100%);
-                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .2), transparent);
-                animation: loading 1.5s infinite;
             }
         }
     }

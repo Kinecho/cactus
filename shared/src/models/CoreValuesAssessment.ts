@@ -1,4 +1,4 @@
-import Question, { DynamicAssessmentParams} from "@shared/models/CoreValuesQuestion";
+import Question, { DynamicAssessmentParams } from "@shared/models/CoreValuesQuestion";
 import Option from "@shared/models/CoreValuesQuestionOption";
 import { CoreValue } from "@shared/models/CoreValueTypes";
 import CoreValuesAssessmentResponse, { CoreValuesResults } from "@shared/models/CoreValuesAssessmentResponse";
@@ -24,20 +24,23 @@ export default class CoreValuesAssessment {
      */
     protected questions: Question[] = [];
 
-    getQuestions(response?: CoreValuesAssessmentResponse): Question[] {
-        if (!response) {
-            return this.questions;
-        }
+    getQuestions(response?: CoreValuesAssessmentResponse | null): Question[] {
+        // if (!response) {
+        //     return this.questions;
+        // }
 
-        return this.questions.filter(q => q.filter({ assessmentResponse: response, assessment: this }));
+        return this.questions.filter((q, index) => {
+            const responses = this.orderedResponses(response)
+            return q.filter({ responses, currentIndex: index, })
+        });
     }
 
-    orderedResponses(assessmentResponse?: CoreValuesAssessmentResponse): CoreValuesQuestionResponse[] {
+    orderedResponses(assessmentResponse?: CoreValuesAssessmentResponse|null): CoreValuesQuestionResponse[] {
         if (!assessmentResponse) {
             return []
         }
 
-        return this.questions.flatMap(q => assessmentResponse.getOptionalResponse(q.id)).filter(isNotNull) as CoreValuesQuestionResponse[];
+        return this.questions.flatMap(q => assessmentResponse.getOptionalResponse(q.id)).filter(isNotNull) as CoreValuesQuestionResponse[] ?? [];
     }
 
     questionIndex(questionId: string): number {
@@ -93,15 +96,22 @@ export default class CoreValuesAssessment {
 }
 
 function getAllPreviousValues(params: DynamicAssessmentParams, question: Question): Option[] {
-    const { assessmentResponse } = params;
-    return assessmentResponse.allResponseValues.map(value => Option.create({ value }));
+    const { responses, currentIndex } = params;
+
+    return responses.slice(0, currentIndex).flatMap(r => r.values).map(value => Option.create({ value }));
 }
 
-function getPreviousResultOptions(params: DynamicAssessmentParams, question: Question) {
-    const { assessment, assessmentResponse } = params;
-    const previousResponse = assessment.previousResponse(assessmentResponse, question);
+function getPreviousResultOptions(params: DynamicAssessmentParams, question: Question): Option[] {
+    const { responses, currentIndex } = params;
+    const previousIndex = currentIndex - 1;
+
+    if (responses.length <= previousIndex) {
+        return []
+    }
+
+    const previousResponse = responses[previousIndex]
     if (!previousResponse) {
-        return
+        return []
     }
     return previousResponse.values.map(value => Option.create({ value }));
 }

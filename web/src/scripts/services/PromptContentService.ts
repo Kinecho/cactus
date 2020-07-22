@@ -1,12 +1,14 @@
-import FlamelinkService, {EntryObserverOptions} from "@web/services/FlamelinkService";
-import PromptContent, {ContentStatus} from "@shared/models/PromptContent";
-import {ListenerUnsubscriber} from "@web/services/FirestoreService";
-import {fromFlamelinkData, getPromptContentForDateQueryOptions} from "@shared/util/FlamelinkUtils";
-import {DateObject} from "luxon";
+import FlamelinkService, { EntryObserverOptions } from "@web/services/FlamelinkService";
+import PromptContent, { ContentStatus } from "@shared/models/PromptContent";
+import { ListenerUnsubscriber } from "@web/services/FirestoreService";
+import { fromFlamelinkData, getPromptContentForDateQueryOptions } from "@shared/util/FlamelinkUtils";
+import { DateObject } from "luxon";
 import Logger from "@shared/Logger";
-import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 
 const logger = new Logger("PromptContentService");
+
+export type GetContentParams = { promptId?: string | null, entryId?: string | null };
 
 export default class PromptContentService {
     public static sharedInstance = new PromptContentService();
@@ -26,6 +28,17 @@ export default class PromptContentService {
             value: promptId,
             Type: PromptContent
         }, options)
+    }
+
+    observeByPromptOrEntryId(params: GetContentParams, options: EntryObserverOptions<PromptContent>): ListenerUnsubscriber | undefined {
+        if (params.entryId) {
+            return this.observeByEntryId(params.entryId, options);
+        } else if (params.promptId) {
+            return this.observeByPromptId(params.promptId, options)
+        } else {
+            options.onData(undefined, "No prompt or entry ID was provided. Can not load content.");
+            return;
+        }
     }
 
     getByPromptId(promptId: string): Promise<PromptContent | undefined> {
@@ -56,7 +69,7 @@ export default class PromptContentService {
             }
 
             const allValues = Object.values(raw);
-            logger.log(`Found ${allValues.length} that matched the criteria for the date range`);
+            logger.log(`Found ${ allValues.length } that matched the criteria for the date range`);
             const [content]: (any | undefined)[] = allValues;
             if (!content) {
                 return undefined;

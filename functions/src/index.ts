@@ -1,7 +1,7 @@
 import * as functions from 'firebase-functions';
 import mailchimpApp from "@api/endpoints/mailchimpEndpoints";
 import inboundApp from "@api/endpoints/inboundApp";
-import checkoutApp from "@api/endpoints/checkoutApp";
+import checkoutApp from "@api/endpoints/checkoutEndpoints";
 import manageNotificationApp from "@api/endpoints/manageNotificationsEndpoints";
 import testApp from "@api/endpoints/testEndpoints";
 import taskEndpoints from "@api/endpoints/taskEndpoints";
@@ -9,14 +9,12 @@ import * as DailySentPromptJob from "@api/pubsub/subscribers/DailySentPromptJob"
 import { backupFirestore, exportFirestoreToBigQuery } from "@api/endpoints/DataExportJob";
 import * as UnsubscriberReportSyncJob from "@api/pubsub/subscribers/UnsubscriberReportSyncJob";
 import {
-    onReflectionResponseCreated,
-    updateReflectionStatsTrigger,
-    updateSentPromptOnReflectionWrite,
+    onWriteReflectionResponse,
+
 } from "@api/triggers/ReflectionResponseTriggers";
 import * as SlackCommandJob from "@api/pubsub/subscribers/SlackCommandJob";
 import * as MemberStatsJob from "@api/pubsub/subscribers/MemberStatsJob";
 import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
-import * as SentPromptTriggers from "@api/triggers/SentPromptTriggers";
 import { onDelete } from "@api/triggers/UserTriggers";
 import { PubSubTopic } from "@shared/types/PubSubTypes";
 import slackEndpoints from "@api/endpoints/slackEndpoints";
@@ -101,11 +99,8 @@ export const cloudFunctions = {
 
     //firestore triggers
     db1: {
-        reflectionResponseCreatedTrigger: onReflectionResponseCreated,
-        sentPromptPushNotificationTrigger: SentPromptTriggers.sentPromptPushNotificationTrigger,
-        updateReflectionStatsTrigger: updateReflectionStatsTrigger,
+        reflectionResponseWrite: onWriteReflectionResponse,
         updateMemberProfileTrigger: updateMemberProfileTrigger,
-        updateSentPromptOnReflectionWrite: updateSentPromptOnReflectionWrite,
     },
     db2: {
         updatePromptSendTimeTrigger: updatePromptSendTimeTrigger,

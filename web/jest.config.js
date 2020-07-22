@@ -16,6 +16,9 @@ module.exports = {
         './src/test/jestsetup.ts',
         "jest-localstorage-mock"
     ],
+    setupFilesAfterEnv: [
+        '../jest.setup.env.ts'
+    ],
     // collectCoverage: true,
     collectCoverageFrom: [
         'src/**/*.{js,ts,vue}',

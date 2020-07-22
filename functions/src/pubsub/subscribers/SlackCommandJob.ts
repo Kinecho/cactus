@@ -6,16 +6,17 @@ import { getConfig } from "@admin/config/configService";
 import AdminSlackService, {
     AttachmentColor,
     ChatMessage,
+    SlackAttachment,
     SlackAttachmentField,
     SlackResponseType,
     SlashCommandResponse
 } from "@admin/services/AdminSlackService";
 import { getActiveUserCountForTrailingDays } from "@api/analytics/BigQueryUtil";
 import {
+    AmericaDenverTimezone,
     formatDateTime,
     getDateAtMidnightDenver,
     getISODate,
-    AmericaDenverTimezone,
     millisecondsToMinutes
 } from "@shared/util/DateUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
@@ -23,13 +24,17 @@ import * as prettyMilliseconds from "pretty-ms";
 import { ListMemberStatus } from "@shared/mailchimp/models/MailchimpTypes";
 import CactusMember from "@shared/models/CactusMember";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
-import ReflectionResponse, { getResponseMediumDisplayName } from "@shared/models/ReflectionResponse";
+import ReflectionResponse from "@shared/models/ReflectionResponse";
 import Logger from "@shared/Logger";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
-import { isValidEmail } from "@shared/util/StringUtil";
+import { formatPriceCentsUsd, isValidEmail } from "@shared/util/StringUtil";
 import { CactusElement } from "@shared/models/CactusElement";
 import DeletedUser from "@shared/models/DeletedUser";
 import AdminDeletedUserService from "@admin/services/AdminDeletedUserService";
+import AdminUserService from "@admin/services/AdminUserService";
+import SubscriptionProduct from "@shared/models/SubscriptionProduct";
+import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
+import { getResponseMediumDisplayName } from "@shared/util/ReflectionResponseUtil";
 
 const logger = new Logger("SlackCommandJob");
 const config = getConfig();
@@ -39,7 +44,8 @@ export enum JobType {
     bigquery = "bigquery",
     durumuru = "durumuru",
     activeUsers = "activeUsers",
-    memberStats = "stats"
+    memberStats = "stats",
+    user = "user",
 }
 
 export interface JobRequest {
@@ -47,6 +53,8 @@ export interface JobRequest {
     payload?: any,
     slackResponseURL?: string,
     channelName?: string,
+    userId?: string,
+    userName?: string,
 }
 
 export async function onPublish(message: Message, context: functions.EventContext) {
@@ -77,6 +85,9 @@ export async function processJob(job: JobRequest) {
             break;
         case JobType.memberStats:
             task = processMemberStats(job);
+            break;
+        case JobType.user:
+            task = processUser(job);
             break;
     }
     if (task) {
@@ -112,11 +123,92 @@ export async function processJob(job: JobRequest) {
             await AdminSlackService.getSharedInstance().sendArbitraryMessage(job.channelName, message as ChatMessage);
         }
 
+        if (message.fileData && (job.channelName || job.userId)) {
+            await AdminSlackService.getSharedInstance().uploadTextSnippet({
+                data: message.fileData,
+                channels: [job.channelName,].filter(Boolean) as string[],
+                useChannelId: true,
+                fileType: "json",
+                filename: `${ job.type ?? "job" }-results.json`,
+            })
+        }
 
         logger.log(`Finished processing SlackCommand ${ job.type }`);
     } else {
         logger.warn("No task was created for job", JSON.stringify(job, null, 2));
     }
+}
+
+/**
+ * Get information about a user and return it to slack.
+ * @param {JobRequest} job
+ * @return {Promise<SlashCommandResponse>}
+ */
+async function processUser(job: JobRequest): Promise<SlashCommandResponse> {
+    logger.log("Getting user info ");
+    const email = job.payload as string;
+
+    const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
+    const userRecord = await AdminUserService.getSharedInstance().getAuthUserByEmail(email)
+
+    const subscriptionProductId = member?.subscription?.subscriptionProductId;
+    let subscriptionProduct: SubscriptionProduct | null = null;
+    if (subscriptionProductId) {
+        subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByEntryId(subscriptionProductId) ?? null;
+    }
+
+    let text = `No user found for email ${ email }`;
+    const attachments: SlackAttachment[] = [];
+    if (member || userRecord) {
+        const envSuffix = config.app.environment === "prod" ? "prod" : "stage"
+        const revenueCatAppId = config.revenuecat.app_id;
+        const firebaseLink = `https://console.firebase.google.com/u/0/project/cactus-app-${ envSuffix }/database/firestore/data~2Fmembers~2F${ member!.id }`;
+        text = `User info for ${ email }`;
+
+        const accessEndsAt = member?.subscription?.cancellation?.accessEndsAt;
+        const trialStartedAt = member?.subscription?.optOutTrial?.startedAt;
+        attachments.push({
+            fields: [
+                {
+                    title: "Member ID / User ID",
+                    value: (member?.id ? `<${ firebaseLink }|${ member?.id }>` : "--") + ` / ${ userRecord?.uid ?? "--" }`,
+                },
+                { title: "Email", value: member?.email ?? email },
+                {
+                    title: "Created At",
+                    value: formatDateTime(member?.createdAt, { timezone: AmericaDenverTimezone }) ?? "--"
+                },
+                {
+                    title: "Source / Medium / Campaign: ",
+                    value: `${ member?.getSignupSource() ?? "--" } / ${ member?.getSignupMedium() ?? "--" } / ${ member?.getSignupCampaign() ?? "--" }`
+                },
+                {
+                    title: "Subscription",
+                    value: `*Tier*: ${ member?.tier ?? "--" }
+*In Trial*: ${ member?.isOptOutTrialing === true ? "Yes" : "No" }
+*Plan Duration* ${ subscriptionProduct?.billingPeriod ?? "--" }
+*Price* ${ subscriptionProduct?.priceCentsUsd ? formatPriceCentsUsd(subscriptionProduct.priceCentsUsd) : "--" }
+*Trial Started At*: ${ formatDateTime(trialStartedAt, { timezone: AmericaDenverTimezone }) ?? "--" }
+*Cancels At*: ${ formatDateTime(accessEndsAt, { timezone: AmericaDenverTimezone }) ?? "--" }
+                    `.trim(),
+                },
+                {
+                    title: "Stats",
+                    value: `*Streak (Days)*: ${ member?.stats.reflections?.currentStreakDays ?? 0 }
+*Total Reflections*: ${ member?.stats?.reflections?.totalCount ?? 0 }`,
+                },
+                {
+                    title: "Links",
+                    value: `<https://app.revenuecat.com/customers/${ revenueCatAppId }/${ member?.id }|RevenueCat>
+<${ firebaseLink }|Firebase Member Record>
+`
+                },
+
+            ]
+        })
+    }
+    const fileData = stringifyJSON({ member: member?.toJSON(), userRecord: userRecord?.toJSON() }, 2);
+    return { text, attachments, fileData, response_type: SlackResponseType.in_channel };
 }
 
 async function processMemberStats(job: JobRequest): Promise<SlashCommandResponse> {
@@ -226,34 +318,41 @@ async function processToday(job: JobRequest): Promise<SlashCommandResponse> {
     };
 }
 
-
+/**
+ * Get stats about the activity that occurred on a given date.
+ * @param {Date} todayDate
+ * @return {Promise<SlackAttachmentField[]>}
+ */
 async function getTodayStatFields(todayDate: Date): Promise<SlackAttachmentField[]> {
-
     const todayFields: SlackAttachmentField[] = [];
 
-
     const [allMembers,
-        unsubscriberes,
         allResponses,
         deletedUsers,
         trialStartMembers,
         cancellationInitiatedMembers,
+        trialConvertedMembers,
+        offersApplied,
+        offersRedeemed,
     ] = await Promise.all([
         AdminCactusMemberService.getSharedInstance().getMembersCreatedSince(todayDate),
-        AdminCactusMemberService.getSharedInstance().getMembersUnsubscribedSince(todayDate),
         AdminReflectionResponseService.getSharedInstance().getResponseSinceDate(todayDate),
         AdminDeletedUserService.getSharedInstance().getAllSince(todayDate),
         AdminCactusMemberService.getSharedInstance().getOptOutTrialStartedSince(todayDate),
         AdminCactusMemberService.getSharedInstance().getCancellationsInitiatedSince(todayDate),
+        AdminCactusMemberService.getSharedInstance().getOptTrialsConvertedToPaidSince(todayDate),
+        AdminCactusMemberService.getSharedInstance().getPromotionalOffersAppliedOn(todayDate),
+        AdminCactusMemberService.getSharedInstance().getPromotionalOffersRedeemedOn(todayDate),
     ]) as [
-        CactusMember[],
         CactusMember[],
         ReflectionResponse[],
         DeletedUser[],
         CactusMember[],
         CactusMember[],
+        CactusMember[],
+        CactusMember[],
+        CactusMember[],
     ];
-
 
     logger.log(`All tasks have completed for Today Stats for ${ getISODate(todayDate) }`);
 
@@ -296,19 +395,40 @@ async function getTodayStatFields(todayDate: Date): Promise<SlackAttachmentField
 
     sortedResponseStats.unshift(`\`TOTAL\` - ${ allResponses.length } from ${ countMembersReflected } members`);
 
+    const offersMap: Record<string, {redeemed: number, applied: number}> = {};
+    offersApplied.forEach(a => {
+        const name = a.currentOffer?.displayName;
+        if (!name) {
+            return;
+        }
+        const r = offersMap[name] ?? {redeemed: 0, applied: 0};
+        r.applied += 1;
+    })
+
+    offersRedeemed.forEach(m => {
+        const name = m.currentOffer?.displayName;
+        if (!name) {
+            return;
+        }
+        const r = offersMap[name] ?? {redeemed: 0, applied: 0};
+        r.redeemed += 1;
+    })
+
+
+    const offerFieldValue = Object.keys(offersMap).map(offerName => {
+        const {redeemed, applied} = offersMap[offerName]
+        return `\`${offerName}\` - ${redeemed} / ${applied} (${applied > 0 ? (redeemed/applied).toFixed(1) : "∞"}%)`;
+    }).join('\n')
+
     todayFields.push({
         title: `Sign Ups`,
         value: `${ confirmedMemberCount }`,
-        short: true,
-    }, {
-        title: `Unsubscribers`,
-        value: `${ unsubscriberes.length }`,
-        short: true,
+        short: false,
     },
     {
         title: "Reflection Responses",
         value: `${ sortedResponseStats.join("\n") }`,
-        short: true
+        short: false
     }, {
         title: "Referrers",
         value: `${ Object.entries(topReferrers).sort(([, v1], [, v2]) => v2 - v1).map(([email, count]) => {
@@ -316,12 +436,20 @@ async function getTodayStatFields(todayDate: Date): Promise<SlackAttachmentField
         }).join("\n") || "None" }`
     },
     {
+        title: "Offers: Redeemed / Applied",
+        value: offerFieldValue,
+    },
+    {
         title: "Deleted Users",
         value: `${ deletedUsers.length }`
     },
     {
-        title: "Trials Started (Opt Out)",
+        title: "Trials Starts",
         value: `${ trialStartMembers.length }`
+    },
+    {
+        title: "Trials Converted to Paid",
+        value: `${ trialConvertedMembers.length }`
     },
     {
         title: "Subscription Cancellations Initiated",

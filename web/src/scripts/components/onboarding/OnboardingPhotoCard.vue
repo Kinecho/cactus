@@ -9,7 +9,7 @@
 <script lang="ts">
     import Vue from "vue";
     import Component from "vue-class-component"
-    import { OnboardingCardViewModel } from "@components/onboarding/OnboardingCardViewModel";
+    import OnboardingCardViewModel from "@components/onboarding/OnboardingCardViewModel";
     import { Prop } from "vue-property-decorator";
     import MarkdownText from "@components/MarkdownText.vue";
 

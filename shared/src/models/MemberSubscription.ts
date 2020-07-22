@@ -1,8 +1,8 @@
-import {DateTime} from "luxon";
+import { DateTime } from "luxon";
 import { DEFAULT_SUBSCRIPTION_TIER, SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 import CopyService from "@shared/copy/CopyService";
-import {BillingPeriod} from "@shared/models/SubscriptionProduct";
-import {isBlank} from "@shared/util/StringUtil";
+import { BillingPeriod } from "@shared/models/SubscriptionProduct";
+import { isBlank } from "@shared/util/StringUtil";
 
 export const SubscriptionTierSortValue: { [tier in SubscriptionTier]: number } = {
     [SubscriptionTier.BASIC]: 0,
@@ -14,7 +14,7 @@ export const BillingPeriodSortOrder: BillingPeriod[] = [BillingPeriod.never, Bil
 
 export const PremiumSubscriptionTiers = [SubscriptionTier.PLUS, SubscriptionTier.PREMIUM];
 
-export function isPremiumTier(tier?: SubscriptionTier): boolean {
+export function isPremiumTier(tier?: SubscriptionTier | null): boolean {
     if (!tier) {
         return false
     }
@@ -158,7 +158,7 @@ export function getDefaultSubscriptionWithEndDate(endDate: Date): MemberSubscrip
 
 export function getDefaultTrial(trialDays: number = DEFAULT_TRIAL_DAYS): OptInTrial {
     const startDate = new Date();
-    const endDate = DateTime.fromJSDate(startDate).plus({days: trialDays}).toJSDate();
+    const endDate = DateTime.fromJSDate(startDate).plus({ days: trialDays }).toJSDate();
     return {
         startedAt: startDate,
         endsAt: endDate,

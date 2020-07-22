@@ -1,5 +1,5 @@
-import {FlamelinkTimestamp} from "@shared/types/FlamelinkWebhookTypes";
-import {convertDateToJSON, convertDateToTimestamp} from "@shared/util/FirestoreUtil";
+import { FlamelinkTimestamp } from "@shared/types/FlamelinkWebhookTypes";
+import { convertDateToJSON, convertDateToTimestamp } from "@shared/util/FirestoreUtil";
 import Logger from "@shared/Logger";
 
 const logger = new Logger("FlamelinkModel");
@@ -9,6 +9,7 @@ export enum SchemaName {
     subscriptionProducts = "subscriptionProducts",
     subscriptionProductGroups = "subscriptionProductGroups",
     appSettings = "appSettings_web",
+    promotionalOffer = "promotionalOffer",
     // coreValuesAssessment = "coreValuesAssessment",
 }
 
@@ -28,17 +29,15 @@ export interface FlamelinkMeta {
 
 }
 
-export interface FlamelinkData {
+export interface FlamelinkData extends Record<string, any> {
     _fl_meta_?: FlamelinkMeta
     id?: string;
     parentId?: string | number;
-    order?: number,
-
-    [key: string]: any
+    order?: number;
 }
 
 export interface FlamelinkIdentifiable extends FlamelinkData {
-    schema: SchemaName,
+    readonly schema: SchemaName,
     _fl_meta_?: FlamelinkMeta
 }
 
@@ -48,7 +47,7 @@ export default abstract class FlamelinkModel implements FlamelinkIdentifiable {
     parentId?: string | number;
     order?: number;
     documentId?: string;
-    entryId?: string;
+    entryId!: string;
     _fl_meta_?: FlamelinkMeta;
 
     protected constructor(data?: FlamelinkData) {
@@ -63,7 +62,11 @@ export default abstract class FlamelinkModel implements FlamelinkIdentifiable {
         this.parentId = data.parentId;
         this.order = data.order;
 
-        this.entryId = this._fl_meta_ ? this._fl_meta_.fl_id : undefined;
+        const entryId = this._fl_meta_?.fl_id
+        if (entryId) {
+            this.entryId = entryId;
+        }
+        // this.entryId = this._fl_meta_ ? this._fl_meta_.fl_id : undefined;
         //this seems to happen when updating after saving the object via Flamelink SDK
         if (data["_fl_meta_.fl_id"] && !this.entryId) {
             this.entryId = data["_fl_meta_.fl_id"]
@@ -71,7 +74,7 @@ export default abstract class FlamelinkModel implements FlamelinkIdentifiable {
     }
 
     prepareForFirestore(): any {
-        return {...this};
+        return { ...this };
     }
 
     toFlamelinkData(removeKeys = ["schema", "entryId", "_fl_meta_"]): any {
@@ -99,7 +102,7 @@ export default abstract class FlamelinkModel implements FlamelinkIdentifiable {
 
     toJSON(removeKeys = ["schema", "_fl_meta_.schemaRef"]): any {
         try {
-            const data = convertDateToJSON({...this});
+            const data = convertDateToJSON({ ...this });
 
             const keysToRemove = Array.isArray(removeKeys) ? removeKeys : ["schema", "_fl_meta_.schemaRef"];
             if (keysToRemove && Array.isArray(keysToRemove) && data) {
@@ -115,8 +118,7 @@ export default abstract class FlamelinkModel implements FlamelinkIdentifiable {
             return data;
         } catch (error) {
             logger.error(error);
-            return {message: "Error processing this model toJSON", error};
+            return { message: "Error processing this model toJSON", error };
         }
     }
-
 }

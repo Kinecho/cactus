@@ -1,27 +1,23 @@
 <template>
     <div class="loading-page">
-        <NavBar/>
         <div class="page-content">
             <spinner message="Loading..."/>
         </div>
-
     </div>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
-    import NavBar from "@components/NavBar.vue";
     import Spinner from "@components/Spinner.vue";
     import Component from "vue-class-component";
 
     @Component({
         components: {
-            NavBar,
             Spinner,
         }
     })
     export default class LoadingPage extends Vue {
-
+        name = "LoadingPage";
     }
 </script>
 
@@ -36,6 +32,7 @@
         flex-direction: column;
         background: white;
         flex: 1;
+
         .page-content {
             flex: 1;
             height: 100%;

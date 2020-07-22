@@ -9,7 +9,7 @@ import {fromJSON} from "@shared/util/FirestoreUtil";
 import {EmailStoragePath} from "@shared/models/EmailReply";
 import {writeToFile} from "@api/util/FileUtil";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
-import ReflectionResponse, {ResponseMedium} from "@shared/models/ReflectionResponse";
+import ReflectionResponse from "@shared/models/ReflectionResponse";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 import MailchimpService from "@admin/services/MailchimpService";
 import AdminSlackService from "@admin/services/AdminSlackService";
@@ -18,6 +18,7 @@ import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminSentCampaignService from "@admin/services/AdminSentCampaignService";
 import {getConfig} from "@admin/config/configService";
 import Logger from "@shared/Logger";
+import { ResponseMedium } from "@shared/util/ReflectionResponseUtil";
 
 const logger = new Logger("inboundApp");
 const app = express();

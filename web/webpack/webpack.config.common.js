@@ -2,19 +2,16 @@ const path = require('path')
 const webpack = require('webpack')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const allPages = require('./../pages')
 const helpers = require('./../helpers')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const WebpackNotifierPlugin = require('webpack-notifier')
-const chalk = require('chalk')
-const simplegit = require('simple-git/promise')
+const simpleGit = require('simple-git')
 const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
 
 function getCommitHash() {
-    const git = simplegit()
+    const git = simpleGit()
     return git.revparse(['HEAD'])
 }
-
 
 function recursiveIssuer(m) {
     if (m.issuer) {
@@ -27,51 +24,22 @@ function recursiveIssuer(m) {
 }
 
 module.exports = (config) => {
-    return getCommitHash().then((gitcommit) => {
+    return getCommitHash().then((commitHash) => {
         return new Promise(resolve => {
             const isDev = config.isDev || false
-            // noinspection MissingOrObsoleteGoogRequiresInspection
-            config.__SENTRY_VERSION__ = process.env.SENTRY_VERSION || gitcommit
-            console.log('got git commit hash', gitcommit)
+            config.__SENTRY_VERSION__ = process.env.SENTRY_VERSION || commitHash
+            console.log('got git commit hash', commitHash)
 
-            let parsedConfig = {}
-
-            // Object.keys(config).forEach(key => {
-            //     parsedConfig[key] = JSON.stringify(config[key])
-            // })
-
-            Object.keys(config).forEach(key => {
-                parsedConfig[`process.env.${key}`] = JSON.stringify(config[key])
-            })
-
-            let jsEntries = Object.keys(allPages).reduce((entries, title) => {
-                console.log(chalk.yellow('adding entry ', title))
-                entries[title] = `${helpers.scriptDir}/pages/${title}.ts`
-                return entries
+            const parsedConfig = Object.keys(config).reduce((cfg, key) => {
+                cfg[`process.env.${key}`] = JSON.stringify(config[key])
+                return cfg
             }, {})
 
-            console.log('JS Entries to use', chalk.cyan(JSON.stringify(jsEntries, null, 2)))
-
-            const plugins = [new MiniCssExtractPlugin({
-                filename: isDev ? '[name].css' : '[id].[hash].css',
-                chunkFilename: isDev ? '[id].css' : '[id].[hash].css',
-
-            })]
-
-            const cssCacheGroups = {}
-            Object.keys(allPages).map(filename => {
-                cssCacheGroups[`${filename}Styles`] = {
-                    name: filename,
-                    // name: false,
-                    test: (m, c, entry = filename) => (m.constructor.name === 'CssModule' && recursiveIssuer(m) === entry),
-                    chunks: 'all',
-                    enforce: true,
-                }
-            })
-
-
             let finalConfig = {
-                entry: jsEntries,
+                entry: [
+                    `${helpers.scriptDir}/main.ts`,
+                    `${helpers.scriptDir}/pages/solo_proxy_auth.ts`,
+                ],
                 output: {
                     path: helpers.publicDir,
                     filename: isDev ? '[name].js' : '[name].[hash].js',
@@ -115,7 +83,12 @@ module.exports = (config) => {
                         maxSize: 750000,
                         chunks: 'all',
                         cacheGroups: {
-                            ...cssCacheGroups,
+                            styles: {
+                                name: 'styles',
+                                test: (m, c, entry) => (m.constructor.name === 'CssModule' && recursiveIssuer(m) === entry),
+                                chunks: 'all',
+                                enforce: true,
+                            },
                             defaultVendors: {
                                 test: /[\\/]node_modules[\\/]/,
                                 name: 'vendors',
@@ -160,9 +133,6 @@ module.exports = (config) => {
                         {
                             test: /\.vue$/,
                             use: [
-                                // {
-                                //     loader: 'cache-loader',
-                                // },
                                 {
                                     loader: 'vue-loader',
                                     options: {
@@ -172,7 +142,6 @@ module.exports = (config) => {
                                     },
                                 },
                             ],
-
                         },
                         {
                             test: /\.ts$/,
@@ -197,7 +166,6 @@ module.exports = (config) => {
                                     },
                                 },
                             ].filter(Boolean),
-
                         },
                         {
                             test: /\.css$/,
@@ -217,20 +185,12 @@ module.exports = (config) => {
                         {
                             test: /\.(scss)$/,
                             use: [
-                                // 'style-loader',
-                                {
-                                    loader: isDev ? 'vue-style-loader' : MiniCssExtractPlugin.loader,
-                                    // options: {
-                                    //     hmr: isDev,
-                                    // },
-                                },
+                                {loader: isDev ? 'vue-style-loader' : MiniCssExtractPlugin.loader},
                                 {
                                     loader: 'css-loader',
                                     options: {sourceMap: true, url: false},
                                 },
-                                {
-                                    loader: 'postcss-loader',
-                                },
+                                {loader: 'postcss-loader'},
                                 {
                                     loader: 'sass-loader',
                                     options: {
@@ -251,22 +211,27 @@ module.exports = (config) => {
                         },
                     ],
                 },
-                plugins: [...plugins,
-                    ...Object.keys(allPages).map(filename => {
-                        const page = allPages[filename]
+                plugins: [
+                    new MiniCssExtractPlugin({
+                        filename: isDev ? '[name].css' : '[id].[hash].css',
+                        chunkFilename: isDev ? '[id].css' : '[id].[hash].css',
 
-                        const chunks = []
-                        chunks.push(filename)
-
-                        console.log(chalk.green('Configuring HTML page ', filename, 'chunks: ', chunks.join(', ')))
-                        return new HtmlWebpackPlugin({
-                            chunks,
-                            title: page.title,
-                            template: `${helpers.htmlDir}/${filename}.html`,
-                            filename: `${filename}.html`,
-                            favicon: `${helpers.srcDir}/favicon.ico`,
-                            alwaysWriteToDisk: true,
-                        })
+                    }),
+                    new HtmlWebpackPlugin({
+                        chunks: ['main'],
+                        analyticsId: config.__GOOGLE_ANALYTICS_ID__,
+                        template: `${helpers.htmlDir}/main.html`,
+                        filename: `main.html`,
+                        favicon: `${helpers.srcDir}/favicon.ico`,
+                        alwaysWriteToDisk: true,
+                    }),
+                    new HtmlWebpackPlugin({
+                        chunks: ['solo_proxy_auth'],
+                        analyticsId: config.__GOOGLE_ANALYTICS_ID__,
+                        template: `${helpers.htmlDir}/solo_proxy_auth.html`,
+                        filename: `solo_proxy_auth.html`,
+                        favicon: `${helpers.srcDir}/favicon.ico`,
+                        alwaysWriteToDisk: true,
                     }),
                     new webpack.DefinePlugin(parsedConfig),
                     new VueLoaderPlugin(),
@@ -277,7 +242,6 @@ module.exports = (config) => {
                     }),
                 ],
             }
-
             if (!isDev) {
                 const smp = new SpeedMeasurePlugin()
                 resolve(smp.wrap(finalConfig))
@@ -286,6 +250,4 @@ module.exports = (config) => {
             }
         })
     })
-
-
 }

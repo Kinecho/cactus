@@ -68,7 +68,7 @@ export default class AdminRevenueCatService {
     private async fetchCactusProducts() {
         const products = await AdminSubscriptionProductService.getSharedInstance().getAll();
         products.forEach(p => {
-            this.cactusSubscriptionProductsById[p.entryId!] = p;
+            this.cactusSubscriptionProductsById[p.entryId] = p;
         });
         this.hasFetchedProducts = true;
         return this.cactusSubscriptionProductsById;
@@ -246,7 +246,7 @@ export default class AdminRevenueCatService {
         await this.client.get(RevenueCatEndpoints.subscriber(memberId), { headers: { ...headers } })
     }
 
-    async updateSubscriberAttributes(member?: CactusMember) {
+    async updateSubscriberAttributes(member?: CactusMember | null) {
         if (!member) {
             return;
         }
@@ -273,8 +273,6 @@ export default class AdminRevenueCatService {
         try {
             const path = RevenueCatEndpoints.subscriberAttributes(memberId);
             const attributes = processAttributeInputForUpdate(params);
-            logger.info("Setting attributes to", stringifyJSON(attributes, 2));
-
             const response = await this.client.post(path, { attributes });
             logger.info("Update attributes success response", stringifyJSON(response.data, 2));
         } catch (error) {

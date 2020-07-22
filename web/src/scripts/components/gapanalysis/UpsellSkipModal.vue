@@ -4,7 +4,7 @@
             <h2>Close the quiz?</h2>
             <p>Leave now and your answers will be discarded. Start a free trial to <strong>get your quiz results</strong>, plus tools designed to help you understand what makes you&nbsp;happy.
             <div class="actions">
-                <button class="" @click="$emit('close')">Try it free</button>
+                <button class="" @click="$emit('close')">Try It Free</button>
                 <button class="secondary" @click="$emit('confirmed')">Discard my answers</button>
             </div>
         </div>

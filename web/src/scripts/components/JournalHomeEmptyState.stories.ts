@@ -5,16 +5,16 @@ import { CactusElement } from "@shared/models/CactusElement";
 import AppSettingsService from "@web/services/AppSettingsService";
 
 export default {
-    title: "Journal Home/Empty State"
+    title: "Empty States/Journal Home"
 }
 
 export const WithFocusElement = () => Vue.extend({
     template: `
         <div :style="containerStyles" v-if="ready">
-            <journal-home-empty-state :focus-element="focusElement" :tier="tier"/>
+            <empty-state :focus-element="focusElement" :tier="tier"/>
         </div>`,
     components: {
-        JournalHomeEmptyState,
+        EmptyState: JournalHomeEmptyState,
     },
     props: {
         tier: {
@@ -48,10 +48,10 @@ export const WithFocusElement = () => Vue.extend({
 export const NoFocusElement = () => Vue.extend({
     template: `
         <div :style="containerStyles" v-if="ready">
-            <journal-home-empty-state :tier="tier"/>
+            <empty-state :tier="tier"/>
         </div>`,
     components: {
-        JournalHomeEmptyState,
+        EmptyState: JournalHomeEmptyState,
     },
     props: {
         tier: {
