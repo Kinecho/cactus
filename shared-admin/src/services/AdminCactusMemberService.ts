@@ -418,7 +418,7 @@ export default class AdminCactusMemberService {
         }
         try {
             const doc = this.getCollectionRef().doc(memberId);
-            await doc.set({ [CactusMember.Field.lastReplyAt]: Timestamp.fromDate(lastReply) }, { merge: true });
+            await doc.update({ [CactusMember.Field.lastReplyAt]: Timestamp.fromDate(lastReply) });
             return;
         } catch (error) {
             logger.error("Failed to update last reply for memberId ", memberId);

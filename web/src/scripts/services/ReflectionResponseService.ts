@@ -1,5 +1,5 @@
 import FirestoreService, { ListenerUnsubscriber, QueryObserverOptions } from "@web/services/FirestoreService";
-import ReflectionResponse, { ReflectionResponseField, ResponseMedium } from "@shared/models/ReflectionResponse";
+import ReflectionResponse, { ReflectionResponseField} from "@shared/models/ReflectionResponse";
 import { BaseModelField, Collection } from "@shared/FirestoreBaseModels";
 import { QuerySortDirection } from "@shared/types/FirestoreConstants";
 import CactusMemberService from "@web/services/CactusMemberService";
@@ -7,7 +7,7 @@ import CactusMember from "@shared/models/CactusMember";
 import { Config } from "@web/config";
 import { PageRoute } from "@shared/PageRoutes";
 import StorageService, { LocalStorageKey } from "@web/services/StorageService";
-import { calculateStreaks, StreakResult } from "@shared/util/ReflectionResponseUtil";
+import { calculateStreaks, ResponseMedium, StreakResult } from "@shared/util/ReflectionResponseUtil";
 import Logger from "@shared/Logger";
 
 const logger = new Logger("ReflectionResponseService");

@@ -24,7 +24,7 @@ import * as prettyMilliseconds from "pretty-ms";
 import { ListMemberStatus } from "@shared/mailchimp/models/MailchimpTypes";
 import CactusMember from "@shared/models/CactusMember";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
-import ReflectionResponse, { getResponseMediumDisplayName } from "@shared/models/ReflectionResponse";
+import ReflectionResponse from "@shared/models/ReflectionResponse";
 import Logger from "@shared/Logger";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
 import { formatPriceCentsUsd, isValidEmail } from "@shared/util/StringUtil";
@@ -34,6 +34,7 @@ import AdminDeletedUserService from "@admin/services/AdminDeletedUserService";
 import AdminUserService from "@admin/services/AdminUserService";
 import SubscriptionProduct from "@shared/models/SubscriptionProduct";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
+import { getResponseMediumDisplayName } from "@shared/util/ReflectionResponseUtil";
 
 const logger = new Logger("SlackCommandJob");
 const config = getConfig();

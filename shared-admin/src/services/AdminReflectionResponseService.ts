@@ -116,6 +116,12 @@ export default class AdminReflectionResponseService {
         return results.results
     }
 
+    /**
+     * Set last journal date in mailchimp
+     * @param {string} email
+     * @param {Date} date
+     * @return {Promise<ApiResponse>}
+     */
     static async setLastJournalDate(email?: string, date?: Date): Promise<ApiResponse> {
         const mailchimpService = MailchimpService.getSharedInstance();
 
@@ -139,6 +145,11 @@ export default class AdminReflectionResponseService {
 
     }
 
+    /**
+     * Update mailchimp member reminder settings
+     * @param {string} email
+     * @return {Promise<ResetUserResponse>}
+     */
     static async resetUserReminder(email?: string): Promise<ResetUserResponse> {
         try {
             const mailchimpService = MailchimpService.getSharedInstance();
@@ -362,6 +373,15 @@ export default class AdminReflectionResponseService {
 
         logger.log(`Permanently deleted ${ totalDeleted } reflection responses for member ${ member.email || member.id }`)
         return totalDeleted
+    }
+
+    async setMightNeedInsights(responseId: string, mightNeedInsights: boolean): Promise<void> {
+        try {
+            const doc = this.getCollectionRef().doc(responseId);
+            await doc.update({ [ReflectionResponse.Field.mightNeedInsightsUpdate]: mightNeedInsights })
+        } catch (error) {
+            logger.error("Failed to update response might need insights")
+        }
     }
 
     async getAllBatch(options: {

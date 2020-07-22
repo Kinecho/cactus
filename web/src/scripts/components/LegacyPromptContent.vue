@@ -105,7 +105,7 @@
     import PromptContentSharing from "@components/PromptContentSharing.vue";
     import PricingModal from "@components/PricingModal.vue";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
-    import ReflectionResponse, { getResponseMedium, ResponseMediumType } from '@shared/models/ReflectionResponse'
+    import ReflectionResponse, { ResponseMediumType } from '@shared/models/ReflectionResponse'
     import { MINIMUM_REFLECT_DURATION_MS } from '@web/PromptContentUtil'
     import CactusMemberService from '@web/services/CactusMemberService'
     import CactusMember from '@shared/models/CactusMember'
@@ -118,6 +118,7 @@
     import Logger from "@shared/Logger";
     import { RoutePageMeta, setPageMeta } from "@web/router-meta";
     import { pushRoute } from "@web/NavigationUtil";
+    import { getResponseMedium } from "@shared/util/ReflectionResponseUtil";
 
     const logger = new Logger("PromptContent.vue");
     const flamelink = getFlamelink();

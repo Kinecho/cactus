@@ -30,9 +30,9 @@ import ActionCodeSettings = admin.auth.ActionCodeSettings;
 import { getISODateTime } from "@shared/util/DateUtil";
 import { QueryParam } from "@shared/util/queryParams";
 import Logger from "@shared/Logger";
-import { getAppEmoji } from "@shared/models/ReflectionResponse";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
 import AdminRevenueCatService from "@admin/services/AdminRevenueCatService";
+import { getAppEmoji } from "@shared/util/ReflectionResponseUtil";
 
 const logger = new Logger("signupEndpoints");
 const Config = getConfig();

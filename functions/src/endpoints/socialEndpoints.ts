@@ -26,8 +26,8 @@ import {unseenActivityCount} from "@shared/util/SocialUtil";
 import Logger from "@shared/Logger";
 import {EmailContact} from "@shared/types/EmailContactTypes";
 import {stringifyJSON} from "@shared/util/ObjectUtil";
-import {getAppEmoji} from "@shared/models/ReflectionResponse";
 import {isBlank} from "@shared/util/StringUtil";
+import { getAppEmoji } from "@shared/util/ReflectionResponseUtil";
 
 const logger = new Logger("socialEndpoints");
 const Config = getConfig();

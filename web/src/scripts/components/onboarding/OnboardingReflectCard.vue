@@ -35,12 +35,13 @@
     import Logger from "@shared/Logger"
     import ResultElement from "@components/gapanalysis/ResultElement.vue";
     import { ListenerUnsubscriber } from "@web/services/FirestoreService";
-    import ReflectionResponse, { ResponseMedium } from "@shared/models/ReflectionResponse";
+    import ReflectionResponse from "@shared/models/ReflectionResponse";
     import ReflectionResponseService from "@web/services/ReflectionResponseService";
     import Spinner from "@components/Spinner.vue";
     import ResizableTextarea from "@components/ResizableTextarea.vue";
     import { getDeviceDimensions } from "@web/DeviceUtil";
     import { debounce } from "debounce";
+    import { ResponseMedium } from "@shared/util/ReflectionResponseUtil";
 
     const logger = new Logger("OnboardingReflectCard");
 

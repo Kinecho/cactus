@@ -79,8 +79,6 @@
     import PromptContentVue from "@components/LegacyPromptContent.vue"
     import { formatDate } from "@shared/util/DateUtil"
     import ReflectionResponse, {
-        getResponseMedium,
-        ResponseMedium,
         ResponseMediumType
     } from "@shared/models/ReflectionResponse"
     import {
@@ -106,6 +104,7 @@
     import { getAppType } from "@web/DeviceUtil";
     import CactusMember from "@shared/models/CactusMember";
     import MarkdownText from "@components/MarkdownText.vue";
+    import { getResponseMedium, ResponseMedium } from "@shared/util/ReflectionResponseUtil";
 
     const logger = new Logger("JournalEntryPromptContentCard.vue");
     const copy = CopyService.getSharedInstance().copy;

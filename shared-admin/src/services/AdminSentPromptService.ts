@@ -10,6 +10,7 @@ import { QuerySortDirection } from "@shared/types/FirestoreConstants";
 import PromptContent from "@shared/models/PromptContent";
 import { TimestampInterface, toTimestamp } from "@shared/util/FirestoreUtil";
 import Logger from "@shared/Logger";
+import ReflectionResponse from "@shared/models/ReflectionResponse";
 
 const logger = new Logger("AdminSentPromptService");
 
@@ -70,10 +71,100 @@ export default class AdminSentPromptService {
         return await this.getFirst(query);
     }
 
+    /**
+     * For a given Reflection Response, find the related Sent Prompt.
+     * @param {ReflectionResponse} reflectionResponse
+     * @return {Promise<SentPrompt | null>}
+     */
+    async getSentPromptForReflectionResponse(reflectionResponse: ReflectionResponse): Promise<SentPrompt | null> {
+        const memberId = reflectionResponse.cactusMemberId;
+        const promptId = reflectionResponse.promptId;
+
+        if (!memberId || !promptId) {
+            return null;
+        }
+
+        const sentPrompt = await this.getSentPromptForCactusMemberId({ cactusMemberId: memberId, promptId })
+        return sentPrompt ?? null;
+    }
+
+    async upsertSentPromptOnReflection(reflectionResponse: ReflectionResponse, member: CactusMember): Promise<{ created: boolean, sentPrompt: SentPrompt | null }> {
+        let created = false;
+        let sentPrompt = await this.getSentPromptForReflectionResponse(reflectionResponse)
+
+        const memberId = member.id;
+        const promptId = reflectionResponse.promptId;
+        if (!memberId || !promptId) {
+            return { created: false, sentPrompt: null }
+        }
+
+        if (!sentPrompt) {
+            sentPrompt = AdminSentPromptService.create({
+                memberId,
+                promptId,
+                userId: member.userId,
+                memberEmail: member.email,
+                createHistoryItem: true,
+                medium: PromptSendMedium.PROMPT_CONTENT,
+                promptType: reflectionResponse.promptType,
+            })
+            created = true;
+        } else if (sentPrompt.completed) {
+            return { created: false, sentPrompt };
+        }
+
+        sentPrompt.completed = true;
+        sentPrompt.completedAt = sentPrompt.completedAt ?? new Date();
+
+        const saved = await this.save(sentPrompt)
+
+        return { created, sentPrompt: saved }
+    }
+
     async getAllForCactusMemberId(cactusMemberId: string): Promise<SentPrompt[]> {
         const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", cactusMemberId).orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc);
         const results = await firestoreService.executeQuery(query, SentPrompt);
         return results.results;
+    }
+
+    static getSentPromptId(params: { memberId: string, promptId: string }): string {
+        const { memberId, promptId } = params;
+        return `${ memberId }_${ promptId }`; //should be deterministic in the case we have a race condition
+    }
+
+    static create(params: {
+        memberId: string,
+        promptId: string,
+        memberEmail?: string,
+        medium?: PromptSendMedium,
+        prompt?: ReflectionPrompt,
+        promptType?: PromptType | null,
+        userId?: string,
+        createHistoryItem?: boolean,
+    }): SentPrompt {
+
+        const currentDate = new Date();
+        const sentPrompt = new SentPrompt();
+        const { memberId, promptId, createHistoryItem } = params;
+
+        sentPrompt.id = AdminSentPromptService.getSentPromptId({ memberId, promptId });
+        sentPrompt.promptType = params.promptType ?? PromptType.CACTUS
+        sentPrompt.createdAt = currentDate;
+        sentPrompt.firstSentAt = currentDate;
+        sentPrompt.lastSentAt = currentDate;
+        sentPrompt.promptId = params.promptId;
+        sentPrompt.cactusMemberId = params.memberId;
+        // sentPrompt.userId = member.userId;
+        sentPrompt.memberEmail = params.memberEmail;
+        if (createHistoryItem) {
+            sentPrompt.sendHistory.push({
+                sendDate: currentDate,
+                email: params.memberEmail,
+                medium: params.medium ?? PromptSendMedium.PROMPT_CONTENT,
+            });
+        }
+
+        return sentPrompt;
     }
 
     /**
@@ -90,6 +181,7 @@ export default class AdminSentPromptService {
         promptContent?: PromptContent,
         medium?: PromptSendMedium,
         prompt?: ReflectionPrompt,
+        userId?: string,
         promptType?: PromptType,
         createHistoryItem?: boolean,
     }): CreateSentPromptResult {
@@ -109,34 +201,21 @@ export default class AdminSentPromptService {
             return result;
         }
 
-        if (!member.id) {
+        const memberId = member.id;
+        if (!memberId) {
             result.error = "No member ID could be found";
             return result;
         }
 
-        const memberId = member.id;
-        const email = member.email;
-        const currentDate = new Date();
-
-        const sentPrompt = new SentPrompt();
-        sentPrompt.promptType = promptType ?? prompt?.promptType ?? PromptType.CACTUS
-        sentPrompt.createdAt = currentDate;
-        sentPrompt.id = `${ memberId }_${ promptId }`; //should be deterministic in the case we have a race condition
-        sentPrompt.firstSentAt = currentDate;
-        sentPrompt.lastSentAt = currentDate;
-        sentPrompt.promptId = promptId;
-        sentPrompt.cactusMemberId = member.id;
-        sentPrompt.userId = member.userId;
-        sentPrompt.memberEmail = member.email;
-        if (createHistoryItem) {
-            sentPrompt.sendHistory.push({
-                sendDate: currentDate,
-                email,
-                medium,
-            });
-        }
-
-        result.sentPrompt = sentPrompt;
+        result.sentPrompt = AdminSentPromptService.create({
+            memberId,
+            promptId,
+            promptType: promptType ?? prompt?.promptType ?? promptContent ? PromptType.CACTUS : undefined,
+            userId: member.userId,
+            memberEmail: member.email,
+            createHistoryItem,
+            medium,
+        });
         return result;
     }
 
