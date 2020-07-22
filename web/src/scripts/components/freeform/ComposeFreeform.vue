@@ -6,33 +6,7 @@
             :error="error"
             @save="save"
     />
-    <!--    <div class="compose-container">-->
-    <!--        <section class="title">-->
-    <!--            <input type="text" placeholder="Title" v-model="form.title"/>-->
-    <!--        </section>-->
-    <!--        <section class="note">-->
-    <!--            <resizable-textarea :max-height-px="maxTextareaHeight">-->
-    <!--                    <textarea placeholder="Write something..."-->
-    <!--                            v-model="form.note"-->
-    <!--                            type="text"-->
-    <!--                            ref="noteInput"-->
-    <!--                            :disabled="saving"-->
-    <!--                    />-->
-    <!--            </resizable-textarea>-->
-    <!--        </section>-->
-    <!--        <section class="actions">-->
-    <!--            <button :disabled="saving"-->
-    <!--                    @click="save"-->
-    <!--                    class="doneBtn icon no-loading">-->
-    <!--                <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">-->
-    <!--                    <path fill="#fff" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/>-->
-    <!--                </svg>-->
-    <!--                <span class="doneText">{{saving ? 'Saving...' : 'Done'}}</span>-->
-    <!--            </button>-->
-    <!--            <p class="error" v-if="error">{{error}}</p>-->
-    <!--        </section>-->
 
-    <!--    </div>-->
 </template>
 
 <script lang="ts">
@@ -44,6 +18,14 @@
     import { Prop } from "vue-property-decorator";
     import FreeformPromptForm from "@components/freeform/FreeformPromptForm.vue";
     import { FreeformFormData } from "@components/freeform/FreeformPromptTypes";
+    import ReflectionPrompt from "@shared/models/ReflectionPrompt";
+    import ReflectionResponse from "@shared/models/ReflectionResponse";
+    import { FreeFormSaveEvent } from "@web/managers/ReflectionManagerTypes";
+
+
+    function isError(input: any): input is { error: string } {
+        return !!(input as { error: string }).error;
+    }
 
     @Component({
         components: {
@@ -57,33 +39,88 @@
         @Prop({ type: Object as () => CactusMember, required: true })
         member!: CactusMember
 
-        maxTextareaHeight = 250;
+        @Prop({ type: Object as () => ReflectionPrompt, required: false, default: null })
+        prompt!: ReflectionPrompt | null;
+
+        @Prop({ type: Object as () => ReflectionResponse, required: false, default: null })
+        reflection!: ReflectionResponse | null;
+
         saving = false;
         error: string | null = null;
-        startTime = Date.now()
+        startTime: number | null = null;
 
         beforeMount() {
             this.startTime = Date.now()
         }
 
+        get isEdit(): boolean {
+            return !!this.prompt && !!this.reflection
+        }
+
+        getDuration(): number {
+            return this.startTime ? Date.now() - this.startTime : 0;
+        }
+
         async save(form: FreeformFormData) {
             this.saving = true;
-            const duration = Date.now() - this.startTime;
+            let saveEvent: FreeFormSaveEvent | { error: string };
+            if (this.isEdit) {
+                saveEvent = await this.updateExisting(form)
+            } else {
+                saveEvent = await this.saveNew(form)
+            }
+            this.saving = false
+            // this.close();
+
+            if (isError(saveEvent)) {
+                this.error = saveEvent.error
+            } else {
+                this.error = null;
+                this.$emit("saved", saveEvent)
+            }
+        }
+
+        async saveNew(form: FreeformFormData): Promise<FreeFormSaveEvent | { error: string }> {
+            this.saving = true;
+            const duration = this.getDuration();
             const saveResult = await ReflectionManager.shared.createFreeformReflection({
-                title: form.title,
-                note: form.note,
+                ...form,
                 member: this.member,
                 duration,
             })
 
-
-            this.saving = false;
-            if (saveResult.success) {
-                this.error = null;
-            } else {
-                this.error = saveResult.error ?? null;
+            if (!saveResult.success) {
+                return { error: saveResult.error }
             }
-            this.close();
+
+            return {
+                prompt: saveResult.prompt,
+                reflectionResponse: saveResult.reflectionResponse,
+                created: true,
+            }
+        }
+
+        async updateExisting(form: FreeformFormData): Promise<FreeFormSaveEvent | { error: string }> {
+            if (!this.reflection || !this.prompt) {
+                return { error: "Oops, we were unable to save your note. Please try again later." };
+            }
+
+            const saveResult = await ReflectionManager.shared.updateFreeformReflection({
+                reflection: this.reflection,
+                prompt: this.prompt,
+                member: this.member,
+                duration: this.getDuration(),
+                ...form
+            })
+
+            if (!saveResult.success) {
+                return { error: saveResult.error };
+            }
+            return {
+                reflectionResponse: this.reflection,
+                prompt: this.prompt,
+                created: false,
+            }
         }
 
         close() {

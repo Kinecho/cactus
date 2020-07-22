@@ -2,7 +2,13 @@
     <modal :show="show" @close="close" :show-close-button="true" :dark="true" :fullScreen="true" id="freeform-compose-modal">
         <template v-slot:body>
             <div class="freeform-modal">
-                <compose-freeform @close="close" :member="member"/>
+                <compose-freeform
+                        :member="member"
+                        :prompt="prompt"
+                        :reflection="reflection"
+                        @saved="onSaved"
+                        @close="close"
+                />
             </div>
         </template>
     </modal>
@@ -15,6 +21,9 @@
     import Modal from "@components/Modal.vue";
     import ComposeFreeform from "@components/freeform/ComposeFreeform.vue";
     import CactusMember from "@shared/models/CactusMember";
+    import { FreeFormSaveEvent } from "@web/managers/ReflectionManagerTypes";
+    import ReflectionPrompt from "@shared/models/ReflectionPrompt";
+    import ReflectionResponse from "@shared/models/ReflectionResponse";
 
     @Component({
         components: {
@@ -28,11 +37,21 @@
         @Prop({ type: Boolean, default: false })
         show!: boolean;
 
-        @Prop({type: Object as () => CactusMember, required: true})
+        @Prop({ type: Object as () => CactusMember, required: true })
         member!: CactusMember;
+
+        @Prop({ type: Object as () => ReflectionPrompt, required: false, default: null })
+        prompt!: ReflectionPrompt | null;
+
+        @Prop({ type: Object as () => ReflectionResponse, required: false, default: null })
+        reflection!: ReflectionResponse | null;
 
         close() {
             this.$emit('close')
+        }
+
+        onSaved(saveEvent: FreeFormSaveEvent) {
+            this.$emit('saved', saveEvent)
         }
     }
 </script>

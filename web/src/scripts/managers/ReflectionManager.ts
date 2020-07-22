@@ -1,4 +1,9 @@
-import { CreateFreeformParams, CreateFreeformResult } from "@web/managers/ReflectionManagerTypes";
+import {
+    CreateFreeformParams,
+    CreateFreeformResult,
+    UpdateFreeformParams,
+    UpdateFreeformResult
+} from "@web/managers/ReflectionManagerTypes";
 import ReflectionPrompt, { PromptType } from "@shared/models/ReflectionPrompt";
 import { getAppType } from "@web/DeviceUtil";
 import ReflectionPromptService from "@web/services/ReflectionPromptService";
@@ -10,11 +15,32 @@ import SentPromptService from "@web/services/SentPromptService";
 
 const logger = new Logger("ReflectionManager");
 
-
 const SAVE_ERROR = "Oops, something went wrong. Please try again later";
 
 export default class ReflectionManager {
     static shared = new ReflectionManager();
+
+    async updateFreeformReflection(params: UpdateFreeformParams): Promise<UpdateFreeformResult> {
+        try {
+            const { title, note, reflection, prompt, member, duration } = params;
+            reflection.content.text = note;
+            reflection.promptQuestion = title;
+            reflection.reflectionDurationMs = (reflection.reflectionDurationMs ?? 0) + duration;
+            prompt.question = title;
+
+            const tasks: Promise<any>[] = [ReflectionResponseService.sharedInstance.save(reflection)]
+            if (prompt.promptType === PromptType.FREE_FORM && prompt.memberId === member.id && member.id) {
+                tasks.push(ReflectionPromptService.sharedInstance.save(prompt));
+            }
+            await Promise.all(tasks);
+            return {
+                success: true,
+            }
+        } catch (error) {
+            logger.error("Failed to update existing freeform prompt")
+            return { success: false, error: SAVE_ERROR };
+        }
+    }
 
     async createFreeformReflection(params: CreateFreeformParams): Promise<CreateFreeformResult> {
         try {
@@ -59,6 +85,7 @@ export default class ReflectionManager {
                 success: true,
                 reflectionResponse: reflection,
                 prompt,
+                sentPrompt,
             }
 
         } catch (error) {

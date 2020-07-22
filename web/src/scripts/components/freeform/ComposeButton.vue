@@ -8,7 +8,13 @@
             </svg>
             <span>{{copy.navigation.COMPOSE}}</span>
         </button>
-        <compose-modal :show="editing" @close="editing = false" :member="member"/>
+        <compose-modal
+                :show="editing"
+                :member="member"
+                :prompt="prompt"
+                :reflection="reflection"
+                @close="editing = false"
+                @saved="onSaved"/>
     </div>
 </template>
 
@@ -21,6 +27,9 @@
     import Modal from "@components/Modal.vue";
     import ComposeFreeform from "@components/freeform/ComposeFreeform.vue";
     import ComposeModal from "@components/freeform/ComposeModal.vue";
+    import { FreeFormSaveEvent } from "@web/managers/ReflectionManagerTypes";
+    import ReflectionPrompt from "@shared/models/ReflectionPrompt";
+    import ReflectionResponse from "@shared/models/ReflectionResponse";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -40,8 +49,17 @@
         copy = copy;
         editing = false;
 
+        prompt: ReflectionPrompt | null = null;
+        reflection: ReflectionResponse | null = null;
+
         async start() {
             this.editing = true;
+        }
+
+        async onSaved(saveEvent: FreeFormSaveEvent) {
+            const { prompt, reflectionResponse } = saveEvent;
+            this.prompt = prompt;
+            this.reflection = reflectionResponse;
         }
     }
 </script>
