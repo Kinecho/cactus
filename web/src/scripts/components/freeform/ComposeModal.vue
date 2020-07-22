@@ -1,5 +1,10 @@
 <template>
-    <modal :show="show" @close="close" :show-close-button="true" :dark="true" :fullScreen="true" id="freeform-compose-modal">
+    <modal :show="show"
+            @close="close"
+            :show-close-button="true"
+            :dark="true"
+            :fullScreen="true"
+            :id="modalId">
         <template v-slot:body>
             <div class="freeform-modal">
                 <compose-freeform
@@ -24,6 +29,7 @@
     import { FreeFormSaveEvent } from "@web/managers/ReflectionManagerTypes";
     import ReflectionPrompt from "@shared/models/ReflectionPrompt";
     import ReflectionResponse from "@shared/models/ReflectionResponse";
+    import * as uuid from "uuid/v4";
 
     @Component({
         components: {
@@ -45,6 +51,8 @@
 
         @Prop({ type: Object as () => ReflectionResponse, required: false, default: null })
         reflection!: ReflectionResponse | null;
+
+        modalId = "compose_modal_" + uuid();
 
         close() {
             this.$emit('close')

@@ -13,7 +13,7 @@
                 :member="member"
                 :prompt="prompt"
                 :reflection="reflection"
-                @close="editing = false"
+                @close="close"
                 @saved="onSaved"/>
     </div>
 </template>
@@ -54,6 +54,12 @@
 
         async start() {
             this.editing = true;
+        }
+
+        close() {
+            this.editing = false
+            this.reflection = null;
+            this.prompt = null;
         }
 
         async onSaved(saveEvent: FreeFormSaveEvent) {

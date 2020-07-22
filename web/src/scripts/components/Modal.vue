@@ -1,5 +1,5 @@
 <template>
-    <MountingPortal v-if="portalReady && (hasShown || show) " :mountTo="target">
+    <MountingPortal v-if="portalReady && (hasShown || show) " :mountTo="target" :name="id">
         <transition name="modal" v-if="show" appear>
             <div :class="['modal-mask', {show, opaque, light, dark, tall, fullScreen}]">
                 <div class="modal-container" :class="{relative: containerPositionRelative}"
@@ -70,7 +70,7 @@
         @Prop({ type: Boolean, default: false })
         fullScreen!: boolean;
 
-        @Prop({type: String, required: false, default: uuid() })
+        @Prop({ type: String, required: false, default: uuid() })
         id!: string;
 
         escapeListener: any = undefined;
@@ -153,6 +153,7 @@
         @Watch("show")
         onShow(newValue: boolean) {
             window.clearInterval(this.cleanupInterval);
+            this.hasShown = newValue || this.hasShown;
             if (newValue) {
                 if (this.key) {
                     let modal = document.getElementById(this.key);
