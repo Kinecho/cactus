@@ -41,7 +41,7 @@
     import { isPremiumTier } from "@shared/models/MemberSubscription";
     import AppSettings from "@shared/models/AppSettings";
     import { FirebaseUser } from "@web/firebase";
-    import ComposeButton from "@components/compose/ComposeButton.vue";
+    import ComposeButton from "@components/freeform/ComposeButton.vue";
 
     const logger = new Logger("App");
 

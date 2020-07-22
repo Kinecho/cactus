@@ -19,8 +19,8 @@
     import { Prop } from "vue-property-decorator";
     import CopyService from "@shared/copy/CopyService";
     import Modal from "@components/Modal.vue";
-    import ComposeFreeform from "@components/compose/ComposeFreeform.vue";
-    import ComposeModal from "@components/compose/ComposeModal.vue";
+    import ComposeFreeform from "@components/freeform/ComposeFreeform.vue";
+    import ComposeModal from "@components/freeform/ComposeModal.vue";
 
     const copy = CopyService.getSharedInstance().copy;
 

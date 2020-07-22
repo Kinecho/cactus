@@ -85,7 +85,7 @@
     import Component from "vue-class-component";
     import { Prop, Watch } from "vue-property-decorator";
     import { NavBarProps } from "@components/NavBarTypes";
-    import ComposeButton from "@components/compose/ComposeButton.vue";
+    import ComposeButton from "@components/freeform/ComposeButton.vue";
 
     const logger = new Logger("NavBar");
     const copy = CopyService.getSharedInstance().copy;

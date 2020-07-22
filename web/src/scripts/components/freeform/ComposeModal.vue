@@ -2,7 +2,7 @@
     <modal :show="show" @close="close" :show-close-button="true" :dark="true" :fullScreen="true" id="freeform-compose-modal">
         <template v-slot:body>
             <div class="freeform-modal">
-                <compose-freeform @cancel="close" :member="member"/>
+                <compose-freeform @close="close" :member="member"/>
             </div>
         </template>
     </modal>
@@ -13,7 +13,7 @@
     import Component from "vue-class-component"
     import { Prop } from "vue-property-decorator";
     import Modal from "@components/Modal.vue";
-    import ComposeFreeform from "@components/compose/ComposeFreeform.vue";
+    import ComposeFreeform from "@components/freeform/ComposeFreeform.vue";
     import CactusMember from "@shared/models/CactusMember";
 
     @Component({

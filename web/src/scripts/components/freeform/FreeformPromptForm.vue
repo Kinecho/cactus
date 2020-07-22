@@ -14,13 +14,6 @@
             </resizable-textarea>
         </section>
         <section class="actions">
-            <!-- <button :disabled="saving"
-                    class="no-loading secondary"
-                    @click="cancel"
-            >
-                Cancel
-            </button> -->
-
             <button :disabled="saving"
                     @click="save"
                     class="doneBtn icon no-loading">
@@ -38,62 +31,63 @@
 <script lang="ts">
     import Vue from "vue";
     import Component from "vue-class-component"
+    import { Prop, Watch } from "vue-property-decorator";
+    import { FreeformFormData } from "@components/freeform/FreeformPromptTypes";
     import ResizableTextarea from "@components/ResizableTextarea.vue";
-    import ReflectionManager from "@web/managers/ReflectionManager";
-    import CactusMember from "@shared/models/CactusMember";
-    import { Prop } from "vue-property-decorator";
 
     @Component({
         components: {
             ResizableTextarea
         }
     })
-    export default class ComposeFreeform extends Vue {
-        name = "ComposeFreeform";
+    export default class FreeformPromptForm extends Vue {
+        name = "FreeformPromptForm";
 
-        @Prop({ type: Object as () => CactusMember, required: true })
-        member!: CactusMember
+        @Prop({ type: String, required: false, default: null })
+        title!: string | null;
 
-        form = {
+        @Prop({ type: String, required: false, default: null })
+        note!: string | null;
+
+        @Prop({ type: Boolean, default: false })
+        saving!: boolean;
+
+        @Prop({ type: String, default: null })
+        error!: string | null;
+
+        maxTextareaHeight = 250;
+
+        form: FreeformFormData = {
             title: "",
             note: ""
         }
 
-        maxTextareaHeight = 250;
-        saving = false;
-        error: string | null = null;
-        startTime = Date.now()
+        @Watch("title")
+        onTitle(title: string | null) {
+            this.form.title = title ?? "";
+        }
+
+        @Watch("note")
+        onNote(note: string | null) {
+            this.form.note = note ?? "";
+        }
 
         beforeMount() {
-            this.startTime = Date.now()
+            this.reset();
         }
 
-        async save() {
-            this.saving = true;
-            const duration = Date.now() - this.startTime;
-            const saveResult = await ReflectionManager.shared.createFreeformReflection({
-                title: this.form.title,
-                note: this.form.note,
-                member: this.member,
-                duration,
-            })
-            this.saving = false;
-            if (saveResult.success) {
-                this.error = null;
-            } else {
-                this.error = saveResult.error ?? null;
-            }
+        reset() {
+            this.form.title = this.title ?? ""
+            this.form.note = this.note ?? "";
         }
 
-        async cancel() {
-            this.$emit('cancel')
+        save() {
+            this.$emit('save', this.form)
         }
     }
 </script>
 
 <style scoped lang="scss">
-    @import "variables";
-    @import "mixins";
     @import "forms";
 
     // This component should avoid having any styles specific to being a modal

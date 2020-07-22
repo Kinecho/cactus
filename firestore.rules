@@ -133,7 +133,7 @@ service cloud.firestore {
     }
     match /sentPrompts/{document=**} {
       allow read,update: if getMemberId() == resource.data.cactusMemberId;
-      allow create: if request.resource.data.memberId == getMemberId() && request.resource.data.promptType == "FREE_FORM";
+      allow create: if request.resource.data.cactusMemberId == getMemberId() && request.resource.data.promptType == "FREE_FORM";
     }
 
     match /friendships/{document=**} {

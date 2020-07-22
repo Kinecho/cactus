@@ -1,10 +1,12 @@
 import { CreateFreeformParams, CreateFreeformResult } from "@web/managers/ReflectionManagerTypes";
-import ReflectionPrompt from "@shared/models/ReflectionPrompt";
+import ReflectionPrompt, { PromptType } from "@shared/models/ReflectionPrompt";
 import { getAppType } from "@web/DeviceUtil";
 import ReflectionPromptService from "@web/services/ReflectionPromptService";
 import Logger from "@shared/Logger"
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import ReflectionResponseService from "@web/services/ReflectionResponseService";
+import SentPrompt, { PromptSendMedium } from "@shared/models/SentPrompt";
+import SentPromptService from "@web/services/SentPromptService";
 
 const logger = new Logger("ReflectionManager");
 
@@ -28,6 +30,21 @@ export default class ReflectionManager {
             if (!promptId) {
                 return { success: false, error: SAVE_ERROR }
             }
+
+            const sentPrompt = SentPrompt.create({
+                memberId: member.id!,
+                promptId,
+                promptType: PromptType.FREE_FORM,
+                createHistoryItem: false,
+                memberEmail: member.email,
+                medium: PromptSendMedium.FREE_FORM,
+                userId: member.userId,
+            })
+
+            sentPrompt.completed = true;
+            sentPrompt.completedAt = new Date();
+
+            await SentPromptService.sharedInstance.save(sentPrompt);
 
             const reflection = ReflectionResponse.createFreeform({
                 member,
