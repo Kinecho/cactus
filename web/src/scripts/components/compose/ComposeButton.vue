@@ -17,7 +17,6 @@
     import Component from "vue-class-component"
     import CactusMember from "@shared/models/CactusMember";
     import { Prop } from "vue-property-decorator";
-    import FloatingAction from "@components/FloatingAction.vue";
     import CopyService from "@shared/copy/CopyService";
     import Modal from "@components/Modal.vue";
     import ComposeFreeform from "@components/compose/ComposeFreeform.vue";
@@ -26,7 +25,11 @@
     const copy = CopyService.getSharedInstance().copy;
 
     @Component({
-        components: { ComposeModal, ComposeFreeform, Modal, FloatingAction }
+        components: {
+            ComposeModal,
+            ComposeFreeform,
+            Modal
+        }
     })
     export default class ComposeButton extends Vue {
         name = "ComposeButton";
