@@ -1,6 +1,6 @@
 <template>
     <div>
-        <upgrade-card class="journalListItem" v-if="showUpgradeCard" :member="member" />
+        <upgrade-card class="journalListItem" v-if="showUpgradeCard" :member="member"/>
         <div class="container centered">
             <transition name="fade-in-fast" appear mode="out-in">
                 <div class="page-loading" v-if="!dataHasLoaded">
@@ -29,8 +29,8 @@
                                     :data-index="index"
                             ></entry>
                         </transition-group>
+                        <spinner message="Loading More" v-show="showPageLoading"/>
                     </section>
-                    <spinner message="Loading More" v-show="showPageLoading"/>
                 </div>
             </transition>
 
@@ -171,7 +171,7 @@
             return -1 * ((window.innerHeight + document.documentElement.scrollTop) - document.body.offsetHeight)
         }
 
-        get emptyStateRoute(): PageRoute|string|null {
+        get emptyStateRoute(): PageRoute | string | null {
             const todayEntryId = this.dataSource?.todayEntry?.promptContent?.entryId
             return todayEntryId ? getPromptContentPath(todayEntryId) : null;
         }
