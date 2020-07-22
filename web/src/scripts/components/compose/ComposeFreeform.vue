@@ -26,7 +26,7 @@
             >
                 {{saving ? 'Saving...' : 'Save'}}
             </button>
-            <p v-if="saving">Not actually saving...</p>
+            <p class="error" v-if="error">{{error}}</p>
         </section>
 
     </div>
@@ -36,6 +36,7 @@
     import Vue from "vue";
     import Component from "vue-class-component"
     import ResizableTextarea from "@components/ResizableTextarea.vue";
+    import ReflectionManager from "@web/managers/ReflectionManager";
 
     @Component({
         components: {
@@ -48,13 +49,20 @@
         editedNote: string = ""
         maxTextareaHeight = 250;
         saving = false;
+        error: string | null = null;
 
         async save() {
             this.saving = true;
-
-            window.setTimeout(() => {
-                this.saving = false
-            }, 1200);
+            const saveResult = await ReflectionManager.shared.createFreeformReflection({
+                title: "title",
+                text: this.editedNote
+            })
+            this.saving = false;
+            if (saveResult.success) {
+                this.error = null;
+            } else {
+                this.error = saveResult.error ?? null;
+            }
         }
 
         async cancel() {
