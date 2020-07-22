@@ -1,9 +1,5 @@
 <template>
     <div class="compose-container">
-        <h1>Freeform compose</h1>
-        <p>
-            Enter whatever you want.
-        </p>
         <section class="title">
             <input type="text" placeholder="Enter a title"/>
         </section>
@@ -19,7 +15,7 @@
         </section>
         <section class="actions">
             <button :disabled="saving"
-                    class="no-loading"
+                    class="no-loading secondary"
                     @click="cancel"
             >
                 Cancel
@@ -28,7 +24,7 @@
             <button :disabled="saving"
                     @click="save"
             >
-                {{saving ? "Saving..." : "Save"}}
+                {{saving ? 'Saving...' : 'Save'}}
             </button>
             <p v-if="saving">Not actually saving...</p>
         </section>
@@ -50,7 +46,7 @@
         name = "ComposeFreeform";
 
         editedNote: string = ""
-        maxTextareaHeight = 200;
+        maxTextareaHeight = 250;
         saving = false;
 
         async save() {
@@ -76,5 +72,34 @@
     // Apply any modal container styles in `ComposeModal.vue`.
     .compose-container {
 
+    }
+
+    textarea, input[type=text] {
+        font-family: $font-stack;
+        background: transparent;
+        border: 0;
+        color: $darkestGreen;
+        font-size: 1.8rem;
+        line-height: 1.4;
+        margin: 0 0 3.2rem 0;
+        opacity: .8;
+        padding: .8rem;
+        width: 100%;
+        resize: none;
+        @include r(374) {
+            font-size: 2rem;
+        }
+        @include r(768) {
+            font-size: 2.4rem;
+            margin: -1.6rem 0 3.2rem -1.6rem;
+            padding: 1.6rem;
+        }
+        @include r(960) {
+            font-size: 3.2rem;
+        }
+
+        &:focus {
+            outline-color: rgba(0, 0, 0, .3);
+        }
     }
 </style>
