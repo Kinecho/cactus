@@ -1,7 +1,7 @@
 <template>
     <div class="compose-container">
         <section class="title">
-            <input type="text" placeholder="Enter a title"/>
+            <input type="text" placeholder="Title"/>
         </section>
         <section class="note">
             <resizable-textarea :max-height-px="maxTextareaHeight">
@@ -74,6 +74,7 @@
 <style scoped lang="scss">
     @import "variables";
     @import "mixins";
+    @import "forms";
 
     // This component should avoid having any styles specific to being a modal
     // We should assume this could be rendered in any type fo container - it's own page, a modal, whatever.
@@ -82,32 +83,11 @@
 
     }
 
-    textarea, input[type=text] {
-        font-family: $font-stack;
-        background: transparent;
-        border: 0;
-        color: $darkestGreen;
-        font-size: 1.8rem;
-        line-height: 1.4;
-        margin: 0 0 3.2rem 0;
-        opacity: .8;
-        padding: .8rem;
-        width: 100%;
-        resize: none;
-        @include r(374) {
-            font-size: 2rem;
-        }
-        @include r(768) {
-            font-size: 2.4rem;
-            margin: -1.6rem 0 3.2rem -1.6rem;
-            padding: 1.6rem;
-        }
-        @include r(960) {
-            font-size: 3.2rem;
-        }
+    textarea {
+        @include textArea;
+    }
 
-        &:focus {
-            outline-color: rgba(0, 0, 0, .3);
-        }
+    input[type=text] {
+        @include textInput;
     }
 </style>
