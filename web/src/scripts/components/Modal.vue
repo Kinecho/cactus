@@ -1,8 +1,8 @@
 <template>
     <MountingPortal v-if="portalReady && (hasShown || show) " :mountTo="target">
         <transition name="modal" v-if="show" appear>
-            <div :class="['modal-mask', {show, opaque, light, dark, tall}]">
-                <div class="modal-container" :class="{relative: containerPositionRelative, fullScreen: fullScreen}"
+            <div :class="['modal-mask', {show, opaque, light, dark, tall, fullScreen}]">
+                <div class="modal-container" :class="{relative: containerPositionRelative}"
                         role="dialog"
                 >
                     <div class="modal-header" v-if="!!$slots.header">
@@ -237,6 +237,23 @@
             }
         }
 
+        &.fullScreen {
+
+            .modal-container {
+                height: 100%;
+                width: 100%;
+            }
+
+            .modal-body {
+                display: flex;
+                height: 100%;
+            }
+
+            .content-body {
+                width: 100%;
+            }
+        }
+
         .modal-container {
             margin: 0 auto;
             border-radius: 2px;
@@ -246,17 +263,6 @@
 
             &.relative {
                 position: relative;
-            }
-
-            &.fullScreen {
-                margin: 0;
-                height: 100%;
-                width: 100%;
-
-                .modal-body,
-                .content-body {
-                    height: 100%;
-                }
             }
 
             .modal-close {
