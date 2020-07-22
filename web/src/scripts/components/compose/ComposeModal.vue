@@ -1,5 +1,5 @@
 <template>
-    <modal :show="show" @close="close" :show-close-button="false" :dark="true" id="freeform-compose-modal">
+    <modal :show="show" @close="close" :show-close-button="true" :dark="true" :fullScreen="true" id="freeform-compose-modal">
         <template v-slot:body>
             <div class="freeform-modal">
                 <compose-freeform @cancel="close" :member="member"/>
@@ -43,7 +43,9 @@
 
     .freeform-modal {
         background-color: $white;
-        @include shadowbox;
-        padding: 2rem;
+        height: 100%;
+        padding: 2.4rem;
+        position: relative;
+        width: 100%;
     }
 </style>

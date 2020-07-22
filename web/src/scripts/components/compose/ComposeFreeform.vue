@@ -14,17 +14,20 @@
             </resizable-textarea>
         </section>
         <section class="actions">
-            <button :disabled="saving"
+            <!-- <button :disabled="saving"
                     class="no-loading secondary"
                     @click="cancel"
             >
                 Cancel
-            </button>
+            </button> -->
 
             <button :disabled="saving"
                     @click="save"
-            >
-                {{saving ? 'Saving...' : 'Save'}}
+                    class="doneBtn icon no-loading">
+                <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">
+                    <path fill="#fff" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/>
+                </svg>
+                <span class="doneText">{{saving ? 'Saving...' : 'Done'}}</span>
             </button>
             <p class="error" v-if="error">{{error}}</p>
         </section>
@@ -106,5 +109,38 @@
 
     input[type=text] {
         @include textInput;
+    }
+
+    .doneBtn {
+        bottom: 2.4rem;
+        padding: 1.6rem;
+        position: absolute;
+        right: 2.4rem;
+        transition: opacity .3s, top .2s;
+
+        @include r(768) {
+            min-width: 14rem;
+            padding: 1.2rem 1.6rem 1.6rem;
+            position: static;
+            width: auto;
+        }
+
+        .check {
+            fill: $white;
+            height: 1.8rem;
+            width: 1.8rem;
+
+            @include r(768) {
+                display: none;
+            }
+        }
+
+        &.icon .doneText {
+            display: none;
+
+            @include r(768) {
+                display: inline;
+            }
+        }
     }
 </style>
