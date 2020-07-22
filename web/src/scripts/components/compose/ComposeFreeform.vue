@@ -8,10 +8,29 @@
             <input type="text" placeholder="Enter a title"/>
         </section>
         <section class="note">
-            <textarea/>
+            <resizable-textarea :max-height-px="maxTextareaHeight">
+                    <textarea placeholder="Write something..."
+                            v-model="editedNote"
+                            type="text"
+                            ref="noteInput"
+                            :disabled="saving"
+                    />
+            </resizable-textarea>
         </section>
         <section class="actions">
-            <button @click="$emit('cancel')">Cancel</button>
+            <button :disabled="saving"
+                    class="no-loading"
+                    @click="cancel"
+            >
+                Cancel
+            </button>
+
+            <button :disabled="saving"
+                    @click="save"
+            >
+                {{saving ? "Saving..." : "Save"}}
+            </button>
+            <p v-if="saving">Not actually saving...</p>
         </section>
 
     </div>
@@ -20,10 +39,31 @@
 <script lang="ts">
     import Vue from "vue";
     import Component from "vue-class-component"
+    import ResizableTextarea from "@components/ResizableTextarea.vue";
 
-    @Component
+    @Component({
+        components: {
+            ResizableTextarea
+        }
+    })
     export default class ComposeFreeform extends Vue {
         name = "ComposeFreeform";
+
+        editedNote: string = ""
+        maxTextareaHeight = 200;
+        saving = false;
+
+        async save() {
+            this.saving = true;
+
+            window.setTimeout(() => {
+                this.saving = false
+            }, 1200);
+        }
+
+        async cancel() {
+            this.$emit('cancel')
+        }
     }
 </script>
 
