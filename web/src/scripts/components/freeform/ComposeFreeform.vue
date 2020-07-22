@@ -1,9 +1,10 @@
 <template>
     <freeform-prompt-form
-            :title="null"
-            :note="null"
+            :title="title"
+            :note="note"
             :saving="saving"
             :error="error"
+            :note-shared="noteShared"
             @save="save"
     />
 
@@ -53,8 +54,20 @@
             this.startTime = Date.now()
         }
 
+        get note(): string | null {
+            return this.reflection?.content.text ?? null;
+        }
+
+        get title(): string | null {
+            return this.prompt?.question ?? null;
+        }
+
         get isEdit(): boolean {
             return !!this.prompt && !!this.reflection
+        }
+
+        get noteShared(): boolean {
+            return this.reflection?.shared ?? false;
         }
 
         getDuration(): number {

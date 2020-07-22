@@ -12,6 +12,7 @@
                             :disabled="saving"
                     />
             </resizable-textarea>
+            <share-warning v-if="noteShared"/>
         </section>
         <section class="actions">
             <button :disabled="saving"
@@ -34,10 +35,12 @@
     import { Prop, Watch } from "vue-property-decorator";
     import { FreeformFormData } from "@components/freeform/FreeformPromptTypes";
     import ResizableTextarea from "@components/ResizableTextarea.vue";
+    import ShareWarning from "@components/promptcontent/ShareWarning.vue";
 
     @Component({
         components: {
-            ResizableTextarea
+            ResizableTextarea,
+            ShareWarning
         }
     })
     export default class FreeformPromptForm extends Vue {
@@ -51,6 +54,9 @@
 
         @Prop({ type: Boolean, default: false })
         saving!: boolean;
+
+        @Prop({type: Boolean, default: false})
+        noteShared!: boolean;
 
         @Prop({ type: String, default: null })
         error!: string | null;
