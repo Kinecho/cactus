@@ -9,6 +9,9 @@
                 <h2>Please log in to continue</h2>
             </div>
         </transition>
+<!--        <FloatingAction>-->
+<!--            <compose-button v-if="isLoggedIn" :member="member"/>-->
+<!--        </FloatingAction>-->
     </div>
 </template>
 
@@ -41,11 +44,15 @@
     import { isPremiumTier } from "@shared/models/MemberSubscription";
     import AppSettings from "@shared/models/AppSettings";
     import { FirebaseUser } from "@web/firebase";
+    import FloatingAction from "@components/FloatingAction.vue";
+    import ComposeButton from "@components/compose/ComposeButton.vue";
 
     const logger = new Logger("App");
 
     @Component({
         components: {
+            ComposeButton,
+            FloatingAction,
             UpgradeSuccessBanner,
             NavBar
         }
@@ -140,6 +147,10 @@
         get allLoaded(): boolean {
             return this.settingsLoaded && this.authLoaded
         }
+
+        get isLoggedIn(): boolean {
+            return !!this.member;
+        }
     }
 </script>
 
@@ -148,6 +159,6 @@
     @import "transitions";
 
     .app-nav {
-        z-index: 1001;
+        z-index: $z-navBar;
     }
 </style>

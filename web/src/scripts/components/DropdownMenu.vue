@@ -147,7 +147,7 @@
 
     .dropdown-menu-wrapper {
         position: relative;
-        z-index: 1500;
+        z-index: $z-dropdownContainer;
     }
 
     .dropdown-menu {
@@ -220,7 +220,7 @@
         padding: .8rem 0;
         position: absolute;
         top: 4rem;
-        z-index: 100;
+        z-index: $z-dropdownBtn;
 
         a {
             background-color: transparent;

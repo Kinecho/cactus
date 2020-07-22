@@ -31,8 +31,6 @@
     import Logger from "@shared/Logger"
     import Component from "vue-class-component";
     import { Prop, Watch } from "vue-property-decorator";
-    import { debounce } from "debounce";
-    import { getDeviceDimensions } from "@web/DeviceUtil";
 
     const logger = new Logger("Modal");
     @Component(
@@ -69,12 +67,14 @@
         @Prop({ type: Boolean, default: false })
         containerPositionRelative!: boolean;
 
+        @Prop({type: String, required: false, default: uuid() })
+        id!: string;
 
         escapeListener: any = undefined;
         cleanupInterval: any = undefined;
         hasShown: boolean = this.show;
         scrollPosition: number = 0;
-        id = uuid();
+
         portalReady: boolean = false;
 
         //END props
@@ -206,7 +206,7 @@
         width: 100%;
         overflow-y: auto;
         transition: opacity .3s ease;
-        z-index: 9998;
+        z-index: $z-modal;
 
         &.light {
             background-color: rgba(255, 255, 255, .6);

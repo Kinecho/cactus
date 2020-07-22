@@ -584,7 +584,7 @@
         top: 1rem;
         left: 1rem;
         right: 1rem;
-        z-index: 5000;
+        z-index: $z-snackbar;
         display: flex;
         flex-direction: column;
         align-items: center;
