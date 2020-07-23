@@ -155,24 +155,31 @@
     // We should assume this could be rendered in any type fo container - it's own page, a modal, whatever.
     // Apply any modal container styles in `ComposeModal.vue`.
 
-    textarea {
-        @include textArea;
-    }
-
     .titleInput {
         @include textInput;
+        font-size: 2rem;
+        font-weight: bold;
 
         @include r(600) {
             width: 66vw;
         }
     }
 
+    .note {
+        @include r(768) {
+            margin-bottom: 3.2rem;
+        }
+    }
+
+    textarea {
+        @include textArea;
+    }
+
     .actions {
         display: flex;
-        position: absolute;
-        right: 2.4rem;
         width: 100%;
         transition: top .2s;
+
         > *:not(.last-child) {
             margin-left: 1rem;
         }
@@ -185,10 +192,10 @@
     }
 
     .doneBtn {
-        bottom: 0;
+        bottom: 2.4rem;
         padding: 1.6rem;
         position: absolute;
-        right: 0;
+        right: 2.4rem;
 
         @include r(768) {
             min-width: 14rem;
