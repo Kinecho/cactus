@@ -25,7 +25,7 @@
     import { Prop } from "vue-property-decorator";
     import CopyService from "@shared/copy/CopyService";
     import Modal from "@components/Modal.vue";
-    import ComposeFreeform from "@components/freeform/ComposeFreeform.vue";
+    import ComposeFreeformNote from "@components/freeform/ComposeFreeformNote.vue";
     import ComposeModal from "@components/freeform/ComposeModal.vue";
     import { FreeFormSaveEvent } from "@web/managers/ReflectionManagerTypes";
     import ReflectionPrompt from "@shared/models/ReflectionPrompt";
@@ -36,7 +36,7 @@
     @Component({
         components: {
             ComposeModal,
-            ComposeFreeform,
+            ComposeFreeform: ComposeFreeformNote,
             Modal
         }
     })

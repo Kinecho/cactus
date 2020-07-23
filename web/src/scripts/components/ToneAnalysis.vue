@@ -18,8 +18,10 @@
                 <span class="tone none">Overall tone is <span class="">{{toneListText}}</span></span>
             </nav>
             <div class="noteText">
-                <p class="analyzed-text" v-if="useDefaultValues && originalText">Your note didn't have enough text to reveal emotions.</p>
-                <p class="analyzed-text" v-if="!originalText && useNoResultsFallback"><a href="#" @click="previous">Add a note</a> to your reflection to reveal specific emotions.</p>
+                <p class="analyzed-text" v-if="useDefaultValues && originalText">Your note didn't have enough text to
+                    reveal emotions.</p>
+                <p class="analyzed-text" v-if="!originalText && useNoResultsFallback"><a href="#" @click="previous">Add
+                    a note</a> to your reflection to reveal specific emotions.</p>
                 <p v-for="(paragraph, i) in paragraphs" :key="`paragraph_${i}`" class="analyzed-text" :class="{fallback: useDefaultValues}">
                 <span v-for="(sentence, i) in paragraph"
                         :key="`sentence_${i}`"
@@ -42,7 +44,7 @@
     import Vue from "vue";
     import Component from "vue-class-component"
     import { SentenceTone, ToneID, ToneResult, ToneScore } from "@shared/api/ToneAnalyzerTypes";
-    import { Prop } from "vue-property-decorator";
+    import { Prop, Watch } from "vue-property-decorator";
     import { isBlank } from "@shared/util/StringUtil";
     import Logger from "@shared/Logger"
     import { createParagraphs } from "@shared/util/ToneAnalyzerUtil";
@@ -78,6 +80,27 @@
         useNoResultsFallback!: boolean;
 
         modalVisible: boolean = false;
+        paragraphs: SentenceTone[][] = [];
+        tones: ToneScore[] = [];
+
+        @Watch("originalText")
+        onOriginalText() {
+            this.setupData()
+        }
+
+        @Watch("toneResult")
+        onToneResult() {
+            this.setupData()
+        }
+
+        setupData() {
+            this.tones = this.getTones();
+            this.paragraphs = this.useDefaultValues ? this.getFallbackParagraphs() : this.getOriginalParagraphs();
+        }
+
+        beforeMount() {
+            this.setupData();
+        }
 
         get useDefaultValues(): boolean {
             return this.useNoResultsFallback && Object.keys(this.toneResult?.sentencesTones ?? []).length === 0;
@@ -87,7 +110,7 @@
             return this.useDefaultValues || (this.toneResult?.sentencesTones ?? []).length > 0;
         }
 
-        get fallbackToneMap(): ToneScoreMap {
+        getFallbackToneMap(): ToneScoreMap {
             const toneMap: ToneScoreMap = {}
 
             ONBOARDING_TONE_RESULTS.sentencesTones?.forEach(s => {
@@ -102,7 +125,7 @@
             return toneMap;
         }
 
-        get originalToneMap(): ToneScoreMap {
+        getOriginalToneMap(): ToneScoreMap {
             const toneMap: ToneScoreMap = {}
             this.toneResult?.sentencesTones?.forEach(s => {
                 s.tones?.forEach(t => {
@@ -116,11 +139,11 @@
             return toneMap;
         }
 
-        get tones(): ToneScore[] {
+        getTones(): ToneScore[] {
             if (this.useDefaultValues) {
-                return Object.values(this.fallbackToneMap);
+                return Object.values(this.getFallbackToneMap());
             } else {
-                return Object.values(this.originalToneMap);
+                return Object.values(this.getOriginalToneMap());
             }
         }
 
@@ -166,13 +189,13 @@
             return this.tones[Math.min(this.currentToneIndex, this.tones.length - 1)]?.toneId ?? null;
         };
 
-        get originalParagraphs(): SentenceTone[][] {
+        getOriginalParagraphs(): SentenceTone[][] {
             const analysisSentences = this.toneResult?.sentencesTones ?? [];
             const displayText = this.originalText;
             const documentTones = this.toneResult?.documentTone?.tones ?? []
 
-            logger.info("Original text", this.originalText);
-            logger.info("display text", displayText);
+            // logger.info("Original text", this.originalText);
+            // logger.info("display text", displayText);
 
             const p = createParagraphs({
                 text: displayText,
@@ -188,7 +211,7 @@
             return p;
         }
 
-        get fallbackParagraphs() {
+        getFallbackParagraphs() {
             const analysisSentences = ONBOARDING_TONE_RESULTS.sentencesTones;
             const displayText = `${ ONBOARDING_DEFAULT_TEXT }`.trim();
             const documentTones = ONBOARDING_TONE_RESULTS.documentTone?.tones;
@@ -207,9 +230,6 @@
             return p;
         }
 
-        get paragraphs(): SentenceTone[][] {
-            return this.useDefaultValues ? this.fallbackParagraphs : this.originalParagraphs;
-        }
 
         showModal() {
             this.modalVisible = true;

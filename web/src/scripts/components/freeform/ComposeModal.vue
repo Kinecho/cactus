@@ -24,7 +24,7 @@
     import Component from "vue-class-component"
     import { Prop } from "vue-property-decorator";
     import Modal from "@components/Modal.vue";
-    import ComposeFreeform from "@components/freeform/ComposeFreeform.vue";
+    import ComposeFreeformNote from "@components/freeform/ComposeFreeformNote.vue";
     import CactusMember from "@shared/models/CactusMember";
     import { FreeFormSaveEvent } from "@web/managers/ReflectionManagerTypes";
     import ReflectionPrompt from "@shared/models/ReflectionPrompt";
@@ -33,7 +33,7 @@
 
     @Component({
         components: {
-            ComposeFreeform,
+            ComposeFreeform: ComposeFreeformNote,
             Modal
         }
     })

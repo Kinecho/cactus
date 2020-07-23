@@ -1,13 +1,29 @@
 <template>
-    <freeform-prompt-form
-            :title="title"
-            :note="note"
-            :saving="saving"
-            :error="error"
-            :note-shared="noteShared"
-            @save="save"
-    />
+    <div class="compose-container">
 
+        <transition-group :name="transitionName" mode="in-out" tag="div" class="transition-container">
+            <div v-if="!showInsights"
+                    :key="`prompt-form`" class="slide-card">
+                <freeform-prompt-form
+                        :title="title"
+                        :note="note"
+                        :saving="saving"
+                        :error="error"
+                        :note-shared="noteShared"
+                        @save="save"
+                >
+                    <button class="secondary" @click="showInsights = !showInsights" v-if="showInsightsButton">
+                        Show Insights
+                    </button>
+                </freeform-prompt-form>
+
+            </div>
+            <div :key="`insights`" v-if="showInsights" class="slide-card">
+                <freeform-insights :reflection="reflection"/>
+                <button class="secondary" @click="showInsights = !showInsights">Back</button>
+            </div>
+        </transition-group>
+    </div>
 </template>
 
 <script lang="ts">
@@ -22,6 +38,7 @@
     import ReflectionPrompt from "@shared/models/ReflectionPrompt";
     import ReflectionResponse from "@shared/models/ReflectionResponse";
     import { FreeFormSaveEvent } from "@web/managers/ReflectionManagerTypes";
+    import FreeformInsights from "@components/freeform/FreeformInsights.vue";
 
 
     function isError(input: any): input is { error: string } {
@@ -30,12 +47,13 @@
 
     @Component({
         components: {
+            FreeformInsights,
             FreeformPromptForm,
             ResizableTextarea
         }
     })
-    export default class ComposeFreeform extends Vue {
-        name = "ComposeFreeform";
+    export default class ComposeFreeformNote extends Vue {
+        name = "ComposeFreeformNote";
 
         @Prop({ type: Object as () => CactusMember, required: true })
         member!: CactusMember
@@ -46,12 +64,21 @@
         @Prop({ type: Object as () => ReflectionResponse, required: false, default: null })
         reflection!: ReflectionResponse | null;
 
+        showInsights = false;
         saving = false;
         error: string | null = null;
         startTime: number | null = null;
 
         beforeMount() {
             this.startTime = Date.now()
+        }
+
+        get showInsightsButton(): boolean {
+            return !!this.reflection
+        }
+
+        get transitionName(): string {
+            return this.showInsights ? "slide-left-absolute" : "slide-right-absolute";
         }
 
         get note(): string | null {
@@ -89,7 +116,8 @@
                 this.error = saveEvent.error
             } else {
                 this.error = null;
-                this.$emit("saved", saveEvent)
+                this.$emit("saved", saveEvent);
+                this.showInsights = true;
             }
         }
 
@@ -149,9 +177,32 @@
 <style scoped lang="scss">
     @import "variables";
     @import "mixins";
-
+    @import "transitions";
     // This component should avoid having any styles specific to being a modal
     // We should assume this could be rendered in any type fo container - it's own page, a modal, whatever.
     // Apply any modal container styles in `ComposeModal.vue`.
+
+    .compose-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        justify-content: center;
+        align-items: center;
+
+        .transition-container {
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slide-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+    }
 
 </style>

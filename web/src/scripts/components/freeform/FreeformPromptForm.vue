@@ -1,5 +1,5 @@
 <template>
-    <div class="compose-container">
+    <div class="freeform-form">
         <section class="title">
             <input type="text" placeholder="Title" v-model="form.title"/>
         </section>
@@ -23,8 +23,9 @@
                 </svg>
                 <span class="doneText">{{saving ? 'Saving...' : 'Done'}}</span>
             </button>
-            <p class="error" v-if="error">{{error}}</p>
+            <slot></slot>
         </section>
+        <p class="error" v-if="error">{{error}}</p>
 
     </div>
 </template>
@@ -55,7 +56,7 @@
         @Prop({ type: Boolean, default: false })
         saving!: boolean;
 
-        @Prop({type: Boolean, default: false})
+        @Prop({ type: Boolean, default: false })
         noteShared!: boolean;
 
         @Prop({ type: String, default: null })
@@ -87,6 +88,11 @@
             this.form.note = this.note ?? "";
         }
 
+        get hasChanges(): boolean {
+            return this.form.title !== this.title || this.form.note !== this.note;
+
+        }
+
         save() {
             this.$emit('save', this.form)
         }
@@ -99,9 +105,6 @@
     // This component should avoid having any styles specific to being a modal
     // We should assume this could be rendered in any type fo container - it's own page, a modal, whatever.
     // Apply any modal container styles in `ComposeModal.vue`.
-    .compose-container {
-
-    }
 
     textarea {
         @include textArea;
@@ -109,6 +112,14 @@
 
     input[type=text] {
         @include textInput;
+    }
+
+    .actions {
+        display: flex;
+
+        > *:not(.last-child) {
+            margin-left: 1rem;
+        }
     }
 
     .doneBtn {

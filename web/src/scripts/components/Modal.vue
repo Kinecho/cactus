@@ -40,6 +40,9 @@
         }
     })
     export default class Modal extends Vue {
+        static openModals: Set<string> = new Set<string>();
+
+
         @Prop({ type: Boolean, default: false })
         show!: boolean
 
@@ -130,13 +133,19 @@
 
         removeStyles() {
             try {
+                if (Modal.openModals.size !== 0) {
+                    logger.info("not removing body styles as modal length is ", Modal.openModals.size)
+                    return;
+                } else {
+                    logger.info("Removing body styles as there are no modals present");
+                }
                 const isNoScroll = document.body.classList.contains("no-scroll");
 
                 document.body.classList.remove("no-scroll");
                 this.$root.$children[0]?.$el?.classList?.remove("modal-mask-in");
                 document.body.style.removeProperty('top');
                 if (isNoScroll) {
-                    logger.info("Scrolling to", this.scrollPosition);
+                    logger.info(this.key + " Scrolling to", this.scrollPosition);
                     window.scrollTo(0, this.scrollPosition);
                 }
             } catch (error) {
@@ -164,14 +173,16 @@
                         wrapper.setAttribute("id", this.key);
                         wrapper.appendChild(portal);
                         document.body.appendChild(wrapper)
+
                         this.portalReady = true;
                     }
                 }
-
+                Modal.openModals.add(this.key);
                 this.hasShown = true;
                 this.addStyles()
 
-            } else {
+            } else if (!this.show) {
+                Modal.openModals.delete(this.key);
                 this.removeStyles()
 
                 //wait for a bit before removing the wrapper element so that any animations can finish.
