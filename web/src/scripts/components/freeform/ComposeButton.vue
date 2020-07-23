@@ -60,6 +60,10 @@
             this.editing = true;
         }
 
+        destroyed() {
+            this.reflectionUnsubscriber?.();
+        }
+
         close() {
             this.editing = false
             this.reflection = null;
