@@ -1,6 +1,6 @@
 import { BaseModel, Collection } from "@shared/FirestoreBaseModels";
 import { CampaignMemberSendStatus } from "@shared/mailchimp/models/MailchimpTypes";
-import ReflectionPrompt, { PromptType } from "@shared/models/ReflectionPrompt";
+import { PromptType } from "@shared/models/ReflectionPrompt";
 
 export enum PromptSendMedium {
     EMAIL_MAILCHIMP = "EMAIL_MAILCHIMP",
