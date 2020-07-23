@@ -161,6 +161,15 @@ export default class ReflectionResponseService {
         });
     }
 
+    observeById(reflectionId: string, options: { onData: (model: ReflectionResponse | undefined, error?: any) => void }): ListenerUnsubscriber{
+        return this.firestoreService.observeById(reflectionId, ReflectionResponse, {
+            queryName: "observeReflectionById",
+            onData: (model: ReflectionResponse | undefined, error) => {
+                options.onData(model, error);
+            }
+        });
+    }
+
     observeForPromptId(promptId: string, options: QueryObserverOptions<ReflectionResponse> & { member?: CactusMember | null }): ListenerUnsubscriber | undefined {
         const member: CactusMember | undefined = options.member ?? CactusMemberService.sharedInstance.currentMember;
         if (!member) {

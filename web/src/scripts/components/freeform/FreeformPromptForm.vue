@@ -2,11 +2,11 @@
     <div class="freeform-form">
         <section class="title">
             <input type="text"
+                    class="titleInput"
                     placeholder="Title"
                     v-model="form.title"
-                    @focus="onTextFocus"
-                    @blur="onTextBlur"
-                    class="titleInput"
+                    @focus="titleSelected = true"
+                    @blur="titleSelected = false"
             />
         </section>
         <section class="note">
@@ -16,8 +16,8 @@
                             type="text"
                             ref="noteInput"
                             :disabled="saving"
-                            @focus="onTextFocus"
-                            @blur="onTextBlur"
+                            @focus="noteSelected = true"
+                            @blur="noteSelected = false"
                     />
             </resizable-textarea>
             <share-warning v-if="noteShared"/>
@@ -79,7 +79,8 @@
         actionStyles: Record<string, string | number> = {};
         maxTextareaHeight = 250;
         debounceWindowSizeHandler: any;
-        textFocused = false;
+        noteSelected = false;
+        titleSelected = false;
         form: FreeformFormData = {
             title: "",
             note: ""
@@ -93,6 +94,16 @@
         @Watch("note")
         onNote(note: string | null) {
             this.form.note = note ?? "";
+        }
+
+        @Watch("noteSelected")
+        onNoteSelected() {
+            this.onWidowSize()
+        }
+
+        @Watch("titleSelected")
+        onTitleSelected() {
+            this.onWidowSize()
         }
 
         beforeMount() {
@@ -112,24 +123,22 @@
             logger.info("set max text height to ", this.maxTextareaHeight);
 
 
-            const offset = isIosDevice() && this.textFocused ? 160 : 0;
+            const noteOffset = 160;
+            const titleOffset = 100;
+
+            const useAdjustment = isIosDevice() && (this.noteSelected || this.titleSelected);
+            const adjustmentValue = this.noteSelected ? noteOffset : titleOffset;
+
+            const offset = useAdjustment ? adjustmentValue : 0;
 
             logger.info("Offset is", offset);
-            let buttonHeight = 100;
+            let actionsHeight = 100;
 
-            const top = getDeviceDimensions().height - buttonHeight + offset
+            const top = getDeviceDimensions().height - actionsHeight + offset
             this.actionStyles = {
                 ...this.actionStyles,
                 top: `${ top }px`,
             }
-        }
-
-        onTextFocus() {
-            this.textFocused = true;
-        }
-
-        onTextBlur() {
-            this.textFocused = false;
         }
 
         reset() {

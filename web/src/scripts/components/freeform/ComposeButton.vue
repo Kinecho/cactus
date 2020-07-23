@@ -30,6 +30,8 @@
     import { FreeFormSaveEvent } from "@web/managers/ReflectionManagerTypes";
     import ReflectionPrompt from "@shared/models/ReflectionPrompt";
     import ReflectionResponse from "@shared/models/ReflectionResponse";
+    import { ListenerUnsubscriber } from "@web/services/FirestoreService";
+    import ReflectionResponseService from "@web/services/ReflectionResponseService";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -52,8 +54,14 @@
         prompt: ReflectionPrompt | null = null;
         reflection: ReflectionResponse | null = null;
 
+        reflectionUnsubscriber: ListenerUnsubscriber | null = null;
+
         async start() {
             this.editing = true;
+        }
+
+        destroyed() {
+            this.reflectionUnsubscriber?.();
         }
 
         close() {
@@ -64,8 +72,24 @@
 
         async onSaved(saveEvent: FreeFormSaveEvent) {
             const { prompt, reflectionResponse } = saveEvent;
-            this.prompt = prompt;
-            this.reflection = reflectionResponse;
+
+            if (!this.reflectionUnsubscriber && reflectionResponse.id) {
+                this.setupObserver(reflectionResponse.id)
+            } else {
+                this.prompt = prompt;
+                this.reflection = reflectionResponse;
+            }
+        }
+
+        setupObserver(id: string) {
+            this.reflectionUnsubscriber?.();
+            this.reflectionUnsubscriber = ReflectionResponseService.sharedInstance.observeById(id, {
+                onData: (reflection) => {
+                    if (reflection) {
+                        this.reflection = reflection
+                    }
+                }
+            })
         }
     }
 </script>
