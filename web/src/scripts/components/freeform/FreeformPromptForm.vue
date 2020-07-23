@@ -2,6 +2,7 @@
     <div class="freeform-form">
         <section class="title">
             <input type="text"
+                    class="titleInput"
                     placeholder="Title"
                     v-model="form.title"
                     @focus="titleSelected = true"
@@ -167,8 +168,12 @@
         @include textArea;
     }
 
-    input[type=text] {
+    .titleInput {
         @include textInput;
+
+        @include r(600) {
+            width: 66vw;
+        }
     }
 
     .actions {
@@ -190,11 +195,10 @@
     }
 
     .doneBtn {
-        bottom: 2.4rem;
+        bottom: 0;
         padding: 1.6rem;
-        /*position: absolute;*/
-        right: 2.4rem;
-        transition: opacity .3s;
+        position: absolute;
+        right: 0;
 
         @include r(768) {
             min-width: 14rem;
