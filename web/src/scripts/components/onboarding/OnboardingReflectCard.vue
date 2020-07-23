@@ -231,9 +231,6 @@
         padding: .8rem;
         width: 100%;
 
-        @include r(374) {
-            font-size: 2rem;
-        }
         @include r(768) {
             font-size: 2.4rem;
             margin: -1.6rem 0 3.2rem -1.6rem;

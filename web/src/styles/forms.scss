@@ -3,7 +3,6 @@
 @import "~styles/../../node_modules/firebaseui/dist/firebaseui.css";
 
 @mixin textInput {
-    background: transparent;
     border: 0;
     color: $darkestGreen;
     font-family: $font-stack;
@@ -14,15 +13,8 @@
     transition: border-color .3s ease-in-out;
     width: 100%;
 
-    @include r(374) {
-        font-size: 2rem;
-    }
     @include r(768) {
-        font-size: 2.4rem;
         padding: 1.6rem;
-    }
-    @include r(960) {
-        font-size: 3.2rem;
     }
 
     &:focus {
@@ -31,6 +23,11 @@
 
     &:disabled {
         opacity: 1;
+    }
+
+    &.rounded {
+        border-radius: 3rem;
+        padding: .8rem 1.6rem;
     }
 }
 
@@ -71,9 +68,6 @@
     resize: none;
     width: 100%;
 
-    @include r(374) {
-        font-size: 2rem;
-    }
     @include r(768) {
         font-size: 2.4rem;
         padding: 1.6rem;

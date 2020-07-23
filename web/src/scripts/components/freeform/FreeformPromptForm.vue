@@ -163,6 +163,12 @@
         @include r(600) {
             width: 66vw;
         }
+        @include r(768) {
+            font-size: 3rem;
+        }
+        @include r(960) {
+            font-size: 3.8rem;
+        }
     }
 
     .note {
