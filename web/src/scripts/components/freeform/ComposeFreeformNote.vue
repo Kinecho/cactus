@@ -11,16 +11,15 @@
                         :error="error"
                         :note-shared="noteShared"
                         @save="save"
-                >
-                    <button class="secondary" @click="showInsights = !showInsights" v-if="showInsightsButton">
-                        Show Insights
-                    </button>
-                </freeform-prompt-form>
-
+                />
             </div>
             <div :key="`insights`" v-if="showInsights" class="slide-card">
                 <freeform-insights :reflection="reflection"/>
-                <button class="secondary" @click="showInsights = !showInsights">Back</button>
+                <button aria-label="Back" @click="showInsights = !showInsights" class="arrow icon tertiary no-loading">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                        <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                    </svg>
+                </button>
             </div>
         </transition-group>
     </div>
@@ -202,6 +201,19 @@
             justify-content: center;
             align-items: center;
             width: 100%;
+    }
+
+    .arrow {
+        left: .8rem;
+        position: absolute;
+        top: .8rem;
+        z-index: 1;
+
+        svg {
+            fill: $darkGreen;
+            height: 1.8rem;
+            transform: scale(-1);
+            width: 1.8rem;
         }
     }
 
