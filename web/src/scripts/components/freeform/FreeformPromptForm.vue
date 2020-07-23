@@ -1,7 +1,13 @@
 <template>
     <div class="freeform-form">
         <section class="title">
-            <input class="titleInput" type="text" placeholder="Title" v-model="form.title"/>
+            <input type="text"
+                    placeholder="Title"
+                    v-model="form.title"
+                    @focus="onTextFocus"
+                    @blur="onTextBlur"
+                    class="titleInput"
+            />
         </section>
         <section class="note">
             <resizable-textarea :max-height-px="maxTextareaHeight">
@@ -10,11 +16,13 @@
                             type="text"
                             ref="noteInput"
                             :disabled="saving"
+                            @focus="onTextFocus"
+                            @blur="onTextBlur"
                     />
             </resizable-textarea>
             <share-warning v-if="noteShared"/>
         </section>
-        <section class="actions">
+        <section class="actions" :style="actionStyles">
             <button :disabled="saving"
                     @click="save"
                     class="doneBtn icon no-loading">
@@ -37,6 +45,11 @@
     import { FreeformFormData } from "@components/freeform/FreeformPromptTypes";
     import ResizableTextarea from "@components/ResizableTextarea.vue";
     import ShareWarning from "@components/promptcontent/ShareWarning.vue";
+    import { debounce } from "debounce";
+    import { getDeviceDimensions, isIosDevice } from "@web/DeviceUtil";
+    import Logger from "@shared/Logger"
+
+    const logger = new Logger("FreeformPromptForm");
 
     @Component({
         components: {
@@ -62,8 +75,11 @@
         @Prop({ type: String, default: null })
         error!: string | null;
 
-        maxTextareaHeight = 250;
 
+        actionStyles: Record<string, string | number> = {};
+        maxTextareaHeight = 250;
+        debounceWindowSizeHandler: any;
+        textFocused = false;
         form: FreeformFormData = {
             title: "",
             note: ""
@@ -81,6 +97,39 @@
 
         beforeMount() {
             this.reset();
+        }
+
+        mounted() {
+            this.onWidowSize();
+            this.debounceWindowSizeHandler = debounce(this.onWidowSize, 100)
+            window.addEventListener("resize", this.debounceWindowSizeHandler);
+            window.visualViewport?.addEventListener("resize", this.debounceWindowSizeHandler)
+        }
+
+
+        onWidowSize() {
+            this.maxTextareaHeight = getDeviceDimensions().height / 2;
+            logger.info("set max text height to ", this.maxTextareaHeight);
+
+
+            const offset = isIosDevice() && this.textFocused ? 160 : 0;
+
+            logger.info("Offset is", offset);
+            let buttonHeight = 100;
+
+            const top = getDeviceDimensions().height - buttonHeight + offset
+            this.actionStyles = {
+                ...this.actionStyles,
+                top: `${ top }px`,
+            }
+        }
+
+        onTextFocus() {
+            this.textFocused = true;
+        }
+
+        onTextBlur() {
+            this.textFocused = false;
         }
 
         reset() {
@@ -120,9 +169,18 @@
 
     .actions {
         display: flex;
-
+        position: absolute;
+        right: 2.4rem;
+        width: 100%;
+        transition: top .2s;
         > *:not(.last-child) {
             margin-left: 1rem;
+        }
+
+        @include r(768) {
+            min-width: 14rem;
+            position: static;
+            width: auto;
         }
     }
 
