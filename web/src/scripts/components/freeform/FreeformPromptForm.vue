@@ -1,7 +1,7 @@
 <template>
     <div class="freeform-form">
         <section class="title">
-            <input type="text" placeholder="Title" v-model="form.title"/>
+            <input class="titleInput" type="text" placeholder="Title" v-model="form.title"/>
         </section>
         <section class="note">
             <resizable-textarea :max-height-px="maxTextareaHeight">
@@ -110,8 +110,12 @@
         @include textArea;
     }
 
-    input[type=text] {
+    .titleInput {
         @include textInput;
+
+        @include r(600) {
+            width: 66vw;
+        }
     }
 
     .actions {
@@ -123,11 +127,10 @@
     }
 
     .doneBtn {
-        bottom: 2.4rem;
+        bottom: 0;
         padding: 1.6rem;
         position: absolute;
-        right: 2.4rem;
-        transition: opacity .3s, top .2s;
+        right: 0;
 
         @include r(768) {
             min-width: 14rem;
