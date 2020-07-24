@@ -100,16 +100,26 @@
             return this.startTime ? Date.now() - this.startTime : 0;
         }
 
+        hasChanges(form: FreeformFormData): boolean {
+            return form.title !== this.title || form.note !== this.note;
+        }
+
         async save(form: FreeformFormData) {
+            if (!this.hasChanges(form)) {
+                this.error = null;
+                this.showInsights = true;
+                return
+            }
+
             this.saving = true;
             let saveEvent: FreeFormSaveEvent | { error: string };
+
             if (this.isEdit) {
                 saveEvent = await this.updateExisting(form)
             } else {
                 saveEvent = await this.saveNew(form)
             }
             this.saving = false
-            // this.close();
 
             if (isError(saveEvent)) {
                 this.error = saveEvent.error
