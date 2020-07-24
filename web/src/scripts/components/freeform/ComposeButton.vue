@@ -61,28 +61,33 @@
         }
 
         destroyed() {
+            this.clear()
+        }
+
+        clear() {
             this.reflectionUnsubscriber?.();
+            this.reflection = null;
+            this.prompt = null;
+            this.reflectionUnsubscriber = null;
         }
 
         close() {
             this.editing = false
-            this.reflection = null;
-            this.prompt = null;
+            this.clear()
         }
 
         async onSaved(saveEvent: FreeFormSaveEvent) {
             const { prompt, reflectionResponse } = saveEvent;
-
+            this.prompt = prompt;
+            this.reflection = reflectionResponse;
             if (!this.reflectionUnsubscriber && reflectionResponse.id) {
                 this.setupObserver(reflectionResponse.id)
-            } else {
-                this.prompt = prompt;
-                this.reflection = reflectionResponse;
             }
         }
 
         setupObserver(id: string) {
             this.reflectionUnsubscriber?.();
+            this.reflectionUnsubscriber = null;
             this.reflectionUnsubscriber = ReflectionResponseService.sharedInstance.observeById(id, {
                 onData: (reflection) => {
                     if (reflection) {
