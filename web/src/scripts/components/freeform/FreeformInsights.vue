@@ -1,11 +1,13 @@
 <template>
-    <div>
+    <div class="freeformInsights">
         <spinner v-if="loading" message="Gathering insights..."/>
-        <template v-if="!loading">
+        <div class="textBox" v-if="!loading">
+            <p>This is what your note reveals about your emotions.</p>
+        </div>
+        <div class="insightsContainer" v-if="!loading">
             <positivity-rating :sentiment-score="sentimentScore"/>
             <tone-analysis :original-text="reflection.content.text" :tone-result="toneResult"/>
-        </template>
-
+        </div>
     </div>
 </template>
 
@@ -49,5 +51,68 @@
 </script>
 
 <style scoped lang="scss">
+    @import "mixins";
+
+    .freeformInsights {
+        display: flex;
+        flex-flow: column nowrap;
+        padding: 6.4rem 2.4rem;
+        width: 100%;
+
+        @include r(768) {
+            height: 100%;
+            justify-content: center;
+            margin: 0 auto;
+            max-width: 110rem;
+            padding: 2.4rem;
+        }
+        @include r(960) {
+            align-items: center;
+            flex-direction: row;
+            justify-content: flex-start;
+        }
+    }
+
+    .textBox {
+        font-size: 2rem;
+        margin-bottom: 3.2rem;
+
+        @include r(374) {
+            font-size: 2.4rem;
+        }
+        @include r(600) {
+            margin: 0 auto 3.2rem;
+            max-width: 60rem;
+            width: 100%;
+        }
+        @include r(768) {
+            font-size: 3.2rem;
+        }
+        @include r(960) {
+            font-size: 4rem;
+            margin-bottom: 0;
+            padding-right: 6.4rem;
+            width: 50%;
+        }
+    }
+
+    .insightsContainer {
+        font-size: 1.8rem;
+        width: 100%;
+
+        @include r(600) {
+            margin: 0 auto;
+            max-width: 60rem;
+        }
+        @include r(960) {
+            align-self: center;
+            font-size: 2rem;
+            max-width: 50%;
+        }
+    }
+
+    .spinner-container {
+        flex-grow: 1;
+    }
 
 </style>
