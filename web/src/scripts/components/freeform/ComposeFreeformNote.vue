@@ -204,9 +204,9 @@
     }
 
     .arrow {
-        left: .8rem;
+        left: 1.2rem;
         position: absolute;
-        top: .8rem;
+        top: 1rem;
         z-index: 1;
 
         svg {

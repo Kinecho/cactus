@@ -158,6 +158,7 @@
 </script>
 
 <style scoped lang="scss">
+    @import "mixins";
     @import "forms";
 
     // This component should avoid having any styles specific to being a modal
@@ -191,31 +192,25 @@
     }
 
     .actions {
+        bottom: 1.6rem;
         display: flex;
-        width: 100%;
-        transition: top .2s;
-
-        > *:not(.last-child) {
-            margin-left: 1rem;
-        }
+        justify-content: flex-end;
+        position: absolute;
+        right: 1.6rem;
 
         @include r(768) {
+            justify-content: flex-start;
             min-width: 14rem;
             position: static;
-            width: auto;
         }
     }
 
     .doneBtn {
-        bottom: 2.4rem;
         padding: 1.6rem;
-        position: absolute;
-        right: 2.4rem;
 
         @include r(768) {
             min-width: 14rem;
             padding: 1.2rem 1.6rem 1.6rem;
-            position: static;
             width: auto;
         }
 
