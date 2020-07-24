@@ -1,7 +1,7 @@
 <template lang="html">
     <header v-bind:class="mainClasses" v-if="!hidden">
         <div class="centered">
-            <router-link :to="logoHref">
+            <router-link :to="logoHref" class="nav-logo-container">
                 <img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" :src="logoSrc" alt="Cactus logo"/>
             </router-link>
             <div v-if="!loggedIn" class="anonLinks">
@@ -9,21 +9,22 @@
                         v-if="displayLoginButton"
                         :to="pricingHref"
                         type="link"
+                        class="navbarLink"
                 >
                     <span>Pricing</span>
                 </router-link>
                 <router-link v-if="displayLoginButton"
-                        class="login "
                         :to="loginHref"
                         @click.prevent="goToLogin"
                         type="link"
+                        class="navbarLink"
                 >
                     <span>{{copy.common.LOG_IN}}</span>
                 </router-link>
                 <router-link v-if="displayLoginButton"
-                        class="login"
                         :to="signupHref"
-                        type="link"
+                        tag="button"
+                        class="small"
                 >
                     <span>{{copy.common.SIGN_UP}}</span>
                 </router-link>
@@ -325,60 +326,24 @@
         justify-content: flex-end;
         white-space: nowrap;
 
-        a {
-            display: block;
+        .navbarLink {
             font-size: 1.6rem;
-            margin: 0;
-            padding-left: 3vw;
-            text-decoration: none;
-            transition: background-color .2s ease-in-out;
+            margin: 0 .8rem;
+            padding: 0;
+
             @include r(600) {
                 font-size: 1.8rem;
-
+                margin: 0 1.6rem;
+                padding: 3.2rem 0;
             }
         }
 
-        .login {
-            &:last-child {
-                border: 1px solid $lightGreen;
-                border-radius: 3rem;
-                margin-left: 3.2vw;
-                padding: .4rem 1.0rem;
-
-                &:hover, &.router-link-active {
-                    background-color: $lightGreen;
-                }
-            }
-
-            @include r(600) {
-                &:last-child {
-                    padding: .8rem 1.6rem;
-
-                    &:hover, &.router-link-active {
-                        background-color: $lightGreen;
-                    }
-                }
-            }
-        }
-
-        a.button.small {
-            background-color: transparent;
-            color: $darkGreen;
+        button.small {
             flex-grow: 0;
-            font-size: 1.6rem;
-            font-weight: bold;
-            margin: 0;
-            padding: 0 0 0 3vw;
+            margin-left: .8rem;
 
-            @include r(374) {
-                background-color: $green;
-                color: $white;
-                margin-left: 2.4vw;
-                padding: .6rem 1.2rem;
-            }
             @include r(600) {
-                margin-left: 3.2vw;
-                padding: .8rem 1.6rem;
+                margin-left: 1.6rem;
             }
         }
     }
@@ -388,16 +353,23 @@
         justify-content: space-between;
     }
 
-    .nav-logo {
+    .nav-logo-container {
         display: block;
-        height: 3.5rem;
-        position: relative;
-        top: 2px;
-        width: 7rem;
+        padding: .8rem .8rem .8rem 0;
 
-        @include r(374) {
+        @include r(600) {
+            padding: 1.6rem 1.6rem 1.6rem 0;
+        }
+    }
+
+    .nav-logo {
+        display: block;    
+        height: auto;
+        top: 2px;
+        width: 24vw;
+
+        @include r(600) {
             height: 5.8rem;
-            position: static;
             width: 11.7rem;
         }
 
@@ -417,16 +389,17 @@
     .navbarLink {
         align-items: center;
         display: flex;
-        padding: 0 1.6rem;
+        padding: 1.6rem;
         position: relative;
         text-decoration: none;
 
         @include r(600) {
-            padding: 0 2.4rem;
+            margin: 0 1.6rem;
+            padding: 3.2rem 0;
 
             &:after {
                 background-color: $green;
-                bottom: -33px;
+                bottom: -1px;
                 content: "";
                 height: 1px;
                 left: 0;
@@ -446,9 +419,8 @@
             height: 2.4rem;
             width: 2.4rem;
 
-            &.pie {
-                height: 2.2rem;
-                width: 2.2rem;
+            &.journal {
+                margin-top: 1px;
             }
 
             @include r(600) {
@@ -495,18 +467,19 @@
         transition: transform .2s ease-in-out;
 
         @include r(600) {
-            padding-left: 2.4rem;
+            margin-left: 1.6rem;
+            padding-left: 0;
 
             &:after {
                 background-color: $green;
                 bottom: -30px;
                 content: "";
                 height: 1px;
-                right: -1.2rem;
+                right: 0;
                 position: absolute;
                 transform: scaleX(0);
                 transition: transform .2s ease-in-out;
-                width: 5.6rem;
+                width: 100%;
             }
 
             &:hover:after, &.router-link-active:after {

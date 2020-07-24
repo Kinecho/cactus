@@ -139,6 +139,7 @@
             bottom: auto;
             color: white;
             height: auto;
+            margin: 0 1.6rem;
             position: static;
             right: auto;
             text-decoration: none;
