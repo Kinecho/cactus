@@ -165,6 +165,21 @@
     // We should assume this could be rendered in any type fo container - it's own page, a modal, whatever.
     // Apply any modal container styles in `ComposeModal.vue`.
 
+    .freeform-form {
+        display: flex;
+        flex-direction: column;
+        margin: 0 auto;
+        max-width: 110rem;
+        padding: 6.4rem 2.4rem;
+        width: 100%;
+
+        @include r(768) {
+            height: 100%;
+            justify-content: center;
+            padding: 2.4rem;
+        }
+    }
+
     .titleInput {
         @include textInput;
         font-size: 2rem;

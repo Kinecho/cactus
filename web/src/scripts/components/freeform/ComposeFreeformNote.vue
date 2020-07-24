@@ -191,16 +191,20 @@
         .transition-container {
             height: 100%;
             display: flex;
-            justify-content: center;
-            align-items: center;
+            justify-content: flex-start;
+
+            @include r(768) {
+                align-items: center;
+                justify-content: center;
+            }
         }
 
         .slide-card {
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             width: 100%;
+        }
     }
 
     .arrow {
