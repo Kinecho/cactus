@@ -60,7 +60,12 @@ export default class ReflectionPrompt extends BaseModel {
         return this;
     }
 
-    static createFreeForm(params: { memberId: string, question?: string | null | undefined, topic?: string | undefined, app?: AppType }): ReflectionPrompt {
+    static createFreeForm(params: {
+        memberId: string,
+        question?: string | null | undefined,
+        topic?: string | undefined,
+        app?: AppType
+    }): ReflectionPrompt {
         const { memberId, question, topic, app } = params;
         const prompt = new ReflectionPrompt();
         prompt.promptType = PromptType.FREE_FORM;

@@ -1,7 +1,7 @@
 <template>
-    <MountingPortal v-if="portalReady && (hasShown || show) " :mountTo="target">
+    <MountingPortal v-if="portalReady && (hasShown || show) " :mountTo="target" :name="id">
         <transition name="modal" v-if="show" appear>
-            <div :class="['modal-mask', {show, opaque, light, dark, tall}]">
+            <div :class="['modal-mask', {show, opaque, light, dark, tall, fullScreen}]">
                 <div class="modal-container" :class="{relative: containerPositionRelative}"
                         role="dialog"
                 >
@@ -31,8 +31,6 @@
     import Logger from "@shared/Logger"
     import Component from "vue-class-component";
     import { Prop, Watch } from "vue-property-decorator";
-    import { debounce } from "debounce";
-    import { getDeviceDimensions } from "@web/DeviceUtil";
 
     const logger = new Logger("Modal");
     @Component(
@@ -42,6 +40,9 @@
         }
     })
     export default class Modal extends Vue {
+        static openModals: Set<string> = new Set<string>();
+
+
         @Prop({ type: Boolean, default: false })
         show!: boolean
 
@@ -69,12 +70,17 @@
         @Prop({ type: Boolean, default: false })
         containerPositionRelative!: boolean;
 
+        @Prop({ type: Boolean, default: false })
+        fullScreen!: boolean;
+
+        @Prop({ type: String, required: false, default: uuid() })
+        id!: string;
 
         escapeListener: any = undefined;
         cleanupInterval: any = undefined;
         hasShown: boolean = this.show;
         scrollPosition: number = 0;
-        id = uuid();
+
         portalReady: boolean = false;
 
         //END props
@@ -127,13 +133,19 @@
 
         removeStyles() {
             try {
+                if (Modal.openModals.size !== 0) {
+                    logger.info("not removing body styles as modal length is ", Modal.openModals.size)
+                    return;
+                } else {
+                    logger.info("Removing body styles as there are no modals present");
+                }
                 const isNoScroll = document.body.classList.contains("no-scroll");
 
                 document.body.classList.remove("no-scroll");
                 this.$root.$children[0]?.$el?.classList?.remove("modal-mask-in");
                 document.body.style.removeProperty('top');
                 if (isNoScroll) {
-                    logger.info("Scrolling to", this.scrollPosition);
+                    logger.info(this.key + " Scrolling to", this.scrollPosition);
                     window.scrollTo(0, this.scrollPosition);
                 }
             } catch (error) {
@@ -150,6 +162,7 @@
         @Watch("show")
         onShow(newValue: boolean) {
             window.clearInterval(this.cleanupInterval);
+            this.hasShown = newValue || this.hasShown;
             if (newValue) {
                 if (this.key) {
                     let modal = document.getElementById(this.key);
@@ -160,14 +173,16 @@
                         wrapper.setAttribute("id", this.key);
                         wrapper.appendChild(portal);
                         document.body.appendChild(wrapper)
+
                         this.portalReady = true;
                     }
                 }
-
+                Modal.openModals.add(this.key);
                 this.hasShown = true;
                 this.addStyles()
 
-            } else {
+            } else if (!this.show) {
+                Modal.openModals.delete(this.key);
                 this.removeStyles()
 
                 //wait for a bit before removing the wrapper element so that any animations can finish.
@@ -206,7 +221,7 @@
         width: 100%;
         overflow-y: auto;
         transition: opacity .3s ease;
-        z-index: 9998;
+        z-index: $z-modal;
 
         &.light {
             background-color: rgba(255, 255, 255, .6);
@@ -231,6 +246,24 @@
                 align-items: center;
                 display: flex;
                 justify-content: center;
+            }
+        }
+
+        &.fullScreen {
+            background-color: $white;
+
+            .modal-container {
+                height: 100%;
+                width: 100%;
+            }
+
+            .modal-body {
+                display: flex;
+                height: 100%;
+            }
+
+            .content-body {
+                width: 100%;
             }
         }
 
@@ -274,10 +307,6 @@
                 position: relative;
                 overflow: auto;
                 max-height: 100%;
-            }
-
-            .content-body {
-
             }
         }
     }

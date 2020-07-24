@@ -2,7 +2,7 @@
     <div class="upgradeJournal basic">
         <div class="centered">
             <p>Get daily insights, core values, and more.</p>
-            <a :href="upgradeRoute" class="btn button primary">Try Cactus Plus</a>
+            <a :href="upgradeRoute" class="button primary small">Try Cactus Plus</a>
         </div>
     </div>
 </template>
@@ -78,10 +78,7 @@
                 }
 
                 a.button {
-                    box-shadow: none;
-                    font-size: 1.6rem;
                     margin-bottom: 0;
-                    padding: 1.2rem 1.6rem;
                 }
             }
         }
@@ -99,7 +96,6 @@
         a.button {
             display: inline-block;
             margin-bottom: .8rem;
-            min-width: 16rem;
         }
     }
 

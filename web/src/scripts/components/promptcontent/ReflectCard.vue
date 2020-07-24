@@ -219,6 +219,7 @@
     @import "prompts";
     @import "transitions";
     @import "mixins";
+    @import "forms";
 
     .elementReflectContainer {
         padding: 0 1.6rem;
@@ -242,31 +243,11 @@
     }
 
     textarea {
-        font-family: $font-stack;
-        background: transparent;
-        border: 0;
-        color: $darkestGreen;
-        font-size: 1.8rem;
-        line-height: 1.4;
+        @include textArea;
         margin: -1.2rem 0 3.2rem -.8rem;
-        opacity: .8;
-        padding: .8rem;
-        width: 100%;
-        resize: none;
-        @include r(374) {
-            font-size: 2rem;
-        }
-        @include r(768) {
-            font-size: 2.4rem;
-            margin: -1.6rem 0 3.2rem -1.6rem;
-            padding: 1.6rem;
-        }
-        @include r(960) {
-            font-size: 3.2rem;
-        }
 
-        &:focus {
-            outline-color: rgba(0, 0, 0, .3);
+        @include r(768) {
+            margin: -1.6rem 0 3.2rem -1.6rem;
         }
     }
 

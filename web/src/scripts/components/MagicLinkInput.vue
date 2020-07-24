@@ -1,7 +1,7 @@
 <template>
     <form class="email-form" id="email-signup" @submit.prevent="submit">
         <div class="alert error" v-if="error">{{error}}</div>
-        <input type="email" name="email" :placeholder="commonCopy.ENTER_YOUR_EMAIL_ADDRESS" v-model="email" :disabled="submitting" :class="{disabled: submitting}"/>
+        <input type="email" name="email" :placeholder="commonCopy.ENTER_YOUR_EMAIL_ADDRESS" v-model="email" :disabled="submitting" class="rounded" :class="{disabled: submitting}"/>
         <button type="submit" name="submit" v-bind:disabled="submitting" :class="['email-submit-button', {loading: submitting, disabled: submitting}]">
             {{nextCopy}}
         </button>
@@ -156,10 +156,21 @@
         padding: 3.2rem 0;
 
         @include r(600) {
-            flex-direction: row;
+            flex-flow: row nowrap;
             padding: 4rem 2.4rem;
         }
     }
 
+    .rounded {
+        margin-bottom: 1.6rem;
+
+        @include r(600) {
+            margin: 0 1.6rem 0 0;;
+        }
+    }
+
+    .email-submit-button {
+        min-width: 18rem;
+    }
 
 </style>

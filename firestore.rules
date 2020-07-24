@@ -108,7 +108,7 @@ service cloud.firestore {
 
     //CUSTOM AUTH
     match /reflectionPrompt/{document=**} {
-    	allow read: if resource.data.get("promptType", "CACTUS") == "CACTUS" || resource.data.get("memberId") == getMemberId() || resource.data.get("shared", false) == true;
+    	allow read: if resource.data.get("promptType", "CACTUS") == "CACTUS" || resource.data.get("memberId", null) == getMemberId() || resource.data.get("shared", false) == true;
     	allow update: if resource.data.memberId == getMemberId() && resource.data.promptType == "FREE_FORM";
     	allow create: if request.resource.data.memberId == getMemberId() && request.resource.data.promptType == "FREE_FORM";
     }
@@ -133,7 +133,7 @@ service cloud.firestore {
     }
     match /sentPrompts/{document=**} {
       allow read,update: if getMemberId() == resource.data.cactusMemberId;
-      allow create: if request.resource.data.memberId == getMemberId() && request.resource.data.promptType == "FREE_FORM";
+      allow create: if request.resource.data.cactusMemberId == getMemberId() && request.resource.data.promptType == "FREE_FORM";
     }
 
     match /friendships/{document=**} {

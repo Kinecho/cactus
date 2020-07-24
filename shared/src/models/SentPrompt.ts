@@ -48,10 +48,47 @@ export default class SentPrompt extends BaseModel {
     promptContentEntryId?: string;
     completed: boolean = false;
     completedAt?: Date;
-    promptType?: PromptType=PromptType.CACTUS;
+    promptType?: PromptType = PromptType.CACTUS;
 
     containsMedium(medium: PromptSendMedium): boolean {
         return !!this.sendHistory.find(history => history.medium === medium);
     }
 
+    static getSentPromptId(params: { memberId: string, promptId: string }): string {
+        const { memberId, promptId } = params;
+        return `${ memberId }_${ promptId }`; //should be deterministic in the case we have a race condition
+    }
+
+    static create(params: {
+        memberId: string,
+        promptId: string,
+        memberEmail?: string,
+        medium?: PromptSendMedium,
+        promptType?: PromptType | null,
+        userId?: string,
+        createHistoryItem?: boolean,
+    }): SentPrompt {
+        const currentDate = new Date();
+        const sentPrompt = new SentPrompt();
+        const { memberId, promptId, createHistoryItem } = params;
+
+        sentPrompt.id = SentPrompt.getSentPromptId({ memberId, promptId });
+        sentPrompt.promptType = params.promptType ?? PromptType.CACTUS
+        sentPrompt.createdAt = currentDate;
+        sentPrompt.firstSentAt = currentDate;
+        sentPrompt.lastSentAt = currentDate;
+        sentPrompt.promptId = params.promptId;
+        sentPrompt.cactusMemberId = params.memberId;
+        // sentPrompt.userId = member.userId;
+        sentPrompt.memberEmail = params.memberEmail;
+        if (createHistoryItem) {
+            sentPrompt.sendHistory.push({
+                sendDate: currentDate,
+                email: params.memberEmail,
+                medium: params.medium ?? PromptSendMedium.PROMPT_CONTENT,
+            });
+        }
+
+        return sentPrompt;
+    }
 }

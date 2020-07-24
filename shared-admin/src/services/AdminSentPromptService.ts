@@ -99,7 +99,7 @@ export default class AdminSentPromptService {
         }
 
         if (!sentPrompt) {
-            sentPrompt = AdminSentPromptService.create({
+            sentPrompt = SentPrompt.create({
                 memberId,
                 promptId,
                 userId: member.userId,
@@ -125,46 +125,6 @@ export default class AdminSentPromptService {
         const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", cactusMemberId).orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc);
         const results = await firestoreService.executeQuery(query, SentPrompt);
         return results.results;
-    }
-
-    static getSentPromptId(params: { memberId: string, promptId: string }): string {
-        const { memberId, promptId } = params;
-        return `${ memberId }_${ promptId }`; //should be deterministic in the case we have a race condition
-    }
-
-    static create(params: {
-        memberId: string,
-        promptId: string,
-        memberEmail?: string,
-        medium?: PromptSendMedium,
-        prompt?: ReflectionPrompt,
-        promptType?: PromptType | null,
-        userId?: string,
-        createHistoryItem?: boolean,
-    }): SentPrompt {
-
-        const currentDate = new Date();
-        const sentPrompt = new SentPrompt();
-        const { memberId, promptId, createHistoryItem } = params;
-
-        sentPrompt.id = AdminSentPromptService.getSentPromptId({ memberId, promptId });
-        sentPrompt.promptType = params.promptType ?? PromptType.CACTUS
-        sentPrompt.createdAt = currentDate;
-        sentPrompt.firstSentAt = currentDate;
-        sentPrompt.lastSentAt = currentDate;
-        sentPrompt.promptId = params.promptId;
-        sentPrompt.cactusMemberId = params.memberId;
-        // sentPrompt.userId = member.userId;
-        sentPrompt.memberEmail = params.memberEmail;
-        if (createHistoryItem) {
-            sentPrompt.sendHistory.push({
-                sendDate: currentDate,
-                email: params.memberEmail,
-                medium: params.medium ?? PromptSendMedium.PROMPT_CONTENT,
-            });
-        }
-
-        return sentPrompt;
     }
 
     /**
@@ -207,7 +167,7 @@ export default class AdminSentPromptService {
             return result;
         }
 
-        result.sentPrompt = AdminSentPromptService.create({
+        result.sentPrompt = SentPrompt.create({
             memberId,
             promptId,
             promptType: promptType ?? prompt?.promptType ?? promptContent ? PromptType.CACTUS : undefined,

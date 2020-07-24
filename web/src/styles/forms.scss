@@ -2,37 +2,33 @@
 @import "~styles/mixins.scss";
 @import "~styles/../../node_modules/firebaseui/dist/firebaseui.css";
 
-
-
 @mixin textInput {
-  border: 1px solid $green;
-  border-radius: 3rem;
-  display: block;
-  flex-grow: 1;
-  font-size: 1.8rem;
-  margin: 0 0 1.6rem;
-  padding: 1.2rem 1.6rem;
-  transition: border-color .3s ease-in-out;
+    border: 0;
+    color: $darkestGreen;
+    font-family: $font-stack;
+    font-size: 1.8rem;
+    line-height: 1.4;
+    padding: .8rem;
+    resize: none;
+    transition: border-color .3s ease-in-out;
+    width: 100%;
 
-  @include r(600) {
-    margin: 0 1.6rem 0 0;
-    max-width: 53rem;
-  }
-  @include r(768) {
-    min-width: 32rem;
-  }
+    @include r(768) {
+        padding: 1.6rem;
+    }
 
-  &:hover {
-    border-color: $darkGreen;
-  }
+    &:focus {
+        outline-color: rgba(0, 0, 0, .3);
+    }
 
-  &:focus {
-    box-shadow: 0 0 3px 2pt $darkGreen;
-  }
+    &:disabled {
+        opacity: 1;
+    }
 
-  &:disabled {
-      opacity: 1;
-  }
+    &.rounded {
+        border-radius: 3rem;
+        padding: .8rem 1.6rem;
+    }
 }
 
 @mixin textInputAlt {
@@ -52,7 +48,6 @@
 
     &:focus {
         border-color: $darkestGreen;
-        border-weight: 2px;
         outline: 0;
     }
 
@@ -62,30 +57,28 @@
 }
 
 @mixin textArea {
-  border: 1px solid darken($lightestGreen, 5%);
-  border-radius: 6px;
-  display: block;
-  flex-grow: 1;
-  font-family: $font-stack;
-  font-size: 1.8rem;
-  line-height: 1.43;
-  max-width: 53rem;
-  padding: 1.2rem 1.6rem;
-  transition: border-color .3s ease-in-out;
-  resize: none;
+    background: transparent;
+    border: 0;
+    color: $darkestGreen;
+    font-family: $font-stack;
+    font-size: 1.8rem;
+    line-height: 1.4;
+    opacity: .8;
+    padding: .8rem;
+    resize: none;
+    width: 100%;
 
-  @include r(768) {
-    min-width: 32rem;
-  }
+    @include r(768) {
+        font-size: 2.4rem;
+        padding: 1.6rem;
+    }
+    @include r(960) {
+        font-size: 3.2rem;
+    }
 
-  &:hover {
-    border-color: $darkGreen;
-  }
-
-  &:focus {
-    box-shadow: 0 0 3px 2pt $darkGreen;
-    outline: none;
-  }
+    &:focus {
+        outline-color: rgba(0, 0, 0, .3);
+    }
 }
 
 @mixin textAreaAlt {

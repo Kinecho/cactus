@@ -13,6 +13,8 @@
     import JournalEntry from '@web/datasource/models/JournalEntry'
     import Logger from "@shared/Logger";
     import CactusMember from "@shared/models/CactusMember";
+    import JournalEntryFreeformCard from "@components/JournalEntryFreeformCard.vue";
+    import { PromptType } from "@shared/models/ReflectionPrompt";
 
     const logger = new Logger("JournalEntryCard");
     export default Vue.extend({
@@ -20,6 +22,7 @@
             Spinner,
             "prompt-content": PromptContentEntryCard,
             "question-content": PromptQuestionEntryCard,
+            "freeform-card": JournalEntryFreeformCard,
             SkeletonEntry,
         },
         props: {
@@ -39,7 +42,7 @@
             bodyComponent(): { name: string, props?: any } | undefined {
                 const entry: JournalEntry = this.entry;
                 if (!entry.allLoaded) {
-                    return {name: "skeleton-entry"};
+                    return { name: "skeleton-entry" };
                 } else if (entry.promptContent) {
                     return {
                         name: "prompt-content",
@@ -50,6 +53,11 @@
                             content: entry.promptContent.content,
                         }
                     };
+                } else if (entry.prompt?.promptType === PromptType.FREE_FORM) {
+                    return {
+                        name: "freeform-card",
+                        props: { entry, member: this.member }
+                    }
                 } else if (entry.prompt) {
                     return {
                         name: "question-content",
@@ -62,6 +70,7 @@
                             responsesLoaded: entry.responsesLoaded,
                         }
                     };
+
                 }
             },
         },

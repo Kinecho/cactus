@@ -41,11 +41,13 @@
     import { isPremiumTier } from "@shared/models/MemberSubscription";
     import AppSettings from "@shared/models/AppSettings";
     import { FirebaseUser } from "@web/firebase";
+    import ComposeButton from "@components/freeform/ComposeButton.vue";
 
     const logger = new Logger("App");
 
     @Component({
         components: {
+            ComposeButton,
             UpgradeSuccessBanner,
             NavBar
         }
@@ -140,6 +142,10 @@
         get allLoaded(): boolean {
             return this.settingsLoaded && this.authLoaded
         }
+
+        get isLoggedIn(): boolean {
+            return !!this.member;
+        }
     }
 </script>
 
@@ -148,6 +154,6 @@
     @import "transitions";
 
     .app-nav {
-        z-index: 1001;
+        z-index: $z-navBar;
     }
 </style>

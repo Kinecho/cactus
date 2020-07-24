@@ -1,12 +1,12 @@
 import CactusMember, { NotificationStatus } from "@shared/models/CactusMember";
 import { buildMockConfig } from "@admin/config/configService";
-import PromptNotificationManager from "@admin/managers/PromptNotificationManager";
+import AdminPromptNotificationManager from "@admin/managers/AdminPromptNotificationManager";
 import { DateTime } from "luxon";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 
 describe("is member's last email", () => {
-    PromptNotificationManager.initialize(buildMockConfig());
-    const manager = PromptNotificationManager.shared;
+    AdminPromptNotificationManager.initialize(buildMockConfig());
+    const manager = AdminPromptNotificationManager.shared;
 
     test("is not last email if no lastReplyAt is set and email is active", () => {
         const member = new CactusMember();
