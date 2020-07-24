@@ -43,7 +43,7 @@
                     </svg>
                     <span class="navLabel">{{copy.navigation.JOURNAL}}</span>
                 </router-link>
-                <compose-button v-if="member" :member="member" />
+                <compose-button class="navbarCompose" v-if="member" :member="member" />
                 <dropdown-menu
                         v-if="loggedIn"
                         :items="links"
@@ -384,6 +384,7 @@
     .navContainer {
         align-items: center;
         display: flex;
+        justify-content: flex-end;
     }
 
     .navbarLink {
@@ -442,6 +443,13 @@
         }
     }
 
+    .navbarCompose {
+        position: absolute; //remove from layout for safari
+
+        @include r(600) {
+            position: static;
+        }
+    }
 
     .badge {
         background-color: $green;
@@ -479,7 +487,7 @@
                 position: absolute;
                 transform: scaleX(0);
                 transition: transform .2s ease-in-out;
-                width: 100%;
+                width: calc(100% - 1.6rem);
             }
 
             &:hover:after, &.router-link-active:after {
