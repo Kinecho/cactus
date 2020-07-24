@@ -355,7 +355,7 @@
 
     .nav-logo-container {
         display: block;
-        padding: .8rem .8rem .8rem 0;
+        padding: 1rem .8rem .8rem 0;
 
         @include r(600) {
             padding: 1.6rem 1.6rem 1.6rem 0;
