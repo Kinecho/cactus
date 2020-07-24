@@ -250,6 +250,7 @@
         }
 
         &.fullScreen {
+            background-color: $white;
 
             .modal-container {
                 height: 100%;
