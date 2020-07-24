@@ -207,6 +207,7 @@
     }
 
     .actions {
+        align-items: flex-end;
         bottom: 1.6rem;
         display: flex;
         justify-content: flex-end;
