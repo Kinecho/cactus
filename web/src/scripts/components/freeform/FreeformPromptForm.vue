@@ -208,16 +208,12 @@
 
     .actions {
         align-items: flex-end;
-        bottom: 1.6rem;
         display: flex;
         justify-content: flex-end;
-        position: absolute;
-        right: 1.6rem;
 
         @include r(768) {
             justify-content: flex-start;
             min-width: 14rem;
-            position: static;
         }
     }
 
