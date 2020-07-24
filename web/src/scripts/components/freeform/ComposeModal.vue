@@ -71,7 +71,6 @@
     .freeform-modal {
         background-color: $white;
         height: 100%;
-        padding: 2.4rem;
         position: relative;
         width: 100%;
 

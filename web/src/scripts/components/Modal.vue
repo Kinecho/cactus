@@ -307,10 +307,6 @@
                 overflow: auto;
                 max-height: 100%;
             }
-
-            .content-body {
-
-            }
         }
     }
 
