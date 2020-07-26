@@ -56,18 +56,20 @@
                     :initialIndex="initialIndex"
             />
         </modal>
-        <modal :show="showSharing" v-on:close="showSharing = false" :showCloseButton="true">
+        <modal :show="showSharing"
+                :showCloseButton="true"
+                @close="showSharing = false"
+        >
             <div class="sharing-card" slot="body">
                 <PromptSharing :promptContent="entry.promptContent"/>
             </div>
         </modal>
-        <modal :show="showShareNote" v-on:close="showShareNote = false" :showCloseButton="true" v-if="!!shareNote">
-            <div class="sharing-card note" slot="body">
-                <legacy-prompt-content-card
-                        :prompt-content="entry.promptContent"
-                        :content="shareNote.content"
-                        :response="shareNote.response"/>
-            </div>
+        <modal v-if="shareNoteCard"
+                :show="showShareNote"
+                :showCloseButton="true"
+                @close="showShareNote = false"
+        >
+            <share-note-card :card="shareNoteCard" slot="body"/>
         </modal>
     </div>
 </template>
@@ -105,6 +107,8 @@
     import CactusMember from "@shared/models/CactusMember";
     import MarkdownText from "@components/MarkdownText.vue";
     import { getResponseMedium, ResponseMedium } from "@shared/util/ReflectionResponseUtil";
+    import ShareNoteCard from "@components/promptcontent/ShareNoteCard.vue";
+    import PromptContentCardViewModel from "@components/promptcontent/PromptContentCardViewModel";
 
     const logger = new Logger("JournalEntryPromptContentCard.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -120,6 +124,7 @@
             FlamelinkImage,
             SkeletonCard,
             MarkdownText,
+            ShareNoteCard
         },
         props: {
             entryId: { type: String, required: true },
@@ -157,9 +162,9 @@
             }
         },
         computed: {
-            shareNote(): { content: Content, response: ReflectionResponse } | undefined {
-                if (!this.entry.promptContent || !this.entry.responses || this.entry.responses.length === 0) {
-                    return;
+            shareNoteCard(): PromptContentCardViewModel | null {
+                if (!this.entry.promptContent || !this.entry.responses || this.entry.responses.length === 0 || !this.entry.prompt) {
+                    return null;
                 }
                 let shareReflectionCopy = isBlank(this.entry.promptContent.shareReflectionCopy_md) ? copy.prompts.SHARE_PROMPT_COPY_MD : this.entry.promptContent.shareReflectionCopy_md;
                 const sharingCard: Content = {
@@ -168,12 +173,14 @@
                     title: copy.prompts.SHARE_YOUR_NOTE,
                 };
 
-                const [response] = this.entry.responses;
-                if (response) {
-                    return { content: sharingCard, response: response }
-                } else {
-                    return
-                }
+
+                const card = PromptContentCardViewModel.createShareNote({
+                    promptContent: this.entry.promptContent,
+                    prompt: this.entry.prompt,
+                    responses: this.entry.responses,
+                    member: this.member,
+                })
+                return card
 
             },
             allLoaded(): boolean {
@@ -280,7 +287,7 @@
                 ];
 
 
-                if (this.hasNote && this.entry.promptContent && this.entry.promptContent.content) {
+                if (this.hasNote && this.entry.promptContent && this.entry.promptContent.content && this.shareNoteCard) {
                     linkItems.push({
                         title: copy.prompts.SHARE_NOTE,
                         onClick: () => {
