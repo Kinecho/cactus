@@ -1,7 +1,8 @@
 <template>
-    <div v-if="bodyComponent">
+    <div v-if="bodyComponent && bodyComponent.name">
         <component v-bind:is="bodyComponent.name" v-bind="bodyComponent.props"></component>
     </div>
+    <div v-else></div>
 </template>
 
 <script lang="ts">
@@ -70,7 +71,8 @@
                             responsesLoaded: entry.responsesLoaded,
                         }
                     };
-
+                } else {
+                    logger.info("No entry.prompt found", entry)
                 }
             },
         },

@@ -80,9 +80,7 @@
     import { PageRoute } from "@shared/PageRoutes"
     import PromptContentVue from "@components/LegacyPromptContent.vue"
     import { formatDate } from "@shared/util/DateUtil"
-    import ReflectionResponse, {
-        ResponseMediumType
-    } from "@shared/models/ReflectionResponse"
+    import { ResponseMediumType } from "@shared/models/ReflectionResponse"
     import {
         getIntegerFromStringBetween,
         getResponseText,
