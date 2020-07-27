@@ -124,6 +124,7 @@
     @import "mixins";
     @import "variables";
     @import "transitions";
+    @import "forms";
 
     .prompt-content-card {
         background: $mediumDolphin url(/assets/images/grainy.png);

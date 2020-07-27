@@ -1,7 +1,7 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="copy-link-container">
-        <input type="text" class="link-input" name="referral-link" :disabled="!editable" :value="formattedText">
-        <button class="copy btn" :class="[buttonStyle]"
+        <input type="text" class="link-input rounded" name="referral-link" :disabled="!editable" :value="formattedText">
+        <button class="copy btn small" :class="[buttonStyle]"
                 v-clipboard:copy="formattedText"
                 v-clipboard:success="handleCopySuccess"
                 v-clipboard:error="handleCopyError">
@@ -13,7 +13,7 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {appendQueryParams} from '@shared/util/StringUtil'
+    import { appendQueryParams } from '@shared/util/StringUtil'
     import Logger from "@shared/Logger";
 
     const logger = new Logger("CopyTextInput.vue");
@@ -25,9 +25,12 @@
         },
         props: {
             text: String,
-            editable: {type: Boolean, default: false},
-            queryParams: {type: Object as () => { [key: string]: string }},
-            buttonStyle: {validator: (value: string) => ["primary", "secondary"].includes(value), default: "secondary"},
+            editable: { type: Boolean, default: false },
+            queryParams: { type: Object as () => { [key: string]: string } },
+            buttonStyle: {
+                validator: (value: string) => ["primary", "secondary"].includes(value),
+                default: "secondary"
+            },
         },
         data(): {
             copySucceeded: boolean,
@@ -44,7 +47,7 @@
                     try {
                         return appendQueryParams(this.text, this.queryParams);
                     } catch (e) {
-                        logger.error(`Unable to append query params to text "${this.text}"`);
+                        logger.error(`Unable to append query params to text "${ this.text }"`);
                         return this.text;
                     }
                 }
@@ -76,7 +79,7 @@
         margin-bottom: .8rem;
         max-width: none;
         width: 100%;
-
+        line-height: 3rem;
         @include r(374) {
             margin-bottom: 0;
         }
