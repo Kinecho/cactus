@@ -97,6 +97,7 @@
         }
 
         destroyed() {
+            Modal.openModals.delete(this.key);
             window.removeEventListener("keyup", this.escapeListener);
             if (this.key) {
                 let wrapper = document.getElementById(this.key);
@@ -144,6 +145,7 @@
                 document.body.classList.remove("no-scroll");
                 this.$root.$children[0]?.$el?.classList?.remove("modal-mask-in");
                 document.body.style.removeProperty('top');
+                Modal.openModals.delete(this.key);
                 if (isNoScroll) {
                     logger.info(this.key + " Scrolling to", this.scrollPosition);
                     window.scrollTo(0, this.scrollPosition);
