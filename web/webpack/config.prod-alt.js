@@ -3,7 +3,7 @@ module.exports = {
     ...config,
     // START: Use stage values for analytics stuff
     __GOOGLE_ANALYTICS_ID__: 'UA-127159143-6',
-    __GOOGLE_OPTIMIZE_ID__: 'GTM-KFBRFFG',
+    __GOOGLE_OPTIMIZE_ID__: 'OPT-PWF92J5',
     __FACEBOOK_PIXEL_ID__: '1028725524153114',
     // END: Use stage values for analytics stuff
 
