@@ -148,7 +148,7 @@
         methods: {
             updateDocumentMeta() {
                 if (this.reflectionResponse) {
-                    let identifier = this.memberProfile?.getFullName() || this.reflectionResponse.getMemberFullName() || this.reflectionResponse.memberEmail;
+                    let identifier = this.memberProfile?.getFullName() || this.reflectionResponse.memberEmail;
                     let question = getPromptQuestion({
                         promptContent: this.promptContent,
                         response: this.reflectionResponse,
