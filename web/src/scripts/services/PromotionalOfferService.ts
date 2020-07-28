@@ -20,6 +20,6 @@ export default class PromotionalOfferService extends FlamelinkModelService<Promo
         if (isBlank(slug)) {
             return null;
         }
-        return await this.getFirstByField({ name: PromotionalOffer.Field.urlSlug, value: slug }) ?? null;
+        return await this.getFirstByField({ name: PromotionalOffer.Field.urlSlug, value: slug, populate: true }) ?? null;
     }
 }

@@ -1,7 +1,8 @@
-import FlamelinkModel, { SchemaName } from "@shared/FlamelinkModel";
+import FlamelinkModel, { FlamelinkData, SchemaName } from "@shared/FlamelinkModel";
 import { isBlank } from "@shared/util/StringUtil";
 import CactusMember from "@shared/models/CactusMember";
 import { isPremiumTier } from "@shared/models/MemberSubscription";
+import Experiment from "@shared/models/Experiment";
 
 enum Field {
     urlSlug = "urlSlug",
@@ -55,10 +56,20 @@ export default class PromotionalOffer extends FlamelinkModel {
     continueUrl?: string;
     description?: string;
     trialDays?: number | null;
+    experiment?: Experiment|null;
 
     constructor(data?: Partial<PromotionalOffer>) {
         super(data);
         Object.assign(this, data);
+    }
+
+    updateFromData(data: FlamelinkData) {
+        super.updateFromData(data)
+
+        const experimentData = data.experiment
+        if (experimentData) {
+            this.experiment = new Experiment(experimentData);
+        }
     }
 
     toOfferDetails(appliedAt: Date = new Date()): OfferDetails {

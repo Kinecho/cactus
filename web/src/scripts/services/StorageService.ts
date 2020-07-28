@@ -15,7 +15,8 @@ export enum LocalStorageKey {
     activityBadgeCount = "activityBadgeCount",
     offerDetails = "offerDetails",
     androidFCMToken = "androidFCMToken",
-    subscriptionPriceCents = "subscriptionPriceCents"
+    subscriptionPriceCents = "subscriptionPriceCents",
+    experiments = "experiments",
 }
 
 const logger = new Logger("StorageService.ts");
@@ -100,7 +101,9 @@ export default class StorageService {
         localStorage.setItem(key, JSON.stringify(object));
     }
 
-    static getJSON(key: LocalStorageKey, defaultValue: Record<string, string> | null = null): Record<string, string> | null {
+    static getJSON(key: LocalStorageKey, defaultValue: Record<string, string|null>): Record<string, string|null>;
+    static getJSON(key: LocalStorageKey): Record<string, string|null>|null;
+    static getJSON(key: LocalStorageKey, defaultValue: Record<string, string|null> | null = null): Record<string, string|null> | null {
         return this.getEncodedMap(key, defaultValue);
     }
 

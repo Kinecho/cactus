@@ -17,6 +17,7 @@ import { CactusElement } from "@shared/models/CactusElement";
 import { InsightWord } from "@shared/api/InsightLanguageTypes";
 import { OfferDetails } from "@shared/models/PromotionalOffer";
 import { isNull } from "@shared/util/ObjectUtil";
+import { MemberExperiments } from "@shared/models/CactusMemberTypes";
 
 export enum JournalStatus {
     PREMIUM = "PREMIUM",
@@ -159,7 +160,7 @@ export default class CactusMember extends BaseModel {
 
     focusElement?: CactusElement | null;
     currentOffer?: OfferDetails | null;
-
+    experiments?: MemberExperiments;
 
     decodeJSON(json: any) {
         super.decodeJSON(json);

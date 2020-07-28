@@ -1,0 +1,1 @@
+export type MemberExperiments = Record<string, string|null>;

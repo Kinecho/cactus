@@ -1,7 +1,12 @@
 import { getFlamelink } from "@web/firebase";
 import flamelink from "flamelink/app";
 import FlamelinkModel from "@shared/FlamelinkModel";
-import { buildQueryResult, fromFlamelinkData, fromFlamelinkQueryResults } from "@shared/util/FlamelinkUtils";
+import {
+    buildQueryResult,
+    fromFlamelinkData,
+    fromFlamelinkQueryResults, GetByFieldOptions,
+    GetModelByFieldOptions
+} from "@shared/util/FlamelinkUtils";
 import { IGetOptions, QueryResult } from "@shared/types/FirestoreTypes";
 import { ListenerUnsubscriber } from "@web/services/FirestoreService";
 import Logger from "@shared/Logger";
@@ -45,7 +50,7 @@ export abstract class FlamelinkModelService<T extends FlamelinkModel> {
         return this.flamelink.observeSingle(this.Type, options);
     }
 
-    async getFirstByField(args: { name: string, value: string }): Promise<T | undefined> {
+    async getFirstByField(args: GetByFieldOptions): Promise<T | undefined> {
         return this.flamelink.getFirstByField({ ...args, Type: this.Type });
     }
 
@@ -172,8 +177,8 @@ export default class FlamelinkService {
     }
 
 
-    async getFirstByField<T extends FlamelinkModel>(args: { name: string, value: string, Type: { new(): T } }): Promise<T | undefined> {
-        const { name, value, Type } = args;
+    async getFirstByField<T extends FlamelinkModel>(args: GetModelByFieldOptions<T>): Promise<T | undefined> {
+        const { name, value, Type, populate=false } = args;
 
         const type = new Type();
         const schema = type.schema;
@@ -182,7 +187,8 @@ export default class FlamelinkService {
             const data: { [entryId: string]: any } = await this.content.getByField({
                 field: name,
                 value,
-                schemaKey: schema
+                schemaKey: schema,
+                populate,
             });
             let entry: any | undefined = undefined;
             if (data) {

@@ -56,11 +56,11 @@
             this.offer = offer;
             this.loading = false;
             const url = this.offer?.continueUrl;
-            if (!isBlank(url)) {
-                await pushRoute(url);
-            } else {
-                await pushRoute(PageRoute.HOME);
-            }
+            // if (!isBlank(url)) {
+            //     await pushRoute(url);
+            // } else {
+            //     await pushRoute(PageRoute.HOME);
+            // }
         }
     }
 </script>
