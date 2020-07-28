@@ -13,3 +13,8 @@ export interface RedirectVariant extends Variant {
 export interface RedirectExperiment {
     variants: RedirectVariant[]
 }
+
+export interface ActivationResult {
+    variant: string|null,
+
+}

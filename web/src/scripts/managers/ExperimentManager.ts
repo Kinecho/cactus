@@ -2,9 +2,9 @@ import CactusMember from "@shared/models/CactusMember";
 import Experiment from "@shared/models/Experiment";
 import { getRandomNumberBetween, isBlank } from "@shared/util/StringUtil";
 import StorageService, { LocalStorageKey } from "@web/services/StorageService";
-import { ExperimentType, Variant } from "@shared/models/ExperimentTypes";
+import { ActivationResult, ExperimentType, Variant } from "@shared/models/ExperimentTypes";
 import Logger from "@shared/Logger"
-import { MemberExperiments } from "@shared/models/CactusMemberTypes";
+import CactusMemberService from "@web/services/CactusMemberService";
 
 const logger = new Logger("ExperimentManager");
 
@@ -19,8 +19,12 @@ export default class ExperimentManager {
      * @param {{member?: CactusMember | null, experiment: Experiment}} options
      * @return {ExperimentVariant}
      */
-    getVariantName(options: { member?: CactusMember | null, experiment: Experiment }): ExperimentVariant {
+    getCurrentVariantName(options: { member?: CactusMember | null, experiment?: Experiment }): ExperimentVariant {
         const { experiment, member } = options;
+
+        if (!experiment) {
+            return null;
+        }
 
         const name = experiment.name;
         let variant: ExperimentVariant = null;
@@ -41,7 +45,8 @@ export default class ExperimentManager {
 
         variant = this.getRandomVariant(experiment)?.name ?? null;
 
-        if (experiment.isValidVariant(variant)) {
+        if (experiment.isValidVariant(variant) && !isBlank(variant)) {
+            this.persistVariantToDevice({experimentName: experiment.name, variant})
             return variant;
         }
         return null;
@@ -61,7 +66,7 @@ export default class ExperimentManager {
             return null;
         }
 
-        const index = getRandomNumberBetween(0, variants.length)
+        const index = getRandomNumberBetween(0, variants.length - 1)
         return variants[index];
     }
 
@@ -101,17 +106,7 @@ export default class ExperimentManager {
      */
     applyDeviceExperimentsToMember(member: CactusMember): boolean {
         const experiments = this.getDeviceExperiments();
-        const memberExperiments: MemberExperiments = member.experiments ?? {}
-        let changed = false;
-        Object.keys(experiments).forEach(expName => {
-            if (isBlank(memberExperiments[expName])) {
-                memberExperiments[expName] = experiments[expName];
-                member.experiments = memberExperiments;
-                changed = true;
-            }
-        })
-
-        return changed;
+        return member.applyExperiments(experiments)
     }
 
     /**
@@ -129,6 +124,34 @@ export default class ExperimentManager {
         } else {
             logger.info("No changes to experiments, not saving. Current experiments are ", experiments)
         }
+    }
+
+    async activateExperiment(experiment: Experiment, member?: CactusMember|null): Promise<ActivationResult> {
+        const variant = this.getCurrentVariantName({experiment, member})
+        if (variant) {
+            await this.applyVariant({experiment, variantName: variant})
+        }
+        return {variant};
+    }
+
+    async applyVariant(options: { experiment: Experiment, variantName: string }): Promise<void> {
+        const {experiment, variantName} = options;
+        if (!experiment.isValidVariant(variantName)) {
+            return;
+        }
+
+        this.persistVariantToDevice({experimentName: experiment.name, variant: variantName})
+
+        await CactusMemberService.sharedInstance.addAuthAction(async ({ member }) => {
+            const changed = this.applyDeviceExperimentsToMember(member)
+            if (changed) {
+                logger.info("Updating member with variant");
+                await CactusMemberService.sharedInstance.save(member);
+            } else {
+                logger.info("Member has no changes to their experiments")
+            }
+            this.clearDeviceExperiments();
+        })
     }
 
     clearDeviceExperiments() {

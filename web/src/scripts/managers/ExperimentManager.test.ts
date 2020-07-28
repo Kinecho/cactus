@@ -1,3 +1,11 @@
+import mock = jest.mock;
+
+mock("@web/services/CactusMemberService", () => {
+    return {
+        sharedInstance: {}
+    }
+})
+
 import Experiment from "@shared/models/Experiment";
 import { ExperimentType } from "@shared/models/ExperimentTypes";
 import CactusMember from "@shared/models/CactusMember";
@@ -124,5 +132,15 @@ describe("apply device experiments to member", () => {
         const changed = manager.applyDeviceExperimentsToMember(member);
         expect(changed).toBeTruthy()
         expect(member.experiments).toEqual({ ...memberExperiments, ...deviceExperiments })
+    })
+})
+
+describe("get random variant", () => {
+    test("variant is not null", () => {
+        for (let i = 0; i < 100; i++) {
+            const variant = manager.getRandomVariant(exp1);
+            expect(variant).not.toBeNull();
+            expect(variant).toBeDefined();
+        }
     })
 })

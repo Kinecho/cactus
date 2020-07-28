@@ -1,5 +1,5 @@
 import FlamelinkModel, { SchemaName } from "@shared/FlamelinkModel";
-import { ExperimentType, RedirectExperiment, Variant } from "@shared/models/ExperimentTypes";
+import { ExperimentType, RedirectExperiment, RedirectVariant, Variant } from "@shared/models/ExperimentTypes";
 import { timestampToDate } from "@shared/util/FirestoreUtil";
 import { getFlamelinkDateStringInDenver } from "@shared/util/DateUtil";
 
@@ -51,5 +51,10 @@ export default class Experiment extends FlamelinkModel {
         }
 
         return variants.some(v => v.name === variant)
+    }
+
+    getRedirectVariant(variant: string|null): RedirectVariant|null {
+        const variants = this.redirects?.variants ?? [];
+        return variants.find(v => v.name === variant) ?? null;
     }
 }
