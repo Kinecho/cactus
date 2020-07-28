@@ -228,6 +228,7 @@ module.exports = (config) => {
                     new HtmlWebpackPlugin({
                         chunks: ['solo_proxy_auth'],
                         analyticsId: config.__GOOGLE_ANALYTICS_ID__,
+                        googleOptimizeID: config.__GOOGLE_OPTIMIZE_ID__,
                         template: `${helpers.htmlDir}/solo_proxy_auth.html`,
                         filename: `solo_proxy_auth.html`,
                         favicon: `${helpers.srcDir}/favicon.ico`,
