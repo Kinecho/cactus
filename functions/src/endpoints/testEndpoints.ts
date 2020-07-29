@@ -30,6 +30,7 @@ import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import { AppType } from "@shared/types/DeviceTypes";
 import AdminSlackService from "@admin/services/AdminSlackService";
+import * as functions from "firebase-functions";
 
 const logger = new Logger("testApp");
 const app = express();
@@ -47,6 +48,15 @@ app.get("/slack", async (req, resp) => {
         resp.send(error)
     }
     return;
+})
+
+app.get("/error", async (req, resp) => {
+    logger.info("This is a Cactus info log", {name: "Cactus", second: "two"})
+    functions.logger.info("This is a firebase log", {name: "firebase", type: "firebase log"})
+    functions.logger.error("Error message text string", new Error("This is an error, omg!"))
+    logger.error("This is a Cactus error with plain object", {message: "Test error message"})
+    logger.error("This is a Cactus error with error object", new Error("OMG Cactus is on fire!"))
+    resp.sendStatus(200);
 })
 
 app.get("/fcm", async (req, res) => {

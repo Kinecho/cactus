@@ -153,7 +153,7 @@ export default class AdminSendgridService {
         if (!isGeneratedEmailAddress(toAddress)) {
             return await sgMail.send(mailParams);
         } else {
-            throw new Error("Email address was generated and is not valid.");
+            return;
         }
     }
 
@@ -343,9 +343,7 @@ export default class AdminSendgridService {
 
     async sendTemplateAndLog(options: SendTemplateOptions): Promise<SendEmailResult> {
         const { email, memberId, template, categories, sender, data, oneTime } = options;
-
         const templateId = this.getSendgridTemplateId(template);
-
         const asm = this.getAdvancedSubscriptionConfiguration(template);
 
         if (oneTime) {
@@ -374,6 +372,11 @@ export default class AdminSendgridService {
         logger.log("Sending email with params", JSON.stringify(mailParams, null, 2));
 
         try {
+            const toAddress = Helpers.getEmailAddressFromEmailData(mailParams.to);
+            if (isGeneratedEmailAddress(toAddress)) {
+                return { didSend: false };
+            }
+
             const _response = await this.sendMail(mailParams);
             let response;
             if (Array.isArray(_response)) {
@@ -401,7 +404,7 @@ export default class AdminSendgridService {
             return { emailLog: log, didSend: true };
         } catch (error) {
             const e = error.response?.body ?? error;
-            logger.error("Failed to send TrialEnding email", e);
+            logger.error("Failed to send email", e);
             return { error: e, didSend: false };
         }
     }
