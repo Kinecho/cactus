@@ -25,7 +25,7 @@
     "email-addresses": "^3.0.3",
     "firebase": "^7.14.6",
     "firebase-admin": "^8.12.1",
-    "firebase-functions": "^3.6.0",
+    "firebase-functions": "^3.8.0",
     "firebase-tools": "^8.4.3",
     "googleapis": "^42.0.0",
     "luxon": "^1.16.0",

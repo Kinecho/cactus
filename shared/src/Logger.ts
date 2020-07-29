@@ -1,8 +1,22 @@
 //tslint:disable:no-console
 
+export interface LoggerAgent {
+    debug(message?: any, ...optionalParams: any[]): void;
+    info(message?: any, ...optionalParams: any[]): void;
+    log(message?: any, ...optionalParams: any[]): void;
+    warn(message?: any, ...optionalParams: any[]): void;
+    error(message?: any, ...optionalParams: any[]): void;
+}
+
 export default class Logger {
     fileName: string;
     serverName?: string;
+
+    static agent:LoggerAgent = console;
+
+    static setAgent(agent: LoggerAgent) {
+        Logger.agent = agent;
+    }
 
     constructor(options: string | { fileName: string, serverName?: string }) {
         if (typeof options === "string") {
@@ -21,7 +35,7 @@ export default class Logger {
     debug(...args: [any?, ...any[]]) {
         const a: any = [].slice.call(arguments, 0);
         a.unshift(this.prefix);
-        console.debug.apply(console, a);
+        Logger.agent.debug.apply(Logger.agent, a);
     }
 
     log(...args: [any?, ...any[]]) {
@@ -31,19 +45,19 @@ export default class Logger {
     info(...args: [any?, ...any[]]) {
         const a: any = [].slice.call(arguments, 0);
         a.unshift(this.prefix);
-        console.log.apply(console, a);
+        Logger.agent.log.apply(Logger.agent, a);
     }
 
     warn(...args: [any?, ...any[]]) {
         const a: any = [].slice.call(arguments, 0);
         a.unshift(this.prefix);
-        console.warn.apply(console, a);
+        Logger.agent.warn.apply(Logger.agent, a);
     }
 
     error(...args: [any?, ...any[]]) {
         const a: any = [].slice.call(arguments, 0);
         a.unshift(this.prefix);
-        console.error.apply(console, a);
+        Logger.agent.error.apply(Logger.agent, a);
     }
 
     getDateString(): string {

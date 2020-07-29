@@ -1,8 +1,10 @@
 require("module-alias/register");
 import { initializeServices } from "@admin/services/AdminServiceConfig";
-
+import { configureLogger } from "@api/util/CloudLogger";
 import * as admin from "firebase-admin";
 import { getConfig } from "@admin/config/configService";
+
+configureLogger();
 
 admin.initializeApp();
 const app = admin.app();
