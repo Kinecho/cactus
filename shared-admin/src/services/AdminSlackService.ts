@@ -1,11 +1,13 @@
 import { CactusConfig } from "@admin/CactusConfig";
 import {
     ChatPostMessageArguments,
-    IncomingWebhook,
-    IncomingWebhookSendArguments,
     MessageAttachment,
     WebClient
-} from "@slack/client";
+} from "@slack/web-api";
+import {
+    IncomingWebhook,
+    IncomingWebhookSendArguments,
+} from "@slack/webhook"
 import axios from "axios";
 import Logger from "@shared/Logger";
 
@@ -306,7 +308,6 @@ export default class AdminSlackService {
             logger.error("Failed to join channel", error);
             return false;
         }
-
     }
 
     async sendEngineeringMessage(message: string | ChatMessage): Promise<void> {
