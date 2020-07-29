@@ -10,6 +10,7 @@ export enum SchemaName {
     subscriptionProductGroups = "subscriptionProductGroups",
     appSettings = "appSettings_web",
     promotionalOffer = "promotionalOffer",
+    experiments = "experiments",
     // coreValuesAssessment = "coreValuesAssessment",
 }
 

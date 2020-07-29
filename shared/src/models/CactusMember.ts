@@ -17,6 +17,8 @@ import { CactusElement } from "@shared/models/CactusElement";
 import { InsightWord } from "@shared/api/InsightLanguageTypes";
 import { OfferDetails } from "@shared/models/PromotionalOffer";
 import { isNull } from "@shared/util/ObjectUtil";
+import { MemberExperiments } from "@shared/models/CactusMemberTypes";
+import { isBlank } from "@shared/util/StringUtil";
 
 export enum JournalStatus {
     PREMIUM = "PREMIUM",
@@ -159,7 +161,7 @@ export default class CactusMember extends BaseModel {
 
     focusElement?: CactusElement | null;
     currentOffer?: OfferDetails | null;
-
+    experiments?: MemberExperiments;
 
     decodeJSON(json: any) {
         super.decodeJSON(json);
@@ -278,6 +280,22 @@ export default class CactusMember extends BaseModel {
             } as PromptSendTime;
         }
         return;
+    }
+
+    applyExperiments(experiments: Record<string, string|null>|null|undefined): boolean {
+        if (!experiments) {
+            return false;
+        }
+        const memberExperiments: MemberExperiments = this.experiments ?? {}
+        let changed = false;
+        Object.keys(experiments).forEach(expName => {
+            if (isBlank(memberExperiments[expName])) {
+                memberExperiments[expName] = experiments[expName];
+                this.experiments = memberExperiments;
+                changed = true;
+            }
+        })
+        return changed;
     }
 
     get tier(): SubscriptionTier {

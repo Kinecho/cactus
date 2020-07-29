@@ -445,6 +445,9 @@ export const routes: MetaRouteConfig[] = [
         "@web/views/PromotionLandingView.vue")),
         props: true,
         path: `${ PageRoute.PROMOS_ROOT }/:slug`,
+        meta: {
+            passMember: true,
+        }
     },
     {
         component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */

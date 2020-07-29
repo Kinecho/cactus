@@ -11,6 +11,12 @@ import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
 const logger = new Logger("FlamelinkUtils");
 
+export interface GetByFieldOptions { name: string, value: string, populate?: boolean|string[] }
+
+export interface GetModelByFieldOptions<T extends FlamelinkModel> extends GetByFieldOptions {
+    Type: { new(): T }
+}
+
 export function fromFlamelinkData<T extends FlamelinkModel>(data: any, Type: { new(): T }): T {
     // const transformed = convertTimestampToDate(data);
     //not transforming timestamps yet

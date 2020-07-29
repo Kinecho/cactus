@@ -10,6 +10,7 @@ import RevenueCatService from "@web/services/RevenueCatService";
 import JournalFeedDataSource from "@web/datasource/JournalFeedDataSource";
 import PromotionalOfferManager from "@web/managers/PromotionalOfferManager";
 import IosAppService from "@web/ios/IosAppService";
+import ExperimentManager from "@web/managers/ExperimentManager";
 
 const logger = new Logger("CactusMemberService");
 
@@ -78,8 +79,10 @@ export default class CactusMemberService {
      * @param {CactusMember} member
      * @return {Promise<void>}
      */
-    async onMemberDataFetched(member: CactusMember) {
-        IosAppService.updateMember(member);
+    async onMemberDataFetched(member?: CactusMember | null) {
+        if (member) {
+            IosAppService.updateMember(member);
+        }
     }
 
     async authReady(): Promise<void> {
@@ -125,12 +128,14 @@ export default class CactusMemberService {
             }
             const zoneName = getDeviceTimeZone();
             const localeName = getDeviceLocale();
-            let doSave = false;
+            let doSave = ExperimentManager.shared.applyDeviceExperimentsToMember(member);
+            ExperimentManager.shared.clearDeviceExperiments();
             //Only update timezone if the member doesn't have one set
             if (zoneName && !member.timeZone) {
                 member.timeZone = zoneName;
                 doSave = true
             }
+
 
             //only update locale if no locale is present
             if (localeName && !member.locale) {
