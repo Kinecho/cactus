@@ -29,13 +29,25 @@ import { PromptSendMedium } from "@shared/models/SentPrompt";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import { AppType } from "@shared/types/DeviceTypes";
+import AdminSlackService from "@admin/services/AdminSlackService";
 
 const logger = new Logger("testApp");
 const app = express();
 app.use(cors({ origin: true }));
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
     res.status(200).json({ status: 'ok', queryParams: req.query });
 });
+
+app.get("/slack", async (req, resp) => {
+    try {
+        await AdminSlackService.getSharedInstance().sendSignupsMessage("This is a test message")
+        resp.sendStatus(200)
+    } catch (error) {
+        logger.error("Failed to send sack message", error);
+        resp.send(error)
+    }
+    return;
+})
 
 app.get("/fcm", async (req, res) => {
     try {
