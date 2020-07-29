@@ -1,5 +1,5 @@
-import {Message} from "firebase-functions/lib/providers/pubsub";
 import * as functions from "firebase-functions";
+import Message = functions.pubsub.Message
 import AdminSubscriptionService, {MemberBatchJob} from "@admin/services/AdminSubscriptionService";
 import AdminSlackService, {ChannelName} from "@admin/services/AdminSlackService";
 import {stringifyJSON} from "@shared/util/ObjectUtil";
@@ -30,7 +30,7 @@ export async function submitJob(job: SyncTrialMembersToMailchimpJob): Promise<st
     }
 }
 
-export async function onPublish(message: Message, context: functions.EventContext) {
+export async function onPublish(message: Message, context: functions.EventContext): Promise<void> {
     logger.info("Starting SyncTrial job for message", message);
     const job = message.json as SyncTrialMembersToMailchimpJob | undefined;
     if (!job) {
