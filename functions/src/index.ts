@@ -51,7 +51,7 @@ export const cloudFunctions = {
     test: functions.runWith({ memory: "1GB", timeoutSeconds: 300 }).https.onRequest(testApp),
     notificationPreferences: functions.https.onRequest(manageNotificationApp),
     apple: functions.https.onRequest(appleEndpoints),
-    tasks: functions.runWith({ memory: "1GB", timeoutSeconds: 120, maxInstances: 10 }).https.onRequest(taskEndpoints),
+    tasks: functions.runWith({ memory: "1GB", timeoutSeconds: 240, maxInstances: 5 }).https.onRequest(taskEndpoints),
 
     //PubSub topics
     pubsub1: {
