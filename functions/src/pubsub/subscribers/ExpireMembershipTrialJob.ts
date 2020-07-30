@@ -75,6 +75,7 @@ export class ExpireMembershipTrialJob {
                 this.errors.push(`No member found for options: ${stringifyJSON(options)}`);
             }
         } catch (error) {
+            logger.error(error);
             this.errors.push("Failed to run job: " + error.message);
         } finally {
             this.endTime = new Date()
@@ -92,6 +93,7 @@ export class ExpireMembershipTrialJob {
                 onData: (members, batchNumber) => this.handleMembersBatch(members, batchNumber)
             })
         } catch (error) {
+            logger.error(error);
             this.errors.push("Failed to run job: " + error.message);
         } finally {
             this.endTime = new Date()

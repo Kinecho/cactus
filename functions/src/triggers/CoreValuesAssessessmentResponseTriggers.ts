@@ -30,7 +30,7 @@ export const updateMemberCoreValueFromAssessment = functions.firestore
     try {
         await AdminCactusMemberService.getSharedInstance().setCoreValues(memberId, values);
     } catch (error) {
-        logger.error("Failed to update the cactus member");
+        logger.error("Failed to update the cactus member", error);
     }
 
 })

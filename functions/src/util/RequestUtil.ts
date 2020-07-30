@@ -7,6 +7,11 @@ import { AppType } from "@shared/types/DeviceTypes";
 
 const logger = new Logger("RequestUtil")
 
+export const SentryExpressHanderConfig = {
+    server: false,
+    user: false,
+}
+
 export async function getAuthUser(request: express.Request): Promise<admin.auth.UserRecord | undefined> {
     try {
         const startTime = new Date().getTime();

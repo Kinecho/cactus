@@ -218,7 +218,7 @@ export function processAttachments(input: InboundEmailAttachments): Array<Inboun
         inspect(input);
         return Object.values(input)
     } catch (error) {
-        logger.error("failed to parse attachments");
+        logger.error("failed to parse attachments", error);
         return [];
     }
 }

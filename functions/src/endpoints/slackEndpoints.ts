@@ -2,6 +2,7 @@ import * as express from "express";
 import * as cors from "cors";
 import * as functions from "firebase-functions";
 import * as crypto from "crypto";
+import * as Sentry from "@sentry/node";
 import { getConfig } from "@admin/config/configService";
 import AdminSlackService, { SlackAttachment, SlackResponseType } from "@admin/services/AdminSlackService";
 import { PubSub } from "@google-cloud/pubsub";
@@ -9,9 +10,11 @@ import { PubSubTopic } from "@shared/types/PubSubTypes";
 import { getSlackHelpText, JobRequest, JobType, processJob } from "@api/pubsub/subscribers/SlackCommandJob";
 import Logger from "@shared/Logger";
 import { isBlank, isValidEmail } from "@shared/util/StringUtil";
+import { SentryExpressHanderConfig } from "@api/util/RequestUtil";
 
 const logger = new Logger("slackEndpoints");
 const app = express();
+app.use(Sentry.Handlers.requestHandler(SentryExpressHanderConfig) as express.RequestHandler);
 
 const config = getConfig();
 
@@ -54,208 +57,232 @@ app.use(cors({ origin: true }));
 app.use(signatureHandler);
 
 app.post("/commands/stats", async (req: functions.https.Request | any, resp: functions.Response) => {
-    const payload: CommandPayload = req.body;
-    const payloadText = payload.text;
-    const [memberEmail, ...rest] = payloadText.split(" ").map(s => s.trim());
-    const immediate = rest.includes("immediate");
-    logger.info(`Getting stats for ${ memberEmail }`);
+    try {
+        const payload: CommandPayload = req.body;
+        const payloadText = payload.text;
+        const [memberEmail, ...rest] = payloadText.split(" ").map(s => s.trim());
+        const immediate = rest.includes("immediate");
+        logger.info(`Getting stats for ${ memberEmail }`);
 
 
-    if (isBlank(memberEmail) || !isValidEmail(memberEmail)) {
-        const attachments: SlackAttachment[] = [];
-        attachments.push({
-            text: "Please provide a a valid email address to get stats for. The command should be run like this: `/stats name@example.com",
-            color: "warning"
-        });
+        if (isBlank(memberEmail) || !isValidEmail(memberEmail)) {
+            const attachments: SlackAttachment[] = [];
+            attachments.push({
+                text: "Please provide a a valid email address to get stats for. The command should be run like this: `/stats name@example.com",
+                color: "warning"
+            });
 
-        await AdminSlackService.getSharedInstance().sendToResponseUrl(payload.response_url, {
-            attachments,
-            response_type: SlackResponseType.ephemeral
-        });
-        resp.sendStatus(200);
-        return;
+            await AdminSlackService.getSharedInstance().sendToResponseUrl(payload.response_url, {
+                attachments,
+                response_type: SlackResponseType.ephemeral
+            });
+            resp.sendStatus(200);
+            return;
+        }
+
+        const job: JobRequest = {
+            type: JobType.memberStats,
+            payload: memberEmail,
+            slackResponseURL: payload.response_url,
+        };
+
+        await submitJobAndReturn({ job, args: rest, immediate, response: resp });
+    } catch (error) {
+        logger.error(error)
+        resp.status(500).send({error: error.message})
     }
-
-    const job: JobRequest = {
-        type: JobType.memberStats,
-        payload: memberEmail,
-        slackResponseURL: payload.response_url,
-    };
-
-    await submitJobAndReturn({ job, args: rest, immediate, response: resp });
-    return;
 });
 
 
 app.post("/commands/member", async (req: functions.https.Request | any, resp: functions.Response) => {
-    const payload: CommandPayload = req.body;
-    const payloadText = payload.text;
-    const [memberEmail, ...rest] = payloadText.split(" ").map(s => s.trim());
-    const immediate = rest.includes("immediate");
-    logger.info(`Getting stats for ${ memberEmail }`);
+   try {
+        const payload: CommandPayload = req.body;
+        const payloadText = payload.text;
+        const [memberEmail, ...rest] = payloadText.split(" ").map(s => s.trim());
+        const immediate = rest.includes("immediate");
+        logger.info(`Getting stats for ${ memberEmail }`);
 
-    if (isBlank(memberEmail) || !isValidEmail(memberEmail)) {
-        const attachments: SlackAttachment[] = [];
-        attachments.push({
-            text: "Please provide a a valid email address to get stats for. The command should be run like this: `/stats name@example.com",
-            color: "warning"
-        });
+        if (isBlank(memberEmail) || !isValidEmail(memberEmail)) {
+            const attachments: SlackAttachment[] = [];
+            attachments.push({
+                text: "Please provide a a valid email address to get stats for. The command should be run like this: `/stats name@example.com",
+                color: "warning"
+            });
 
-        await AdminSlackService.getSharedInstance().sendToResponseUrl(payload.response_url, {
-            attachments,
-            response_type: SlackResponseType.ephemeral
-        });
-        resp.sendStatus(200);
-        return;
-    }
+            await AdminSlackService.getSharedInstance().sendToResponseUrl(payload.response_url, {
+                attachments,
+                response_type: SlackResponseType.ephemeral
+            });
+            resp.sendStatus(200);
+            return;
+        }
 
-    const job: JobRequest = {
-        type: JobType.user,
-        payload: memberEmail,
-        slackResponseURL: payload.response_url,
-        channelName: payload.channel_id,
-        userId: payload.user_id,
-        userName: payload.user_name
-    };
+        const job: JobRequest = {
+            type: JobType.user,
+            payload: memberEmail,
+            slackResponseURL: payload.response_url,
+            channelName: payload.channel_id,
+            userId: payload.user_id,
+            userName: payload.user_name
+        };
 
-    await submitJobAndReturn({ job, args: rest, immediate, response: resp });
-    return;
+        await submitJobAndReturn({ job, args: rest, immediate, response: resp });
+    } catch (error) {
+       logger.error(error)
+       resp.status(500).send({error: error.message})
+   }
 });
 
 app.post("/commands", async (req: functions.https.Request | any, resp: functions.Response) => {
-    logger.log("req", JSON.stringify(req.body, null, 2));
+    try {
+        logger.log("req", JSON.stringify(req.body, null, 2));
 
-    const payload: CommandPayload = req.body;
+        const payload: CommandPayload = req.body;
 
 
-    const commandText = payload.text;
-    const [commandName, ...rest] = commandText.split(" ").map(s => s.trim());
+        const commandText = payload.text;
+        const [commandName, ...rest] = commandText.split(" ").map(s => s.trim());
 
-    const immediate = rest.includes("immediate");
+        const immediate = rest.includes("immediate");
 
-    let jobType: JobType | undefined = undefined;
-    let jobPayload: any = undefined;
-    switch (commandName) {
-        case "bigquery":
-            jobType = JobType.bigquery;
-            break;
-        case "activeUsers":
-            jobType = JobType.activeUsers;
-            jobPayload = rest;
-            break;
-        case "durumuru":
-            jobPayload = rest;
-            jobType = JobType.durumuru;
-            break;
-        case "today":
-            jobType = JobType.today;
-            break;
-        default:
-            break;
-    }
-
-    if (!jobType) {
-        const { intro, commands } = getSlackHelpText();
-        const attachments: SlackAttachment[] = [];
-        if (commandName.trim().length > 0) {
-            attachments.unshift({
-                text: `Unknown command name: \`${ commandName }\``,
-                color: "danger"
-            })
+        let jobType: JobType | undefined = undefined;
+        let jobPayload: any = undefined;
+        switch (commandName) {
+            case "bigquery":
+                jobType = JobType.bigquery;
+                break;
+            case "activeUsers":
+                jobType = JobType.activeUsers;
+                jobPayload = rest;
+                break;
+            case "durumuru":
+                jobPayload = rest;
+                jobType = JobType.durumuru;
+                break;
+            case "today":
+                jobType = JobType.today;
+                break;
+            default:
+                break;
         }
 
-        attachments.push({
-            text: intro,
-            color: "good"
-        }, {
-            text: commands,
-            color: "good"
-        });
+        if (!jobType) {
+            const { intro, commands } = getSlackHelpText();
+            const attachments: SlackAttachment[] = [];
+            if (commandName.trim().length > 0) {
+                attachments.unshift({
+                    text: `Unknown command name: \`${ commandName }\``,
+                    color: "danger"
+                })
+            }
 
-        await AdminSlackService.getSharedInstance().sendToResponseUrl(payload.response_url, {
-            attachments,
-            response_type: SlackResponseType.ephemeral
-        });
-        resp.sendStatus(200);
+            attachments.push({
+                text: intro,
+                color: "good"
+            }, {
+                text: commands,
+                color: "good"
+            });
+
+            await AdminSlackService.getSharedInstance().sendToResponseUrl(payload.response_url, {
+                attachments,
+                response_type: SlackResponseType.ephemeral
+            });
+            resp.sendStatus(200);
+            return;
+        }
+
+        const job: JobRequest = {
+            type: jobType,
+            payload: jobPayload,
+            slackResponseURL: payload.response_url,
+        };
+
+        await submitJobAndReturn({ job, args: rest, immediate, response: resp });
+    } catch (error) {
+        logger.error(error)
+        resp.status(500).send({error: error.message})
         return;
     }
-
-    const job: JobRequest = {
-        type: jobType,
-        payload: jobPayload,
-        slackResponseURL: payload.response_url,
-    };
-
-    await submitJobAndReturn({ job, args: rest, immediate, response: resp });
-    return;
 });
 
 
 async function submitJobAndReturn(options: { job: JobRequest, immediate: boolean, response: functions.Response, args?: string[] }): Promise<void> {
-    const { job, immediate, response, args } = options;
-    logger.log("Job built:", JSON.stringify(job, null, 2));
+    try {
+        const { job, immediate, response, args } = options;
+        logger.log("Job built:", JSON.stringify(job, null, 2));
 
-    const slackCmdName = `${ job.type } ${ args }`.trim();
-    if (!immediate) {
-        logger.log("Not immediate - sending to pubsub");
-        const pubsub = new PubSub();
-        await pubsub.topic(PubSubTopic.slack_command).publishJSON(job);
+        const slackCmdName = `${ job.type } ${ args }`.trim();
+        if (!immediate) {
+            logger.log("Not immediate - sending to pubsub");
+            const pubsub = new PubSub();
+            await pubsub.topic(PubSubTopic.slack_command).publishJSON(job);
 
-        response.status(200).send({ text: `:hourglass_flowing_sand: Processing Job \`${ slackCmdName }\`` });
-        response.end();
-    } else {
-        logger.warn("Processing slack command immediately");
-        try {
-            await processJob(job);
-        } catch (error) {
-            logger.error("failed to process job immediately", error);
-            response.status(200).send({ text: `Error Processing Job \`${ slackCmdName }\`: \n\`${ JSON.stringify(job) }\`\n\`${ JSON.stringify(error.message || error, null, 2) }\`` });
+            response.status(200).send({ text: `:hourglass_flowing_sand: Processing Job \`${ slackCmdName }\`` });
+            response.end();
+        } else {
+            logger.warn("Processing slack command immediately");
+            try {
+                await processJob(job);
+            } catch (error) {
+                logger.error("failed to process job immediately", error);
+                response.status(200).send({ text: `Error Processing Job \`${ slackCmdName }\`: \n\`${ JSON.stringify(job) }\`\n\`${ JSON.stringify(error.message || error, null, 2) }\`` });
+            }
         }
+    } catch (error) {
+        logger.error(error)
+        options.response.status(500).send({success: false})
+        return;
     }
-    return;
 }
 
 app.post("/actions", async (req: functions.https.Request | any, resp: functions.Response) => {
-
-    const payload: {
-        type: string,
-        token: string,
-        action_ts: string,
-        team: {
-            id: string,
-            domain: string,
-        },
-        user: {
-            id: string,
-            name: string,
-        },
-        channel: {
-            id: string,
-            name: string,
-        },
-        callback_id: string,
-        trigger_id: string,
-        message_ts: string,
-        message: {
-            client_msg_id: string,
+    try {
+        const payload: {
             type: string,
-            text: string,
-            user: string,
-            ts: string,
-            team: string,
-        },
-        response_url: string,
-    } = JSON.parse(req.body.payload);
+            token: string,
+            action_ts: string,
+            team: {
+                id: string,
+                domain: string,
+            },
+            user: {
+                id: string,
+                name: string,
+            },
+            channel: {
+                id: string,
+                name: string,
+            },
+            callback_id: string,
+            trigger_id: string,
+            message_ts: string,
+            message: {
+                client_msg_id: string,
+                type: string,
+                text: string,
+                user: string,
+                ts: string,
+                team: string,
+            },
+            response_url: string,
+        } = JSON.parse(req.body.payload);
 
-    const callbackId: string | undefined = payload.callback_id;
-    logger.log('body: ', JSON.stringify(payload, null, 2));
-    if (callbackId === 'get_mailchimp_member') {
-        await AdminSlackService.getSharedInstance().sendToResponseUrl(payload.response_url, { text: "This doesnt do anything useful... yet" });
+        const callbackId: string | undefined = payload.callback_id;
+        logger.log('body: ', JSON.stringify(payload, null, 2));
+        if (callbackId === 'get_mailchimp_member') {
+            await AdminSlackService.getSharedInstance().sendToResponseUrl(payload.response_url, { text: "This doesnt do anything useful... yet" });
 
-        resp.send({ success: true });
-    } else {
-        resp.sendStatus(400);
+            resp.send({ success: true });
+        } else {
+            resp.sendStatus(400);
+        }
+    } catch (error) {
+        logger.error(error)
+        resp.status(500).send({success: false})
     }
 });
+
+app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler);
 
 export default app;

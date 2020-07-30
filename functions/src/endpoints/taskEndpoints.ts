@@ -1,4 +1,5 @@
 import * as express from "express";
+import * as Sentry from "@sentry/node";
 import Logger from "@shared/Logger"
 import {
     MemberPromptNotificationTaskParams,
@@ -8,36 +9,39 @@ import {
 import AdminPromptNotificationManager from "@admin/managers/AdminPromptNotificationManager";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
 import HoboCache from "@admin/HoboCache";
+import { SentryExpressHanderConfig } from "@api/util/RequestUtil";
 
 const logger = new Logger("taskEndpoints");
 
 const app = express();
+app.use(Sentry.Handlers.requestHandler(SentryExpressHanderConfig) as express.RequestHandler);
 
 app.post("/daily-prompt-email", async (req: express.Request, resp: express.Response) => {
-    const taskId = req.header("x-cloudtasks-taskname");
-    const retryCount = req.header("x-cloudtasks-taskretrycount");
-    const executionCount = req.header("x-cloudtasks-taskexecutioncount");
-    const params = req.body as SendEmailNotificationParams;
-    logger.info("Send Emails task called", stringifyJSON(params, 2));
-
     try {
+        const taskId = req.header("x-cloudtasks-taskname");
+        const retryCount = req.header("x-cloudtasks-taskretrycount");
+        const executionCount = req.header("x-cloudtasks-taskexecutioncount");
+        const params = req.body as SendEmailNotificationParams;
+        logger.info("Send Emails task called", stringifyJSON(params, 2));
+
         const result = await AdminPromptNotificationManager.shared.sendPromptNotificationEmail(params);
         const logData = { taskInfo: { taskId, retryCount, executionCount }, params, result };
         logger.info(stringifyJSON(logData, 2));
         resp.sendStatus(204);
     } catch (error) {
-        logger.error("Unexpected error", error);
+        logger.error(error);
         resp.status(500).send({ message: "Unexpected error while processing email task", error });
         return
     }
 })
 
 app.post("/daily-prompt-push", async (req: express.Request, resp: express.Response) => {
-    const taskId = req.header("x-cloudtasks-taskname");
-    const retryCount = req.header("x-cloudtasks-taskretrycount");
-    const executionCount = req.header("x-cloudtasks-taskexecutioncount");
-    const params = req.body as SendPushNotificationParams;
     try {
+        const taskId = req.header("x-cloudtasks-taskname");
+        const retryCount = req.header("x-cloudtasks-taskretrycount");
+        const executionCount = req.header("x-cloudtasks-taskexecutioncount");
+        const params = req.body as SendPushNotificationParams;
+
         const pushResult = await AdminPromptNotificationManager.shared.sendPromptNotificationPush(params);
         const logData = { taskInfo: { taskId, retryCount, executionCount }, pushResult, params, };
         logger.info(stringifyJSON(logData));
@@ -48,27 +52,28 @@ app.post("/daily-prompt-push", async (req: express.Request, resp: express.Respon
             resp.sendStatus(204);
         }
     } catch (error) {
-        logger.error("Unexpected error", error);
+        logger.error(error);
         resp.status(500).send({ message: "Unexpected error while processing push task", error });
         return
     }
 })
 
 app.post("/daily-prompt-setup", async (req: express.Request, resp: express.Response) => {
-    logger.info("Create Daily Prompt Headers", stringifyJSON(req.headers, 2));
-    const taskId = req.header("x-cloudtasks-taskname");
-    const retryCount = req.header("x-cloudtasks-taskretrycount");
-    const executionCount = req.header("x-cloudtasks-taskexecutioncount");
-    const params: MemberPromptNotificationTaskParams = req.body;
-    if (!params.memberId) {
-        logger.info("No member ID was found, can not process task. Removing from queue");
-        resp.status(200).send({
-            success: false,
-            error: "No member ID was found on the task. Can ont process it.",
-            retryable: false
-        });
-    }
     try {
+        logger.info("Create Daily Prompt Headers", stringifyJSON(req.headers, 2));
+        const taskId = req.header("x-cloudtasks-taskname");
+        const retryCount = req.header("x-cloudtasks-taskretrycount");
+        const executionCount = req.header("x-cloudtasks-taskexecutioncount");
+        const params: MemberPromptNotificationTaskParams = req.body;
+        if (!params.memberId) {
+            logger.info("No member ID was found, can not process task. Removing from queue");
+            resp.status(200).send({
+                success: false,
+                error: "No member ID was found on the task. Can ont process it.",
+                retryable: false
+            });
+        }
+
         const result = await AdminPromptNotificationManager.shared.createMemberDailyPromptNotifications(params);
         logger.info(stringifyJSON({
             params, result,
@@ -86,53 +91,27 @@ app.post("/daily-prompt-setup", async (req: express.Request, resp: express.Respo
             resp.status(200).send(result);
         }
     } catch (error) {
-        logger.error("Unexpected error", error);
-        resp.status(500).send({ message: "Unexected error while processing setup task", error });
+        logger.error(error);
+        resp.status(500).send({ message: "Unexpected error while processing setup task", error });
     }
     return;
 })
 
 app.get("/purge-cache", async (req: express.Request, resp: express.Response) => {
-    if (req.query.confirm !== "true") {
-        resp.sendStatus(400);
-        return
+    try {
+        if (req.query.confirm !== "true") {
+            resp.sendStatus(400);
+            return
+        }
+        HoboCache.purge();
+        resp.send(`Cache purged at ${ new Date().toISOString() } `);
+        return;
+    } catch (error) {
+        logger.error("Unexpected error while processing API call", error);
+        resp.status(500)
+        resp.send({ error: error.message });
     }
-    HoboCache.purge();
-    resp.send(`Cache purged at ${ new Date().toISOString() } `);
-    return;
 });
 
-// app.get("/create", async (req: express.Request, resp: express.Response) => {
-//     const numToCreate = Number(req.query.num ?? "1");
-//     const numSeconds = Number(req.query.s ?? "5");
-//     const processAt = new Date(Date.now() + 1000 * numSeconds);
-//     const today = new Date();
-//     const utcHour = today.getUTCHours()
-//     const utcMinutes = getQuarterHourFromMinute(today.getUTCMinutes());
-//
-//     const memberId = "s4RMQ186oVFvNbJan41b" //neil@cactus.app
-//     const promptSendTimeUTC: PromptSendTime = { hour: utcHour, minute: utcMinutes };
-//
-//     try {
-//         const tasks: Promise<SubmitTaskResponse>[] = [];
-//         for (let i = 0; i < numToCreate; i++) {
-//             const createTask = PromptNotificationManager.shared.createDailyPromptSetupTask({
-//                 memberId,
-//                 promptSendTimeUTC,
-//                 systemDateObject: DateTime.utc().toObject()
-//             }, processAt)
-//             tasks.push(createTask);
-//         }
-//         const responses = await Promise.all(tasks);
-//         resp.send(responses);
-//     } catch (error) {
-//         logger.error("Failed to send message", Error(error.message));
-//         logger.error(error);
-//         resp.status(400).send({ error })
-//     }
-//
-//     return;
-// })
-
-
+app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler);
 export default app;

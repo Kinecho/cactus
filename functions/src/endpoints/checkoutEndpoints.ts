@@ -1,12 +1,14 @@
 import * as express from "express";
 import * as cors from "cors";
+import * as Sentry from "@sentry/node";
 import Stripe from "stripe";
 import { getConfig, getHostname } from "@admin/config/configService";
 import {
     AndroidFulfillParams,
     AndroidFulfillRestoredPurchasesParams,
     AndroidFulfillRestorePurchasesResult,
-    AndroidFulfillResult, CancelStripeSubscriptionResponse,
+    AndroidFulfillResult,
+    CancelStripeSubscriptionResponse,
     CreateSessionRequest,
     CreateSessionResponse,
     CreateSetupSubscriptionSessionRequest,
@@ -14,7 +16,7 @@ import {
 } from "@shared/api/CheckoutTypes";
 import { QueryParam } from "@shared/util/queryParams";
 import Logger from "@shared/Logger";
-import { getAuthUserId } from "@api/util/RequestUtil";
+import { getAuthUserId, SentryExpressHanderConfig } from "@api/util/RequestUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CheckoutSession from "@shared/models/CheckoutSession";
 import AdminCheckoutSessionService from "@admin/services/AdminCheckoutSessionService";
@@ -42,6 +44,8 @@ const stripe = new Stripe(config.stripe.secret_key, {
     apiVersion: '2019-12-03',
 });
 const app = express();
+app.use(Sentry.Handlers.requestHandler(SentryExpressHanderConfig) as express.RequestHandler);
+
 logger.info("allowed origins: ", JSON.stringify(config.allowedOrigins));
 // Automatically allow cross-origin requests
 app.use(cors({
@@ -58,38 +62,40 @@ app.get('/healthcheck', async (req: express.Request, res: express.Response) => {
 })
 
 app.post("/stripe/subscriptions/cancel", async (req: express.Request, res: express.Response) => {
-    const userId = await getAuthUserId(req);
-
-    const response: CancelStripeSubscriptionResponse = { success: false };
-    if (!userId) {
-        logger.info("You must be authenticated to create a checkout session.");
-        response.error = "You must be logged in to create a checkout session";
-        res.status(401).send(response);
-        return;
-    }
-    const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
-    const memberId = member?.id;
-    if (!member || !memberId) {
-        response.error = "You must have a member associated with your account to create a checkout session";
-        res.status(403).send(response);
-        return;
-    }
-
-
-    // StripeService.
-    const subscriptionId = member.subscription?.stripeSubscriptionId;
-    if (!subscriptionId) {
-        res.status(400).send({ success: false, error: "Member does not have a stripe subscription" });
-        return;
-    }
     try {
+        const userId = await getAuthUserId(req);
+
+        const response: CancelStripeSubscriptionResponse = { success: false };
+        if (!userId) {
+            logger.info("You must be authenticated to create a checkout session.");
+            response.error = "You must be logged in to create a checkout session";
+            res.status(401).send(response);
+            return;
+        }
+        const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
+        const memberId = member?.id;
+        if (!member || !memberId) {
+            response.error = "You must have a member associated with your account to create a checkout session";
+            res.status(403).send(response);
+            return;
+        }
+
+
+        // StripeService.
+        const subscriptionId = member.subscription?.stripeSubscriptionId;
+        if (!subscriptionId) {
+            res.status(400).send({ success: false, error: "Member does not have a stripe subscription" });
+            return;
+        }
+
         //we only need to cancel on Stripe, webhooks will deal with updating the member record as needed.
         await StripeService.getSharedInstance().cancelAtPeriodEnd(subscriptionId);
         const subscriptionInvoice = await AdminSubscriptionService.getSharedInstance().getUpcomingInvoice({ member });
         res.status(200).send({ success: true, subscriptionInvoice });
         return;
     } catch (error) {
-
+        logger.error(error);
+        res.status(500).send({ success: false, error: error.message });
     }
 });
 
@@ -98,70 +104,76 @@ app.post("/stripe/subscriptions/cancel", async (req: express.Request, res: expre
  * and the StripeWebhookService will handle (or not) the given event type.
  */
 app.post("/stripe/webhooks/main", bodyParser.raw({ type: 'application/json' }), async (req: express.Request, res: express.Response) => {
-    if (!isRawBodyRequest(req)) {
-        logger.error("Incoming stripe webhook was not of type firebase.https.Request. Can not process request", req.body);
-        res.sendStatus(204);
-        return
-    }
+    try {
+        if (!isRawBodyRequest(req)) {
+            logger.error("Incoming stripe webhook was not of type firebase.https.Request. Can not process request", req.body);
+            res.sendStatus(204);
+            return
+        }
 
-    const event = StripeWebhookService.getSharedInstance().getSignedEvent({
-        request: req,
-        webhookSigningKey: config.stripe.webhook_signing_secrets.main
-    });
-
-    if (!event) {
-        const stripeType = req.body?.type || "unknown";
-        const slackPayload = { body: req.body, headers: req.headers };
-        await AdminSlackService.getSharedInstance().uploadTextSnippet({
-            data: stringifyJSON(slackPayload, 2),
-            fileType: "json",
-            message: `:stripe: \`${ stripeType }\` webhook failed. No event was parsed from the body. Perhaps the signature was invalid?`,
-            filename: `stripe-failed-webhook-${ stripeType.replace(".", "-") }-${ (new Date()).toISOString() }.json`,
-            channel: ChannelName.engineering
+        const event = StripeWebhookService.getSharedInstance().getSignedEvent({
+            request: req,
+            webhookSigningKey: config.stripe.webhook_signing_secrets.main
         });
-        logger.error("Unable to construct the signed stripe event");
-        res.status(400).send("Unable to parse the stripe event. Perhaps it wasn't able verify the signature? ");
+
+        if (!event) {
+            const stripeType = req.body?.type || "unknown";
+            const slackPayload = { body: req.body, headers: req.headers };
+            await AdminSlackService.getSharedInstance().uploadTextSnippet({
+                data: stringifyJSON(slackPayload, 2),
+                fileType: "json",
+                message: `:stripe: \`${ stripeType }\` webhook failed. No event was parsed from the body. Perhaps the signature was invalid?`,
+                filename: `stripe-failed-webhook-${ stripeType.replace(".", "-") }-${ (new Date()).toISOString() }.json`,
+                channel: ChannelName.engineering
+            });
+            logger.error("Unable to construct the signed stripe event");
+            res.status(400).send("Unable to parse the stripe event. Perhaps it wasn't able verify the signature? ");
+            return;
+        }
+
+        const result = await StripeWebhookService.getSharedInstance().handleWebhookEvent(event);
+        logger.info("Processed webhook event: ", result.type);
+        res.status(result.statusCode).send(result);
+
         return;
+    } catch (error) {
+        logger.error(error);
+        res.status(500).send({ success: false, error: error.message });
     }
-
-    const result = await StripeWebhookService.getSharedInstance().handleWebhookEvent(event);
-    logger.info("Processed webhook event: ", result.type);
-    res.status(result.statusCode).send(result);
-
-    return;
 });
 
 /**
  * Get a sessionID to setup billing info on an existing subscription
  */
 app.post("/sessions/setup-subscription", async (req: express.Request, res: express.Response) => {
-    const userId = await getAuthUserId(req);
-
-    const response: CreateSetupSubscriptionSessionResponse = { success: false };
-    if (!userId) {
-        logger.info("You must be authenticated to create a checkout session.");
-        response.error = "You must be logged in to create a checkout session";
-        res.status(401).send(response);
-        return;
-    }
-    const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
-    const memberId = member?.id;
-    if (!member || !memberId) {
-        response.error = "You must have a member associated with your account to create a checkout session";
-        res.status(403).send(response);
-        return;
-    }
-
-    const stripeSubscriptionId = member?.subscription?.stripeSubscriptionId;
-    const stripeCustomerId = member?.stripeCustomerId;
-    if (!stripeSubscriptionId || !stripeCustomerId) {
-        response.error = "member does not have all of the required stripe fields: subscription, customerId";
-        res.status(400).send(response);
-        return;
-    }
-
-    const { successUrl, cancelUrl } = req.body as CreateSetupSubscriptionSessionRequest;
     try {
+        const userId = await getAuthUserId(req);
+
+        const response: CreateSetupSubscriptionSessionResponse = { success: false };
+        if (!userId) {
+            logger.info("You must be authenticated to create a checkout session.");
+            response.error = "You must be logged in to create a checkout session";
+            res.status(401).send(response);
+            return;
+        }
+        const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
+        const memberId = member?.id;
+        if (!member || !memberId) {
+            response.error = "You must have a member associated with your account to create a checkout session";
+            res.status(403).send(response);
+            return;
+        }
+
+        const stripeSubscriptionId = member?.subscription?.stripeSubscriptionId;
+        const stripeCustomerId = member?.stripeCustomerId;
+        if (!stripeSubscriptionId || !stripeCustomerId) {
+            response.error = "member does not have all of the required stripe fields: subscription, customerId";
+            res.status(400).send(response);
+            return;
+        }
+
+        const { successUrl, cancelUrl } = req.body as CreateSetupSubscriptionSessionRequest;
+
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             mode: 'setup',
@@ -182,9 +194,7 @@ app.post("/sessions/setup-subscription", async (req: express.Request, res: expre
         return;
     } catch (error) {
         logger.error("Failed to create stripe session", error);
-        response.error = "Unable to create stripe session";
-        response.success = false;
-        res.send(response);
+        res.send({ error: "unable to create stripe session: " + error.message, success: false });
         return;
     }
 });
@@ -347,124 +357,146 @@ async function buildStripeSubscriptionCheckoutSessionOptions(options: {
  * Returns a {SubscriptionDetails} object
  */
 app.get("/subscription-details", async (req: express.Request, resp: express.Response) => {
-    const userId = await getAuthUserId(req);
-    if (!userId) {
-        resp.sendStatus(401);
+    try {
+        const userId = await getAuthUserId(req);
+        if (!userId) {
+            resp.sendStatus(401);
+            return;
+        }
+
+        const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
+        if (!member) {
+            resp.sendStatus(401);
+            return;
+        }
+        // const memberId = member.id!;
+        const upcomingInvoice = await AdminSubscriptionService.getSharedInstance().getUpcomingInvoice({ member });
+
+        let subscriptionProduct: SubscriptionProduct | undefined;
+        const subscriptionProductId = member.subscription?.subscriptionProductId;
+        if (subscriptionProductId) {
+            subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByEntryId(subscriptionProductId)
+        }
+
+
+        const subscriptionDetails: SubscriptionDetails = {
+            upcomingInvoice: upcomingInvoice,
+            subscriptionProduct,
+        };
+
+        logger.info(`Subscription details for member ${ member.email }: ${ stringifyJSON(subscriptionDetails, 2) }`)
+        resp.send(subscriptionDetails);
+
         return;
+    } catch (error) {
+        logger.error(error);
+        resp.status(500).send({ success: false, error: error.message })
     }
-
-    const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
-    if (!member) {
-        resp.sendStatus(401);
-        return;
-    }
-    // const memberId = member.id!;
-    const upcomingInvoice = await AdminSubscriptionService.getSharedInstance().getUpcomingInvoice({ member });
-
-    let subscriptionProduct: SubscriptionProduct | undefined;
-    const subscriptionProductId = member.subscription?.subscriptionProductId;
-    if (subscriptionProductId) {
-        subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByEntryId(subscriptionProductId)
-    }
-
-
-    const subscriptionDetails: SubscriptionDetails = {
-        upcomingInvoice: upcomingInvoice,
-        subscriptionProduct,
-    };
-
-    logger.info(`Subscription details for member ${ member.email }: ${ stringifyJSON(subscriptionDetails, 2) }`)
-    resp.send(subscriptionDetails);
-
-    return;
 });
 
 app.post("/android/fulfill-purchase", async (req, resp) => {
-    const userId = await getAuthUserId(req);
+    try {
+        const userId = await getAuthUserId(req);
 
-    let result: AndroidFulfillResult = { success: false };
-    if (!userId) {
-        result.message = "You must be authenticated to fulfill a purchase";
-        resp.status(401).send(result);
+        let result: AndroidFulfillResult = { success: false };
+        if (!userId) {
+            result.message = "You must be authenticated to fulfill a purchase";
+            resp.status(401).send(result);
+            return;
+        }
+
+        const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
+        if (!member) {
+            result.message = "No cactus member found for authenticated user";
+            resp.status(401).send(result);
+            return;
+        }
+
+        const params = req.body as AndroidFulfillParams;
+
+        result = await AdminSubscriptionService.getSharedInstance().fulfillAndroidPurchase(member, { purchase: params.purchase });
+        result.message = result.message + "\n\nWARNING:\nSTILL USING HARD CODED USER ID";
+        resp.status(200).send(result);
         return;
+    } catch (error) {
+        logger.error(error);
+        resp.status(500).send({ success: false, error: error.message })
     }
-
-    const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
-    if (!member) {
-        result.message = "No cactus member found for authenticated user";
-        resp.status(401).send(result);
-        return;
-    }
-
-    const params = req.body as AndroidFulfillParams;
-
-    result = await AdminSubscriptionService.getSharedInstance().fulfillAndroidPurchase(member, { purchase: params.purchase });
-    result.message = result.message + "\n\nWARNING:\nSTILL USING HARD CODED USER ID";
-    resp.status(200).send(result);
-    return;
 });
 
 app.post("/android/fulfill-restored-purchases", async (req, resp) => {
-    const result: AndroidFulfillRestorePurchasesResult = { success: false };
-    const userId = await getAuthUserId(req);
-    if (!userId) {
-        result.message = "You must be authenticated to fulfill a purchase";
-        resp.status(401).send(result);
+    try {
+        const result: AndroidFulfillRestorePurchasesResult = { success: false };
+        const userId = await getAuthUserId(req);
+        if (!userId) {
+            result.message = "You must be authenticated to fulfill a purchase";
+            resp.status(401).send(result);
+            return;
+        }
+
+        const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
+        if (!member) {
+            result.message = "No cactus member found for authenticated user";
+            resp.status(401).send(result);
+            return;
+        }
+
+        const params = req.body as AndroidFulfillRestoredPurchasesParams;
+
+        const { fulfillmentResults, success } = await AdminSubscriptionService.getSharedInstance().fulfillRestoredAndroidPurchases(member, params);
+        result.success = success;
+        result.fulfillResults = fulfillmentResults;
+
+        result.message = result.message + "\n\nWARNING:\nSTILL USING HARD CODED USER ID";
+        resp.status(200).send(result);
         return;
+    } catch (error) {
+        logger.error(error);
+        resp.status(500).send({ success: false, error: error.message })
     }
-
-    const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
-    if (!member) {
-        result.message = "No cactus member found for authenticated user";
-        resp.status(401).send(result);
-        return;
-    }
-
-    const params = req.body as AndroidFulfillRestoredPurchasesParams;
-
-    const { fulfillmentResults, success } = await AdminSubscriptionService.getSharedInstance().fulfillRestoredAndroidPurchases(member, params);
-    result.success = success;
-    result.fulfillResults = fulfillmentResults;
-
-    result.message = result.message + "\n\nWARNING:\nSTILL USING HARD CODED USER ID";
-    resp.status(200).send(result);
-    return;
 });
 
 app.post("/reveneuecat/webhooks", async (req, resp) => {
-    const authHeader = req.header("Authorization");
-    if (!authHeader) {
-        resp.sendStatus(401);
-        return
-    }
-    const authToken = authHeader.split("Bearer ")[1];
-    logger.info("Auth token on the request is", authToken);
-    logger.info("Expected token value is", config.revenuecat.webhook_bearer_token);
-    if (authToken !== config.revenuecat.webhook_bearer_token) {
-        resp.sendStatus(403);
-        return
-    }
+    try {
+        const authHeader = req.header("Authorization");
+        if (!authHeader) {
+            resp.sendStatus(401);
+            return
+        }
+        const authToken = authHeader.split("Bearer ")[1];
+        logger.info("Auth token on the request is", authToken);
+        logger.info("Expected token value is", config.revenuecat.webhook_bearer_token);
+        if (authToken !== config.revenuecat.webhook_bearer_token) {
+            resp.sendStatus(403);
+            return
+        }
 
-    const payload = req.body;
+        const payload = req.body;
 
-    if (!isWebhookPayload(payload)) {
-        logger.warn("The body of the webhook payload did not conform to WebhookPayload type");
-        resp.sendStatus(400);
+        if (!isWebhookPayload(payload)) {
+            logger.warn("The body of the webhook payload did not conform to WebhookPayload type");
+            resp.sendStatus(400);
+            return;
+        }
+
+        logger.info("Authenticated the webhook request", stringifyJSON(payload, 2));
+
+        const messageId = await submitRevenueCatEvent(payload);
+
+        if (!messageId) {
+            logger.error("Unable to submit the message successfully. Returning an error code so revenue cat will retry");
+            resp.status(500).send("Unable to submit the event for processing");
+            return;
+        }
+        logger.info("Submitted revenuecat message payload. MessageID =", messageId);
+        resp.sendStatus(200);
         return;
+    } catch (error) {
+        logger.error(error);
+        resp.status(500).send({ success: false, error: error.message })
     }
-
-    logger.info("Authenticated the webhook request", stringifyJSON(payload, 2));
-
-    const messageId = await submitRevenueCatEvent(payload);
-
-    if (!messageId) {
-        logger.error("Unable to submit the message successfully. Returning an error code so revenue cat will retry");
-        resp.status(500).send("Unable to submit the event for processing");
-        return;
-    }
-    logger.info("Submitted revenuecat message payload. MessageID =", messageId);
-    resp.sendStatus(200);
-    return;
 })
+
+app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler);
 
 export default app;

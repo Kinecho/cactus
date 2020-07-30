@@ -24,71 +24,80 @@ import AdminPendingUserService from "@admin/services/AdminPendingUserService";
 import AdminSocialInviteService from "@admin/services/AdminSocialInviteService";
 import AdminUserService from "@admin/services/AdminUserService";
 import MailchimpService from "@admin/services/MailchimpService";
-import { getAuthUser } from "@api/util/RequestUtil";
-import UserRecord = admin.auth.UserRecord;
-import ActionCodeSettings = admin.auth.ActionCodeSettings;
+import { getAuthUser, SentryExpressHanderConfig } from "@api/util/RequestUtil";
 import { getISODateTime } from "@shared/util/DateUtil";
 import { QueryParam } from "@shared/util/queryParams";
 import Logger from "@shared/Logger";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
 import AdminRevenueCatService from "@admin/services/AdminRevenueCatService";
 import { getAppEmoji } from "@shared/util/ReflectionResponseUtil";
+import UserRecord = admin.auth.UserRecord;
+import ActionCodeSettings = admin.auth.ActionCodeSettings;
 
 const logger = new Logger("signupEndpoints");
 const Config = getConfig();
 
 const app = express();
+app.use(Sentry.Handlers.requestHandler(SentryExpressHanderConfig) as express.RequestHandler);
 app.use(cors({
     origin: Config.allowedOrigins,
 }));
 
 app.post("/email-status", async (req: functions.https.Request | any, resp: functions.Response) => {
-
-    const payload: EmailStatusRequest = req.body;
-    logger.log("signupEndpoints.email-status", payload);
-    let response: EmailStatusResponse | undefined = undefined;
-    const email = payload.email;
-    let exists = false;
-
-    if (!email) {
-        logger.error("No email was provided for the signup endpoint");
-        await AdminSlackService.getSharedInstance().sendSignupsMessage({
-            text: `Magic Link endpoint called with no email in payload.`
-        });
-
-        response = { exists: false, error: "No email provided", success: false, email: "" };
-        resp.send(response);
-        return
-
-    }
-
-    let user: UserRecord | undefined | null = undefined;
     try {
-        user = await admin.auth().getUserByEmail(email);
-        if (user) {
-            exists = true;
+        const payload: EmailStatusRequest = req.body;
+        logger.log("signupEndpoints.email-status", payload);
+        let response: EmailStatusResponse | undefined = undefined;
+        const email = payload.email;
+        let exists = false;
+
+        if (!email) {
+            logger.error("No email was provided for the signup endpoint");
+            await AdminSlackService.getSharedInstance().sendSignupsMessage({
+                text: `Magic Link endpoint called with no email in payload.`
+            });
+
+            response = { exists: false, error: "No email provided", success: false, email: "" };
+            resp.send(response);
+            return
+
         }
 
-    } catch (e) {
-        logger.error("no user found for email", email);
+        let user: UserRecord | undefined | null = undefined;
+        try {
+            user = await admin.auth().getUserByEmail(email);
+            if (user) {
+                exists = true;
+            }
+
+        } catch (e) {
+            logger.error("no user found for email", email);
+        }
+
+        await AdminSlackService.getSharedInstance().sendActivityMessage({
+            text: `${ email } triggered the Magic Link flow. Existing Email = ${ exists }`
+        });
+
+        response = { exists, email };
+        resp.send(response);
+    } catch (error) {
+        logger.error(error)
+        resp.status(500).send({error: error.message})
     }
-
-    await AdminSlackService.getSharedInstance().sendActivityMessage({
-        text: `${ email } triggered the Magic Link flow. Existing Email = ${ exists }`
-    });
-
-    response = { exists, email };
-    resp.send(response);
-    return;
 });
 
 
 app.post("/login", async (req: functions.https.Request | any, resp: functions.Response) => {
-    logger.log("handling logged in ");
-    const user = await getAuthUser(req);
-    if (!user) {
-        resp.sendStatus(401);
-        return
+    try {
+        logger.log("handling logged in ");
+        const user = await getAuthUser(req);
+        if (!user) {
+            resp.sendStatus(401);
+            return
+        }
+    } catch (error) {
+        logger.error(error)
+        resp.status(500).send({error: error.message})
     }
 });
 
@@ -226,7 +235,6 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
 
             resp.send(response);
         } catch (error) {
-            Sentry.captureException(error);
             logger.error(error);
             await AdminSlackService.getSharedInstance().uploadTextSnippet({
                 message: `Failed to send magic link to ${ email }`,
@@ -244,13 +252,9 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
             });
         }
 
-
-        return;
-
     } catch (error) {
-        logger.error("Failed to generate magic link");
+        logger.error(error);
         resp.status(500).send({ sendSuccess: false, error: error.message, email: email });
-        return
     }
 });
 
@@ -394,10 +398,12 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
         }
         resp.sendStatus(204);
     } catch (error) {
-        logger.error("An unexpected error occurred while processing the login-event");
+        logger.error(error);
         resp.sendStatus(500)
     }
 
 });
+
+app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler);
 
 export default app;

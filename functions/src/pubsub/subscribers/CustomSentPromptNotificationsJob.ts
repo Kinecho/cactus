@@ -59,40 +59,50 @@ export interface MemberResult {
 }
 
 export async function onPublish(message: Message, context: functions.EventContext) {
-    if (!message.json) {
-        logger.error("No message json found");
-        return;
+    try {
+        if (!message.json) {
+            logger.error("No message json found");
+            return;
+        }
+        const job: CustomNotificationJob = message.json;
+        logger.log("processing job", job);
+        const result = await runCustomNotificationJob(job);
+        logger.log("Job result", result);
+    } catch (error) {
+        logger.error(error);
+        return error;
     }
-    const job: CustomNotificationJob = message.json;
-    logger.log("processing job", job);
-    const result = await runCustomNotificationJob(job);
-    logger.log("Job result", result);
 }
 
 export async function runCustomNotificationJob(job: CustomNotificationJob): Promise<CustomNotificationJobResult> {
     const sendTimeUTC = job.sendTimeUTC || convertDateToSendTimeUTC(new Date());
-    const jobStartTime = Date.now();
-    const { tasks: taskResults, emails } = await AdminPromptNotificationManager.shared.createNotificationTasksForUTCSendTime(sendTimeUTC);
+    try {
+        const jobStartTime = Date.now();
+        const { tasks: taskResults, emails } = await AdminPromptNotificationManager.shared.createNotificationTasksForUTCSendTime(sendTimeUTC);
 
-    const result: CustomNotificationJobResult = {
-        sendTimeUTC,
-        success: true,
-        numSuccess: taskResults.length,
-        systemDateObject: job.systemDateObject,
-        numMembersFound: taskResults.length,
-        emailsProcessed: emails,
-    };
+        const result: CustomNotificationJobResult = {
+            sendTimeUTC,
+            success: true,
+            numSuccess: taskResults.length,
+            systemDateObject: job.systemDateObject,
+            numMembersFound: taskResults.length,
+            emailsProcessed: emails,
+        };
 
-    logger.info("Finished processing custom sent time jobs", stringifyJSON(result, 2));
-    const { memberResults, ...trimmedResult } = result;
-    const endJobTime = (new Date()).getTime();
-    await AdminSlackService.getSharedInstance().uploadTextSnippet({
-        message: `:calling: Custom Sent Prompt Notification Job finished in ${ endJobTime - jobStartTime }ms.`,
-        data: `${ JSON.stringify(trimmedResult, null, 2) }`,
-        title: `Custom Send Time for h${ sendTimeUTC.hour } m${ sendTimeUTC.minute }`,
-        filename: `custom-sent-prompt-${ sendTimeUTC.hour }-${ sendTimeUTC.minute }.json`,
-        fileType: "json",
-        channel: ChannelName.data_log,
-    });
-    return result;
+        logger.info("Finished processing custom sent time jobs", stringifyJSON(result, 2));
+        const { memberResults, ...trimmedResult } = result;
+        const endJobTime = (new Date()).getTime();
+        await AdminSlackService.getSharedInstance().uploadTextSnippet({
+            message: `:calling: Custom Sent Prompt Notification Job finished in ${ endJobTime - jobStartTime }ms.`,
+            data: `${ JSON.stringify(trimmedResult, null, 2) }`,
+            title: `Custom Send Time for h${ sendTimeUTC.hour } m${ sendTimeUTC.minute }`,
+            filename: `custom-sent-prompt-${ sendTimeUTC.hour }-${ sendTimeUTC.minute }.json`,
+            fileType: "json",
+            channel: ChannelName.data_log,
+        });
+        return result;
+    } catch (error) {
+        logger.error(error);
+        return { success: false, error: error.message, sendTimeUTC };
+    }
 }

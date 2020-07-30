@@ -15,6 +15,7 @@ import AdminSlackService, {SlackAttachment} from "@admin/services/AdminSlackServ
 import {JobMetadataResponse} from "@google-cloud/bigquery/build/src/table";
 import Logger from "@shared/Logger";
 import { Collection } from "@shared/FirestoreBaseModels";
+import { stringifyJSON } from "@shared/util/ObjectUtil";
 
 const logger = new Logger("DataExportJob");
 
@@ -297,6 +298,7 @@ async function exportForBigQuery(collectionIds: string[]): Promise<{ operation?:
         return {operation: finishedOperation, endTime, nextPrefix: nextPrefix};
 
     } catch (e) {
+        logger.error(e)
         const endTime = new Date();
         return {endTime, error: e};
     }
@@ -316,7 +318,7 @@ export async function getOperation(name: string): Promise<Operation | undefined>
     } catch (error) {
         if (error.isAxiosError) {
             const axiosError = error as AxiosError;
-            logger.error(`Failed to get operation. Code ${axiosError.code}. ${JSON.stringify(axiosError.response, null, 2)}`);
+            logger.error(`Failed to get operation. Code ${axiosError.code}. ${stringifyJSON(axiosError.response?.data ?? "no data", 2)}`);
             await slackService.sendEngineeringMessage({text: `Failed to get operation. Code ${axiosError.code}.\n\`\`\`${JSON.stringify(axiosError.response?.data, null, 2)}\`\`\``})
         } else {
             logger.error("Failed to get operation" + name, error);

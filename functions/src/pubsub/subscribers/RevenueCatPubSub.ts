@@ -11,31 +11,36 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 const logger = new Logger("RevenueCatPubSub");
 
 export async function onPublish(message: Message, context: functions.EventContext) {
-    const payload = message.json;
-    if (!payload) {
-        logger.error("No message was passed into the queue. can not process. returning");
+    try {
+        const payload = message.json;
+        if (!payload) {
+            logger.error("No message was passed into the queue. can not process. returning");
+            return true;
+        }
+
+        if (!isWebhookPayload(payload)) {
+            logger.error("Message event does not conform to RevenueCat webhook payload.", stringifyJSON(payload, 2));
+            return true;
+        }
+
+        const event = payload.event;
+
+        logger.info("retrieved the revenuecat event message", stringifyJSON(message.json, 2));
+
+        const member = await AdminCactusMemberService.getSharedInstance().getById(event.app_user_id);
+        await AdminSlackService.getSharedInstance().uploadTextSnippet({
+            message: `:revenuecat: RevenueCat status update: \`${ event.type }\` for member ${ member?.email } \`${ event.app_user_id }\``,
+            data: stringifyJSON(payload, 2),
+            filename: `RevenueCatUpdate-${ event.id }.json`,
+            fileType: "json",
+            channel: ChannelName.subscription_status,
+        })
+        logger.info("Sent slack message about the status update");
         return true;
+    } catch (error) {
+        logger.error(error);
+        return false;
     }
-
-    if (!isWebhookPayload(payload)) {
-        logger.error("Message event does not conform to RevenueCat webhook payload.", stringifyJSON(payload, 2));
-        return true;
-    }
-
-    const event = payload.event;
-
-    logger.info("retrieved the revenuecat event message", stringifyJSON(message.json, 2));
-
-    const member = await AdminCactusMemberService.getSharedInstance().getById(event.app_user_id);
-    await AdminSlackService.getSharedInstance().uploadTextSnippet({
-        message: `:revenuecat: RevenueCat status update: \`${ event.type }\` for member ${ member?.email } \`${ event.app_user_id }\``,
-        data: stringifyJSON(payload, 2),
-        filename: `RevenueCatUpdate-${ event.id }.json`,
-        fileType: "json",
-        channel: ChannelName.subscription_status,
-    })
-    logger.info("Sent slack message about the status update");
-    return true;
 }
 
 /**

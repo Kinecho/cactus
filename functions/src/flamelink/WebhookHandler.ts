@@ -1,7 +1,6 @@
-import {EventAction, FlamelinkWebhookEvent, ModuleType} from "@shared/types/FlamelinkWebhookTypes";
-import {SchemaName} from "@shared/FlamelinkModel";
+import { EventAction, FlamelinkWebhookEvent, ModuleType } from "@shared/types/FlamelinkWebhookTypes";
+import { SchemaName } from "@shared/FlamelinkModel";
 import PromptContent from "@shared/models/PromptContent";
-import * as Sentry from "@sentry/node";
 import AdminUserService from "@admin/services/AdminUserService";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import Logger from "@shared/Logger";
@@ -71,7 +70,6 @@ async function handlePromptContentEvent(event: FlamelinkWebhookEvent, action: Ev
         return {success: true, message: "Not yet implemented"}
     } catch (error) {
         logger.error("Failed to handle Prompt Content event", error);
-        Sentry.captureException(error);
         return {success: false, message: "Unexpected Error", error,}
     }
 

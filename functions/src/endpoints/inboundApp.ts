@@ -1,13 +1,14 @@
 import * as express from "express";
 import * as cors from "cors";
 import * as functions from "firebase-functions";
-import {processEmail} from "@api/inbound/EmailProcessor"
-import {saveEmailReply} from "@api/services/emailService";
+import * as Sentry from "@sentry/node";
+import { processEmail } from "@api/inbound/EmailProcessor"
+import { saveEmailReply } from "@api/services/emailService";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import TestModel from "@shared/models/TestModel";
-import {fromJSON} from "@shared/util/FirestoreUtil";
-import {EmailStoragePath} from "@shared/models/EmailReply";
-import {writeToFile} from "@api/util/FileUtil";
+import { fromJSON } from "@shared/util/FirestoreUtil";
+import { EmailStoragePath } from "@shared/models/EmailReply";
+import { writeToFile } from "@api/util/FileUtil";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
@@ -16,40 +17,45 @@ import AdminSlackService from "@admin/services/AdminSlackService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminSentCampaignService from "@admin/services/AdminSentCampaignService";
-import {getConfig} from "@admin/config/configService";
+import { getConfig } from "@admin/config/configService";
 import Logger from "@shared/Logger";
 import { ResponseMedium } from "@shared/util/ReflectionResponseUtil";
+import { SentryExpressHanderConfig } from "@api/util/RequestUtil";
 
 const logger = new Logger("inboundApp");
 const app = express();
 const config = getConfig();
+
+app.use(Sentry.Handlers.requestHandler(SentryExpressHanderConfig) as express.RequestHandler);
 
 app.use(cors({origin: config.allowedOrigins}));
 
 app.get('/', (req, res) => res.status(200).json({status: 'ok'}));
 
 app.get('/testModel/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        if (!id) {
+             res.status(400);
+             return
+        }
 
-    const id = req.params.id;
-    if (!id) {
-        return res.status(400);
+        const model = await AdminFirestoreService.getSharedInstance().getById(id, TestModel);
+
+        if (!model) {
+            res.sendStatus(404);
+            return
+        }
+        logger.log("model.name", model.name);
+        res.status(200).json({ status: 'ok', data: model.toJSON() })
+        return;
+    } catch (error) {
+        logger.error(error);
+        res.status(500).send({success: false, error: error.message})
     }
-
-    const model = await AdminFirestoreService.getSharedInstance().getById(id, TestModel);
-
-    if (!model) {
-        return res.sendStatus(404);
-    }
-
-
-    logger.log("model.name", model.name);
-
-    return res.status(200).json({status: 'ok', data: model.toJSON()})
-
 });
 
 app.post("/testModel", async (req, res) => {
-
     try {
         logger.log("body", JSON.stringify(req.body));
         const model = fromJSON(req.body, TestModel);
@@ -58,10 +64,9 @@ app.post("/testModel", async (req, res) => {
         logger.log("saved object", saved);
         res.send({data: saved.toJSON()})
     } catch (e) {
+        logger.error(e);
         res.status(500).send({error: e});
     }
-
-
 });
 
 /**
@@ -227,5 +232,5 @@ app.post("/", async (req: functions.https.Request | any, res: express.Response) 
     }
 });
 
-
+app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler);
 export default app;

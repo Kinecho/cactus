@@ -30,10 +30,12 @@ import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import { AppType } from "@shared/types/DeviceTypes";
 import AdminSlackService from "@admin/services/AdminSlackService";
-import * as functions from "firebase-functions";
+import { SentryExpressHanderConfig } from "@api/util/RequestUtil";
 
 const logger = new Logger("testApp");
 const app = express();
+app.use(Sentry.Handlers.requestHandler(SentryExpressHanderConfig) as express.RequestHandler);
+
 app.use(cors({ origin: true }));
 app.get('/', async (req, res) => {
     res.status(200).json({ status: 'ok', queryParams: req.query });
@@ -50,13 +52,14 @@ app.get("/slack", async (req, resp) => {
     return;
 })
 
-app.get("/error", async (req, resp) => {
-    logger.info("This is a Cactus info log", {name: "Cactus", second: "two"})
-    functions.logger.info("This is a firebase log", {name: "firebase", type: "firebase log"})
-    functions.logger.error("Error message text string", new Error("This is an error, omg!"))
-    logger.error("This is a Cactus error with plain object", {message: "Test error message"})
-    logger.error("This is a Cactus error with error object", new Error("OMG Cactus is on fire!"))
-    resp.sendStatus(200);
+app.get("/error", async (req, resp: express.Response) => {
+    try {
+        throw new Error("We will have to wrap all api functions in try catch")
+    } catch (error){
+        logger.error("Unexpected error while processing API call", error);
+        resp.status(500)
+        resp.send({error: error});
+    }
 })
 
 app.get("/fcm", async (req, res) => {
@@ -111,279 +114,352 @@ app.get("/stats", async (req, res) => {
 });
 
 app.get("/operation", async (req, res) => {
-    const name = req.query.name as string | undefined;
-    if (!name) {
-        res.send(400);
-        return;
+    try {
+        const name = req.query.name as string | undefined;
+        if (!name) {
+            res.send(400);
+            return;
+        }
+        const operation = await getOperation(name);
+        res.send(operation);
+    } catch (error){
+        logger.error("Unexpected error while processing API call", error);
+        res.status(500)
+        res.send({error: error.message});
     }
-    const operation = await getOperation(name);
-    return res.send(operation);
 });
 
 app.get('/bq', async (req, resp) => {
-    const results = await getActiveUserCountForTrailingDays(1);
-
-    return resp.send({ results: results });
+    try {
+        const results = await getActiveUserCountForTrailingDays(1);
+        resp.send({ results: results });
+    } catch (error){
+        logger.error("Unexpected error while processing API call", error);
+        resp.status(500)
+        resp.send({error: error.message});
+    }
 });
 
 app.get("/send-time", async (req, res) => {
-    const hour = req.query.h || undefined;
-    const minute = req.query.m || undefined;
-    const currentDate = new Date();
-    const day = req.query.date || currentDate.getDate();
-    const month = req.query.month || currentDate.getMonth();
-    const year = req.query.y || currentDate.getFullYear();
-    logger.log(`found hour=${ hour } and minute=${ minute }`);
-    let sendTime: PromptSendTime | undefined = undefined;
+    try {
+        const hour = req.query.h || undefined;
+        const minute = req.query.m || undefined;
+        const currentDate = new Date();
+        const day = req.query.date || currentDate.getDate();
+        const month = req.query.month || currentDate.getMonth();
+        const year = req.query.y || currentDate.getFullYear();
+        logger.log(`found hour=${ hour } and minute=${ minute }`);
+        let sendTime: PromptSendTime | undefined = undefined;
 
-    const systemDateObject = DateTime.local().setZone("utc").toObject();
+        const systemDateObject = DateTime.local().setZone("utc").toObject();
 
-    if (hour && minute) {
-        sendTime = { hour: Number(hour), minute: DateUtil.getQuarterHourFromMinute(Number(minute)) };
+        if (hour && minute) {
+            sendTime = { hour: Number(hour), minute: DateUtil.getQuarterHourFromMinute(Number(minute)) };
 
-        systemDateObject.day = Number(day);
-        systemDateObject.year = Number(year);
-        systemDateObject.month = Number(month);
-        systemDateObject.minute = Number(minute);
-        systemDateObject.hour = Number(hour);
+            systemDateObject.day = Number(day);
+            systemDateObject.year = Number(year);
+            systemDateObject.month = Number(month);
+            systemDateObject.minute = Number(minute);
+            systemDateObject.hour = Number(hour);
+        }
+        const result = await CustomSentPromptNotificationsJob.runCustomNotificationJob({
+            sendTimeUTC: sendTime,
+            dryRun: true,
+            systemDateObject: systemDateObject
+        });
+        logger.log("result", result);
+
+        res.send(result)
+    } catch (error){
+        logger.error("Unexpected error while processing API call", error);
+        res.status(500)
+        res.send({error: error.message});
     }
-    const result = await CustomSentPromptNotificationsJob.runCustomNotificationJob({
-        sendTimeUTC: sendTime,
-        dryRun: true,
-        systemDateObject: systemDateObject
-    });
-    logger.log("result", result);
-
-    res.send(result)
 });
 
 app.get("/start-notif-task", async (req, resp) => {
-    const email = req.query.email as string | undefined ?? "neil@cactus.app";
-    const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
-    const memberId = member?.id;
-    if (!memberId) {
-        resp.send({ error: `No member found for email ${ email }` });
+    try {
+        const email = req.query.email as string | undefined ?? "neil@cactus.app";
+        const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
+        const memberId = member?.id;
+        if (!memberId) {
+            resp.send({ error: `No member found for email ${ email }` });
+            return;
+        }
+        const payload: MemberPromptNotificationTaskParams = {
+            memberId,
+            systemDateObject: DateTime.local().toObject(),
+            promptSendTimeUTC: member?.promptSendTime ?? DEFAULT_PROMPT_SEND_TIME,
+        }
+        const result = await AdminPromptNotificationManager.shared.createDailyPromptSetupTask(payload);
+        resp.send({ result });
         return;
+    } catch (error){
+        logger.error("Unexpected error while processing API call", error);
+        resp.status(500)
+        resp.send({error: error.message});
     }
-    const payload: MemberPromptNotificationTaskParams = {
-        memberId,
-        systemDateObject: DateTime.local().toObject(),
-        promptSendTimeUTC: member?.promptSendTime ?? DEFAULT_PROMPT_SEND_TIME,
-    }
-    const result = await AdminPromptNotificationManager.shared.createDailyPromptSetupTask(payload);
-    resp.send({ result });
-    return;
 })
 
 /**
  * Create new sent prompt (if required) for a given user and prompt entry id
  */
 app.post("/sent-prompt", async (req, resp) => {
-    const { promptId, email, memberId } = req.body as { promptId?: string, email?: string, memberId?: string };
-    if (!promptId || (isBlank(email) && isBlank(memberId))) {
-        resp.send({ error: "You must provide a promptId and either email or memberId" });
-        return
-    }
-    const member = memberId ? await AdminCactusMemberService.getSharedInstance().getById(memberId) : await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email)
-    if (!member) {
-        resp.send({ error: `No member found for id=${ memberId ?? "none" } or email ${ email ?? "none" }` });
+    try {
+        const { promptId, email, memberId } = req.body as { promptId?: string, email?: string, memberId?: string };
+        if (!promptId || (isBlank(email) && isBlank(memberId))) {
+            resp.send({ error: "You must provide a promptId and either email or memberId" });
+            return
+        }
+        const member = memberId ? await AdminCactusMemberService.getSharedInstance().getById(memberId) : await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email)
+        if (!member) {
+            resp.send({ error: `No member found for id=${ memberId ?? "none" } or email ${ email ?? "none" }` });
+            return;
+        }
+
+        const promptContent = await AdminPromptContentService.getSharedInstance().getByEntryId(promptId);
+        if (!promptContent) {
+            resp.send({ error: `No prompt content found for prompt content entry id = ${ promptId }` });
+            return;
+        }
+
+        const { sentPrompt, error } = AdminSentPromptService.createSentPrompt({
+            member,
+            promptContent,
+            medium: PromptSendMedium.PROMPT_CONTENT,
+            createHistoryItem: true
+        });
+        if (!sentPrompt) {
+            resp.send({ message: "Unable to create a sent prompt", error })
+            return;
+        }
+
+        await AdminSentPromptService.getSharedInstance().save(sentPrompt);
+        resp.send({ sentPrompt, success: true });
         return;
+    } catch (error){
+        logger.error("Unexpected error while processing API call", error);
+        resp.status(500)
+        resp.send({error: error.message});
     }
-
-    const promptContent = await AdminPromptContentService.getSharedInstance().getByEntryId(promptId);
-    if (!promptContent) {
-        resp.send({ error: `No prompt content found for prompt content entry id = ${ promptId }` });
-        return;
-    }
-
-    const { sentPrompt, error } = AdminSentPromptService.createSentPrompt({
-        member,
-        promptContent,
-        medium: PromptSendMedium.PROMPT_CONTENT,
-        createHistoryItem: true
-    });
-    if (!sentPrompt) {
-        resp.send({ message: "Unable to create a sent prompt", error })
-        return;
-    }
-
-    await AdminSentPromptService.getSharedInstance().save(sentPrompt);
-    resp.send({ sentPrompt, success: true });
-    return;
-
 });
 
 /**
  * Create new free-form prompt
  */
 app.post("/free-form-prompt", async (req, resp) => {
-    const { title, email, memberId } = req.body as { title?: string, email?: string, memberId?: string };
-    const completed = req.body.completed === "true" || Boolean(req.body.completed);
+    try {
+        const { title, email, memberId } = req.body as { title?: string, email?: string, memberId?: string };
+        const completed = req.body.completed === "true" || Boolean(req.body.completed);
 
-    if (isBlank(email) && isBlank(memberId)) {
-        resp.send({ error: "You must provide a promptId and either email or memberId" });
-        return
-    }
-    const member = await AdminCactusMemberService.getSharedInstance().findCactusMember({
-        cactusMemberId: memberId,
-        email,
-    });
-    if (!member) {
-        resp.send({ error: `No member found for id=${ memberId ?? "none" } or email ${ email ?? "none" }` });
+        if (isBlank(email) && isBlank(memberId)) {
+            resp.send({ error: "You must provide a promptId and either email or memberId" });
+            return
+        }
+        const member = await AdminCactusMemberService.getSharedInstance().findCactusMember({
+            cactusMemberId: memberId,
+            email,
+        });
+        if (!member) {
+            resp.send({ error: `No member found for id=${ memberId ?? "none" } or email ${ email ?? "none" }` });
+            return;
+        }
+
+
+        const prompt = ReflectionPrompt.createFreeForm({ memberId: member.id!, question: title, app: AppType.WEB });
+        await AdminReflectionPromptService.getSharedInstance().save(prompt);
+
+        const { sentPrompt, error } = AdminSentPromptService.createSentPrompt({
+            member,
+            prompt,
+            medium: PromptSendMedium.FREE_FORM,
+            createHistoryItem: true
+        });
+
+        if (!sentPrompt) {
+            resp.send({ message: "Unable to create a sent prompt", error })
+            return;
+        }
+
+        if (completed) {
+            sentPrompt.completed = completed;
+        }
+        await AdminSentPromptService.getSharedInstance().save(sentPrompt);
+        resp.send({ prompt, sentPrompt, success: true });
         return;
+    } catch (error){
+        logger.error("Unexpected error while processing API call", error);
+        resp.status(500)
+        resp.send({error: error.message});
     }
-
-
-    const prompt = ReflectionPrompt.createFreeForm({ memberId: member.id!, question: title, app: AppType.WEB });
-    await AdminReflectionPromptService.getSharedInstance().save(prompt);
-
-    const { sentPrompt, error } = AdminSentPromptService.createSentPrompt({
-        member,
-        prompt,
-        medium: PromptSendMedium.FREE_FORM,
-        createHistoryItem: true
-    });
-
-    if (!sentPrompt) {
-        resp.send({ message: "Unable to create a sent prompt", error })
-        return;
-    }
-
-    if (completed) {
-        sentPrompt.completed = completed;
-    }
-    await AdminSentPromptService.getSharedInstance().save(sentPrompt);
-    resp.send({ prompt, sentPrompt, success: true });
-    return;
-
 })
 
 app.get("/send-notification-email", async (req, resp) => {
-    const email = req.query.email as string | undefined ?? "neil@cactus.app";
-    const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
-    if (!member) {
-        resp.status(400).send({ success: false, message: `No member found for email: "${ email }"` });
-        return
+    try {
+        const email = req.query.email as string | undefined ?? "neil@cactus.app";
+        const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
+        if (!member) {
+            resp.status(400).send({ success: false, message: `No member found for email: "${ email }"` });
+            return
+        }
+
+        const sendResult = await AdminSendgridService.getSharedInstance().sendPromptNotification({
+            reflectUrl: "http://localhost:8080/home",
+            email,
+            isPlus: true,
+            mainText: "This is test text from the test endpoint",
+            memberId: member.id!,
+            subjectLine: "[STAGE] Test endpoint",
+            promptContentEntryId: "xxxx",
+            isLastEmail: true,
+        })
+
+        const result = { success: true, message: "", sendResult };
+        resp.send(result);
+    } catch (error){
+        logger.error("Unexpected error while processing API call", error);
+        resp.status(500)
+        resp.send({error: error.message});
     }
-
-    const sendResult = await AdminSendgridService.getSharedInstance().sendPromptNotification({
-        reflectUrl: "http://localhost:8080/home",
-        email,
-        isPlus: true,
-        mainText: "This is test text from the test endpoint",
-        memberId: member.id!,
-        subjectLine: "[STAGE] Test endpoint",
-        promptContentEntryId: "xxxx",
-        isLastEmail: true,
-    })
-
-    const result = { success: true, message: "", sendResult };
-    resp.send(result);
 })
 
 app.get("/member-send-time", async (req, resp) => {
-    const memberId = req.query.memberId as string | undefined;
-    const email = req.query.email as string | undefined;
+    try {
+        const memberId = req.query.memberId as string | undefined;
+        const email = req.query.email as string | undefined;
 
-    let member: CactusMember | undefined;
-    if (!memberId && email) {
-        member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
-    } else if (memberId) {
-        member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
-    }
+        let member: CactusMember | undefined;
+        if (!memberId && email) {
+            member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
+        } else if (memberId) {
+            member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+        }
 
-    if (!member) {
-        resp.status(404);
-        resp.send("No member found");
-        return;
+        if (!member) {
+            resp.status(404);
+            resp.send("No member found");
+            return;
+        }
+        logger.log('Found a member:');
+        logger.log(member);
+        const result = await AdminCactusMemberService.getSharedInstance().updateMemberSendPromptTime(member);
+        resp.send(result || "none")
+    } catch (error){
+        logger.error("Unexpected error while processing API call", error);
+        resp.status(500)
+        resp.send({error: error.message});
     }
-    logger.log('Found a member:');
-    logger.log(member);
-    const result = await AdminCactusMemberService.getSharedInstance().updateMemberSendPromptTime(member);
-    return resp.send(result || "none")
 });
 
 app.get("/expire-trial", async (req, resp) => {
-    const memberId = req.query.memberId as string | undefined;
-    const email = req.query.email as string | undefined;
-    let member: CactusMember | undefined;
-    if (!memberId && email) {
-        member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
-    } else if (memberId) {
-        member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
-    }
+    try {
+        const memberId = req.query.memberId as string | undefined;
+        const email = req.query.email as string | undefined;
+        let member: CactusMember | undefined;
+        if (!memberId && email) {
+            member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
+        } else if (memberId) {
+            member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+        }
 
-    if (!member?.id) {
-        resp.status(404);
-        resp.send("No member found");
-        return;
-    }
-    logger.log('Found a member:');
-    logger.log(member);
+        if (!member?.id) {
+            resp.status(404);
+            resp.send("No member found");
+            return;
+        }
+        logger.log('Found a member:');
+        logger.log(member);
 
-    const result = await AdminSubscriptionService.getSharedInstance().expireTrial(member);
-    return resp.send(result || "none")
+        const result = await AdminSubscriptionService.getSharedInstance().expireTrial(member);
+        resp.send(result || "none")
+        return
+    } catch (error){
+        logger.error("Unexpected error while processing API call", error);
+        resp.status(500)
+        resp.send({error: error.message});
+        return
+    }
 });
 
 app.get("/member-stats", async (req, resp) => {
-    const memberId = req.query.memberId as string | undefined;
-    const email = req.query.email as string | undefined;
-    let member: CactusMember | undefined;
-    if (!memberId && email) {
-        member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
-    } else if (memberId) {
-        member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
-    }
+    try {
+        const memberId = req.query.memberId as string | undefined;
+        const email = req.query.email as string | undefined;
+        let member: CactusMember | undefined;
+        if (!memberId && email) {
+            member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
+        } else if (memberId) {
+            member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+        }
 
-    if (!member?.id) {
-        resp.status(404);
-        resp.send("No member found");
-        return;
-    }
-    logger.log('Found a member:');
-    logger.log(member);
+        if (!member?.id) {
+            resp.status(404);
+            resp.send("No member found");
+            return;
+        }
+        logger.log('Found a member:');
+        logger.log(member);
 
-    const result = await AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({
-        memberId: member.id,
-        timeZone: member?.timeZone ? member.timeZone.toString() : undefined
-    });
-    return resp.send(result || "none")
+        const result = await AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({
+            memberId: member.id,
+            timeZone: member?.timeZone ? member.timeZone.toString() : undefined
+        });
+        resp.send(result || "none")
+        return
+    } catch (error){
+        logger.error("Unexpected error while processing API call", error);
+        resp.status(500)
+        resp.send({error: error.message});
+    }
 });
 
 app.get("/member-word-cloud", async (req, resp) => {
-    const memberId = req.query.memberId as string | undefined;
-    const email = req.query.email as string | undefined;
-    let member: CactusMember | undefined;
-    if (!memberId && email) {
-        member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
-    } else if (memberId) {
-        member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
-    }
+    try {
+        const memberId = req.query.memberId as string | undefined;
+        const email = req.query.email as string | undefined;
+        let member: CactusMember | undefined;
+        if (!memberId && email) {
+            member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
+        } else if (memberId) {
+            member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+        }
 
-    if (!member?.id) {
-        resp.status(404);
-        resp.send("No member found");
-        return;
-    }
-    logger.log('Found a member:');
-    logger.log(member);
+        if (!member?.id) {
+            resp.status(404);
+            resp.send("No member found");
+            return;
+        }
+        logger.log('Found a member:');
+        logger.log(member);
 
-    const result = await AdminReflectionResponseService.getSharedInstance().aggregateWordInsightsForMember({ memberId: member.id });
-    return resp.send(result || "none")
+        const result = await AdminReflectionResponseService.getSharedInstance().aggregateWordInsightsForMember({ memberId: member.id });
+        resp.send(result || "none")
+        return
+    } catch (error){
+        logger.error("Unexpected error while processing API call", error);
+        resp.status(500)
+        resp.send({error: error.message});
+    }
 });
 
 app.get("/content", async (req, resp) => {
-    logger.log("Trying to fetch content");
-    const qDate = req.query.d as string | undefined;
-    let d = DateUtil.getDateAtMidnightDenver();
-    if (qDate) {
-        logger.log("date input", qDate);
-        d = DateUtil.localDateFromISOString(qDate) || d
-    }
+    try {
+        logger.log("Trying to fetch content");
+        const qDate = req.query.d as string | undefined;
+        let d = DateUtil.getDateAtMidnightDenver();
+        if (qDate) {
+            logger.log("date input", qDate);
+            d = DateUtil.localDateFromISOString(qDate) || d
+        }
 
-    logger.log("local date ", d);
-    const content = await AdminPromptContentService.getSharedInstance().getPromptContentForDate({ systemDate: d });
-    return resp.send((content && content.toJSON()) || "none")
+        logger.log("local date ", d);
+        const content = await AdminPromptContentService.getSharedInstance().getPromptContentForDate({ systemDate: d });
+        resp.send((content && content.toJSON()) || "none")
+    } catch (error){
+        logger.error("Unexpected error while processing API call", error);
+        resp.status(500)
+        resp.send({error: error.message});
+    }
 });
 
 app.get("/error", async (req, resp) => {
@@ -391,7 +467,7 @@ app.get("/error", async (req, resp) => {
         // noinspection ExceptionCaughtLocallyJS
         throw new Error("This is a test API Error");
     } catch (e) {
-        Sentry.captureException(e);
+        logger.error(e)
         return resp.sendStatus(500);
     }
 });
@@ -413,6 +489,7 @@ app.get("/language-entities", async (req, resp) => {
             data: entities
         });
     } catch (e) {
+        logger.error(e);
         resp.send({ error: e });
     }
 });
@@ -434,6 +511,7 @@ app.get("/language-syntax", async (req, resp) => {
             data: entities
         });
     } catch (e) {
+        logger.error(e);
         resp.send({ error: e });
     }
 });
@@ -558,10 +636,6 @@ app.get("/sheets/process", async (req, resp) => {
             writeResult,
         });
 
-
-        // const
-
-
     } catch (e) {
         logger.error(e);
         resp.send({ error: e });
@@ -605,17 +679,30 @@ app.get("/sheets/add", async (req, resp) => {
 });
 
 app.get("/watson", async (req, resp) => {
-    const text = req.query.text as string;
-    const data = await ToneAnalyzerService.shared.watsonBasicSdk(text)
-    resp.send({ watson: data });
+    try {
+        const text = req.query.text as string;
+        const data = await ToneAnalyzerService.shared.watsonBasicSdk(text)
+        resp.send({ watson: data });
+    } catch (error){
+        logger.error("Unexpected error while processing API call", error);
+        resp.status(500)
+        resp.send({error: error.message});
+    }
 })
 
 app.get("/sentiment", async (req, resp) => {
-    const text = req.query.text as string;
+    try {
+        const text = req.query.text as string;
 
-    const data = await GoogleLanguageService.getSharedInstance().getSentiment(text)
-    resp.send({ google: data });
+        const data = await GoogleLanguageService.getSharedInstance().getSentiment(text)
+        resp.send({ google: data });
+    } catch (error){
+        logger.error("Unexpected error while processing API call", error);
+        resp.status(500)
+        resp.send({error: error.message});
+    }
 
 })
+app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler);
 
 export default app;

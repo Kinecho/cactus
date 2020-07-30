@@ -24,6 +24,7 @@ export async function writeToFile(filePath:string, data: any): Promise<string|bo
         try {
             await fs.mkdirp(folder, {recursive: true});
         } catch (error){
+            logger.error(error);
             // logger.debug("Unable to create folder " + folder, error);
         }
 

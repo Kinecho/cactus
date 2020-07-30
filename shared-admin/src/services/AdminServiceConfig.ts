@@ -13,7 +13,6 @@ import AdminSendgridService from "@admin/services/AdminSendgridService";
 import AdminPendingUserService from "@admin/services/AdminPendingUserService";
 import GoogleSheetsService from "@admin/services/GoogleSheetsService";
 import GoogleLanguageService from "@admin/services/GoogleLanguageService";
-import * as Sentry from "@sentry/node";
 import AdminFlamelinkService from "@admin/services/AdminFlamelinkService";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
@@ -45,7 +44,7 @@ import ToneAnalyzerService from "@admin/services/ToneAnalyzerService";
 
 const logger = new Logger("AdminServiceConfig");
 
-export function initializeServices(config: CactusConfig, app: admin.app.App, timestampClass: any, functionName: string | undefined) {
+export function initializeServices(config: CactusConfig, app: admin.app.App, timestampClass: any) {
     logger.log("initializing all services");
     setTimestamp(timestampClass || admin.firestore.Timestamp);
 
@@ -107,16 +106,6 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
 
     //IBM Watson
     ToneAnalyzerService.initialize(config);
-
-    logger.log("Initializing Sentry");
-    const sentryOptions: Sentry.NodeOptions = {
-        dsn: config.sentry.functions_dsn,
-        environment: config.app.environment,
-        release: config.sentry.release,
-        serverName: functionName || "unknown"
-    };
-
-    Sentry.init(sentryOptions);
 
 
 }

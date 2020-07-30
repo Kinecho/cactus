@@ -2,6 +2,10 @@ import Logger from "@shared/Logger";
 
 const logger = new Logger("ObjectUtil.ts");
 
+export function isError(input: any): input is Error {
+    return input instanceof Error;
+}
+
 export function isNonEmptyObject(input: any): input is Object {
     if (isNull(input)) {
         return false;

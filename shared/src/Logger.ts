@@ -8,11 +8,20 @@ export interface LoggerAgent {
     error(message?: any, ...optionalParams: any[]): void;
 }
 
+export enum LogLevel {
+    debug,
+    info,
+    log,
+    warn,
+    error,
+}
+
 export default class Logger {
     fileName: string;
     serverName?: string;
 
     static agent:LoggerAgent = console;
+    static onLog?: (level: LogLevel, ...args: any[]) => void;
 
     static setAgent(agent: LoggerAgent) {
         Logger.agent = agent;
@@ -36,6 +45,7 @@ export default class Logger {
         const a: any = [].slice.call(arguments, 0);
         a.unshift(this.prefix);
         Logger.agent.debug.apply(Logger.agent, a);
+        Logger.onLog?.(LogLevel.debug, ...args);
     }
 
     log(...args: [any?, ...any[]]) {
@@ -46,18 +56,21 @@ export default class Logger {
         const a: any = [].slice.call(arguments, 0);
         a.unshift(this.prefix);
         Logger.agent.log.apply(Logger.agent, a);
+        Logger.onLog?.(LogLevel.info, ...args);
     }
 
     warn(...args: [any?, ...any[]]) {
         const a: any = [].slice.call(arguments, 0);
         a.unshift(this.prefix);
         Logger.agent.warn.apply(Logger.agent, a);
+        Logger.onLog?.(LogLevel.warn, ...args);
     }
 
     error(...args: [any?, ...any[]]) {
         const a: any = [].slice.call(arguments, 0);
         a.unshift(this.prefix);
         Logger.agent.error.apply(Logger.agent, a);
+        Logger.onLog?.(LogLevel.error, ...args);
     }
 
     getDateString(): string {

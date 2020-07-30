@@ -48,7 +48,7 @@
   "license": "ISC",
   "dependencies": {
     "@sentry/browser": "5.17.0",
-    "@sentry/integrations": "5.11.1",
+    "@sentry/integrations": "5.20.1",
     "@types/d3-hierarchy": "^1.1.6",
     "atob": "^2.1.2",
     "axios": "^0.19.2",
