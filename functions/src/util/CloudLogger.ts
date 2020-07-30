@@ -56,7 +56,9 @@ export function configureLogger(config: CactusConfig) {
         if (level > LogLevel.warn) {
             console.log("Handling a log", ...args)
             handleArgs(level, ...args)
-            Sentry.flush(2000).then(() => "")
+            Sentry.flush(2000).catch(error => {
+                console.log("There was an error flushing sentry logs", error);
+            })
         }
     }
 }
