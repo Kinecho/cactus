@@ -444,35 +444,14 @@ export const MAGIC_CORE_VALUES_ONBOARDING_QUESTIONS = (): Question[] => [
     // }),
     Question.create({
         // id: "9",
-        type: QuestionType.MULTI_SELECT,
-        titleMarkdown: "Reflecting on your selected values, which do you value as the result of positive, strengthening experiences or decisions? **Select 2-8:**",
+        type: QuestionType.RADIO,
+        titleMarkdown: "Reflecting on your selected values, which do you most value as the result of positive, strengthening experiences or decisions?",
         descriptionMarkdown: "",
-        multiSelectMinimum: 2,
-        multiSelectLimit: 8,
-        filter: (response) => {
-            return true;
-        },
         options: [],
         getOptions: (params, question) => {
             return getAllPreviousValues(params, question);
         }
     }),
-    // Question.create({
-    //     // id: "10",
-    //     type: QuestionType.MULTI_SELECT,
-    //     titleMarkdown: "Reflect on important life decisions you’ve made, then select which of the values were at the heart of those decisions. **Select 2-4:**",
-    //     descriptionMarkdown: "",
-    //     multiSelectMinimum: 2,
-    //     multiSelectLimit: 4,
-    //     filter: (params, question) => {
-    //         const results = getPreviousResultOptions(params, question);
-    //         return (results?.length ?? 0) > 2;
-    //     },
-    //     options: [],
-    //     getOptions: (params, question) => {
-    //         return getPreviousResultOptions(params, question);
-    //     }
-    // }),
 ].map((q, index) => {
     q.id = q.id ?? `${ index }`;
     return q
