@@ -20,9 +20,9 @@
                     :member="member"
                     :checkout-info="checkoutInfo"
                     :selected-word="selectedWord"
-                    :core-value-results="coreValueResults"
+                    :core-values-response="coreValuesResponse"
                     @selectedWord="setSelectedWord"
-                    @coreValueResult="handleCoreValueResult"
+                    @coreValuesResponse="handleCoreValueResponse"
                     @next="nextAction"
                     @previous="previous"
                     @checkout="startCheckout"
@@ -75,7 +75,7 @@ import { QueryParam } from "@shared/util/queryParams";
 import { fireOptInStartTrialEvent } from "@web/analytics";
 import StorageService, { LocalStorageKey } from "@web/services/StorageService";
 import { getQueryParam } from "@web/util";
-import { CoreValuesResults } from "@shared/models/CoreValuesAssessmentResponse";
+import CoreValuesAssessmentResponse, { CoreValuesResults } from "@shared/models/CoreValuesAssessmentResponse";
 
 const logger = new Logger("Onboarding");
 
@@ -113,7 +113,7 @@ export default class Onboarding extends Vue {
 
     showCloseConfirm = false;
     selectedWord: InsightWord | null = null;
-    coreValueResults: CoreValuesResults | null = null;
+    coreValuesResponse: CoreValuesAssessmentResponse | null = null;
     checkoutLoading = false;
     checkoutError: string | null = null;
     cardTransitionName = transitionName.next;
@@ -188,9 +188,9 @@ export default class Onboarding extends Vue {
         this.selectedWord = word;
     }
 
-    handleCoreValueResult(results: CoreValuesResults | null) {
-        logger.info("handling core value results", results)
-        this.coreValueResults = results;
+    handleCoreValueResponse(response: CoreValuesAssessmentResponse | null) {
+        logger.info("handling core value results", response)
+        this.coreValuesResponse = response;
     }
 
     setIndex(index: number) {

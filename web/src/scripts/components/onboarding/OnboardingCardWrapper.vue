@@ -5,7 +5,7 @@
                 :member="member"
                 v-bind="cardInfo.props"
                 @selectedWord="setSelectedWord"
-                @coreValueResult="setCoreValueResult"
+                @coreValuesResponse="setCoreValueResponse"
                 @next="$emit('next')"
                 @previous="$emit('previous')"
                 @checkout="$emit('checkout')"
@@ -33,7 +33,7 @@ import { CheckoutInfo } from "@components/onboarding/OnboardingTypes";
 import CactusMember from "@shared/models/CactusMember";
 import { InsightWord } from "@shared/api/InsightLanguageTypes";
 import MiniCoreValuesCard from "@components/onboarding/MiniCoreValuesCard.vue";
-import { CoreValuesResults } from "@shared/models/CoreValuesAssessmentResponse";
+import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
 
 interface CardProps {
     type: string,
@@ -71,15 +71,15 @@ export default class OnboardingCardWrapper extends Vue {
     @Prop({ type: Object as () => InsightWord, required: false, default: null })
     selectedWord!: InsightWord | null;
 
-    @Prop({ type: Object as () => CoreValuesResults, required: false, default: null })
-    coreValueResults!: CoreValuesResults | null;
+    @Prop({ type: Object as () => CoreValuesAssessmentResponse, required: false, default: null })
+    coreValuesResponse!: CoreValuesAssessmentResponse | null;
 
     setSelectedWord(word: InsightWord | null) {
         this.$emit('selectedWord', word);
     }
 
-    setCoreValueResult(results: CoreValuesResults | null) {
-        this.$emit("coreValueResult", results);
+    setCoreValueResponse(results: CoreValuesAssessmentResponse | null) {
+        this.$emit("coreValuesResponse", results);
     }
 
     handleClose(force: boolean = false) {
@@ -92,7 +92,7 @@ export default class OnboardingCardWrapper extends Vue {
 
     get cardInfo(): CardProps {
         let info: CardProps = { type: "text-card", props: { card: this.card } }
-        const coreValue = this.coreValueResults?.values[0] ?? null;
+        const coreValue = this.coreValuesResponse?.results?.values[0] ?? null;
         switch (this.card.type) {
             case CardType.text:
                 info.type = "text-card";
@@ -126,6 +126,7 @@ export default class OnboardingCardWrapper extends Vue {
                 break;
             case CardType.mini_core_values:
                 info.type = "mini-core-values-card";
+                info.props.coreValuesResponse = this.coreValuesResponse;
                 break;
             default:
                 break;

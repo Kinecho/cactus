@@ -4,7 +4,7 @@
                 :assessment="assessment"
                 :questions="questions"
                 :question-index="questionIndex"
-                :assessmentResponse="assessmentResponse"
+                :assessmentResponse="response"
                 :loading="loading"
                 :done="done"
                 :show-close-button="false"
@@ -26,7 +26,7 @@ import Assessment from "@components/corevalues/Assessment.vue";
 import CoreValuesAssessment from "@shared/models/CoreValuesAssessment";
 import CoreValuesQuestion from "@shared/models/CoreValuesQuestion";
 import CoreValuesQuestionResponse from "@shared/models/CoreValuesQuestionResponse";
-import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
+import CoreValuesAssessmentResponse, { CoreValuesResults } from "@shared/models/CoreValuesAssessmentResponse";
 import CactusMember from "@shared/models/CactusMember";
 import { Prop } from "vue-property-decorator";
 import Logger from "@shared/Logger"
@@ -46,18 +46,21 @@ export default class MiniCoreValuesCard extends Vue {
     @Prop({ type: Object as () => CactusMember, required: true })
     member!: CactusMember;
 
+    @Prop({type: Object as () => CoreValuesAssessmentResponse, required: false,})
+    coreValuesResponse!: CoreValuesAssessmentResponse|null;
+
     assessment = CoreValuesAssessment.onboarding()
     questions: CoreValuesQuestion[] = []
-    assessmentResponse: CoreValuesAssessmentResponse | null = null;
+    response: CoreValuesAssessmentResponse | null = null;
     questionIndex = 0;
     done = false
     loading = false
 
     async beforeMount() {
         this.questions = this.assessment.getQuestions();
-        this.assessmentResponse = CoreValuesAssessmentResponse.create({
+        this.response = this.coreValuesResponse ?? CoreValuesAssessmentResponse.create({
             version: this.assessment.version,
-            memberId: this.member.id!
+            memberId: this.member.id!,
         });
     }
 
@@ -77,9 +80,8 @@ export default class MiniCoreValuesCard extends Vue {
     }
 
     async save() {
-        if (this.assessmentResponse) {
-            const results = this.$emit("results", this.assessment.getResults(this.assessmentResponse))
-            this.$emit("coreValueResult", results)
+        if (this.response) {
+            this.$emit("coreValuesResponse", this.coreValuesResponse)
         }
     }
 
@@ -88,7 +90,7 @@ export default class MiniCoreValuesCard extends Vue {
     }
 
     async onResponse(response: CoreValuesQuestionResponse) {
-        this.assessmentResponse?.setResponse(response);
+        this.response?.setResponse(response);
         // await this.save()
     }
 
@@ -99,24 +101,18 @@ export default class MiniCoreValuesCard extends Vue {
     async completed() {
         // logCoreValuesAssessmentCompleted();
         logger.info("Completing core mini values");
-        const assessmentResponse = this.assessmentResponse;
+        const assessmentResponse = this.response;
         if (!assessmentResponse) {
             logger.info("there was no assessment response")
             return;
         }
         // assessmentResponse.completed = true;
         assessmentResponse.results = this.assessment.getResults(assessmentResponse);
-        this.assessmentResponse = assessmentResponse
-        // await this.save();
+        this.response = assessmentResponse
         assessmentResponse.completed = true;
 
-        this.$emit("coreValueResult", assessmentResponse.results)
+        this.$emit("coreValuesResponse", assessmentResponse)
         this.$emit("next")
-        // if (isPremiumTier(this.member.tier)) {
-        //     await pushRoute(this.resultsRoute);
-        //     return;
-        // }
-        // await this.goToUpgrade();
     }
 
 }
