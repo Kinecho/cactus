@@ -76,8 +76,6 @@ export default class ToneAnalyzerService {
         try {
             const watsonRequest = await this.watson.tone({ toneInput: { text }, sentences: true })
             const result = watsonRequest.result;
-
-
             return ToneAnalyzerService.fromWatsonAnalysis(result);
         } catch (error) {
             logger.error("failed to get watson tone analysis", error);

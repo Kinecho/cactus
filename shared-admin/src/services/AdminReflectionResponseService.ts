@@ -402,28 +402,33 @@ export default class AdminReflectionResponseService {
     }
 
     async updateTextAnalysis(response?: ReflectionResponse): Promise<ReflectionResponse | undefined> {
-        const responseId = response?.id;
-        if (!response || !responseId) {
+        try {
+            const responseId = response?.id;
+            if (!response || !responseId) {
+                return undefined;
+            }
+
+            const doc = this.getCollectionRef().doc(responseId);
+            const text = response.content.text;
+            const [wordCloud, sentiment, toneAnalysis] = await Promise.all([
+                GoogleLanguageService.getSharedInstance().insightWords(text),
+                GoogleLanguageService.getSharedInstance().getSentiment(text),
+                ToneAnalyzerService.shared.watsonBasicSdk(text),
+            ]);
+
+            await doc.set({
+                [ReflectionResponse.Field.insights]: wordCloud ?? null,
+                [ReflectionResponse.Field.toneAnalysis]: toneAnalysis ?? null,
+                [ReflectionResponse.Field.sentiment]: sentiment ?? null,
+                [ReflectionResponse.Field.mightNeedInsightsUpdate]: false,
+                [ReflectionResponse.Field.insightsUpdatedAt]: FieldValue.serverTimestamp(),
+            }, { merge: true });
+
+            return undefined;
+        } catch (error) {
+            logger.error(error);
             return undefined;
         }
-
-        const doc = this.getCollectionRef().doc(responseId);
-        const text = response.content.text;
-        const [wordCloud, sentiment, toneAnalysis] = await Promise.all([
-            GoogleLanguageService.getSharedInstance().insightWords(text),
-            GoogleLanguageService.getSharedInstance().getSentiment(text),
-            ToneAnalyzerService.shared.watsonBasicSdk(text),
-        ]);
-
-        await doc.set({
-            [ReflectionResponse.Field.insights]: wordCloud ?? null,
-            [ReflectionResponse.Field.toneAnalysis]: toneAnalysis ?? null,
-            [ReflectionResponse.Field.sentiment]: sentiment ?? null,
-            [ReflectionResponse.Field.mightNeedInsightsUpdate]: false,
-            [ReflectionResponse.Field.insightsUpdatedAt]: FieldValue.serverTimestamp(),
-        }, { merge: true });
-
-        return undefined;
     }
 
     async updateToneAnalysis(response?: ReflectionResponse): Promise<void> {

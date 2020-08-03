@@ -80,59 +80,72 @@ export default class GoogleLanguageService {
      * @return {Promise<SentimentResult | undefined>}
      */
     async getSentiment(text?: string): Promise<SentimentResult | undefined> {
-        const document = {
-            content: text,
-            type: Document.Type.PLAIN_TEXT,
+        try {
+            const document = {
+                content: text,
+                type: Document.Type.PLAIN_TEXT,
+            }
+            const [sentiment] = await this.client.analyzeSentiment({ document })
+            return sentiment;
+        } catch (error) {
+            logger.info("Failed to get document sentiment")
+            logger.error(error);
+            return undefined;
         }
-        const [sentiment] = await this.client.analyzeSentiment({ document })
-        return sentiment;
     }
 
     async insightWords(text?: string): Promise<InsightWordsResult> {
-        if (!text || isBlank(text)) {
+        try {
+            if (!text || isBlank(text)) {
+                return {
+                    insightWords: [],
+                };
+            }
+
+            const [syntaxTokens, entities] = await Promise.all([
+                this.getSyntaxTokens(text),
+                this.getEntities(text)
+            ]);
+
+            const insightWords: InsightWord[] = [];
+
+            syntaxTokens?.forEach((token: any) => {
+                if (this.tagsToKeep.includes(token.partOfSpeech?.tag)) {
+                    if (token.text?.content) {
+                        const wordObj: InsightWord = {
+                            word: token.text.content,
+                            partOfSpeech: WordTypes[token.partOfSpeech.tag as keyof typeof WordTypes]
+                        };
+
+                        if (entities) {
+                            const salience = this.getSalience(wordObj.word, entities);
+                            if (salience) {
+                                wordObj.salience = salience;
+                            }
+                        }
+
+                        insightWords.push(wordObj);
+                    }
+                }
+            });
+
+
+            // sort words by salience
+            if (insightWords.length > 1) {
+                insightWords.sort((a, b) => ((a.salience || 0) > (b.salience || 0)) ? -1 : 1)
+            }
+
+            return {
+                insightWords: insightWords,
+                // syntaxRaw: syntaxTokens,
+                // entitiesRaw: entities
+            };
+        } catch (error) {
+            logger.error("Failed to get insight words", error);
             return {
                 insightWords: [],
             };
         }
-
-        const [syntaxTokens, entities] = await Promise.all([
-            this.getSyntaxTokens(text),
-            this.getEntities(text)
-        ]);
-
-        const insightWords: InsightWord[] = [];
-
-        syntaxTokens?.forEach((token: any) => {
-            if (this.tagsToKeep.includes(token.partOfSpeech?.tag)) {
-                if (token.text?.content) {
-                    const wordObj: InsightWord = {
-                        word: token.text.content,
-                        partOfSpeech: WordTypes[token.partOfSpeech.tag as keyof typeof WordTypes]
-                    };
-
-                    if (entities) {
-                        const salience = this.getSalience(wordObj.word, entities);
-                        if (salience) {
-                            wordObj.salience = salience;
-                        }
-                    }
-
-                    insightWords.push(wordObj);
-                }
-            }
-        });
-
-
-        // sort words by salience
-        if (insightWords.length > 1) {
-            insightWords.sort((a, b) => ((a.salience || 0) > (b.salience || 0)) ? -1 : 1)
-        }
-
-        return {
-            insightWords: insightWords,
-            // syntaxRaw: syntaxTokens,
-            // entitiesRaw: entities
-        };
     }
 
     getSalience(word: string, entities: any[]): number | undefined {

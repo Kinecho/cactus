@@ -22,10 +22,10 @@
             "bash ./sentry-init.sh",
             "bash ./sentry-funcs-start.sh",
             "npm --prefix scripts run firebase:predeploy functions",
-            "npm --prefix \"$RESOURCE_DIR\" run build:deploy",
-            "SENTRY_NO_PROGRESS_BAR=1 bash ./sentry-funcs-upload.sh"
+            "npm --prefix \"$RESOURCE_DIR\" run build:deploy"
         ],
         "postdeploy": [
+            "SENTRY_NO_PROGRESS_BAR=1 bash ./sentry-funcs-upload.sh",
             "npm --prefix scripts run firebase:postdeploy functions",
             "bash ./sentry-funcs-finish.sh"
         ],

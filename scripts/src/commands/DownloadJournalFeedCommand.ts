@@ -20,6 +20,7 @@ import AdminPromptContentService from "@admin/services/AdminPromptContentService
 interface UserInput {
     email: string,
     redactResponses: boolean,
+    onlyText: boolean,
 }
 
 interface JournalEntry {
@@ -59,6 +60,10 @@ export default class DownloadJournalFeedCommand extends FirebaseCommand {
             name: "redactResponses",
             message: "Redact user reflections?",
             type: "confirm"
+        }, {
+            name: "onlyText",
+            message: "Get Text",
+            type: "confirm",
         }]);
         console.log("Got user input", userInput);
         this.userInput = userInput;
@@ -74,8 +79,13 @@ export default class DownloadJournalFeedCommand extends FirebaseCommand {
 
         this.feed = await this.buildFeed(memberId);
 
+        let fileString = JSON.stringify(this.feedToJson(), null, 2)
 
-        const jsonString = JSON.stringify(this.feedToJson(), null, 2)
+
+
+        if (userInput.onlyText) {
+            fileString = this.feed.map(entry => (entry.reflectionResponses ?? []).map(r => r.content.text).join("\n\n")).join("\n\n")
+        }
 
         const filename = `DownloadUser_${project}_${userInput.email.replace("@", "_").replace(".", "_")}` + `_${new Date().getTime()}.json`;
 
@@ -84,7 +94,7 @@ export default class DownloadJournalFeedCommand extends FirebaseCommand {
         console.log();
         const outputPath = path.resolve(helpers.outputDir, filename);
 
-        await writeToFile(outputPath, jsonString);
+        await writeToFile(outputPath, fileString);
 
         const openResponse = await prompts({
             name: "open",

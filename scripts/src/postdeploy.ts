@@ -6,9 +6,7 @@ const git: SimpleGit = simpleGit();
 (async () => {
     const projectId = process.env.GCLOUD_PROJECT;
     const isProd = projectId === 'cactus-app-prod';
-
     let resource = "Unknown";
-    console.log(process.argv);
     if (process.argv && process.argv.length > 2) {
         resource = process.argv[2];
     }

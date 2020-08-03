@@ -7,4 +7,4 @@ echo "google project $GCLOUD_PROJECT"
 VERSION=$(sentry-cli releases propose-version)
 
 echo "uploading source maps for $VERSION"
-sentry-cli releases files ${VERSION} upload-sourcemaps web/public --no-rewrite --log-level ERROR
+sentry-cli releases files "${VERSION}" upload-sourcemaps web/public --no-rewrite --log-level ERROR
