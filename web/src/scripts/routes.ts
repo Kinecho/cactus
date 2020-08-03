@@ -88,7 +88,20 @@ export const routes: MetaRouteConfig[] = [
                     description: "Research-backed prompts to increase self-awareness and resilience",
                     footer: { lifted: true },
                 },
-            }, {
+            },
+            {
+                path: "magic-cv",
+                component: () => lazyLoadView(import(
+                /* webpackPrefetch: true, webpackChunkName: "pages" */
+                "@web/views/marketing/MagicCoreValuesMLP.vue"
+                )),
+                meta: {
+                    title: "Cactus | Mindfulness without meditation",
+                    description: "Research-backed prompts to increase self-awareness and resilience",
+                    footer: { lifted: true },
+                },
+            },
+            {
                 path: "*",
                 redirect: "/",
             }
