@@ -22,6 +22,7 @@
     import MarkdownText from "@components/MarkdownText.vue";
     import OnboardingActionButton from "@components/OnboardingActionButton.vue";
     import CactusMember from "@shared/models/CactusMember";
+    import { CoreValue } from "@shared/models/CoreValueTypes";
 
     @Component({
         components: {
@@ -41,8 +42,11 @@
         @Prop({ type: String, required: false, default: null })
         selectedInsightWord!: string | null;
 
+        @Prop({type: String as CoreValue, required: false, default: null})
+        selectedCoreValue!: CoreValue | null;
+
         get markdownText() {
-            return this.card.getMarkdownText({ selectedInsight: this.selectedInsightWord })
+            return this.card.getMarkdownText({ selectedInsight: this.selectedInsightWord, selectedCoreValue: this.selectedCoreValue })
         }
 
         closeOnboarding() {

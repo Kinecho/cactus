@@ -33,6 +33,10 @@ export default class AppSettings extends FlamelinkModel {
         promptEntryId2: string,
     }
 
+    magicCoreValuesOnboarding!: {
+        promptEntryId1: string,
+    }
+
     journal: JournalSettings = defaultJournalSettings();
 
     constructor(data?: Partial<AppSettings>) {
