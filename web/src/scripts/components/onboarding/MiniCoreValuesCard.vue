@@ -123,7 +123,6 @@ export default class MiniCoreValuesCard extends Vue {
 @import "mixins";
 @import "assessment";
 
-
 .miniCoreValuesPage {
   display: flex;
   flex-flow: column nowrap;
@@ -131,40 +130,6 @@ export default class MiniCoreValuesCard extends Vue {
   justify-content: space-between;
   overflow: hidden;
   position: relative;
-
-  //&:after {
-  //  background: url(/assets/images/cvBlob.png) no-repeat;
-  //  content: "";
-  //  display: block;
-  //  height: 35rem;
-  //  overflow: hidden;
-  //  position: absolute;
-  //  left: 70%;
-  //  top: -26rem;
-  //  width: 40rem;
-  //}
-
-  //&:before {
-  //  background: url(/assets/images/pinkVs.svg) no-repeat;
-  //  background-size: cover;
-  //  content: "";
-  //  display: block;
-  //  height: 17rem;
-  //  overflow: hidden;
-  //  position: absolute;
-  //  right: 70%;
-  //  top: 70%;
-  //  width: 18rem;
-  //}
-
-  //@include r(768) {
-  //  background: $mediumDolphin url(/assets/images/grainy.png);
-  //
-  //  &:after {
-  //    top: -22rem;
-  //    z-index: 0;
-  //  }
-  //}
 
   header, .centered {
     width: 100%;
