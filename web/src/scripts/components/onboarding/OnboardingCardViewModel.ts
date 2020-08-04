@@ -87,30 +87,33 @@ export default class OnboardingCardViewModel {
             OnboardingCardViewModel.create({
                 type: CardType.text,
                 slug: "how-it-works",
-                text: "CORE VALUES: Cactus is a different kind of mindfulness.\n\nIt sends you a quick question every day, prompting you to consider what really matters to you, and write it down.",
-                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard2.png?alt=media&token=198b352b-c074-4577-8971-1a340054efee"
-            }),
-            OnboardingCardViewModel.create({
-                slug: "about-insights",
-                text: "Spend a minute writing and Cactus analyzes your words to reveal surprising insights about your thoughts and emotions.",
-                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard3.png?alt=media&token=3ea75e15-0759-4c5e-8021-09f55c5497b0"
-            }),
-            OnboardingCardViewModel.create({
-                slug: "discover-happiness",
-                text: "You'll discover the things that contribute to your happiness. You'll make better decisions and experience greater resilience and optimism.",
-                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard4.png?alt=media&token=44045a9c-1e23-4ab9-8d4a-ec8e57e75576"
+                text: "CORE VALUES: Cactus is a different kind of mindfulness.\n\nIt asks questions to help you focus on what really matters to you.",
+                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard1.png?alt=media&token=e36e050c-7564-44c5-8c48-64d64484b3f6"
             }),
             OnboardingCardViewModel.create({
                 slug: "discover-core-values",
                 type: CardType.mini_core_values,
-                text: "You'll discover the things that contribute to your happiness. You'll make better decisions and experience greater resilience and optimism.",
-                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard4.png?alt=media&token=44045a9c-1e23-4ab9-8d4a-ec8e57e75576"
+            }),
+            OnboardingCardViewModel.create({
+                slug: "core-values-intro",
+                type: CardType.text,
+                text: "Great!\n\n**{{OB_CORE_VALUE}}** is your first core value.\n\nCore values are the expression of what is important to you.\n\nThey shed light on your past and help you make better decisions.",
+                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard2.png?alt=media&token=198b352b-c074-4577-8971-1a340054efee",
+                defaultReplacementValue: "your core value",
+                textReplacementType: TextReplacementType.onboarding_core_value,
+                textReplacerToken: "{{OB_CORE_VALUE}}"
+            }),
+            OnboardingCardViewModel.create({
+                type: CardType.text,
+                slug: "cactus-learns",
+                text: "As Cactus learns more about you, questions become increasingly about you.\n\nLet's try it now.",
+                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard3.png?alt=media&token=3ea75e15-0759-4c5e-8021-09f55c5497b0"
             }),
             OnboardingCardViewModel.create({
                 slug: "reflect-on-core-values",
                 type: CardType.reflect,
                 defaultNextActionsEnabled: false,
-                text: "How does **{{OB_CORE_VALUE}}** make you feel?",
+                text: "When did **{{OB_CORE_VALUE}}** help you make an important decision?",
                 promptContentEntryId: settings?.magicCoreValuesOnboarding.promptEntryId1,
                 element: CactusElement.energy,
                 defaultReplacementValue: "your core value",
@@ -123,23 +126,10 @@ export default class OnboardingCardViewModel {
                 promptContentEntryId: settings?.magicCoreValuesOnboarding.promptEntryId1,
             }),
             OnboardingCardViewModel.create({
-                slug: "build-awareness",
-                type: CardType.elements,
-                text: "Great! Cactus is built on your awareness and care of five elements:"
-            }),
-            OnboardingCardViewModel.create({
-                slug: "cactus-learns",
-                text: "As Cactus learns more about you, questions become increasingly about you.",
-                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard6.png?alt=media&token=f103da10-62a7-4a45-92f1-60039bd171d6"
-            }),
-            OnboardingCardViewModel.create({
-                slug: "core-values-intro",
                 type: CardType.text,
-                text: `Besides **{{OB_CORE_VALUE}}**, knowing the rest of your core values helps you make better, healthier decisions in all aspects of your life.\n\nDo you know all of your core values?`,
-                textReplacementType: TextReplacementType.onboarding_core_value,
-                textReplacerToken: "{{OB_CORE_VALUE}}",
-                defaultReplacementValue: "your selected core value",
-                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard1.png?alt=media&token=e36e050c-7564-44c5-8c48-64d64484b3f6"
+                slug: "about-insights",
+                text: "Reflect on questions for a few days and you’ll get more insights.",
+                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard4.png?alt=media&token=44045a9c-1e23-4ab9-8d4a-ec8e57e75576"
             }),
             OnboardingCardViewModel.create({
                 slug: "discover-cactus-plus",
@@ -149,7 +139,7 @@ export default class OnboardingCardViewModel {
             OnboardingCardViewModel.create({
                 slug: "activity-completed",
                 type: CardType.text,
-                text: "You completed your first activity with Cactus! We are excited to be your co-pilot on your journey of self-understanding.",
+                text: "Tomorrow you’ll receive a new prompt to continue your journey of self-understanding.\n\nKeep it up and you'll see how you positively change over time.",
                 imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard7.png?alt=media&token=591df28c-fbd1-405c-8a37-31e8d1f6af9b",
                 buttons: [{
                     action: ContentAction.complete,
