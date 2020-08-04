@@ -129,7 +129,7 @@ export default class OnboardingCardViewModel {
                 type: CardType.text,
                 slug: "about-insights",
                 text: "Reflect on questions for a few days and you’ll get more insights.",
-                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard4.png?alt=media&token=44045a9c-1e23-4ab9-8d4a-ec8e57e75576"
+                imageUrl: "/assets/images/linearPositivity.svg"
             }),
             OnboardingCardViewModel.create({
                 slug: "discover-cactus-plus",

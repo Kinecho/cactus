@@ -343,8 +343,7 @@ export default class Onboarding extends Vue {
   background-position: left 40vw bottom -70vh, left -10vw top -70vh;
 }
 
-.index-1,
-.index-6 {
+.index-1 {
   background-color: lighten($lightDolphin, 10%);
 }
 
