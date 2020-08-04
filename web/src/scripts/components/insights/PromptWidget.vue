@@ -339,15 +339,11 @@
     }
 
     .backgroundImage {
-        height: 28rem;
-        margin: 0 0 -14rem;
-        overflow: hidden;
+        margin: 2.4rem 0 -14rem;
         position: relative;
-        right: 0;
         z-index: 0;
 
         @include r(600) {
-            height: auto;
             left: 66%;
             position: absolute;
             top: 3.2rem;
@@ -367,9 +363,12 @@
 
         img {
             display: block;
-            margin: auto;
-            max-height: 100%;
             max-width: 100%;
+
+            @include r(600) {
+                margin: auto;
+                max-height: 100%;
+            }
         }
     }
 
