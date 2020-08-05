@@ -5,6 +5,7 @@ import { CoreValue } from "@shared/models/CoreValueTypes";
 
 export enum CardType {
     text = "text",
+    streak = "streak",
     // photo = "photo",
     reflect = "reflect",
     elements = "elements",
@@ -138,9 +139,8 @@ export default class OnboardingCardViewModel {
             }),
             OnboardingCardViewModel.create({
                 slug: "activity-completed",
-                type: CardType.text,
+                type: CardType.streak,
                 text: "Tomorrow you’ll receive a new prompt to continue your journey of self-understanding.\n\nKeep it up and you'll see how you positively change over time.",
-                imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard7.png?alt=media&token=591df28c-fbd1-405c-8a37-31e8d1f6af9b",
                 buttons: [{
                     action: ContentAction.complete,
                     label: "Explore Cactus",

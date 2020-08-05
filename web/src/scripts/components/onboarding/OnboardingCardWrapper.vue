@@ -22,6 +22,7 @@ import { Prop } from "vue-property-decorator";
 import OnboardingCardViewModel, { CardType } from "@components/onboarding/OnboardingCardViewModel";
 import PhotoCard from "@components/onboarding/OnboardingPhotoCard.vue";
 import TextCard from "@components/onboarding/OnboardingTextCard.vue";
+import StreakCard from "@components/onboarding/OnboardingStreakCard.vue";
 import ReflectCard from "@components/onboarding/OnboardingReflectCard.vue";
 import ElementsCard from "@components/onboarding/OnboardingElementsCard.vue";
 import WordCloudCard from "@components/onboarding/OnboardingWordCloudCard.vue";
@@ -43,6 +44,7 @@ interface CardProps {
 @Component({
     components: {
         TextCard,
+        StreakCard,
         PhotoCard,
         ReflectCard,
         ElementsCard,
@@ -96,6 +98,11 @@ export default class OnboardingCardWrapper extends Vue {
         switch (this.card.type) {
             case CardType.text:
                 info.type = "text-card";
+                info.props.selectedInsightWord = this.selectedWord?.word;
+                info.props.selectedCoreValue = coreValue;
+                break;
+            case CardType.streak:
+                info.type = "streak-card";
                 info.props.selectedInsightWord = this.selectedWord?.word;
                 info.props.selectedCoreValue = coreValue;
                 break;
