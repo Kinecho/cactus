@@ -305,8 +305,8 @@ export const MAGIC_CORE_VALUES_ONBOARDING_QUESTIONS = (): Question[] => [
     Question.create({
         // id: "0",
         type: QuestionType.MULTI_SELECT,
-        titleMarkdown: "Think of a time when you felt like you had choices and were in control of how to act. "
-        + "What values motivated those feelings? **Select two:**",
+        titleMarkdown: "Think of a time when you felt like you were in control of how to act."
+        + "What motivated those feelings? **Select two:**",
         descriptionMarkdown: "",
         multiSelectLimit: 2,
         multiSelectMinimum: 2,
@@ -325,37 +325,12 @@ export const MAGIC_CORE_VALUES_ONBOARDING_QUESTIONS = (): Question[] => [
     }),
     Question.create({
         // id: "1",
-        type: QuestionType.RADIO,
-        titleMarkdown: "Which **one** of these is the most active value in your life?",
-        descriptionMarkdown: "",
-        options: [
-            Option.create({ value: CoreValue.Clarity }),
-            Option.create({ value: CoreValue.SelfCare }),
-            Option.create({ value: CoreValue.Appearance }),
-            Option.create({ value: CoreValue.Personal }),
-            Option.create({ value: CoreValue.Humor }),
-        ],
-    }),
-    Question.create({
-        // id: "2",
-        type: QuestionType.RADIO,
-        titleMarkdown: "Which **one** of these is the most active value in your life?",
-        descriptionMarkdown: "",
-        options: [
-            Option.create({ value: CoreValue.Commitment }),
-            Option.create({ value: CoreValue.Altruism }),
-            Option.create({ value: CoreValue.Nature }),
-            Option.create({ value: CoreValue.Security }),
-            Option.create({ value: CoreValue.Power }),
-        ]
-    }),
-    Question.create({
-        // id: "3",
         type: QuestionType.MULTI_SELECT,
-        titleMarkdown: "Think of a time when you felt challenged, but effective, prepared, and adequately resourced. What values helped you feel that way? **Select two:**",
+        titleMarkdown: "Think of a time when you felt challenged, but prepared and adequately resourced."
+        + "What helped you feel that way? **Select two:**",
         descriptionMarkdown: "",
-        multiSelectMinimum: 2,
         multiSelectLimit: 2,
+        multiSelectMinimum: 2,
         options: [
             Option.create({ value: CoreValue.Fulfillment }),
             Option.create({ value: CoreValue.Accomplishment }),
@@ -367,8 +342,41 @@ export const MAGIC_CORE_VALUES_ONBOARDING_QUESTIONS = (): Question[] => [
             Option.create({ value: CoreValue.SelfRealization }),
             Option.create({ value: CoreValue.Success }),
             Option.create({ value: CoreValue.Truth }),
-        ]
+        ],
     }),
+    // Question.create({
+    //     // id: "2",
+    //     type: QuestionType.RADIO,
+    //     titleMarkdown: "Which **one** of these is the most active value in your life?",
+    //     descriptionMarkdown: "",
+    //     options: [
+    //         Option.create({ value: CoreValue.Commitment }),
+    //         Option.create({ value: CoreValue.Altruism }),
+    //         Option.create({ value: CoreValue.Nature }),
+    //         Option.create({ value: CoreValue.Security }),
+    //         Option.create({ value: CoreValue.Power }),
+    //     ]
+    // }),
+    // Question.create({
+    //     // id: "3",
+    //     type: QuestionType.MULTI_SELECT,
+    //     titleMarkdown: "Think of a time when you felt challenged, but effective, prepared, and adequately resourced. What values helped you feel that way? **Select two:**",
+    //     descriptionMarkdown: "",
+    //     multiSelectMinimum: 2,
+    //     multiSelectLimit: 2,
+    //     options: [
+    //         Option.create({ value: CoreValue.Fulfillment }),
+    //         Option.create({ value: CoreValue.Accomplishment }),
+    //         Option.create({ value: CoreValue.Achievement }),
+    //         Option.create({ value: CoreValue.Growth }),
+    //         Option.create({ value: CoreValue.Leadership }),
+    //         Option.create({ value: CoreValue.Professionalism }),
+    //         Option.create({ value: CoreValue.Recognition }),
+    //         Option.create({ value: CoreValue.SelfRealization }),
+    //         Option.create({ value: CoreValue.Success }),
+    //         Option.create({ value: CoreValue.Truth }),
+    //     ]
+    // }),
     // Question.create({
     //     // id: "4",
     //     type: QuestionType.RADIO,
@@ -445,7 +453,7 @@ export const MAGIC_CORE_VALUES_ONBOARDING_QUESTIONS = (): Question[] => [
     Question.create({
         // id: "9",
         type: QuestionType.RADIO,
-        titleMarkdown: "Reflecting on your selected values, which do you most value as the result of positive, strengthening experiences or decisions?",
+        titleMarkdown: "Which one of these do you believe is the result of positive, strengthening experiences?",
         descriptionMarkdown: "",
         options: [],
         getOptions: (params, question) => {
