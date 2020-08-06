@@ -11,6 +11,9 @@
             </div>
         </div>
         <img height="300" width="300" class="image" v-if="card.imageUrl" :src="card.imageUrl" alt="Image"/>
+        <video v-if="card.videoUrl" muted autoplay>
+            <source :src="card.videoUrl" type="video/mp4">
+        </video>
     </div>
 </template>
 
@@ -91,13 +94,14 @@
         }
     }
 
-    .image {
+    .image,
+    video {
         height: auto;
         width: 100%;
 
         @include r(768) {
             align-self: center;
-            max-width: 33%;
+            max-width: 40%;
         }
     }
 

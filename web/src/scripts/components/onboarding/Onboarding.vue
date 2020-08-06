@@ -317,10 +317,13 @@ export default class Onboarding extends Vue {
 }
 
 .index-0,
-.index-6,
 .index-8,
 .index-12 {
   background-position: left 50vw bottom 50vh, left -50vw top 50vh;
+}
+
+.index-6 {
+    background-position: left 50vw bottom 70vh, left -50vw top 70vh;
 }
 
 .index-1,

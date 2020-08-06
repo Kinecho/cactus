@@ -35,6 +35,7 @@ export default class OnboardingCardViewModel {
      */
     text?: string;
     imageUrl?: string;
+    videoUrl?: string;
     element?: CactusElement;
     promptContentEntryId?: string;
     /**
@@ -130,7 +131,7 @@ export default class OnboardingCardViewModel {
                 type: CardType.text,
                 slug: "about-insights",
                 text: "Reflect on questions for a few days and you’ll get more insights.",
-                imageUrl: "/assets/images/linearPositivity.svg"
+                videoUrl: "/assets/videos/posChartDemo.mp4"
             }),
             OnboardingCardViewModel.create({
                 slug: "discover-cactus-plus",
