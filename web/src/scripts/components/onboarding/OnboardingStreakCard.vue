@@ -86,18 +86,23 @@
 
     .streak {
         display: flex;
-        margin-top: 4rem;
+        margin: 4rem 0 .8rem;
 
         span {
             align-items: center;
             background-color: $white;
             border-radius: 50%;
             display: flex;
-            height: 4rem;
+            flex-shrink: 0;
+            height: 3.6rem;
             justify-content: center;
             margin-right: .4rem;
-            width: 4rem;
+            width: 3.6rem;
 
+            @include r(374) {
+                height: 4rem;
+                width: 4rem;
+            }
             @include r(768) {
                 height: 4.8rem;
                 margin-right: .8rem;
@@ -134,7 +139,6 @@
     .text-card {
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
         min-height: 80vh;
         padding: 0 .8rem;
 
@@ -162,10 +166,15 @@
         }
 
         button {
+            margin-left: 50%;
+            max-width: 48rem;
+            transform: translateX(-50%);
             width: 100%;
 
             @include r(768) {
+                margin: 0;
                 min-width: 24rem;
+                transform: none;
                 width: auto;
             }
         }
