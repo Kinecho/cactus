@@ -8,16 +8,23 @@
                 <markdown-text :source="card.text"/>
             </strong>
             <transition name="component-fade" appear>
-                <resizable-textarea :max-height-px="maxTextareaHeight">
-                    <textarea placeholder="Write something..."
-                            v-model="responseText"
-                            type="text"
-                            ref="noteInput"
-                            :disabled="saving"
-                            @focus="onNoteFocus"
-                            @blur="onNoteBlur"
-                    />
-                </resizable-textarea>
+                <div class="textareaContainer">
+                    <resizable-textarea :max-height-px="maxTextareaHeight">
+                        <textarea placeholder="Write something..."
+                                v-model="responseText"
+                                type="text"
+                                ref="noteInput"
+                                :disabled="saving"
+                                @focus="onNoteFocus"
+                                @blur="onNoteBlur"
+                                class="writeSomething"
+                        />
+                    </resizable-textarea>
+                    <svg class="textAreaProgress" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle class="circleBg" cx="16" cy="16" r="14" stroke="black" stroke-width="4" stroke-opacity="10%"/>
+                        <circle class="circleProgress" cx="16" cy="16" r="14" stroke="#33CCAB" stroke-width="4"/>
+                    </svg>
+                </div>
             </transition>
             <share-warning v-if="card.noteShared"/>
             <button v-if="hasText" class="doneBtn icon no-loading" @click="saveAndContinue" :disabled="saving" :style="buttonStyles">
@@ -242,14 +249,54 @@
         }
     }
 
-    textarea {
+    .textareaContainer {
+        margin-bottom: 3.2rem;
+        position: relative;
+    }
+
+    .writeSomething {
         @include textArea;
-        margin: -1.2rem 0 3.2rem -.8rem;
+        margin: -1.2rem 0 0 -.8rem;
+        padding-bottom: 2.4rem;
 
         @include r(768) {
-            margin: -1.6rem 0 3.2rem -1.6rem;
+            margin: -1.6rem 0 0m -1.6rem;
         }
     }
+
+    .textAreaProgress {
+        $diameter: 2.4rem;
+        bottom: 1.6rem;
+        display: none;
+        height: $diameter;
+        position: absolute;
+        right: 1.6rem;
+        transform: rotate(-90deg);
+        width: $diameter;
+
+        @include r(768) {
+            bottom: 1.8rem;
+        }
+        @include r(960) {
+            bottom: 2.4rem;
+        }
+
+         .writeSomething:focus + & {
+             display: block;
+         }
+
+        .circleProgress {
+            //animation: html 1s ease-out forwards;
+            stroke-dasharray: $diameter * 4;
+            stroke-dashoffset: $diameter * 4;
+        }
+    }
+
+    // @keyframes html {
+    //     to {
+    //         stroke-dashoffset: 0;
+    //     }
+    // }
 
     .doneBtn, .skipBtn {
         /*bottom: 2.4rem;*/
