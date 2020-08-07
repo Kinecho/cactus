@@ -446,24 +446,24 @@ export default class PromptContent extends FlamelinkModel {
             const hasValue = !isBlank(dynamicValues[r.token]);
             const hasDefault = !isBlank(r.defaultValue);
             if (!validToken) {
-                logger.info(`The token "${ r.token }" was invalid, returning error`)
+                // logger.info(`The token "${ r.token }" was invalid, returning error`)
                 return false
             }
             if (hasValue) {
-                logger.info(`"The token has as value, "${ r.token }" is valid!"`)
+                // logger.info(`"The token has as value, "${ r.token }" is valid!"`)
                 return true;
             } else if (r.valueRequired) {
-                logger.info(`A value is required for the token ${ r.token } but it was not found. Invalid replacer`)
+                // logger.info(`A value is required for the token ${ r.token } but it was not found. Invalid replacer`)
                 return false;
             }
 
             if (!hasDefault) {
-                logger.info(`The default value of ${ r.defaultValue } was not valid for token ${ r.token }`);
+                // logger.info(`The default value of ${ r.defaultValue } was not valid for token ${ r.token }`);
             }
             return hasDefault;
         })
         if (!allReplacementsValid) {
-            logger.info("Not all replacement values were valid")
+            // logger.info("Not all replacement values were valid")
             return undefined;
         }
 
@@ -474,7 +474,7 @@ export default class PromptContent extends FlamelinkModel {
             return text?.replace(token, value);
         }, templateTextMd);
 
-        logger.info(`Dynamic Content Processed Text\nTemplate=${ templateTextMd }\nProcessed=${ processedText }`);
+        // logger.info(`Dynamic Content Processed Text\nTemplate=${ templateTextMd }\nProcessed=${ processedText }`);
         return processedText;
     }
 }

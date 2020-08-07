@@ -20,10 +20,7 @@
                                 class="writeSomething"
                         />
                     </resizable-textarea>
-                    <svg class="textAreaProgress" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle class="circleBg" cx="16" cy="16" r="14" stroke="black" stroke-width="4" stroke-opacity="10%"/>
-                        <circle class="circleProgress" cx="16" cy="16" r="14" stroke="#33CCAB" stroke-width="4"/>
-                    </svg>
+                    <note-input-analysis-progress :input="responseText" class="noteProgress" v-show="showProgress || true"/>
                 </div>
             </transition>
             <share-warning v-if="card.noteShared"/>
@@ -56,11 +53,13 @@
     import ShareWarning from "@components/promptcontent/ShareWarning.vue";
     import { isBlank } from "@shared/util/StringUtil";
     import { ResponseMedium } from "@shared/util/ReflectionResponseUtil";
+    import NoteInputAnalysisProgress from "@components/insights/NoteInputAnalysisProgress.vue";
 
     const logger = new Logger("ReflectCard");
 
     @Component({
         components: {
+            NoteInputAnalysisProgress,
             ShareWarning,
             ElementAnimation,
             MarkdownText,
@@ -84,6 +83,7 @@
         startTime: Date = new Date();
         buttonStyles: Record<string, string> = {};
         noteFocused = false;
+        showProgress = false;
 
         @Watch("card")
         onCard(current?: PromptContentCardViewModel, previous?: PromptContentCardViewModel) {
@@ -116,11 +116,13 @@
         onNoteFocus() {
             this.$emit('enableKeyboardNavigation', false)
             this.noteFocused = true;
+            this.showProgress = true;
         }
 
         onNoteBlur() {
             this.$emit('enableKeyboardNavigation', true)
             this.noteFocused = false;
+            this.showProgress = false;
         }
 
         get doneButtonText(): string {
@@ -264,15 +266,9 @@
         }
     }
 
-    .textAreaProgress {
-        $diameter: 2.4rem;
-        bottom: 1.6rem;
-        display: none;
-        height: $diameter;
+    .noteProgress {
         position: absolute;
         right: 1.6rem;
-        transform: rotate(-90deg);
-        width: $diameter;
 
         @include r(768) {
             bottom: 1.8rem;
@@ -281,22 +277,7 @@
             bottom: 2.4rem;
         }
 
-         .writeSomething:focus + & {
-             display: block;
-         }
-
-        .circleProgress {
-            //animation: html 1s ease-out forwards;
-            stroke-dasharray: $diameter * 4;
-            stroke-dashoffset: $diameter * 4;
-        }
     }
-
-    // @keyframes html {
-    //     to {
-    //         stroke-dashoffset: 0;
-    //     }
-    // }
 
     .doneBtn, .skipBtn {
         /*bottom: 2.4rem;*/
