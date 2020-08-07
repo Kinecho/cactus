@@ -21,15 +21,17 @@ export default class NoteInputAnalysisProgress extends Vue {
     @Prop({ type: String, required: false, default: null })
     input!: string | null;
 
+    @Prop({ type: Number, required: false, default: 200 })
+    characterThreshold!: number;
+
     circleRadius!: number;
 
     mounted() {
         this.circleRadius = (this.$refs.circle as SVGCircleElement).r.baseVal.value
     }
 
-
     get progressStyles(): Record<string, any> {
-        const percent = Math.min(1, (this.input ?? "").length / 100);
+        const percent = Math.min(1, (this.input ?? "").length / this.characterThreshold);
         const circumference = this.circleRadius * 2 * Math.PI;
         const offset = Math.max(0, circumference - circumference * percent)
         return {
