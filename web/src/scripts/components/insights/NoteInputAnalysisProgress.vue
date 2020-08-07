@@ -2,7 +2,7 @@
     <div>
         <svg class="textAreaProgress" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle class="circleBg" cx="16" cy="16" :r="circleRadius" stroke="black" stroke-width="4" stroke-opacity="10%"/>
-            <circle class="circleProgress" cx="16" cy="16" r="14" stroke="#33CCAB" stroke-width="4" :style="progressStyles" ref="circle"/>
+            <circle class="circleProgress" cx="16" cy="16" :r="circleRadius" stroke="#33CCAB" stroke-width="4" :style="progressStyles" ref="circle"/>
         </svg>
     </div>
 </template>
