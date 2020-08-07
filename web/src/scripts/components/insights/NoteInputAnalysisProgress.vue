@@ -28,7 +28,6 @@ export default class NoteInputAnalysisProgress extends Vue {
         const rems = maxRem - offsetRems
         console.log("Setting rems to", rems, `${percent}%`)
         return {
-            strokeDasharray: `${ maxRem }rem ${ maxRem }rem`,
             strokeDashoffset: `${ rems }rem`,
         }
     }
@@ -64,7 +63,7 @@ export default class NoteInputAnalysisProgress extends Vue {
 
   .circleProgress {
     //animation: html 1s ease-out forwards;
-    //stroke-dasharray: $diameter * 4;
+    stroke-dasharray: $diameter * 4 $diameter * 4;
     //stroke-dashoffset: $diameter * 4;
     //transition: stroke-dashoffset 0.15s;
   }
