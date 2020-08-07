@@ -20,6 +20,7 @@
                             @blur="noteSelected = false"
                     />
             </resizable-textarea>
+            <note-input-analysis-progress :input="form.note" class="noteProgress"/>
             <share-warning v-if="noteShared"/>
         </section>
         <section class="actions" :style="actionStyles">
@@ -48,11 +49,13 @@
     import { debounce } from "debounce";
     import { getDeviceDimensions, isIosDevice } from "@web/DeviceUtil";
     import Logger from "@shared/Logger"
+    import NoteInputAnalysisProgress from "@components/insights/NoteInputAnalysisProgress.vue";
 
     const logger = new Logger("FreeformPromptForm");
 
     @Component({
         components: {
+            NoteInputAnalysisProgress,
             ResizableTextarea,
             ShareWarning
         }
@@ -197,9 +200,23 @@
     }
 
     .note {
+        position: relative;
         @include r(768) {
             margin-bottom: 3.2rem;
         }
+    }
+
+    .noteProgress {
+      position: absolute;
+      right: 1.6rem;
+
+      @include r(768) {
+        bottom: 1.8rem;
+      }
+      @include r(960) {
+        bottom: 2.4rem;
+      }
+
     }
 
     textarea {

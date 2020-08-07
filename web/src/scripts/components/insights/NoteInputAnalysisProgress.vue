@@ -1,7 +1,7 @@
 <template>
     <div>
         <svg class="textAreaProgress" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle class="circleBg" cx="16" cy="16" r="14" stroke="black" stroke-width="4" stroke-opacity="10%"/>
+            <circle class="circleBg" cx="16" cy="16" :r="circleRadius" stroke="black" stroke-width="4" stroke-opacity="10%"/>
             <circle class="circleProgress" cx="16" cy="16" r="14" stroke="#33CCAB" stroke-width="4" :style="progressStyles" ref="circle"/>
         </svg>
     </div>
@@ -24,11 +24,7 @@ export default class NoteInputAnalysisProgress extends Vue {
     @Prop({ type: Number, required: false, default: 200 })
     characterThreshold!: number;
 
-    circleRadius!: number;
-
-    mounted() {
-        this.circleRadius = (this.$refs.circle as SVGCircleElement).r.baseVal.value
-    }
+    circleRadius: number = 14;
 
     get progressStyles(): Record<string, any> {
         const percent = Math.min(1, (this.input ?? "").length / this.characterThreshold);
