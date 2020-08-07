@@ -2,7 +2,7 @@
     <div>
         <svg class="textAreaProgress" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle class="circleBg" cx="16" cy="16" r="14" stroke="black" stroke-width="4" stroke-opacity="10%"/>
-            <circle class="circleProgress" cx="16" cy="16" r="14" stroke="#33CCAB" stroke-width="4" :style="styles"/>
+            <circle class="circleProgress" cx="16" cy="16" r="14" stroke="#33CCAB" stroke-width="4" :style="progressStyles" ref="circle"/>
         </svg>
     </div>
 </template>
@@ -21,14 +21,20 @@ export default class NoteInputAnalysisProgress extends Vue {
     @Prop({ type: String, required: false, default: null })
     input!: string | null;
 
-    get styles(): Record<string, any> {
-        let percent =  (this.input ?? "").length / 100;
-        const maxRem = 9.6;
-        const offsetRems = Math.min(maxRem, maxRem * percent);
-        const rems = maxRem - offsetRems
-        console.log("Setting rems to", rems, `${percent}%`)
+    circleRadius!: number;
+
+    mounted() {
+        this.circleRadius = (this.$refs.circle as SVGCircleElement).r.baseVal.value
+    }
+
+
+    get progressStyles(): Record<string, any> {
+        const percent = Math.min(1, (this.input ?? "").length / 100);
+        const circumference = this.circleRadius * 2 * Math.PI;
+        const offset = Math.max(0, circumference - circumference * percent)
         return {
-            strokeDashoffset: `${ rems }rem`,
+            strokeDashoffset: `${ offset }`,
+            strokeDasharray: `${ circumference } ${ circumference }`
         }
     }
 }
@@ -40,32 +46,16 @@ export default class NoteInputAnalysisProgress extends Vue {
 
 .textAreaProgress {
   $diameter: 2.4rem;
-  //bottom: 1.6rem;
-  //display: none;
   height: $diameter;
-  //position: absolute;
-  //right: 1.6rem;
+  width: $diameter;
   transform: rotate(-90deg);
   transform-origin: 50% 50%;
-
-  width: $diameter;
 
   @include r(768) {
     bottom: 1.8rem;
   }
   @include r(960) {
     bottom: 2.4rem;
-  }
-
-  //.writeSomething:focus + & {
-  //  display: block;
-  //}
-
-  .circleProgress {
-    //animation: html 1s ease-out forwards;
-    stroke-dasharray: $diameter * 4 $diameter * 4;
-    //stroke-dashoffset: $diameter * 4;
-    //transition: stroke-dashoffset 0.15s;
   }
 }
 </style>
