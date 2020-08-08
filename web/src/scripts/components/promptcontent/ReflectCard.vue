@@ -267,6 +267,7 @@
     }
 
     .noteProgress {
+        bottom: 1.6rem;
         position: absolute;
         right: 1.6rem;
 

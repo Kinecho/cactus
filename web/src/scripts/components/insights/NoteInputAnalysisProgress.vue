@@ -44,6 +44,7 @@ export default class NoteInputAnalysisProgress extends Vue {
 
 .textAreaProgress {
   $diameter: 2.4rem;
+  display: block;
   height: $diameter;
   width: $diameter;
   transform: rotate(-90deg);

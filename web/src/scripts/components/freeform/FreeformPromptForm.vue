@@ -207,6 +207,7 @@
     }
 
     .noteProgress {
+      bottom: 1.6rem;
       position: absolute;
       right: 1.6rem;
 
@@ -221,6 +222,7 @@
 
     textarea {
         @include textArea;
+        padding-bottom: 2.4rem;
     }
 
     .actions {

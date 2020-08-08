@@ -248,16 +248,17 @@ strong {
 
 
 .noteProgress {
+  bottom: 1.6rem;
   position: absolute;
   right: 1.6rem;
 
   @include r(768) {
     bottom: 1.8rem;
+    right: 2.4rem;
   }
   @include r(960) {
     bottom: 2.4rem;
   }
-
 }
 
 textarea {
@@ -267,15 +268,15 @@ textarea {
   color: $darkestGreen;
   font-size: 1.8rem;
   line-height: 1.4;
-  margin: -1.2rem 0 3.2rem -.8rem;
+  margin: -1.2rem 0 0 -.8rem;
   opacity: .8;
-  padding: .8rem;
+  padding: .8rem .8rem 2.4rem;
   width: 100%;
 
   @include r(768) {
     font-size: 2.4rem;
-    margin: -1.6rem 0 3.2rem -1.6rem;
-    padding: 1.6rem;
+    margin: -1.6rem 0 0 -1.6rem;
+    padding: 1.6rem 1.6rem 2.4rem;
   }
   @include r(960) {
     font-size: 3.2rem;
