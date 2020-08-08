@@ -21,7 +21,7 @@ export default class NoteInputAnalysisProgress extends Vue {
     @Prop({ type: String, required: false, default: null })
     input!: string | null;
 
-    @Prop({ type: Number, required: false, default: 200 })
+    @Prop({ type: Number, required: false, default: 100 })
     characterThreshold!: number;
 
     circleRadius: number = 14;
