@@ -276,14 +276,17 @@
         background-color: $bgDolphin;
         display: flex;
         justify-content: space-evenly;
-        margin: 0 -2.4rem 4.8rem;
+        margin: 0 0 4.8rem;
         overflow: hidden;
         padding: 1.6rem;
 
+        @include r(374) {
+            margin: 0 -2.4rem 4.8rem;
+        }
         @include r(768) {
             border-radius: 1.2rem;
             margin: 0 1.6rem 4.8rem 0;
-            padding: 2.4rem;
+            padding: 2.4rem 1.6rem;
         }
 
         .dayContainer {
@@ -316,16 +319,15 @@
         }
 
         .day {
-            color: $mediumDolphin;
+            color: $lightText;
             font-size: 1.4rem;
-            font-weight: bold;
             margin-bottom: 1.2rem;
         }
 
         .circle {
             align-items: center;
             background-color: lighten($lightDolphin, 15%);
-            border: 1.2rem solid $bgDolphin;
+            border: 1.4rem solid $bgDolphin;
             border-radius: 50%;
             display: flex;
             height: 4.4rem;

@@ -39,12 +39,15 @@
         display: flex;
         flex-basis: 50%;
 
+        @include r(374) {
+            justify-content: center;
+        }
         @include r(600) {
             margin-right: 1.6rem;
-            padding: 3.2rem;
         }
-        @include r(768) {
+        @include r(960) {
             @include shadowbox;
+            padding: 3.2rem;
 
             &:last-child {
                 margin-right: 0;
@@ -58,12 +61,20 @@
         border-radius: 50%;
         display: flex;
         flex-shrink: 0;
-        height: 5.6rem;
+        height: 4rem;
         justify-content: center;
         margin-right: .8rem;
-        width: 5.6rem;
+        width: 4rem;
 
+        @include r(374) {
+            height: 5.6rem;
+            width: 5.6rem;
+        }
         @include r(600) {
+            height: 6.4rem;
+            width: 6.4rem;
+        }
+        @include r(960) {
             height: 8rem;
             margin-right: 1.6rem;
             width: 8rem;
@@ -74,6 +85,10 @@
             width: 2rem;
 
             @include r(600) {
+                height: 2.4rem;
+                width: 2.4rem;
+            }
+            @include r(960) {
                 height: 3.2rem;
                 width: 3.2rem;
             }
@@ -81,8 +96,9 @@
     }
 
     .statLabel {
-        margin-bottom: .4rem;
-
+        @include r(374) {
+            margin-bottom: .4rem;
+        }
         @include r(600) {
             margin-bottom: 0;
         }
@@ -95,6 +111,9 @@
         line-height: 1;
 
         @include r(600) {
+            font-size: 4rem;
+        }
+        @include r(960) {
             font-size: 5.6rem;
         }
     }
