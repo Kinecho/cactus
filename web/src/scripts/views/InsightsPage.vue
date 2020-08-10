@@ -6,9 +6,44 @@
                 <spinner :delay="1500" message="Loading..."/>
             </div>
             <div v-else class="insightsGrid" :class="insightsGridClassNames">
+                <div class="streakCalendar">
+                    <div class="dayContainer checked">
+                        <div class="day">S</div>
+                        <div class="circle">
+                            <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                    </div>
+                    <div class="dayContainer checked">
+                        <div class="day">M</div>
+                        <div class="circle">
+                            <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                    </div>
+                    <div class="dayContainer">
+                        <div class="day">T</div>
+                        <div class="circle"></div>
+                    </div>
+                    <div class="dayContainer checked">
+                        <div class="day">W</div>
+                        <div class="circle">
+                            <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                    </div>
+                    <div class="dayContainer">
+                        <div class="day">T</div>
+                        <div class="circle"></div>
+                    </div>
+                    <div class="dayContainer">
+                        <div class="day">F</div>
+                        <div class="circle"></div>
+                    </div>
+                    <div class="dayContainer">
+                        <div class="day">S</div>
+                        <div class="circle"></div>
+                    </div>
+                </div>
                 <reflection-stats-widget v-if="!showEmptyState && reflectionStats" :reflection-stats="reflectionStats"/>
-
-                <prompt-widget v-if="" :entry="todayEntry" :member="member" :loading="todayPromptLoading"/>
+                <prompt-widget :entry="todayEntry" :member="member" :loading="todayPromptLoading"/>
                 <section class="bubblesContainer" v-if="hasWordCloud">
                     <div class="flexIt">
                         <h2>Word Bubbles</h2>
@@ -238,6 +273,68 @@
     @import "mixins";
     @import "variables";
     @import "insights";
+
+    .streakCalendar {
+        background-color: $bgDolphin;
+        display: flex;
+        justify-content: space-evenly;
+        margin: 0 -2.4rem 4.8rem;
+        padding: 1.6rem;
+
+        .dayContainer {
+            display: flex;
+            flex-basis: 14%;
+            flex-direction: column;
+            position: relative;
+            text-align: center;
+
+            &.checked {
+                .circle {
+                    background-color: $royal;
+                    height: 4.4rem;
+                    width: 4.4rem;
+                }
+            }
+        }
+
+        .checked + .checked {
+            .day:before {
+                background-color: $royal;
+                bottom: 0;
+                content: "";
+                height: 4.4rem;
+                left: -50%;
+                position: absolute;
+                width: 100%;
+                z-index: 0;
+            }
+        }
+
+        .day {
+            color: $mediumDolphin;
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 1.2rem;
+        }
+
+        .circle {
+            align-items: center;
+            background-color: lighten($lightDolphin, 15%);
+            border-radius: 50%;
+            display: flex;
+            height: 1.6rem;
+            justify-content: center;
+            margin: auto;
+            position: relative;
+            width: 1.6rem;
+            z-index: 1;
+
+            .check {
+                height: 2rem;
+                width: 2rem;
+            }
+        }
+    }
 
     .insightsDash {
         display: flex;

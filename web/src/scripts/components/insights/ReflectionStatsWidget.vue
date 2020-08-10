@@ -36,28 +36,28 @@
 
             const stats: StatWidgetData[] = [];
 
-            if (memberStats.currentStreakDays > 1) {
-                stats.push({
-                    value: `${ memberStats.currentStreakDays }`,
-                    label: "Streak",
-                    unit: "Days",
-                    icon: "flame"
-                })
-            } else if (memberStats.currentStreakWeeks > 1) {
-                stats.push({
-                    value: `${ memberStats.currentStreakWeeks }`,
-                    label: "Streak",
-                    unit: "Weeks",
-                    icon: "flame"
-                })
-            } else if (memberStats.currentStreakMonths > 1) {
-                stats.push({
-                    value: `${ memberStats.currentStreakMonths }`,
-                    label: "Streak",
-                    unit: "Months",
-                    icon: "flame"
-                })
-            }
+            // if (memberStats.currentStreakDays > 1) {
+            //     stats.push({
+            //         value: `${ memberStats.currentStreakDays }`,
+            //         label: "Streak",
+            //         unit: "Days",
+            //         icon: "flame"
+            //     })
+            // } else if (memberStats.currentStreakWeeks > 1) {
+            //     stats.push({
+            //         value: `${ memberStats.currentStreakWeeks }`,
+            //         label: "Streak",
+            //         unit: "Weeks",
+            //         icon: "flame"
+            //     })
+            // } else if (memberStats.currentStreakMonths > 1) {
+            //     stats.push({
+            //         value: `${ memberStats.currentStreakMonths }`,
+            //         label: "Streak",
+            //         unit: "Months",
+            //         icon: "flame"
+            //     })
+            // }
 
             stats.push({
                 value: `${ memberStats.totalCount }`,
