@@ -94,8 +94,11 @@
 
     .statsContainer {
         display: flex;
-        margin-bottom: 3.2rem;
+        margin-bottom: 4rem;
 
+        @include r(768) {
+            margin-left: 1.6rem;
+        }
         @include r(960) {
             margin-bottom: 4.8rem;
         }

@@ -275,11 +275,19 @@
     @import "insights";
 
     .streakCalendar {
+        align-items: center;
         background-color: $bgDolphin;
         display: flex;
         justify-content: space-evenly;
         margin: 0 -2.4rem 4.8rem;
+        overflow: hidden;
         padding: 1.6rem;
+
+        @include r(768) {
+            border-radius: 1.2rem;
+            margin: 0 1.6rem 4.8rem 0;
+            padding: 2.4rem;
+        }
 
         .dayContainer {
             display: flex;
@@ -291,15 +299,14 @@
             &.checked {
                 .circle {
                     background-color: $royal;
-                    height: 4.4rem;
-                    width: 4.4rem;
+                    border: 0;
                 }
             }
         }
 
         .checked + .checked,
         .checked:first-child {
-            .day:before {
+            &:before {
                 background-color: $royal;
                 bottom: 0;
                 content: "";
@@ -321,18 +328,18 @@
         .circle {
             align-items: center;
             background-color: lighten($lightDolphin, 15%);
+            border: 1.2rem solid $bgDolphin;
             border-radius: 50%;
             display: flex;
-            height: 1.6rem;
+            height: 4.4rem;
             justify-content: center;
-            margin: auto;
-            position: relative;
-            width: 1.6rem;
-            z-index: 1;
+            margin: 0 auto;
+            width: 4.4rem;
 
             .check {
                 height: 2rem;
                 width: 2rem;
+                z-index: 1;
             }
         }
     }
@@ -390,7 +397,7 @@
 
         @include r(768) {
             display: grid;
-            grid-template-areas: "stats stats stats stats stats stats"
+            grid-template-areas: "streak streak streak stats stats stats"
                 "today today today today bubbles bubbles"
                 "values values values gap gap gap";
             grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
@@ -400,10 +407,13 @@
             &.highlightCV {
                 grid-template-areas: 
                 "values values values values gap gap"
-                "stats stats stats stats stats stats"
+                "streak streak streak stats stats stats"
                 "today today today today bubbles bubbles";
             }
 
+            .streakCalendar {
+                grid-area: streak;
+            }
             .statsContainer {
                 grid-area: stats;
             }

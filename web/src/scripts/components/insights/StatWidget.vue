@@ -43,10 +43,8 @@
             margin-right: 1.6rem;
             padding: 3.2rem;
         }
-        @include r(960) {
+        @include r(768) {
             @include shadowbox;
-            border: 0;
-            flex-grow: 1;
 
             &:last-child {
                 margin-right: 0;
