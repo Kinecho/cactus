@@ -35,12 +35,9 @@
 
     .stat {
         align-items: center;
-        border: 1px solid $lightest;
         border-radius: 1.2rem;
         display: flex;
-        flex-basis: 33%;
-        margin-right: .8rem;
-        padding: 2.4rem;
+        flex-basis: 50%;
 
         @include r(600) {
             margin-right: 1.6rem;
@@ -58,20 +55,27 @@
     }
 
     .statIcon {
-        display: none;
+        align-items: center;
+        background-color: $bgGreen;
+        border-radius: 50%;
+        display: flex;
+        flex-shrink: 0;
+        height: 5.6rem;
+        justify-content: center;
+        margin-right: .8rem;
+        width: 5.6rem;
 
         @include r(600) {
-            align-items: center;
-            background-color: $bgGreen;
-            border-radius: 50%;
-            display: flex;
-            flex-shrink: 0;
             height: 8rem;
-            justify-content: center;
             margin-right: 1.6rem;
             width: 8rem;
+        }
 
-            img {
+        img {
+            height: 2rem;
+            width: 2rem;
+
+            @include r(600) {
                 height: 3.2rem;
                 width: 3.2rem;
             }
@@ -99,7 +103,6 @@
 
     .unit {
         font-size: 1.8rem;
-        padding-left: .8rem;
 
         &:empty {
             display: none;

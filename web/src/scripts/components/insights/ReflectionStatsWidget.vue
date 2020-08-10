@@ -76,11 +76,8 @@
                     durationLabel = this.copy.prompts.SECOND
                 }
             } else {
-                durationLabel = this.copy.prompts.MINUTES;
+                durationLabel = this.copy.common.MIN;
                 durationValue = millisecondsToMinutes(totalDuration, 0);
-                if (durationValue === "1") {
-                    durationLabel = this.copy.common.MINUTE
-                }
             }
 
             stats.push({ value: durationValue, label: "Duration", unit: durationLabel, icon: "clock" });
@@ -96,23 +93,11 @@
     @import "variables";
 
     .statsContainer {
-        animation: .3s ease-in slideX;
         display: flex;
-        margin: 0 -2.4rem 1.6rem 2.4rem;
-        overflow: auto;
-        padding-bottom: 1.6rem;
+        margin-bottom: 3.2rem;
 
-        @include r(374) {
-            margin: 0 -2.4rem 1.6rem;
-            padding-left: 2.4rem;
-        }
-        @include r(600) {
-            animation: none;
-        }
         @include r(960) {
-            margin: 0 0 2.4rem;
-            overflow: visible;
-            padding: 0 0 2.4rem;
+            margin-bottom: 4.8rem;
         }
     }
 </style>
