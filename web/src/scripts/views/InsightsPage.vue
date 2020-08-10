@@ -297,7 +297,8 @@
             }
         }
 
-        .checked + .checked {
+        .checked + .checked,
+        .checked:first-child {
             .day:before {
                 background-color: $royal;
                 bottom: 0;
