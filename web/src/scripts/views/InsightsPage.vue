@@ -45,9 +45,6 @@
                 <reflection-stats-widget v-if="!showEmptyState && reflectionStats" :reflection-stats="reflectionStats"/>
                 <prompt-widget :entry="todayEntry" :member="member" :loading="todayPromptLoading"/>
                 <section class="bubblesContainer" v-if="hasWordCloud">
-                    <div class="flexIt">
-                        <h2>Word Bubbles</h2>
-                    </div>
                     <div class="wordCloud">
                         <WordCloud class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
                     </div>
