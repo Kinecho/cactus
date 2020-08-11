@@ -20,7 +20,7 @@ export function getMilestoneText(days: number): { title: string, message: string
         case 1:
             return {title: "Well done", message: "Tomorrow you'll receive a new prompt to continue your journal of self-understanding.\n\nKeep it up and you'll see how you positively change over time."}
         case 2:
-            return {title: "Nice work", message: "Just one m ore reflection to reveal your positivity insight.\n\nWe are excited to be your co-pilot on your journey of self-understanding"}
+            return {title: "Nice work", message: "Just one more reflection to reveal your positivity insight.\n\nWe are excited to be your co-pilot on your journey of self-understanding"}
         case 3:
             return {title: "You did it", message: "You've reflected three times and now your positivity insight is ready."}
         case 4:
