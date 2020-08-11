@@ -89,7 +89,7 @@ export default class OnboardingCardViewModel {
             OnboardingCardViewModel.create({
                 type: CardType.text,
                 slug: "how-it-works",
-                text: "CORE VALUES: Cactus is a different kind of mindfulness.\n\nIt asks questions to help you focus on what really matters to you.",
+                text: "Cactus is a different kind of mindfulness.\n\nIt asks questions to help you focus on what really matters to you.",
                 imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fonboard1.png?alt=media&token=e36e050c-7564-44c5-8c48-64d64484b3f6"
             }),
             OnboardingCardViewModel.create({

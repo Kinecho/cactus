@@ -305,7 +305,7 @@ export const MAGIC_CORE_VALUES_ONBOARDING_QUESTIONS = (): Question[] => [
     Question.create({
         // id: "0",
         type: QuestionType.MULTI_SELECT,
-        titleMarkdown: "Think of a time when you felt like you were in control of how to act."
+        titleMarkdown: "Think of a time when you felt like you were in control of how to act. "
         + "What motivated those feelings? **Select two:**",
         descriptionMarkdown: "",
         multiSelectLimit: 2,
@@ -326,7 +326,7 @@ export const MAGIC_CORE_VALUES_ONBOARDING_QUESTIONS = (): Question[] => [
     Question.create({
         // id: "1",
         type: QuestionType.MULTI_SELECT,
-        titleMarkdown: "Think of a time when you felt challenged, but prepared and adequately resourced."
+        titleMarkdown: "Think of a time when you felt challenged, but prepared and adequately resourced. "
         + "What helped you feel that way? **Select two:**",
         descriptionMarkdown: "",
         multiSelectLimit: 2,
@@ -453,7 +453,7 @@ export const MAGIC_CORE_VALUES_ONBOARDING_QUESTIONS = (): Question[] => [
     Question.create({
         // id: "9",
         type: QuestionType.RADIO,
-        titleMarkdown: "Which one of these do you believe is the result of positive, strengthening experiences?",
+        titleMarkdown: "Which of these do you believe is the result of positive, strengthening experiences? **Select one:**",
         descriptionMarkdown: "",
         options: [],
         getOptions: (params, question) => {
