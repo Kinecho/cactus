@@ -30,7 +30,7 @@
     import Vue from "vue";
     import CactusConfetti from "@components/CactusConfetti.vue";
     import Component from "vue-class-component";
-    import RadarChart from "@components/RadarChart.vue";
+    import RadarChart from "@components/charts/RadarChart.vue";
     import { Prop } from "vue-property-decorator";
     import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
     import ResultElement from "@components/gapanalysis/ResultElement.vue";

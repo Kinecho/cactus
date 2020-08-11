@@ -5,6 +5,9 @@ import Logger from "@shared/Logger";
 
 const logger = new Logger("util.ts");
 
+
+export interface EdgeInsets { top: number, right: number, bottom: number, left: number }
+
 function createElementFromString(htmlString: string): ChildNode {
     const div = document.createElement('div');
     div.innerHTML = htmlString.trim();

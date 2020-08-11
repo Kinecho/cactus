@@ -107,7 +107,7 @@
     import GapAnalysisAssessment from "@shared/models/GapAnalysisAssessment";
     import Logger from "@shared/Logger";
     import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
-    import RadarChart from "@components/RadarChart.vue";
+    import RadarChart from "@components/charts/RadarChart.vue";
     import CactusConfetti from "@components/CactusConfetti.vue";
     import ResultsOnboarding from "@components/gapanalysis/ResultsOnboarding.vue";
     import ProgressStepper from "@components/ProgressStepper.vue";
