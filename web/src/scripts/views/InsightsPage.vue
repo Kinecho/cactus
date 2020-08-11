@@ -284,6 +284,8 @@
             margin: 0 -2.4rem 4.8rem;
         }
         @include r(768) {
+            background: transparent;
+            border: 1px solid darken($bgDolphin, 3%);
             border-radius: 1.2rem;
             margin: 0 1.6rem 4.8rem 0;
             padding: 2.4rem 1.6rem;
@@ -335,6 +337,11 @@
             margin: 0 auto;
             width: 4.4rem;
 
+            @include r(768) {
+                background-color: lighten($lightDolphin, 20%);
+                border-color: $white;
+            }
+
             .check {
                 height: 2rem;
                 width: 2rem;
@@ -366,12 +373,10 @@
     }
 
     h1 {
-        margin: 3.2rem 2.4rem;
+        display: none;
 
-        @include r(374) {
-            margin: 3.2rem 0;
-        }
         @include r(768) {
+            display: block;
             margin: 6.4rem 0 4rem;
         }
 

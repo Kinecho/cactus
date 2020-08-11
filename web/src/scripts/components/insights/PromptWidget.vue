@@ -224,7 +224,7 @@
     @import "transitions";
 
     .today-widget {
-        background-color: $beige;
+        background-color: $bgDolphin;
         border-radius: 1.6rem;
         box-shadow: 0 6.9px 21px -24px rgba(0, 0, 0, 0.032),
         0 11.5px 32.3px -24px rgba(0, 0, 0, 0.056),
