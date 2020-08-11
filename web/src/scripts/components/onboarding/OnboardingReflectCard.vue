@@ -8,16 +8,20 @@
         </strong>
 
         <transition name="component-fade" appear>
-            <resizable-textarea :max-height-px="maxTextareaHeight" ref="resizableTextArea" v-if="!responsesLoading">
+            <div class="textareaContainer">
+                <resizable-textarea :max-height-px="maxTextareaHeight" ref="resizableTextArea" v-if="!responsesLoading">
                 <textarea placeholder="Write something..."
                         v-model="responseText"
                         ref="textInput"
                         type="text"
+                        class="writeSomething"
                         :disabled="saving"
-                        @focus="$emit('enableKeyboardNavigation', false)"
-                        @blur="$emit('enableKeyboardNavigation', true)"
+                        @focus="onNoteFocus"
+                        @blur="onNoteBlur"
                 />
-            </resizable-textarea>
+                </resizable-textarea>
+                <note-input-analysis-progress :input="responseText" class="noteProgress" v-show="showProgress || true"/>
+            </div>
         </transition>
         <button :class="responseText ? 'show' : 'hide'" class="doneBtn icon no-loading" @click="saveAndContinue" :disabled="saving">
             <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">
@@ -45,6 +49,7 @@ import { getDeviceDimensions } from "@web/DeviceUtil";
 import { debounce } from "debounce";
 import { ResponseMedium } from "@shared/util/ReflectionResponseUtil";
 import { CoreValue } from "@shared/models/CoreValueTypes";
+import NoteInputAnalysisProgress from "@components/insights/NoteInputAnalysisProgress.vue";
 
 const logger = new Logger("OnboardingReflectCard");
 
@@ -53,7 +58,8 @@ const logger = new Logger("OnboardingReflectCard");
         ResultElement,
         MarkdownText,
         Spinner,
-        ResizableTextarea
+        ResizableTextarea,
+        NoteInputAnalysisProgress
     }
 })
 export default class OnboardingReflectCard extends Vue {
@@ -80,7 +86,8 @@ export default class OnboardingReflectCard extends Vue {
     errorMessage: string | null = null;
     maxTextareaHeight = 200;
     debounceWindowSizeHandler: any;
-
+    showProgress = false;
+    noteFocused = false;
     startAt!: Date;
 
     get markdownText(): string | undefined {
@@ -138,6 +145,19 @@ export default class OnboardingReflectCard extends Vue {
     beforeDestroy() {
         this.reflectionUnsubscriber?.();
         window.removeEventListener("resize", this.debounceWindowSizeHandler);
+    }
+
+
+    onNoteFocus() {
+        this.$emit('enableKeyboardNavigation', false)
+        this.noteFocused = true;
+        this.showProgress = true;
+    }
+
+    onNoteBlur() {
+        this.$emit('enableKeyboardNavigation', true)
+        this.noteFocused = false;
+        this.showProgress = false;
     }
 
     async saveAndContinue() {
@@ -254,11 +274,42 @@ textarea {
   opacity: .8;
   padding: .8rem;
   width: 100%;
+.textareaContainer {
+  margin-bottom: 3.2rem;
+  position: relative;
+}
+
+
+.noteProgress {
+  bottom: 1.6rem;
+  position: absolute;
+  right: 1.6rem;
+
+  @include r(768) {
+    bottom: 1.8rem;
+    right: 2.4rem;
+  }
+  @include r(960) {
+    bottom: 2.4rem;
+  }
+}
+
+textarea {
+  font-family: $font-stack;
+  background: transparent;
+  border: 0;
+  color: $darkestGreen;
+  font-size: 1.8rem;
+  line-height: 1.4;
+  margin: -1.2rem 0 0 -.8rem;
+  opacity: .8;
+  padding: .8rem .8rem 2.4rem;
+  width: 100%;
 
   @include r(768) {
     font-size: 2.4rem;
-    margin: -1.6rem 0 3.2rem -1.6rem;
-    padding: 1.6rem;
+    margin: -1.6rem 0 0 -1.6rem;
+    padding: 1.6rem 1.6rem 2.4rem;
   }
   @include r(960) {
     font-size: 3.2rem;
