@@ -11,6 +11,7 @@
 import Vue from "vue";
 import Component from "vue-class-component"
 import { Prop } from "vue-property-decorator";
+import { isBlank } from "@shared/util/StringUtil";
 
 @Component({
     components: {}
@@ -27,7 +28,15 @@ export default class NoteInputAnalysisProgress extends Vue {
     circleRadius: number = 14;
 
     get progressStyles(): Record<string, any> {
-        const percent = Math.min(1, (this.input ?? "").length / this.characterThreshold);
+
+        const sentences = (this.input ?? "").split(".")
+        const hasMinSentences = sentences.length > 1 && !isBlank(sentences[1])
+        let percent = Math.min(1, (this.input ?? "").length / this.characterThreshold);
+
+        if (!hasMinSentences) {
+            percent = Math.min(percent, 0.75); //max out at 75% until they have more than 1 sentence.
+        }
+
         const circumference = this.circleRadius * 2 * Math.PI;
         const offset = Math.max(0, circumference - circumference * percent)
         return {
