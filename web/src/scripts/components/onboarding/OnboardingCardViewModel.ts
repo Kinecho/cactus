@@ -95,6 +95,7 @@ export default class OnboardingCardViewModel {
             OnboardingCardViewModel.create({
                 slug: "discover-core-values",
                 type: CardType.mini_core_values,
+                defaultNextActionsEnabled: false,
             }),
             OnboardingCardViewModel.create({
                 slug: "core-values-intro",
