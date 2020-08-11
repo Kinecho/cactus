@@ -49,6 +49,28 @@
                         <WordCloud class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
                     </div>
                 </section>
+                <div class="emotionsChart">
+                    <h2>Emotions</h2>
+                    <template v-if="hasEmotionsChart">
+                        <p class="subtext">The emotions revealed in your reflections over time.</p>
+                        <div class="chart">chart</div>
+                    </template>
+                    <template v-else>
+                        <p class="subtext">Reflect a few more times to reveal the emotions in your reflections over time.</p>
+                        <div class="chart"><img src="/assets/images/emotionsEmpty.png" alt="empty state graphic"/></div>
+                    </template>
+                </div>
+                <div class="positivityChart">
+                    <h2>Positivity Rating</h2>
+                    <template v-if="hasPositivityChart">
+                        <p class="subtext">Your positivity in your reflections over time.</p>
+                        <div class="chart">chart</div>
+                    </template>
+                    <template v-else>
+                        <p class="subtext">The positivity of your reflections over time. Reflect a few more times to reveal it.</p>
+                        <div class="chart"><img src="/assets/images/positivityEmpty.png" alt="empty state graphic"/></div>
+                    </template>
+                </div>
                 <div class="valuesWrapper">
                     <core-value-results v-if="hasCoreValues" :core-values="coreValues" :show-description="false" :show-dropdown-menu="true"/>
                     <router-link v-else tag="section" class="novaluesContainer" :class="{plus: isPlusMember}" :to="coreValuesHref">
@@ -271,6 +293,40 @@
     @import "variables";
     @import "insights";
 
+    .emotionsChart {
+        border: 1px solid $lightest;
+        border-radius: 1.6rem;
+        margin: 0 2.4rem 3.2rem;
+        padding: 2.4rem;
+
+        @include r(374) {
+            margin: 0 0 3.2rem;
+        }
+        @include r(768) {
+            margin: 0 1.6rem 4.8rem 0;
+            padding: 3.2rem;
+        }
+    }
+
+    .chart img {
+        width: 100%;
+    }
+
+    .positivityChart {
+        border: 1px solid $lightest;
+        border-radius: 1.6rem;
+        margin: 0 2.4rem 3.2rem;
+        padding: 2.4rem;
+
+        @include r(374) {
+            margin: 0 0 3.2rem;
+        }
+        @include r(768) {
+            margin: 0 0 4.8rem 1.6rem;
+            padding: 3.2rem;
+        }
+    }
+
     .streakCalendar {
         align-items: center;
         background-color: $bgDolphin;
@@ -285,7 +341,7 @@
         }
         @include r(768) {
             background: transparent;
-            border: 1px solid darken($bgDolphin, 3%);
+            border: 1px solid $lightest;
             border-radius: 1.2rem;
             margin: 0 1.6rem 4.8rem 0;
             padding: 2.4rem 1.6rem;
@@ -403,6 +459,7 @@
             display: grid;
             grid-template-areas: "streak streak streak stats stats stats"
                 "today today today today bubbles bubbles"
+                "emotions emotions emotions positivity positivity positivity"
                 "values values values gap gap gap";
             grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
             grid-template-rows: auto;
@@ -412,7 +469,8 @@
                 grid-template-areas: 
                 "values values values values gap gap"
                 "streak streak streak stats stats stats"
-                "today today today today bubbles bubbles";
+                "today today today today bubbles bubbles"
+                "emotions emotions emotions positivity positivity positivity";
             }
 
             .streakCalendar {
@@ -426,6 +484,12 @@
             }
             .bubblesContainer {
                 grid-area: bubbles;
+            }
+            .emotionsChart {
+                grid-area: emotions;
+            }
+            .positivityChart {
+                grid-area: positivity;
             }
             .valuesWrapper {
                 grid-area: values;

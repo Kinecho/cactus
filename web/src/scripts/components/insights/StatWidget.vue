@@ -46,7 +46,7 @@
             margin-right: 1.6rem;
         }
         @include r(1024) {
-            border: 1px solid darken($bgDolphin, 3%);
+            border: 1px solid $lightest;
             padding: 3.2rem;
 
             &:last-child {
