@@ -146,7 +146,6 @@
             justify-content: center;
             margin: 0 auto;
             max-width: 48rem;
-            padding: 0 2.4rem;
         }
         @include r(768) {
             max-width: none;

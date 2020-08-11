@@ -124,12 +124,18 @@ export default class MiniCoreValuesCard extends Vue {
 @import "assessment";
 
 .miniCoreValuesPage {
+    @include shadowbox;
   display: flex;
   flex-flow: column nowrap;
   min-height: 100vh;
   justify-content: space-between;
   overflow: hidden;
   position: relative;
+
+  @include r(768) {
+      background: transparent;
+      box-shadow: none;
+  }
 
   header, .centered {
     width: 100%;
