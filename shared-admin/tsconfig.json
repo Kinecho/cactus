@@ -12,6 +12,7 @@
         "strict": true,
         "target": "es5",
         "downlevelIteration": true,
+        "experimentalDecorators": true,
         "lib": [
             "es2019",
             "dom"

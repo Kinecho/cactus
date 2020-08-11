@@ -67,50 +67,40 @@
 </template>
 
 <script lang="ts">
-    import Vue from "vue";
-    import Component from "vue-class-component"
-    import PromptContent, { ContentType } from "@shared/models/PromptContent";
-    import { Prop } from "vue-property-decorator";
-    import ReflectionResponse from "@shared/models/ReflectionResponse";
-    import ProgressStepper from "@components/ProgressStepper.vue";
-    import Logger from "@shared/Logger"
-    import PromptContentCardViewModel from "@components/promptcontent/PromptContentCardViewModel";
-    import TextCard from "@components/promptcontent/TextCard.vue";
-    import PhotoCard from "@components/promptcontent/PhotoCard.vue";
-    import ReflectCard from "@components/promptcontent/ReflectCard.vue";
-    import QuoteCard from "@components/promptcontent/QuoteCard.vue";
-    import VideoCard from "@components/promptcontent/VideoCard.vue";
-    import ReflectionAnalysisCard from "@components/promptcontent/ReflectionAnalysisCard.vue";
-    import Modal from "@components/Modal.vue";
-    import { isBlank } from "@shared/util/StringUtil";
-    import ShareNoteCard from "@components/promptcontent/ShareNoteCard.vue";
-    import SvgIcon from "@components/SvgIcon.vue";
-    import ElementsCard from "@components/promptcontent/ElementsCard.vue";
-    import AudioCard from "@components/promptcontent/AudioCard.vue";
-    import InviteFriendsCard from "@components/promptcontent/InviteFriendsCard.vue";
-    import OnboardingActionButton from "@components/OnboardingActionButton.vue";
-    import PricingModal from "@components/PricingModal.vue";
-    import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
-    import PromptButton from "@components/promptcontent/PromptButton.vue";
-    import CardElement from "@components/promptcontent/CardElement.vue";
-    import ActionButtonContainer from "@components/promptcontent/ActionButtonContainer.vue";
-    import { debounce } from "debounce";
-    import { getDeviceDimensions } from "@web/DeviceUtil";
+import Vue from "vue";
+import Component from "vue-class-component"
+import PromptContent, { ContentType } from "@shared/models/PromptContent";
+import { Prop } from "vue-property-decorator";
+import ReflectionResponse from "@shared/models/ReflectionResponse";
+import ProgressStepper from "@components/ProgressStepper.vue";
+import Logger from "@shared/Logger"
+import PromptContentCardViewModel, {
+    CardType,
+    isPromptContentCardViewModel,
+    PromptCardViewModel
+} from "@components/promptcontent/PromptContentCardViewModel";
+import TextCard from "@components/promptcontent/TextCard.vue";
+import PhotoCard from "@components/promptcontent/PhotoCard.vue";
+import ReflectCard from "@components/promptcontent/ReflectCard.vue";
+import QuoteCard from "@components/promptcontent/QuoteCard.vue";
+import VideoCard from "@components/promptcontent/VideoCard.vue";
+import ReflectionAnalysisCard from "@components/promptcontent/ReflectionAnalysisCard.vue";
+import Modal from "@components/Modal.vue";
+import { isBlank } from "@shared/util/StringUtil";
+import ShareNoteCard from "@components/promptcontent/ShareNoteCard.vue";
+import SvgIcon from "@components/SvgIcon.vue";
+import ElementsCard from "@components/promptcontent/ElementsCard.vue";
+import AudioCard from "@components/promptcontent/AudioCard.vue";
+import InviteFriendsCard from "@components/promptcontent/InviteFriendsCard.vue";
+import OnboardingActionButton from "@components/OnboardingActionButton.vue";
+import PricingModal from "@components/PricingModal.vue";
+import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
+import PromptButton from "@components/promptcontent/PromptButton.vue";
+import CardElement from "@components/promptcontent/CardElement.vue";
+import ActionButtonContainer from "@components/promptcontent/ActionButtonContainer.vue";
+import MilestoneCard from "@components/promptcontent/MilestoneCard.vue";
 
-    export enum CardType {
-        text = "text-card",
-        photo = "photo-card",
-        quote = "quote-card",
-        reflect = "reflect-card",
-        video = "video-card",
-        reflection_analysis = "reflection-analysis-card",
-        elements = "elements-card",
-        share_note = "share-note-card",
-        audio = "audio-card",
-        invite_friends = "invite-friend-card",
-    }
-
-    const logger = new Logger("PromptContent");
+const logger = new Logger("PromptContent");
 
     const transitionName = {
         next: "slide-left-absolute",
@@ -134,6 +124,7 @@
             [CardType.audio]: AudioCard,
             [CardType.invite_friends]: InviteFriendsCard,
             [CardType.reflection_analysis]: ReflectionAnalysisCard,
+            [CardType.milestones]: MilestoneCard,
             ProgressStepper,
             PricingModal,
             ElementDescriptionModal,
@@ -154,8 +145,8 @@
         @Prop({ type: Number, required: false, default: 0 })
         index!: number;
 
-        @Prop({ type: Array as () => PromptContentCardViewModel[], required: true, default: [] })
-        cards!: PromptContentCardViewModel[]
+        @Prop({ type: Array as () => PromptCardViewModel[], required: true, default: [] })
+        cards!: PromptCardViewModel[]
 
         cardTransitionName = transitionName.next;
         keyListener: any = null;
@@ -176,43 +167,29 @@
             this.keyboardNavigationEnabled = enabled;
         }
 
-        get supportedCards(): PromptContentCardViewModel[] {
+        get supportedCards(): PromptCardViewModel[] {
             return this.cards.filter(card => !!this.getCardType(card));
         }
 
-        getCardType(card: PromptContentCardViewModel): CardType | null {
-            switch (card.type) {
-                case ContentType.text:
-                    return CardType.text;
-                case ContentType.photo:
-                    return CardType.photo;
-                case ContentType.reflect:
-                    return CardType.reflect;
-                case ContentType.quote:
-                    return CardType.quote;
-                case ContentType.video:
-                    return CardType.video;
-                case ContentType.reflection_analysis:
-                    return CardType.reflection_analysis;
-                case ContentType.elements:
-                    return CardType.elements;
-                case ContentType.share_reflection:
-                    return CardType.share_note;
-                case ContentType.audio:
-                    return CardType.audio;
-                case ContentType.invite:
-                    return CardType.invite_friends;
-                default:
-                    return null
-            }
+        getCardType(card: PromptCardViewModel): CardType | null {
+            return card.cardType
         }
 
-        get card(): PromptContentCardViewModel {
+        get card(): PromptCardViewModel {
             return this.supportedCards[this.index];
         }
 
         get shareReflectionCard(): PromptContentCardViewModel | null {
-            return this.supportedCards.find(card => card.type === ContentType.reflect) ?? null
+            const found = this.supportedCards.find(card => {
+                if (!isPromptContentCardViewModel(card)){
+                    return false
+                }
+                return card.type === ContentType.reflect
+            })
+            if (found && isPromptContentCardViewModel(found)) {
+                return found
+            }
+            return null;
         }
 
         get hasNote(): boolean {
@@ -232,7 +209,7 @@
         }
 
         get isReflectCard(): boolean {
-            return this.card.type === ContentType.reflect;
+            return this.card.cardType === CardType.reflect;
         }
 
         get showNextButton(): boolean {
