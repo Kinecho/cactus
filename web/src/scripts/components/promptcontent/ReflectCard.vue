@@ -8,16 +8,20 @@
                 <markdown-text :source="card.text"/>
             </strong>
             <transition name="component-fade" appear>
-                <resizable-textarea :max-height-px="maxTextareaHeight">
-                    <textarea placeholder="Write something..."
-                            v-model="responseText"
-                            type="text"
-                            ref="noteInput"
-                            :disabled="saving"
-                            @focus="onNoteFocus"
-                            @blur="onNoteBlur"
-                    />
-                </resizable-textarea>
+                <div class="textareaContainer">
+                    <resizable-textarea :max-height-px="maxTextareaHeight">
+                        <textarea placeholder="Write something..."
+                                v-model="responseText"
+                                type="text"
+                                ref="noteInput"
+                                :disabled="saving"
+                                @focus="onNoteFocus"
+                                @blur="onNoteBlur"
+                                class="writeSomething"
+                        />
+                    </resizable-textarea>
+                    <note-input-analysis-progress :input="responseText" class="noteProgress" v-show="showProgress || true"/>
+                </div>
             </transition>
             <share-warning v-if="card.noteShared"/>
             <button v-if="hasText" class="doneBtn icon no-loading" @click="saveAndContinue" :disabled="saving" :style="buttonStyles">
@@ -49,11 +53,13 @@
     import ShareWarning from "@components/promptcontent/ShareWarning.vue";
     import { isBlank } from "@shared/util/StringUtil";
     import { ResponseMedium } from "@shared/util/ReflectionResponseUtil";
+    import NoteInputAnalysisProgress from "@components/insights/NoteInputAnalysisProgress.vue";
 
     const logger = new Logger("ReflectCard");
 
     @Component({
         components: {
+            NoteInputAnalysisProgress,
             ShareWarning,
             ElementAnimation,
             MarkdownText,
@@ -77,6 +83,7 @@
         startTime: Date = new Date();
         buttonStyles: Record<string, string> = {};
         noteFocused = false;
+        showProgress = false;
 
         @Watch("card")
         onCard(current?: PromptContentCardViewModel, previous?: PromptContentCardViewModel) {
@@ -109,11 +116,13 @@
         onNoteFocus() {
             this.$emit('enableKeyboardNavigation', false)
             this.noteFocused = true;
+            this.showProgress = true;
         }
 
         onNoteBlur() {
             this.$emit('enableKeyboardNavigation', true)
             this.noteFocused = false;
+            this.showProgress = false;
         }
 
         get doneButtonText(): string {
@@ -242,13 +251,33 @@
         }
     }
 
-    textarea {
+    .textareaContainer {
+        margin-bottom: 3.2rem;
+        position: relative;
+    }
+
+    .writeSomething {
         @include textArea;
-        margin: -1.2rem 0 3.2rem -.8rem;
+        margin: -1.2rem 0 0 -.8rem;
+        padding-bottom: 2.4rem;
 
         @include r(768) {
-            margin: -1.6rem 0 3.2rem -1.6rem;
+            margin: -1.6rem 0 0m -1.6rem;
         }
+    }
+
+    .noteProgress {
+        bottom: 1.6rem;
+        position: absolute;
+        right: 1.6rem;
+
+        @include r(768) {
+            bottom: 1.8rem;
+        }
+        @include r(960) {
+            bottom: 2.4rem;
+        }
+
     }
 
     .doneBtn, .skipBtn {
