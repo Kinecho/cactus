@@ -1,6 +1,6 @@
 <template>
-    <div class="timeseries-container">
-        <div class="timeseries-chart" :class="chartId"/>
+    <div class="stacked-bar-container">
+        <div class="stacked-bar-chart" :class="chartId"/>
     </div>
 </template>
 
@@ -10,8 +10,8 @@ import Component from "vue-class-component";
 import { Prop, Watch } from "vue-property-decorator";
 import Logger from "@shared/Logger";
 import { debounce } from "debounce";
-import { drawTimeSeriesChart} from "@web/charts/timeSeriesChart";
-import { TimeSeriesConfig, TimeSeriesDataPoint } from "@shared/charts/TimeSeriesChartTypes";
+import { BarChartDataPoint, StackedBarChartOptions } from "@shared/charts/StackedBarChartTypes";
+import { drawStackedBarChart } from "@web/charts/stackedBarChart";
 
 const logger = new Logger("TimeseriesChart");
 
@@ -20,12 +20,15 @@ width = Math.min(700, window.innerWidth - 10) - margin.left - margin.right,
 height = Math.min(700, window.innerHeight - margin.top - margin.bottom);
 
 @Component
-export default class TimeSeriesChart extends Vue {
-    @Prop({ type: Object as () => Partial<TimeSeriesConfig>, default: null, required: false })
-    options!: Partial<TimeSeriesConfig> | null;
+export default class StackedBarChart extends Vue {
+    @Prop({ type: Object as () => StackedBarChartOptions, default: {}, required: false })
+    options!: StackedBarChartOptions | {};
 
-    @Prop({ type: Array as () => TimeSeriesDataPoint[], required: true })
-    chartData!: TimeSeriesDataPoint[];
+    @Prop({ type: Array as () => BarChartDataPoint[], required: true })
+    chartData!: BarChartDataPoint[];
+
+    @Prop({ type: String, required: true })
+    xAxis!: string;
 
     @Prop({ type: String, required: true })
     chartId!: string;
@@ -33,7 +36,7 @@ export default class TimeSeriesChart extends Vue {
     @Prop({ type: Number, required: false, default: 0.75 })
     aspectRatio!: number;
 
-    name = "TimeSeriesChart";
+    name = "StackedBarChart";
     isMounted = false;
     debounceHandler: (() => void) | null = null;
     chartWidth = 400;
@@ -67,8 +70,9 @@ export default class TimeSeriesChart extends Vue {
             return;
         }
         const width = Math.max(this.chartWidth, 300);
-        drawTimeSeriesChart(`.${ this.chartId }`,
+        drawStackedBarChart(`.${ this.chartId }`,
         this.chartData,
+        this.xAxis,
         {
             ...this.options ?? {},
             w: width,
@@ -82,7 +86,8 @@ export default class TimeSeriesChart extends Vue {
 @import "variables";
 @import "mixins";
 
-.timeseries-chart {
+.stacked-bar-chart {
   font-family: $font-stack;
+  border: 2px solid red;
 }
 </style>

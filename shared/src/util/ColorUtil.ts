@@ -43,3 +43,8 @@ export const Colors = {
     textDefault: colorHex.darkestGreen,
     borderLight: colorHex.gray,
 }
+
+export interface GradientPoint {
+    offset: string,
+    color: string,
+}

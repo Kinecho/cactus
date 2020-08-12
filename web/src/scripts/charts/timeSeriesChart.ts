@@ -12,39 +12,12 @@ import {
     timeDay,
     timeFormat,
 } from "d3";
-import { EdgeInsets } from "@web/util";
 import Logger from "@shared/Logger"
 import { isBlank } from "@shared/util/StringUtil";
 import { Colors } from "@shared/util/ColorUtil";
-import { GradientPoint, TimeSeriesDataPoint } from "@shared/charts/TimeSeriesChartTypes";
+import { TickSetting, TimeSeriesConfig, TimeSeriesDataPoint } from "@shared/charts/TimeSeriesChartTypes";
 
 const logger = new Logger("timeSeriesChart");
-
-export interface TickSetting<T> {
-    size: number,
-    padding: number,
-    fontSize: number,
-    fontColor: string,
-    format: ((value: T, index: number) => string),
-}
-
-export interface TimeSeriesConfig {
-    w: number,
-    h: number,
-    margin: EdgeInsets,
-    gradient: GradientPoint[],
-    showYAxis: boolean,
-    axisColor: string,
-    labels: {
-        x: string | null,
-        y: string | null
-    },
-    fontFamily: string,
-    ticks: {
-        x: TickSetting<Date>,
-        y: TickSetting<number>,
-    }
-}
 
 export const DEFAULT_TICK_SETTINGS_X = (): TickSetting<Date> => ({
     size: 0,

@@ -17,9 +17,9 @@
 import Vue from "vue";
 import Component from "vue-class-component"
 import { Prop } from "vue-property-decorator";
-import { TimeSeriesDataPoint } from "@shared/charts/TimeSeriesChartTypes";
+import { TimeSeriesConfig, TimeSeriesDataPoint } from "@shared/charts/TimeSeriesChartTypes";
 import TimeSeriesChart from "@components/charts/TimeSeriesChart.vue";
-import { createTickSettingsX, createTickSettingsY, TimeSeriesConfig } from "@web/charts/timeSeriesChart";
+import { createTickSettingsX, createTickSettingsY} from "@web/charts/timeSeriesChart";
 
 @Component({
     components: {
