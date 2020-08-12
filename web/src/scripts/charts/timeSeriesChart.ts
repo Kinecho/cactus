@@ -6,8 +6,10 @@ import {
     axisBottom,
     scaleLinear,
     area,
-    timeParse,
+    timeDay,
+    curveCardinal,
     axisLeft,
+    timeFormat,
     max as d3Max,
 } from "d3";
 import { EdgeInsets } from "@web/util";
@@ -35,6 +37,14 @@ export const DEFAULT_CONFIG = (): TimeSeriesConfig => ({
 })
 
 
+/**
+ * Draws a line chart.
+ * For date formatting see [D3 Time Format](https://github.com/d3/d3-time-format#locale_format)
+ *
+ * @param {string} selector
+ * @param {TimeSeriesDataPoint[]} data
+ * @param {Partial<TimeSeriesConfig>} options
+ */
 export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[], options: Partial<TimeSeriesConfig> = {}) {
     const config = Object.assign(DEFAULT_CONFIG(), options)
     const { w, h, margin } = config;
@@ -51,28 +61,29 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
 
     const svg = parent
     .append("svg")
-    .attr("viewBox", `0 0 ${ w + margin.left + margin.right } ${ h + margin.top + margin.bottom }`);
-    // .attr("width", width + margin.left + margin.right)
-    // .attr("height", height + margin.top + margin.bottom)
+    .attr("viewBox", `0 0 ${ w + margin.left + margin.right } ${ h + margin.top + margin.bottom }`)
 
-
-    //TODO: Not sure what this G does
-    svg.append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    // Create the main G container
+    const g = svg.append("g")
+    .attr("transform", `translate(${ margin.left }, ${ margin.top })`);
 
 
     // Add X axis --> it is a date format
     const xExtent = extent(data, d => d.date) as [Date, Date] //cast this to [Date, Date]
 
-    const xAxis = scaleTime()
+    const xAxisScale = scaleTime()
     .domain(xExtent)
     .range([0, width]);
 
-    const xAxisG = svg.append("g");
+    //Create the x-axis svg
 
-    xAxisG
+    const xAxis = axisBottom<Date>(xAxisScale)
+    .tickFormat(timeFormat("%x"))
+    .ticks(timeDay)
+
+    g.append("g")
     .attr("transform", "translate(0," + height + ")")
-    .call(axisBottom(xAxis));
+    .call(xAxis);
 
     // Calculate Y Axis Range
     const y = scaleLinear()
@@ -80,17 +91,18 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
     .range([height, 0]);
 
     // Append the YAxis SVG
-    svg.append("g")
-    .call(axisLeft(y));
+    g.append("g")
+    .call(axisLeft(y).tickFormat(v => `${v}`));
 
     // Add the area
-    svg.append("path")
+    g.append("path")
     .datum(data)
     .attr("fill", "#cce5df")
     .attr("stroke", "#69b3a2")
     .attr("stroke-width", 1.5)
     .attr("d", area<TimeSeriesDataPoint>()
-    .x(d => xAxis(d.date))
+    .curve(curveCardinal)
+    .x(d => xAxisScale(d.date))
     .y0(y(0))
     .y1(d => y(d.value))
     )
