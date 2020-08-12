@@ -10,7 +10,8 @@ import Component from "vue-class-component";
 import { Prop, Watch } from "vue-property-decorator";
 import Logger from "@shared/Logger";
 import { debounce } from "debounce";
-import { drawTimeSeriesChart, TimeSeriesConfig, TimeSeriesDataPoint } from "@web/charts/timeSeriesChart";
+import { drawTimeSeriesChart, TimeSeriesConfig } from "@web/charts/timeSeriesChart";
+import { TimeSeriesDataPoint } from "@shared/charts/TimeSeriesChartTypes";
 
 const logger = new Logger("TimeseriesChart");
 
@@ -29,10 +30,13 @@ export default class TimeSeriesChart extends Vue {
     @Prop({ type: String, required: true })
     chartId!: string;
 
+    @Prop({ type: Number, required: false, default: 0.75 })
+    aspectRatio!: number;
+
     name = "TimeSeriesChart";
     isMounted = false;
     debounceHandler: (() => void) | null = null;
-    chartDiameter = 400;
+    chartWidth = 400;
 
     mounted() {
         this.isMounted = true;
@@ -42,7 +46,7 @@ export default class TimeSeriesChart extends Vue {
     }
 
     onResize() {
-        this.chartDiameter = this.$el.getBoundingClientRect().width;
+        this.chartWidth = this.$el.getBoundingClientRect().width;
         this.drawChart();
     }
 
@@ -62,13 +66,13 @@ export default class TimeSeriesChart extends Vue {
             logger.info("Not mounted yet");
             return;
         }
-        logger.info("Drawing chart");
+        const width = Math.max(this.chartWidth, 300);
         drawTimeSeriesChart(`.${ this.chartId }`,
         this.chartData,
         {
             ...this.options ?? {},
-            w: Math.max(this.chartDiameter, 300),
-            h: Math.max(this.chartDiameter, 300),
+            w: width,
+            h: width * this.aspectRatio,
         });
     }
 }

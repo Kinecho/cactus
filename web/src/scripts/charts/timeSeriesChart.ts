@@ -3,8 +3,6 @@ import {
     axisBottom,
     axisLeft,
     BaseType,
-    scaleOrdinal,
-scaleUtc,
     curveCardinal,
     extent,
     max as d3Max,
@@ -18,20 +16,9 @@ import { EdgeInsets } from "@web/util";
 import Logger from "@shared/Logger"
 import { isBlank } from "@shared/util/StringUtil";
 import { Colors } from "@shared/util/ColorUtil";
+import { GradientPoint, TimeSeriesDataPoint } from "@shared/charts/TimeSeriesChartTypes";
 
 const logger = new Logger("timeSeriesChart");
-
-
-export interface TimeSeriesDataPoint {
-    date: Date,
-    label: string,
-    value: number,
-}
-
-export interface GradientPoint {
-    offset: string,
-    color: string,
-}
 
 export interface TickSetting<T> {
     size: number,
@@ -91,11 +78,12 @@ export function createTickSettingsY(params: Partial<TickSetting<number>>): TickS
 
 export const DEFAULT_CONFIG = (): TimeSeriesConfig => ({
     w: 400,
-    h: 400,
+    h: 300,
     margin: { top: 10, right: 0, bottom: 30, left: 0 },
     gradient: [
         { offset: "0%", color: Colors.indigo },
-        { offset: "50%", color: Colors.royal },
+        { offset: "40%", color: Colors.royal },
+        { offset: "90%", color: Colors.green },
         { offset: "100%", color: Colors.green }
     ],
     labels: {
@@ -123,7 +111,6 @@ export const DEFAULT_CONFIG = (): TimeSeriesConfig => ({
 export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[], options: Partial<TimeSeriesConfig> = {}) {
     const config = Object.assign(DEFAULT_CONFIG(), options)
     const { w, h, margin, gradient, showYAxis, labels, ticks, fontFamily, axisColor } = config;
-// set the dimensions and margins of the graph
 
     const { x: labelX, y: labelY } = labels ?? {}
 

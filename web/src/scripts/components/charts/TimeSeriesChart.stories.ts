@@ -2,11 +2,11 @@ import Vue from "vue";
 import TimeSeriesChart from "@components/charts/TimeSeriesChart.vue";
 import {
     TimeSeriesConfig,
-    TimeSeriesDataPoint,
     createTickSettingsX,
     createTickSettingsY
 } from "@web/charts/timeSeriesChart";
 import { boolean, number, text } from "@storybook/addon-knobs";
+import { TimeSeriesDataPoint } from "@shared/charts/TimeSeriesChartTypes";
 
 export default {
     title: "Charts/TimeSeries"
