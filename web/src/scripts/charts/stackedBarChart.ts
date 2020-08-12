@@ -100,15 +100,20 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
     .attr('class', 'layer')
     .style('fill', (d, i) => (z(d.key))!)
 
+    const _w = barWidth ?? x.bandwidth()
+
+    const heightOffset = _w;
     layer.selectAll('rect')
     .data(d => d)
     .enter()
+
     .append('rect')
     .attr('x', d => x(new Date(d.data.x))!)
-    .attr('y', d => y(d[0] + d[1]))
-    .attr('height', d => y(d[0]) - y(d[1] + d[0]))
+    .attr('y', d => y(d[0] + d[1]) - heightOffset)
+    .attr('height', d => y(d[0]) - y(d[1] + d[0]) + heightOffset)
     .attr('width', barWidth ?? x.bandwidth())
-    .attr("transform", `translate(${ barWidth ? x.bandwidth() / 2 - (barWidth ?? 0) / 2 : 0 }, 0)`);
+    .attr("transform", `translate(${ barWidth ? x.bandwidth() / 2 - (barWidth ?? 0) / 2 : 0 }, 0)`)
+    .attr("rx", _w/2)
 
     const xAxisSvg = svg.append('g')
     .attr('transform', `translate(0,${ height })`)
@@ -135,6 +140,25 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
     // create the svg
 
 
+}
+
+function bar(x: number, y: number, w: number, h: number, r: number, _f?: number | undefined) {
+    let f = _f
+    // Flag for sweep:
+    if (f === undefined) {
+        f = 1;
+    }
+
+    // x coordinates of top of arcs
+    const x0 = x + r;
+    const x1 = x + w - r;
+    // y coordinates of bottom of arcs
+    const y0 = y - h + r;
+    // just for convenience (slightly different than above):
+    const l = "L", a = "A";
+
+    const parts = ["M", x, y, l, x, y0, a, r, r, 0, 0, f, x0, y - h, l, x1, y - h, a, r, r, 0, 0, f, x + w, y0, l, x + w, y, "Z"];
+    return parts.join(" ");
 }
 
 function buildTooltip<T extends BarXType>(svg: d3.Selection<d3.BaseType, BarChartDatum, any, any>) {
