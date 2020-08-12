@@ -1,7 +1,7 @@
 <template>
     <div class="timeseries-container">
         <p>IsMounted = {{ isMounted }}</p>
-        <p>Chart Diameter = {{chartDiameter}}</p>
+        <p>Chart Diameter = {{ chartDiameter }}</p>
         <div class="timeseries-chart" :class="chartId"/>
     </div>
 </template>
@@ -70,7 +70,7 @@ export default class TimeSeriesChart extends Vue {
             logger.info("Not mounted yet");
             return;
         }
-            logger.info("Drawing chart");
+        logger.info("Drawing chart");
         drawTimeSeriesChart(`.${ this.chartId }`,
         this.chartData,
         {
@@ -83,8 +83,14 @@ export default class TimeSeriesChart extends Vue {
 </script>
 
 <style scoped lang="scss">
+@import "variables";
+@import "mixins";
+
 .timeseries-chart {
   border: 2px solid red;
   height: 500px;
+
+  font-family: $font-stack;
+
 }
 </style>
