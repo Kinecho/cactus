@@ -57,13 +57,13 @@ export default class MilestoneProgress extends Vue {
   }
 
   svg {
-    height: 1.4rem;
+    height: 1.6rem;
     stroke: $white;
-    width: 1.4rem;
+    width: 1.6rem;
 
     @include r(768) {
-      height: 1.8rem;
-      width: 1.8rem;
+      height: 2rem;
+      width: 2rem;
     }
 
     &.flag {
