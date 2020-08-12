@@ -178,6 +178,7 @@
         @include r(960) {
             align-items: center;
             display: flex;
+            justify-content: space-between;
         }
     }
 
@@ -221,6 +222,7 @@
         }
 
         @include r(960) {
+            margin: 0;
             width: 66%;
 
             .legend {
