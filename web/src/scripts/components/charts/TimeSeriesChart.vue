@@ -1,7 +1,5 @@
 <template>
     <div class="timeseries-container">
-        <p>IsMounted = {{ isMounted }}</p>
-        <p>Chart Diameter = {{ chartDiameter }}</p>
         <div class="timeseries-chart" :class="chartId"/>
     </div>
 </template>
@@ -22,24 +20,18 @@ height = Math.min(700, window.innerHeight - margin.top - margin.bottom);
 
 @Component
 export default class TimeSeriesChart extends Vue {
-    name = "TimeSeriesChart";
-
-    isMounted = false;
-
     @Prop({ type: Object as () => Partial<TimeSeriesConfig>, default: undefined, required: false })
     options: Partial<TimeSeriesConfig> | undefined;
 
     @Prop({ type: Array as () => TimeSeriesDataPoint[], required: true })
     chartData!: TimeSeriesDataPoint[];
 
-    // @Prop({ type: Array as () => string[], required: false })
-    // colors?: string[];
-
     @Prop({ type: String, required: true })
     chartId!: string;
 
+    name = "TimeSeriesChart";
+    isMounted = false;
     debounceHandler: (() => void) | null = null;
-
     chartDiameter = 400;
 
     mounted() {
@@ -87,10 +79,6 @@ export default class TimeSeriesChart extends Vue {
 @import "mixins";
 
 .timeseries-chart {
-  border: 2px solid red;
-  height: 500px;
-
   font-family: $font-stack;
-
 }
 </style>

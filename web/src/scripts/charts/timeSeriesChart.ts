@@ -1,16 +1,18 @@
 import {
-    select,
-    BaseType,
-    scaleTime,
-    extent,
-    axisBottom,
-    scaleLinear,
     area,
-    timeDay,
-    curveCardinal,
+    axisBottom,
     axisLeft,
-    timeFormat,
+    BaseType,
+    scaleOrdinal,
+scaleUtc,
+    curveCardinal,
+    extent,
     max as d3Max,
+    scaleLinear,
+    scaleTime,
+    select,
+    timeDay,
+    timeFormat,
 } from "d3";
 import { EdgeInsets } from "@web/util";
 import Logger from "@shared/Logger"
@@ -35,6 +37,7 @@ export interface TickSetting<T> {
     size: number,
     padding: number,
     fontSize: number,
+    fontColor: string,
     format: ((value: T, index: number) => string),
 }
 
@@ -56,14 +59,44 @@ export interface TimeSeriesConfig {
     }
 }
 
+export const DEFAULT_TICK_SETTINGS_X = (): TickSetting<Date> => ({
+    size: 0,
+    format: timeFormat("%-m/%-d"),
+    padding: 10,
+    fontSize: 14,
+    fontColor: Colors.lightText
+})
+
+export const DEFAULT_TICK_SETTINGS_Y = (): TickSetting<number> => ({
+    size: 0,
+    format: () => "",
+    padding: 3,
+    fontSize: 14,
+    fontColor: Colors.lightText
+})
+
+export function createTickSettingsX(params: Partial<TickSetting<Date>>): TickSetting<Date> {
+    return {
+        ...DEFAULT_TICK_SETTINGS_X(),
+        ...params,
+    }
+}
+
+export function createTickSettingsY(params: Partial<TickSetting<number>>): TickSetting<number> {
+    return {
+        ...DEFAULT_TICK_SETTINGS_Y(),
+        ...params,
+    }
+}
+
 export const DEFAULT_CONFIG = (): TimeSeriesConfig => ({
     w: 400,
     h: 400,
-    margin: { top: 10, right: 30, bottom: 30, left: 50 },
+    margin: { top: 10, right: 0, bottom: 30, left: 0 },
     gradient: [
-        { offset: "0%", color: "#294FA3" },
-        { offset: "50%", color: "#6590ED" },
-        { offset: "100%", color: "#33CCAB" }
+        { offset: "0%", color: Colors.indigo },
+        { offset: "50%", color: Colors.royal },
+        { offset: "100%", color: Colors.green }
     ],
     labels: {
         x: null,
@@ -72,18 +105,8 @@ export const DEFAULT_CONFIG = (): TimeSeriesConfig => ({
     axisColor: Colors.borderLight,
     fontFamily: "Lato, sans-serif",
     ticks: {
-        x: {
-            size: 0,
-            format: timeFormat("%-m/%-d"),
-            padding: 3,
-            fontSize: 12,
-        },
-        y: {
-            size: 0,
-            format: () => "",
-            padding: 3,
-            fontSize: 12,
-        }
+        x: DEFAULT_TICK_SETTINGS_X(),
+        y: DEFAULT_TICK_SETTINGS_Y(),
     },
     showYAxis: false,
 })
@@ -123,36 +146,37 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
     .attr("transform", `translate(${ margin.left }, ${ margin.top })`);
 
 
+    // Calculate Y Axis Range
+    const maxY = d3Max<TimeSeriesDataPoint, number>(data, d => +d.value)!;
+    logger.info("Max y = ", maxY)
+
+    const y = scaleLinear()
+    .domain([0, maxY])
+    .range([height, margin.bottom + margin.top]);
+
     // Add X axis --> it is a date format
-    const xExtent = extent<TimeSeriesDataPoint, Date>(data, d => d.date) as [Date, Date] //cast this to [Date, Date]
+    const [d1, d2] = extent<TimeSeriesDataPoint, Date>(data, d => d.date) as [Date, Date] //cast this to [Date, Date]
     const xAxisScale = scaleTime()
-    .domain(xExtent)
-    .range([0, width]);
+    .domain([d1, d2])
+    .range([0, width - 10])
 
     //Create the x-axis svg
     const xAxis = axisBottom<Date>(xAxisScale)
     .tickFormat(ticks.x.format)
-    .ticks(timeDay)
+    .ticks(timeDay.every(1))
     .tickSize(ticks.x.size)
-    .tickPadding(10)
+    .tickPadding(ticks.x.padding)
 
+    //Add the X-Axis
+    const xSvg = g.append("g");
 
-    g.append("g")
-    .attr("color", Colors.textDefault)
+    xSvg.attr("color", ticks.x.fontColor)
     .style("font-size", `${ ticks.x.fontSize }`)
     .style("font-family", fontFamily)
     .attr("class", "xaxis axis")
     .attr("transform", `translate(${ 0 }, ${ height })`)
     .call(xAxis)
-    .selectAll("path").style("stroke", axisColor);;
-
-    // Calculate Y Axis Range
-    const maxY = d3Max<TimeSeriesDataPoint, number>(data, d => +d.value)!;
-    logger.info("Max y = ", maxY)
-    const y = scaleLinear()
-
-    .domain([0, maxY])
-    .range([height, 0]);
+    .selectAll("path").style("stroke", axisColor)
 
 
     svg.append("linearGradient")
@@ -180,7 +204,7 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
 
         g.append("g")
         .style("font-family", fontFamily)
-        .attr("color", Colors.textDefault)
+        .attr("color", ticks.y.fontColor)
         .attr("class", "yaxis axis")
         .call(yAxis)
         .selectAll("path").style("stroke", axisColor);
