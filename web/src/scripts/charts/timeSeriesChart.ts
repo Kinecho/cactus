@@ -15,7 +15,8 @@ import {
 import Logger from "@shared/Logger"
 import { isBlank } from "@shared/util/StringUtil";
 import { Colors } from "@shared/util/ColorUtil";
-import { TickSetting, TimeSeriesConfig, TimeSeriesDataPoint } from "@shared/charts/TimeSeriesChartTypes";
+import { TimeSeriesConfig, TimeSeriesDataPoint } from "@shared/charts/TimeSeriesChartTypes";
+import { TickSetting } from "@shared/charts/ChartTypes";
 
 const logger = new Logger("timeSeriesChart");
 

@@ -22,7 +22,7 @@ height = Math.min(700, window.innerHeight - margin.top - margin.bottom);
 @Component
 export default class StackedBarChart extends Vue {
     @Prop({ type: Object as () => StackedBarChartOptions, default: {}, required: false })
-    options!: StackedBarChartOptions | {};
+    options!: StackedBarChartOptions;
 
     @Prop({ type: Array as () => BarChartDataPoint[], required: true })
     chartData!: BarChartDataPoint[];
@@ -70,14 +70,15 @@ export default class StackedBarChart extends Vue {
             return;
         }
         const width = Math.max(this.chartWidth, 300);
+        logger.info("Custom options", this.options)
+
         drawStackedBarChart(`.${ this.chartId }`,
-        this.chartData,
-        this.xAxis,
-        {
-            ...this.options ?? {},
-            w: width,
-            h: width * this.aspectRatio,
-        });
+            this.chartData,
+            {
+                ...(this.options ?? {}),
+                w: width,
+                h: width * this.aspectRatio,
+            });
     }
 }
 </script>

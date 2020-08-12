@@ -2,6 +2,10 @@ import Logger from "@shared/Logger";
 
 const logger = new Logger("ObjectUtil.ts");
 
+export type RecursivePartial<T> = {
+    [P in keyof T]?: RecursivePartial<T[P]>;
+};
+
 export function isError(input: any): input is Error {
     return input instanceof Error;
 }

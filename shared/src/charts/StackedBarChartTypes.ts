@@ -1,4 +1,9 @@
 import { EdgeInsets } from "@shared/util/LayoutUtil";
+import { TickSetting } from "@shared/charts/ChartTypes";
+import { RecursivePartial } from "@shared/util/ObjectUtil";
+import Logger from "@shared/Logger"
+
+const logger = new Logger("StackedBarChartTypes");
 
 export interface Numeric {
     valueOf(): number;
@@ -30,12 +35,28 @@ export interface StackedBarChartConfig {
     w: number,
     h: number,
     margin: EdgeInsets,
+    showYAxis: boolean,
+    fontFamily: string,
+    axisColor: string,
+    showXAxisLine: boolean,
+    barWidth: number | null,
+    colors: string[],
+    ticks: {
+        x: TickSetting<Date>,
+        y: TickSetting<number>,
+    }
 }
 
-export type StackedBarChartOptions = Partial<StackedBarChartConfig>
+export type StackedBarChartOptions = RecursivePartial<StackedBarChartConfig>
 
-export function mergeConfig(config: StackedBarChartConfig, options: StackedBarChartOptions) {
-    return Object.assign(config, options);
+export function mergeConfig(defaultConfig: StackedBarChartConfig, options: StackedBarChartOptions) {
+    logger.info("Merge config options", options);
+    const cfg = Object.assign(defaultConfig, options);
+    cfg.ticks = {
+        x: Object.assign(defaultConfig.ticks.x, options.ticks?.x ?? {}),
+        y: Object.assign(defaultConfig.ticks.y, options.ticks?.y ?? {})
+    }
+    return cfg;
 }
 
 export function getKeys<T extends BarXType>(data: BarChartDataPoint<T>[]): string[] {
