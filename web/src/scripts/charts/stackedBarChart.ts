@@ -146,31 +146,36 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
     }
 
 
-    const legendX = margin.left + 12
+    const legendX = margin.left
     // add the legend
     const legend = svg.append('g')
     .attr('class', 'legend')
-    .attr('transform', 'translate(' + legendX + ', 0)');
+    .attr('transform', `translate( ${ legendX } , 10)`);
+
+    const legendRectHeight = 18;
+    const legendSpacing = 6;
 
     legend.selectAll('rect')
-    .data(layers)
+    .data(layers.reverse())
     .enter()
     .append('rect')
     .attr('x', 0)
     .attr('y', function (d, i) {
-        return i * 18;
+        return i * (legendRectHeight + legendSpacing);
     })
-    .attr('width', 12)
-    .attr('height', 12)
-    .attr('fill', (d, i) => (z(d.key))!);
+    .attr('width', legendRectHeight)
+    .attr('height', legendRectHeight)
+    .attr('fill', (d, i) => (z(d.key))!)
+    .attr("rx", legendRectHeight / 2);
 
     legend.selectAll('text')
     .data(layers)
     .enter()
     .append('text')
     .text((d, i) => d.key)
-    .attr('x', 18)
-    .attr('y', (d, i) => i * 16)
+    .attr('x', legendRectHeight + legendSpacing)
+    .attr('y', (d, i) => i * (legendRectHeight + legendSpacing))
+    .style("font-family", fontFamily)
     .attr('text-anchor', 'start')
     .attr('alignment-baseline', 'hanging');
 }
@@ -187,25 +192,6 @@ function barHeightFactory(y: d3.ScaleLinear<number, number>, chartHeight: number
         const barHeight = y(d[0]) - y(d[1])
         return isNaN(barHeight) ? 0 : (barHeight + barWidth)
     }
-}
-
-function bar(x: number, y: number, w: number, h: number, r: number, _f?: number | undefined) {
-    let f = _f
-    // Flag for sweep:
-    if (f === undefined) {
-        f = 1;
-    }
-
-    // x coordinates of top of arcs
-    const x0 = x + r;
-    const x1 = x + w - r;
-    // y coordinates of bottom of arcs
-    const y0 = y - h + r;
-    // just for convenience (slightly different than above):
-    const l = "L", a = "A";
-
-    const parts = ["M", x, y, l, x, y0, a, r, r, 0, 0, f, x0, y - h, l, x1, y - h, a, r, r, 0, 0, f, x + w, y0, l, x + w, y, "Z"];
-    return parts.join(" ");
 }
 
 function buildTooltip<T extends BarXType>(svg: d3.Selection<d3.BaseType, BarChartDatum, any, any>) {
