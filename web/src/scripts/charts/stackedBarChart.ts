@@ -73,6 +73,7 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
 
     const xAxis = d3.axisBottom<Date>(x)
     .tickFormat(d3.timeFormat("%-m/%-d"))
+    .ticks(d3.timeDay.every(1))
     .tickSize(ticks.x.size)
     .tickPadding(ticks.x.padding)
 
@@ -99,8 +100,12 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
     .append('g')
     .attr('class', 'layer')
     .style('fill', (d, i) => (z(d.key))!)
+    .sort((a, b) => b.index - a.index)
 
     const _w = barWidth ?? x.bandwidth()
+
+    const barHeight = barHeightFactory(y, height, _w)
+    const barY = barYFactory(y, height, _w)
 
     const heightOffset = _w;
     layer.selectAll('rect')
@@ -109,11 +114,12 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
 
     .append('rect')
     .attr('x', d => x(new Date(d.data.x))!)
-    .attr('y', d => y(d[0] + d[1]) - heightOffset)
-    .attr('height', d => y(d[0]) - y(d[1] + d[0]) + heightOffset)
-    .attr('width', barWidth ?? x.bandwidth())
-    .attr("transform", `translate(${ barWidth ? x.bandwidth() / 2 - (barWidth ?? 0) / 2 : 0 }, 0)`)
-    .attr("rx", _w/2)
+    // .attr('y', d => y(d[0] + d[1]) - heightOffset)
+    .attr('y', barY)
+    .attr('height', barHeight)
+    .attr('width', _w)
+    .attr("transform", `translate(${ barWidth ? (x.bandwidth() / 2 - (barWidth ?? 0) / 2) : 0 }, 0)`)
+    .attr("rx", _w / 2)
 
     const xAxisSvg = svg.append('g')
     .attr('transform', `translate(0,${ height })`)
@@ -137,9 +143,49 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
         .attr('transform', `translate(${ 0 },0)`)
         .call(yAxis)
     }
-    // create the svg
 
 
+    const legendX = margin.left + 12
+    // add the legend
+    const legend = svg.append('g')
+    .attr('class', 'legend')
+    .attr('transform', 'translate(' + legendX + ', 0)');
+
+    legend.selectAll('rect')
+    .data(layers)
+    .enter()
+    .append('rect')
+    .attr('x', 0)
+    .attr('y', function (d, i) {
+        return i * 18;
+    })
+    .attr('width', 12)
+    .attr('height', 12)
+    .attr('fill', (d, i) => (z(d.key))!);
+
+    legend.selectAll('text')
+    .data(layers)
+    .enter()
+    .append('text')
+    .text((d, i) => d.key)
+    .attr('x', 18)
+    .attr('y', (d, i) => i * 16)
+    .attr('text-anchor', 'start')
+    .attr('alignment-baseline', 'hanging');
+}
+
+function barYFactory(y: d3.ScaleLinear<number, number>, chartHeight: number, barWidth: number) {
+    return (d: d3.SeriesPoint<BarChartDatum>) => {
+        const barY = y(d[1])
+        return isNaN(barY) ? 0 : (barY - barWidth)
+    }
+}
+
+function barHeightFactory(y: d3.ScaleLinear<number, number>, chartHeight: number, barWidth: number) {
+    return (d: d3.SeriesPoint<BarChartDatum>): number => {
+        const barHeight = y(d[0]) - y(d[1])
+        return isNaN(barHeight) ? 0 : (barHeight + barWidth)
+    }
 }
 
 function bar(x: number, y: number, w: number, h: number, r: number, _f?: number | undefined) {

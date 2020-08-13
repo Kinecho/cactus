@@ -33,18 +33,18 @@ export const Default = () => Vue.extend({
             return [
                 {
                     x: DateTime.local(2020, 8, 1).toJSDate(),
-                    series: { redDelicious: 10, mcintosh: 15, oranges: 9, pears: 6 }
+                    series: { redDelicious: 10 }
                 },
                 {
                     x: DateTime.local(2020, 8, 2).toJSDate(),
-                    series: { redDelicious: 12, mcintosh: 18, oranges: 9, pears: 4 }
+                    series: { redDelicious: 12, pears: 4 }
                 },
                 {
                     x: DateTime.local(2020, 8, 3).toJSDate(),
                     series: { redDelicious: 5, mcintosh: 20, oranges: 8, pears: 2 }
                 },
                 {
-                    x: DateTime.local(2020, 8, 4).toJSDate(),
+                    x: DateTime.local(2020, 8, 5).toJSDate(),
                     series: { redDelicious: 1, mcintosh: 15, oranges: 5, pears: 4 }
                 },
                 {
@@ -64,6 +64,13 @@ export const Default = () => Vue.extend({
         },
         options(): StackedBarChartOptions {
             return {
+                showYAxis: this.showYAxis,
+                margin: {
+                    left: 30,
+                    top: 0,
+                    bottom: 20,
+                    right: 30
+                },
                 barWidth: this.fixedBarWidth ? this.barWidth : null,
             };
         }
