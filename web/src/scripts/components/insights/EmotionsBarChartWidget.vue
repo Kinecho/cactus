@@ -44,6 +44,7 @@ export default class EmotionsBarChartWidget extends Vue {
 
     options: StackedBarChartOptions = {
         showYAxis: false,
+
         ticks: {
             every: 2,
         }

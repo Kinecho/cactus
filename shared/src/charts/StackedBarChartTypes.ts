@@ -40,6 +40,7 @@ export interface StackedBarChartConfig {
     ensureConsecutive: boolean,
     margin: EdgeInsets,
     showYAxis: boolean,
+    showLegend: boolean,
     fontFamily: string,
     axisColor: string,
     showXAxisLine: boolean,

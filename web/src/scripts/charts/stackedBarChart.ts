@@ -32,6 +32,7 @@ const DEFAULT_CONFIG = (): StackedBarChartConfig => ({
     barWidth: 16,
     showYAxis: false,
     showXAxisLine: false,
+    showLegend: false,
     axisColor: Colors.borderLight,
     fontFamily: "Lato, sans-serif",
     ticks: {
@@ -55,7 +56,7 @@ const DEFAULT_CONFIG = (): StackedBarChartConfig => ({
 
 export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPoint<Date>[], options: StackedBarChartOptions) {
     const config = mergeConfig(DEFAULT_CONFIG(), options);
-    const { w, h, margin, colors, showYAxis, ticks, axisColor, fontFamily, showXAxisLine, barWidth, ensureConsecutive } = config
+    const { w, h, margin, colors, showYAxis, ticks, axisColor, fontFamily, showXAxisLine, barWidth, ensureConsecutive, showLegend } = config
     const data: BarChartDatum[] = processDataPoints(dataPoints, ensureConsecutive)
     logger.info("Bar width", barWidth)
     const width = w - margin.left - margin.right;
@@ -131,8 +132,8 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
 
     //remove ticks as necessary
     d3.selectAll(".tick text")
-    .each(function(_,i){
-        if(i % ticks.every !== 0) d3.select(this).remove();
+    .each(function (_, i) {
+        if (i % ticks.every !== 0) d3.select(this).remove();
     });
 
     if (showYAxis) {
@@ -145,39 +146,42 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
         .call(yAxis)
     }
 
+    if (showLegend) {
 
-    const legendX = margin.left
-    // add the legend
-    const legend = svg.append('g')
-    .attr('class', 'legend')
-    .attr('transform', `translate( ${ legendX } , 10)`);
 
-    const legendRectHeight = 18;
-    const legendSpacing = 6;
+        const legendX = margin.left
+        // add the legend
+        const legend = svg.append('g')
+        .attr('class', 'legend')
+        .attr('transform', `translate( ${ legendX } , 10)`);
 
-    legend.selectAll('rect')
-    .data(layers.reverse())
-    .enter()
-    .append('rect')
-    .attr('x', 0)
-    .attr('y', function (d, i) {
-        return i * (legendRectHeight + legendSpacing);
-    })
-    .attr('width', legendRectHeight)
-    .attr('height', legendRectHeight)
-    .attr('fill', (d, i) => (z(d.key))!)
-    .attr("rx", legendRectHeight / 2);
+        const legendRectHeight = 18;
+        const legendSpacing = 6;
 
-    legend.selectAll('text')
-    .data(layers)
-    .enter()
-    .append('text')
-    .text((d, i) => d.key)
-    .attr('x', legendRectHeight + legendSpacing)
-    .attr('y', (d, i) => i * (legendRectHeight + legendSpacing))
-    .style("font-family", fontFamily)
-    .attr('text-anchor', 'start')
-    .attr('alignment-baseline', 'hanging');
+        legend.selectAll('rect')
+        .data(layers.reverse())
+        .enter()
+        .append('rect')
+        .attr('x', 0)
+        .attr('y', function (d, i) {
+            return i * (legendRectHeight + legendSpacing);
+        })
+        .attr('width', legendRectHeight)
+        .attr('height', legendRectHeight)
+        .attr('fill', (d, i) => (z(d.key))!)
+        .attr("rx", legendRectHeight / 2);
+
+        legend.selectAll('text')
+        .data(layers)
+        .enter()
+        .append('text')
+        .text((d, i) => d.key)
+        .attr('x', legendRectHeight + legendSpacing)
+        .attr('y', (d, i) => i * (legendRectHeight + legendSpacing))
+        .style("font-family", fontFamily)
+        .attr('text-anchor', 'start')
+        .attr('alignment-baseline', 'hanging');
+    }
 }
 
 function barYFactory(y: d3.ScaleLinear<number, number>, chartHeight: number, barWidth: number) {
