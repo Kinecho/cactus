@@ -51,8 +51,8 @@ export default class TimeSeriesChart extends Vue {
     }
 
 
-    @Watch("dataPoints")
-    dataPointsChanged() {
+    @Watch("chartData")
+    onChartData() {
         this.drawChart()
     }
 

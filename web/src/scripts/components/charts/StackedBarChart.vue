@@ -51,8 +51,8 @@ export default class StackedBarChart extends Vue {
     }
 
 
-    @Watch("dataPoints")
-    dataPointsChanged() {
+    @Watch("chartData")
+    onChartData() {
         this.drawChart()
     }
 

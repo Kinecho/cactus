@@ -91,12 +91,12 @@ export default class InsightsDataSource {
         this.reflections_l30 = [];
     }
 
-    get positivityChartData(): TimeSeriesDataPoint[] {
+    getPositivityChartData(reflections: ReflectionResponse[]): TimeSeriesDataPoint[] {
         const data: TimeSeriesDataPoint[] = [];
 
         let last: TimeSeriesDataPoint | null = null;
         let dayGroup: ReflectionResponse[] = []
-        this.reflections_l30.forEach(r => {
+        reflections.forEach(r => {
             const sentiment = r.sentiment?.documentSentiment;
             if (!sentiment?.score || !r.createdAt) {
                 return;
@@ -139,11 +139,11 @@ export default class InsightsDataSource {
      * If there are missing days in the range of Today - interval 14 days, they will be filled in as blank
      * @return {BarChartDataPoint<Date>[]}
      */
-    get emotionsChartData(): BarChartDataPoint<Date>[] {
+    getEmotionsChartData(reflections: ReflectionResponse[]): BarChartDataPoint<Date>[] {
         const rangeStart = DateTime.local().minus({ days: this.emotionsChartDays })
         const data: BarChartDataPoint<Date>[] = [];
         let lastReflection: ReflectionResponse | null = null;
-        this.reflections_l30.forEach(r => {
+        reflections.forEach(r => {
             const documentTone = r.toneAnalysis?.documentTone
             if (!documentTone || !r.createdAt) {
                 return;

@@ -274,7 +274,8 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
     }
 
     get positivityData(): TimeSeriesDataPoint[] {
-        return this.chartData.positivityChartData;
+        const data = this.chartData.reflections_l30
+        return this.chartData.getPositivityChartData(data);
     }
 
     get positivityLocked(): boolean {
@@ -282,8 +283,8 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
     }
 
     get emotionsChartData(): BarChartDataPoint<Date>[] {
-        // return mockEmotionsData()
-        return this.chartData.emotionsChartData;
+        const data = this.chartData.reflections_l30
+        return this.chartData.getEmotionsChartData(data);
     }
 
     get emotionsChartLocked(): boolean {
