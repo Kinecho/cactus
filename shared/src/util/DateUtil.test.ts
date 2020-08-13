@@ -731,12 +731,21 @@ describe("daysUntil test", () => {
 
 describe("Get dates between", () => {
     test("Same day - no dates", () => {
-        const d1 = DateTime.local(2020, 8, 1);
-        const d2 = DateTime.local(2020, 8, 1);
+        const d1 = DateTime.local(2020, 8, 1, 4);
+        const d2 = DateTime.local(2020, 8, 1, 12);
 
         const dates = getDatesBetween(d1.toJSDate(), d2.toJSDate());
         expect(dates.length).toEqual(0)
     })
+
+    test("Same day - JS date", () => {
+        const d1 = new Date("Tue Aug 10 2020 14:30:12 GMT-0600");
+        const d2 = new Date("Tue Aug 11 2020 15:30:12 GMT-0600");
+
+        const dates = getDatesBetween(d1, d2);
+        expect(dates.length).toEqual(0)
+    })
+
 
     test("Next day - no dates", () => {
         const d1 = DateTime.local(2020, 8, 1);

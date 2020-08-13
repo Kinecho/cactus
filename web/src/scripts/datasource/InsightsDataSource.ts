@@ -6,6 +6,7 @@ import ReflectionResponseService from "@web/services/ReflectionResponseService";
 import { DateTime } from "luxon";
 import Vue from "vue";
 import { BarChartDataPoint } from "@shared/charts/StackedBarChartTypes";
+import { getDatesBetween } from "@shared/util/DateUtil";
 
 const logger = new Logger("InsightsDataSource");
 
@@ -17,7 +18,7 @@ export default class InsightsDataSource {
     static shared: InsightsDataSource = Vue.observable(new InsightsDataSource());
     private member: CactusMember | null = null;
     reflectionsObserver: ListenerUnsubscriber | null = null;
-
+    emotionsChartDays = 14;
     loading: boolean = false
     reflections_l30: ReflectionResponse[] = [];
     reflections_l14: ReflectionResponse[] = [];
@@ -88,27 +89,81 @@ export default class InsightsDataSource {
         this.reflections_l30 = [];
     }
 
+    /**
+     * Create chart data using the last 14 days of data.
+     * If there are missing days in the range of Today - interval 14 days, they will be filled in as blank
+     * @return {BarChartDataPoint<Date>[]}
+     */
     get emotionsChartData(): BarChartDataPoint<Date>[] {
+        const rangeStart = DateTime.local().minus({ days: this.emotionsChartDays })
         const data: BarChartDataPoint<Date>[] = [];
-        this.reflections_l14.forEach(r => {
+        let lastReflection: ReflectionResponse | null = null;
+        this.reflections_l30.forEach(r => {
             const documentTone = r.toneAnalysis?.documentTone
-            if (!documentTone) {
+            if (!documentTone || !r.createdAt) {
+                // lastReflection = r;
                 return;
             }
-            const series: Record<string, number> = {};
 
-            (documentTone.tones ?? []).reduce((total, score) => {
+            const rDt = DateTime.fromJSDate(r.createdAt);
+            if (rDt.diff(rangeStart).as("days") < 0) {
+                return;
+            }
+
+            if (lastReflection?.createdAt && DateTime.fromJSDate(lastReflection.createdAt).diff(rDt).as("days") === 0) {
+                return;
+            }
+
+            const tones = documentTone.tones ?? [];
+            if (tones.length === 0) {
+                // lastReflection = r;
+                return;
+            }
+
+            const series: Record<string, number> = {};
+            tones.reduce((total, score) => {
                 total[score.toneName] = score.score
                 return total;
-
             }, series)
 
-            data.push({
-                x: r.createdAt!,
-                series,
-            })
+            if (Object.keys(series).length > 0) {
+                data.push({
+                    x: r.createdAt,
+                    series,
+                });
+                lastReflection = r;
+            }
+
+            // lastReflection = r;
         })
 
+        if (data.length === 0) {
+            logger.info("Filling with empty data");
+            // const fillerDates = getDatesBetween(DateTime.local().minus({ days: 10 }).toJSDate(), new Date());
+            // fillerDates.forEach(d => {
+            //     data.push({ x: d, series: {} })
+            // })
+            return [];
+        } else {
+            const tomorrow = DateTime.local().plus({ days: 1 }).toJSDate()
+            const [first] = data;
+            const last = data[data.length - 1];
+            logger.info("original data series", JSON.stringify(data));
+            logger.info("first.x", first.x)
+            logger.info("last.x", last.x);
+            const startFiller = getDatesBetween(rangeStart.toJSDate(), first.x)
+            logger.info("start filler dates", startFiller)
+            startFiller.reverse().forEach(d => {
+                logger.info("adding date to beginning of series", d)
+                data.unshift({ x: d, series: {} })
+            })
+
+            getDatesBetween(last.x, tomorrow).forEach(d => {
+                logger.info("adding date to the end of the series", d)
+                data.push({ x: d, series: {} })
+            })
+        }
+        logger.info("Chart data", data);
         return data
     }
 }
