@@ -8,7 +8,7 @@ export interface TimeSeriesDataPoint {
     value: number,
 }
 
-export const createMockData = (): TimeSeriesDataPoint[] => [
+export const createMockPositivityData = (): TimeSeriesDataPoint[] => [
     { date: new Date('2020-01-01'), value: 0.65, label: "One" },
     { date: new Date('2020-01-02'), value: 0.7, label: "Three" },
     { date: new Date('2020-01-03'), value: 0.6, label: "Three" },

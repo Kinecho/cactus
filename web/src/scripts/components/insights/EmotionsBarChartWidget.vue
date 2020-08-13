@@ -17,7 +17,7 @@
 import Vue from "vue";
 import Component from "vue-class-component"
 import { Prop } from "vue-property-decorator";
-import { BarChartDataPoint, StackedBarChartOptions } from "@shared/charts/StackedBarChartTypes";
+import { BarChartDataPoint, mockEmotionsData, StackedBarChartOptions } from "@shared/charts/StackedBarChartTypes";
 import StackedBarChart from "@components/charts/StackedBarChart.vue";
 
 @Component({
@@ -33,6 +33,14 @@ export default class EmotionsBarChartWidget extends Vue {
 
     @Prop({ type: Boolean, required: false, default: false })
     locked!: boolean;
+
+    get actualData(): BarChartDataPoint<Date>[] {
+        if (this.locked) {
+            return mockEmotionsData();
+        } else {
+            return this.data;
+        }
+    }
 
     options: StackedBarChartOptions = {
         showYAxis: false,

@@ -126,7 +126,7 @@ import { Prop } from "vue-property-decorator";
 import JournalFeedDataSource, { JournalFeedDataSourceDelegate } from "@web/datasource/JournalFeedDataSource";
 import CoreValueResults from "@components/insights/CoreValueResults.vue";
 import PositivityRatingWidget from "@components/insights/PositivityRatingWidget.vue";
-import { createMockData, TimeSeriesDataPoint } from "@shared/charts/TimeSeriesChartTypes";
+import { createMockPositivityData, TimeSeriesDataPoint } from "@shared/charts/TimeSeriesChartTypes";
 import EmotionsBarChartWidget from "@components/insights/EmotionsBarChartWidget.vue";
 import { BarChartDataPoint, mockEmotionsData } from "@shared/charts/StackedBarChartTypes";
 import InsightsDataSource from "@web/datasource/InsightsDataSource";
@@ -279,7 +279,7 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
     }
 
     get positivityLocked(): boolean {
-        return this.chartData.reflections_l30.length < 2 && false;
+        return this.chartData.reflections_l30.length < 5;
     }
 
     get emotionsChartData(): BarChartDataPoint<Date>[] {
@@ -288,7 +288,7 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
     }
 
     get emotionsChartLocked(): boolean {
-        return this.chartData.reflections_l14.length < 3 && false;
+        return this.chartData.reflections_l14.length < 3;
     }
 
 

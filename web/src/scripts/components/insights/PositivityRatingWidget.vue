@@ -7,7 +7,7 @@
         <time-series-chart
                 chart-id="insights-positivity-widget"
                 :class="{locked}"
-                :chart-data="data"
+                :chart-data="actualData"
                 :aspect-ratio="0.75"
                 :options="options"/>
     </div>
@@ -17,7 +17,7 @@
 import Vue from "vue";
 import Component from "vue-class-component"
 import { Prop } from "vue-property-decorator";
-import { TimeSeriesConfig, TimeSeriesDataPoint } from "@shared/charts/TimeSeriesChartTypes";
+import { createMockPositivityData, TimeSeriesConfig, TimeSeriesDataPoint } from "@shared/charts/TimeSeriesChartTypes";
 import TimeSeriesChart from "@components/charts/TimeSeriesChart.vue";
 import { createTickSettingsX, createTickSettingsY} from "@web/charts/timeSeriesChart";
 
@@ -34,6 +34,14 @@ export default class PositivityRatingWidget extends Vue {
 
     @Prop({ type: Boolean, required: false, default: false })
     locked!: boolean;
+
+    get actualData(): TimeSeriesDataPoint[] {
+        if (this.locked) {
+            return createMockPositivityData()
+        } else {
+            return this.data;
+        }
+    }
 
     options: Partial<TimeSeriesConfig> = {
         showYAxis: true,
