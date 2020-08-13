@@ -288,7 +288,7 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
     }
 
     get emotionsChartLocked(): boolean {
-        return this.chartData.reflections_l14.length < 3;
+        return this.chartData.reflections_l14.length < 5;
     }
 
 

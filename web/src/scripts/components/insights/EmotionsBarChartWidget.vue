@@ -7,7 +7,7 @@
         <stacked-bar-chart
                 chart-id="emotions-chart-widget"
                 :class="{locked}"
-                :chart-data="data"
+                :chart-data="actualData"
                 :aspect-ratio="0.75"
                 :options="options"/>
     </div>
