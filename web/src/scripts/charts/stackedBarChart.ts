@@ -37,6 +37,7 @@ const DEFAULT_CONFIG = (): StackedBarChartConfig => ({
     axisColor: Colors.borderLight,
     fontFamily: "Lato, sans-serif",
     ticks: {
+        every: 1,
         y: {
             size: 0,
             format: () => "",
@@ -74,7 +75,7 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
 
     const xAxis = d3.axisBottom<Date>(x)
     .tickFormat(d3.timeFormat("%-m/%-d"))
-    .ticks(d3.timeDay.every(1))
+    .ticks(d3.timeDay.every(2))
     .tickSize(ticks.x.size)
     .tickPadding(ticks.x.padding)
 
@@ -134,6 +135,12 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
         xAxisSvg.selectAll("path").remove()
     }
 
+
+    //remove ticks as necessary
+    d3.selectAll(".tick text")
+    .each(function(_,i){
+        if(i % ticks.every !== 0) d3.select(this).remove();
+    });
 
     if (showYAxis) {
         const yAxis = d3.axisLeft(y)

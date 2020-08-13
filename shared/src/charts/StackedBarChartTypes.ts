@@ -46,6 +46,7 @@ export interface StackedBarChartConfig {
     barWidth: number | null,
     colors: string[],
     ticks: {
+        every: number,
         x: TickSetting<Date>,
         y: TickSetting<number>,
     }
@@ -55,11 +56,14 @@ export type StackedBarChartOptions = RecursivePartial<StackedBarChartConfig>
 
 export function mergeConfig(defaultConfig: StackedBarChartConfig, options: StackedBarChartOptions) {
     logger.info("Merge config options", options);
-    const cfg = Object.assign(defaultConfig, options);
-    cfg.ticks = {
-        x: Object.assign(defaultConfig.ticks.x, options.ticks?.x ?? {}),
-        y: Object.assign(defaultConfig.ticks.y, options.ticks?.y ?? {})
-    }
+    const cfg = Object.assign(defaultConfig, options, {
+        ticks: {
+            every: options.ticks?.every ?? defaultConfig.ticks.every,
+            x: Object.assign(defaultConfig.ticks.x, options.ticks?.x ?? {}),
+            y: Object.assign(defaultConfig.ticks.y, options.ticks?.y ?? {})
+        }
+    });
+
     return cfg;
 }
 
@@ -97,7 +101,7 @@ export function getSeriesTotal<T extends BarXType>(data: BarChartDataPoint<T>): 
     }, 0);
 }
 
-export const mockEmotionsData = ():BarChartDataPoint<Date>[] => [
+export const mockEmotionsData = (): BarChartDataPoint<Date>[] => [
     {
         x: DateTime.local(2020, 8, 3).toJSDate(),
         series: { [ToneID.anger]: 0.5 }
