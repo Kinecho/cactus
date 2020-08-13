@@ -3,19 +3,17 @@ import Logger from "@shared/Logger"
 
 import {
     BarChartDataPoint,
-    BarChartDatum, BarXType, getKeys,
-    getSeriesTotal,
+    BarChartDatum,
+    BarXType,
+    getKeys,
     mergeConfig,
-    Numeric,
     processDataPoints,
-    SeriesType,
     StackedBarChartConfig,
     StackedBarChartOptions
 } from "@shared/charts/StackedBarChartTypes";
 import { Colors } from "@shared/util/ColorUtil";
 
 const logger = new Logger("stackedBarChart");
-
 
 const DEFAULT_CONFIG = (): StackedBarChartConfig => ({
     w: 400,
@@ -53,7 +51,6 @@ const DEFAULT_CONFIG = (): StackedBarChartConfig => ({
             fontColor: Colors.lightText
         }
     }
-
 })
 
 export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPoint<Date>[], options: StackedBarChartOptions) {
@@ -90,7 +87,6 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
     .attr('transform', `translate(${ margin.left },${ margin.top })`)
 
     const dataKeys: string[] = getKeys(dataPoints)
-
     const layers = d3.stack<BarChartDatum>().keys(dataKeys)(data)
 
     x.domain(layers[0].map(d => new Date(d.data.x)))
@@ -109,14 +105,12 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
     const barHeight = barHeightFactory(y, height, _w)
     const barY = barYFactory(y, height, _w)
 
-    const heightOffset = _w;
     layer.selectAll('rect')
     .data(d => d)
     .enter()
 
     .append('rect')
     .attr('x', d => x(new Date(d.data.x))!)
-    // .attr('y', d => y(d[0] + d[1]) - heightOffset)
     .attr('y', barY)
     .attr('height', barHeight)
     .attr('width', _w)
@@ -134,7 +128,6 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
     if (!showXAxisLine) {
         xAxisSvg.selectAll("path").remove()
     }
-
 
     //remove ticks as necessary
     d3.selectAll(".tick text")
