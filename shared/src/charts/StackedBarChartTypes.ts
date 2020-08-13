@@ -2,6 +2,7 @@ import { EdgeInsets } from "@shared/util/LayoutUtil";
 import { TickSetting } from "@shared/charts/ChartTypes";
 import { RecursivePartial } from "@shared/util/ObjectUtil";
 import Logger from "@shared/Logger"
+import { getDatesBetween } from "@shared/util/DateUtil";
 
 const logger = new Logger("StackedBarChartTypes");
 
@@ -34,6 +35,7 @@ export interface BarChartDatum {
 export interface StackedBarChartConfig {
     w: number,
     h: number,
+    ensureConsecutive: boolean,
     margin: EdgeInsets,
     showYAxis: boolean,
     fontFamily: string,
@@ -67,12 +69,24 @@ export function getKeys<T extends BarXType>(data: BarChartDataPoint<T>[]): strin
 }
 
 
-export function processDataPoints<T extends BarXType>(data: BarChartDataPoint<T>[]): BarChartDatum[] {
-    return data.map(d => {
+export function processDataPoints<T extends BarXType>(data: BarChartDataPoint<T>[], ensureConsecutive: boolean = true): BarChartDatum[] {
+    const processed: BarChartDatum[] = []
+    let last: BarChartDataPoint<T> | null = data[0] ?? null;
+    data.sort((d1, d2) => {
+        return d1.x.valueOf() - d2.x.valueOf()
+    }).forEach(d => {
+        const fillerDays = last?.x ? getDatesBetween(last.x, d.x) : [];
+
+        fillerDays.forEach(filler => {
+            processed.push({ total: 0, x: filler.valueOf() })
+        })
+
         const total = getSeriesTotal(d)
-        // const {x, (...rest as {[key: string]: number})} = d
-        return { ...d.series, total, x: d.x.valueOf() }
+        const datum = { ...d.series, total, x: d.x.valueOf() }
+        processed.push(datum)
+        last = d;
     })
+    return processed
 }
 
 export function getSeriesTotal<T extends BarXType>(data: BarChartDataPoint<T>): number {

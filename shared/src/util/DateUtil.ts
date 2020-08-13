@@ -572,3 +572,22 @@ export function getContentQueryDateStrings(options: {
 
     return { startDateString, endDateString }
 }
+
+export function getDatesBetween(startDate: Date, endDate: Date): Date[] {
+    let d1 = DateTime.fromJSDate(startDate)
+    let d2 = DateTime.fromJSDate(endDate)
+
+    const days = d2.diff(d1).as("days");
+    if (days <= 1) {
+        return []
+    }
+
+    let previous = d1;
+    const array: Date[] = [];
+    while(d2.diff(previous).as("days") > 1) {
+        const next = previous.plus({day: 1})
+        array.push(next.toJSDate())
+        previous = next;
+    }
+    return array;
+}

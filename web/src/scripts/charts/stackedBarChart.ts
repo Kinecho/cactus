@@ -20,6 +20,7 @@ const logger = new Logger("stackedBarChart");
 const DEFAULT_CONFIG = (): StackedBarChartConfig => ({
     w: 400,
     h: 400,
+    ensureConsecutive: true,
     margin: { top: 20, left: 0, bottom: 20, right: 0 },
     colors: [
         Colors.dolphin,
@@ -56,8 +57,8 @@ const DEFAULT_CONFIG = (): StackedBarChartConfig => ({
 
 export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPoint<Date>[], options: StackedBarChartOptions) {
     const config = mergeConfig(DEFAULT_CONFIG(), options);
-    const data: BarChartDatum[] = processDataPoints(dataPoints)
-    const { w, h, margin, colors, showYAxis, ticks, axisColor, fontFamily, showXAxisLine, barWidth } = config
+    const { w, h, margin, colors, showYAxis, ticks, axisColor, fontFamily, showXAxisLine, barWidth, ensureConsecutive } = config
+    const data: BarChartDatum[] = processDataPoints(dataPoints, ensureConsecutive)
     logger.info("Bar width", barWidth)
     const width = w - margin.left - margin.right;
     const height = h - margin.top - margin.bottom;
