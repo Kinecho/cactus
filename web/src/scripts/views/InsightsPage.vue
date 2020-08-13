@@ -274,7 +274,7 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
     }
 
     get positivityData(): TimeSeriesDataPoint[] {
-        return createMockData();
+        return this.chartData.positivityChartData;
     }
 
     get positivityLocked(): boolean {

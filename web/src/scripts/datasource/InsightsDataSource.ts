@@ -7,6 +7,8 @@ import { DateTime } from "luxon";
 import Vue from "vue";
 import { BarChartDataPoint } from "@shared/charts/StackedBarChartTypes";
 import { getDatesBetween } from "@shared/util/DateUtil";
+import { TimeSeriesDataPoint } from "@shared/charts/TimeSeriesChartTypes";
+import { PromptType } from "@shared/models/ReflectionPrompt";
 
 const logger = new Logger("InsightsDataSource");
 
@@ -89,6 +91,49 @@ export default class InsightsDataSource {
         this.reflections_l30 = [];
     }
 
+    get positivityChartData(): TimeSeriesDataPoint[] {
+        const data: TimeSeriesDataPoint[] = [];
+
+        let last: TimeSeriesDataPoint | null = null;
+        let dayGroup: ReflectionResponse[] = []
+        this.reflections_l30.forEach(r => {
+            const sentiment = r.sentiment?.documentSentiment;
+            if (!sentiment?.score || !r.createdAt) {
+                return;
+            }
+            const rDt = DateTime.fromJSDate(r.createdAt).set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+            const score = (sentiment.score + 1) / 2;
+            const point = { value: score, date: r.createdAt, label: "" }
+
+            if (last?.date && DateTime.fromJSDate(last.date)
+            .set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
+            .diff(rDt).as("days") === 0) {
+                dayGroup.push(r);
+
+                // if the date is the same, we want to take the cactus score (averaged)
+                // or the total score (averaged) if there was no cactus score
+                const { cactusCt, cactusScore, totalCount, totalScore } = dayGroup.reduce((total, g) => {
+                    total.totalCount++;
+                    total.totalScore += g.sentiment?.documentSentiment?.score ?? 0;
+                    const isCactus = g.promptType === PromptType.CACTUS;
+                    total.cactusCt += isCactus ? 1 : 0;
+                    total.cactusScore += isCactus ? g.sentiment?.documentSentiment?.score ?? 0 : 0
+
+                    return total;
+                }, { cactusCt: 0, cactusScore: 0, totalScore: 0, totalCount: 0 });
+
+                last.value = cactusCt > 0 ? cactusScore / Math.max(cactusCt, 1) : totalScore / Math.max(totalCount, 1)
+                return;
+            }
+
+            data.push(point);
+            last = point;
+            dayGroup = [r];
+        })
+        logger.info("Positivity data", data);
+        return data;
+    }
+
     /**
      * Create chart data using the last 14 days of data.
      * If there are missing days in the range of Today - interval 14 days, they will be filled in as blank
@@ -101,7 +146,6 @@ export default class InsightsDataSource {
         this.reflections_l30.forEach(r => {
             const documentTone = r.toneAnalysis?.documentTone
             if (!documentTone || !r.createdAt) {
-                // lastReflection = r;
                 return;
             }
 
@@ -133,16 +177,10 @@ export default class InsightsDataSource {
                 });
                 lastReflection = r;
             }
-
-            // lastReflection = r;
         })
 
         if (data.length === 0) {
             logger.info("Filling with empty data");
-            // const fillerDates = getDatesBetween(DateTime.local().minus({ days: 10 }).toJSDate(), new Date());
-            // fillerDates.forEach(d => {
-            //     data.push({ x: d, series: {} })
-            // })
             return [];
         } else {
             const tomorrow = DateTime.local().plus({ days: 1 }).toJSDate()
