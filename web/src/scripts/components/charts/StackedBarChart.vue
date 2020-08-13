@@ -24,11 +24,8 @@ export default class StackedBarChart extends Vue {
     @Prop({ type: Object as () => StackedBarChartOptions, default: {}, required: false })
     options!: StackedBarChartOptions;
 
-    @Prop({ type: Array as () => BarChartDataPoint[], required: true })
-    chartData!: BarChartDataPoint[];
-
-    @Prop({ type: String, required: true })
-    xAxis!: string;
+    @Prop({ type: Array as () => BarChartDataPoint<Date>[], required: true })
+    chartData!: BarChartDataPoint<Date>[];
 
     @Prop({ type: String, required: true })
     chartId!: string;
@@ -73,12 +70,12 @@ export default class StackedBarChart extends Vue {
         logger.info("Custom options", this.options)
 
         drawStackedBarChart(`.${ this.chartId }`,
-            this.chartData,
-            {
-                ...(this.options ?? {}),
-                w: width,
-                h: width * this.aspectRatio,
-            });
+        this.chartData,
+        {
+            ...(this.options ?? {}),
+            w: width,
+            h: width * this.aspectRatio,
+        });
     }
 }
 </script>
@@ -89,6 +86,5 @@ export default class StackedBarChart extends Vue {
 
 .stacked-bar-chart {
   font-family: $font-stack;
-  border: 2px solid red;
 }
 </style>

@@ -56,16 +56,7 @@
                     </div>
                 </section>
                 <div class="emotionsChart">
-                    <h2>Emotions</h2>
-                    <template v-if="hasEmotionsChart">
-                        <p class="subtext">The emotions revealed in your reflections over time.</p>
-                        <div class="chart">chart</div>
-                    </template>
-                    <template v-else>
-                        <p class="subtext">Reflect a few more times to reveal the emotions in your reflections over
-                            time.</p>
-                        <div class="chart"><img src="/assets/images/emotionsEmpty.png" alt="empty state graphic"/></div>
-                    </template>
+                    <EmotionsBarChartWidget :data="emotionsChartData" :locked="emotionsChartLocked"/>
                 </div>
                 <div class="positivityChart">
                     <PositivityRatingWidget :data="positivityData" :locked="positivityLocked"/>
@@ -131,12 +122,15 @@ import JournalFeedDataSource, { JournalFeedDataSourceDelegate } from "@web/datas
 import CoreValueResults from "@components/insights/CoreValueResults.vue";
 import PositivityRatingWidget from "@components/insights/PositivityRatingWidget.vue";
 import { createMockData, TimeSeriesDataPoint } from "@shared/charts/TimeSeriesChartTypes";
+import EmotionsBarChartWidget from "@components/insights/EmotionsBarChartWidget.vue";
+import { BarChartDataPoint, mockEmotionsData } from "@shared/charts/StackedBarChartTypes";
 
 const logger = new Logger("InsightsPage");
 const copy = CopyService.getSharedInstance().copy;
 
 @Component({
     components: {
+        EmotionsBarChartWidget,
         PositivityRatingWidget,
         CoreValueResults,
         PromptWidget,
@@ -277,6 +271,14 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
     }
 
     get positivityLocked(): boolean {
+        return true;
+    }
+
+    get emotionsChartData(): BarChartDataPoint<Date>[] {
+        return mockEmotionsData()
+    }
+
+    get emotionsChartLocked(): boolean {
         return true;
     }
 
