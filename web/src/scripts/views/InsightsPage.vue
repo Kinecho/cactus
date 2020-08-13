@@ -1,6 +1,11 @@
 <template>
     <div class="insightsDash">
         <div class="centered">
+            <div><h1>Chart data</h1>
+                loading = {{ chartData.loading }}<br/>
+                l14.length = {{ chartData.reflections_l14.length }}<br/>
+                l30.length = {{ chartData.reflections_l30.length }}<br/>
+            </div>
             <h1 v-if="!loading">{{ welcomeMessage }}</h1>
             <div v-if="loading">
                 <spinner :delay="1500" message="Loading..."/>
@@ -124,6 +129,7 @@ import PositivityRatingWidget from "@components/insights/PositivityRatingWidget.
 import { createMockData, TimeSeriesDataPoint } from "@shared/charts/TimeSeriesChartTypes";
 import EmotionsBarChartWidget from "@components/insights/EmotionsBarChartWidget.vue";
 import { BarChartDataPoint, mockEmotionsData } from "@shared/charts/StackedBarChartTypes";
+import InsightsDataSource from "@web/datasource/InsightsDataSource";
 
 const logger = new Logger("InsightsPage");
 const copy = CopyService.getSharedInstance().copy;
@@ -159,6 +165,7 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
     journalLoaded: boolean = false;
     showEmptyState: boolean = false;
     fromParam: string | null = null
+    chartData = InsightsDataSource.shared;
 
     async beforeMount() {
         this.dataSource = JournalFeedDataSource.setup(this.member, { onlyCompleted: true, delegate: this })
@@ -271,16 +278,18 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
     }
 
     get positivityLocked(): boolean {
-        return true;
+        return this.chartData.reflections_l30.length < 2;
     }
 
     get emotionsChartData(): BarChartDataPoint<Date>[] {
-        return mockEmotionsData()
+        // return mockEmotionsData()
+        return this.chartData.emotionsChartData;
     }
 
     get emotionsChartLocked(): boolean {
-        return true;
+        return this.chartData.reflections_l14.length < 3;
     }
+
 
     /* START: JOURNAL FEED DATA SOURCE DELEGATE */
     didLoad(hasData: boolean): void {

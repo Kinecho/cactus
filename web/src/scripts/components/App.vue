@@ -13,147 +13,149 @@
 </template>
 
 <script lang="ts">
-    import Vue from "vue";
-    import Component from "vue-class-component";
-    import CactusMemberService from "@web/services/CactusMemberService";
-    import AppSettingsService from "@web/services/AppSettingsService";
-    import { ListenerUnsubscriber } from "@web/services/FirestoreService";
-    import CactusMember from "@shared/models/CactusMember";
-    import Logger from "@shared/Logger"
-    import NavBar from "@components/NavBar.vue";
-    import {
-        doPassMember,
-        doPassSettings,
-        doPassUser,
-        doShowNavBar,
-        isAuthRequired,
-        MetaRouteConfig,
-    } from "@web/router-meta";
-    import { NavBarProps } from "@components/NavBarTypes";
-    import { isBoolean } from "@shared/util/ObjectUtil";
-    import { Route } from "vue-router";
-    import { Watch } from "vue-property-decorator";
-    import UpgradeSuccessBanner from "@components/upgrade/UpgradeSuccessBanner.vue";
-    import { getQueryParam, removeQueryParam } from "@web/util";
-    import { QueryParam } from "@shared/util/queryParams";
-    import StorageService, { LocalStorageKey } from "@web/services/StorageService";
-    import { fireOptInStartTrialEvent } from "@web/analytics";
-    import { isPremiumTier } from "@shared/models/MemberSubscription";
-    import AppSettings from "@shared/models/AppSettings";
-    import { FirebaseUser } from "@web/firebase";
-    import ComposeButton from "@components/freeform/ComposeButton.vue";
+import Vue from "vue";
+import Component from "vue-class-component";
+import CactusMemberService from "@web/services/CactusMemberService";
+import AppSettingsService from "@web/services/AppSettingsService";
+import { ListenerUnsubscriber } from "@web/services/FirestoreService";
+import CactusMember from "@shared/models/CactusMember";
+import Logger from "@shared/Logger"
+import NavBar from "@components/NavBar.vue";
+import {
+    doPassMember,
+    doPassSettings,
+    doPassUser,
+    doShowNavBar,
+    isAuthRequired,
+    MetaRouteConfig,
+} from "@web/router-meta";
+import { NavBarProps } from "@components/NavBarTypes";
+import { isBoolean } from "@shared/util/ObjectUtil";
+import { Route } from "vue-router";
+import { Watch } from "vue-property-decorator";
+import UpgradeSuccessBanner from "@components/upgrade/UpgradeSuccessBanner.vue";
+import { getQueryParam, removeQueryParam } from "@web/util";
+import { QueryParam } from "@shared/util/queryParams";
+import StorageService, { LocalStorageKey } from "@web/services/StorageService";
+import { fireOptInStartTrialEvent } from "@web/analytics";
+import { isPremiumTier } from "@shared/models/MemberSubscription";
+import AppSettings from "@shared/models/AppSettings";
+import { FirebaseUser } from "@web/firebase";
+import ComposeButton from "@components/freeform/ComposeButton.vue";
+import InsightsDataSource from "@web/datasource/InsightsDataSource";
 
-    const logger = new Logger("App");
+const logger = new Logger("App");
 
-    @Component({
-        components: {
-            ComposeButton,
-            UpgradeSuccessBanner,
-            NavBar
-        }
-    })
-    export default class App extends Vue {
-        name = "App"
-        settings: AppSettings | null = null;
-        settingsUnsubscriber!: ListenerUnsubscriber;
-        authLoaded = false;
-        settingsLoaded = false;
-        member: CactusMember | null = null;
-        user: FirebaseUser | null = null;
-        memberListener!: ListenerUnsubscriber;
-        showUnauthorizedRoute = false;
-        hasUpgradeSuccessParam = false;
-
-        @Watch("$route")
-        onRoute(route: Route) {
-            this.showUnauthorizedRoute = isAuthRequired(route) && !this.member && this.authLoaded;
-
-            if (getQueryParam(QueryParam.UPGRADE_SUCCESS) === 'success') {
-                this.hasUpgradeSuccessParam = true;
-                removeQueryParam(QueryParam.UPGRADE_SUCCESS)
-                logger.info("Firing upgrade confirmed event");
-                let priceDollars = StorageService.getNumber(LocalStorageKey.subscriptionPriceCents);
-
-                if (priceDollars) {
-                    priceDollars = priceDollars / 100;
-                }
-
-                fireOptInStartTrialEvent({ value: priceDollars });
-            } else {
-                this.hasUpgradeSuccessParam = false;
-            }
-            // updateRouteMeta(route)
-        }
-
-        get showUpgradeSuccessBanner(): boolean {
-            return this.authLoaded && !!this.member && this.hasUpgradeSuccessParam && isPremiumTier(this.member?.tier)
-        }
-
-        async beforeMount() {
-            // this.onRoute(this.$route)
-            this.settingsUnsubscriber = AppSettingsService.sharedInstance.observeAppSettings({
-                onData: (settings) => {
-                    this.settings = settings ?? null;
-                    this.settingsLoaded = true;
-                }
-            });
-
-            this.memberListener = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({ member, user }) => {
-                    this.member = member ?? null;
-                    this.user = user ?? null;
-                    this.authLoaded = true;
-                }
-            })
-        }
-
-        get props(): Record<string, any> {
-            const props: Record<string, any> = {}
-            if (doPassMember(this.$route)) {
-                props.member = this.member;
-            }
-            if (doPassUser(this.$route)) {
-                props.user = this.user;
-            }
-
-            if (doPassSettings(this.$route)) {
-                props.settings = this.settings
-            }
-
-            return props
-        }
-
-        get showNav(): boolean {
-            return doShowNavBar(this.$route);
-        }
-
-        get navProps(): Partial<NavBarProps | null> {
-            const props = (this.$route as MetaRouteConfig).meta?.navBar ?? null;
-            if (isBoolean(props)) {
-                return null;
-            }
-            return props;
-        }
-
-        get showRoute(): boolean {
-            return isAuthRequired(this.$route) ? !!this.member : true
-        }
-
-        get allLoaded(): boolean {
-            return this.settingsLoaded && this.authLoaded
-        }
-
-        get isLoggedIn(): boolean {
-            return !!this.member;
-        }
+@Component({
+    components: {
+        ComposeButton,
+        UpgradeSuccessBanner,
+        NavBar
     }
+})
+export default class App extends Vue {
+    name = "App"
+    settings: AppSettings | null = null;
+    settingsUnsubscriber!: ListenerUnsubscriber;
+    authLoaded = false;
+    settingsLoaded = false;
+    member: CactusMember | null = null;
+    user: FirebaseUser | null = null;
+    memberListener!: ListenerUnsubscriber;
+    showUnauthorizedRoute = false;
+    hasUpgradeSuccessParam = false;
+
+    @Watch("$route")
+    onRoute(route: Route) {
+        this.showUnauthorizedRoute = isAuthRequired(route) && !this.member && this.authLoaded;
+
+        if (getQueryParam(QueryParam.UPGRADE_SUCCESS) === 'success') {
+            this.hasUpgradeSuccessParam = true;
+            removeQueryParam(QueryParam.UPGRADE_SUCCESS)
+            logger.info("Firing upgrade confirmed event");
+            let priceDollars = StorageService.getNumber(LocalStorageKey.subscriptionPriceCents);
+
+            if (priceDollars) {
+                priceDollars = priceDollars / 100;
+            }
+
+            fireOptInStartTrialEvent({ value: priceDollars });
+        } else {
+            this.hasUpgradeSuccessParam = false;
+        }
+        // updateRouteMeta(route)
+    }
+
+    get showUpgradeSuccessBanner(): boolean {
+        return this.authLoaded && !!this.member && this.hasUpgradeSuccessParam && isPremiumTier(this.member?.tier)
+    }
+
+    async beforeMount() {
+        // this.onRoute(this.$route)
+        this.settingsUnsubscriber = AppSettingsService.sharedInstance.observeAppSettings({
+            onData: (settings) => {
+                this.settings = settings ?? null;
+                this.settingsLoaded = true;
+            }
+        });
+
+        this.memberListener = CactusMemberService.sharedInstance.observeCurrentMember({
+            onData: ({ member, user }) => {
+                this.member = member ?? null;
+                this.user = user ?? null;
+                this.authLoaded = true;
+                InsightsDataSource.shared.setMember(member ?? null);
+            }
+        })
+    }
+
+    get props(): Record<string, any> {
+        const props: Record<string, any> = {}
+        if (doPassMember(this.$route)) {
+            props.member = this.member;
+        }
+        if (doPassUser(this.$route)) {
+            props.user = this.user;
+        }
+
+        if (doPassSettings(this.$route)) {
+            props.settings = this.settings
+        }
+
+        return props
+    }
+
+    get showNav(): boolean {
+        return doShowNavBar(this.$route);
+    }
+
+    get navProps(): Partial<NavBarProps | null> {
+        const props = (this.$route as MetaRouteConfig).meta?.navBar ?? null;
+        if (isBoolean(props)) {
+            return null;
+        }
+        return props;
+    }
+
+    get showRoute(): boolean {
+        return isAuthRequired(this.$route) ? !!this.member : true
+    }
+
+    get allLoaded(): boolean {
+        return this.settingsLoaded && this.authLoaded
+    }
+
+    get isLoggedIn(): boolean {
+        return !!this.member;
+    }
+}
 </script>
 
 <style lang="scss">
-    @import "common";
-    @import "transitions";
+@import "common";
+@import "transitions";
 
-    .app-nav {
-        z-index: $z-navBar;
-    }
+.app-nav {
+  z-index: $z-navBar;
+}
 </style>
