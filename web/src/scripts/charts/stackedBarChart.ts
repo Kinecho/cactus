@@ -29,7 +29,7 @@ const DEFAULT_CONFIG = (): StackedBarChartConfig => ({
         Colors.indigo,
         Colors.royal
     ],
-    barWidth: 16,
+    barWidth: 12,
     showYAxis: false,
     showXAxisLine: false,
     showLegend: false,
