@@ -73,7 +73,7 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
 
     const xAxis = d3.axisBottom<Date>(x)
     .tickFormat(d3.timeFormat("%-m/%-d"))
-    .ticks(d3.timeDay.every(2))
+    .ticks(d3.timeDay.every(1))
     .tickSize(ticks.x.size)
     .tickPadding(ticks.x.padding)
 
@@ -135,9 +135,9 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
     }
 
     //remove ticks as necessary
-    d3.selectAll(".tick text")
+    svg.selectAll(".xaxis .tick")
     .each(function (_, i) {
-        if (i % ticks.every !== 0) d3.select(this).remove();
+        if ((i % ticks.every) !== 0) d3.select(this).select("text").remove()
     });
 
     if (showYAxis) {

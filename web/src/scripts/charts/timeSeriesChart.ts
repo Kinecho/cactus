@@ -225,7 +225,7 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
 
     //remove ticks as necessary
     if (!isNull(ticks.x.interval)) {
-        d3.selectAll(".tick text")
+        svg.selectAll(".tick text")
         .each(function (_, i) {
             if (i % (ticks.x.interval ?? 1) !== 0) d3.select(this).remove();
         });
