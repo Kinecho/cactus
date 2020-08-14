@@ -9,6 +9,8 @@ import { BarChartDataPoint } from "@shared/charts/StackedBarChartTypes";
 import { getDatesBetween } from "@shared/util/DateUtil";
 import { TimeSeriesDataPoint } from "@shared/charts/TimeSeriesChartTypes";
 import { PromptType } from "@shared/models/ReflectionPrompt";
+import { ChartDataResult } from "@shared/charts/ChartTypes";
+import { stringifyJSON } from "@shared/util/ObjectUtil";
 
 const logger = new Logger("InsightsDataSource");
 
@@ -21,6 +23,7 @@ export default class InsightsDataSource {
     private member: CactusMember | null = null;
     reflectionsObserver: ListenerUnsubscriber | null = null;
     emotionsChartDays = 14;
+    positivityChartDays = 14;
     loading: boolean = false
     reflections_l30: ReflectionResponse[] = [];
     reflections_l14: ReflectionResponse[] = [];
@@ -91,10 +94,11 @@ export default class InsightsDataSource {
         this.reflections_l30 = [];
     }
 
-    getPositivityChartData(reflections: ReflectionResponse[]): TimeSeriesDataPoint[] {
+    getPositivityChartData(reflections: ReflectionResponse[]): ChartDataResult<TimeSeriesDataPoint> {
+        const rangeStart = DateTime.local().minus({ days: this.positivityChartDays })
         const data: TimeSeriesDataPoint[] = [];
 
-        let last: TimeSeriesDataPoint | null = null;
+        let lastPoint: TimeSeriesDataPoint | null = null;
         let dayGroup: ReflectionResponse[] = []
         reflections.forEach(r => {
             const sentiment = r.sentiment?.documentSentiment;
@@ -105,7 +109,7 @@ export default class InsightsDataSource {
             const score = (sentiment.score + 1) / 2;
             const point = { value: score, date: r.createdAt, label: "" }
 
-            if (last?.date && DateTime.fromJSDate(last.date)
+            if (lastPoint?.date && DateTime.fromJSDate(lastPoint.date)
             .set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
             .diff(rDt).as("days") === 0) {
                 dayGroup.push(r);
@@ -122,16 +126,46 @@ export default class InsightsDataSource {
                     return total;
                 }, { cactusCt: 0, cactusScore: 0, totalScore: 0, totalCount: 0 });
 
-                last.value = cactusCt > 0 ? cactusScore / Math.max(cactusCt, 1) : totalScore / Math.max(totalCount, 1)
+                lastPoint.value = cactusCt > 0 ? cactusScore / Math.max(cactusCt, 1) : totalScore / Math.max(totalCount, 1)
                 return;
             }
 
             data.push(point);
-            last = point;
+            lastPoint = point;
             dayGroup = [r];
         })
-        logger.info("Positivity data", data);
-        return data;
+
+        const nonEmptyCount = data.length;
+        logger.info("Positivity initial data", { ...data });
+        const tomorrow = DateTime.local().plus({ days: 1 }).toJSDate()
+        if (nonEmptyCount === 0) {
+            logger.info("positivity: Filling with empty data");
+            getDatesBetween(rangeStart.toJSDate(), tomorrow).forEach(d => {
+                logger.info("positivity: adding date to the end of the series", d)
+                data.push({ value: null, date: d, label: "" })
+            })
+        } else {
+
+            const [first] = data;
+            const last = data[data.length - 1];
+            logger.info("Positivity: original data series", JSON.stringify(data));
+            logger.info("Positivity: first.date", first.date)
+            logger.info("Positivity: last.date", last.date);
+            const startFiller = getDatesBetween(rangeStart.toJSDate(), first.date)
+            logger.info("Positivity: start filler dates", startFiller)
+            startFiller.reverse().forEach(d => {
+                logger.info("Positivity: adding date to beginning of series", d)
+                data.unshift({ value: null, date: d, label: "" })
+            })
+
+            getDatesBetween(last.date, tomorrow).forEach(d => {
+                logger.info("Positivity: adding date to the end of the series", d)
+                data.push({ value: null, date: d, label: "" })
+            })
+        }
+
+        logger.info("Positivity filled data", data);
+        return { data, nonEmptyCount };
     }
 
     /**
@@ -139,7 +173,7 @@ export default class InsightsDataSource {
      * If there are missing days in the range of Today - interval 14 days, they will be filled in as blank
      * @return {BarChartDataPoint<Date>[]}
      */
-    getEmotionsChartData(reflections: ReflectionResponse[]): { nonEmptyCount: number, data: BarChartDataPoint<Date>[] } {
+    getEmotionsChartData(reflections: ReflectionResponse[]): ChartDataResult<BarChartDataPoint<Date>> {
         const rangeStart = DateTime.local().minus({ days: this.emotionsChartDays })
         const data: BarChartDataPoint<Date>[] = [];
         let lastReflection: ReflectionResponse | null = null;

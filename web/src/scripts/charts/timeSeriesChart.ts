@@ -11,12 +11,16 @@ import {
     select,
     timeDay,
     timeFormat,
+    AxisScale,
+scaleOrdinal,
 } from "d3";
 import Logger from "@shared/Logger"
 import { isBlank } from "@shared/util/StringUtil";
 import { Colors } from "@shared/util/ColorUtil";
 import { TimeSeriesConfig, TimeSeriesDataPoint } from "@shared/charts/TimeSeriesChartTypes";
 import { TickSetting } from "@shared/charts/ChartTypes";
+import * as d3 from "d3";
+import { isNull } from "@shared/util/ObjectUtil";
 
 const logger = new Logger("timeSeriesChart");
 
@@ -25,6 +29,7 @@ export const DEFAULT_TICK_SETTINGS_X = (): TickSetting<Date> => ({
     format: timeFormat("%-m/%-d"),
     padding: 10,
     fontSize: 14,
+    interval: 2,
     fontColor: Colors.lightText
 })
 
@@ -64,6 +69,7 @@ export const DEFAULT_CONFIG = (): TimeSeriesConfig => ({
         x: null,
         y: null,
     },
+    fixedDateRange: true,
     axisColor: Colors.borderLight,
     fontFamily: "Lato, sans-serif",
     ticks: {
@@ -84,7 +90,7 @@ export const DEFAULT_CONFIG = (): TimeSeriesConfig => ({
  */
 export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[], options: Partial<TimeSeriesConfig> = {}) {
     const config = Object.assign(DEFAULT_CONFIG(), options)
-    const { w, h, margin, gradient, showYAxis, labels, ticks, fontFamily, axisColor } = config;
+    const { w, h, margin, gradient, showYAxis, labels, ticks, fontFamily, axisColor, fixedDateRange } = config;
 
     const { x: labelX, y: labelY } = labels ?? {}
 
@@ -112,19 +118,26 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
     logger.info("Max y = ", maxY)
 
     const y = scaleLinear()
-    .domain([0, maxY])
+    .domain([0, maxY]).nice()
     .range([height, margin.bottom + margin.top]);
 
     const [d1, d2] = extent<TimeSeriesDataPoint, Date>(data, d => d.date) as [Date, Date] //cast this to [Date, Date]
-    const xAxisScale = scaleTime()
-    .range([0, width - 10])
-    .domain([d1, d2])
 
+    let xAxisScale: AxisScale<Date>;
+    if (!fixedDateRange) {
+        xAxisScale = scaleTime()
+        .range([0, width - 10])
+        .domain([d1, d2])
+    } else {
+        xAxisScale = scaleLinear()
+        .range([0, width - 10])
+        .domain([d1, d2])
+    }
 
     //Create the x-axis svg
     const xAxis = axisBottom<Date>(xAxisScale)
     .tickFormat(ticks.x.format)
-    .ticks(timeDay.every(1))
+    // .ticks(timeDay.every(ticks.x.interval ?? 2))
     .tickSize(ticks.x.size)
     .tickPadding(ticks.x.padding)
 
@@ -173,15 +186,24 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
     }
 
     const chartArea = area<TimeSeriesDataPoint>()
+    .defined(d => !isNaN(d.value) && !isNull(d.value))
     .curve(curveCardinal)
     .x(d => xAxisScale(d.date))
     .y0(y(0))
     .y1(d => y(d.value));
 
-    // Add the area
+    // Add the defined area
+    g.append("path")
+    .datum(data.filter(chartArea.defined()))
+    // .attr("fill", "url(#temperature-gradient)")
+    .attr("fill", "red")
+    .attr("d", chartArea)
+
+    // add chart data
     g.append("path")
     .datum(data)
     .attr("fill", "url(#temperature-gradient)")
+    // .attr("fill", "red")
     .attr("d", chartArea)
 
 
@@ -201,6 +223,14 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
         .attr("transform", `translate(${ -2 * margin.left / 3 }, ${ height / 2 })rotate(-90)`)
         .attr("fill", Colors.textDefault)
         .text(labelY)
+    }
+
+    //remove ticks as necessary
+    if (!isNull(ticks.x.interval)) {
+        d3.selectAll(".tick text")
+        .each(function (_, i) {
+            if (i % (ticks.x.interval ?? 1) !== 0) d3.select(this).remove();
+        });
     }
 
 }

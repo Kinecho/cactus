@@ -5,7 +5,7 @@ import { TickSetting } from "@shared/charts/ChartTypes";
 export interface TimeSeriesDataPoint {
     date: Date,
     label: string,
-    value: number,
+    value: number|null,
 }
 
 export const createMockPositivityData = (): TimeSeriesDataPoint[] => [
@@ -25,6 +25,7 @@ export interface TimeSeriesConfig {
     gradient: GradientPoint[],
     showYAxis: boolean,
     axisColor: string,
+    fixedDateRange: boolean,
     labels: {
         x: string | null,
         y: string | null

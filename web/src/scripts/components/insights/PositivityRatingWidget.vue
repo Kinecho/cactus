@@ -3,6 +3,7 @@
         <h2>Positivity Rating</h2>
         <p class="subtext" v-if="locked">The positivity of your reflections over time. Reflect a few more times to
             reveal it.</p>
+        <p class="subtext" v-else-if="empty">THERE IS NO DATA FOR THIS TIME PERIOD</p>
         <p class="subtext" v-else>The positivity of your reflections over time</p>
         <time-series-chart
                 chart-id="insights-positivity-widget"
@@ -35,6 +36,9 @@ export default class PositivityRatingWidget extends Vue {
     @Prop({ type: Boolean, required: false, default: false })
     locked!: boolean;
 
+    @Prop({type: Boolean, required: false, default: false})
+    empty!: boolean;
+
     get actualData(): TimeSeriesDataPoint[] {
         if (this.locked) {
             return createMockPositivityData()
@@ -44,9 +48,10 @@ export default class PositivityRatingWidget extends Vue {
     }
 
     options: Partial<TimeSeriesConfig> = {
-        showYAxis: true,
+        showYAxis: false,
+        fixedDateRange: true,
         ticks: {
-            x: createTickSettingsX({ fontSize: 14 }),
+            x: createTickSettingsX({ fontSize: 14, interval: 2 }),
             y: createTickSettingsY({ fontSize: 14 })
         }
     }

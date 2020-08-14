@@ -59,7 +59,7 @@
                     <EmotionsBarChartWidget :data="emotionsChartData.data" :locked="emotionsChartLocked" :empty="emotionsChartData.isEmpty"/>
                 </div>
                 <div class="positivityChart">
-                    <PositivityRatingWidget :data="positivityData" :locked="positivityLocked"/>
+                    <PositivityRatingWidget :data="positivityData.data" :locked="positivityLocked" :empty="positivityData.isEmpty"/>
                 </div>
 
                 <div class="valuesWrapper">
@@ -125,6 +125,7 @@ import { createMockPositivityData, TimeSeriesDataPoint } from "@shared/charts/Ti
 import EmotionsBarChartWidget from "@components/insights/EmotionsBarChartWidget.vue";
 import { BarChartDataPoint, mockEmotionsData } from "@shared/charts/StackedBarChartTypes";
 import InsightsDataSource from "@web/datasource/InsightsDataSource";
+import { ChartDataResult } from "@shared/charts/ChartTypes";
 
 const logger = new Logger("InsightsPage");
 const copy = CopyService.getSharedInstance().copy;
@@ -268,9 +269,11 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
         return this.member.focusElement ?? null;
     }
 
-    get positivityData(): TimeSeriesDataPoint[] {
-        const data = this.chartData.reflections_l30
-        return this.chartData.getPositivityChartData(data);
+    get positivityData(): { data: TimeSeriesDataPoint[], isEmpty: boolean } {
+        const reflections = this.chartData.reflections_l30;
+        // const reflections = [];
+        const data = this.chartData.getPositivityChartData(reflections);
+        return { data: data.data, isEmpty: data.nonEmptyCount === 0 }
     }
 
     get positivityLocked(): boolean {
@@ -280,8 +283,8 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
     get emotionsChartData(): { isEmpty: boolean, data: BarChartDataPoint<Date>[] } {
         const reflections = this.chartData.reflections_l14
         // const reflections = [];
-        const data = this.chartData.getEmotionsChartData(reflections)
-        return { data: data.data, isEmpty: data.nonEmptyCount === 0  };
+        const data: ChartDataResult<BarChartDataPoint<Date>> = this.chartData.getEmotionsChartData(reflections)
+        return { data: data.data, isEmpty: data.nonEmptyCount === 0 };
     }
 
     get emotionsChartLocked(): boolean {
