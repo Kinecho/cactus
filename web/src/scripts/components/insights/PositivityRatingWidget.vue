@@ -64,6 +64,6 @@ export default class PositivityRatingWidget extends Vue {
 @import "insights";
 
 .locked {
-  filter: blur(5px);
+  filter: blur(8px);
 }
 </style>

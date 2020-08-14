@@ -60,9 +60,7 @@ export const DEFAULT_CONFIG = (): TimeSeriesConfig => ({
     h: 300,
     margin: { top: 10, right: 0, bottom: 30, left: 0 },
     gradient: [
-        { offset: "0%", color: Colors.indigo },
-        { offset: "40%", color: Colors.royal },
-        { offset: "90%", color: Colors.green },
+        { offset: "0%", color: Colors.royal },
         { offset: "100%", color: Colors.green }
     ],
     labels: {

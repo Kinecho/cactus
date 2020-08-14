@@ -6,48 +6,6 @@
                 <spinner :delay="1500" message="Loading..."/>
             </div>
             <div v-else class="insightsGrid" :class="insightsGridClassNames">
-                <div class="streakCalendar">
-                    <div class="dayContainer checked">
-                        <div class="day">S</div>
-                        <div class="circle">
-                            <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="dayContainer checked">
-                        <div class="day">M</div>
-                        <div class="circle">
-                            <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="dayContainer">
-                        <div class="day">T</div>
-                        <div class="circle"></div>
-                    </div>
-                    <div class="dayContainer checked">
-                        <div class="day">W</div>
-                        <div class="circle">
-                            <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="dayContainer">
-                        <div class="day">T</div>
-                        <div class="circle"></div>
-                    </div>
-                    <div class="dayContainer">
-                        <div class="day">F</div>
-                        <div class="circle"></div>
-                    </div>
-                    <div class="dayContainer">
-                        <div class="day">S</div>
-                        <div class="circle"></div>
-                    </div>
-                </div>
                 <reflection-stats-widget v-if="!showEmptyState && reflectionStats" :reflection-stats="reflectionStats"/>
                 <prompt-widget :entry="todayEntry" :member="member" :loading="todayPromptLoading"/>
                 <section class="bubblesContainer" v-if="hasWordCloud">
@@ -349,85 +307,6 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
   }
 }
 
-.streakCalendar {
-  align-items: center;
-  background-color: $bgDolphin;
-  display: flex;
-  justify-content: space-evenly;
-  margin: 0 0 4.8rem;
-  overflow: hidden;
-  padding: 1.6rem;
-
-  @include r(374) {
-    margin: 0 -2.4rem 4.8rem;
-  }
-  @include r(768) {
-    background: transparent;
-    border: 1px solid $lightest;
-    border-radius: 1.2rem;
-    margin: 0 1.6rem 4.8rem 0;
-    padding: 2.4rem 1.6rem;
-  }
-
-  .dayContainer {
-    display: flex;
-    flex-basis: 14%;
-    flex-direction: column;
-    position: relative;
-    text-align: center;
-
-    &.checked {
-      .circle {
-        background-color: $royal;
-        border: 0;
-      }
-    }
-  }
-
-  .checked + .checked,
-  .checked:first-child {
-    &:before {
-      background-color: $royal;
-      bottom: 0;
-      content: "";
-      height: 4.4rem;
-      left: -50%;
-      position: absolute;
-      width: 100%;
-      z-index: 0;
-    }
-  }
-
-  .day {
-    color: $lightText;
-    font-size: 1.4rem;
-    margin-bottom: 1.2rem;
-  }
-
-  .circle {
-    align-items: center;
-    background-color: lighten($lightDolphin, 15%);
-    border: 1.4rem solid $bgDolphin;
-    border-radius: 50%;
-    display: flex;
-    height: 4.4rem;
-    justify-content: center;
-    margin: 0 auto;
-    width: 4.4rem;
-
-    @include r(768) {
-      background-color: lighten($lightDolphin, 20%);
-      border-color: $white;
-    }
-
-    .check {
-      height: 2rem;
-      width: 2rem;
-      z-index: 1;
-    }
-  }
-}
-
 .insightsDash {
   display: flex;
   flex-flow: column nowrap;
@@ -479,7 +358,7 @@ h1 {
 
   @include r(768) {
     display: grid;
-    grid-template-areas: "streak streak streak stats stats stats"
+    grid-template-areas: "stats stats stats stats stats stats"
                 "today today today today bubbles bubbles"
                 "emotions emotions emotions positivity positivity positivity"
                 "values values values gap gap gap";
@@ -490,14 +369,11 @@ h1 {
     &.highlightCV {
       grid-template-areas:
                 "values values values values gap gap"
-                "streak streak streak stats stats stats"
+                "stats stats stats stats stats stats"
                 "today today today today bubbles bubbles"
                 "emotions emotions emotions positivity positivity positivity";
     }
 
-    .streakCalendar {
-      grid-area: streak;
-    }
     .statsContainer {
       grid-area: stats;
     }
