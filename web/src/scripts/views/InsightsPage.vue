@@ -13,11 +13,13 @@
                         <WordCloud class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
                     </div>
                 </section>
-                <div class="emotionsChart">
-                    <EmotionsBarChartWidget :data="emotionsChartData.data" :locked="emotionsChartLocked" :empty="emotionsChartData.isEmpty"/>
-                </div>
-                <div class="positivityChart">
-                    <PositivityRatingWidget :data="positivityData.data" :locked="positivityLocked" :empty="positivityData.isEmpty"/>
+                <div class="shadyArea">
+                    <div class="emotionsChart">
+                        <EmotionsBarChartWidget :data="emotionsChartData.data" :locked="emotionsChartLocked" :empty="emotionsChartData.isEmpty"/>
+                    </div>
+                    <div class="positivityChart">
+                        <PositivityRatingWidget :data="positivityData.data" :locked="positivityLocked" :empty="positivityData.isEmpty"/>
+                    </div>
                 </div>
 
                 <div class="valuesWrapper">
@@ -273,18 +275,34 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
 @import "variables";
 @import "insights";
 
-.emotionsChart {
-  border: 1px solid $lightest;
-  border-radius: 1.6rem;
-  margin: 0 2.4rem 3.2rem;
-  padding: 2.4rem;
+.shadyArea {
+    background-color: $bgDolphin;
+    margin-bottom: 3.2rem;
+    padding: 2.4rem 2.4rem 0;
 
-  @include r(374) {
-    margin: 0 0 3.2rem;
-  }
+    @include r(374) {
+        border-radius: 1.6rem;
+    }
+
+    @include r(768) {
+        display: flex;
+        margin-bottom: 4.8rem;
+        padding: 3.2rem 3.2rem 0;
+
+        .emotionsChart,
+        .positivityChart {
+            flex-basis: 50%;
+        }
+    }
+
+    .subtext {
+        margin-bottom: 3.2rem;
+    }
+}
+
+.emotionsChart {
   @include r(768) {
-    margin: 0 1.6rem 4.8rem 0;
-    padding: 3.2rem;
+    margin-right: 1.6rem;
   }
 }
 
@@ -293,17 +311,8 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
 }
 
 .positivityChart {
-  border: 1px solid $lightest;
-  border-radius: 1.6rem;
-  margin: 0 2.4rem 3.2rem;
-  padding: 2.4rem;
-
-  @include r(374) {
-    margin: 0 0 3.2rem;
-  }
   @include r(768) {
-    margin: 0 0 4.8rem 1.6rem;
-    padding: 3.2rem;
+    margin-left: 1.6rem;
   }
 }
 
@@ -359,7 +368,7 @@ h1 {
     display: grid;
     grid-template-areas: "stats stats stats stats stats stats"
                 "today today today today bubbles bubbles"
-                "emotions emotions emotions positivity positivity positivity"
+                "eaCharts eaCharts eaCharts eaCharts eaCharts eaCharts"
                 "values values values gap gap gap";
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
     grid-template-rows: auto;
@@ -370,7 +379,7 @@ h1 {
                 "values values values values gap gap"
                 "stats stats stats stats stats stats"
                 "today today today today bubbles bubbles"
-                "emotions emotions emotions positivity positivity positivity";
+                "eaCharts eaCharts eaCharts eaCharts eaCharts eaCharts";
     }
 
     .statsContainer {
@@ -382,11 +391,8 @@ h1 {
     .bubblesContainer {
       grid-area: bubbles;
     }
-    .emotionsChart {
-      grid-area: emotions;
-    }
-    .positivityChart {
-      grid-area: positivity;
+    .shadyArea {
+      grid-area: eaCharts;
     }
     .valuesWrapper {
       grid-area: values;
