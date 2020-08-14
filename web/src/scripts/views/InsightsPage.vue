@@ -274,21 +274,23 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
     }
 
     get positivityData(): TimeSeriesDataPoint[] {
-        const data = this.chartData.reflections_l30
-        return this.chartData.getPositivityChartData(data);
+        // const data = this.chartData.reflections_l30
+        // return this.chartData.getPositivityChartData(data);
+        return [];
     }
 
     get positivityLocked(): boolean {
-        return this.chartData.reflections_l30.length < 5;
+        return this.chartData.reflections_l30.length < 0;
     }
 
     get emotionsChartData(): BarChartDataPoint<Date>[] {
-        const data = this.chartData.reflections_l30
-        return this.chartData.getEmotionsChartData(data);
+        // const data = this.chartData.reflections_l30
+        // return this.chartData.getEmotionsChartData(data);
+        return []
     }
 
     get emotionsChartLocked(): boolean {
-        return this.chartData.reflections_l14.length < 5;
+        return this.chartData.reflections_l14.length < 0;
     }
 
 

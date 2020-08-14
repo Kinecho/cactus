@@ -89,9 +89,10 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
 
     const dataKeys: string[] = getKeys(dataPoints)
     const layers = d3.stack<BarChartDatum>().keys(dataKeys)(data)
-
-    x.domain(layers[0].map(d => new Date(d.data.x)))
-    y.domain([0, d3.max(layers[layers.length - 1], d => (d[0] + d[1]))!]).nice()
+    if (layers.length > 0) {
+        x.domain(layers[0].map(d => new Date(d.data.x)))
+        y.domain([0, d3.max(layers[layers.length - 1], d => (d[0] + d[1]))!]).nice()
+    }
 
     const layer = svg.selectAll('layer')
     .data(layers)
