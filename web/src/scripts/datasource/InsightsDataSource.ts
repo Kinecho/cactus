@@ -6,7 +6,7 @@ import ReflectionResponseService from "@web/services/ReflectionResponseService";
 import { DateTime } from "luxon";
 import Vue from "vue";
 import { BarChartDataPoint } from "@shared/charts/StackedBarChartTypes";
-import { getDatesBetween } from "@shared/util/DateUtil";
+import { ensureConsecutive, getDatesBetween } from "@shared/util/DateUtil";
 import { TimeSeriesDataPoint } from "@shared/charts/TimeSeriesChartTypes";
 import { PromptType } from "@shared/models/ReflectionPrompt";
 import { ChartDataResult } from "@shared/charts/ChartTypes";
@@ -95,9 +95,13 @@ export default class InsightsDataSource {
     }
 
     getPositivityChartData(reflections: ReflectionResponse[]): ChartDataResult<TimeSeriesDataPoint> {
-        const rangeStart = DateTime.local().minus({ days: this.positivityChartDays })
+        const rangeStart = DateTime.local().set({
+            hour: 0,
+            minute: 0,
+            second: 0,
+            millisecond: 0
+        }).minus({ days: this.positivityChartDays - 1 })
         const data: TimeSeriesDataPoint[] = [];
-
         let lastPoint: TimeSeriesDataPoint | null = null;
         let dayGroup: ReflectionResponse[] = []
         reflections.forEach(r => {
@@ -136,36 +140,17 @@ export default class InsightsDataSource {
         })
 
         const nonEmptyCount = data.length;
-        logger.info("Positivity initial data", { ...data });
-        const tomorrow = DateTime.local().plus({ days: 1 }).toJSDate()
-        if (nonEmptyCount === 0) {
-            logger.info("positivity: Filling with empty data");
-            getDatesBetween(rangeStart.toJSDate(), tomorrow).forEach(d => {
-                logger.info("positivity: adding date to the end of the series", d)
-                data.push({ value: null, date: d, label: "" })
-            })
-        } else {
 
-            const [first] = data;
-            const last = data[data.length - 1];
-            logger.info("Positivity: original data series", JSON.stringify(data));
-            logger.info("Positivity: first.date", first.date)
-            logger.info("Positivity: last.date", last.date);
-            const startFiller = getDatesBetween(rangeStart.toJSDate(), first.date)
-            logger.info("Positivity: start filler dates", startFiller)
-            startFiller.reverse().forEach(d => {
-                logger.info("Positivity: adding date to beginning of series", d)
-                data.unshift({ value: null, date: d, label: "" })
-            })
+        const processed = ensureConsecutive<TimeSeriesDataPoint>({
+            start: rangeStart.toJSDate(),
+            end: new Date(),
+            data,
+            createEmpty: d => ({ date: d, value: null, label: "" }),
+            getDate: item => item.date,
+        })
 
-            getDatesBetween(last.date, tomorrow).forEach(d => {
-                logger.info("Positivity: adding date to the end of the series", d)
-                data.push({ value: null, date: d, label: "" })
-            })
-        }
-
-        logger.info("Positivity filled data", data);
-        return { data, nonEmptyCount };
+        logger.info("Positivity filled data", processed);
+        return { data: processed, nonEmptyCount };
     }
 
     /**
@@ -174,7 +159,12 @@ export default class InsightsDataSource {
      * @return {BarChartDataPoint<Date>[]}
      */
     getEmotionsChartData(reflections: ReflectionResponse[]): ChartDataResult<BarChartDataPoint<Date>> {
-        const rangeStart = DateTime.local().minus({ days: this.emotionsChartDays })
+        const rangeStart = DateTime.local().set({
+            hour: 0,
+            minute: 0,
+            second: 0,
+            millisecond: 0
+        }).minus({ days: this.emotionsChartDays - 1 })
         const data: BarChartDataPoint<Date>[] = [];
         let lastReflection: ReflectionResponse | null = null;
         reflections.forEach(r => {
@@ -213,34 +203,17 @@ export default class InsightsDataSource {
             }
         })
         const dataCount = data.length;
-        const tomorrow = DateTime.local().plus({ days: 1 }).toJSDate()
-        if (data.length === 0) {
-            logger.info("Filling with empty data");
-            getDatesBetween(rangeStart.toJSDate(), tomorrow).forEach(d => {
-                logger.info("adding date to the end of the series", d)
-                data.push({ x: d, series: {} })
-            })
-        } else {
 
-            const [first] = data;
-            const last = data[data.length - 1];
-            logger.info("original data series", JSON.stringify(data));
-            logger.info("first.x", first.x)
-            logger.info("last.x", last.x);
-            const startFiller = getDatesBetween(rangeStart.toJSDate(), first.x)
-            logger.info("start filler dates", startFiller)
-            startFiller.reverse().forEach(d => {
-                logger.info("adding date to beginning of series", d)
-                data.unshift({ x: d, series: {} })
-            })
+        const processed = ensureConsecutive<BarChartDataPoint<Date>>({
+            start: rangeStart.toJSDate(),
+            end: new Date(),
+            data,
+            getDate: item => item.x,
+            createEmpty: d => ({ x: d, series: {} })
+        })
 
-            getDatesBetween(last.x, tomorrow).forEach(d => {
-                logger.info("adding date to the end of the series", d)
-                data.push({ x: d, series: {} })
-            })
-        }
-        logger.info("Emotions chart data", data);
-        return { data, nonEmptyCount: dataCount }
+        logger.info("Emotions chart data", processed);
+        return { data: processed, nonEmptyCount: dataCount }
     }
 }
 
