@@ -139,7 +139,7 @@ export default class InsightsDataSource {
      * If there are missing days in the range of Today - interval 14 days, they will be filled in as blank
      * @return {BarChartDataPoint<Date>[]}
      */
-    getEmotionsChartData(reflections: ReflectionResponse[]): BarChartDataPoint<Date>[] {
+    getEmotionsChartData(reflections: ReflectionResponse[]): { nonEmptyCount: number, data: BarChartDataPoint<Date>[] } {
         const rangeStart = DateTime.local().minus({ days: this.emotionsChartDays })
         const data: BarChartDataPoint<Date>[] = [];
         let lastReflection: ReflectionResponse | null = null;
@@ -178,12 +178,16 @@ export default class InsightsDataSource {
                 lastReflection = r;
             }
         })
-
+        const dataCount = data.length;
+        const tomorrow = DateTime.local().plus({ days: 1 }).toJSDate()
         if (data.length === 0) {
             logger.info("Filling with empty data");
-            return [];
+            getDatesBetween(rangeStart.toJSDate(), tomorrow).forEach(d => {
+                logger.info("adding date to the end of the series", d)
+                data.push({ x: d, series: {} })
+            })
         } else {
-            const tomorrow = DateTime.local().plus({ days: 1 }).toJSDate()
+
             const [first] = data;
             const last = data[data.length - 1];
             logger.info("original data series", JSON.stringify(data));
@@ -201,8 +205,8 @@ export default class InsightsDataSource {
                 data.push({ x: d, series: {} })
             })
         }
-        logger.info("Chart data", data);
-        return data
+        logger.info("Emotions chart data", data);
+        return { data, nonEmptyCount: dataCount }
     }
 }
 

@@ -1,11 +1,6 @@
 <template>
     <div class="insightsDash">
         <div class="centered">
-            <div><h1>Chart data</h1>
-                loading = {{ chartData.loading }}<br/>
-                l14.length = {{ chartData.reflections_l14.length }}<br/>
-                l30.length = {{ chartData.reflections_l30.length }}<br/>
-            </div>
             <h1 v-if="!loading">{{ welcomeMessage }}</h1>
             <div v-if="loading">
                 <spinner :delay="1500" message="Loading..."/>
@@ -61,7 +56,7 @@
                     </div>
                 </section>
                 <div class="emotionsChart">
-                    <EmotionsBarChartWidget :data="emotionsChartData" :locked="emotionsChartLocked"/>
+                    <EmotionsBarChartWidget :data="emotionsChartData.data" :locked="emotionsChartLocked" :empty="emotionsChartData.isEmpty"/>
                 </div>
                 <div class="positivityChart">
                     <PositivityRatingWidget :data="positivityData" :locked="positivityLocked"/>
@@ -274,25 +269,24 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
     }
 
     get positivityData(): TimeSeriesDataPoint[] {
-        // const data = this.chartData.reflections_l30
-        // return this.chartData.getPositivityChartData(data);
-        return [];
+        const data = this.chartData.reflections_l30
+        return this.chartData.getPositivityChartData(data);
     }
 
     get positivityLocked(): boolean {
         return this.chartData.reflections_l30.length < 0;
     }
 
-    get emotionsChartData(): BarChartDataPoint<Date>[] {
-        // const data = this.chartData.reflections_l30
-        // return this.chartData.getEmotionsChartData(data);
-        return []
+    get emotionsChartData(): { isEmpty: boolean, data: BarChartDataPoint<Date>[] } {
+        const reflections = this.chartData.reflections_l14
+        // const reflections = [];
+        const data = this.chartData.getEmotionsChartData(reflections)
+        return { data: data.data, isEmpty: data.nonEmptyCount === 0  };
     }
 
     get emotionsChartLocked(): boolean {
         return this.chartData.reflections_l14.length < 0;
     }
-
 
     /* START: JOURNAL FEED DATA SOURCE DELEGATE */
     didLoad(hasData: boolean): void {
