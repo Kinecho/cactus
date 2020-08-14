@@ -20,9 +20,14 @@ import {
     makeUTCDateIntoMailchimpDate,
     numDaysAgoFromMidnights,
     plusDays,
-    toTimestampMs, getDatesBetween,
+    toTimestampMs, getDatesBetween, ensureConsecutive, getDateRange,
 } from "@shared/util/DateUtil";
 import { DateTime } from "luxon";
+import Logger from "@shared/Logger"
+import { stringifyJSON } from "@shared/util/ObjectUtil";
+
+const logger = new Logger("DateUtil.test");
+
 
 describe("getMailchimpCurrentDateString test", () => {
     test("no arguments returns a value", () => {
@@ -774,4 +779,208 @@ describe("Get dates between", () => {
         expect(DateTime.fromJSDate(dates[1]).day).toEqual(3)
         expect(DateTime.fromJSDate(dates[2]).day).toEqual(4)
     })
+})
+
+describe("Get date range (inclusive)", () => {
+    test("same date returns 1 value", () => {
+        const d1 = DateTime.local(2020, 8, 1);
+        const d2 = DateTime.local(2020, 8, 1);
+
+        const range = getDateRange(d1.toJSDate(), d2.toJSDate())
+        expect(range.length).toEqual(1);
+    })
+
+    test("one day apart - two value (start and end)", () => {
+        const d1 = DateTime.local(2020, 8, 1);
+        const d2 = DateTime.local(2020, 8, 2);
+
+        const range = getDateRange(d1.toJSDate(), d2.toJSDate())
+        expect(range.length).toEqual(2);
+    })
+
+    test("five days apart - 5 value (start and end)", () => {
+        const d1 = DateTime.local(2020, 8, 1);
+        const d2 = DateTime.local(2020, 8, 5);
+
+        const range = getDateRange(d1.toJSDate(), d2.toJSDate())
+        expect(range.length).toEqual(5);
+    })
+
+    test("3 day apart, no end date - two values", () => {
+        const d1 = DateTime.local(2020, 8, 1);
+        const d2 = DateTime.local(2020, 8, 3);
+
+        const range = getDateRange(d1.toJSDate(), d2.toJSDate(), { includeStart: true, includeEnd: false })
+        expect(range.length).toEqual(2);
+        expect(range).toEqual([
+            DateTime.local(2020, 8, 1).toJSDate(),
+            DateTime.local(2020, 8, 2).toJSDate()
+        ])
+    })
+
+    test("3 day apart, no start date - two values", () => {
+        const d1 = DateTime.local(2020, 8, 1);
+        const d2 = DateTime.local(2020, 8, 3);
+
+        const range = getDateRange(d1.toJSDate(), d2.toJSDate(), { includeStart: false, includeEnd: true })
+        expect(range).toEqual([
+            DateTime.local(2020, 8, 2).toJSDate(),
+            DateTime.local(2020, 8, 3).toJSDate()
+        ])
+        expect(range.length).toEqual(2);
+
+    })
+
+    test("end date is after start date", () => {
+        const d1 = DateTime.local(2020, 8, 5);
+        const d2 = DateTime.local(2020, 8, 1);
+
+        const range = getDateRange(d1.toJSDate(), d2.toJSDate())
+        expect(range.length).toEqual(0);
+    })
+})
+
+describe("Ensure Consecutive", () => {
+    test("empty data with same start and end in wrong order", () => {
+        const start = DateTime.local(2020, 8, 2);
+        const end = DateTime.local(2020, 8, 1);
+        const data: Date[] = [];
+
+        const processed = ensureConsecutive({
+            data,
+            createEmpty: d => d,
+            getDate: d => d,
+            start: start.toJSDate(),
+            end: end.toJSDate()
+        });
+        logger.info(processed)
+        expect(processed.length).toEqual(0)
+
+    })
+
+    test("empty data with same start and end returns single value", () => {
+        const start = DateTime.local(2020, 8, 1);
+        const end = DateTime.local(2020, 8, 1);
+        const data: Date[] = [];
+
+        const processed = ensureConsecutive({
+            data,
+            createEmpty: d => d,
+            getDate: d => d,
+            start: start.toJSDate(),
+            end: end.toJSDate()
+        });
+        logger.info(processed)
+        expect(processed.length).toEqual(1)
+
+    })
+
+    test("empty data with dates 5 days apart", () => {
+        const start = DateTime.local(2020, 8, 1);
+        const end = DateTime.local(2020, 8, 5);
+        const data: Date[] = [];
+
+        const processed = ensureConsecutive({
+            data,
+            createEmpty: d => d,
+            getDate: d => d,
+            start: start.toJSDate(),
+            end: end.toJSDate()
+        });
+        logger.info(processed)
+        expect(processed.length).toEqual(5)
+
+    });
+
+    test("single data point in middle of range", () => {
+        const start = DateTime.local(2020, 8, 1);
+        const end = DateTime.local(2020, 8, 5);
+
+        const data: Date[] = [DateTime.local(2020, 8, 3).toJSDate()];
+
+        const processed = ensureConsecutive({
+            data,
+            createEmpty: d => d,
+            getDate: d => d,
+            start: start.toJSDate(),
+            end: end.toJSDate()
+        });
+        logger.info(stringifyJSON(processed, 2))
+        expect(processed.length).toEqual(5)
+        expect(processed).toEqual([
+            DateTime.local(2020, 8, 1).toJSDate(),
+            DateTime.local(2020, 8, 2).toJSDate(),
+            DateTime.local(2020, 8, 3).toJSDate(),
+            DateTime.local(2020, 8, 4).toJSDate(),
+            DateTime.local(2020, 8, 5).toJSDate()
+        ])
+    });
+
+    test("10 day range, with values mixed in the middle", () => {
+        const start = DateTime.local(2020, 8, 1);
+        const end = DateTime.local(2020, 8, 10);
+
+        const data: Date[] = [
+            DateTime.local(2020, 8, 3).toJSDate(),
+            DateTime.local(2020, 8, 6).toJSDate(),
+            DateTime.local(2020, 8, 7).toJSDate(),
+            DateTime.local(2020, 8, 9).toJSDate(),
+        ];
+
+        const processed = ensureConsecutive({
+            data,
+            createEmpty: d => d,
+            getDate: d => d,
+            start: start.toJSDate(),
+            end: end.toJSDate()
+        });
+        logger.info(stringifyJSON(processed, 2))
+        expect(processed.length).toEqual(10)
+        expect(processed).toEqual([
+            DateTime.local(2020, 8, 1).toJSDate(),
+            DateTime.local(2020, 8, 2).toJSDate(),
+            DateTime.local(2020, 8, 3).toJSDate(),
+            DateTime.local(2020, 8, 4).toJSDate(),
+            DateTime.local(2020, 8, 5).toJSDate(),
+            DateTime.local(2020, 8, 6).toJSDate(),
+            DateTime.local(2020, 8, 7).toJSDate(),
+            DateTime.local(2020, 8, 8).toJSDate(),
+            DateTime.local(2020, 8, 9).toJSDate(),
+            DateTime.local(2020, 8, 10).toJSDate(),
+        ])
+    });
+
+    test("10 day range, with values mixed in the middle - custom object", () => {
+        const start = DateTime.local(2020, 8, 1);
+        const end = DateTime.local(2020, 8, 10);
+        type Data = { d: Date, value: string }
+        const data: Data[] = [
+            { value: "3", d: DateTime.local(2020, 8, 3).toJSDate() },
+            { value: "6", d: DateTime.local(2020, 8, 6).toJSDate() },
+            { value: "7", d: DateTime.local(2020, 8, 7).toJSDate() },
+            { value: "9", d: DateTime.local(2020, 8, 9).toJSDate() },
+        ];
+
+        const processed = ensureConsecutive<Data>({
+            data,
+            createEmpty: (d: Date) => ({d: d, value: `${d.getDate()} - e`}),
+            getDate: item => item.d,
+            start: start.toJSDate(),
+            end: end.toJSDate()
+        });
+        logger.info(stringifyJSON(processed, 2))
+        expect(processed.length).toEqual(10)
+        expect(processed).toEqual([
+            { value: "1 - e", d: DateTime.local(2020, 8, 1).toJSDate() },
+            { value: "2 - e", d: DateTime.local(2020, 8, 2).toJSDate() },
+            { value: "3", d: DateTime.local(2020, 8, 3).toJSDate() },
+            { value: "4 - e", d: DateTime.local(2020, 8, 4).toJSDate() },
+            { value: "5 - e", d: DateTime.local(2020, 8, 5).toJSDate() },
+            { value: "6", d: DateTime.local(2020, 8, 6).toJSDate() },
+            { value: "7", d: DateTime.local(2020, 8, 7).toJSDate() },
+            { value: "8 - e", d: DateTime.local(2020, 8, 8).toJSDate() },
+            { value: "9", d: DateTime.local(2020, 8, 9).toJSDate() },
+            { value: "10 - e", d: DateTime.local(2020, 8, 10).toJSDate() },
+        ])
+    });
 })
