@@ -36,28 +36,28 @@
 
             const stats: StatWidgetData[] = [];
 
-            // if (memberStats.currentStreakDays > 1) {
-            //     stats.push({
-            //         value: `${ memberStats.currentStreakDays }`,
-            //         label: "Streak",
-            //         unit: "Days",
-            //         icon: "flame"
-            //     })
-            // } else if (memberStats.currentStreakWeeks > 1) {
-            //     stats.push({
-            //         value: `${ memberStats.currentStreakWeeks }`,
-            //         label: "Streak",
-            //         unit: "Weeks",
-            //         icon: "flame"
-            //     })
-            // } else if (memberStats.currentStreakMonths > 1) {
-            //     stats.push({
-            //         value: `${ memberStats.currentStreakMonths }`,
-            //         label: "Streak",
-            //         unit: "Months",
-            //         icon: "flame"
-            //     })
-            // }
+            if (memberStats.currentStreakDays > 1) {
+                stats.push({
+                    value: `${ memberStats.currentStreakDays }`,
+                    label: "Streak",
+                    unit: "Days",
+                    icon: "flame"
+                })
+            } else if (memberStats.currentStreakWeeks > 1) {
+                stats.push({
+                    value: `${ memberStats.currentStreakWeeks }`,
+                    label: "Streak",
+                    unit: "Weeks",
+                    icon: "flame"
+                })
+            } else if (memberStats.currentStreakMonths > 1) {
+                stats.push({
+                    value: `${ memberStats.currentStreakMonths }`,
+                    label: "Streak",
+                    unit: "Months",
+                    icon: "flame"
+                })
+            }
 
             stats.push({
                 value: `${ memberStats.totalCount }`,
@@ -76,8 +76,11 @@
                     durationLabel = this.copy.prompts.SECOND
                 }
             } else {
-                durationLabel = this.copy.common.MIN;
+                durationLabel = this.copy.prompts.MINUTES;
                 durationValue = millisecondsToMinutes(totalDuration, 0);
+                if (durationValue === "1") {
+                    durationLabel = this.copy.common.MINUTE
+                }
             }
 
             stats.push({ value: durationValue, label: "Duration", unit: durationLabel, icon: "clock" });
@@ -93,17 +96,23 @@
     @import "variables";
 
     .statsContainer {
+        animation: .3s ease-in slideX;
         display: flex;
-        margin: 0 2.4rem 4rem;
+        margin: 0 -2.4rem 1.6rem 2.4rem;
+        overflow: auto;
+        padding-bottom: 1.6rem;
 
         @include r(374) {
-            margin: 0 0 4rem;
+            margin: 0 -2.4rem 1.6rem;
+            padding-left: 2.4rem;
         }
-        @include r(768) {
-            margin-left: 1.6rem;
+        @include r(600) {
+            animation: none;
         }
         @include r(960) {
-            margin-bottom: 4.8rem;
+            margin: 0 0 2.4rem;
+            overflow: visible;
+            padding: 0 0 2.4rem;
         }
     }
 </style>

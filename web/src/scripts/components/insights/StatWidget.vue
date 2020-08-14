@@ -35,19 +35,21 @@
 
     .stat {
         align-items: center;
+        border: 1px solid $lightest;
         border-radius: 1.2rem;
         display: flex;
-        flex-basis: 50%;
+        flex-basis: 33%;
+        margin-right: .8rem;
+        padding: 2.4rem;
 
-        @include r(374) {
-            justify-content: center;
-        }
         @include r(600) {
             margin-right: 1.6rem;
-        }
-        @include r(1024) {
-            border: 1px solid $lightest;
             padding: 3.2rem;
+        }
+        @include r(960) {
+            @include shadowbox;
+            border: 0;
+            flex-grow: 1;
 
             &:last-child {
                 margin-right: 0;
@@ -56,39 +58,20 @@
     }
 
     .statIcon {
-        align-items: center;
-        background-color: $bgGreen;
-        border-radius: 50%;
-        display: flex;
-        flex-shrink: 0;
-        height: 4rem;
-        justify-content: center;
-        margin-right: .8rem;
-        width: 4rem;
+        display: none;
 
-        @include r(374) {
-            height: 5.6rem;
-            width: 5.6rem;
-        }
         @include r(600) {
-            height: 6.4rem;
-            width: 6.4rem;
-        }
-        @include r(960) {
+            align-items: center;
+            background-color: $bgGreen;
+            border-radius: 50%;
+            display: flex;
+            flex-shrink: 0;
             height: 8rem;
+            justify-content: center;
             margin-right: 1.6rem;
             width: 8rem;
-        }
 
-        img {
-            height: 2rem;
-            width: 2rem;
-
-            @include r(600) {
-                height: 2.4rem;
-                width: 2.4rem;
-            }
-            @include r(960) {
+            img {
                 height: 3.2rem;
                 width: 3.2rem;
             }
@@ -96,9 +79,8 @@
     }
 
     .statLabel {
-        @include r(374) {
-            margin-bottom: .4rem;
-        }
+        margin-bottom: .4rem;
+
         @include r(600) {
             margin-bottom: 0;
         }
@@ -111,15 +93,13 @@
         line-height: 1;
 
         @include r(600) {
-            font-size: 4rem;
-        }
-        @include r(960) {
             font-size: 5.6rem;
         }
     }
 
     .unit {
         font-size: 1.8rem;
+        padding-left: .8rem;
 
         &:empty {
             display: none;
