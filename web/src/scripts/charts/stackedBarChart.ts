@@ -125,6 +125,7 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
     .attr('transform', `translate(0,${ height })`)
     .style("font-size", `${ ticks.x.fontSize }`)
     .style("font-family", fontFamily)
+    .attr("color", ticks.x.fontColor)
     .attr("class", "xaxis axis")
     .call(xAxis);
 
@@ -150,8 +151,6 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
     }
 
     if (showLegend) {
-
-
         const legendX = margin.left
         // add the legend
         const legend = svg.append('g')
