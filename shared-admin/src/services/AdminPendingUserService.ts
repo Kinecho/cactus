@@ -1,7 +1,7 @@
-import AdminFirestoreService, {QueryOptions, SaveOptions, Transaction} from "@admin/services/AdminFirestoreService";
-import PendingUser, {PendingUserStatus} from "@shared/models/PendingUser";
-import {Collection} from "@shared/FirestoreBaseModels";
-import {QuerySortDirection} from "@shared/types/FirestoreConstants";
+import AdminFirestoreService, { QueryOptions, SaveOptions, Transaction } from "@admin/services/AdminFirestoreService";
+import PendingUser, { PendingUserStatus } from "@shared/models/PendingUser";
+import { Collection } from "@shared/FirestoreBaseModels";
+import { QuerySortDirection } from "@shared/types/FirestoreConstants";
 import Logger from "@shared/Logger";
 
 const logger = new Logger("AdminPendingUserService");
@@ -11,7 +11,7 @@ export interface PendingUserRequest {
     email: string,
     referredByEmail?: string,
     reflectionResponseIds?: string[],
-    queryParams?: { [name: string]: string },
+    queryParams?: { [name: string]: string | null },
 }
 
 export default class AdminPendingUserService {
@@ -44,9 +44,9 @@ export default class AdminPendingUserService {
     async getPendingByEmail(email: string, options?: QueryOptions): Promise<PendingUser | undefined> {
         try {
             const query = this.getCollectionRef()
-                .where(PendingUser.Field.email, "==", email)
-                .where(PendingUser.Field.status, "==", PendingUserStatus.PENDING)
-                .orderBy(PendingUser.Field.magicLinkSentAt, QuerySortDirection.desc);
+            .where(PendingUser.Field.email, "==", email)
+            .where(PendingUser.Field.status, "==", PendingUserStatus.PENDING)
+            .orderBy(PendingUser.Field.magicLinkSentAt, QuerySortDirection.desc);
 
             return await AdminFirestoreService.getSharedInstance().getFirst(query, PendingUser, options);
         } catch (e) {
@@ -64,7 +64,7 @@ export default class AdminPendingUserService {
      * @return {Promise<PendingUser>}
      */
     async addPendingSignup(args: PendingUserRequest): Promise<PendingUser> {
-        const {email, referredByEmail, reflectionResponseIds = [], queryParams = {}} = args;
+        const { email, referredByEmail, reflectionResponseIds = [], queryParams = {} } = args;
         let recentReferrer: PendingUser | undefined = undefined;
         if (!referredByEmail) {
             recentReferrer = await this.findMostRecentReferrer(email);
@@ -75,8 +75,8 @@ export default class AdminPendingUserService {
 
         if (recentReferrer && recentReferrer.reflectionResponseIds) {
             recentReferrer.reflectionResponseIds
-                .filter(id => !reflectionResponseIds.includes(id))
-                .forEach(id => reflectionResponseIds.push(id));
+            .filter(id => !reflectionResponseIds.includes(id))
+            .forEach(id => reflectionResponseIds.push(id));
         }
 
         const pendingUser = new PendingUser();
@@ -92,7 +92,7 @@ export default class AdminPendingUserService {
         }
 
         if (recentReferrer && recentReferrer.queryParams) {
-            pendingUser.queryParams = {...recentReferrer.queryParams, ...queryParams};
+            pendingUser.queryParams = { ...recentReferrer.queryParams, ...queryParams };
             logger.log("merged query params into ", pendingUser.queryParams)
         }
 
@@ -108,8 +108,8 @@ export default class AdminPendingUserService {
         logger.log("attempting to cancel all pending users");
         try {
             const query = this.getCollectionRef()
-                .where(PendingUser.Field.email, "==", email)
-                .where(PendingUser.Field.status, "==", PendingUserStatus.PENDING);
+            .where(PendingUser.Field.email, "==", email)
+            .where(PendingUser.Field.status, "==", PendingUserStatus.PENDING);
 
             const now = new Date();
             const results = await AdminFirestoreService.getSharedInstance().executeQuery(query, PendingUser);
@@ -131,9 +131,9 @@ export default class AdminPendingUserService {
         logger.log("Attempting to find most recent referrers");
         try {
             const query = this.getCollectionRef()
-                .where(PendingUser.Field.email, "==", email)
-                .where(PendingUser.Field.status, "==", PendingUserStatus.PENDING)
-                .orderBy(PendingUser.Field.magicLinkSentAt, QuerySortDirection.desc);
+            .where(PendingUser.Field.email, "==", email)
+            .where(PendingUser.Field.status, "==", PendingUserStatus.PENDING)
+            .orderBy(PendingUser.Field.magicLinkSentAt, QuerySortDirection.desc);
 
             const result = await AdminFirestoreService.getSharedInstance().executeQuery(query, PendingUser);
             const [mostRecent] = result.results;
@@ -146,8 +146,8 @@ export default class AdminPendingUserService {
 
     }
 
-    async completeSignupForPendingUser(args: {pendingUser: PendingUser, userId: string}, options? : QueryOptions): Promise<PendingUser> {
-        const {userId, pendingUser} = args;
+    async completeSignupForPendingUser(args: { pendingUser: PendingUser, userId: string }, options?: QueryOptions): Promise<PendingUser> {
+        const { userId, pendingUser } = args;
         logger.log("Found pending user for email", pendingUser);
         pendingUser.signupCompletedAt = new Date();
         pendingUser.signupCompleted = true;
@@ -157,19 +157,19 @@ export default class AdminPendingUserService {
     }
 
     async completeSignup(args: { userId: string, email: string }, options?: QueryOptions): Promise<PendingUser | undefined> {
-        const {email, userId} = args;
+        const { email, userId } = args;
 
         const transaction = options && options.transaction;
 
         const transactionJob = async (t: Transaction) => {
-            const pendingUser = await this.getPendingByEmail(email, {transaction: t});
+            const pendingUser = await this.getPendingByEmail(email, { transaction: t });
             if (pendingUser) {
                 logger.log("Found pending user for email", email, pendingUser);
                 pendingUser.signupCompletedAt = new Date();
                 pendingUser.signupCompleted = true;
                 pendingUser.userId = userId;
                 pendingUser.status = PendingUserStatus.COMPLETED;
-                return await this.save(pendingUser, {transaction: t});
+                return await this.save(pendingUser, { transaction: t });
             } else {
                 logger.log("No pending user was found for email", email);
             }
@@ -187,7 +187,7 @@ export default class AdminPendingUserService {
 
     async deletePermanentlyForEmail(email: string): Promise<number> {
         const query = this.getCollectionRef()
-            .where(PendingUser.Field.email, "==", email);
+        .where(PendingUser.Field.email, "==", email);
         // let deleteTasks: Promise<PendingUser | undefined>[] = [];
         return await firestoreService.deletePermanentlyForQuery(query)
     }
