@@ -330,10 +330,9 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
 }
 
 h1 {
-  display: none;
+  margin: 3.2rem 2.4rem;
 
   @include r(768) {
-    display: block;
     margin: 6.4rem 0 4rem;
   }
 
