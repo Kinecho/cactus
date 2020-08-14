@@ -3,6 +3,7 @@
         <h2>Emotions</h2>
         <p class="subtext" v-if="locked">Reflect a few more times to reveal the emotions in your writing over
             time.</p>
+        <p class="subtext" v-else-if="empty">YOU HAVE NO DATA FOR THIS TIME PERIOD</p>
         <p class="subtext" v-else>The emotions revealed in your reflections over time</p>
         <stacked-bar-chart
                 chart-id="emotions-chart-widget"
@@ -33,6 +34,9 @@ export default class EmotionsBarChartWidget extends Vue {
 
     @Prop({ type: Boolean, required: false, default: false })
     locked!: boolean;
+
+    @Prop({type: Boolean, required: false, default: false})
+    empty!: boolean;
 
     get actualData(): BarChartDataPoint<Date>[] {
         if (this.locked) {

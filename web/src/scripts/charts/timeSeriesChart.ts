@@ -113,11 +113,11 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
     .domain([0, maxY])
     .range([height, margin.bottom + margin.top]);
 
-    // Add X axis --> it is a date format
     const [d1, d2] = extent<TimeSeriesDataPoint, Date>(data, d => d.date) as [Date, Date] //cast this to [Date, Date]
     const xAxisScale = scaleTime()
-    .domain([d1, d2])
     .range([0, width - 10])
+    .domain([d1, d2])
+
 
     //Create the x-axis svg
     const xAxis = axisBottom<Date>(xAxisScale)
@@ -138,21 +138,22 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
     .selectAll("path").style("stroke", axisColor)
 
 
-    svg.append("linearGradient")
-    .attr("id", "temperature-gradient")
-    .attr("gradientUnits", "userSpaceOnUse")
-    .attr("x1", 0).attr("y1", y(0))
-    .attr("x2", 0).attr("y2", y(maxY))
-    .selectAll("stop")
-    .data(gradient)
-    .enter().append("stop")
-    .attr("offset", function (d) {
-        return d.offset;
-    })
-    .attr("stop-color", function (d) {
-        return d.color;
-    });
-
+    if (data.length > 0) {
+        svg.append("linearGradient")
+        .attr("id", "temperature-gradient")
+        .attr("gradientUnits", "userSpaceOnUse")
+        .attr("x1", 0).attr("y1", y(0))
+        .attr("x2", 0).attr("y2", y(maxY))
+        .selectAll("stop")
+        .data(gradient)
+        .enter().append("stop")
+        .attr("offset", function (d) {
+            return d.offset;
+        })
+        .attr("stop-color", function (d) {
+            return d.color;
+        });
+    }
 
     if (showYAxis) {
         // Append the YAxis SVG
