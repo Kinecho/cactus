@@ -12,7 +12,7 @@ import {
     timeDay,
     timeFormat,
     AxisScale,
-scaleOrdinal,
+    scaleOrdinal,
 } from "d3";
 import Logger from "@shared/Logger"
 import { isBlank } from "@shared/util/StringUtil";
@@ -121,21 +121,21 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
 
     const [d1, d2] = extent<TimeSeriesDataPoint, Date>(data, d => d.date) as [Date, Date] //cast this to [Date, Date]
 
-    let xAxisScale: AxisScale<Date>;
+    let x: AxisScale<Date>;
     if (!fixedDateRange) {
-        xAxisScale = scaleTime()
-        .range([0, width - 10])
+        x = scaleTime()
+        .range([0, width])
         .domain([d1, d2])
     } else {
-        xAxisScale = scaleLinear()
-        .range([0, width - 10])
-        .domain([d1, d2])
+        x = d3.scaleTime()
+        .range([0, width])
+        .domain([d1, d2]).nice()
     }
 
     //Create the x-axis svg
-    const xAxis = axisBottom<Date>(xAxisScale)
+    const xAxis = axisBottom<Date>(x)
     .tickFormat(ticks.x.format)
-    // .ticks(timeDay.every(ticks.x.interval ?? 2))
+    // .ticks(timeDay.every(ticks.x.interval ?? 1))
     .tickSize(ticks.x.size)
     .tickPadding(ticks.x.padding)
 
@@ -185,24 +185,57 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
 
     const chartArea = area<TimeSeriesDataPoint>()
     .defined(d => !isNaN(d.value) && !isNull(d.value))
-    .curve(curveCardinal)
-    .x(d => xAxisScale(d.date))
+    .x(d => x(d.date))
     .y0(y(0))
     .y1(d => y(d.value));
 
-    // Add the defined area
+    const undefArea = area<TimeSeriesDataPoint>()
+    .defined(d => isNull(d.value))
+    .x(d => x(d.date))
+    .y0(y(0))
+    .y1(d => y(1))
+
+    //create a mask from the data set that is null
+    const mask = g.append("mask")
+    .attr("id", "area-null-data")
+
+    //apply a full width/height white rectangle for the mask.
+    mask.append("rect")
+    .attr("width", "100%")
+    .attr("height", "100%")
+    .attr("fill", "white");
+
+    //apply the path of the null value area chart, fill it with black for the mask to work.
+    mask.append("path")
+    .datum(data)
+    .attr("fill", "black")
+    .attr("d", undefArea);
+
+    // add normal, defined data
     g.append("path")
     .datum(data.filter(chartArea.defined()))
-    // .attr("fill", "url(#temperature-gradient)")
-    .attr("fill", "red")
-    .attr("d", chartArea)
-
-    // add chart data
-    g.append("path")
-    .datum(data)
     .attr("fill", "url(#temperature-gradient)")
-    // .attr("fill", "red")
-    .attr("d", chartArea)
+    .attr("mask", "url(#area-null-data)")
+    .attr("d", chartArea.curve(curveCardinal));
+
+    //add line
+    const line = d3.line()
+    // .curve(curveCardinal)
+    .defined(d => !isNaN(d.value) && !isNull(d.value))
+    .x(d => x(d.date))
+    .y(d => y(d.value))
+
+
+    //add dots to the undefined values
+    g.selectAll("myCircles")
+    .data(data.filter(d => !line.defined()(d)))
+    .enter()
+    .append("circle")
+    .attr("fill", Colors.lightDolphin)
+    .attr("stroke", "none")
+    .attr("cx", d => x(d.date))
+    .attr("cy", d => y(d.value))
+    .attr("r", 3)
 
 
     if (!isBlank(labelX)) {

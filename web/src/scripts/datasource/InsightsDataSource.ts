@@ -111,7 +111,7 @@ export default class InsightsDataSource {
             }
             const rDt = DateTime.fromJSDate(r.createdAt).set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
             const score = (sentiment.score + 1) / 2;
-            const point = { value: score, date: r.createdAt, label: "" }
+            const point = { value: score, date: DateTime.fromJSDate(r.createdAt).set({hour: 0, minute: 0, second: 0, millisecond: 0}).toJSDate(), label: "" }
 
             if (lastPoint?.date && DateTime.fromJSDate(lastPoint.date)
             .set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
@@ -149,7 +149,7 @@ export default class InsightsDataSource {
             getDate: item => item.date,
         })
 
-        logger.info("Positivity filled data", processed);
+        logger.info("Positivity data", processed);
         return { data: processed, nonEmptyCount };
     }
 
