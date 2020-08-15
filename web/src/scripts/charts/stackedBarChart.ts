@@ -24,9 +24,9 @@ const DEFAULT_CONFIG = (): StackedBarChartConfig => ({
         Colors.dolphin,
         Colors.mediumDolphin,
         Colors.lightDolphin,
-        Colors.coral,
+        Colors.lightPink,
         Colors.pink,
-        Colors.indigo,
+        Colors.lightRoyal,
         Colors.royal
     ],
     barWidth: 12,
