@@ -48,4 +48,5 @@ export const Colors = {
 export interface GradientPoint {
     offset: string,
     color: string,
+    opacity?: number
 }

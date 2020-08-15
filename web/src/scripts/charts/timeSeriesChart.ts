@@ -16,7 +16,7 @@ import {
 } from "d3";
 import Logger from "@shared/Logger"
 import { isBlank } from "@shared/util/StringUtil";
-import { Colors } from "@shared/util/ColorUtil";
+import { Colors, GradientPoint } from "@shared/util/ColorUtil";
 import { TimeSeriesConfig, TimeSeriesDataPoint } from "@shared/charts/TimeSeriesChartTypes";
 import { TickSetting } from "@shared/charts/ChartTypes";
 import * as d3 from "d3";
@@ -168,6 +168,30 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
         });
     }
 
+    const bgGradients: GradientPoint[] = [{
+        offset: 0.5,
+        color: "white",
+        opacity: 0,
+    }]
+    // faded background gradient
+    svg.append("linearGradient")
+    .attr("id", "bg_gradient1")
+    .attr("gradientUnits", "userSpaceOnUse")
+    .attr("x1", 0)
+    .attr("y1", y(maxY)/3)
+    .attr("x2", width)
+    .attr("y2", y(maxY)/3)
+    .selectAll("stop")
+    .data(bgGradients)
+    .enter().append("stop")
+    .attr("offset", function (d) {
+        return d.offset;
+    })
+    .attr("stop-color", function (d) {
+        return d.color;
+    }).attr("stop-opacity", d => d.opactiy ?? 1);
+
+
     if (showYAxis) {
         // Append the YAxis SVG
         const yAxis = axisLeft<number>(y)
@@ -188,50 +212,63 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
     .x(d => x(d.date))
     .y0(y(0))
     .y1(d => y(d.value));
-
-    const undefArea = area<TimeSeriesDataPoint>()
-    .defined(d => isNull(d.value))
-    .x(d => x(d.date))
-    .y0(y(0))
-    .y1(d => y(1))
-
-    //create a mask from the data set that is null
-    const mask = g.append("mask")
-    .attr("id", "area-null-data")
-
-    //apply a full width/height white rectangle for the mask.
-    mask.append("rect")
-    .attr("width", "100%")
-    .attr("height", "100%")
-    .attr("fill", "white");
-
-    //apply the path of the null value area chart, fill it with black for the mask to work.
-    mask.append("path")
-    .datum(data)
-    .attr("fill", "black")
-    .attr("d", undefArea);
-
-    // add normal, defined data
+    //
+    // const undefArea = area<TimeSeriesDataPoint>()
+    // .defined(d => isNull(d.value))
+    // .x(d => x(d.date))
+    // .y0(y(0))
+    // .y1(d => y(1))
+    //
+    // //create a mask from the data set that is null
+    // const mask = g.append("mask")
+    // .attr("id", "area-null-data")
+    //
+    // //apply a full width/height white rectangle for the mask.
+    // mask.append("rect")
+    // .attr("width", "100%")
+    // .attr("height", "100%")
+    // .attr("fill", "white");
+    //
+    // //apply the path of the null value area chart, fill it with black for the mask to work.
+    // mask.append("path")
+    // .datum(data)
+    // .attr("fill", "black")
+    // .attr("d", undefArea);
+    //
+    // // add normal, defined data
     g.append("path")
     .datum(data.filter(chartArea.defined()))
-    .attr("fill", "url(#temperature-gradient)")
-    .attr("mask", "url(#area-null-data)")
+    .datum(data)
+    // .attr("fill", "url(#temperature-gradient)")
+    .attr("fill", "url(#bg_gradient1)")
+    // .attr("fill", "blue")
+    // .attr("mask", "url(#area-null-data)")
     .attr("d", chartArea.curve(curveCardinal));
 
     //add line
     const line = d3.line()
-    // .curve(curveCardinal)
-    .defined(d => !isNaN(d.value) && !isNull(d.value))
+    .curve(curveCardinal)
+    .defined(d => !isNull(d.value))
     .x(d => x(d.date))
     .y(d => y(d.value))
 
+    g.append("path")
+    // .datum(data.filter(line.defined()))
+    .datum(data)
+    .attr("fill", "none")
+    // .attr("stroke", Colors.darkGreen)
+    .attr("stroke", "url(#temperature-gradient)")
+    .attr("stroke-width", "8")
+    .attr("d",line)
 
     //add dots to the undefined values
     g.selectAll("myCircles")
-    .data(data.filter(d => !line.defined()(d)))
+    // .data(data.filter(d => !line.defined()(d)))
+    .data(data.filter(line.defined()))
     .enter()
     .append("circle")
-    .attr("fill", Colors.lightDolphin)
+    // .attr("fill", Colors.darkGreen)
+    .attr("fill", "url(#temperature-gradient)")
     .attr("stroke", "none")
     .attr("cx", d => x(d.date))
     .attr("cy", d => y(d.value))
