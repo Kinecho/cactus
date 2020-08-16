@@ -17,7 +17,7 @@ const logger = new Logger("stackedBarChart");
 
 const DEFAULT_CONFIG = (): StackedBarChartConfig => ({
     w: 400,
-    h: 400,
+    h: 225,
     ensureConsecutive: true,
     margin: { top: 20, left: 0, bottom: 20, right: 0 },
     colors: [
@@ -85,7 +85,6 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
     .style("font-family", fontFamily)
     .attr("viewBox", `0 0 ${ w + margin.left + margin.right } ${ h + margin.top + margin.bottom }`)
     .append('g')
-    .attr('transform', `translate(${ margin.left },${ margin.top })`)
 
     const dataKeys: string[] = getKeys(dataPoints)
     const layers = d3.stack<BarChartDatum>().keys(dataKeys)(data)

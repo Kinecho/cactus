@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="widgetContainer">
         <h2>Positivity Rating</h2>
         <p class="subtext" v-if="locked">The positivity of your reflections over time. Reflect a few more times to reveal it.</p>
         <p class="subtext" v-else-if="empty">The positivity of your reflections over time. Reflect a few more times to reveal it.</p>
@@ -8,7 +8,7 @@
                 chart-id="insights-positivity-widget"
                 :class="{locked}"
                 :chart-data="actualData"
-                :aspect-ratio="0.75"
+                :aspect-ratio="0.56"
                 :options="options"/>
     </div>
 </template>
@@ -61,6 +61,10 @@ export default class PositivityRatingWidget extends Vue {
 @import "variables";
 @import "mixins";
 @import "insights";
+
+.widgetContainer {
+    width: 100%;
+}
 
 .locked {
   filter: blur(8px);

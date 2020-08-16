@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="widgetContainer">
         <h2>Emotions</h2>
         <p class="subtext" v-if="locked">Reflect a few more times to reveal the emotions in your writing over time.</p>
         <p class="subtext" v-else-if="empty">Reflect a few more times to reveal the emotions in your writing over time.</p>
@@ -8,7 +8,7 @@
                 chart-id="emotions-chart-widget"
                 :class="{locked}"
                 :chart-data="actualData"
-                :aspect-ratio="0.75"
+                :aspect-ratio="0.56"
                 :options="options"/>
     </div>
 </template>
@@ -59,6 +59,10 @@ export default class EmotionsBarChartWidget extends Vue {
 @import "variables";
 @import "mixins";
 @import "insights";
+
+.widgetContainer {
+    width: 100%;
+}
 
 .locked {
   filter: blur(8px);

@@ -57,8 +57,8 @@ export function createTickSettingsY(params: Partial<TickSetting<number>>): TickS
 
 export const DEFAULT_CONFIG = (): TimeSeriesConfig => ({
     w: 400,
-    h: 300,
-    margin: { top: 10, right: 0, bottom: 30, left: 0 },
+    h: 225,
+    margin: { top: 0, right: 0, bottom: 10, left: 0 },
     gradient: [
         { offset: "0%", color: Colors.royal },
         { offset: "100%", color: Colors.green }
@@ -108,8 +108,6 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
     // Create the main G container
     const g = svg.append("g")
     .style("font-family", fontFamily)
-    .attr("transform", `translate(${ margin.left }, ${ margin.top })`);
-
 
     // Calculate Y Axis Range
     const maxY = d3Max<TimeSeriesDataPoint, number>(data, d => +d.value)!;
@@ -169,7 +167,7 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
     }
 
     const bgGradients: GradientPoint[] = [{
-        offset: 0.5,
+        offset: "0.5",
         color: "white",
         opacity: 0,
     }]
@@ -189,7 +187,7 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
     })
     .attr("stop-color", function (d) {
         return d.color;
-    }).attr("stop-opacity", d => d.opactiy ?? 1);
+    }).attr("stop-opacity", d => d.opacity ?? 1);
 
 
     if (showYAxis) {
