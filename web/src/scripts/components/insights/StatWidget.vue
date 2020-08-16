@@ -42,25 +42,27 @@
         margin-right: .8rem;
         padding: 2.4rem;
 
-        @include r(600) {
+        @include r(768) {
             margin-right: 1.6rem;
             padding: 3.2rem;
         }
         @include r(960) {
-            @include shadowbox;
-            border: 0;
             flex-grow: 1;
 
             &:last-child {
                 margin-right: 0;
             }
         }
+
+        &:last-child {
+            margin-right: 0;
+        }
     }
 
     .statIcon {
         display: none;
 
-        @include r(600) {
+        @include r(960) {
             align-items: center;
             background-color: $bgGreen;
             border-radius: 50%;
@@ -92,7 +94,7 @@
         font-weight: bold;
         line-height: 1;
 
-        @include r(600) {
+        @include r(768) {
             font-size: 5.6rem;
         }
     }

@@ -98,9 +98,9 @@
     .statsContainer {
         animation: .3s ease-in slideX;
         display: flex;
-        margin: 0 -2.4rem 1.6rem 2.4rem;
+        margin: 0 0 1.6rem;
         overflow: auto;
-        padding-bottom: 1.6rem;
+        padding: 0 2.4rem 1.6rem;
 
         @include r(374) {
             margin: 0 -2.4rem 1.6rem;
