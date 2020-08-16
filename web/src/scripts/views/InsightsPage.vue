@@ -1,5 +1,5 @@
 <template>
-    <div class="insightsDash">
+    <div class="insightsDash" :class="isPlusMember ? 'plus' : 'basic'">
         <div class="centered">
             <h1 v-if="!loading">{{ welcomeMessage }}</h1>
             <div v-if="loading">
@@ -15,10 +15,26 @@
                 </section>
                 <div class="shadyArea">
                     <div class="emotionsChart">
-                        <EmotionsBarChartWidget :data="emotionsChartData.data" :locked="emotionsChartLocked" :empty="emotionsChartData.isEmpty"/>
+                        <EmotionsBarChartWidget v-if="isPlusMember" :data="emotionsChartData.data" :locked="emotionsChartLocked" :empty="emotionsChartData.isEmpty"/>
+                        <router-link tag="section" class="emotionsBasic" v-else :to="pricingHref">
+                            <svg class="lock" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9F9BB8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.8">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            <h2>Emotions</h2>
+                            <p class="subtext">See how the emotions revealed in your notes change over time.</p>
+                        </router-link>
                     </div>
                     <div class="positivityChart">
-                        <PositivityRatingWidget :data="positivityData.data" :locked="positivityLocked" :empty="positivityData.isEmpty"/>
+                        <PositivityRatingWidget v-if="isPlusMember" :data="positivityData.data" :locked="positivityLocked" :empty="positivityData.isEmpty"/>
+                        <router-link tag="section" class="positivityBasic" v-else :to="pricingHref">
+                            <svg class="lock" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.8">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            <h2>Positivity Rating</h2>
+                            <p class="subtext">Understand how your notes reflect your positivity over time.</p>
+                        </router-link>
                     </div>
                 </div>
 
@@ -144,6 +160,10 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
         return {
             highlightCV: this.fromParam === "core-values"
         }
+    }
+
+    get pricingHref(): string {
+        return PageRoute.PRICING;
     }
 
     async fetchGapResults() {
@@ -275,45 +295,143 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
 @import "variables";
 @import "insights";
 
-.shadyArea {
-    background-color: $bgDolphin;
-    margin-bottom: 3.2rem;
-    padding: 2.4rem 2.4rem 0;
-
-    @include r(374) {
-        border-radius: 1.6rem;
-    }
-
+.positivityChart {
     @include r(768) {
         display: flex;
-        margin-bottom: 4.8rem;
-        padding: 3.2rem 3.2rem 0;
+        flex-basis: 50%;
+        margin-right: 1.6rem;
+    }
 
-        .emotionsChart,
-        .positivityChart {
-            flex-basis: 50%;
+    .basic & {
+        margin-bottom: 1.6rem;
+
+        @include r(600) {
+            cursor: pointer;
+            transition: box-shadow .2s, transform .2s ease-in;
+
+            &:hover {
+                box-shadow: 0 6.9px 21px -24px rgba(0, 0, 0, 0.012),
+                    0 11.5px 32.3px -24px rgba(0, 0, 0, 0.036),
+                    0 13.9px 37.7px -24px rgba(0, 0, 0, 0.074),
+                    0 24px 63px -24px rgba(0, 0, 0, 0.15);
+                transform: translateY(-.2rem);
+            }
+        }
+        @include r(768) {
+            margin-right: 0;
+        }
+        @include r(960) {
+            margin-bottom: 0;
+            margin-right: 1.6rem;
         }
     }
 
-    .subtext {
-        margin-bottom: 3.2rem;
+    .plus & {
+        @include r(768) {
+            margin-left: 3.2rem;
+            margin-right: 0;
+        }
     }
 }
 
 .emotionsChart {
-  @include r(768) {
-    margin-right: 1.6rem;
-  }
+    @include r(768) {
+        display: flex;
+        flex-basis: 50%;
+        margin-right: 1.6rem;
+    }
+
+    .basic & {
+        margin-bottom: 1.6rem;
+
+        @include r(600) {
+            cursor: pointer;
+            transition: box-shadow .2s, transform .2s ease-in;
+
+            &:hover {
+                box-shadow: 0 6.9px 21px -24px rgba(0, 0, 0, 0.012),
+                    0 11.5px 32.3px -24px rgba(0, 0, 0, 0.036),
+                    0 13.9px 37.7px -24px rgba(0, 0, 0, 0.074),
+                    0 24px 63px -24px rgba(0, 0, 0, 0.15);
+                transform: translateY(-.2rem);
+            }
+        }
+        @include r(960) {
+            margin-bottom: 0;
+        }
+    }
+
+    .plus & {
+        @include r(768) {
+            margin-right: 3.2rem;
+        }
+    }
+}
+
+.shadyArea {
+    @include r(768) {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto;
+    }
+
+    .basic & {
+        margin: 0 2.4rem;
+
+        @include r(374) {
+            margin: 0;
+        }
+    }
+
+    .plus & {
+        background-color: $bgDolphin;
+        margin-bottom: 3.2rem;
+        padding: 2.4rem;
+
+        @include r(374) {
+            border-radius: 1.6rem;
+        }
+        @include r(768) {
+            padding: 3.2rem;
+            margin-bottom: 4.8rem;
+        }
+    }
 }
 
 .chart img {
   width: 100%;
 }
 
-.positivityChart {
-  @include r(768) {
-    margin-left: 1.6rem;
-  }
+.emotionsBasic {
+    background: lighten($lightDolphin, 30%) url(/assets/images/emotionGraphic.svg) no-repeat right -26px top -4px;
+    border-radius: 1.6rem;
+    color: $dolphin;
+    display: block;
+    padding: 5.6rem 6.4rem 3.2rem 2.4rem;
+    position: relative;
+    text-decoration: none;
+
+    @include r(960) {
+        background-position: right -5px bottom -144px;
+        padding-bottom: 5.6rem;
+    }
+}
+
+.positivityBasic {
+    background-image: url(/assets/images/grainy.png), url(/assets/images/wave.svg), linear-gradient(to right, $royal, $green);
+    background-repeat: repeat, no-repeat, repeat;
+    background-position: 0 0, right 0 top -24px, 0 0;
+    background-size: 10rem, auto, auto;
+    border-radius: 1.6rem;
+    color: $white;
+    display: block;
+    padding: 5.6rem 2.4rem 3.2rem;
+    position: relative;
+    text-decoration: none;
+
+    @include r(960) {
+        padding-bottom: 5.6rem;
+    }
 }
 
 .insightsDash {
@@ -367,19 +485,28 @@ h1 {
   @include r(768) {
     display: grid;
     grid-template-areas: "stats stats stats stats stats stats"
-                "today today today today bubbles bubbles"
-                "eaCharts eaCharts eaCharts eaCharts eaCharts eaCharts"
-                "values values values gap gap gap";
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+        "today today today today bubbles bubbles"
+        "eaCharts eaCharts eaCharts eaCharts eaCharts eaCharts"
+        "values values values gap gap gap";
+    grid-template-columns: repeat(6, 1fr);
     grid-template-rows: auto;
     width: auto;
 
+    .plus & {
+        grid-template-areas: "stats stats stats stats stats stats"
+            "today today today today bubbles bubbles"
+            "eaCharts eaCharts eaCharts eaCharts eaCharts eaCharts"
+            "values values values gap gap gap";
+        grid-template-columns: repeat(6, 1fr);
+    }
+
     &.highlightCV {
-      grid-template-areas:
-                "values values values values gap gap"
-                "stats stats stats stats stats stats"
-                "today today today today bubbles bubbles"
-                "eaCharts eaCharts eaCharts eaCharts eaCharts eaCharts";
+        grid-template-areas:
+            "values values values values gap gap"
+            "stats stats stats stats stats stats"
+            "today today today today bubbles bubbles"
+            "eaCharts eaCharts eaCharts eaCharts eaCharts eaCharts";
+        grid-template-columns: repeat(6, 1fr);
     }
 
     .statsContainer {
@@ -402,6 +529,13 @@ h1 {
       grid-area: gap;
     }
   }
+
+  @include r(960) {
+      grid-template-areas: "stats stats stats stats stats stats stats stats"
+        "today today today today today bubbles bubbles bubbles"
+        "eaCharts eaCharts eaCharts eaCharts values values gap gap";
+      grid-template-columns: repeat(8, 1fr);
+  }
 }
 
 .novaluesContainer {
@@ -409,16 +543,16 @@ h1 {
   background-image: url(/assets/images/grainy.png), url(/assets/images/cvBlob.png), url(/assets/images/pinkVs.svg);
   background-position: 0 0, -17rem -7rem, right -6rem top -4rem;
   background-repeat: repeat, no-repeat, no-repeat;
-  background-size: auto, 28rem, auto;
+  background-size: 10rem, 28rem, auto;
   border-radius: 1.6rem;
   color: $white;
   cursor: pointer;
-  padding: 2.4rem 3.2rem 3.2rem 5.6rem;
+  padding: 5.6rem 3.2rem 3.2rem 2.4rem;
   position: relative;
   width: 100%;
 
   @include r(600) {
-    transition: box-shadow .3s, transform .3s ease-in;
+    transition: box-shadow .2s, transform .2s ease-in;
 
     &:hover {
       box-shadow: 0 6.9px 21px -24px rgba(0, 0, 0, 0.012),
@@ -436,7 +570,7 @@ h1 {
       background-image: url(/assets/images/grainy.png), url(/assets/images/cvBlob.png), url(/assets/images/pinkVs.svg), url(/assets/images/cvBlob.png);
       background-position: 0 0, -17rem -7rem, right -6rem top -4rem, right -6rem bottom -14rem;
       background-repeat: repeat, no-repeat, no-repeat, no-repeat;
-      background-size: auto, 28rem, auto, auto;
+      background-size: 10rem, 28rem, auto, auto;
 
       .subtext {
         font-size: 1.8rem;
@@ -459,6 +593,11 @@ h1 {
     }
   }
 
+  h2 {
+      line-height: 1.2;
+      margin-bottom: .8rem;
+  }
+
   .subtext {
     max-width: 56rem;
     opacity: .8;
@@ -466,16 +605,19 @@ h1 {
 }
 
 .valuesWrapper {
-  border: 1px solid $lightest;
-  border-radius: 1.6rem;
-  margin: 0 2.4rem 3.2rem;
+  margin: 0 2.4rem 1.6rem;
 
   @include r(374) {
-    margin: 0 0 3.2rem;
+    margin: 0 0 1.6rem;
   }
   @include r(768) {
     display: flex;
-    margin: 0 1.6rem 4.8rem 0;
+    margin: 0 1.6rem 0 0;
+  }
+
+  .plus & {
+    border: 1px solid $lightest;
+    border-radius: 1.6rem;
   }
 }
 

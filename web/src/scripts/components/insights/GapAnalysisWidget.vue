@@ -237,7 +237,7 @@
             margin: 0 0 3.2rem;
         }
         @include r(768) {
-            margin: 0 0 4.8rem 1.6rem;
+            margin: 0;
         }
     }
 
@@ -250,7 +250,7 @@
             background-image: url(/assets/images/grainy.png), url(/assets/images/radarChartGraphicGreen.svg);
             background-position: 0 0, right -17rem bottom -9rem;
             background-repeat: repeat, no-repeat;
-            background-size: 16rem, 43rem;
+            background-size: 10rem, 43rem;
             border-radius: 1.6rem;
             color: $white;
             padding: 2.4rem 3.2rem 3.2rem;
@@ -294,7 +294,7 @@
             background-size: 16rem, 19rem;
             border-radius: 1.6rem;
             color: $white;
-            padding: 2.4rem 3.2rem 3.2rem 5.6rem;
+            padding: 5.6rem 3.2rem 3.2rem 2.4rem;
 
             @include r(600) {
                 transition: box-shadow .3s, transform .3s ease-in;
@@ -310,7 +310,8 @@
         }
 
         h2 {
-            margin-bottom: .4rem;
+            line-height: 1.2;
+            margin-bottom: .8rem;
         }
     }
 
