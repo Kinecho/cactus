@@ -1,0 +1,26 @@
+<svg width="97" height="256" viewBox="0 0 97 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M97 172.98L97 178C97 181.314 94.3137 184 91 184V184C87.6863 184 85 181.314 85 178L85 172.98L97 172.98Z" fill="#47445E"/>
+<rect x="97" y="122.469" width="9.18367" height="12" transform="rotate(90 97 122.469)" fill="#D3D1E3"/>
+<rect x="97" y="131.653" width="41.3265" height="12" transform="rotate(90 97 131.653)" fill="#8D8BA1"/>
+<rect x="97" y="26.0408" width="9.18367" height="12" transform="rotate(90 97 26.0408)" fill="#6590ED"/>
+<rect x="97" y="35.2245" width="33.0612" height="12" transform="rotate(90 97 35.2245)" fill="#FFCCD8"/>
+<rect x="97" y="68.2858" width="54.1837" height="12" transform="rotate(90 97 68.2858)" fill="#FF99B2"/>
+<path d="M91 4C94.3137 4 97 6.68629 97 10L97 25.991L85 25.991L85 10C85 6.68629 87.6863 4 91 4V4Z" fill="#BAD0FF"/>
+<path d="M75 110.227L75 178.24C75 181.554 72.3137 184.24 69 184.24V184.24C65.6863 184.24 63 181.554 63 178.24L63 110.227L75 110.227Z" fill="#D3D1E3"/>
+<path d="M69 38.9999C72.3137 38.9999 75 41.6862 75 44.9999L75 75.3081L63 75.3081L63 44.9999C63 41.6862 65.6863 38.9999 69 38.9999V38.9999Z" fill="#6590ED"/>
+<rect x="75" y="75.3152" width="36.3082" height="12" transform="rotate(90 75 75.3152)" fill="#FF99B2"/>
+<path d="M54 74L54 122C54 125.314 51.3137 128 48 128V128C44.6863 128 42 125.314 42 122L42 74L54 74Z" fill="#47445E"/>
+<path d="M48 -3.1529e-07C51.3137 -1.4116e-07 54 2.68629 54 6L54 74L42 74L42 6C42 2.68629 44.6863 -4.8942e-07 48 -3.1529e-07V-3.1529e-07Z" fill="#BAD0FF"/>
+<path d="M33 152.154L33 178C33 181.314 30.3137 184 27 184V184C23.6863 184 21 181.314 21 178L21 152.154L33 152.154Z" fill="#47445E"/>
+<rect x="33" y="91" width="61" height="12" transform="rotate(90 33 91)" fill="#8D8BA1"/>
+<rect x="33" y="66.9952" width="24.353" height="12" transform="rotate(90 33 66.9952)" fill="#FF99B2"/>
+<rect x="33" y="43" width="39" height="12" transform="rotate(90 33 43)" fill="#FFCCD8"/>
+<path d="M27 18C30.3137 18 33 20.6863 33 24L33 43.2896L21 43.2896L21 24C21 20.6863 23.6863 18 27 18V18Z" fill="#BAD0FF"/>
+<path d="M12 225.846L12 250C12 253.314 9.31371 256 6 256V256C2.68629 256 5.72639e-08 253.314 1.65408e-07 250L9.53674e-07 225.846L12 225.846Z" fill="#47445E"/>
+<rect x="12" y="152.235" width="47.0046" height="12" transform="rotate(90 12 152.235)" fill="#D3D1E3"/>
+<rect x="12" y="199.24" width="26.6063" height="12" transform="rotate(90 12 199.24)" fill="#8D8BA1"/>
+<rect x="12" y="83.9456" width="23.0588" height="12" transform="rotate(90 12 83.9456)" fill="#6590ED"/>
+<rect x="12" y="107.004" width="23.0588" height="12" transform="rotate(90 12 107.004)" fill="#FFCCD8"/>
+<rect x="12" y="130.063" width="23.0588" height="12" transform="rotate(90 12 130.063)" fill="#FF99B2"/>
+<path d="M6 60C9.31371 60 12 62.6863 12 66L12 83.9457L1.722e-07 83.9457L7.57863e-07 66C8.66007e-07 62.6863 2.68629 60 6 60V60Z" fill="#BAD0FF"/>
+</svg>
