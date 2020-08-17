@@ -71,7 +71,9 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
     const y = d3.scaleLinear<number>()
     .rangeRound([height, margin.bottom])
 
-    // const z = d3.scaleOrdinal(colors)
+    const yMax = d3.max(data, d => d.total)
+    y.domain([0, yMax]).nice()
+
     const getColor = (key: string) => {
         return ToneColorMap[key] ?? Colors.bgDolphin
     }
@@ -93,9 +95,9 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
     const dataKeys: string[] = getKeys(dataPoints)
     const layers = d3.stack<BarChartDatum>().keys(dataKeys)(data)
     logger.info("layers", layers)
-    if (layers.length > 0) {
-        y.domain([0, d3.max(layers[layers.length - 1], d => (d[0] + d[1]))!]).nice()
-    }
+    // if (layers.length > 0) {
+    //     y.domain([0, d3.max(layers[layers.length - 1], d => (d[0] + d[1]))!]).nice()
+    // }
 
     const layer = svg.selectAll('layer')
     .data(layers)

@@ -2,7 +2,7 @@ import { EdgeInsets } from "@shared/util/LayoutUtil";
 import { TickSetting } from "@shared/charts/ChartTypes";
 import { RecursivePartial } from "@shared/util/ObjectUtil";
 import Logger from "@shared/Logger"
-import { getDatesBetween } from "@shared/util/DateUtil";
+import { ensureConsecutive, getDatesBetween } from "@shared/util/DateUtil";
 import { ToneID } from "@shared/api/ToneAnalyzerTypes";
 import { DateTime } from "luxon";
 
@@ -102,47 +102,55 @@ export function getSeriesTotal<T extends BarXType>(data: BarChartDataPoint<T>): 
     }, 0);
 }
 
-export const mockEmotionsData = (): BarChartDataPoint<Date>[] => [
-    {
-        x: DateTime.local(2020, 8, 3).toJSDate(),
-        series: { [ToneID.anger]: 0.5 }
-    },
-    {
-        x: DateTime.local(2020, 8, 2).toJSDate(),
-        series: { [ToneID.sadness]: 0.73, [ToneID.anger]: 0.5 }
-    },
-    {
-        x: DateTime.local(2020, 8, 1).toJSDate(),
-        series: { [ToneID.sadness]: 0.5, [ToneID.analytical]: 0.9, [ToneID.confident]: 0.5 }
-    },
-    {
-        x: DateTime.local(2020, 8, 5).toJSDate(),
-        series: {
-            [ToneID.sadness]: 0.5,
-            [ToneID.analytical]: 0.9,
-            [ToneID.confident]: 0.5,
-            [ToneID.joy]: 1
-        }
-    },
-    {
+export const mockEmotionsData = (): BarChartDataPoint<Date>[] => ensureConsecutive({
+    createEmpty: d => ({ x: d, series: {} }),
+    getDate: item => item.x,
+    start: DateTime.local(2020, 8, 1).toJSDate(),
+    end: DateTime.local(2020, 8, 14).toJSDate(),
+    data: [
+        {
+            x: DateTime.local(2020, 8, 1).toJSDate(),
+            series: { [ToneID.sadness]: 0.75, [ToneID.tentative]: 0.9 }
+        },
+        {
+            x: DateTime.local(2020, 8, 2).toJSDate(),
+            series: { [ToneID.sadness]: 0.73, [ToneID.anger]: 1 }
+        },
+        {
+            x: DateTime.local(2020, 8, 3).toJSDate(),
+            series: { [ToneID.anger]: 0.5 }
+        },
+        {
+            x: DateTime.local(2020, 8, 5).toJSDate(),
+            series: {
+                [ToneID.sadness]: 3,
+                [ToneID.tentative]: 0.8,
+                // [ToneID.confident]: 1,
+                // [ToneID.joy]: 1,
+                // [ToneID.confident]: 1,
+                [ToneID.analytical]: 1,
+            }
+        },
+        {
 
-        x: DateTime.local(2020, 8, 6).toJSDate(),
-        series: {
-            [ToneID.sadness]: 1,
-            [ToneID.analytical]: 0.9,
-            [ToneID.confident]: 1,
-            [ToneID.joy]: 1,
-            [ToneID.fear]: 0.5
-        }
-    },
-    {
-        x: DateTime.local(2020, 8, 10).toJSDate(),
-        series: {
-            [ToneID.sadness]: 1,
-            [ToneID.analytical]: 0.9,
-            [ToneID.confident]: 1,
-            [ToneID.joy]: 1,
-            [ToneID.fear]: 0.5
-        }
-    },
-];
+            x: DateTime.local(2020, 8, 6).toJSDate(),
+            series: {
+                [ToneID.sadness]: 1,
+                // [ToneID.analytical]: 0.9,
+                [ToneID.confident]: 1,
+                // [ToneID.joy]: 1,
+                [ToneID.fear]: 0.5
+            }
+        },
+        {
+            x: DateTime.local(2020, 8, 10).toJSDate(),
+            series: {
+                [ToneID.sadness]: 1,
+                // [ToneID.analytical]: 0.9,
+                // [ToneID.confident]: 1,
+                // [ToneID.joy]: 1,
+                // [ToneID.fear]: 0.5
+            }
+        },
+    ]
+});
