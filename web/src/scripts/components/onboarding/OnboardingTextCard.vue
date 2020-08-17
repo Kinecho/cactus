@@ -11,6 +11,9 @@
             </div>
         </div>
         <img height="300" width="300" class="image" v-if="card.imageUrl" :src="card.imageUrl" alt="Image"/>
+        <video v-if="card.videoUrl" muted autoplay>
+            <source :src="card.videoUrl" type="video/mp4">
+        </video>
     </div>
 </template>
 
@@ -22,6 +25,7 @@
     import MarkdownText from "@components/MarkdownText.vue";
     import OnboardingActionButton from "@components/OnboardingActionButton.vue";
     import CactusMember from "@shared/models/CactusMember";
+    import { CoreValue } from "@shared/models/CoreValueTypes";
 
     @Component({
         components: {
@@ -41,8 +45,11 @@
         @Prop({ type: String, required: false, default: null })
         selectedInsightWord!: string | null;
 
+        @Prop({type: String as CoreValue, required: false, default: null})
+        selectedCoreValue!: CoreValue | null;
+
         get markdownText() {
-            return this.card.getMarkdownText({ selectedInsight: this.selectedInsightWord })
+            return this.card.getMarkdownText({ selectedInsight: this.selectedInsightWord, selectedCoreValue: this.selectedCoreValue })
         }
 
         closeOnboarding() {
@@ -87,13 +94,14 @@
         }
     }
 
-    .image {
+    .image,
+    video {
         height: auto;
         width: 100%;
 
         @include r(768) {
             align-self: center;
-            max-width: 33%;
+            max-width: 40%;
         }
     }
 

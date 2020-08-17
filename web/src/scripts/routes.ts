@@ -57,7 +57,7 @@ export const routes: MetaRouteConfig[] = [
                 path: "gap",
                 component: () => lazyLoadView(import(
                 /* webpackPrefetch: true, webpackChunkName: "pages" */
-                "@web/views/marketing/GapOnboarding.vue"
+                "@web/views/marketing/GapAnalysisMLP.vue"
                 )),
                 meta: {
                     title: "Cactus | Mindfulness without meditation",
@@ -69,7 +69,7 @@ export const routes: MetaRouteConfig[] = [
                 path: "core-values",
                 component: () => lazyLoadView(import(
                 /* webpackPrefetch: true, webpackChunkName: "pages" */
-                "@web/views/marketing/CoreValuesOnboarding.vue"
+                "@web/views/marketing/CoreValuesMLP.vue"
                 )),
                 meta: {
                     title: "Cactus | Mindfulness without meditation",
@@ -81,14 +81,27 @@ export const routes: MetaRouteConfig[] = [
                 path: "magic",
                 component: () => lazyLoadView(import(
                 /* webpackPrefetch: true, webpackChunkName: "pages" */
-                "@web/views/marketing/MagicMomentOnboarding.vue"
+                "@web/views/marketing/MagicMomentMLP.vue"
                 )),
                 meta: {
                     title: "Cactus | Mindfulness without meditation",
                     description: "Research-backed prompts to increase self-awareness and resilience",
                     footer: { lifted: true },
                 },
-            }, {
+            },
+            {
+                path: "magic-cv",
+                component: () => lazyLoadView(import(
+                /* webpackPrefetch: true, webpackChunkName: "pages" */
+                "@web/views/marketing/MagicCoreValuesMLP.vue"
+                )),
+                meta: {
+                    title: "Cactus | Mindfulness without meditation",
+                    description: "Research-backed prompts to increase self-awareness and resilience",
+                    footer: { lifted: true },
+                },
+            },
+            {
                 path: "*",
                 redirect: "/",
             }
@@ -451,8 +464,35 @@ export const routes: MetaRouteConfig[] = [
     },
     {
         component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
-        "@web/views/OnboardingPage.vue")),
+        "@web/views/MagicMomentOnboardingPage.vue")),
         path: PageRoute.HELLO_ONBOARDING,
+        meta: {
+            passMember: true,
+            authRequired: true,
+            // navBar: false,
+        },
+        props: (route) => {
+            return {
+                // page: route.params.page ? Number(route.params.page) : 1,
+                pageStatus: route.params.status ?? null,
+                slug: route.params.slug,
+            }
+        },
+        children: [
+            {
+                path: ":slug",
+                props: true,
+                children: [{
+                    path: ":status",
+                    props: true,
+                }]
+            }
+        ]
+    },
+    {
+        component: () => lazyLoadView(import(/* webpackPrefetch: true, webpackChunkName: "pages" */
+        "@web/views/MagicCoreValuesOnboardingPage.vue")),
+        path: PageRoute.HELLO_CORE_VALUES,
         meta: {
             passMember: true,
             authRequired: true,

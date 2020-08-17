@@ -249,4 +249,8 @@
         display: none;
     }
 
+    .checkbox-label {
+        font-size: 1.8rem;
+    }
+
 </style>

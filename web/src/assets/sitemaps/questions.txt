@@ -1,5 +1,5 @@
 https://cactus.app/terms-of-service
 https://cactus.app/privacy-policy
 https://cactus.app/pricing
-https://cactus.app/ios-login-continue
 https://cactus.app/sponsor
+https://cactus.app/

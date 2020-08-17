@@ -31,11 +31,13 @@
 
     const logger = new Logger("OnboardingPage");
 
+    const BASE_PATH = PageRoute.HELLO_CORE_VALUES;
+
     @Component({
         components: { Onboarding }
     })
-    export default class OnboardingPage extends Vue {
-        name = "OnboardingPage";
+    export default class MagicCoreValuesOnboarding extends Vue {
+        name = "MagicCoreValuesOnboarding";
 
         @Prop({ type: String as () => PageStatus, required: false, default: null })
         pageStatus!: PageStatus | null;
@@ -58,12 +60,12 @@
 
         async setIndex(index: number) {
             if (index === 0) {
-                await pushRoute(PageRoute.HELLO_ONBOARDING);
+                await pushRoute(BASE_PATH);
                 return
             }
             let card = this.cards[index];
             const slug = card?.slug ?? (index + 1);
-            await pushRoute(`${ PageRoute.HELLO_ONBOARDING }/${ slug }`);
+            await pushRoute(`${ BASE_PATH }/${ slug }`);
         }
 
         get index(): number {
@@ -82,7 +84,7 @@
         }
 
         get cards(): OnboardingCardViewModel[] {
-            let cards = OnboardingCardViewModel.createAll(this.settings);
+            let cards = OnboardingCardViewModel.createCoreValuesCards(this.settings);
             if (isPremiumTier(this.member.tier) && this.pageStatus !== PageStatus.success) {
                 cards = cards.filter(card => card.type !== CardType.upsell)
             }

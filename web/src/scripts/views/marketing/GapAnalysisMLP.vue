@@ -44,8 +44,8 @@
             PlayStoreIcon,
         }
     })
-    export default class LandingPageOne extends Vue {
-        name = "GapOnboarding.vue";
+    export default class GapAnalysisMLP extends Vue {
+        name = "GapAnalysisMLP.vue";
 
         get mainCtaPath(): string {
             return PageRoute.GAP_ANALYSIS
