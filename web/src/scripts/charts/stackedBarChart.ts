@@ -148,7 +148,7 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
         .call(yAxis)
     }
 
-    if (showLegend) {
+    if (showLegend || true) {
         const legendX = margin.left
         // add the legend
         const legend = svg.append('g')

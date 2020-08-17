@@ -233,7 +233,7 @@ export default class InsightsDataSource {
             end: new Date(),
             data,
             getDate: item => item.x,
-            createEmpty: d => ({ x: d, series: {total: 0} })
+            createEmpty: d => ({ x: d, series: {} })
         })
 
         logger.info("Emotions chart data", processed);
