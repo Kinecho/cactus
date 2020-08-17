@@ -44,9 +44,9 @@ export default class ToneColorLegend extends Vue {
     @import "mixins";
 
     .tone-legend {
-        display: flex;
-        flex-flow: row wrap;
-        justify-content: center;
+        display: grid;
+        grid-auto-rows: 1fr;
+        grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
         list-style: none;
         margin: 0;
         padding: 0;
@@ -55,8 +55,7 @@ export default class ToneColorLegend extends Vue {
     .tone {
         align-items: center;
         display: flex;
-        padding-left: 2rem;
-        padding-right: 2rem;
+        padding: .4rem 1.2rem .4rem 0;
     }
 
     .color {
