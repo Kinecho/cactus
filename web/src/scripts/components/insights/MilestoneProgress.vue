@@ -11,7 +11,7 @@
 import Vue from "vue";
 import Component from "vue-class-component"
 import { Prop } from "vue-property-decorator";
-import { defaultMilestones, Milestone } from "@components/insights/MilestoneTypes";
+import { defaultMilestones, MilestoneProgressItem } from "@components/insights/MilestoneTypes";
 
 @Component
 export default class MilestoneProgress extends Vue {
@@ -20,8 +20,8 @@ export default class MilestoneProgress extends Vue {
     @Prop({ type: Number, default: 0, required: true })
     totalReflections!: number;
 
-    @Prop({ type: Array as () => Milestone[], default: () => defaultMilestones(), required: false })
-    milestones!: Milestone[]
+    @Prop({ type: Array as () => MilestoneProgressItem[], default: () => defaultMilestones(), required: false })
+    milestones!: MilestoneProgressItem[]
 
 }
 </script>

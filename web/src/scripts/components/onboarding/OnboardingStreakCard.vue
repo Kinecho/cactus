@@ -25,12 +25,12 @@ import OnboardingActionButton from "@components/OnboardingActionButton.vue";
 import CactusMember from "@shared/models/CactusMember";
 import { CoreValue } from "@shared/models/CoreValueTypes";
 import SvgIcon from "@components/SvgIcon.vue";
-import MilestoneProgress from "@components/insights/MilestoneProgress.vue";
+import MilestoneProgressItem from "@components/insights/MilestoneProgress.vue";
 import { getMilestoneText } from "@components/insights/MilestoneTypes";
 
 @Component({
     components: {
-        MilestoneProgress,
+        MilestoneProgress: MilestoneProgressItem,
         MarkdownText,
         SvgIcon,
         ActionButton: OnboardingActionButton,

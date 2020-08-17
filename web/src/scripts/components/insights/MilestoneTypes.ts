@@ -1,8 +1,8 @@
-export interface Milestone {
+export interface MilestoneProgress {
     type: "check" | "flag"
 }
 
-export const defaultMilestones = (): Milestone[] => {
+export const defaultMilestones = (): MilestoneProgress[] => {
     return [
         { type: "check" },
         { type: "check" },

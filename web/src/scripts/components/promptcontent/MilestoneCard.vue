@@ -22,12 +22,12 @@ import { Prop } from "vue-property-decorator";
 import PromptContentCardViewModel, { PromptCardViewModel } from "@components/promptcontent/PromptContentCardViewModel";
 import { getMilestoneText } from "@components/insights/MilestoneTypes";
 import MarkdownText from "@components/MarkdownText.vue";
-import MilestoneProgress from "@components/insights/MilestoneProgress.vue";
+import MilestoneProgressItem from "@components/insights/MilestoneProgress.vue";
 
 @Component({
     components: {
         MarkdownText,
-        MilestoneProgress
+        MilestoneProgress: MilestoneProgressItem
     }
 })
 export default class MilestoneCard extends Vue {

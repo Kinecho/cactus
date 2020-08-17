@@ -1,5 +1,5 @@
 import Vue from "vue";
-import MilestoneProgress from "@components/insights/MilestoneProgress.vue"
+import MilestoneProgressItem from "@components/insights/MilestoneProgress.vue"
 import { number } from "@storybook/addon-knobs";
 import { getMilestoneText } from "@components/insights/MilestoneTypes";
 import MarkdownText from "@components/MarkdownText.vue";
@@ -17,7 +17,7 @@ export const DayOne = () => Vue.extend({
         <pre>Note: message and title are added for testing purposes and are not styled</pre>
     </div>`,
     components: {
-        MilestoneProgress,
+        MilestoneProgress: MilestoneProgressItem,
         MarkdownText
     },
     props: {
@@ -41,7 +41,7 @@ export const DayTwo = () => Vue.extend({
     <pre>Note: message and title are added for testing purposes and are not styled</pre>
     </div>`,
     components: {
-        MilestoneProgress,
+        MilestoneProgress: MilestoneProgressItem,
         MarkdownText
     },
     props: {
@@ -65,7 +65,7 @@ export const DayThree = () => Vue.extend({
         <pre>Note: message and title are added for testing purposes and are not styled</pre>
     </div>`,
     components: {
-        MilestoneProgress,
+        MilestoneProgress: MilestoneProgressItem,
         MarkdownText
     },
     props: {
@@ -89,7 +89,7 @@ export const DayFour = () => Vue.extend({
         <pre>Note: message and title are added for testing purposes and are not styled</pre>
     </div>`,
     components: {
-        MilestoneProgress,
+        MilestoneProgress: MilestoneProgressItem,
         MarkdownText
     },
     props: {
@@ -113,7 +113,7 @@ export const DayFive = () => Vue.extend({
         <pre>Note: message and title are added for testing purposes and are not styled</pre>
     </div>`,
     components: {
-        MilestoneProgress,
+        MilestoneProgress: MilestoneProgressItem,
         MarkdownText
     },
     props: {
@@ -137,7 +137,7 @@ export const DaySix = () => Vue.extend({
         <pre>Note: message and title are added for testing purposes and are not styled</pre>
     </div>`,
     components: {
-        MilestoneProgress,
+        MilestoneProgress: MilestoneProgressItem,
         MarkdownText
     },
     props: {
@@ -161,7 +161,7 @@ export const DaySeven = () => Vue.extend({
         <pre>Note: message and title are added for testing purposes and are not styled</pre>
     </div>`,
     components: {
-        MilestoneProgress,
+        MilestoneProgress: MilestoneProgressItem,
         MarkdownText
     },
     props: {
