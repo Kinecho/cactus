@@ -87,6 +87,10 @@ export default class EmotionsBarChartWidget extends Vue {
   filter: blur(8px);
 }
 
+.tone-legend.locked {
+    display: none;
+}
+
 .subtext {
     margin-bottom: 2.4rem;
 }
