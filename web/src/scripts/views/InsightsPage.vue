@@ -103,6 +103,7 @@ import { BarChartDataPoint, mockEmotionsData } from "@shared/charts/StackedBarCh
 import InsightsDataSource from "@web/datasource/InsightsDataSource";
 import { ChartDataResult } from "@shared/charts/ChartTypes";
 import { MilestoneID, Milestones } from "@shared/Milestones";
+import { ToneID } from "@shared/api/ToneAnalyzerTypes";
 
 const logger = new Logger("InsightsPage");
 const copy = CopyService.getSharedInstance().copy;
@@ -260,9 +261,9 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
         return (this.member.stats.reflections?.totalCount ?? 0) < Milestones[MilestoneID.positivity_analysis].unlockedAfterReflectionCount
     }
 
-    get emotionsChartData(): { isEmpty: boolean, data: BarChartDataPoint<Date>[] } {
+    get emotionsChartData(): { isEmpty: boolean, data: BarChartDataPoint<Date, ToneID>[] } {
         const reflections = this.chartData.reflections_l14
-        const data: ChartDataResult<BarChartDataPoint<Date>> = this.chartData.getEmotionsChartData(reflections)
+        const data: ChartDataResult<BarChartDataPoint<Date, ToneID>> = this.chartData.getEmotionsChartData(reflections)
         return { data: data.data, isEmpty: data.nonEmptyCount === 0 };
     }
 

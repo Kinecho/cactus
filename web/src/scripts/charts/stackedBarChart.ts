@@ -12,7 +12,9 @@ import {
     StackedBarChartOptions
 } from "@shared/charts/StackedBarChartTypes";
 import { Colors } from "@shared/util/ColorUtil";
-import { ToneColorMap } from "@shared/api/ToneAnalyzerTypes";
+import { ToneColorMap, ToneID } from "@shared/api/ToneAnalyzerTypes";
+import { curveCardinal, line as d3Line } from "d3";
+import { isNull } from "@shared/util/ObjectUtil";
 
 const logger = new Logger("stackedBarChart");
 
@@ -55,7 +57,7 @@ const DEFAULT_CONFIG = (): StackedBarChartConfig => ({
     }
 })
 
-export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPoint<Date>[], options: StackedBarChartOptions) {
+export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPoint<Date, ToneID>[], options: StackedBarChartOptions) {
     const config = mergeConfig(DEFAULT_CONFIG(), options);
     const { w, h, margin, colors, showYAxis, ticks, axisColor, fontFamily, showXAxisLine, barWidth, ensureConsecutive, showLegend } = config
     const data: BarChartDatum[] = processDataPoints(dataPoints, ensureConsecutive)
@@ -65,17 +67,17 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
 
     const x = d3.scaleBand<Date>()
     .rangeRound([0, width])
-    .domain(data.map(d => d.x))
+    .domain(data.map(d => new Date(d.x)))
     .padding(barWidth ? 0 : 0.2)
 
     const y = d3.scaleLinear<number>()
     .rangeRound([height, margin.bottom])
 
-    const yMax = d3.max(data, d => d.total)
+    const yMax = d3.max(data, d => d.total) ?? 0
     y.domain([0, yMax]).nice()
 
     const getColor = (key: string) => {
-        return ToneColorMap[key] ?? Colors.bgDolphin
+        return ToneColorMap[key as ToneID] ?? Colors.bgDolphin
     }
     const xAxis = d3.axisBottom<Date>(x)
     .tickFormat(d3.timeFormat("%-m/%-d"))
@@ -83,7 +85,7 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
     .tickSize(ticks.x.size)
     .tickPadding(ticks.x.padding)
 
-    const parent = d3.select<d3.BaseType, BarChartDataPoint<Date>>(selector)
+    const parent = d3.select<d3.BaseType, BarChartDataPoint<Date, ToneID>>(selector)
     parent.select("svg").remove()
 
     const svg = parent.append("svg")
@@ -142,6 +144,27 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
     .each(function (_, i) {
         if ((i % ticks.every) !== 0) d3.select(this).select("text").remove()
     });
+
+    const line = d3.line<BarChartDatum>()
+    .curve(curveCardinal)
+    .defined(d => !isNull(d.total) && d.total > 0)
+    .x(d => x(new Date(d.x))!)
+    .y(d => y(d.value ?? 0))
+
+
+    const dotRadius = 4;
+    //add dots to the undefined values
+    svg.selectAll<d3.BaseType, BarChartDatum>("undefinedCircles")
+    .data(data.filter(d => isNull(d.total) || d.total === 0))
+    .enter()
+    .append("circle")
+    .attr("fill", Colors.lightGray)
+    .attr("stroke", "none")
+    .attr("cx", d => x(new Date(d.x))!)
+    .attr("cy", d => y(0))
+    .attr("transform", `translate(${ (barWidth ? (x.bandwidth() / 2 - (barWidth ?? 0) / 2) : 0) + dotRadius * 2 }, -4)`)
+    .attr("r", dotRadius)
+
 
     if (showYAxis) {
         const yAxis = d3.axisLeft(y)
