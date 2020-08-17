@@ -11,6 +11,7 @@ import JournalFeedDataSource from "@web/datasource/JournalFeedDataSource";
 import PromotionalOfferManager from "@web/managers/PromotionalOfferManager";
 import IosAppService from "@web/ios/IosAppService";
 import ExperimentManager from "@web/managers/ExperimentManager";
+import InsightsDataSource from "@web/datasource/InsightsDataSource";
 
 const logger = new Logger("CactusMemberService");
 
@@ -292,6 +293,7 @@ export default class CactusMemberService {
 
     async signOut() {
         JournalFeedDataSource.current?.stop();
+        InsightsDataSource.shared.setMember(null)
         this.currentMemberUnsubscriber?.()
         await getAuth().signOut();
     }

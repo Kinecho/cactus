@@ -19,6 +19,7 @@ import { getAppType, isAndroidApp } from "@web/DeviceUtil";
 import { pushRoute } from "@web/NavigationUtil";
 import CactusMember from "@shared/models/CactusMember";
 import CactusMemberService from "@web/services/CactusMemberService";
+import InsightsDataSource from "@web/datasource/InsightsDataSource";
 
 const logger = new Logger("auth.ts");
 
