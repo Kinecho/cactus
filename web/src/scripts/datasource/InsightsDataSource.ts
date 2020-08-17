@@ -23,8 +23,8 @@ export default class InsightsDataSource {
     static shared: InsightsDataSource = Vue.observable(new InsightsDataSource());
     private member: CactusMember | null = null;
     reflectionsObserver: ListenerUnsubscriber | null = null;
-    emotionsChartDays = 14;
-    positivityChartDays = 14;
+    emotionsChartDays = 13;
+    positivityChartDays = 13;
     loading: boolean = false
     reflections_l30: ReflectionResponse[] = [];
     reflections_l14: ReflectionResponse[] = [];
