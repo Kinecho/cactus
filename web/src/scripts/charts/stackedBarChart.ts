@@ -158,7 +158,7 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
     .data(data.filter(d => isNull(d.total) || d.total === 0))
     .enter()
     .append("circle")
-    .attr("fill", Colors.lightGray)
+    .attr("fill", "#d3d1e3")
     .attr("stroke", "none")
     .attr("cx", d => x(new Date(d.x))!)
     .attr("cy", d => y(0))
