@@ -14,17 +14,6 @@
                     </div>
                 </section>
                 <div class="shadyArea">
-                    <div class="emotionsChart">
-                        <EmotionsBarChartWidget v-if="isPlusMember" :data="emotionsChartData.data" :locked="emotionsChartLocked" :empty="emotionsChartData.isEmpty"/>
-                        <router-link tag="section" class="emotionsBasic" v-else :to="pricingHref">
-                            <svg class="lock" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9F9BB8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.8">
-                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                            </svg>
-                            <h2>Emotions</h2>
-                            <p class="subtext">See how the emotions revealed in your notes change over time.</p>
-                        </router-link>
-                    </div>
                     <div class="positivityChart">
                         <PositivityRatingWidget v-if="isPlusMember" :data="positivityData.data" :locked="positivityLocked" :empty="positivityData.isEmpty"/>
                         <router-link tag="section" class="positivityBasic" v-else :to="pricingHref">
@@ -34,6 +23,17 @@
                             </svg>
                             <h2>Positivity Rating</h2>
                             <p class="subtext">Understand how your notes reflect your positivity over time.</p>
+                        </router-link>
+                    </div>
+                    <div class="emotionsChart">
+                        <EmotionsBarChartWidget v-if="isPlusMember" :data="emotionsChartData.data" :locked="emotionsChartLocked" :empty="emotionsChartData.isEmpty"/>
+                        <router-link tag="section" class="emotionsBasic" v-else :to="pricingHref">
+                            <svg class="lock" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9F9BB8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.8">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            <h2>Emotions</h2>
+                            <p class="subtext">See how the emotions revealed in your notes change over time.</p>
                         </router-link>
                     </div>
                 </div>
@@ -296,10 +296,12 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
 @import "insights";
 
 .positivityChart {
+    margin-bottom: 4rem;
   @include r(768) {
     display: flex;
     flex-basis: 50%;
-    margin-right: 1.6rem;
+    margin-bottom: 0;
+    margin-left: 1.6rem;
   }
 
   .basic & {
@@ -318,18 +320,18 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
       }
     }
     @include r(768) {
-      margin-right: 0;
+      margin-left: 0;
     }
     @include r(960) {
       margin-bottom: 0;
-      margin-right: 1.6rem;
+      margin-left: 1.6rem;
     }
   }
 
   .plus & {
     @include r(768) {
-      margin-left: 3.2rem;
-      margin-right: 0;
+      margin-left: 0;
+      margin-right: 3.2rem;
     }
   }
 }
@@ -338,7 +340,7 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
   @include r(768) {
     display: flex;
     flex-basis: 50%;
-    margin-right: 1.6rem;
+    margin-left: 1.6rem;
   }
 
   .basic & {
@@ -363,7 +365,7 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
 
   .plus & {
     @include r(768) {
-      margin-right: 3.2rem;
+      margin-left: 3.2rem;
     }
   }
 }
@@ -395,7 +397,7 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
       border-radius: 1.6rem;
     }
     @include r(768) {
-      padding: 3.2rem;
+      padding: 3.2rem 3.2rem 4rem;
       margin-bottom: 4.8rem;
     }
   }

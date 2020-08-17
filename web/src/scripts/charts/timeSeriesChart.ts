@@ -257,11 +257,11 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
     .data(data.filter(d => isNull(d.value)))
     .enter()
     .append("circle")
-    .attr("fill", "url(#temperature-gradient)")
+    .attr("fill", "#d3d1e3")
     .attr("stroke", "none")
     .attr("cx", d => x(d.date)!)
     .attr("cy", d => y(d.value ?? 0))
-    .attr("r", 4)
+    .attr("r", 3)
 
 
     if (!isBlank(labelX)) {
