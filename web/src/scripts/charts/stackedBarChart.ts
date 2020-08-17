@@ -72,7 +72,7 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
     .rangeRound([height, margin.bottom])
 
     // const z = d3.scaleOrdinal(colors)
-    const z = (key: string) => {
+    const getColor = (key: string) => {
         return ToneColorMap[key] ?? Colors.bgDolphin
     }
     const xAxis = d3.axisBottom<Date>(x)
@@ -102,7 +102,7 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
     .enter()
     .append('g')
     .attr('class', 'layer')
-    .style('fill', (d, i) => (z(d.key))!)
+    .style('fill', (d, i) => getColor(d.key))
     .sort((a, b) => b.index - a.index)
 
     const _w = barWidth ?? x.bandwidth()
@@ -171,7 +171,7 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
         })
         .attr('width', legendRectHeight)
         .attr('height', legendRectHeight)
-        .attr('fill', (d, i) => (z(d.key))!)
+        .attr('fill', (d, i) => getColor(d.key))
         .attr("rx", legendRectHeight / 2);
 
         legend.selectAll('text')
