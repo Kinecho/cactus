@@ -12,6 +12,7 @@ import {
     StackedBarChartOptions
 } from "@shared/charts/StackedBarChartTypes";
 import { Colors } from "@shared/util/ColorUtil";
+import { ToneColorMap } from "@shared/api/ToneAnalyzerTypes";
 
 const logger = new Logger("stackedBarChart");
 
@@ -70,8 +71,10 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
     const y = d3.scaleLinear<number>()
     .rangeRound([height, margin.bottom])
 
-    const z = d3.scaleOrdinal(colors)
-
+    // const z = d3.scaleOrdinal(colors)
+    const z = (key: string) => {
+        return ToneColorMap[key] ?? Colors.bgDolphin
+    }
     const xAxis = d3.axisBottom<Date>(x)
     .tickFormat(d3.timeFormat("%-m/%-d"))
     .ticks(d3.timeDay.every(1))
@@ -148,7 +151,7 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
         .call(yAxis)
     }
 
-    if (showLegend || true) {
+    if (showLegend) {
         const legendX = margin.left
         // add the legend
         const legend = svg.append('g')

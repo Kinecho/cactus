@@ -20,9 +20,9 @@ export interface Stringable {
 export type BarXType = Date
 export type SeriesType = Record<string, number>
 
-export interface BarChartDataPoint<T extends BarXType> {
+export interface BarChartDataPoint<T extends BarXType, S extends string> {
     x: T,
-    series: Record<string, number>
+    series: Record<S, number>
     // [key: string]: number
     total?: number
 }

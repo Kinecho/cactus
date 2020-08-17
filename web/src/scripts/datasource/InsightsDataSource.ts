@@ -11,6 +11,7 @@ import { TimeSeriesDataPoint } from "@shared/charts/TimeSeriesChartTypes";
 import { PromptType } from "@shared/models/ReflectionPrompt";
 import { ChartDataResult } from "@shared/charts/ChartTypes";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
+import { ToneID } from "@shared/api/ToneAnalyzerTypes";
 
 const logger = new Logger("InsightsDataSource");
 
@@ -173,14 +174,14 @@ export default class InsightsDataSource {
      * If there are missing days in the range of Today - interval 14 days, they will be filled in as blank
      * @return {BarChartDataPoint<Date>[]}
      */
-    getEmotionsChartData(reflections: ReflectionResponse[]): ChartDataResult<BarChartDataPoint<Date>> {
+    getEmotionsChartData(reflections: ReflectionResponse[]): ChartDataResult<BarChartDataPoint<Date, ToneID>> {
         const rangeStart = DateTime.local().set({
             hour: 0,
             minute: 0,
             second: 0,
             millisecond: 0
         }).minus({ days: this.emotionsChartDays - 1 })
-        const data: BarChartDataPoint<Date>[] = [];
+        const data: BarChartDataPoint<Date, ToneID>[] = [];
         let lastReflection: ReflectionResponse | null = null;
         reflections.forEach(r => {
             const documentTone = r.toneAnalysis?.documentTone
@@ -208,13 +209,12 @@ export default class InsightsDataSource {
 
             const tones = documentTone.tones ?? [];
             if (tones.length === 0) {
-                // lastReflection = r;
                 return;
             }
 
-            const series: Record<string, number> = {};
+            const series: Record<ToneID, number> = {};
             tones.reduce((total, score) => {
-                total[score.toneName] = score.score
+                total[score.toneId] = score.score
                 return total;
             }, series)
 
@@ -228,7 +228,7 @@ export default class InsightsDataSource {
         })
         const dataCount = data.length;
 
-        const processed = ensureConsecutive<BarChartDataPoint<Date>>({
+        const processed = ensureConsecutive<BarChartDataPoint<Date, ToneID>>({
             start: rangeStart.toJSDate(),
             end: new Date(),
             data,
