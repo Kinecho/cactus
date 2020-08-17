@@ -266,13 +266,25 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
     .attr("stroke-width", "8")
     .attr("d", line)
 
-    //add dots to the undefined values
+    // add dots to the defined values values to support gaps in data
     g.selectAll("myCircles")
     // .data(data.filter(d => !line.defined()(d)))
     .data(data.filter(line.defined()))
     .enter()
     .append("circle")
-    // .attr("fill", Colors.darkGreen)
+    .attr("fill", "url(#temperature-gradient)")
+    .attr("stroke", "none")
+    .attr("cx", d => x(d.date))
+    .attr("cy", d => y(d.value))
+    .attr("r", 4)
+
+
+    //add dots to the undefined values
+    g.selectAll("undefinedCircles")
+    .data(data.filter(d => !line.defined()(d)))
+    // .data(data.filter(line.defined()))
+    .enter()
+    .append("circle")
     .attr("fill", "url(#temperature-gradient)")
     .attr("stroke", "none")
     .attr("cx", d => x(d.date))
