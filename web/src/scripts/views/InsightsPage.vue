@@ -252,27 +252,22 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
 
     get positivityData(): { data: TimeSeriesDataPoint[], isEmpty: boolean } {
         const reflections = this.chartData.reflections_l14;
-        // const reflections = [];
         const data = this.chartData.getPositivityChartData(reflections);
         return { data: data.data, isEmpty: data.nonEmptyCount === 0 }
     }
 
     get positivityLocked(): boolean {
-        // return (this.member.stats.reflections?.totalCount ?? 0) < Milestones[MilestoneID.positivity_analysis].unlockedAfterReflectionCount
+        return (this.member.stats.reflections?.totalCount ?? 0) < Milestones[MilestoneID.positivity_analysis].unlockedAfterReflectionCount
     }
 
     get emotionsChartData(): { isEmpty: boolean, data: BarChartDataPoint<Date>[] } {
         const reflections = this.chartData.reflections_l14
-        // const reflections = [];
         const data: ChartDataResult<BarChartDataPoint<Date>> = this.chartData.getEmotionsChartData(reflections)
-        // return { data: data.data, isEmpty: data.nonEmptyCount === 0 };
-        return { data: mockEmotionsData(), isEmpty: data.nonEmptyCount === 0 };
-
+        return { data: data.data, isEmpty: data.nonEmptyCount === 0 };
     }
 
     get emotionsChartLocked(): boolean {
-        // return (this.member.stats.reflections?.totalCount ?? 0) < Milestones[MilestoneID.emotions_analysis].unlockedAfterReflectionCount
-        return false
+        return (this.member.stats.reflections?.totalCount ?? 0) < Milestones[MilestoneID.emotions_analysis].unlockedAfterReflectionCount
     }
 
     /* START: JOURNAL FEED DATA SOURCE DELEGATE */

@@ -118,27 +118,43 @@ export const mockEmotionsData = (): BarChartDataPoint<Date>[] => ensureConsecuti
         },
         {
             x: DateTime.local(2020, 8, 3).toJSDate(),
-            series: { [ToneID.anger]: 0.5 }
+            series: { [ToneID.sadness]: 1,
+                [ToneID.tentative]: 0.3,
+                [ToneID.confident]: 6,
+                [ToneID.joy]: 0.7,
+                [ToneID.confident]: 0.1,
+                [ToneID.analytical]: 0.6, }
         },
         {
             x: DateTime.local(2020, 8, 5).toJSDate(),
             series: {
-                [ToneID.sadness]: 3,
+                [ToneID.sadness]: 1,
                 [ToneID.tentative]: 0.8,
-                // [ToneID.confident]: 1,
-                // [ToneID.joy]: 1,
-                // [ToneID.confident]: 1,
-                [ToneID.analytical]: 1,
+                [ToneID.confident]: 1,
+                [ToneID.joy]: 0.3,
+                [ToneID.confident]: 1,
+                [ToneID.analytical]: 0.6,
             }
         },
         {
 
             x: DateTime.local(2020, 8, 6).toJSDate(),
             series: {
-                [ToneID.sadness]: 1,
+                [ToneID.sadness]: .8,
+                [ToneID.analytical]: 0.9,
+                [ToneID.confident]: .45,
+                [ToneID.joy]: .4,
+                [ToneID.fear]: 0.5
+            }
+        },
+        {
+
+            x: DateTime.local(2020, 8, 7).toJSDate(),
+            series: {
+                [ToneID.sadness]: .8,
                 // [ToneID.analytical]: 0.9,
-                [ToneID.confident]: 1,
-                // [ToneID.joy]: 1,
+                // [ToneID.confident]: .45,
+                [ToneID.joy]: 2,
                 [ToneID.fear]: 0.5
             }
         },
@@ -146,10 +162,26 @@ export const mockEmotionsData = (): BarChartDataPoint<Date>[] => ensureConsecuti
             x: DateTime.local(2020, 8, 10).toJSDate(),
             series: {
                 [ToneID.sadness]: 1,
-                // [ToneID.analytical]: 0.9,
-                // [ToneID.confident]: 1,
-                // [ToneID.joy]: 1,
-                // [ToneID.fear]: 0.5
+                [ToneID.analytical]: 0.9,
+                [ToneID.confident]: 1,
+                [ToneID.joy]: 1,
+                [ToneID.fear]: 0.5
+            }
+        },
+        {
+            x: DateTime.local(2020, 8, 12).toJSDate(),
+            series: {
+                [ToneID.sadness]: .3,
+                [ToneID.confident]: .8,
+                [ToneID.joy]: 1,
+            }
+        },
+        {
+            x: DateTime.local(2020, 8, 14).toJSDate(),
+            series: {
+                [ToneID.anger]: 1,
+                [ToneID.confident]: .8,
+                [ToneID.joy]: .4,
             }
         },
     ]
