@@ -20,7 +20,7 @@ const DEFAULT_CONFIG = (): StackedBarChartConfig => ({
     w: 400,
     h: 225,
     ensureConsecutive: true,
-    margin: { top: 20, left: 0, bottom: 20, right: 0 },
+    margin: { top: 0, left: 0, bottom: 10, right: 0 },
     colors: [
         Colors.dolphin,
         Colors.mediumDolphin,

@@ -12,7 +12,7 @@
                 :aspect-ratio="0.56"
                 :options="options"/>
 
-        <tone-color-legend :tone-ids="tones"/>
+        <tone-color-legend :class="{locked}" :tone-ids="tones"/>
     </div>
 </template>
 

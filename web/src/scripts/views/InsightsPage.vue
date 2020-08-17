@@ -257,7 +257,7 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
     }
 
     get positivityLocked(): boolean {
-        return this.chartData.reflections_l30.length < 0;
+        return (this.member.stats.reflections?.totalCount ?? 0) < 3
     }
 
     get emotionsChartData(): { isEmpty: boolean, data: BarChartDataPoint<Date>[] } {
@@ -268,7 +268,7 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
     }
 
     get emotionsChartLocked(): boolean {
-        return this.chartData.reflections_l14.length < 0;
+        return (this.member.stats.reflections?.totalCount ?? 0) < 7
     }
 
     /* START: JOURNAL FEED DATA SOURCE DELEGATE */
