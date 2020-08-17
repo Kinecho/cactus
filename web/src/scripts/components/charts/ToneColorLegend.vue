@@ -40,23 +40,34 @@ export default class ToneColorLegend extends Vue {
 </script>
 
 <style scoped lang="scss">
-@import "variables";
-@import "mixins";
+    @import "variables";
+    @import "mixins";
 
-.tone-legend {
-  list-style: none;
+    .tone-legend {
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: center;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
 
-  .tone {
-    display: flex;
-    align-content: center;
-    align-items: center;
-  }
+    .tone {
+        align-items: center;
+        display: flex;
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
 
-  .color {
-    width: 1rem;
-    height: 1rem;
-    margin-right: 1rem;
-    border-radius: 50%;
-  }
-}
+    .color {
+        border-radius: 50%;
+        height: 1.2rem;
+        margin-right: .4rem;
+        width: 1.2rem;
+    }
+
+    .label {
+        color: $lightText;
+        font-size: 1.4rem;
+    }
 </style>
