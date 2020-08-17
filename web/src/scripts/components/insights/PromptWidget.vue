@@ -309,6 +309,7 @@
 
     .entry {
         margin: 0 0 2.4rem -2rem;
+        opacity: .8;
         padding-left: 2rem;
         position: relative;
         white-space: pre-line;
