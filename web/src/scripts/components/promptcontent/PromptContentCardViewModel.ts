@@ -234,7 +234,7 @@ export default class PromptContentCardViewModel implements PromptCardViewModel {
         const { prompt, promptContent, responses, member } = params;
         let lastReflectIndex: number | null = null;
         let hasInsightsAnalysis = false;
-        let showMilestoneCard = (member.stats.reflections?.totalCount ?? 0) < 8;
+        const showMilestoneCard = (member.stats.reflections?.totalCount ?? 0) < 8;
         const models: PromptCardViewModel[] = promptContent.content.filter(c => {
             if (c.contentType === ContentType.share_reflection && isBlank(getResponseText(responses))) {
                 return false;
