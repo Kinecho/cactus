@@ -102,6 +102,7 @@ import EmotionsBarChartWidget from "@components/insights/EmotionsBarChartWidget.
 import { BarChartDataPoint, mockEmotionsData } from "@shared/charts/StackedBarChartTypes";
 import InsightsDataSource from "@web/datasource/InsightsDataSource";
 import { ChartDataResult } from "@shared/charts/ChartTypes";
+import { MilestoneID, Milestones } from "@shared/Milestones";
 
 const logger = new Logger("InsightsPage");
 const copy = CopyService.getSharedInstance().copy;
@@ -257,7 +258,7 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
     }
 
     get positivityLocked(): boolean {
-        return (this.member.stats.reflections?.totalCount ?? 0) < 3
+        return (this.member.stats.reflections?.totalCount ?? 0) < Milestones[MilestoneID.positivity_analysis].unlockedAfterReflectionCount
     }
 
     get emotionsChartData(): { isEmpty: boolean, data: BarChartDataPoint<Date>[] } {
@@ -268,7 +269,7 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
     }
 
     get emotionsChartLocked(): boolean {
-        return (this.member.stats.reflections?.totalCount ?? 0) < 7
+        return (this.member.stats.reflections?.totalCount ?? 0) < Milestones[MilestoneID.emotions_analysis].unlockedAfterReflectionCount
     }
 
     /* START: JOURNAL FEED DATA SOURCE DELEGATE */
@@ -296,109 +297,109 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
 @import "insights";
 
 .positivityChart {
+  @include r(768) {
+    display: flex;
+    flex-basis: 50%;
+    margin-right: 1.6rem;
+  }
+
+  .basic & {
+    margin-bottom: 1.6rem;
+
+    @include r(600) {
+      cursor: pointer;
+      transition: box-shadow .2s, transform .2s ease-in;
+
+      &:hover {
+        box-shadow: 0 6.9px 21px -24px rgba(0, 0, 0, 0.012),
+        0 11.5px 32.3px -24px rgba(0, 0, 0, 0.036),
+        0 13.9px 37.7px -24px rgba(0, 0, 0, 0.074),
+        0 24px 63px -24px rgba(0, 0, 0, 0.15);
+        transform: translateY(-.2rem);
+      }
+    }
     @include r(768) {
-        display: flex;
-        flex-basis: 50%;
-        margin-right: 1.6rem;
+      margin-right: 0;
     }
-
-    .basic & {
-        margin-bottom: 1.6rem;
-
-        @include r(600) {
-            cursor: pointer;
-            transition: box-shadow .2s, transform .2s ease-in;
-
-            &:hover {
-                box-shadow: 0 6.9px 21px -24px rgba(0, 0, 0, 0.012),
-                    0 11.5px 32.3px -24px rgba(0, 0, 0, 0.036),
-                    0 13.9px 37.7px -24px rgba(0, 0, 0, 0.074),
-                    0 24px 63px -24px rgba(0, 0, 0, 0.15);
-                transform: translateY(-.2rem);
-            }
-        }
-        @include r(768) {
-            margin-right: 0;
-        }
-        @include r(960) {
-            margin-bottom: 0;
-            margin-right: 1.6rem;
-        }
+    @include r(960) {
+      margin-bottom: 0;
+      margin-right: 1.6rem;
     }
+  }
 
-    .plus & {
-        @include r(768) {
-            margin-left: 3.2rem;
-            margin-right: 0;
-        }
+  .plus & {
+    @include r(768) {
+      margin-left: 3.2rem;
+      margin-right: 0;
     }
+  }
 }
 
 .emotionsChart {
+  @include r(768) {
+    display: flex;
+    flex-basis: 50%;
+    margin-right: 1.6rem;
+  }
+
+  .basic & {
+    margin-bottom: 1.6rem;
+
+    @include r(600) {
+      cursor: pointer;
+      transition: box-shadow .2s, transform .2s ease-in;
+
+      &:hover {
+        box-shadow: 0 6.9px 21px -24px rgba(0, 0, 0, 0.012),
+        0 11.5px 32.3px -24px rgba(0, 0, 0, 0.036),
+        0 13.9px 37.7px -24px rgba(0, 0, 0, 0.074),
+        0 24px 63px -24px rgba(0, 0, 0, 0.15);
+        transform: translateY(-.2rem);
+      }
+    }
+    @include r(960) {
+      margin-bottom: 0;
+    }
+  }
+
+  .plus & {
     @include r(768) {
-        display: flex;
-        flex-basis: 50%;
-        margin-right: 1.6rem;
+      margin-right: 3.2rem;
     }
-
-    .basic & {
-        margin-bottom: 1.6rem;
-
-        @include r(600) {
-            cursor: pointer;
-            transition: box-shadow .2s, transform .2s ease-in;
-
-            &:hover {
-                box-shadow: 0 6.9px 21px -24px rgba(0, 0, 0, 0.012),
-                    0 11.5px 32.3px -24px rgba(0, 0, 0, 0.036),
-                    0 13.9px 37.7px -24px rgba(0, 0, 0, 0.074),
-                    0 24px 63px -24px rgba(0, 0, 0, 0.15);
-                transform: translateY(-.2rem);
-            }
-        }
-        @include r(960) {
-            margin-bottom: 0;
-        }
-    }
-
-    .plus & {
-        @include r(768) {
-            margin-right: 3.2rem;
-        }
-    }
+  }
 }
 
 .shadyArea {
+  @include r(768) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+  }
+
+  .basic & {
+    margin: 0 2.4rem;
+
+    @include r(374) {
+      margin: 0;
+    }
+    @include r(960) {
+      margin-bottom: 4.8rem;
+    }
+  }
+
+  .plus & {
+    background-color: $bgDolphin;
+    margin-bottom: 3.2rem;
+    padding: 2.4rem;
+
+    @include r(374) {
+      border-radius: 1.6rem;
+    }
     @include r(768) {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: auto;
+      padding: 3.2rem;
+      margin-bottom: 4.8rem;
     }
-
-    .basic & {
-        margin: 0 2.4rem;
-
-        @include r(374) {
-            margin: 0;
-        }
-        @include r(960) {
-            margin-bottom: 4.8rem;
-        }
-    }
-
-    .plus & {
-        background-color: $bgDolphin;
-        margin-bottom: 3.2rem;
-        padding: 2.4rem;
-
-        @include r(374) {
-            border-radius: 1.6rem;
-        }
-        @include r(768) {
-            padding: 3.2rem;
-            margin-bottom: 4.8rem;
-        }
-    }
+  }
 }
 
 .chart img {
@@ -406,35 +407,35 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
 }
 
 .emotionsBasic {
-    background: lighten($lightDolphin, 30%) url(/assets/images/emotionGraphic.svg) no-repeat right -26px top -4px;
-    border-radius: 1.6rem;
-    color: $dolphin;
-    display: block;
-    padding: 5.6rem 6.4rem 3.2rem 2.4rem;
-    position: relative;
-    text-decoration: none;
+  background: lighten($lightDolphin, 30%) url(/assets/images/emotionGraphic.svg) no-repeat right -26px top -4px;
+  border-radius: 1.6rem;
+  color: $dolphin;
+  display: block;
+  padding: 5.6rem 6.4rem 3.2rem 2.4rem;
+  position: relative;
+  text-decoration: none;
 
-    @include r(960) {
-        background-position: right -5px bottom -144px;
-        padding-bottom: 5.6rem;
-    }
+  @include r(960) {
+    background-position: right -5px bottom -144px;
+    padding-bottom: 5.6rem;
+  }
 }
 
 .positivityBasic {
-    background-image: url(/assets/images/grainy.png), url(/assets/images/wave.svg), linear-gradient(to right, $royal, $green);
-    background-repeat: repeat, no-repeat, repeat;
-    background-position: 0 0, right 0 top -24px, 0 0;
-    background-size: 10rem, auto, auto;
-    border-radius: 1.6rem;
-    color: $white;
-    display: block;
-    padding: 5.6rem 2.4rem 3.2rem;
-    position: relative;
-    text-decoration: none;
+  background-image: url(/assets/images/grainy.png), url(/assets/images/wave.svg), linear-gradient(to right, $royal, $green);
+  background-repeat: repeat, no-repeat, repeat;
+  background-position: 0 0, right 0 top -24px, 0 0;
+  background-size: 10rem, auto, auto;
+  border-radius: 1.6rem;
+  color: $white;
+  display: block;
+  padding: 5.6rem 2.4rem 3.2rem;
+  position: relative;
+  text-decoration: none;
 
-    @include r(960) {
-        padding-bottom: 5.6rem;
-    }
+  @include r(960) {
+    padding-bottom: 5.6rem;
+  }
 }
 
 .insightsDash {
@@ -496,20 +497,20 @@ h1 {
     width: auto;
 
     .plus & {
-        grid-template-areas: "stats stats stats stats stats stats"
+      grid-template-areas: "stats stats stats stats stats stats"
             "today today today today bubbles bubbles"
             "eaCharts eaCharts eaCharts eaCharts eaCharts eaCharts"
             "values values values gap gap gap";
-        grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: repeat(6, 1fr);
     }
 
     &.highlightCV {
-        grid-template-areas:
+      grid-template-areas:
             "values values values gap gap gap"
             "stats stats stats stats stats stats"
             "today today today today bubbles bubbles"
             "eaCharts eaCharts eaCharts eaCharts eaCharts eaCharts";
-        grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: repeat(6, 1fr);
     }
 
     .statsContainer {
@@ -534,10 +535,10 @@ h1 {
   }
 
   @include r(960) {
-      grid-template-areas: "stats stats stats stats stats stats stats stats"
+    grid-template-areas: "stats stats stats stats stats stats stats stats"
         "today today today today today bubbles bubbles bubbles"
         "eaCharts eaCharts eaCharts eaCharts values values gap gap";
-      grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: repeat(8, 1fr);
   }
 }
 
@@ -597,8 +598,8 @@ h1 {
   }
 
   h2 {
-      line-height: 1.2;
-      margin-bottom: .8rem;
+    line-height: 1.2;
+    margin-bottom: .8rem;
   }
 
   .subtext {
