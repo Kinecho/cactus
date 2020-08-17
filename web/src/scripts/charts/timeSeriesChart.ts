@@ -74,6 +74,7 @@ export const DEFAULT_CONFIG = (): TimeSeriesConfig => ({
         y: DEFAULT_TICK_SETTINGS_Y(),
     },
     showYAxis: false,
+    showXAxisLine: false,
 })
 
 
@@ -87,7 +88,7 @@ export const DEFAULT_CONFIG = (): TimeSeriesConfig => ({
  */
 export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[], options: Partial<TimeSeriesConfig> = {}) {
     const config = Object.assign(DEFAULT_CONFIG(), options)
-    const { w, h, margin, gradient, showYAxis, labels, ticks, fontFamily, axisColor, fixedDateRange } = config;
+    const { w, h, margin, gradient, showYAxis, labels, ticks, fontFamily, axisColor, fixedDateRange, showXAxisLine } = config;
 
     const { x: labelX, y: labelY } = labels ?? {}
 
@@ -145,6 +146,10 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
     .attr("transform", `translate(${ 0 }, ${ height })`)
     .call(xAxis)
     .selectAll("path").style("stroke", axisColor)
+
+    if (!showXAxisLine) {
+        xSvg.selectAll("path").remove()
+    }
 
     xSvg.selectAll(".tick text")
     .style("font-size", `${ ticks.x.fontSize }`)

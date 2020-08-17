@@ -24,6 +24,7 @@ export interface TimeSeriesConfig {
     margin: EdgeInsets,
     gradient: GradientPoint[],
     showYAxis: boolean,
+    showXAxisLine: boolean,
     axisColor: string,
     fixedDateRange: boolean,
     labels: {
