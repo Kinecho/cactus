@@ -109,9 +109,24 @@ export default class InsightsDataSource {
             if (!sentiment?.score || !r.createdAt) {
                 return;
             }
+
+
             const rDt = DateTime.fromJSDate(r.createdAt).set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+            if (rDt.diff(rangeStart).as("days") < 0) {
+                return;
+            }
+
             const score = (sentiment.score + 1) / 2;
-            const point = { value: score, date: DateTime.fromJSDate(r.createdAt).set({hour: 0, minute: 0, second: 0, millisecond: 0}).toJSDate(), label: "" }
+            const point = {
+                value: score,
+                date: DateTime.fromJSDate(r.createdAt).set({
+                    hour: 0,
+                    minute: 0,
+                    second: 0,
+                    millisecond: 0
+                }).toJSDate(),
+                label: ""
+            }
 
             if (lastPoint?.date && DateTime.fromJSDate(lastPoint.date)
             .set({ hour: 0, minute: 0, second: 0, millisecond: 0 })

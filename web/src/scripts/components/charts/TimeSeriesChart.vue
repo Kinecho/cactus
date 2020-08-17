@@ -10,7 +10,7 @@ import Component from "vue-class-component";
 import { Prop, Watch } from "vue-property-decorator";
 import Logger from "@shared/Logger";
 import { debounce } from "debounce";
-import { drawTimeSeriesChart} from "@web/charts/timeSeriesChart";
+import { drawTimeSeriesChart } from "@web/charts/timeSeriesChart";
 import { TimeSeriesConfig, TimeSeriesDataPoint } from "@shared/charts/TimeSeriesChartTypes";
 
 const logger = new Logger("TimeseriesChart");
@@ -67,6 +67,10 @@ export default class TimeSeriesChart extends Vue {
             return;
         }
         const width = Math.max(this.chartWidth, 300);
+        console.log("Drawing chart with size; ", {
+            w: width,
+            h: width * this.aspectRatio,
+        })
         drawTimeSeriesChart(`.${ this.chartId }`,
         this.chartData,
         {
