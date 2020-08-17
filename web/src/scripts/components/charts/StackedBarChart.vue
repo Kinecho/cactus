@@ -84,6 +84,14 @@ export default class StackedBarChart extends Vue {
 @import "variables";
 @import "mixins";
 
+.stacked-bar-container {
+    margin-bottom: 2.4rem;
+
+    @include r(768) {
+        margin-bottom: 3.2rem;
+    }
+}
+
 .stacked-bar-chart {
   font-family: $font-stack;
 }
