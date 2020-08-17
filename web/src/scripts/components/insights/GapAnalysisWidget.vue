@@ -47,11 +47,11 @@
         <dropdown-menu :items="mentalFitnessDropdownLinks" class="dotsBtn"/>
     </section>
     <!-- Show PLUS User Empty State message -->
-    <section v-else-if="isPlusMember" class="plus nogapContainer">
+    <router-link v-else-if="isPlusMember" tag="section" class="plus nogapContainer" :to="gapAssessmentHref">
         <h2>What Makes You Happy?</h2>
         <p class="subtext">Understand what contributes to (and detracts from) your satisfaction.</p>
         <router-link tag="button" class="secondary esButton" :to="gapAssessmentHref">Take the Quiz</router-link>
-    </section>
+    </router-link>
     <!-- Show BASIC User Upgrade message -->
     <router-link v-else-if="!isPlusMember" tag="section" class="basic nogapContainer" :to="gapAssessmentHref">
         <svg class="lock" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
@@ -178,6 +178,7 @@
         @include r(960) {
             align-items: center;
             display: flex;
+            justify-content: space-between;
         }
     }
 
@@ -221,6 +222,7 @@
         }
 
         @include r(960) {
+            margin: 0;
             width: 66%;
 
             .legend {
