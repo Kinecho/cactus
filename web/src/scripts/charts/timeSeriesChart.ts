@@ -276,7 +276,7 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
     .attr("stroke", "none")
     .attr("cx", d => x(d.date))
     .attr("cy", d => y(d.value))
-    .attr("r", 3)
+    .attr("r", 4)
 
 
     if (!isBlank(labelX)) {

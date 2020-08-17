@@ -60,7 +60,7 @@ export function getToneDisplayName(tone: ToneID): string {
         case ToneID.joy:
             return "Joy";
         case ToneID.sadness:
-            return "Joy";
+            return "Sadness";
         case ToneID.analytical:
             return "Analytical";
         case ToneID.confident:
