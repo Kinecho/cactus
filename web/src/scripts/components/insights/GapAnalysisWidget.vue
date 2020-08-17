@@ -239,7 +239,7 @@
             margin: 0 0 3.2rem;
         }
         @include r(768) {
-            margin: 0;
+            margin: 0 0 4.8rem;
         }
     }
 
@@ -255,7 +255,7 @@
             background-size: 10rem, 43rem;
             border-radius: 1.6rem;
             color: $white;
-            padding: 2.4rem 3.2rem 3.2rem;
+            padding: 3.2rem;
 
             @include r(600) {
                 transition: box-shadow .3s, transform .3s ease-in;

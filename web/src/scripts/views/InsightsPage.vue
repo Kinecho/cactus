@@ -381,6 +381,9 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
         @include r(374) {
             margin: 0;
         }
+        @include r(960) {
+            margin-bottom: 4.8rem;
+        }
     }
 
     .plus & {
@@ -502,7 +505,7 @@ h1 {
 
     &.highlightCV {
         grid-template-areas:
-            "values values values values gap gap"
+            "values values values gap gap gap"
             "stats stats stats stats stats stats"
             "today today today today bubbles bubbles"
             "eaCharts eaCharts eaCharts eaCharts eaCharts eaCharts";
@@ -564,7 +567,7 @@ h1 {
   }
 
   &.plus {
-    padding-left: 3.2rem;
+    padding: 3.2rem;
 
     @include r(600) {
       background-image: url(/assets/images/grainy.png), url(/assets/images/cvBlob.png), url(/assets/images/pinkVs.svg), url(/assets/images/cvBlob.png);
@@ -612,7 +615,7 @@ h1 {
   }
   @include r(768) {
     display: flex;
-    margin: 0 1.6rem 0 0;
+    margin: 0 1.6rem 4.8rem 0;
   }
 
   .plus & {
