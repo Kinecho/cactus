@@ -89,7 +89,7 @@ export function processDataPoints<T extends BarXType>(data: BarChartDataPoint<T>
         })
 
         const total = getSeriesTotal(d)
-        const datum = { ...d.series, total, x: d.x.valueOf() }
+        const datum = { ...d.series, total, x: d.x }
         processed.push(datum)
         last = d;
     })
