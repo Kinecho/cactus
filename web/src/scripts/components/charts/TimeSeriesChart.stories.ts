@@ -6,6 +6,7 @@ import {
 } from "@web/charts/timeSeriesChart";
 import { boolean, number, text } from "@storybook/addon-knobs";
 import { TimeSeriesConfig, TimeSeriesDataPoint } from "@shared/charts/TimeSeriesChartTypes";
+import { DateTime } from "luxon";
 
 export default {
     title: "Charts/TimeSeries"
@@ -29,22 +30,26 @@ export const Configurable = () => Vue.extend({
     },
     computed: {
         data(): TimeSeriesDataPoint[] {
-            let lastDate = new Date('2020-01-10')
-            lastDate.setHours(0)
-            lastDate.setMinutes(0)
-            lastDate.setSeconds(0)
+            // let lastDate = new Date('2020-01-10')
+            const startDate = DateTime.local(2020, 8, 4, 0, 0, 0, 0)
+            // lastDate.setHours(0)
+            // lastDate.setMinutes(0)
+            // lastDate.setSeconds(0)
             return [
-                { date: new Date('2020-01-01'), value: 0.5, label: "One" },
-                { date: new Date('2020-01-02'), value: 0.43, label: "Two" },
-                { date: new Date('2020-01-03'), value: 0.88, label: "Three" },
-                { date: new Date('2020-01-04'), value: 0.95, label: "Four" },
-                { date: new Date('2020-01-05'), value: 0.73, label: "Five" },
-                { date: new Date('2020-01-06'), value: 0.81, label: "Six" },
-                { date: new Date('2020-01-07'), value: 0.96, label: "Seven" },
-                { date: new Date('2020-01-08'), value: 0.94, label: "Eight" },
-                { date: new Date('2020-01-09'), value: 0.3, label: "Nine" },
-                { date: lastDate, value: 0.6, label: "ten" },
-                { date: new Date('2020-01-11'), value: 0.3, label: "Nine" },
+                { date: startDate.plus({ days: 0 }).toJSDate(), value: 0.5, label: "One" },
+                { date: startDate.plus({ days: 1 }).toJSDate(), value: 0.5, label: "One" },
+                { date: startDate.plus({ days: 2 }).toJSDate(), value: 0.43, label: "Two" },
+                { date: startDate.plus({ days: 3 }).toJSDate(), value: 0.88, label: "Three" },
+                { date: startDate.plus({ days: 4 }).toJSDate(), value: null, label: "Four" },
+                { date: startDate.plus({ days: 5 }).toJSDate(), value: 0.73, label: "Five" },
+                { date: startDate.plus({ days: 6 }).toJSDate(), value: null, label: "Six" },
+                { date: startDate.plus({ days: 7 }).toJSDate(), value: 0.96, label: "Seven" },
+                { date: startDate.plus({ days: 8 }).toJSDate(), value: 0.94, label: "Eight" },
+                { date: startDate.plus({ days: 9 }).toJSDate(), value: 0.3, label: "Nine" },
+                { date: startDate.plus({ days: 10 }).toJSDate(), value: 0.6, label: "ten" },
+                { date: startDate.plus({ days: 11 }).toJSDate(), value: 0.3, label: "Nine" },
+                { date: startDate.plus({ days: 12 }).toJSDate(), value: 0.3, label: "Nine" },
+                { date: startDate.plus({ days: 13 }).toJSDate(), value: 0.3, label: "Nine" },
             ]
         },
         options(): Partial<TimeSeriesConfig> {

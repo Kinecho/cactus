@@ -133,7 +133,8 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
     //Create the x-axis svg
     const xAxis = axisBottom<Date>(x)
     .tickFormat(ticks.x.format)
-    .ticks(timeDay.every(ticks.x.interval ?? 1))
+    // .ticks(timeDay.every(ticks.x.interval ?? 1))
+    .ticks(data.length)
     .tickSize(ticks.x.size)
     .tickPadding(ticks.x.padding)
 
@@ -297,13 +298,10 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
         .text(labelY)
     }
 
-
-    // xTicks.attr("transform", `translate(10, 0)`)
-
     //remove ticks as necessary
     if (!isNull(ticks.x.interval)) {
         xSvg.selectAll(".tick text").each(function (_, i) {
-            // if (i % (ticks.x.interval ?? 1) !== 0) select(this).remove();
+            if (i % (ticks.x.interval ?? 1) !== 0) select(this).remove();
         });
     }
 
