@@ -1,4 +1,3 @@
-import * as d3 from "d3";
 import {
     area,
     axisBottom,
@@ -11,6 +10,7 @@ import {
     max as d3Max,
     scaleLinear,
     scaleTime,
+    line as d3Line,
     select,
     timeFormat,
 } from "d3";
@@ -124,7 +124,7 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
         .range([margin.left, w - margin.left - margin.right])
         .domain([d1, d2])
     } else {
-        x = d3.scaleTime()
+        x = scaleTime()
         .rangeRound([margin.left, w - margin.left - margin.right])
         .domain([d1, d2])
     }
@@ -245,7 +245,7 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
     .attr("d", chartArea.curve(curveCardinal));
 
     //add line
-    const line = d3.line()
+    const line = d3Line()
     .curve(curveCardinal)
     .defined(d => !isNull(d.value))
     .x(d => x(d.date))
@@ -298,7 +298,7 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
     //remove ticks as necessary
     if (!isNull(ticks.x.interval)) {
         xSvg.selectAll(".tick text").each(function (_, i) {
-            // if (i % (ticks.x.interval ?? 1) !== 0) d3.select(this).remove();
+            // if (i % (ticks.x.interval ?? 1) !== 0) select(this).remove();
         });
     }
 
