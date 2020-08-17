@@ -7,7 +7,7 @@ export enum MilestoneID {
     positivity_analysis = "positivity_analysis",
 }
 
-export const Milestones: {[id: MilestoneID]: MilestoneConfig} = {
+export const Milestones: {[id in MilestoneID]: MilestoneConfig} = {
     [MilestoneID.emotions_analysis]: {
         unlockedAfterReflectionCount: 7
     },
