@@ -67,7 +67,7 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
     .padding(barWidth ? 0 : 0.2)
 
     const y = d3.scaleLinear<number>()
-    .rangeRound([height, 0])
+    .rangeRound([height,  margin.bottom])
 
     const z = d3.scaleOrdinal(colors)
 

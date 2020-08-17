@@ -188,14 +188,23 @@ export default class InsightsDataSource {
                 return;
             }
 
-            const rDt = DateTime.fromJSDate(r.createdAt);
+            const rDt = DateTime.fromJSDate(r.createdAt).set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
             if (rDt.diff(rangeStart).as("days") < 0) {
                 return;
             }
 
-            if (lastReflection?.createdAt && DateTime.fromJSDate(lastReflection.createdAt).diff(rDt).as("days") === 0) {
-                return;
+            if (lastReflection?.createdAt) {
+                const lastDt = DateTime.fromJSDate(lastReflection.createdAt).set({
+                    hour: 0,
+                    minute: 0,
+                    second: 0,
+                    millisecond: 0
+                });
+                if (lastReflection?.createdAt && lastDt.diff(rDt).as("days") === 0) {
+                    return;
+                }
             }
+
 
             const tones = documentTone.tones ?? [];
             if (tones.length === 0) {
