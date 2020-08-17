@@ -252,7 +252,6 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
 
     get positivityData(): { data: TimeSeriesDataPoint[], isEmpty: boolean } {
         const reflections = this.chartData.reflections_l14;
-        // const reflections = [];
         const data = this.chartData.getPositivityChartData(reflections);
         return { data: data.data, isEmpty: data.nonEmptyCount === 0 }
     }
@@ -263,7 +262,6 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
 
     get emotionsChartData(): { isEmpty: boolean, data: BarChartDataPoint<Date>[] } {
         const reflections = this.chartData.reflections_l14
-        // const reflections = [];
         const data: ChartDataResult<BarChartDataPoint<Date>> = this.chartData.getEmotionsChartData(reflections)
         return { data: data.data, isEmpty: data.nonEmptyCount === 0 };
     }

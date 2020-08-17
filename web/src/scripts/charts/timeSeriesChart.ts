@@ -217,37 +217,12 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
     .x(d => x(d.date))
     .y0(y(0))
     .y1(d => y(d.value));
-    //
-    // const undefArea = area<TimeSeriesDataPoint>()
-    // .defined(d => isNull(d.value))
-    // .x(d => x(d.date))
-    // .y0(y(0))
-    // .y1(d => y(1))
-    //
-    // //create a mask from the data set that is null
-    // const mask = g.append("mask")
-    // .attr("id", "area-null-data")
-    //
-    // //apply a full width/height white rectangle for the mask.
-    // mask.append("rect")
-    // .attr("width", "100%")
-    // .attr("height", "100%")
-    // .attr("fill", "white");
-    //
-    // //apply the path of the null value area chart, fill it with black for the mask to work.
-    // mask.append("path")
-    // .datum(data)
-    // .attr("fill", "black")
-    // .attr("d", undefArea);
-    //
+
     // // add normal, defined data
     g.append("path")
     .datum(data.filter(chartArea.defined()))
     .datum(data)
-    // .attr("fill", "url(#temperature-gradient)")
     .attr("fill", "url(#bg_gradient1)")
-    // .attr("fill", "blue")
-    // .attr("mask", "url(#area-null-data)")
     .attr("d", chartArea.curve(curveCardinal));
 
     //add line
@@ -258,21 +233,29 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
     .y(d => y(d.value))
 
     g.append("path")
-    // .datum(data.filter(line.defined()))
     .datum(data)
     .attr("fill", "none")
-    // .attr("stroke", Colors.darkGreen)
     .attr("stroke", "url(#temperature-gradient)")
     .attr("stroke-width", "8")
     .attr("d", line)
 
-    //add dots to the undefined values
+    // add dots to the defined values values to support gaps in data
     g.selectAll("myCircles")
-    // .data(data.filter(d => !line.defined()(d)))
     .data(data.filter(line.defined()))
     .enter()
     .append("circle")
-    // .attr("fill", Colors.darkGreen)
+    .attr("fill", "url(#temperature-gradient)")
+    .attr("stroke", "none")
+    .attr("cx", d => x(d.date))
+    .attr("cy", d => y(d.value))
+    .attr("r", 4)
+
+
+    //add dots to the undefined values
+    g.selectAll("undefinedCircles")
+    .data(data.filter(d => !line.defined()(d)))
+    .enter()
+    .append("circle")
     .attr("fill", "url(#temperature-gradient)")
     .attr("stroke", "none")
     .attr("cx", d => x(d.date))

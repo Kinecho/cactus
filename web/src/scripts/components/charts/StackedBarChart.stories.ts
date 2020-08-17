@@ -12,15 +12,20 @@ export default {
 
 export const Default = () => Vue.extend({
     template: `
-      <div>
-      <stacked-bar-chart :chart-data="data" :options="options" chart-id="bar-chart-1" x-axis="year"/>
+      <div :style="{border: '8px solid teal'}">
+      <stacked-bar-chart 
+          :chart-data="data" 
+          :options="options" 
+          :aspect-ratio="9/16"
+          chart-id="bar-chart-1" 
+          x-axis="year"/>
       </div>`,
     components: {
         StackedBarChart
     },
     props: {
         showYAxis: {
-            default: boolean("Show Y Axis", true)
+            default: boolean("Show Y Axis", false)
         },
         labelX: { default: text("Label X Axis", "") },
         labelY: { default: text("Label Y Axis", "") },
@@ -36,10 +41,13 @@ export const Default = () => Vue.extend({
             return {
                 showYAxis: this.showYAxis,
                 margin: {
-                    left: 30,
+                    left: 0,
                     top: 0,
-                    bottom: 20,
-                    right: 30
+                    bottom: 10,
+                    right: 0
+                },
+                ticks: {
+                    every: 2,
                 },
                 barWidth: this.fixedBarWidth ? this.barWidth : null,
             };
