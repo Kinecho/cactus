@@ -320,11 +320,11 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
       }
     }
     @include r(768) {
-      margin-left: 0;
+        margin-left: 0;
+      margin-right: 1.6rem;
     }
     @include r(960) {
       margin-bottom: 0;
-      margin-left: 1.6rem;
     }
   }
 
@@ -358,8 +358,12 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
         transform: translateY(-.2rem);
       }
     }
+    @include r(768) {
+        margin-left: 0;
+    }
     @include r(960) {
       margin-bottom: 0;
+      margin-right: 1.6rem;
     }
   }
 
