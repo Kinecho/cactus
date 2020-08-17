@@ -152,7 +152,7 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
     .y(d => y(d.value ?? 0))
 
 
-    const dotRadius = 4;
+    const dotRadius = 3;
     //add dots to the undefined values
     svg.selectAll<d3.BaseType, BarChartDatum>("undefinedCircles")
     .data(data.filter(d => isNull(d.total) || d.total === 0))
