@@ -72,7 +72,7 @@ const DEFAULT_CONFIG = (): StackedBarChartConfig => ({
     }
 })
 
-export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPoint<Date, ToneID>[], options: StackedBarChartOptions) {
+export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPoint<Date>[], options: StackedBarChartOptions) {
     const config = mergeConfig(DEFAULT_CONFIG(), options);
     const { w, h, margin, colors, showYAxis, ticks, axisColor, fontFamily, showXAxisLine, barWidth, showLegend } = config
     const data: BarChartDatum[] = processDataPoints(dataPoints)
@@ -100,7 +100,7 @@ export function drawStackedBarChart(selector: string, dataPoints: BarChartDataPo
     .tickSize(ticks.x.size)
     .tickPadding(ticks.x.padding)
 
-    const parent = d3Select<BaseType, BarChartDataPoint<Date, ToneID>>(selector)
+    const parent = d3Select<BaseType, BarChartDataPoint<Date>>(selector)
     parent.select("svg").remove()
 
     const svg = parent.append("svg")
