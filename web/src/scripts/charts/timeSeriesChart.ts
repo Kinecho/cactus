@@ -7,6 +7,7 @@ import {
     curveCardinal,
     extent,
     timeDay,
+curveCardinalOpen,
     max as d3Max,
     scaleLinear,
     scaleTime,
@@ -226,6 +227,39 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
     .attr("fill", "url(#bg_gradient1)")
     .attr("d", chartArea.curve(curveCardinal));
 
+
+    // Start Mask Definition
+    const undefArea = area<TimeSeriesDataPoint>()
+    .defined(d => !isNull(d.value))
+    .x(d => x(d.date)!)
+    .y0(y(0))
+    .y1(d => 0)
+    // .y1(d => y(d.value ?? 0))
+
+    //create a mask from the data set that is null
+    const mask = svg.append("mask")
+    .attr("id", "area-null-data")
+
+    //apply a full width/height white rectangle for the mask.
+    mask.append("rect")
+    .attr("width", "100%")
+    .attr("height", "100%")
+    .attr("fill", "white");
+
+    //Tmp area for to debug mask area
+    // g.append("path")
+    // // .datum(data.filter(undefArea.defined()))
+    // .datum(data)
+    // .attr("fill", "red")
+    // .attr("d", undefArea.curve(curveCardinal))
+
+    //apply the path of the null value area chart, fill it with black for the mask to work.
+    mask.append("path")
+    .datum(data)
+    .attr("fill", "black")
+    .attr("d", undefArea);
+    // end mask definition
+
     //add line
     const line = d3Line<TimeSeriesDataPoint>()
     .curve(curveCardinal)
@@ -233,12 +267,29 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
     .x(d => x(d.date)!)
     .y(d => y(d.value ?? 0))
 
+    //add regular line for defined points
     g.append("path")
     .datum(data)
     .attr("fill", "none")
     .attr("stroke", "url(#temperature-gradient)")
     .attr("stroke-width", "8")
+    .attr("stroke-linecap", "round")
     .attr("d", line)
+
+
+    //add undefined dotted connecting line
+    g.append("path")
+    .datum(data.filter(line.defined()))
+    .attr("mask", "url(#area-null-data)")
+    .attr("fill", "none")
+    .attr("stroke", "#d3d1e3")
+    .attr("stroke-width", "3")
+    .attr("stroke-dasharray", ("0, 12"))
+    .attr("stroke-linecap", "round")
+    .attr("d", line)
+
+
+
 
     // add dots to the defined values values to support gaps in data
     g.selectAll<BaseType, TimeSeriesDataPoint>("myCircles")
@@ -252,16 +303,16 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
     .attr("r", 4)
 
 
-    //add dots to the undefined values
-    g.selectAll("undefinedCircles")
-    .data(data.filter(d => isNull(d.value)))
-    .enter()
-    .append("circle")
-    .attr("fill", "#d3d1e3")
-    .attr("stroke", "none")
-    .attr("cx", d => x(d.date)!)
-    .attr("cy", d => y(d.value ?? 0))
-    .attr("r", 3)
+    //add dots to the undefined values (not needed since we added dashed interpolated line)
+    // g.selectAll("undefinedCircles")
+    // .data(data.filter(d => isNull(d.value)))
+    // .enter()
+    // .append("circle")
+    // .attr("fill", "#d3d1e3")
+    // .attr("stroke", "none")
+    // .attr("cx", d => x(d.date)!)
+    // .attr("cy", d => y(d.value ?? 0))
+    // .attr("r", 3)
 
 
     if (!isBlank(labelX)) {
