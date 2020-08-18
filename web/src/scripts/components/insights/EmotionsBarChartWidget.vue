@@ -20,7 +20,7 @@
 import Vue from "vue";
 import Component from "vue-class-component"
 import { Prop } from "vue-property-decorator";
-import { BarChartDataPoint, mockEmotionsData, StackedBarChartOptions } from "@shared/charts/StackedBarChartTypes";
+import { BarChartDataPoint, mockEmotionsData, StackedBarChartOptions, TonesSortOrder } from "@shared/charts/StackedBarChartTypes";
 import StackedBarChart from "@components/charts/StackedBarChart.vue";
 import ToneColorLegend from "@components/charts/ToneColorLegend.vue";
 import { ToneID } from "@shared/api/ToneAnalyzerTypes";
@@ -53,7 +53,9 @@ export default class EmotionsBarChartWidget extends Vue {
             })
         })
 
-        return [...tones].sort()
+        return [...tones].sort((a, b) => {
+            return TonesSortOrder.indexOf(a) - TonesSortOrder.indexOf(b);
+        });
     }
 
     get actualData(): BarChartDataPoint<Date, ToneID>[] {

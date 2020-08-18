@@ -8,6 +8,8 @@ import { DateTime } from "luxon";
 
 const logger = new Logger("StackedBarChartTypes");
 
+export const TonesSortOrder: ToneID[] = [ToneID.tentative, ToneID.fear, ToneID.joy, ToneID.sadness, ToneID.anger, ToneID.analytical, ToneID.confident, ToneID.unknown];
+
 export interface Numeric {
     valueOf(): number;
 }
