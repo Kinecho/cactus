@@ -69,4 +69,8 @@ export default class PositivityRatingWidget extends Vue {
 .locked {
   filter: blur(8px);
 }
+
+.subtext {
+    margin-bottom: 2.4rem;
+}
 </style>

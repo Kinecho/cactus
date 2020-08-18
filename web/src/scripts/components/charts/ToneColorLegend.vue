@@ -45,8 +45,9 @@ export default class ToneColorLegend extends Vue {
 
     .tone-legend {
         display: grid;
-        grid-auto-rows: 1fr;
+        /* autoprefixer: off */
         grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+        grid-template-rows: auto;
         list-style: none;
         margin: 0;
         padding: 0;
