@@ -283,8 +283,8 @@ export function drawTimeSeriesChart(selector: string, data: TimeSeriesDataPoint[
     .attr("mask", "url(#area-null-data)")
     .attr("fill", "none")
     .attr("stroke", "#d3d1e3")
-    .attr("stroke-width", "3")
-    .attr("stroke-dasharray", ("0, 12"))
+    .attr("stroke-width", "6")
+    .attr("stroke-dasharray", ("0, 24"))
     .attr("stroke-linecap", "round")
     .attr("d", line)
 
