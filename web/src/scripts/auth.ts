@@ -19,6 +19,7 @@ import { getAppType, isAndroidApp } from "@web/DeviceUtil";
 import { pushRoute } from "@web/NavigationUtil";
 import CactusMember from "@shared/models/CactusMember";
 import CactusMemberService from "@web/services/CactusMemberService";
+import InsightsDataSource from "@web/datasource/InsightsDataSource";
 
 const logger = new Logger("auth.ts");
 
@@ -95,7 +96,7 @@ export async function sendEmailLinkSignIn(params: SignupRequest): Promise<EmailL
         completeSignInPath = `${ completeSignInPath }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(redirectUrlParam) }`
     }
 
-    const landingParams = StorageService.getJSON(LocalStorageKey.landingQueryParams);
+    const landingParams = StorageService.getJSON(LocalStorageKey.landingQueryParams) ?? {};
     const sourceApp = isAndroidApp() ? SourceApp.android : SourceApp.web;
 
     logger.log("Setting redirect url for email link signup to be ", completeSignInPath);

@@ -18,7 +18,7 @@ export import Transaction = firebaseClient.firestore.Transaction;
 import CollectionReference = firebaseClient.firestore.CollectionReference;
 export import DocumentReference = firebaseClient.firestore.DocumentReference;
 import DocumentSnapshot = firebaseClient.firestore.DocumentSnapshot;
-import Timestamp = firebaseClient.firestore.Timestamp;
+export import Timestamp = firebaseClient.firestore.Timestamp;
 import FieldValue = firebaseClient.firestore.FieldValue;
 import Logger from "@shared/Logger";
 

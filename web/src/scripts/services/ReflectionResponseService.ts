@@ -1,4 +1,4 @@
-import FirestoreService, { ListenerUnsubscriber, QueryObserverOptions } from "@web/services/FirestoreService";
+import FirestoreService, { ListenerUnsubscriber, QueryObserverOptions, Timestamp } from "@web/services/FirestoreService";
 import ReflectionResponse, { ReflectionResponseField} from "@shared/models/ReflectionResponse";
 import { BaseModelField, Collection } from "@shared/FirestoreBaseModels";
 import { QuerySortDirection } from "@shared/types/FirestoreConstants";
@@ -9,6 +9,7 @@ import { PageRoute } from "@shared/PageRoutes";
 import StorageService, { LocalStorageKey } from "@web/services/StorageService";
 import { calculateStreaks, ResponseMedium, StreakResult } from "@shared/util/ReflectionResponseUtil";
 import Logger from "@shared/Logger";
+import { DateTime } from "luxon";
 
 const logger = new Logger("ReflectionResponseService");
 
@@ -192,6 +193,16 @@ export default class ReflectionResponseService {
         options.queryName = "ReflectionResponseService:observeForMailchimpMemberId";
         return this.firestoreService.observeQuery(query, ReflectionResponse, options);
 
+    }
+
+    observeAllSince(options: QueryObserverOptions<ReflectionResponse> & {daysAgo: number, memberId: string}): ListenerUnsubscriber {
+        const {daysAgo, memberId} = options;
+        const endDate = Timestamp.fromDate(DateTime.local().minus({days: daysAgo}).toJSDate())
+        const query = this.getCollectionRef().where(ReflectionResponseField.cactusMemberId, "==", memberId)
+        .where(BaseModelField.createdAt, ">=", endDate)
+        .orderBy(BaseModelField.createdAt, QuerySortDirection.asc);
+        options.queryName = "ReflectionResponseService:observeAllSince";
+        return this.firestoreService.observeQuery(query, ReflectionResponse, options);
     }
 
     async getById(id: string): Promise<ReflectionResponse | undefined> {

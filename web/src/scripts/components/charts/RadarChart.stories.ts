@@ -1,4 +1,4 @@
-import RadarChart from "@components/RadarChart.vue";
+import RadarChart from "@components/charts/RadarChart.vue";
 import Vue from "vue";
 import { RadarChartData } from "@shared/charts/RadarChartData";
 import { CactusElement } from "@shared/models/CactusElement";

@@ -1,5 +1,5 @@
 import Vue from "vue";
-import RadarChart from "@components/RadarChart.vue";
+import RadarChart from "@components/charts/RadarChart.vue";
 
 new Vue({
     template: `

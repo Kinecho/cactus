@@ -11,6 +11,7 @@
         "strict": true,
         "target": "es5",
         "baseUrl": ".",
+        "experimentalDecorators": true,
         "lib": ["es2019"],
         "rootDirs": [
             "src",

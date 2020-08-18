@@ -86,6 +86,7 @@ export default class EnglishCopy extends LocalizedCopy {
         LOADING: "Loading",
         HOUR: "Hour",
         MINUTE: "Minute",
+        MIN: "min",
         DAYS_LEFT: "days left",
         DAY_LEFT: "day left",
         DAYS_LEFT_IN_TRIAL: "days left in trial",

@@ -23,7 +23,7 @@ export interface MagicLinkRequest {
     continuePath: string,
     referredBy?: string | undefined,
     reflectionResponseIds?: string[],
-    queryParams?: { [id: string]: string },
+    queryParams?: { [id: string]: string|null },
     sourceApp?: SourceApp
 }
 
@@ -40,7 +40,7 @@ export interface LoginEvent {
     isNewUser: boolean,
     providerId?: string,
     referredByEmail?: string | undefined | null,
-    signupQueryParams?: { [name: string]: string } | undefined;
+    signupQueryParams?: { [name: string]: string|null } | undefined;
     reflectionResponseIds?: string[],
     app?: AppType,
 }

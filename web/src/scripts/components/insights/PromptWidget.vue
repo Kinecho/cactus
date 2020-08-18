@@ -224,12 +224,13 @@
     @import "transitions";
 
     .today-widget {
-        background-color: $beige;
+        background-color: lighten($darkestGreen, 5%);
         border-radius: 1.6rem;
         box-shadow: 0 6.9px 21px -24px rgba(0, 0, 0, 0.032),
-        0 11.5px 32.3px -24px rgba(0, 0, 0, 0.056),
-        0 13.9px 37.7px -24px rgba(0, 0, 0, 0.094),
-        0 24px 63px -24px rgba(0, 0, 0, 0.35);
+            0 11.5px 32.3px -24px rgba(0, 0, 0, 0.056),
+            0 13.9px 37.7px -24px rgba(0, 0, 0, 0.094),
+            0 24px 63px -24px rgba(0, 0, 0, 0.35);
+        color: $white;
         margin: 0 2.4rem 3.2rem;
         overflow: hidden;
         padding: 2.4rem;
@@ -308,6 +309,7 @@
 
     .entry {
         margin: 0 0 2.4rem -2rem;
+        opacity: .8;
         padding-left: 2rem;
         position: relative;
         white-space: pre-line;

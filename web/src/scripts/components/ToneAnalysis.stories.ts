@@ -105,7 +105,7 @@ export const NoSentenceToneResults = () => Vue.extend({
             const toneIdList = Object.values(ToneID);
             const tones: ToneScore[] = []
             for (let i = 0; i < this.numTones ?? 0; i++) {
-                const tone: string = toneIdList[i];
+                const tone: ToneID = toneIdList[i];
                 tones.push({
                     score: getRandomNumberBetween(0, 1, 2),
                     toneId: tone,

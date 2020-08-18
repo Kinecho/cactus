@@ -1,7 +1,7 @@
 <template>
     <div>
         <hero title="Mindfulness without meditation" sub-text="Research-backed prompts to increase self-awareness and resilience">
-            <router-link :to="mainCtaPath" tag="a" class="mainCta button primary">Try It Free</router-link>
+            <router-link :to="mainCtaPath" tag="button" class="mainCta primary">Try It Free</router-link>
         </hero>
         <why-cactus/>
         <split-view>
@@ -10,7 +10,7 @@
         </split-view>
         <testimonials/>
         <pre-footer>
-            <router-link :to="mainCtaPath" tag="a" class="mainCta button primary">Try It Free</router-link>
+            <router-link :to="mainCtaPath" tag="button" class="mainCta primary">Try It Free</router-link>
         </pre-footer>
     </div>
 </template>
@@ -44,11 +44,11 @@
             PlayStoreIcon,
         }
     })
-    export default class CoreValuesOnboarding extends Vue {
-        name = "CoreValuesOnboarding.vue";
+    export default class MagicCoreValuesMLP extends Vue {
+        name = "MagicCoreValuesMLP.vue";
 
         get mainCtaPath(): string {
-            return PageRoute.CORE_VALUES_ASSESSMENT
+            return PageRoute.HELLO_CORE_VALUES
         }
 
     }

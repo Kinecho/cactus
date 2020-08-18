@@ -36,7 +36,7 @@
 import Vue from "vue";
 import Component from "vue-class-component"
 import { Prop } from "vue-property-decorator";
-import OnboardingCardViewModel from "@components/onboarding/OnboardingCardViewModel";
+import OnboardingCardViewModel, { TextReplacementType } from "@components/onboarding/OnboardingCardViewModel";
 import MarkdownText from "@components/MarkdownText.vue";
 import Logger from "@shared/Logger"
 import ResultElement from "@components/gapanalysis/ResultElement.vue";
@@ -48,6 +48,7 @@ import ResizableTextarea from "@components/ResizableTextarea.vue";
 import { getDeviceDimensions } from "@web/DeviceUtil";
 import { debounce } from "debounce";
 import { ResponseMedium } from "@shared/util/ReflectionResponseUtil";
+import { CoreValue } from "@shared/models/CoreValueTypes";
 import NoteInputAnalysisProgress from "@components/insights/NoteInputAnalysisProgress.vue";
 
 const logger = new Logger("OnboardingReflectCard");
@@ -70,8 +71,12 @@ export default class OnboardingReflectCard extends Vue {
     @Prop({ type: String, required: false, default: null })
     selectedInsightWord!: string | null;
 
+    @Prop({ type: String as () => CoreValue, required: false, default: null })
+    selectedCoreValue!: CoreValue | null;
+
     @Prop({ type: Boolean, default: true })
     autofocusInput!: boolean;
+
     responseText = ""
     saving = false;
 
@@ -86,7 +91,10 @@ export default class OnboardingReflectCard extends Vue {
     startAt!: Date;
 
     get markdownText(): string | undefined {
-        return this.card.getMarkdownText({ selectedInsight: this.selectedInsightWord })
+        return this.card.getMarkdownText({
+            selectedInsight: this.selectedInsightWord,
+            selectedCoreValue: this.selectedCoreValue
+        })
     }
 
     get loading(): boolean {
@@ -177,10 +185,24 @@ export default class OnboardingReflectCard extends Vue {
         const currentDuration = response.reflectionDurationMs ?? 0;
         response.reflectionDurationMs = currentDuration + duration;
         response.content.text = this.responseText;
-        if (this.selectedInsightWord) {
+
+
+        let dynamicValue: string | null = null;
+        switch (this.card.textReplacementType) {
+            case TextReplacementType.selected_insight_word:
+                dynamicValue = this.selectedInsightWord;
+                break;
+            case TextReplacementType.onboarding_core_value:
+                dynamicValue = this.selectedCoreValue;
+                break;
+            default:
+                break;
+        }
+
+        if (dynamicValue) {
             response.dynamicValues = {
                 ...response.dynamicValues,
-                [this.card.textReplacerToken]: this.selectedInsightWord
+                [this.card.textReplacerToken]: dynamicValue
             }
         }
 
@@ -242,89 +264,89 @@ strong {
 }
 
 .textareaContainer {
-  margin-bottom: 3.2rem;
-  position: relative;
+    margin-bottom: 3.2rem;
+    position: relative;
+
+    textarea {
+        font-family: $font-stack;
+        background: transparent;
+        border: 0;
+        color: $darkestGreen;
+        font-size: 1.8rem;
+        line-height: 1.4;
+        margin: -1.2rem 0 0 -.8rem;
+        opacity: .8;
+        padding: .8rem .8rem 2.4rem;
+        width: 100%;
+
+        @include r(768) {
+            font-size: 2.4rem;
+            margin: -1.6rem 0 0 -1.6rem;
+            padding: 1.6rem 1.6rem 2.4rem;
+        }
+        @include r(960) {
+            font-size: 3.2rem;
+        }
+
+        &:focus {
+        outline-color: rgba(0, 0, 0, .3);
+        }
+    }
+
+    .noteProgress {
+        bottom: 1.6rem;
+        position: absolute;
+        right: 1.6rem;
+
+        @include r(768) {
+            bottom: 1.8rem;
+            right: 2.4rem;
+        }
+        @include r(960) {
+            bottom: 2.4rem;
+        }
+    }
 }
 
 
-.noteProgress {
-  bottom: 1.6rem;
-  position: absolute;
-  right: 1.6rem;
-
-  @include r(768) {
-    bottom: 1.8rem;
-    right: 2.4rem;
-  }
-  @include r(960) {
+  .doneBtn {
     bottom: 2.4rem;
-  }
-}
-
-textarea {
-  font-family: $font-stack;
-  background: transparent;
-  border: 0;
-  color: $darkestGreen;
-  font-size: 1.8rem;
-  line-height: 1.4;
-  margin: -1.2rem 0 0 -.8rem;
-  opacity: .8;
-  padding: .8rem .8rem 2.4rem;
-  width: 100%;
-
-  @include r(768) {
-    font-size: 2.4rem;
-    margin: -1.6rem 0 0 -1.6rem;
-    padding: 1.6rem 1.6rem 2.4rem;
-  }
-  @include r(960) {
-    font-size: 3.2rem;
-  }
-
-  &:focus {
-    outline-color: rgba(0, 0, 0, .3);
-  }
-}
-
-.doneBtn {
-  bottom: 2.4rem;
-  padding: 1.6rem;
-  position: fixed;
-  right: 2.4rem;
-  transition: opacity .3s;
-
-  @include r(768) {
-    min-width: 20rem;
-    padding: 1.2rem 1.6rem 1.6rem;
-    position: static;
-    width: auto;
-  }
-
-  .check {
-    fill: $white;
-    height: 1.8rem;
-    width: 1.8rem;
+    padding: 1.6rem;
+    position: fixed;
+    right: 2.4rem;
+    transition: opacity .3s;
 
     @include r(768) {
+      min-width: 20rem;
+      padding: 1.2rem 1.6rem 1.6rem;
+      position: static;
+      width: auto;
+    }
+
+    .check {
+      fill: $white;
+      height: 1.8rem;
+      width: 1.8rem;
+
+      @include r(768) {
+        display: none;
+      }
+    }
+
+    .doneText {
       display: none;
+
+      @include r(768) {
+        display: inline;
+      }
+    }
+
+    &.hide {
+      opacity: 0;
+    }
+
+    &.show {
+      opacity: 1;
     }
   }
-
-  .doneText {
-    display: none;
-
-    @include r(768) {
-      display: inline;
-    }
-  }
-
-  &.hide {
-    opacity: 0;
-  }
-
-  &.show {
-    opacity: 1;
-  }
-}
 </style>

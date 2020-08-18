@@ -22,7 +22,6 @@ export interface JournalFeedDataSourceDelegate {
 export interface SetupJournalEntryResult {
     created: boolean,
     entry?: JournalEntry,
-
 }
 
 class JournalFeedDataSource implements JournalEntryDelegate, TodayPromptDataSourceDelegate {

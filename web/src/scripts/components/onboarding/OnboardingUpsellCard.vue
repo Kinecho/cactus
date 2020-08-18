@@ -14,15 +14,15 @@
                 <ul class="upsellInfo">
                     <li>
                         <svg-icon icon="heartOutline" class="icon"/>
-                        <span><strong>Personalized</strong> journal app with daily questions to reflect&nbsp;on</span>
+                        <span><strong>Personalized questions</strong> based on your core values</span>
                     </li>
                     <li>
                         <svg-icon icon="pie" class="icon"/>
-                        <span><strong>Insights</strong> dashboard, showing the things that make you&nbsp;happy</span>
+                        <span><strong>Personal insights</strong> showing the things that make you happy</span>
                     </li>
                     <li>
                         <svg-icon icon="checkCircle" class="icon"/>
-                        <span><strong>Personality</strong> tests to help you better know&nbsp;yourself</span>
+                        <span><strong>Personality tests</strong> to help you better know&nbsp;yourself</span>
                     </li>
                 </ul>
                 <div class="btnContainer">
@@ -98,9 +98,9 @@
         get markdownText(): string | undefined {
             // return this.card.getMarkdownText();
             if (this.trialDays && this.trialDays > 0) {
-                return `Discover your core values when you start a free ${this.trialDays}-day trial`
+                return `Discover the rest of your core values when you start a free ${this.trialDays}-day trial`
             }
-            return `Discover your core values when you upgrade to Cactus Plus`
+            return `Discover the rest of your core values when you upgrade to Cactus Plus`
         }
 
         get errorMessage(): string | null {

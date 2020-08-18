@@ -140,9 +140,9 @@ export default class CactusMember extends BaseModel {
     readonly promptSendTimeUTC?: PromptSendTime = this.getDefaultPromptSendTimeUTC();
     referredByEmail?: string;
     signupQueryParams: {
-        utm_source?: string,
-        utm_medium?: string,
-        [name: string]: string | undefined
+        utm_source?: string | null,
+        utm_medium?: string | null,
+        [name: string]: string | undefined | null
     } = {};
 
     stats: {
@@ -231,7 +231,7 @@ export default class CactusMember extends BaseModel {
         return;
     }
 
-    getSignupCampaign(): string | undefined {
+    getSignupCampaign(): string | undefined | null {
         return this.signupQueryParams?.utm_campaign;
     }
 
@@ -282,7 +282,7 @@ export default class CactusMember extends BaseModel {
         return;
     }
 
-    applyExperiments(experiments: Record<string, string|null>|null|undefined): boolean {
+    applyExperiments(experiments: Record<string, string | null> | null | undefined): boolean {
         if (!experiments) {
             return false;
         }

@@ -7,7 +7,7 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import MagicMomentOnboarding from "@web/views/marketing/MagicMomentOnboarding.vue";
+    import MagicMomentOnboarding from "@web/views/marketing/MagicMomentMLP.vue";
     import StandardFooter from "@components/StandardFooter.vue";
     import { PageRoute } from "@shared/PageRoutes";
 

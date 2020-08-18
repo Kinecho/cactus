@@ -44,8 +44,8 @@
             PlayStoreIcon,
         }
     })
-    export default class MagicMomentOnboarding extends Vue {
-        name = "MagicMomentOnboarding.vue";
+    export default class MagicMomentMLP extends Vue {
+        name = "MagicMomentMLP.vue";
 
         get mainCtaPath(): string {
             return PageRoute.HELLO_ONBOARDING

@@ -39,7 +39,7 @@
         @Prop({type: String as () => string|PageRoute, default: null})
         to!: string|PageRoute|null;
 
-        get onboardingPath(): PageRoute {
+        get onboardingPath(): PageRoute| string {
             return this.to ?? PageRoute.HELLO_ONBOARDING;
         }
 

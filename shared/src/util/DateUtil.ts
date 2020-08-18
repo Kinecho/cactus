@@ -572,3 +572,100 @@ export function getContentQueryDateStrings(options: {
 
     return { startDateString, endDateString }
 }
+
+export function getDatesBetween(startDate: Date, endDate: Date): Date[] {
+    const d1 = DateTime.fromJSDate(startDate).set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
+    const d2 = DateTime.fromJSDate(endDate).set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
+
+    const days = d2.diff(d1).as("days");
+    if (days <= 1) {
+        return []
+    }
+
+    let previous = d1;
+    const array: Date[] = [];
+    while (d2.diff(previous).as("days") > 1) {
+        const next = previous.plus({ day: 1 })
+        array.push(next.toJSDate())
+        previous = next;
+    }
+    return array;
+}
+
+/**
+ * Get all dates in a range for a given start date and end date. Returned set is inclusive of the provided dates.
+ * By Default will use midnight of hte start range and 11:59:59.999 pm for the end date
+ * @param {Date} startDate
+ * @param {Date} endDate
+ * @param {object} options
+ */
+export function getDateRange(startDate: Date, endDate: Date, options?: { includeEnd?: boolean, includeStart?: boolean }): Date[] {
+    const { includeEnd = true, includeStart = true } = options ?? {};
+
+    const startDt = DateTime.fromJSDate(startDate).set({
+        hour: 0,
+        minute: 0,
+        second: 0,
+        millisecond: 0
+    }).plus({ day: includeStart ? 0 : 1 });
+
+    const endDt = DateTime.fromJSDate(endDate).set({
+        hour: 0,
+        minute: 0,
+        second: 0,
+        millisecond: 0
+    }).plus({ days: includeEnd ? 1 : 0 })
+
+    const interval = Interval.fromDateTimes(startDt, endDt);
+
+    const range: Date[] = []
+    let current = startDt
+    while (interval.contains(current)) {
+        range.push(current.toJSDate())
+        current = current.plus({ day: 1 })
+    }
+    return range;
+}
+
+/**
+ * Returns a new array ensuring every date in the provided range (inclusive) has a value
+ * @param {data: T[], createEmpty: (d: Date) => T, start: Date, end: Date} params
+ */
+export function ensureConsecutive<T>(params: {
+    data: T[],
+    createEmpty: (d: Date) => T,
+    getDate: (item: T) => Date,
+    start: Date,
+    end: Date,
+}): T[] {
+    const { data, createEmpty, start, end, getDate } = params;
+
+    const sorted: T[] = [...data].sort((a, b) => {
+        return getDate(a).valueOf() - getDate(b).valueOf()
+    })
+
+    if (sorted.length === 0) {
+        const dateRange: Date[] = getDateRange(start, end);
+        return dateRange.map(d => createEmpty(d))
+    }
+    const processed: T[] = [];
+    let previous = sorted[0];
+
+    getDateRange(start, getDate(previous), { includeStart: true, includeEnd: false }).forEach(d => {
+        processed.push(createEmpty(d))
+    })
+
+    sorted.forEach(item => {
+        getDatesBetween(getDate(previous), getDate(item)).forEach(missing => {
+            processed.push(createEmpty(missing))
+        })
+        processed.push(item)
+        previous = item;
+    })
+
+    getDateRange(getDate(previous), end, { includeStart: false, includeEnd: true }).forEach(d => {
+        processed.push(createEmpty(d))
+    })
+
+    return processed;
+}

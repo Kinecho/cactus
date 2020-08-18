@@ -9,6 +9,7 @@ export enum PageRoute {
     GAP_ANALYSIS = "/gap-analysis",
     GET_STARTED = "/get-started",
     HELLO_ONBOARDING = "/hello",
+    HELLO_CORE_VALUES = "/hello-cv",
     HOME = "/",
     INSIGHTS = "/insights",
     INSIGHTS_EMBED = '/insights-embed',

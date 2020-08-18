@@ -5,16 +5,16 @@
 </template>
 
 <script lang="ts">
-    import Vue from "vue";
-    import Component from "vue-class-component";
-    import { Prop, Watch } from "vue-property-decorator";
-    import { RadarChartData } from "@shared/charts/RadarChartData";
-    import Logger from "@shared/Logger";
-    import * as d3 from "d3";
-    import { drawRadarChartD3, RadarChartConfig } from "@web/charts/radarChart";
-    import { debounce } from "debounce";
+import Vue from "vue";
+import Component from "vue-class-component";
+import { Prop, Watch } from "vue-property-decorator";
+import { RadarChartData } from "@shared/charts/RadarChartData";
+import Logger from "@shared/Logger";
+import * as d3 from "d3";
+import { drawRadarChartD3, RadarChartConfig } from "@web/charts/radarChart";
+import { debounce } from "debounce";
 
-    const logger = new Logger("RadarChart");
+const logger = new Logger("RadarChart");
 
     const margin = { top: 100, right: 100, bottom: 100, left: 100 },
     width = Math.min(700, window.innerWidth - 10) - margin.left - margin.right,
@@ -81,8 +81,7 @@
         }
 
         onResize() {
-            const w = this.$el.getBoundingClientRect().width;
-            this.chartDiameter = w;
+            this.chartDiameter = this.$el.getBoundingClientRect().width;
             this.drawChart();
         }
 
