@@ -22,7 +22,7 @@ export type SeriesType = Record<string, number>
 
 export interface BarChartDataPoint<T extends BarXType, S extends string> {
     x: T,
-    series: Record<S, number>
+    series: Record<S, number>|{}
     // [key: string]: number
     total?: number
 }
@@ -68,7 +68,7 @@ export function mergeConfig(defaultConfig: StackedBarChartConfig, options: Stack
     return cfg;
 }
 
-export function getKeys<T extends BarXType>(data: BarChartDataPoint<T>[]): string[] {
+export function getKeys<T extends BarXType, D extends string>(data: BarChartDataPoint<T, D>[]): string[] {
     const keys = new Set<string>()
     data.forEach(d => Object.keys(d.series).forEach(k => keys.add(k)))
     return [...keys]
@@ -76,9 +76,9 @@ export function getKeys<T extends BarXType>(data: BarChartDataPoint<T>[]): strin
 }
 
 
-export function processDataPoints<T extends BarXType>(data: BarChartDataPoint<T>[], ensureConsecutive: boolean = true): BarChartDatum[] {
+export function processDataPoints<T extends BarXType, D extends string>(data: BarChartDataPoint<T, D>[]): BarChartDatum[] {
     const processed: BarChartDatum[] = []
-    let last: BarChartDataPoint<T> | null = data[0] ?? null;
+    let last: BarChartDataPoint<T, D> | null = data[0] ?? null;
     data.sort((d1, d2) => {
         return d1.x.valueOf() - d2.x.valueOf()
     }).forEach(d => {
@@ -89,21 +89,21 @@ export function processDataPoints<T extends BarXType>(data: BarChartDataPoint<T>
         })
 
         const total = getSeriesTotal(d)
-        const datum = { ...d.series, total, x: d.x }
+        const datum:BarChartDatum = { ...d.series, total, x: d.x.valueOf() }
         processed.push(datum)
         last = d;
     })
     return processed
 }
 
-export function getSeriesTotal<T extends BarXType>(data: BarChartDataPoint<T>): number {
-    return Object.values(data.series).reduce((t, value) => {
+export function getSeriesTotal<T extends BarXType, D extends string>(data: BarChartDataPoint<T, D>): number {
+    return Object.values(data.series).reduce((t:number, value:number) => {
         return t + value
     }, 0);
 }
 
-export const mockEmotionsData = (): BarChartDataPoint<Date>[] => ensureConsecutive({
-    createEmpty: d => ({ x: d, series: {} }),
+export const mockEmotionsData = (): BarChartDataPoint<Date, ToneID>[] => ensureConsecutive<BarChartDataPoint<Date, ToneID>>({
+    createEmpty: d => ({ x: d, series: {} } ),
     getDate: item => item.x,
     start: DateTime.local(2020, 8, 1).toJSDate(),
     end: DateTime.local(2020, 8, 14).toJSDate(),

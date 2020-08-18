@@ -212,7 +212,7 @@ export default class InsightsDataSource {
                 return;
             }
 
-            const series: Record<ToneID, number> = {};
+            const series: Partial<Record<ToneID, number>> = {};
             tones.reduce((total, score) => {
                 total[score.toneId] = score.score
                 return total;
