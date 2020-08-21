@@ -15,7 +15,7 @@
         </div>
         <div slot="body" class="modalContainer" v-else>
             <h2>First, cancel your subscription</h2>
-            <p>To permenantly delete your Cactus account, first you need to cancel your paid subscription. You can find details in your <a :href="accountUrl">Account Settings</a> under Subscription.</p>
+            <p>To permanently delete your Cactus account, first you need to cancel your paid subscription. You can find details in your <a :href="accountUrl">Account Settings</a> under Subscription.</p>
         </div>
     </modal>
 </template>
