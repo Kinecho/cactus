@@ -14,6 +14,19 @@
         <video v-if="card.videoUrl" muted autoplay>
             <source :src="card.videoUrl" type="video/mp4">
         </video>
+        <div v-if="card.demo" class="animationContainer">
+            <div class="phoneMask">
+                <div class="stats">
+                    <img class="duration stat" src="/assets/images/durationStat.svg" alt="duration stat" />
+                    <img class="reflections stat" src="/assets/images/reflectionsStat.svg" alt="reflections stat" />
+                    <img class="streak stat" src="/assets/images/streakStat.svg" alt="streak stat" />
+                </div>
+                <img class="prompt" src="/assets/images/promptExample.png" alt="prompt" />
+                <img class="positivity" src="/assets/images/positivityRating.svg" alt="positivity rating" />
+                <img class="emotions" src="/assets/images/emotionsExample.svg" alt="emotions" />
+                <img class="cv" src="/assets/images/cvExample.png" alt="core values" />
+            </div>
+        </div>
     </div>
 </template>
 
@@ -61,6 +74,133 @@
 <style scoped lang="scss">
     @import "variables";
     @import "mixins";
+
+    @keyframes resize {
+        100% {
+            background-color: rgba(255,255,255,.6);
+            box-shadow: 0 40px 170px -38px rgba(0, 0, 0, 0.7);
+            height: 667px;
+            overflow-y: auto;
+            width: 375px;
+        }
+    }
+
+    .animationContainer {
+        animation: resize 1s 2s ease-in forwards;
+        background-color: transparent;
+        border-radius: 2.4rem;
+        box-shadow: none;
+        height: 100px;
+        overflow: visible;
+        padding: 2.4rem 1.2rem;
+        position: relative;
+        width: 100px;
+
+        @include r(768) {
+            align-self: center;
+            height: 750px;
+            max-width: 50%;
+            width: 350px;
+        }
+
+        @keyframes scroll {
+            50% {
+                transform: translateY(-3%);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .phoneMask {
+            align-items: flex-start;
+            animation: scroll .3s 3s ease-in forwards;
+        }
+
+        @keyframes sizeUp {
+            40% {
+                width: 34rem;
+            }
+            100% {
+                transform: scale(1);
+                width: 34rem;
+            }
+        }
+
+        .stats {
+            animation: sizeUp .5s 2s ease-in forwards;
+            display: flex;
+            margin-bottom: 2.4rem;
+            overflow: hidden;
+            transform: scale(0.75) translate(-443px, 63px);
+            width: 60rem;
+
+            img {
+                margin-right: .8rem;
+                transform: none;
+            }
+        }
+
+        img {
+            position: relative;
+            transform: scale(.75);
+            z-index: 0;
+        }
+
+        @keyframes reset {
+            100% {
+                transform: scale(1);
+                width: 100%;
+            }
+        }
+
+        .prompt {
+            animation: reset .3s 2s ease-in forwards;
+            filter: drop-shadow(0 24px 25px rgba(0, 0, 0, 0.5));
+            margin-bottom: 2.4rem;
+            transform: scale(.75);
+            width: 32rem;
+            z-index: 5;
+        }
+
+        @keyframes CVreset {
+            100% {
+                transform: scale(1);
+                width: 43rem;
+            }
+        }
+
+        .cv {
+            animation: CVreset .3s 2s ease-in forwards;
+            transform: scale(0.75) translate(206px, -1362px);
+            width: 43rem;
+
+            @include r(768) {
+                transform: scale(0.75) translate(206px, -1362px);
+            }
+        }
+
+        .emotions {
+            animation: reset .3s 2s ease-in forwards;
+            transform: scale(0.75) translate(-44%, -810px);
+            width: 32rem;
+
+            @include r(768) {
+                transform: scale(0.75) translate(-44%, -810px);
+            }
+        }
+
+        .positivity {
+            animation: reset .3s 2s ease-in forwards;
+            margin-bottom: 2.4rem;
+            transform: scale(0.75) translate(70%, -577px);
+            width: 32rem;
+
+            @include r(768) {
+                transform: scale(0.75) translate(70%, -577px);
+            }
+        }
+    }
 
     .text-card {
         display: flex;
