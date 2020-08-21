@@ -225,7 +225,24 @@ export function getCharacterCount(text?: string): number {
 export function getIntegerFromStringBetween(input: string, max: number): number {
     let hash = 0;
     for (let i = 0; i < input.length; i++) {
-        hash = Math.abs(input.charCodeAt(i) + ((hash << 5) - hash));
+        const charCode = input.charCodeAt(i);
+        /*
+         * Shift the bits to the left by 1 byte. Because of javascript, this produces 32 bit number,
+         * retaining the least significant bits. Can produce negative numbers whens shifted.
+         *
+         * When this number is then used as a signed value, it can be negative (if the bits have overflowed).
+         */
+        const shifted = hash << 5;
+
+        /*
+         * Then, update the hash, which occurs using 64 bit representations.
+         */
+        const updatedHash = charCode + (shifted - hash)
+
+        /*
+         * take the absolute value of the hash, as the resulting number may be negative due to byte overflow.
+         */
+        hash = Math.abs(updatedHash);
     }
     return hash % max;
 }

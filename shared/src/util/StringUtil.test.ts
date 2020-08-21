@@ -304,6 +304,8 @@ describe("get number from string", () => {
     test("various strings", () => {
         expect(getIntegerFromStringBetween("abc", 5)).toEqual(4);
         expect(getIntegerFromStringBetween("abc124", 5)).toEqual(1);
+        expect(getIntegerFromStringBetween("HumorNature", 5)).toEqual(0);
+        expect(getIntegerFromStringBetween("HumorNature", 8)).toEqual(4);
         expect(getIntegerFromStringBetween("aaaa", 5)).toEqual(3);
         expect(getIntegerFromStringBetween("a", 5)).toEqual(2);
         expect(getIntegerFromStringBetween("b", 5)).toEqual(3);
