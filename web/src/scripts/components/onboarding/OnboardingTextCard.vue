@@ -14,7 +14,7 @@
         <video v-if="card.videoUrl" muted autoplay>
             <source :src="card.videoUrl" type="video/mp4">
         </video>
-        <div v-if="card.demo" class="animationContainer">
+        <div v-if="card.demo" class="animationContainer" :class="{'overflow': overflow}">
             <div class="phoneMask">
                 <div class="stats">
                     <img class="duration stat" src="/assets/images/durationStat.svg" alt="duration stat" />
@@ -61,12 +61,19 @@
         @Prop({type: String as CoreValue, required: false, default: null})
         selectedCoreValue!: CoreValue | null;
 
+        @Prop({ type: Boolean, required: false, default: false })
+        overflow!: boolean | undefined;
+
         get markdownText() {
             return this.card.getMarkdownText({ selectedInsight: this.selectedInsightWord, selectedCoreValue: this.selectedCoreValue })
         }
 
         closeOnboarding() {
             this.$emit('close', true)
+        }
+
+        mounted() {
+            setTimeout(() => this.overflow = true, 2500);
         }
     }
 </script>
@@ -75,32 +82,45 @@
     @import "variables";
     @import "mixins";
 
+    @keyframes resizeMob {
+        100% {
+            background-color: rgba(255,255,255,.6);
+            box-shadow: 0 40px 170px -38px rgba(0, 0, 0, 0.7);
+            height: 460px;
+            width: 255px;
+        }
+    }
     @keyframes resize {
         100% {
             background-color: rgba(255,255,255,.6);
             box-shadow: 0 40px 170px -38px rgba(0, 0, 0, 0.7);
             height: 667px;
-            overflow-y: auto;
             width: 375px;
         }
     }
 
     .animationContainer {
-        animation: resize 1s 2s ease-in forwards;
+        animation: resizeMob .5s 2s 1 ease-in forwards;
         background-color: transparent;
         border-radius: 2.4rem;
         box-shadow: none;
-        height: 100px;
-        overflow: visible;
-        padding: 2.4rem 1.2rem;
+        height: 420px;
+        margin: 0 auto;
+        padding: 1.2rem;
         position: relative;
-        width: 100px;
+        width: 250px;
 
-        @include r(768) {
+        @include r(600) {
+            animation-name: resize;
             align-self: center;
             height: 750px;
-            max-width: 50%;
+            padding: 2.4rem 1.2rem;
             width: 350px;
+        }
+
+        &.overflow {
+            overflow: hidden;
+            overflow-y: auto;
         }
 
         @keyframes scroll {
@@ -114,9 +134,21 @@
 
         .phoneMask {
             align-items: flex-start;
-            animation: scroll .3s 3s ease-in forwards;
+
+            @include r(768) {
+                animation: scroll .3s 3s ease-in forwards;
+            }
         }
 
+        @keyframes sizeUpMob {
+            40% {
+                width: 34rem;
+            }
+            100% {
+                transform: scale(.75) translate(-55px, 0px);
+                width: 34rem;
+            }
+        }
         @keyframes sizeUp {
             40% {
                 width: 34rem;
@@ -128,23 +160,24 @@
         }
 
         .stats {
-            animation: sizeUp .5s 2s ease-in forwards;
+            animation: sizeUpMob .5s 2s ease-in forwards;
             display: flex;
-            margin-bottom: 2.4rem;
+            margin-bottom: .8rem;
             overflow: hidden;
-            transform: scale(0.75) translate(-443px, 63px);
+            transform: scale(0.5) translate(-763px, -7px);
             width: 60rem;
 
+            @include r(600) {
+                animation-name: sizeUp;
+                margin-bottom: 2.4rem;
+                transform: scale(0.75) translate(-443px, 63px);
+            }
+
             img {
+                animation: none;
                 margin-right: .8rem;
                 transform: none;
             }
-        }
-
-        img {
-            position: relative;
-            transform: scale(.75);
-            z-index: 0;
         }
 
         @keyframes reset {
@@ -154,15 +187,32 @@
             }
         }
 
-        .prompt {
+        img {
             animation: reset .3s 2s ease-in forwards;
-            filter: drop-shadow(0 24px 25px rgba(0, 0, 0, 0.5));
-            margin-bottom: 2.4rem;
+            position: relative;
             transform: scale(.75);
-            width: 32rem;
-            z-index: 5;
+            z-index: 0;
         }
 
+        .prompt {
+            filter: drop-shadow(0 24px 25px rgba(0, 0, 0, 0.5));
+            margin-bottom: 1.6rem;
+            transform: scale(0.5) translate(-100px, -190px);
+            width: 32rem;
+            z-index: 5;
+
+            @include r(600) {
+                margin-bottom: 2.4rem;
+                transform: scale(.75);
+            }
+        }
+
+        @keyframes CVresetMob {
+            100% {
+                transform: scale(1);
+                width: 31rem;
+            }
+        }
         @keyframes CVreset {
             100% {
                 transform: scale(1);
@@ -171,32 +221,32 @@
         }
 
         .cv {
-            animation: CVreset .3s 2s ease-in forwards;
-            transform: scale(0.75) translate(206px, -1362px);
+            animation: CVresetMob .3s 2s ease-in forwards;
+            transform: scale(0.5) translate(-34px, -2342px);
             width: 43rem;
 
-            @include r(768) {
+            @include r(600) {
+                animation-name: CVreset;
                 transform: scale(0.75) translate(206px, -1362px);
             }
         }
 
         .emotions {
-            animation: reset .3s 2s ease-in forwards;
-            transform: scale(0.75) translate(-44%, -810px);
+            transform: scale(0.5) translate(-106%, -1500px);
             width: 32rem;
 
-            @include r(768) {
+            @include r(600) {
                 transform: scale(0.75) translate(-44%, -810px);
             }
         }
 
         .positivity {
-            animation: reset .3s 2s ease-in forwards;
-            margin-bottom: 2.4rem;
-            transform: scale(0.75) translate(70%, -577px);
+            margin-bottom: 1.6rem;
+            transform: scale(0.5) translate(0%, -1047px);
             width: 32rem;
 
-            @include r(768) {
+            @include r(600) {
+                margin-bottom: 2.4rem;
                 transform: scale(0.75) translate(70%, -577px);
             }
         }
@@ -220,6 +270,9 @@
             flex-direction: row;
             justify-content: flex-start;
             max-width: none;
+            padding: 0 3.2rem;
+        }
+        @include r(960) {
             padding: 0 6.4rem;
         }
     }
@@ -229,8 +282,11 @@
 
         @include r(768) {
             margin-bottom: 0;
-            padding-right: 6.4rem;
+            padding-right: 3.2rem;
             width: 66%;
+        }
+        @include r(960) {
+            padding-right: 6.4rem;
         }
     }
 
