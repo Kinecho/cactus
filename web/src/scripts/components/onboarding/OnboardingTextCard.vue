@@ -108,6 +108,7 @@
         margin: 0 auto;
         padding: 1.2rem;
         position: relative;
+        transform: translateZ(0);
         width: 250px;
 
         @include r(600) {
@@ -151,11 +152,11 @@
         }
         @keyframes sizeUp {
             40% {
-                width: 34rem;
+                width: 37rem;
             }
             100% {
                 transform: scale(1);
-                width: 34rem;
+                width: 37rem;
             }
         }
 
