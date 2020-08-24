@@ -2,7 +2,6 @@ import { CactusElement } from "@shared/models/CactusElement";
 import { ActionButton, ContentAction, LinkStyle, LinkTarget } from "@shared/models/PromptContent";
 import AppSettings from "@shared/models/AppSettings";
 import { CoreValue } from "@shared/models/CoreValueTypes";
-import HomeDemoAnimation from "@components/HomeDemoAnimation.vue";
 
 export enum CardType {
     text = "text",
@@ -22,6 +21,10 @@ export enum TextReplacementType {
     onboarding_core_value = "OB_CORE_VALUE"
 }
 
+export enum ComponentName {
+    HomeDemoAnimation = "HomeDemoAnimation",
+}
+
 export interface LinkableActionButton extends ActionButton {
     href?: string;
     target?: LinkTarget;
@@ -35,7 +38,7 @@ export default class OnboardingCardViewModel {
      * Markdown enabled text
      */
     text?: string;
-    component?: object;
+    componentName?: ComponentName;
     imageUrl?: string;
     demo: boolean = true;
     videoUrl?: string;
@@ -135,7 +138,7 @@ export default class OnboardingCardViewModel {
                 type: CardType.text,
                 slug: "about-insights",
                 text: "Reflect on questions for a few days and you’ll get more insights.",
-                component: HomeDemoAnimation,
+                componentName: ComponentName.HomeDemoAnimation,
             }),
             OnboardingCardViewModel.create({
                 slug: "discover-cactus-plus",
