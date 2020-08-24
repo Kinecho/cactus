@@ -40,7 +40,6 @@ export default class OnboardingCardViewModel {
     text?: string;
     componentName?: ComponentName;
     imageUrl?: string;
-    demo: boolean = true;
     videoUrl?: string;
     element?: CactusElement;
     promptContentEntryId?: string;
