@@ -25,6 +25,9 @@
         @Prop({ type: Boolean, required: false, default: false })
         overflow!: boolean | undefined;
 
+        //Below is causing this error: Avoid mutating a prop directly since the value will be overwritten whenever
+        //the parent component re-renders. Instead, use a data or computed property based on the prop's value. 
+        //Prop being mutated: "overflow"
         mounted() {
             setTimeout(() => this.overflow = true, 2500);
         }
