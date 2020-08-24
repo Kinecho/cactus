@@ -76,6 +76,7 @@ import { fireOptInStartTrialEvent } from "@web/analytics";
 import StorageService, { LocalStorageKey } from "@web/services/StorageService";
 import { getQueryParam } from "@web/util";
 import CoreValuesAssessmentResponse, { CoreValuesResults } from "@shared/models/CoreValuesAssessmentResponse";
+import HomeDemoAnimation from "@components/HomeDemoAnimation.vue";
 
 const logger = new Logger("Onboarding");
 
@@ -91,6 +92,7 @@ const transitionName = {
         ProgressStepper,
         OnboardingCard,
         Modal,
+        HomeDemoAnimation,
     }
 })
 export default class Onboarding extends Vue {
