@@ -15,21 +15,21 @@
 </template>
 
 <script lang="ts">
-    import Vue from "vue";
-    import Component from "vue-class-component"
-    import { Prop } from "vue-property-decorator";
+import Vue from "vue";
+import Component from "vue-class-component"
 
+@Component
     export default class HomeDemoAnimation extends Vue {
         name = "HomeDemoAnimation.vue";
+        overflow: boolean = false;
+        animationTimeout: number|undefined;
 
-        @Prop({ type: Boolean, required: false, default: false })
-        overflow!: boolean | undefined;
-
-        //Below is causing this error: Avoid mutating a prop directly since the value will be overwritten whenever
-        //the parent component re-renders. Instead, use a data or computed property based on the prop's value. 
-        //Prop being mutated: "overflow"
         mounted() {
-            setTimeout(() => this.overflow = true, 2500);
+            this.animationTimeout = window.setTimeout(() => this.overflow = true, 2500);
+        }
+
+        destroyed() {
+            window.clearTimeout(this.animationTimeout)
         }
     }
 </script>

@@ -14,7 +14,7 @@
         <video v-if="card.videoUrl" muted autoplay>
             <source :src="card.videoUrl" type="video/mp4">
         </video>
-        <component v-if="card.componentName" :is="card.componentName"></component>
+        <HomeDemoAnimation v-if="card.showHomeDemo"/>
     </div>
 </template>
 
@@ -48,14 +48,11 @@
         @Prop({ type: String, required: false, default: null })
         selectedInsightWord!: string | null;
 
-        @Prop({type: String as CoreValue, required: false, default: null})
+        @Prop({type: String as () => CoreValue, required: false, default: null})
         selectedCoreValue!: CoreValue | null;
 
         @Prop({ type: Object, required: false })
         componentName!: object | undefined;
-
-        @Prop({ type: Boolean, required: false, default: false })
-        overflow!: boolean | undefined;
 
         get markdownText() {
             return this.card.getMarkdownText({ selectedInsight: this.selectedInsightWord, selectedCoreValue: this.selectedCoreValue })

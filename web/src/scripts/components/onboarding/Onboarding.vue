@@ -91,8 +91,7 @@ const transitionName = {
         PhotoCard,
         ProgressStepper,
         OnboardingCard,
-        Modal,
-        HomeDemoAnimation,
+        Modal
     }
 })
 export default class Onboarding extends Vue {

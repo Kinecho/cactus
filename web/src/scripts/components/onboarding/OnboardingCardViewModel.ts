@@ -21,10 +21,6 @@ export enum TextReplacementType {
     onboarding_core_value = "OB_CORE_VALUE"
 }
 
-export enum ComponentName {
-    HomeDemoAnimation = "HomeDemoAnimation",
-}
-
 export interface LinkableActionButton extends ActionButton {
     href?: string;
     target?: LinkTarget;
@@ -38,7 +34,7 @@ export default class OnboardingCardViewModel {
      * Markdown enabled text
      */
     text?: string;
-    componentName?: ComponentName;
+    showHomeDemo?: boolean = false
     imageUrl?: string;
     videoUrl?: string;
     element?: CactusElement;
@@ -137,7 +133,7 @@ export default class OnboardingCardViewModel {
                 type: CardType.text,
                 slug: "about-insights",
                 text: "Reflect on questions for a few days and you’ll get more insights.",
-                componentName: ComponentName.HomeDemoAnimation,
+                showHomeDemo: true,
             }),
             OnboardingCardViewModel.create({
                 slug: "discover-cactus-plus",
