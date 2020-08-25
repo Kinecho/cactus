@@ -187,6 +187,9 @@
 
             if (this.isPlusMember) {
                 this.existingResults = await this.loadCurrentResults();
+                if (!this.existingResults) {
+                    this.showAssessment = true
+                }
             } else {
                 this.showAssessment = true;
             }
