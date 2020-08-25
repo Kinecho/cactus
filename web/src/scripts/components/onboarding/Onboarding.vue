@@ -75,8 +75,7 @@ import { QueryParam } from "@shared/util/queryParams";
 import { fireOptInStartTrialEvent } from "@web/analytics";
 import StorageService, { LocalStorageKey } from "@web/services/StorageService";
 import { getQueryParam } from "@web/util";
-import CoreValuesAssessmentResponse, { CoreValuesResults } from "@shared/models/CoreValuesAssessmentResponse";
-import HomeDemoAnimation from "@components/HomeDemoAnimation.vue";
+import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
 
 const logger = new Logger("Onboarding");
 
