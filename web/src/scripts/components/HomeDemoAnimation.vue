@@ -25,7 +25,7 @@ import Component from "vue-class-component"
         animationTimeout: number|undefined;
 
         mounted() {
-            this.animationTimeout = window.setTimeout(() => this.overflow = true, 2500);
+            this.animationTimeout = window.setTimeout(() => this.overflow = true, 1600);
         }
 
         destroyed() {
@@ -37,6 +37,8 @@ import Component from "vue-class-component"
 <style scoped lang="scss">
     @import "variables";
     @import "mixins";
+
+    $delay: 1.4s;
 
     @keyframes resizeMob {
         100% {
@@ -56,7 +58,7 @@ import Component from "vue-class-component"
     }
 
     .animationContainer {
-        animation: resizeMob .5s 2s 1 ease-in forwards;
+        animation: resizeMob .5s $delay 1 ease-in forwards;
         background-color: transparent;
         border-radius: 2.4rem;
         box-shadow: none;
@@ -93,7 +95,7 @@ import Component from "vue-class-component"
             align-items: flex-start;
 
             @include r(768) {
-                animation: scroll .3s 3s ease-in forwards;
+                animation: scroll .3s $delay ease-in forwards;
             }
         }
 
@@ -117,7 +119,7 @@ import Component from "vue-class-component"
         }
 
         .stats {
-            animation: sizeUpMob .5s 2s ease-in forwards;
+            animation: sizeUpMob .5s $delay ease-in forwards;
             display: flex;
             margin-bottom: .8rem;
             overflow: hidden;
@@ -145,7 +147,7 @@ import Component from "vue-class-component"
         }
 
         img {
-            animation: reset .3s 2s ease-in forwards;
+            animation: reset .3s $delay ease-in forwards;
             position: relative;
             transform: scale(.75);
             z-index: 0;
@@ -178,7 +180,7 @@ import Component from "vue-class-component"
         }
 
         .cv {
-            animation: CVresetMob .3s 2s ease-in forwards;
+            animation: CVresetMob .3s $delay ease-in forwards;
             transform: scale(0.5) translate(-34px, -2342px);
             width: 43rem;
 
