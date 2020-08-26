@@ -75,7 +75,7 @@ import { QueryParam } from "@shared/util/queryParams";
 import { fireOptInStartTrialEvent } from "@web/analytics";
 import StorageService, { LocalStorageKey } from "@web/services/StorageService";
 import { getQueryParam } from "@web/util";
-import CoreValuesAssessmentResponse, { CoreValuesResults } from "@shared/models/CoreValuesAssessmentResponse";
+import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
 
 const logger = new Logger("Onboarding");
 
@@ -90,7 +90,7 @@ const transitionName = {
         PhotoCard,
         ProgressStepper,
         OnboardingCard,
-        Modal,
+        Modal
     }
 })
 export default class Onboarding extends Vue {

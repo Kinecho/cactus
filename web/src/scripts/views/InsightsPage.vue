@@ -296,7 +296,6 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
 @import "insights";
 
 .positivityChart {
-    margin-bottom: 4rem;
   @include r(768) {
     display: flex;
     flex-basis: 50%;
@@ -329,9 +328,16 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
   }
 
   .plus & {
+      background-color: $bgDolphin;
+      padding: 2.4rem;
+
+    @include r(374) {
+      border-radius: 1.6rem;
+      margin-bottom: 3.2rem;
+    }
     @include r(768) {
-      margin-left: 0;
-      margin-right: 3.2rem;
+      margin: 0 3.2rem 0 0;
+      padding: 0;
     }
   }
 }
@@ -368,8 +374,17 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
   }
 
   .plus & {
+      background-color: $bgDolphin;
+      padding: 2.4rem;
+
+    @include r(374) {
+      border-radius: 1.6rem;
+      margin-bottom: 3.2rem;
+    }
     @include r(768) {
+      margin-bottom: 0;
       margin-left: 3.2rem;
+      padding: 0;
     }
   }
 }
@@ -393,14 +408,14 @@ export default class InsightsPage extends Vue implements JournalFeedDataSourceDe
   }
 
   .plus & {
-    background-color: $bgDolphin;
-    margin-bottom: 3.2rem;
-    padding: 2.4rem;
+      margin-bottom: 3.2rem;
 
     @include r(374) {
-      border-radius: 1.6rem;
+      margin-bottom: 0;
     }
     @include r(768) {
+      background-color: $bgDolphin;  
+      border-radius: 1.6rem;
       padding: 3.2rem 3.2rem 4rem;
       margin-bottom: 4.8rem;
     }

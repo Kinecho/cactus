@@ -34,6 +34,7 @@ export default class OnboardingCardViewModel {
      * Markdown enabled text
      */
     text?: string;
+    showHomeDemo?: boolean = false
     imageUrl?: string;
     videoUrl?: string;
     element?: CactusElement;
@@ -132,7 +133,7 @@ export default class OnboardingCardViewModel {
                 type: CardType.text,
                 slug: "about-insights",
                 text: "Reflect on questions for a few days and you’ll get more insights.",
-                videoUrl: "/assets/videos/posChartDemo.mp4"
+                showHomeDemo: true,
             }),
             OnboardingCardViewModel.create({
                 slug: "discover-cactus-plus",
