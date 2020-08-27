@@ -95,7 +95,7 @@ import Component from "vue-class-component"
             align-items: flex-start;
 
             @include r(768) {
-                animation: scroll .3s $delay ease-in forwards;
+                animation: scroll .3s 2.2s ease-in forwards;
             }
         }
 
