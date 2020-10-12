@@ -14,6 +14,7 @@
         <video v-if="card.videoUrl" muted autoplay>
             <source :src="card.videoUrl" type="video/mp4">
         </video>
+        <HomeDemoAnimation v-if="card.showHomeDemo"/>
     </div>
 </template>
 
@@ -26,11 +27,13 @@
     import OnboardingActionButton from "@components/OnboardingActionButton.vue";
     import CactusMember from "@shared/models/CactusMember";
     import { CoreValue } from "@shared/models/CoreValueTypes";
+    import HomeDemoAnimation from "../HomeDemoAnimation.vue";
 
     @Component({
         components: {
             MarkdownText,
             ActionButton: OnboardingActionButton,
+            HomeDemoAnimation,
         }
     })
     export default class OnboardingTextCard extends Vue {
@@ -45,8 +48,11 @@
         @Prop({ type: String, required: false, default: null })
         selectedInsightWord!: string | null;
 
-        @Prop({type: String as CoreValue, required: false, default: null})
+        @Prop({type: String as () => CoreValue, required: false, default: null})
         selectedCoreValue!: CoreValue | null;
+
+        @Prop({ type: Object, required: false })
+        componentName!: object | undefined;
 
         get markdownText() {
             return this.card.getMarkdownText({ selectedInsight: this.selectedInsightWord, selectedCoreValue: this.selectedCoreValue })
@@ -80,6 +86,9 @@
             flex-direction: row;
             justify-content: flex-start;
             max-width: none;
+            padding: 0 3.2rem;
+        }
+        @include r(960) {
             padding: 0 6.4rem;
         }
     }
@@ -89,8 +98,11 @@
 
         @include r(768) {
             margin-bottom: 0;
-            padding-right: 6.4rem;
+            padding-right: 3.2rem;
             width: 66%;
+        }
+        @include r(960) {
+            padding-right: 6.4rem;
         }
     }
 
