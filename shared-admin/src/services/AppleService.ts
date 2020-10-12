@@ -168,7 +168,7 @@ export default class AppleService {
 
         const subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByAppleProductId({
             appleProductId,
-            onlyAvailableForSale: true
+            onlyAvailableForSale: false
         });
 
         let currency = "USD";
