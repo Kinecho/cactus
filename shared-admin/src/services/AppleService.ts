@@ -208,6 +208,19 @@ export default class AppleService {
 
         result.subscriptionProduct = subscriptionProduct;
         const subscriptionProductId = subscriptionProduct?.entryId;
+
+        try {
+            const payment = Payment.fromAppleReceipt({
+                receipt: receipt,
+                memberId: memberId,
+                subscriptionProductId: subscriptionProductId,
+                productPrice: productPrice,
+            });
+            await AdminPaymentService.getSharedInstance().save(payment);
+        } catch (error) {
+            logger.error('failed to save payment to database. Original payload was', JSON.stringify(payment), error);
+        }
+
         if (!subscriptionProductId) {
             result.success = false;
             result.message = "No subscription product could be found for apple id: " + appleProductId;
@@ -217,13 +230,7 @@ export default class AppleService {
             this.logger.info("Fulfilling subscription for product id", subscriptionProductId);
         }
 
-        const payment = Payment.fromAppleReceipt({
-            receipt: receipt,
-            memberId: memberId,
-            subscriptionProductId: subscriptionProductId,
-            productPrice: productPrice,
-        });
-        await AdminPaymentService.getSharedInstance().save(payment);
+
         // this.logger.info("Saved payment for apple receipt", stringifyJSON(payment, 2));
         const [latest_receipt_info] = receipt.latest_receipt_info;
         const cactusSubscription = member.subscription ?? getDefaultSubscription();
