@@ -1,7 +1,8 @@
 import {
     AppleCompletePurchaseRequest,
     AppleCompletePurchaseResult,
-    AppleFulfillmentResult, AppleProductPrice,
+    AppleFulfillmentResult,
+    AppleProductPrice,
     AppleServerNotificationBody,
     AppleTransactionInfo,
     AppleVerifiedReceipt,
@@ -213,12 +214,12 @@ export default class AppleService {
             const payment = Payment.fromAppleReceipt({
                 receipt: receipt,
                 memberId: memberId,
-                subscriptionProductId: subscriptionProductId,
+                subscriptionProductId: subscriptionProductId!,
                 productPrice: productPrice,
             });
             await AdminPaymentService.getSharedInstance().save(payment);
         } catch (error) {
-            logger.error('failed to save payment to database. Original payload was', JSON.stringify(payment), error);
+            this.logger.error('failed to save payment to database. Original payload was', JSON.stringify(receipt), error);
         }
 
         if (!subscriptionProductId) {
