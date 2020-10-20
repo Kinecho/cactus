@@ -49,7 +49,7 @@ export default class ExportContactsCommand extends FirebaseCommand {
 
                     contacts.push({
                         email: m.email!,
-                        tier: m.tier!,
+                        tier: m.tier,
                         createdAt: formatDateTime(m.createdAt!)!,
                         memberId: m.id!,
                         reflectionCount: m.stats?.reflections?.totalCount ?? 0,
