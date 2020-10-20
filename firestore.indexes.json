@@ -229,6 +229,32 @@
           "order": "ASCENDING"
         },
         {
+          "fieldPath": "promptSendTimeUTC.hour",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "promptSendTimeUTC.minute",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "subscription.tier",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "members",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "deleted",
+          "order": "ASCENDING"
+        },
+        {
           "fieldPath": "signupConfirmedAt",
           "order": "ASCENDING"
         }
