@@ -579,7 +579,8 @@ export default class AdminCactusMemberService {
 
     async getMembersForUTCSendPromptTimeBatch(sendTime: PromptSendTime, options: GetBatchOptions<CactusMember>): Promise<void> {
         const query = this.getCollectionRef().where(CactusMember.Field.promptSendTimeUTC_hour, "==", sendTime.hour)
-        .where(CactusMember.Field.promptSendTimeUTC_minute, "==", sendTime.minute);
+        .where(CactusMember.Field.promptSendTimeUTC_minute, "==", sendTime.minute)
+        .where(CactusMember.Field.subscriptionTier, "==", SubscriptionTier.PLUS);
 
         await firestoreService.executeBatchedQuery({
             query,
