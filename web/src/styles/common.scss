@@ -42,21 +42,9 @@ body {
 
 header {
   background-color: white;
-  padding: 0 1.6rem;
-
-  @include r(374) {
-    padding: 0 2.4rem;
-  }
-  @include r(600) {
-    border-bottom: 1px solid lighten($lightestGreen, 5%);
-
-    &.noborder {
-      border-bottom: 0;
-    }
-  }
+  
   @include r(768) {
     background-color: transparent;
-    padding: 0 1.6rem;
     position: relative;
   }
 
@@ -78,8 +66,16 @@ header {
     align-items: center;
     display: flex;
     justify-content: space-between;
+    padding: 0 1.6rem;
     text-align: left;
     width: 100%;
+
+    @include r(374) {
+        padding: 0 2.4rem;
+    }
+    @include r(768) {
+        padding: 0 1.6rem;
+    }
   }
 }
 

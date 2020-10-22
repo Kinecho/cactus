@@ -58,6 +58,7 @@
                 </dropdown-menu>
             </div>
         </div>
+        <div class="reflectionapp">Cactus will shut down on Nov 19. Migrate your data and try <a href="#">Reflection.app</a>.</div>
     </header>
 </template>
 
@@ -315,6 +316,18 @@
     @import "mixins";
     @import "transitions";
 
+    .reflectionapp {
+        background-color: #557ed6;
+        color: $white;
+        font-size: 1.6rem;
+        padding: 1.2rem 2.4rem;
+        text-align: center;
+
+        a {
+            color: $white;
+        }
+    }
+
     body.error header {
         background: $white;
     }
@@ -346,11 +359,6 @@
                 margin-left: 1.6rem;
             }
         }
-    }
-
-    header.loggedIn {
-        display: flex;
-        justify-content: space-between;
     }
 
     .nav-logo-container {
