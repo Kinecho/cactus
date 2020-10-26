@@ -58,7 +58,7 @@
                 </dropdown-menu>
             </div>
         </div>
-        <div class="reflectionapp">Cactus will shut down on Nov 19. Migrate your data and try <a href="https://reflectionapp.webflow.io/migrate-from-cactus">Reflection.app</a>.</div>
+        <div class="reflectionapp">Cactus will shut down on Nov 19. Migrate your data and try <a href="https://www.reflection.app/cactus">Reflection.app</a>.</div>
     </header>
 </template>
 
