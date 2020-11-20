@@ -67,6 +67,7 @@ export enum Field {
     unsubscribedAt = "unsubscribedAt",
     stats = "stats",
     stats_reflections = "reflections",
+    statReflectionCount = 'stats.reflections.totalCount',
     activityStatus = "activityStatus",
     promptSendTime = "promptSendTime",
     timeZone = "timeZone",

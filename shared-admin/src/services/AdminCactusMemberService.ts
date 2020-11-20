@@ -543,9 +543,9 @@ export default class AdminCactusMemberService {
         const todayTs = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(date));
         const tomorrowTs = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(tomorrow))
         const query = this.getCollectionRef()
-            .where(CactusMember.Field.subscriptionOptOutTrialEndsAt, ">=", todayTs)
-            .where(CactusMember.Field.subscriptionOptOutTrialEndsAt, "<=", tomorrowTs)
-            .where(CactusMember.Field.subscriptionTier, "==", SubscriptionTier.PLUS);
+        .where(CactusMember.Field.subscriptionOptOutTrialEndsAt, ">=", todayTs)
+        .where(CactusMember.Field.subscriptionOptOutTrialEndsAt, "<=", tomorrowTs)
+        .where(CactusMember.Field.subscriptionTier, "==", SubscriptionTier.PLUS);
         return (await firestoreService.executeQuery(query, CactusMember)).results;
     }
 
@@ -579,7 +579,22 @@ export default class AdminCactusMemberService {
 
     async getMembersForUTCSendPromptTimeBatch(sendTime: PromptSendTime, options: GetBatchOptions<CactusMember>): Promise<void> {
         const query = this.getCollectionRef().where(CactusMember.Field.promptSendTimeUTC_hour, "==", sendTime.hour)
-        .where(CactusMember.Field.promptSendTimeUTC_minute, "==", sendTime.minute);
+        .where(CactusMember.Field.promptSendTimeUTC_minute, "==", sendTime.minute)
+        .where(CactusMember.Field.subscriptionTier, "==", SubscriptionTier.PLUS);
+
+        await firestoreService.executeBatchedQuery({
+            query,
+            type: CactusMember,
+            onData: options.onData,
+            batchSize: options?.batchSize,
+            orderBy: BaseModelField.createdAt,
+            sortDirection: QuerySortDirection.asc
+        });
+        return;
+    }
+
+    async getMembersWithReflectionCountGreaterThan(reflectionCount: number, options: GetBatchOptions<CactusMember>): Promise<void> {
+        const query = this.getCollectionRef()
 
         await firestoreService.executeBatchedQuery({
             query,
